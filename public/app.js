@@ -916,10 +916,266 @@ class ProspectProRealAPI {
             alert('Failed to export CSV. Please try again.');
         }
     }
+
+    // Settings Management
+    initializeSettingsHandlers() {
+        // Load saved configuration
+        this.loadConfiguration();
+
+        // Grafana Dashboard Link Handler
+        const grafanaLink = document.getElementById('grafanaLink');
+        const grafanaUrl = document.getElementById('grafanaUrl');
+        
+        // Update Grafana link when URL changes
+        grafanaUrl.addEventListener('change', () => {
+            const url = grafanaUrl.value.trim();
+            if (url) {
+                grafanaLink.href = url;
+                grafanaLink.style.display = 'inline-block';
+            } else {
+                grafanaLink.href = '#';
+                grafanaLink.style.display = 'none';
+            }
+        });
+
+        // Configuration Save Handler
+        document.getElementById('saveAllSettings').addEventListener('click', () => {
+            this.saveConfiguration();
+        });
+
+        // Reset to Defaults Handler
+        document.getElementById('resetToDefaults').addEventListener('click', () => {
+            this.resetConfiguration();
+        });
+
+        // Export Handlers
+        document.getElementById('exportCampaignData').addEventListener('click', () => {
+            this.exportDashboardData('campaign');
+        });
+
+        document.getElementById('exportCostAnalysis').addEventListener('click', () => {
+            this.exportDashboardData('cost');
+        });
+
+        document.getElementById('exportROIReport').addEventListener('click', () => {
+            this.exportDashboardData('roi');
+        });
+
+        // Test Dashboard Connection
+        document.getElementById('testDashboardConnection').addEventListener('click', () => {
+            this.testDashboardConnection();
+        });
+    }
+
+    loadConfiguration() {
+        const config = JSON.parse(localStorage.getItem('prospectpro_config') || '{}');
+        
+        // Load cost and usage limits
+        document.getElementById('dailyCostLimit').value = config.dailyCostLimit || '50.00';
+        document.getElementById('costPerLeadLimit').value = config.costPerLeadLimit || '2.00';
+        document.getElementById('qualificationRateAlert').value = config.qualificationRateAlert || '70';
+        document.getElementById('maxLeadsPerCampaign').value = config.maxLeadsPerCampaign || '50';
+
+        // Load campaign settings
+        document.getElementById('confidenceThreshold').value = config.confidenceThreshold || '80';
+        document.getElementById('emailVerificationEnabled').checked = config.emailVerificationEnabled !== false;
+        document.getElementById('websiteValidationEnabled').checked = config.websiteValidationEnabled !== false;
+        document.getElementById('socialProfilesEnabled').checked = config.socialProfilesEnabled || false;
+
+        // Load monitoring configuration
+        document.getElementById('grafanaUrl').value = config.grafanaUrl || '';
+        document.getElementById('metricsCollectionInterval').value = config.metricsCollectionInterval || '60';
+        document.getElementById('healthCheckInterval').value = config.healthCheckInterval || '300';
+        document.getElementById('enableRealTimeUpdates').checked = config.enableRealTimeUpdates !== false;
+
+        // Update Grafana link
+        const grafanaUrl = config.grafanaUrl || '';
+        const grafanaLink = document.getElementById('grafanaLink');
+        if (grafanaUrl) {
+            grafanaLink.href = grafanaUrl;
+            grafanaLink.style.display = 'inline-block';
+        } else {
+            grafanaLink.href = '#';
+            grafanaLink.onclick = (e) => {
+                e.preventDefault();
+                alert('Please configure your Grafana URL in the monitoring settings below.');
+            };
+        }
+    }
+
+    saveConfiguration() {
+        const config = {
+            // Cost and usage limits
+            dailyCostLimit: document.getElementById('dailyCostLimit').value,
+            costPerLeadLimit: document.getElementById('costPerLeadLimit').value,
+            qualificationRateAlert: document.getElementById('qualificationRateAlert').value,
+            maxLeadsPerCampaign: document.getElementById('maxLeadsPerCampaign').value,
+
+            // Campaign settings
+            confidenceThreshold: document.getElementById('confidenceThreshold').value,
+            emailVerificationEnabled: document.getElementById('emailVerificationEnabled').checked,
+            websiteValidationEnabled: document.getElementById('websiteValidationEnabled').checked,
+            socialProfilesEnabled: document.getElementById('socialProfilesEnabled').checked,
+
+            // Monitoring configuration
+            grafanaUrl: document.getElementById('grafanaUrl').value,
+            metricsCollectionInterval: document.getElementById('metricsCollectionInterval').value,
+            healthCheckInterval: document.getElementById('healthCheckInterval').value,
+            enableRealTimeUpdates: document.getElementById('enableRealTimeUpdates').checked,
+
+            // Save timestamp
+            lastUpdated: new Date().toISOString()
+        };
+
+        localStorage.setItem('prospectpro_config', JSON.stringify(config));
+        
+        // Show success message
+        const saveButton = document.getElementById('saveAllSettings');
+        const originalText = saveButton.textContent;
+        saveButton.textContent = '✅ Configuration Saved!';
+        saveButton.style.backgroundColor = '#10b981';
+        
+        setTimeout(() => {
+            saveButton.textContent = originalText;
+            saveButton.style.backgroundColor = '';
+        }, 2000);
+
+        console.log('Configuration saved:', config);
+    }
+
+    resetConfiguration() {
+        if (confirm('This will reset all configuration to default values. Are you sure?')) {
+            localStorage.removeItem('prospectpro_config');
+            this.loadConfiguration();
+            
+            const resetButton = document.getElementById('resetToDefaults');
+            const originalText = resetButton.textContent;
+            resetButton.textContent = '🔄 Reset Complete!';
+            
+            setTimeout(() => {
+                resetButton.textContent = originalText;
+            }, 2000);
+        }
+    }
+
+    async exportDashboardData(type) {
+        try {
+            const endpoint = {
+                'campaign': '/api/dashboard/export/campaign-performance',
+                'cost': '/api/dashboard/export/cost-analysis',
+                'roi': '/api/dashboard/export/roi-reports'
+            }[type];
+
+            if (!endpoint) {
+                throw new Error('Invalid export type');
+            }
+
+            const response = await fetch(`${this.baseUrl}${endpoint}?format=csv`);
+            
+            if (!response.ok) {
+                throw new Error(`Export failed: ${response.statusText}`);
+            }
+
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            
+            const timestamp = new Date().toISOString().slice(0, 19).replace(/[:-]/g, '');
+            link.href = url;
+            link.download = `ProspectPro_${type}_export_${timestamp}.csv`;
+            link.click();
+            
+            window.URL.revokeObjectURL(url);
+            
+            console.log(`${type} export completed successfully`);
+        } catch (error) {
+            console.error(`${type} export failed:`, error);
+            alert(`Failed to export ${type} data. Please try again.`);
+        }
+    }
+
+    async testDashboardConnection() {
+        const button = document.getElementById('testDashboardConnection');
+        const originalText = button.textContent;
+        
+        button.textContent = '🔍 Testing...';
+        button.disabled = true;
+
+        try {
+            const grafanaUrl = document.getElementById('grafanaUrl').value;
+            
+            if (!grafanaUrl) {
+                throw new Error('Please configure Grafana URL first');
+            }
+
+            // Test basic connectivity
+            const response = await fetch(`${this.baseUrl}/api/dashboard/health-check`);
+            const healthData = await response.json();
+
+            if (response.ok) {
+                button.textContent = '✅ Connection OK!';
+                button.style.backgroundColor = '#10b981';
+                console.log('Dashboard connection test successful:', healthData);
+                
+                // Show detailed status
+                alert(`Dashboard Connection Test Results:
+- Database: ${healthData.database ? '✅ Connected' : '❌ Failed'}
+- API Endpoints: ${healthData.apiEndpoints ? '✅ Available' : '❌ Unavailable'}
+- Monitoring: ${healthData.monitoring ? '✅ Active' : '❌ Inactive'}
+- Last Update: ${new Date(healthData.timestamp).toLocaleString()}`);
+            } else {
+                throw new Error(`Health check failed: ${healthData.error || 'Unknown error'}`);
+            }
+
+        } catch (error) {
+            console.error('Dashboard connection test failed:', error);
+            button.textContent = '❌ Connection Failed';
+            button.style.backgroundColor = '#ef4444';
+            alert(`Dashboard connection test failed: ${error.message}`);
+        } finally {
+            setTimeout(() => {
+                button.textContent = originalText;
+                button.style.backgroundColor = '';
+                button.disabled = false;
+            }, 3000);
+        }
+    }
+
+    updateSessionStats() {
+        // Update session stats in settings page
+        const stats = this.searchResults ? {
+            leads: this.searchResults.length,
+            qualified: this.searchResults.filter(b => b.confidence >= 70).length,
+            cost: this.searchResults.reduce((sum, b) => sum + (b.actualCost || 0), 0)
+        } : { leads: 0, qualified: 0, cost: 0 };
+
+        const sessionLeadsEl = document.getElementById('sessionLeads');
+        const sessionCostEl = document.getElementById('sessionCost');
+        const sessionQualificationEl = document.getElementById('sessionQualification');
+        const sessionEfficiencyEl = document.getElementById('sessionEfficiency');
+
+        if (sessionLeadsEl) sessionLeadsEl.textContent = stats.leads;
+        if (sessionCostEl) sessionCostEl.textContent = `$${stats.cost.toFixed(2)}`;
+        if (sessionQualificationEl) {
+            const rate = stats.leads > 0 ? ((stats.qualified / stats.leads) * 100).toFixed(1) : '0';
+            sessionQualificationEl.textContent = `${rate}%`;
+        }
+        if (sessionEfficiencyEl) {
+            const efficiency = stats.qualified > 0 ? (stats.cost / stats.qualified).toFixed(2) : '-';
+            sessionEfficiencyEl.textContent = stats.qualified > 0 ? `$${efficiency}` : '-';
+        }
+    }
 }
 
 // Initialize the application
 let prospectProApp;
 document.addEventListener('DOMContentLoaded', () => {
     prospectProApp = new ProspectProRealAPI();
+    
+    // Initialize settings handlers
+    setTimeout(() => {
+        if (prospectProApp.initializeSettingsHandlers) {
+            prospectProApp.initializeSettingsHandlers();
+        }
+    }, 100);
 });

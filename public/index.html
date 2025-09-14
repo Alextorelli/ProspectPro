@@ -274,148 +274,180 @@
                 <!-- Admin Settings Page -->
                 <div id="settingsPage" class="page-content hidden">
                     <div class="page-header">
-                        <h1>⚙️ Admin Dashboard - Phase 1</h1>
-                        <p>Monitor usage, performance, and API costs with enhanced owner data tracking</p>
+                        <h1>⚙️ Monitoring & Configuration</h1>
+                        <p>Monitor campaign performance, configure cost limits, and access dashboard analytics</p>
                         <button class="btn btn-outline" id="backFromSettings">← Back to Home</button>
                     </div>
 
                     <div class="settings-grid">
-                        <!-- Enhanced Usage Statistics -->
+                        <!-- Grafana Dashboard Access -->
                         <div class="settings-card">
-                            <h3>📊 Campaign Statistics</h3>
-                            <div class="stats-grid">
-                                <div class="stat-item">
-                                    <div class="stat-value" id="totalSearches">-</div>
-                                    <div class="stat-label">Total Campaigns</div>
+                            <h3>📊 Dashboard Analytics</h3>
+                            <div class="dashboard-access">
+                                <div class="dashboard-info">
+                                    <div class="dashboard-icon">🎯</div>
+                                    <div class="dashboard-details">
+                                        <h4>Grafana Dashboard</h4>
+                                        <p>Real-time campaign monitoring, cost analysis, and ROI tracking</p>
+                                    </div>
                                 </div>
-                                <div class="stat-item">
-                                    <div class="stat-value" id="totalLeads">-</div>
-                                    <div class="stat-label">Owners Found</div>
-                                </div>
-                                <div class="stat-item">
-                                    <div class="stat-value" id="totalBusinesses">-</div>
-                                    <div class="stat-label">Businesses Processed</div>
-                                </div>
-                                <div class="stat-item">
-                                    <div class="stat-value" id="avgConfidence">-</div>
-                                    <div class="stat-label">Success Rate</div>
+                                <div class="dashboard-actions">
+                                    <a href="#" id="grafanaLink" class="btn btn-primary" target="_blank" rel="noopener">
+                                        📈 Open Dashboard
+                                    </a>
+                                    <p class="dashboard-note">Configure your Grafana URL in settings below</p>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Cost Analysis -->
+                        <!-- Cost & Usage Limits -->
                         <div class="settings-card">
-                            <h3>💰 Cost Analysis</h3>
-                            <div class="stats-grid">
-                                <div class="stat-item">
-                                    <div class="stat-value" id="totalCost">-</div>
-                                    <div class="stat-label">Total API Cost</div>
-                                </div>
-                                <div class="stat-item">
-                                    <div class="stat-value" id="avgCostPerLead">-</div>
-                                    <div class="stat-label">Cost Per Lead</div>
-                                </div>
-                                <div class="stat-item">
-                                    <div class="stat-value" id="emailVerificationRate">-</div>
-                                    <div class="stat-label">Email Verification Rate</div>
-                                </div>
-                                <div class="stat-item">
-                                    <div class="stat-value" id="freeApiCalls">-</div>
-                                    <div class="stat-label">Free API Calls</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- API Usage Breakdown -->
-                        <div class="settings-card">
-                            <h3>🚀 API Usage Breakdown</h3>
-                            <div class="api-usage-grid">
-                                <div class="usage-category">
-                                    <div class="usage-header">
-                                        <span class="usage-icon">🆓</span>
-                                        <span class="usage-title">Free Sources</span>
-                                    </div>
-                                    <div class="usage-stats">
-                                        <div class="usage-item">State Registries: <span id="stateRegistryUsage">-</span></div>
-                                        <div class="usage-item">OpenCorporates: <span id="openCorpUsage">-</span></div>
-                                        <div class="usage-item">Website Scraping: <span id="websiteScrapingUsage">-</span></div>
-                                    </div>
-                                </div>
-                                <div class="usage-category">
-                                    <div class="usage-header">
-                                        <span class="usage-icon">💳</span>
-                                        <span class="usage-title">Low-Cost APIs</span>
-                                    </div>
-                                    <div class="usage-stats">
-                                        <div class="usage-item">Hunter.io: <span id="hunterUsage">-</span></div>
-                                        <div class="usage-item">NeverBounce: <span id="neverBounceUsage">-</span></div>
-                                        <div class="usage-item">Total Low-Cost: <span id="lowCostApiCalls">-</span></div>
-                                    </div>
-                                </div>
-                                <div class="usage-category">
-                                    <div class="usage-header">
-                                        <span class="usage-icon">💎</span>
-                                        <span class="usage-title">Premium APIs</span>
-                                    </div>
-                                    <div class="usage-stats">
-                                        <div class="usage-item">LinkedIn (Future): <span id="linkedinUsage">N/A</span></div>
-                                        <div class="usage-item">Total Premium: <span id="expensiveApiCalls">-</span></div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Recent Campaigns -->
-                        <div class="settings-card">
-                            <h3>📈 Recent Campaigns</h3>
-                            <div id="recentCampaigns" class="recent-campaigns">
-                                <div class="loading">Loading campaign history...</div>
-                            </div>
-                        </div>
-
-                        <!-- Current Session Stats -->
-                        <div class="settings-card">
-                            <h3>🔄 Current Session</h3>
-                            <div id="currentSessionStats" class="current-session">
-                                <div class="no-session">No active session data</div>
-                            </div>
-                        </div>
-
-                        <!-- System Configuration -->
-                        <div class="settings-card">
-                            <h3>🔧 Configuration</h3>
+                            <h3>💰 Cost & Usage Controls</h3>
                             <div class="config-options">
                                 <div class="config-item">
-                                    <label for="confidenceThreshold">Owner Data Confidence Threshold</label>
-                                    <select id="confidenceThreshold" class="form-select">
-                                        <option value="50">50% - Show all owner data</option>
-                                        <option value="70" selected>70% - High confidence only</option>
-                                        <option value="90">90% - Very high confidence only</option>
-                                    </select>
+                                    <label for="dailyCostLimit">Daily Cost Limit ($)</label>
+                                    <input type="number" id="dailyCostLimit" class="form-control" value="50.00" min="0" step="0.01" placeholder="50.00">
+                                    <small>Maximum daily spending across all APIs</small>
                                 </div>
                                 <div class="config-item">
-                                    <label for="maxLeadsPerSearch">Maximum Leads Per Search</label>
-                                    <select id="maxLeadsPerSearch" class="form-select">
-                                        <option value="25" selected>25 leads</option>
-                                        <option value="50">50 leads</option>
+                                    <label for="costPerLeadLimit">Cost Per Lead Limit ($)</label>
+                                    <input type="number" id="costPerLeadLimit" class="form-control" value="2.00" min="0" step="0.01" placeholder="2.00">
+                                    <small>Maximum cost per qualified lead</small>
+                                </div>
+                                <div class="config-item">
+                                    <label for="qualificationRateAlert">Qualification Rate Alert (%)</label>
+                                    <input type="number" id="qualificationRateAlert" class="form-control" value="70" min="0" max="100" step="1" placeholder="70">
+                                    <small>Alert when qualification rate drops below this percentage</small>
+                                </div>
+                                <div class="config-item">
+                                    <label for="maxLeadsPerCampaign">Maximum Leads Per Campaign</label>
+                                    <select id="maxLeadsPerCampaign" class="form-select">
+                                        <option value="25">25 leads</option>
+                                        <option value="50" selected>50 leads</option>
                                         <option value="100">100 leads</option>
+                                        <option value="250">250 leads</option>
                                     </select>
                                 </div>
-                                <div class="config-item">
-                                    <label for="ownerDiscoveryEnabled">Enable Enhanced Owner Discovery</label>
-                                    <input type="checkbox" id="ownerDiscoveryEnabled" checked>
-                                    <span class="checkbox-label">Use Phase 1 multi-source owner discovery</span>
-                                </div>
-                                <div class="config-item">
-                                    <label for="emailVerificationEnabled">Enable Email Verification</label>
-                                    <input type="checkbox" id="emailVerificationEnabled" checked>
-                                    <span class="checkbox-label">Verify emails with NeverBounce (uses API quota)</span>
-                                </div>
-                            </div>
-                            <div class="config-actions">
-                                <button class="btn btn-primary" id="saveSettings">Save Configuration</button>
                             </div>
                         </div>
+
+                        <!-- Campaign Configuration -->
+                        <div class="settings-card">
+                            <h3>🎯 Campaign Settings</h3>
+                            <div class="config-options">
+                                <div class="config-item">
+                                    <label for="confidenceThreshold">Quality Confidence Threshold (%)</label>
+                                    <select id="confidenceThreshold" class="form-select">
+                                        <option value="50">50% - Show all leads</option>
+                                        <option value="70">70% - High quality only</option>
+                                        <option value="80" selected>80% - Premium quality only</option>
+                                        <option value="90">90% - Ultra-premium quality only</option>
+                                    </select>
+                                </div>
+                                <div class="config-item">
+                                    <label for="emailVerificationEnabled">Email Verification</label>
+                                    <input type="checkbox" id="emailVerificationEnabled" checked>
+                                    <span class="checkbox-label">Verify email deliverability (recommended)</span>
+                                </div>
+                                <div class="config-item">
+                                    <label for="websiteValidationEnabled">Website Validation</label>
+                                    <input type="checkbox" id="websiteValidationEnabled" checked>
+                                    <span class="checkbox-label">Validate website accessibility (recommended)</span>
+                                </div>
+                                <div class="config-item">
+                                    <label for="socialProfilesEnabled">Social Profile Discovery</label>
+                                    <input type="checkbox" id="socialProfilesEnabled">
+                                    <span class="checkbox-label">Find LinkedIn, Facebook profiles (additional cost)</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Dashboard & Monitoring Configuration -->
+                        <div class="settings-card">
+                            <h3>🔧 Monitoring Configuration</h3>
+                            <div class="config-options">
+                                <div class="config-item">
+                                    <label for="grafanaUrl">Grafana Dashboard URL</label>
+                                    <input type="url" id="grafanaUrl" class="form-control" placeholder="https://yourusername.grafana.net">
+                                    <small>Your Grafana Cloud dashboard URL</small>
+                                </div>
+                                <div class="config-item">
+                                    <label for="metricsCollectionInterval">Metrics Collection Interval (seconds)</label>
+                                    <select id="metricsCollectionInterval" class="form-select">
+                                        <option value="30">30 seconds</option>
+                                        <option value="60" selected>1 minute</option>
+                                        <option value="300">5 minutes</option>
+                                        <option value="900">15 minutes</option>
+                                    </select>
+                                </div>
+                                <div class="config-item">
+                                    <label for="healthCheckInterval">API Health Check Interval (seconds)</label>
+                                    <select id="healthCheckInterval" class="form-select">
+                                        <option value="60">1 minute</option>
+                                        <option value="300" selected>5 minutes</option>
+                                        <option value="600">10 minutes</option>
+                                        <option value="1800">30 minutes</option>
+                                    </select>
+                                </div>
+                                <div class="config-item">
+                                    <label for="enableRealTimeUpdates">Real-Time Dashboard Updates</label>
+                                    <input type="checkbox" id="enableRealTimeUpdates" checked>
+                                    <span class="checkbox-label">Enable WebSocket real-time monitoring</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Current Session Overview -->
+                        <div class="settings-card">
+                            <h3>📈 Current Session Stats</h3>
+                            <div class="stats-grid">
+                                <div class="stat-item">
+                                    <div class="stat-value" id="sessionLeads">0</div>
+                                    <div class="stat-label">Leads Generated</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-value" id="sessionCost">$0.00</div>
+                                    <div class="stat-label">Session Cost</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-value" id="sessionQualification">0%</div>
+                                    <div class="stat-label">Qualification Rate</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-value" id="sessionEfficiency">-</div>
+                                    <div class="stat-label">Cost Per Lead</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Quick Actions -->
+                        <div class="settings-card">
+                            <h3>⚡ Quick Actions</h3>
+                            <div class="quick-actions">
+                                <button class="btn btn-outline" id="exportCampaignData">
+                                    📊 Export Campaign Data (CSV)
+                                </button>
+                                <button class="btn btn-outline" id="exportCostAnalysis">
+                                    💰 Export Cost Analysis (CSV)
+                                </button>
+                                <button class="btn btn-outline" id="exportROIReport">
+                                    📈 Export ROI Report (CSV)
+                                </button>
+                                <button class="btn btn-outline" id="testDashboardConnection">
+                                    🔍 Test Dashboard Connection
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Save Configuration -->
+                    <div class="config-actions" style="margin-top: 2rem; text-align: center;">
+                        <button class="btn btn-primary btn-large" id="saveAllSettings">
+                            💾 Save All Configuration
+                        </button>
+                        <button class="btn btn-outline" id="resetToDefaults">
+                            🔄 Reset to Defaults
+                        </button>
                     </div>
                 </div>
             </div>

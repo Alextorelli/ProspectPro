@@ -157,9 +157,18 @@ app.get('/api/status', async (req, res) => {
 
 // Import API routes
 const businessDiscoveryRouter = require('./api/business-discovery');
+const { createDashboardExportRoutes } = require('./api/dashboard-export');
+
+// Create Supabase client for dashboard exports
+const { createClient } = require('@supabase/supabase-js');
+const supabaseClient = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY
+);
 
 // Mount API routes
 app.use('/api/business', businessDiscoveryRouter);
+app.use('/api/dashboard', createDashboardExportRoutes(supabaseClient));
 
 // =====================================
 // STATIC FILE SERVING
