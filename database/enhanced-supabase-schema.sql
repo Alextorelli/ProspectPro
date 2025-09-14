@@ -498,6 +498,443 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+-- ============================================================================
+-- MONITORING DASHBOARD INTEGRATION TABLES
+-- ============================================================================
+
+-- Campaign analytics for dashboard monitoring
+CREATE TABLE IF NOT EXISTS campaign_analytics (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  campaign_id UUID REFERENCES campaigns(id) ON DELETE CASCADE,
+  metric_name TEXT NOT NULL,
+  metric_value DECIMAL(12,4),
+  metric_type TEXT, -- 'cost', 'usage', 'performance', 'quality'
+  api_service TEXT, -- 'hunter_io', 'scrapingdog', 'google_places'
+  timestamp TIMESTAMP WITH TIME ZONE DEFAULT now(),
+  metadata JSONB DEFAULT '{}',
+  
+  CONSTRAINT valid_metric_type CHECK (metric_type IN ('cost', 'usage', 'performance', 'quality'))
+);
+
+-- API cost tracking for dashboard monitoring
+CREATE TABLE IF NOT EXISTS api_cost_tracking (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  campaign_id UUID REFERENCES campaigns(id) ON DELETE CASCADE,
+  api_service TEXT NOT NULL,
+  endpoint TEXT,
+  request_count INTEGER DEFAULT 1,
+  cost_per_request DECIMAL(8,4),
+  total_cost DECIMAL(10,4),
+  success_count INTEGER DEFAULT 0,
+  error_count INTEGER DEFAULT 0,
+  avg_response_time_ms INTEGER,
+  rate_limit_remaining INTEGER,
+  date DATE DEFAULT CURRENT_DATE,
+  hour INTEGER DEFAULT EXTRACT(hour FROM now()),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT now()
+);
+
+-- Lead qualification metrics for dashboard
+CREATE TABLE IF NOT EXISTS lead_qualification_metrics (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  campaign_id UUID REFERENCES campaigns(id) ON DELETE CASCADE,
+  total_leads_discovered INTEGER DEFAULT 0,
+  leads_qualified INTEGER DEFAULT 0,
+  qualification_rate DECIMAL(5,4), -- Calculated: qualified/total
+  avg_confidence_score DECIMAL(5,2),
+  total_api_calls INTEGER DEFAULT 0,
+  total_api_cost DECIMAL(10,4) DEFAULT 0,
+  cost_per_qualified_lead DECIMAL(8,4),
+  roi_percentage DECIMAL(8,4),
+  date DATE DEFAULT CURRENT_DATE,
+  hour INTEGER DEFAULT EXTRACT(hour FROM now()),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT now()
+);
+
+-- Real-time service health for dashboard monitoring
+CREATE TABLE IF NOT EXISTS service_health_metrics (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  service_name TEXT NOT NULL, -- 'hunter_io', 'scrapingdog', 'google_places'
+  status TEXT NOT NULL, -- 'healthy', 'degraded', 'down'
+  response_time_ms INTEGER,
+  error_rate DECIMAL(5,4), -- Percentage
+  rate_limit_remaining INTEGER,
+  cost_budget_remaining DECIMAL(10,2),
+  requests_today INTEGER DEFAULT 0,
+  cost_today DECIMAL(10,2) DEFAULT 0.00,
+  last_successful_call TIMESTAMP WITH TIME ZONE,
+  last_error TEXT,
+  timestamp TIMESTAMP WITH TIME ZONE DEFAULT now()
+);
+
+-- Dashboard export logs
+CREATE TABLE IF NOT EXISTS dashboard_exports (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID NOT NULL,
+  export_type TEXT NOT NULL, -- 'cost_analysis', 'campaign_performance', 'roi_report'
+  file_format TEXT NOT NULL, -- 'csv', 'excel', 'json'
+  start_date DATE,
+  end_date DATE,
+  campaign_ids UUID[],
+  row_count INTEGER,
+  file_size_mb DECIMAL(8,2),
+  export_status TEXT DEFAULT 'completed' CHECK (export_status IN ('pending', 'completed', 'failed')),
+  download_url TEXT,
+  expires_at TIMESTAMP WITH TIME ZONE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT now()
+);
+
+-- Indexes for monitoring dashboard performance
+CREATE INDEX IF NOT EXISTS idx_campaign_analytics_campaign_date ON campaign_analytics(campaign_id, DATE(timestamp));
+CREATE INDEX IF NOT EXISTS idx_campaign_analytics_metric_type ON campaign_analytics(metric_type, timestamp DESC);
+CREATE INDEX IF NOT EXISTS idx_api_cost_tracking_service_date ON api_cost_tracking(api_service, date, hour);
+CREATE INDEX IF NOT EXISTS idx_api_cost_tracking_campaign ON api_cost_tracking(campaign_id, date DESC);
+CREATE INDEX IF NOT EXISTS idx_lead_qualification_date ON lead_qualification_metrics(date DESC, hour DESC);
+CREATE INDEX IF NOT EXISTS idx_lead_qualification_campaign ON lead_qualification_metrics(campaign_id, date DESC);
+CREATE INDEX IF NOT EXISTS idx_service_health_service_timestamp ON service_health_metrics(service_name, timestamp DESC);
+CREATE INDEX IF NOT EXISTS idx_dashboard_exports_user_created ON dashboard_exports(user_id, created_at DESC);
+
+-- ============================================================================
+-- MONITORING DASHBOARD FUNCTIONS
+-- ============================================================================
+
+-- Calculate comprehensive cost per qualified lead for dashboards
+CREATE OR REPLACE FUNCTION calculate_cost_per_qualified_lead_dashboard(
+  campaign_id_param UUID DEFAULT NULL,
+  start_date DATE DEFAULT CURRENT_DATE - INTERVAL '30 days',
+  end_date DATE DEFAULT CURRENT_DATE
+)
+RETURNS TABLE (
+  campaign_id UUID,
+  campaign_name TEXT,
+  total_api_cost DECIMAL(10,4),
+  total_qualified_leads INTEGER,
+  cost_per_qualified_lead DECIMAL(8,4),
+  roi_percentage DECIMAL(8,4),
+  efficiency_score INTEGER,
+  trend_direction TEXT
+) AS $$
+BEGIN
+  RETURN QUERY
+  SELECT 
+    c.id as campaign_id,
+    c.name as campaign_name,
+    COALESCE(SUM(act.total_cost), 0) as total_api_cost,
+    COALESCE(SUM(lqm.leads_qualified), 0) as total_qualified_leads,
+    CASE 
+      WHEN SUM(lqm.leads_qualified) > 0 
+      THEN ROUND(SUM(act.total_cost) / SUM(lqm.leads_qualified), 4)
+      ELSE 0 
+    END as cost_per_qualified_lead,
+    CASE 
+      WHEN SUM(act.total_cost) > 0 
+      THEN ROUND((SUM(lqm.leads_qualified) * 10.00 - SUM(act.total_cost)) / SUM(act.total_cost) * 100, 4)
+      ELSE 0 
+    END as roi_percentage,
+    -- Efficiency score (0-100) based on cost per lead and qualification rate
+    LEAST(100, GREATEST(0, 
+      100 - (CASE 
+        WHEN SUM(lqm.leads_qualified) > 0 
+        THEN (SUM(act.total_cost) / SUM(lqm.leads_qualified)) * 100
+        ELSE 100 
+      END)::INTEGER
+    )) as efficiency_score,
+    -- Trend direction based on last 7 days vs previous 7 days
+    CASE 
+      WHEN LAG(SUM(act.total_cost)) OVER (ORDER BY c.id) IS NULL THEN 'stable'
+      WHEN SUM(act.total_cost) > LAG(SUM(act.total_cost)) OVER (ORDER BY c.id) THEN 'improving'
+      ELSE 'declining'
+    END as trend_direction
+  FROM campaigns c
+  LEFT JOIN api_cost_tracking act ON c.id = act.campaign_id 
+    AND act.date BETWEEN start_date AND end_date
+  LEFT JOIN lead_qualification_metrics lqm ON c.id = lqm.campaign_id 
+    AND lqm.date BETWEEN start_date AND end_date
+  WHERE (campaign_id_param IS NULL OR c.id = campaign_id_param)
+    AND c.status IN ('running', 'completed')
+  GROUP BY c.id, c.name
+  ORDER BY cost_per_qualified_lead ASC;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Real-time dashboard metrics function
+CREATE OR REPLACE FUNCTION get_dashboard_realtime_metrics()
+RETURNS JSON AS $$
+DECLARE
+  result JSON;
+BEGIN
+  SELECT json_build_object(
+    'overview', (
+      SELECT json_build_object(
+        'active_campaigns', COUNT(*) FILTER (WHERE status = 'running'),
+        'total_leads_today', (
+          SELECT COUNT(*) FROM enhanced_leads 
+          WHERE DATE(created_at) = CURRENT_DATE
+        ),
+        'qualified_leads_today', (
+          SELECT COUNT(*) FROM enhanced_leads 
+          WHERE DATE(created_at) = CURRENT_DATE AND confidence_score >= 80
+        ),
+        'total_cost_today', (
+          SELECT COALESCE(SUM(total_cost), 0) 
+          FROM api_cost_tracking 
+          WHERE date = CURRENT_DATE
+        ),
+        'avg_qualification_rate', (
+          SELECT ROUND(AVG(qualification_rate * 100), 1)
+          FROM lead_qualification_metrics 
+          WHERE date >= CURRENT_DATE - INTERVAL '7 days'
+        )
+      )
+      FROM campaigns
+    ),
+    'service_health', (
+      SELECT json_object_agg(
+        service_name, 
+        json_build_object(
+          'status', status,
+          'response_time_ms', response_time_ms,
+          'error_rate', error_rate,
+          'rate_limit_remaining', rate_limit_remaining,
+          'cost_budget_remaining', cost_budget_remaining,
+          'requests_today', requests_today,
+          'last_updated', timestamp
+        )
+      )
+      FROM (
+        SELECT DISTINCT ON (service_name) 
+          service_name, status, response_time_ms, error_rate,
+          rate_limit_remaining, cost_budget_remaining, requests_today, timestamp
+        FROM service_health_metrics 
+        ORDER BY service_name, timestamp DESC
+      ) latest_health
+    ),
+    'hourly_performance', (
+      SELECT json_agg(
+        json_build_object(
+          'hour', hour,
+          'total_requests', SUM(request_count),
+          'total_cost', SUM(total_cost),
+          'success_rate', ROUND(SUM(success_count)::numeric / NULLIF(SUM(request_count), 0) * 100, 1),
+          'avg_response_time', ROUND(AVG(avg_response_time_ms))
+        )
+        ORDER BY hour DESC
+      )
+      FROM api_cost_tracking 
+      WHERE date = CURRENT_DATE
+      GROUP BY hour
+      LIMIT 24
+    ),
+    'top_performing_campaigns', (
+      SELECT json_agg(
+        json_build_object(
+          'campaign_id', campaign_id,
+          'campaign_name', campaign_name,
+          'qualified_leads', total_qualified_leads,
+          'cost_per_lead', cost_per_qualified_lead,
+          'roi_percentage', roi_percentage,
+          'efficiency_score', efficiency_score
+        )
+        ORDER BY efficiency_score DESC
+      )
+      FROM calculate_cost_per_qualified_lead_dashboard(NULL, CURRENT_DATE - INTERVAL '7 days', CURRENT_DATE)
+      LIMIT 10
+    )
+  ) INTO result;
+  
+  RETURN result;
+END;
+$$ LANGUAGE plpgsql;
+
+-- API service breakdown for dashboard
+CREATE OR REPLACE FUNCTION get_api_service_breakdown(
+  start_date DATE DEFAULT CURRENT_DATE - INTERVAL '30 days',
+  end_date DATE DEFAULT CURRENT_DATE
+)
+RETURNS TABLE (
+  api_service TEXT,
+  total_requests INTEGER,
+  total_cost DECIMAL(10,4),
+  success_rate DECIMAL(5,2),
+  avg_response_time_ms INTEGER,
+  cost_per_request DECIMAL(8,4),
+  trend_7day TEXT
+) AS $$
+BEGIN
+  RETURN QUERY
+  SELECT 
+    act.api_service,
+    SUM(act.request_count)::INTEGER as total_requests,
+    SUM(act.total_cost) as total_cost,
+    ROUND(
+      SUM(act.success_count)::numeric / NULLIF(SUM(act.request_count), 0) * 100, 2
+    ) as success_rate,
+    ROUND(AVG(act.avg_response_time_ms))::INTEGER as avg_response_time_ms,
+    ROUND(
+      SUM(act.total_cost) / NULLIF(SUM(act.request_count), 0), 4
+    ) as cost_per_request,
+    CASE 
+      WHEN AVG(CASE WHEN act.date >= end_date - INTERVAL '7 days' THEN act.total_cost END) >
+           AVG(CASE WHEN act.date < end_date - INTERVAL '7 days' THEN act.total_cost END)
+      THEN 'increasing'
+      WHEN AVG(CASE WHEN act.date >= end_date - INTERVAL '7 days' THEN act.total_cost END) <
+           AVG(CASE WHEN act.date < end_date - INTERVAL '7 days' THEN act.total_cost END)
+      THEN 'decreasing'
+      ELSE 'stable'
+    END as trend_7day
+  FROM api_cost_tracking act
+  WHERE act.date BETWEEN start_date AND end_date
+  GROUP BY act.api_service
+  ORDER BY total_cost DESC;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Export data preparation function for dashboards
+CREATE OR REPLACE FUNCTION prepare_dashboard_export_data(
+  export_type TEXT,
+  start_date DATE,
+  end_date DATE,
+  campaign_ids UUID[] DEFAULT NULL
+)
+RETURNS JSON AS $$
+DECLARE
+  result JSON;
+BEGIN
+  CASE export_type
+    WHEN 'cost_analysis' THEN
+      SELECT json_build_object(
+        'export_type', 'cost_analysis',
+        'date_range', json_build_object('start', start_date, 'end', end_date),
+        'campaign_performance', (
+          SELECT json_agg(row_to_json(cpq))
+          FROM calculate_cost_per_qualified_lead_dashboard(
+            NULL, start_date, end_date
+          ) cpq
+          WHERE campaign_ids IS NULL OR cpq.campaign_id = ANY(campaign_ids)
+        ),
+        'api_breakdown', (
+          SELECT json_agg(row_to_json(asb))
+          FROM get_api_service_breakdown(start_date, end_date) asb
+        ),
+        'daily_trends', (
+          SELECT json_agg(
+            json_build_object(
+              'date', date,
+              'total_cost', SUM(total_cost),
+              'total_requests', SUM(request_count),
+              'qualified_leads', (
+                SELECT COUNT(*) FROM enhanced_leads el
+                JOIN campaigns c ON el.campaign_id = c.id
+                WHERE DATE(el.created_at) = act.date
+                AND el.confidence_score >= 80
+                AND (campaign_ids IS NULL OR c.id = ANY(campaign_ids))
+              )
+            )
+            ORDER BY date
+          )
+          FROM api_cost_tracking act
+          WHERE act.date BETWEEN start_date AND end_date
+          AND (campaign_ids IS NULL OR act.campaign_id = ANY(campaign_ids))
+          GROUP BY date
+        )
+      ) INTO result;
+      
+    WHEN 'campaign_performance' THEN
+      SELECT json_build_object(
+        'export_type', 'campaign_performance',
+        'campaigns', (
+          SELECT json_agg(
+            json_build_object(
+              'campaign_id', c.id,
+              'name', c.name,
+              'status', c.status,
+              'created_at', c.created_at,
+              'total_leads', COUNT(el.id),
+              'qualified_leads', COUNT(el.id) FILTER (WHERE el.confidence_score >= 80),
+              'total_cost', COALESCE(SUM(el.total_cost), 0),
+              'avg_confidence_score', ROUND(AVG(el.confidence_score), 2)
+            )
+          )
+          FROM campaigns c
+          LEFT JOIN enhanced_leads el ON c.id = el.campaign_id
+          WHERE c.created_at BETWEEN start_date AND end_date + INTERVAL '1 day'
+          AND (campaign_ids IS NULL OR c.id = ANY(campaign_ids))
+          GROUP BY c.id, c.name, c.status, c.created_at
+        )
+      ) INTO result;
+      
+    ELSE
+      SELECT json_build_object('error', 'Invalid export type') INTO result;
+  END CASE;
+  
+  RETURN result;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Enable RLS on monitoring tables
+ALTER TABLE campaign_analytics ENABLE ROW LEVEL SECURITY;
+ALTER TABLE api_cost_tracking ENABLE ROW LEVEL SECURITY;
+ALTER TABLE lead_qualification_metrics ENABLE ROW LEVEL SECURITY;
+ALTER TABLE service_health_metrics ENABLE ROW LEVEL SECURITY;
+ALTER TABLE dashboard_exports ENABLE ROW LEVEL SECURITY;
+
+-- RLS Policies for monitoring tables
+CREATE POLICY "Users can view campaign analytics from their campaigns" ON campaign_analytics
+  FOR SELECT USING (
+    campaign_id IN (
+      SELECT id FROM campaigns WHERE user_id = auth.uid()
+    )
+  );
+
+CREATE POLICY "System can insert campaign analytics" ON campaign_analytics
+  FOR INSERT WITH CHECK (
+    campaign_id IN (
+      SELECT id FROM campaigns WHERE user_id = auth.uid()
+    )
+  );
+
+CREATE POLICY "Users can view API cost tracking from their campaigns" ON api_cost_tracking
+  FOR SELECT USING (
+    campaign_id IN (
+      SELECT id FROM campaigns WHERE user_id = auth.uid()
+    )
+  );
+
+CREATE POLICY "System can insert API cost tracking" ON api_cost_tracking
+  FOR INSERT WITH CHECK (
+    campaign_id IN (
+      SELECT id FROM campaigns WHERE user_id = auth.uid()
+    )
+  );
+
+CREATE POLICY "Users can view lead qualification metrics from their campaigns" ON lead_qualification_metrics
+  FOR SELECT USING (
+    campaign_id IN (
+      SELECT id FROM campaigns WHERE user_id = auth.uid()
+    )
+  );
+
+CREATE POLICY "System can insert lead qualification metrics" ON lead_qualification_metrics
+  FOR INSERT WITH CHECK (
+    campaign_id IN (
+      SELECT id FROM campaigns WHERE user_id = auth.uid()
+    )
+  );
+
+-- Service health metrics can be viewed by all authenticated users
+CREATE POLICY "Users can view service health metrics" ON service_health_metrics
+  FOR SELECT USING (auth.role() = 'authenticated');
+
+CREATE POLICY "System can insert service health metrics" ON service_health_metrics
+  FOR INSERT WITH CHECK (auth.role() = 'authenticated');
+
+-- Dashboard exports for user's own exports
+CREATE POLICY "Users can view their own dashboard exports" ON dashboard_exports
+  FOR SELECT USING (user_id = auth.uid());
+
+CREATE POLICY "Users can create their own dashboard exports" ON dashboard_exports
+  FOR INSERT WITH CHECK (user_id = auth.uid());
+
 -- Grant necessary permissions (adjust as needed for your setup)
 -- GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO authenticated;
 -- GRANT USAGE ON ALL SEQUENCES IN SCHEMA public TO authenticated;
