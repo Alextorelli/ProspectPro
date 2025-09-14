@@ -1,0 +1,107 @@
+﻿Business Category,Business Type,Description
+Professional Services,accounting,Business-to-business and professional services
+Professional Services,lawyer,Business-to-business and professional services
+Professional Services,consultant,Business-to-business and professional services
+Professional Services,real estate agency,Business-to-business and professional services
+Professional Services,insurance agency,Business-to-business and professional services
+Professional Services,corporate office,Business-to-business and professional services
+Health & Medical Services,doctor,Healthcare and medical service providers
+Health & Medical Services,dentist,Healthcare and medical service providers
+Health & Medical Services,hospital,Healthcare and medical service providers
+Health & Medical Services,pharmacy,Healthcare and medical service providers
+Health & Medical Services,drugstore,Healthcare and medical service providers
+Health & Medical Services,chiropractor,Healthcare and medical service providers
+Health & Medical Services,physiotherapist,Healthcare and medical service providers
+Health & Medical Services,dental clinic,Healthcare and medical service providers
+Health & Medical Services,medical lab,Healthcare and medical service providers
+Health & Medical Services,veterinary care,Healthcare and medical service providers
+Health & Medical Services,wellness center,Healthcare and medical service providers
+Health & Medical Services,skin care clinic,Healthcare and medical service providers
+Personal Care & Beauty,hair salon,Personal grooming and beauty services
+Personal Care & Beauty,hair care,Personal grooming and beauty services
+Personal Care & Beauty,beauty salon,Personal grooming and beauty services
+Personal Care & Beauty,barber shop,Personal grooming and beauty services
+Personal Care & Beauty,nail salon,Personal grooming and beauty services
+Personal Care & Beauty,spa,Personal grooming and beauty services
+Personal Care & Beauty,massage,Personal grooming and beauty services
+Personal Care & Beauty,beautician,Personal grooming and beauty services
+Personal Care & Beauty,makeup artist,Personal grooming and beauty services
+Personal Care & Beauty,body art service,Personal grooming and beauty services
+Personal Care & Beauty,tanning studio,Personal grooming and beauty services
+Personal Care & Beauty,sauna,Personal grooming and beauty services
+Home & Property Services,electrician,"Construction, maintenance, and property services"
+Home & Property Services,plumber,"Construction, maintenance, and property services"
+Home & Property Services,painter,"Construction, maintenance, and property services"
+Home & Property Services,roofing contractor,"Construction, maintenance, and property services"
+Home & Property Services,general contractor,"Construction, maintenance, and property services"
+Home & Property Services,locksmith,"Construction, maintenance, and property services"
+Home & Property Services,moving company,"Construction, maintenance, and property services"
+Home & Property Services,laundry,"Construction, maintenance, and property services"
+Home & Property Services,storage,"Construction, maintenance, and property services"
+Home & Property Services,catering service,"Construction, maintenance, and property services"
+Automotive Services,car repair,Vehicle-related services and sales
+Automotive Services,car wash,Vehicle-related services and sales
+Automotive Services,car dealer,Vehicle-related services and sales
+Automotive Services,car rental,Vehicle-related services and sales
+Automotive Services,gas station,Vehicle-related services and sales
+Automotive Services,electric vehicle charging station,Vehicle-related services and sales
+Automotive Services,auto parts store,Vehicle-related services and sales
+Food & Beverage,restaurant,"Restaurants, cafes, and food services"
+Food & Beverage,cafe,"Restaurants, cafes, and food services"
+Food & Beverage,bakery,"Restaurants, cafes, and food services"
+Food & Beverage,bar,"Restaurants, cafes, and food services"
+Food & Beverage,fast food restaurant,"Restaurants, cafes, and food services"
+Food & Beverage,pizza restaurant,"Restaurants, cafes, and food services"
+Food & Beverage,chinese restaurant,"Restaurants, cafes, and food services"
+Food & Beverage,mexican restaurant,"Restaurants, cafes, and food services"
+Food & Beverage,italian restaurant,"Restaurants, cafes, and food services"
+Food & Beverage,japanese restaurant,"Restaurants, cafes, and food services"
+Food & Beverage,indian restaurant,"Restaurants, cafes, and food services"
+Food & Beverage,meal delivery,"Restaurants, cafes, and food services"
+Food & Beverage,meal takeaway,"Restaurants, cafes, and food services"
+Food & Beverage,catering service,"Restaurants, cafes, and food services"
+Food & Beverage,pub,"Restaurants, cafes, and food services"
+Food & Beverage,wine bar,"Restaurants, cafes, and food services"
+Food & Beverage,coffee shop,"Restaurants, cafes, and food services"
+Food & Beverage,ice cream shop,"Restaurants, cafes, and food services"
+Food & Beverage,food court,"Restaurants, cafes, and food services"
+Retail & Commerce,clothing store,Retail stores and commercial establishments
+Retail & Commerce,shoe store,Retail stores and commercial establishments
+Retail & Commerce,electronics store,Retail stores and commercial establishments
+Retail & Commerce,furniture store,Retail stores and commercial establishments
+Retail & Commerce,home goods store,Retail stores and commercial establishments
+Retail & Commerce,jewelry store,Retail stores and commercial establishments
+Retail & Commerce,book store,Retail stores and commercial establishments
+Retail & Commerce,gift shop,Retail stores and commercial establishments
+Retail & Commerce,department store,Retail stores and commercial establishments
+Retail & Commerce,shopping mall,Retail stores and commercial establishments
+Retail & Commerce,supermarket,Retail stores and commercial establishments
+Retail & Commerce,grocery store,Retail stores and commercial establishments
+Retail & Commerce,convenience store,Retail stores and commercial establishments
+Retail & Commerce,pet store,Retail stores and commercial establishments
+Retail & Commerce,sporting goods store,Retail stores and commercial establishments
+Retail & Commerce,bicycle store,Retail stores and commercial establishments
+Technology & Digital Services,electronics store,"IT, technology, and digital services"
+Technology & Digital Services,cell phone store,"IT, technology, and digital services"
+Technology & Digital Services,telecommunications service provider,"IT, technology, and digital services"
+Technology & Digital Services,internet cafe,"IT, technology, and digital services"
+Education & Training,school,Educational institutions and training services
+Education & Training,university,Educational institutions and training services
+Education & Training,primary school,Educational institutions and training services
+Education & Training,secondary school,Educational institutions and training services
+Education & Training,preschool,Educational institutions and training services
+Education & Training,library,Educational institutions and training services
+Education & Training,summer camp organizer,Educational institutions and training services
+Event & Entertainment Services,event venue,"Entertainment, events, and recreational services"
+Event & Entertainment Services,wedding venue,"Entertainment, events, and recreational services"
+Event & Entertainment Services,banquet hall,"Entertainment, events, and recreational services"
+Event & Entertainment Services,movie theater,"Entertainment, events, and recreational services"
+Event & Entertainment Services,bowling alley,"Entertainment, events, and recreational services"
+Event & Entertainment Services,amusement park,"Entertainment, events, and recreational services"
+Event & Entertainment Services,casino,"Entertainment, events, and recreational services"
+Event & Entertainment Services,night club,"Entertainment, events, and recreational services"
+Event & Entertainment Services,tourist attraction,"Entertainment, events, and recreational services"
+Event & Entertainment Services,museum,"Entertainment, events, and recreational services"
+Event & Entertainment Services,zoo,"Entertainment, events, and recreational services"
+Event & Entertainment Services,aquarium,"Entertainment, events, and recreational services"
+Event & Entertainment Services,park,"Entertainment, events, and recreational services"

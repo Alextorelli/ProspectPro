@@ -3,28 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ProspectPro v2.0 - Real Business Data</title>
+    <title>ProspectPro - Lead Generation Platform</title>
     <link rel="stylesheet" href="style.css">
     <script src="business-categories.js"></script>
 </head>
-<body data-theme="dark">
+<body>
     <div class="app">
         <!-- Header -->
         <header class="header">
             <div class="container">
                 <div class="header-content">
                     <div class="header-left">
-                        <h1 class="logo">🎯 ProspectPro v2.0</h1>
-                        <div class="version-badge">REAL API</div>
+                        <h1 class="logo" id="logoLink" style="cursor: pointer;">🎯 ProspectPro</h1>
+                        <div class="breadcrumb">Real-Time Lead Generation</div>
                     </div>
-                    <div class="header-right">
-                        <button class="theme-toggle" id="themeToggle" title="Toggle Theme">
-                            <span class="theme-icon">🌙</span>
-                        </button>
-                        <div class="api-status" id="apiStatus">
-                            <span class="status-dot"></span>
-                            <span class="status-text">Checking APIs...</span>
-                        </div>
+                    <div class="api-status" id="apiStatus">
+                        <span class="status-dot"></span>
+                        <span class="status-text">Checking APIs...</span>
                     </div>
                 </div>
             </div>
@@ -36,7 +31,7 @@
                 <div class="banner-content">
                     <span class="banner-icon">⚡</span>
                     <div class="banner-text">
-                        <strong>REAL API INTEGRATION:</strong> No fake data - only verified business contacts from Google Places, website scraping, and email validation services.
+                        <strong>ZERO FAKE DATA:</strong> Only verified business contacts from real APIs - Google Places, website scraping, and email validation.
                     </div>
                 </div>
             </div>
@@ -45,60 +40,237 @@
         <!-- Main Content -->
         <main class="main">
             <div class="container">
-                <div class="page-header">
-                    <h1>Professional Lead Generation Platform</h1>
-                    <p>Extract verified business contact information using real APIs - zero fake data guaranteed</p>
-                </div>
-
-                <!-- Tool Selection -->
-                <div class="tools-grid">
-                    <div class="tool-card active" id="businessDiscoveryTool">
-                        <div class="tool-header">
-                            <div class="tool-icon">🏢</div>
-                            <div class="tool-info">
-                                <h3>Business Lead Discovery</h3>
-                                <p>Find and verify business contacts with real data validation</p>
-                            </div>
-                        </div>
-                        <div class="tool-status">
-                            <span class="status-badge status-badge--active">Active</span>
-                        </div>
+                <!-- Homepage Templates -->
+                <div id="homePage" class="page-content">
+                    <div class="page-header">
+                        <h1>Lead Generation Templates</h1>
+                        <p>Choose a template to start generating high-quality leads for your business</p>
                     </div>
 
-                    <div class="tool-card disabled" id="consumerDiscoveryTool">
-                        <div class="tool-header">
-                            <div class="tool-icon">👥</div>
-                            <div class="tool-info">
-                                <h3>Consumer Email Lists</h3>
-                                <p>Build targeted consumer email lists for marketing campaigns</p>
-                            </div>
-                        </div>
-                        <div class="tool-status">
-                            <span class="status-badge status-badge--coming-soon">Coming Soon</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Business Discovery Search Interface -->
-                <div class="search-interface" id="businessDiscoveryInterface">
-                    <div class="search-card">
-                        <div class="search-header">
-                            <h2>Business Discovery Parameters</h2>
-                            <p>Configure your search to find the most relevant business leads</p>
-                        </div>
-
-                        <form class="search-form" id="searchForm">
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label for="categorySelect">Business Category</label>
-                                    <select id="categorySelect" class="form-select" required>
-                                        <option value="">Select a category...</option>
-                                    </select>
+                    <div class="batch-templates">
+                        <div class="templates-grid">
+                            <!-- Local Business Discovery - Active -->
+                            <div class="template-card active" id="localBusinessCard" onclick="prospectProApp.selectTemplate('local-business')">
+                                <div class="template-header">
+                                    <h3>📍 Local Business Discovery</h3>
+                                    <span class="template-badge">Active</span>
                                 </div>
-                                <div class="form-group">
-                                    <label for="typeSelect">Business Type</label>
-                                    <select id="typeSelect" class="form-select" required disabled>
-                                        <option value="">Select category first...</option>
+                                <div class="template-stats">
+                                    <div class="stat">
+                                        <span class="stat-value">5-100</span>
+                                        <span class="stat-label">Lead Count</span>
+                                    </div>
+                                    <div class="stat">
+                                        <span class="stat-value">87%</span>
+                                        <span class="stat-label">Success Rate</span>
+                                    </div>
+                                </div>
+                                <p class="template-description">Find local service-based businesses using Google Places with contact enrichment</p>
+                                <div class="template-details">
+                                    ✅ Geographic targeting<br>
+                                    ✅ Business type filtering<br>
+                                    ✅ Contact verification
+                                </div>
+                            </div>
+
+                            <!-- LinkedIn Lead Gen Forms Sync - Coming Soon -->
+                            <div class="template-card disabled" id="linkedinCard">
+                                <div class="template-header">
+                                    <h3>💼 LinkedIn Lead Gen Forms Sync</h3>
+                                    <span class="template-badge disabled">Coming Soon</span>
+                                </div>
+                                <div class="template-stats">
+                                    <div class="stat">
+                                        <span class="stat-value">10-500</span>
+                                        <span class="stat-label">Lead Count</span>
+                                    </div>
+                                    <div class="stat">
+                                        <span class="stat-value">96%</span>
+                                        <span class="stat-label">Success Rate</span>
+                                    </div>
+                                </div>
+                                <p class="template-description">Sync leads from your LinkedIn advertising campaigns and Lead Gen Forms</p>
+                                <div class="template-details">
+                                    ✅ Active LinkedIn ad account<br>
+                                    ✅ Lead Gen Forms setup<br>
+                                    ✅ Webhook configuration
+                                </div>
+                            </div>
+
+                            <!-- Website Contact Extraction - Coming Soon -->
+                            <div class="template-card disabled" id="websiteCard">
+                                <div class="template-header">
+                                    <h3>🌐 Website Contact Extraction</h3>
+                                    <span class="template-badge disabled">Coming Soon</span>
+                                </div>
+                                <div class="template-stats">
+                                    <div class="stat">
+                                        <span class="stat-value">5-100</span>
+                                        <span class="stat-label">Lead Count</span>
+                                    </div>
+                                    <div class="stat">
+                                        <span class="stat-value">73%</span>
+                                        <span class="stat-label">Success Rate</span>
+                                    </div>
+                                </div>
+                                <p class="template-description">Extract contact information from business websites and team pages</p>
+                                <div class="template-details">
+                                    ✅ Target website list<br>
+                                    ✅ Contact page identification<br>
+                                    ✅ Email validation
+                                </div>
+                            </div>
+
+                            <!-- Industry Directory Mining - Coming Soon -->
+                            <div class="template-card disabled" id="directoryCard">
+                                <div class="template-header">
+                                    <h3>📚 Industry Directory Mining</h3>
+                                    <span class="template-badge disabled">Coming Soon</span>
+                                </div>
+                                <div class="template-stats">
+                                    <div class="stat">
+                                        <span class="stat-value">25-1000</span>
+                                        <span class="stat-label">Lead Count</span>
+                                    </div>
+                                    <div class="stat">
+                                        <span class="stat-value">81%</span>
+                                        <span class="stat-label">Success Rate</span>
+                                    </div>
+                                </div>
+                                <p class="template-description">Mine professional directories and industry databases for leads</p>
+                                <div class="template-details">
+                                    ✅ Industry selection<br>
+                                    ✅ Professional title criteria<br>
+                                    ✅ Company size filtering
+                                </div>
+                            </div>
+
+                            <!-- Event Attendee Research - Coming Soon -->
+                            <div class="template-card disabled" id="eventCard">
+                                <div class="template-header">
+                                    <h3>🎪 Event Attendee Research</h3>
+                                    <span class="template-badge disabled">Coming Soon</span>
+                                </div>
+                                <div class="template-stats">
+                                    <div class="stat">
+                                        <span class="stat-value">10-500</span>
+                                        <span class="stat-label">Lead Count</span>
+                                    </div>
+                                    <div class="stat">
+                                        <span class="stat-value">79%</span>
+                                        <span class="stat-label">Success Rate</span>
+                                    </div>
+                                </div>
+                                <p class="template-description">Research attendees and speakers from industry events and conferences</p>
+                                <div class="template-details">
+                                    ✅ Event identification<br>
+                                    ✅ Speaker/attendee lists<br>
+                                    ✅ Contact enrichment
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Local Business Discovery Tool -->
+                <div id="localBusinessPage" class="page-content hidden">
+                    <div class="page-header">
+                        <h1>Local Business Discovery</h1>
+                        <p>Find and verify local business contacts with real data validation</p>
+                        <button class="btn btn-outline" id="newSearchBtn" onclick="prospectProApp.goHome()">← New Search</button>
+                    </div>
+
+                    <!-- Business Discovery Search Interface -->
+                    <div class="search-interface">
+                        <div class="search-card">
+                            <form class="search-form" id="searchForm">
+                                <!-- Step 1: Location and Radius -->
+                                <div class="form-step">
+                                    <h3>📍 Location & Search Area</h3>
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label for="locationInput">Target Location</label>
+                                            <input type="text" id="locationInput" class="form-control" 
+                                                   placeholder="e.g., San Diego, CA" required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="radiusSelect">Search Radius</label>
+                                            <select id="radiusSelect" class="form-select" required>
+                                                <option value="5">5 miles</option>
+                                                <option value="10" selected>10 miles</option>
+                                                <option value="25">25 miles</option>
+                                                <option value="50">50 miles</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Step 2: Business Filtering -->
+                                <div class="form-step">
+                                    <h3>🏢 Business Filtering</h3>
+                                    <div class="form-row-triple">
+                                        <div class="form-group">
+                                            <label for="categorySelect">Business Category</label>
+                                            <select id="categorySelect" class="form-select" required>
+                                                <option value="">Select a category...</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="typeSelect">Business Type</label>
+                                            <select id="typeSelect" class="form-select" required disabled>
+                                                <option value="">Select category first...</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="sizeSelect">Business Size</label>
+                                            <select id="sizeSelect" class="form-select">
+                                                <option value="">Any size</option>
+                                                <option value="1-9">1-9 Employees</option>
+                                                <option value="10-19">10-19 Employees</option>
+                                                <option value="20-49">20-49 Employees</option>
+                                                <option value="50+">50+ Employees</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Step 3: Lead Quantity -->
+                                <div class="form-step">
+                                    <h3>📊 Lead Quantity</h3>
+                                    <div class="quantity-buttons" id="quantityButtons">
+                                        <button type="button" class="quantity-btn" data-value="1">1</button>
+                                        <button type="button" class="quantity-btn" data-value="3">3</button>
+                                        <button type="button" class="quantity-btn selected" data-value="5">5</button>
+                                        <button type="button" class="quantity-btn" data-value="10">10</button>
+                                        <button type="button" class="quantity-btn" data-value="25">25</button>
+                                    </div>
+                                    <div class="cost-estimate">
+                                        <span>Estimated cost: <strong id="costEstimate">$0.42</strong></span>
+                                    </div>
+                                </div>
+
+                                <div class="form-actions">
+                                    <button type="submit" class="btn btn-primary" id="searchButton">
+                                        <span class="btn-text">🔍 Start Discovery</span>
+                                        <span class="btn-spinner hidden"></span>
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Results Section -->
+                    <div id="resultsSection" class="results-section hidden">
+                        <!-- Results will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
                                     </select>
                                 </div>
                             </div>

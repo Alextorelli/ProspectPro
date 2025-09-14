@@ -15,40 +15,55 @@ class ProspectProRealAPI {
     async init() {
         console.log('🚀 ProspectPro Real API Client initialized');
 
-        // Initialize theme
-        this.initTheme();
-
         // Check API status
         await this.checkApiStatus();
 
-        // Initialize business categories
-        this.initBusinessCategories();
+        // Initialize business categories (only when on business page)
+        if (document.getElementById('categorySelect')) {
+            this.initBusinessCategories();
+        }
 
         // Bind events
         this.bindEvents();
         
         // Update initial cost estimate
         this.updateCostEstimate();
+
+        // Set initial lead quantity
+        this.selectedQuantity = 5;
     }
 
-    initTheme() {
-        const themeToggle = document.getElementById('themeToggle');
-        const currentTheme = localStorage.getItem('theme') || 'dark';
-        
-        document.body.setAttribute('data-theme', currentTheme);
-        this.updateThemeIcon(currentTheme);
-        
-        themeToggle.addEventListener('click', () => {
-            const newTheme = document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-            document.body.setAttribute('data-theme', newTheme);
-            localStorage.setItem('theme', newTheme);
-            this.updateThemeIcon(newTheme);
+    selectTemplate(templateType) {
+        if (templateType === 'local-business') {
+            this.showPage('localBusinessPage');
+            this.initBusinessCategories();
+        }
+    }
+
+    showPage(pageId) {
+        // Hide all pages
+        document.querySelectorAll('.page-content').forEach(page => {
+            page.classList.add('hidden');
         });
+        
+        // Show selected page
+        const targetPage = document.getElementById(pageId);
+        if (targetPage) {
+            targetPage.classList.remove('hidden');
+        }
     }
 
-    updateThemeIcon(theme) {
-        const themeIcon = document.querySelector('.theme-icon');
-        themeIcon.textContent = theme === 'dark' ? '☀️' : '🌙';
+    goHome() {
+        this.showPage('homePage');
+    }
+
+    updateCostEstimate() {
+        const leadCount = this.selectedQuantity || 5;
+        const estimatedCost = (leadCount * this.costPerLead).toFixed(2);
+        const costElement = document.getElementById('costEstimate');
+        if (costElement) {
+            costElement.textContent = `$${estimatedCost}`;
+        }
     }
 
     async checkApiStatus() {
@@ -134,22 +149,44 @@ class ProspectProRealAPI {
     }
 
     bindEvents() {
-        // Form submission
-        document.getElementById('searchForm').addEventListener('submit', (e) => {
-            e.preventDefault();
-            this.handleSearch();
-        });
+        // Logo click to go home
+        const logoLink = document.getElementById('logoLink');
+        if (logoLink) {
+            logoLink.addEventListener('click', () => this.goHome());
+        }
 
-        // Lead count change
-        document.getElementById('leadCountSelect').addEventListener('change', () => {
-            this.updateCostEstimate();
+        // Form submission (only bind if form exists)
+        const searchForm = document.getElementById('searchForm');
+        if (searchForm) {
+            searchForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                this.handleSearch();
+            });
+        }
+
+        // Quantity button selection
+        const quantityButtons = document.querySelectorAll('.quantity-btn');
+        quantityButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                // Remove selected class from all buttons
+                quantityButtons.forEach(b => b.classList.remove('selected'));
+                // Add selected class to clicked button
+                btn.classList.add('selected');
+                // Update selected quantity
+                this.selectedQuantity = parseInt(btn.dataset.value);
+                // Update cost estimate
+                this.updateCostEstimate();
+            });
         });
     }
 
     updateCostEstimate() {
-        const leadCount = parseInt(document.getElementById('leadCountSelect').value);
+        const leadCount = this.selectedQuantity || 5;
         const estimatedCost = (leadCount * this.costPerLead).toFixed(2);
-        document.getElementById('costEstimate').textContent = `$${estimatedCost}`;
+        const costElement = document.getElementById('costEstimate');
+        if (costElement) {
+            costElement.textContent = `$${estimatedCost}`;
+        }
     }
 
     async handleSearch() {
@@ -157,7 +194,6 @@ class ProspectProRealAPI {
         const typeSelect = document.getElementById('typeSelect');
         const locationInput = document.getElementById('locationInput');
         const radiusSelect = document.getElementById('radiusSelect');
-        const leadCountSelect = document.getElementById('leadCountSelect');
 
         // Get form values
         const category = categorySelect.value;
@@ -165,7 +201,7 @@ class ProspectProRealAPI {
         const businessType = window.BusinessCategories.getRawTypeForDisplay(businessTypeDisplay);
         const location = locationInput.value.trim();
         const radius = parseInt(radiusSelect.value);
-        const leadCount = parseInt(leadCountSelect.value);
+        const leadCount = this.selectedQuantity || 5;
 
         // Validate form
         if (!category || !businessType || !location) {
@@ -173,7 +209,7 @@ class ProspectProRealAPI {
             return;
         }
 
-        console.log(`🔍 Starting business discovery: "${businessType}" in "${location}" (${radius} miles)`);
+        console.log(`🔍 Starting business discovery: "${businessType}" in "${location}" (${radius} miles, ${leadCount} leads)`);
 
         // Show loading state
         this.setLoadingState(true);
@@ -269,9 +305,14 @@ class ProspectProRealAPI {
                 <div class="export-section">
                     <h3>Export Your Leads</h3>
                     <p>Download your verified business leads as a CSV file</p>
-                    <button class="btn btn-primary" onclick="prospectProApp.exportResults()">
-                        Export to CSV
-                    </button>
+                    <div class="results-actions">
+                        <button class="btn btn-outline" onclick="prospectProApp.goHome()">
+                            ← New Search
+                        </button>
+                        <button class="btn btn-primary" onclick="prospectProApp.exportResults()">
+                            📄 Export to CSV
+                        </button>
+                    </div>
                 </div>
             ` : ''}
         `;

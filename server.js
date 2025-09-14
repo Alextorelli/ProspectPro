@@ -221,23 +221,31 @@ async function startServer() {
     const dbConnected = await testConnection();
     
     if (!dbConnected) {
-      console.error('❌ Supabase connection failed. Please check your credentials.');
-      console.log('📋 Make sure you have set the following environment variables:');
-      console.log('   - SUPABASE_URL');
-      console.log('   - SUPABASE_SERVICE_ROLE_KEY');
-      console.log('   - SUPABASE_ANON_KEY');
-      process.exit(1);
+      console.error('❌ Supabase connection failed.');
+      if (process.env.NODE_ENV === 'development' || process.env.SKIP_AUTH_IN_DEV === 'true') {
+        console.log('⚠️  Continuing in development mode without Supabase...');
+      } else {
+        console.log('📋 Make sure you have set the following environment variables:');
+        console.log('   - SUPABASE_URL');
+        console.log('   - SUPABASE_SERVICE_ROLE_KEY');
+        console.log('   - SUPABASE_ANON_KEY');
+        process.exit(1);
+      }
     }
 
     // Initialize database schema
     console.log('🏗️  Checking database schema...');
-    const schemaReady = await initializeDatabase();
-    
-    if (!schemaReady) {
-      console.warn('⚠️  Database schema may need initialization.');
-      console.log('📋 Please run the SQL schema in your Supabase dashboard:');
-      console.log('   File: docs/supabase-schema.sql');
-      console.log('   URL: https://app.supabase.com/project/[your-project]/sql');
+    if (dbConnected) {
+      const schemaReady = await initializeDatabase();
+      
+      if (!schemaReady) {
+        console.warn('⚠️  Database schema may need initialization.');
+        console.log('📋 Please run the SQL schema in your Supabase dashboard:');
+        console.log('   File: docs/supabase-schema.sql');
+        console.log('   URL: https://app.supabase.com/project/[your-project]/sql');
+      }
+    } else {
+      console.log('⚠️  Skipping schema check (no database connection)');
     }
 
     // Check API key configuration
