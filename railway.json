@@ -1,0 +1,76 @@
+{
+  "name": "ProspectPro",
+  "displayName": "Deploy ProspectPro",
+  "description": "Real business lead generation platform with verified contact data. Zero fake data tolerance.",
+  "iconUrl": "https://railway.app/brand/logo-light.png",
+  "repository": "https://github.com/your-username/ProspectPro",
+  "plugins": [
+    {
+      "type": "web",
+      "name": "ProspectPro API Server",
+      "config": {
+        "build": {
+          "commands": [
+            "npm ci"
+          ]
+        },
+        "deploy": {
+          "startCommand": "npm start",
+          "healthcheckPath": "/health",
+          "restartPolicyType": "on-failure",
+          "restartPolicyMaxRetries": 3
+        }
+      }
+    }
+  ],
+  "variables": {
+    "SUPABASE_URL": {
+      "description": "Your Supabase project URL (https://your-project-id.supabase.co)",
+      "required": true
+    },
+    "SUPABASE_ANON_KEY": {
+      "description": "Supabase anonymous/public key from Settings > API",
+      "required": true
+    },
+    "SUPABASE_SERVICE_ROLE_KEY": {
+      "description": "Supabase service role key (keep secret!)",
+      "required": true
+    },
+    "GOOGLE_PLACES_API_KEY": {
+      "description": "Google Cloud Console Places API key",
+      "required": true
+    },
+    "SCRAPINGDOG_API_KEY": {
+      "description": "ScrapingDog API key for website scraping",
+      "required": true
+    },
+    "HUNTER_IO_API_KEY": {
+      "description": "Hunter.io API key for email discovery",
+      "required": true  
+    },
+    "NEVERBOUNCE_API_KEY": {
+      "description": "NeverBounce API key for email validation",
+      "required": true
+    },
+    "PERSONAL_ACCESS_TOKEN": {
+      "description": "Secure token for API access (generate with: node -e \"console.log(require('crypto').randomBytes(32).toString('hex'))\")",
+      "required": true
+    },
+    "PERSONAL_USER_ID": {
+      "description": "Your unique user identifier",
+      "default": "railway-user"
+    },
+    "PERSONAL_EMAIL": {
+      "description": "Your email address",
+      "required": true
+    },
+    "NODE_ENV": {
+      "description": "Node environment",
+      "default": "production"
+    },
+    "ALLOWED_ORIGINS": {
+      "description": "Comma-separated list of allowed CORS origins (will be auto-configured)",
+      "default": "${{RAILWAY_STATIC_URL}},${{RAILWAY_PUBLIC_DOMAIN}}"
+    }
+  }
+}

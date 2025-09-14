@@ -1,0 +1,32 @@
+services:
+  - type: web
+    name: prospectpro
+    runtime: node
+    plan: starter
+    buildCommand: npm ci
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_ANON_KEY  
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: GOOGLE_PLACES_API_KEY
+        sync: false
+      - key: SCRAPINGDOG_API_KEY
+        sync: false
+      - key: HUNTER_IO_API_KEY
+        sync: false
+      - key: NEVERBOUNCE_API_KEY
+        sync: false
+      - key: PERSONAL_ACCESS_TOKEN
+        generateValue: true
+        sync: false
+      - key: PERSONAL_USER_ID
+        value: render-user
+      - key: PERSONAL_EMAIL
+        sync: false
