@@ -3,12 +3,21 @@ const GooglePlacesClient = require('../modules/api-clients/google-places');
 const YellowPagesScraper = require('../modules/scrapers/yellow-pages-scraper');
 const PreValidationScorer = require('../modules/validators/pre-validation');
 const OwnerDiscovery = require('../modules/enrichment/owner-discovery');
+const CampaignLogger = require('../modules/logging/campaign-logger');
 const router = express.Router();
+
+// Initialize components with API keys from environment
+const apiKeys = {
+    hunter: process.env.HUNTER_IO_API_KEY,
+    neverBounce: process.env.NEVERBOUNCE_API_KEY,
+    openCorporates: process.env.OPENCORPORATES_API_KEY
+};
 
 const googlePlacesClient = new GooglePlacesClient(process.env.GOOGLE_PLACES_API_KEY);
 const yellowPagesScraper = new YellowPagesScraper();
 const preValidationScorer = new PreValidationScorer();
-const ownerDiscovery = new OwnerDiscovery();
+const ownerDiscovery = new OwnerDiscovery(apiKeys);
+const campaignLogger = new CampaignLogger();
 
 // POST /api/business/discover
 router.post('/discover', async (req, res) => {
@@ -80,6 +89,7 @@ router.post('/discover', async (req, res) => {
         // Stage 5: Enrich with contact details and owner information
         console.log(`🔍 Enriching ${limitedResults.length} businesses with contact details and owner info...`);
         const enrichedBusinesses = [];
+        const campaignStart = Date.now();
         
         for (const business of limitedResults) {
             try {
@@ -97,9 +107,34 @@ router.post('/discover', async (req, res) => {
                     };
                 }
 
-                // Discover owner information (layered on top)
+                // Enhanced owner discovery with cost-efficient API integration
                 const ownerInfo = await ownerDiscovery.discoverOwnerInfo(enrichedBusiness);
-                enrichedBusiness.ownerData = ownerInfo;
+                
+                // Structure the final business data for export
+                enrichedBusiness = {
+                    ...enrichedBusiness,
+                    // Owner information from enrichment
+                    ownerName: ownerInfo.ownerName,
+                    ownerEmail: ownerInfo.ownerEmail,
+                    ownerPhone: ownerInfo.ownerPhone,
+                    ownerTitle: ownerInfo.ownerTitle,
+                    ownerLinkedIn: ownerInfo.ownerLinkedIn,
+                    
+                    // Quality metrics
+                    confidence: ownerInfo.confidence,
+                    qualityGrade: ownerInfo.qualityGrade,
+                    
+                    // Cost tracking
+                    estimatedCost: ownerInfo.estimatedCost,
+                    actualCost: ownerInfo.actualCost,
+                    
+                    // Enrichment metadata
+                    sources: ownerInfo.sources,
+                    emailVerification: ownerInfo.emailVerification,
+                    officers: ownerInfo.officers,
+                    incorporationState: ownerInfo.incorporationState,
+                    companyNumber: ownerInfo.companyNumber
+                };
 
                 enrichedBusinesses.push(enrichedBusiness);
 
@@ -108,10 +143,43 @@ router.post('/discover', async (req, res) => {
                 // Keep business without enrichment rather than losing it
                 enrichedBusinesses.push({
                     ...business,
-                    ownerData: { confidence: 0, sources: [], error: error.message }
+                    ownerName: null,
+                    ownerEmail: null,
+                    ownerPhone: null,
+                    ownerTitle: null,
+                    ownerLinkedIn: null,
+                    confidence: 0,
+                    qualityGrade: 'F',
+                    estimatedCost: 0,
+                    actualCost: 0,
+                    sources: [],
+                    error: error.message
                 });
             }
         }
+
+        // Calculate campaign duration
+        const campaignDuration = (Date.now() - campaignStart) / 1000; // seconds
+
+        // Log campaign results for admin review and algorithm improvement
+        try {
+            const campaignData = {
+                businessType: query,
+                location: location,
+                businessSize: req.body.businessSize,
+                targetCount: count,
+                businesses: enrichedBusinesses,
+                duration: campaignDuration,
+                estimatedCost: enrichedBusinesses.reduce((sum, b) => sum + (b.estimatedCost || 0), 0)
+            };
+            
+            await campaignLogger.logCampaignResults(campaignData);
+        } catch (loggingError) {
+            console.error('Campaign logging failed:', loggingError.message);
+        }
+
+        // Get enrichment statistics
+        const enrichmentStats = ownerDiscovery.getEnrichmentStats();
 
         console.log(`✅ Business discovery complete: ${enrichedBusinesses.length} enriched businesses found`);
 
@@ -124,7 +192,22 @@ router.post('/discover', async (req, res) => {
                 returned: enrichedBusinesses.length,
                 googleResults: googleResults.length,
                 yellowPagesResults: yellowPagesResults.length,
-                enriched: enrichedBusinesses.filter(b => b.phone || b.website).length
+                enriched: enrichedBusinesses.filter(b => b.phone || b.website).length,
+                withOwners: enrichedBusinesses.filter(b => b.ownerName).length,
+                withEmails: enrichedBusinesses.filter(b => b.ownerEmail).length,
+                withVerifiedEmails: enrichedBusinesses.filter(b => 
+                    b.ownerEmail && b.emailVerification?.isValid
+                ).length
+            },
+            costs: {
+                totalEstimated: enrichmentStats.totalCost,
+                averagePerLead: enrichmentStats.averageCostPerLead,
+                apiCalls: enrichmentStats.apiCalls
+            },
+            performance: {
+                duration: campaignDuration,
+                businessesPerMinute: Math.round((enrichedBusinesses.length / campaignDuration) * 60),
+                qualityDistribution: calculateQualityDistribution(enrichedBusinesses)
             },
             searchParams: { query, location, count, batchType }
         });
@@ -140,6 +223,70 @@ router.post('/discover', async (req, res) => {
         });
     }
 });
+
+// GET /api/business/stats - Get campaign statistics for admin dashboard
+router.get('/stats', async (req, res) => {
+    try {
+        const stats = await campaignLogger.getCampaignStats();
+        const recentCampaigns = await campaignLogger.getRecentCampaigns(5);
+        const enrichmentStats = ownerDiscovery.getEnrichmentStats();
+
+        res.json({
+            success: true,
+            aggregateStats: stats,
+            recentCampaigns: recentCampaigns,
+            currentSessionStats: enrichmentStats
+        });
+    } catch (error) {
+        console.error('Failed to get campaign stats:', error);
+        res.status(500).json({
+            error: 'Failed to retrieve statistics',
+            message: error.message
+        });
+    }
+});
+
+// POST /api/business/usage-report - Generate usage report for date range
+router.post('/usage-report', async (req, res) => {
+    try {
+        const { startDate, endDate } = req.body;
+        
+        if (!startDate || !endDate) {
+            return res.status(400).json({
+                error: 'startDate and endDate are required'
+            });
+        }
+
+        const report = await campaignLogger.getUsageReport(startDate, endDate);
+        
+        res.json({
+            success: true,
+            report: report
+        });
+    } catch (error) {
+        console.error('Failed to generate usage report:', error);
+        res.status(500).json({
+            error: 'Failed to generate usage report',
+            message: error.message
+        });
+    }
+});
+});
+
+// Helper function to calculate quality distribution
+function calculateQualityDistribution(businesses) {
+    if (!businesses) return { A: 0, B: 0, C: 0, D: 0, F: 0 };
+    
+    const distribution = { A: 0, B: 0, C: 0, D: 0, F: 0 };
+    businesses.forEach(b => {
+        const grade = b.qualityGrade || 'F';
+        if (distribution[grade] !== undefined) {
+            distribution[grade]++;
+        }
+    });
+    
+    return distribution;
+}
 
 function mergeBusinessSources(googleResults, yellowPagesResults) {
     const merged = [...googleResults];

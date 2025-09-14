@@ -17,9 +17,14 @@
                         <h1 class="logo" id="logoLink" style="cursor: pointer;">🎯 ProspectPro</h1>
                         <div class="breadcrumb">Real-Time Lead Generation</div>
                     </div>
-                    <div class="api-status" id="apiStatus">
-                        <span class="status-dot"></span>
-                        <span class="status-text">Checking APIs...</span>
+                    <div class="header-right">
+                        <div class="api-status" id="apiStatus">
+                            <span class="status-dot"></span>
+                            <span class="status-text">Checking APIs...</span>
+                        </div>
+                        <button class="settings-btn" id="settingsBtn" title="Admin Settings">
+                            ⚙️
+                        </button>
                     </div>
                 </div>
             </div>
@@ -224,13 +229,13 @@
                                         </div>
                                         <div class="form-group">
                                             <label for="sizeSelect">Business Size</label>
-                                            <select id="sizeSelect" class="form-select">
-                                                <option value="">Any size</option>
+                                            <select id="sizeSelect" class="form-select" multiple>
                                                 <option value="1-9">1-9 Employees</option>
                                                 <option value="10-19">10-19 Employees</option>
                                                 <option value="20-49">20-49 Employees</option>
                                                 <option value="50+">50+ Employees</option>
                                             </select>
+                                            <small class="form-help">Hold Ctrl/Cmd to select multiple sizes (optional)</small>
                                         </div>
                                     </div>
                                 </div>
@@ -263,6 +268,154 @@
                     <!-- Results Section -->
                     <div id="resultsSection" class="results-section hidden">
                         <!-- Results will be populated by JavaScript -->
+                    </div>
+                </div>
+
+                <!-- Admin Settings Page -->
+                <div id="settingsPage" class="page-content hidden">
+                    <div class="page-header">
+                        <h1>⚙️ Admin Dashboard - Phase 1</h1>
+                        <p>Monitor usage, performance, and API costs with enhanced owner data tracking</p>
+                        <button class="btn btn-outline" id="backFromSettings">← Back to Home</button>
+                    </div>
+
+                    <div class="settings-grid">
+                        <!-- Enhanced Usage Statistics -->
+                        <div class="settings-card">
+                            <h3>📊 Campaign Statistics</h3>
+                            <div class="stats-grid">
+                                <div class="stat-item">
+                                    <div class="stat-value" id="totalSearches">-</div>
+                                    <div class="stat-label">Total Campaigns</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-value" id="totalLeads">-</div>
+                                    <div class="stat-label">Owners Found</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-value" id="totalBusinesses">-</div>
+                                    <div class="stat-label">Businesses Processed</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-value" id="avgConfidence">-</div>
+                                    <div class="stat-label">Success Rate</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Cost Analysis -->
+                        <div class="settings-card">
+                            <h3>💰 Cost Analysis</h3>
+                            <div class="stats-grid">
+                                <div class="stat-item">
+                                    <div class="stat-value" id="totalCost">-</div>
+                                    <div class="stat-label">Total API Cost</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-value" id="avgCostPerLead">-</div>
+                                    <div class="stat-label">Cost Per Lead</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-value" id="emailVerificationRate">-</div>
+                                    <div class="stat-label">Email Verification Rate</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-value" id="freeApiCalls">-</div>
+                                    <div class="stat-label">Free API Calls</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- API Usage Breakdown -->
+                        <div class="settings-card">
+                            <h3>🚀 API Usage Breakdown</h3>
+                            <div class="api-usage-grid">
+                                <div class="usage-category">
+                                    <div class="usage-header">
+                                        <span class="usage-icon">🆓</span>
+                                        <span class="usage-title">Free Sources</span>
+                                    </div>
+                                    <div class="usage-stats">
+                                        <div class="usage-item">State Registries: <span id="stateRegistryUsage">-</span></div>
+                                        <div class="usage-item">OpenCorporates: <span id="openCorpUsage">-</span></div>
+                                        <div class="usage-item">Website Scraping: <span id="websiteScrapingUsage">-</span></div>
+                                    </div>
+                                </div>
+                                <div class="usage-category">
+                                    <div class="usage-header">
+                                        <span class="usage-icon">💳</span>
+                                        <span class="usage-title">Low-Cost APIs</span>
+                                    </div>
+                                    <div class="usage-stats">
+                                        <div class="usage-item">Hunter.io: <span id="hunterUsage">-</span></div>
+                                        <div class="usage-item">NeverBounce: <span id="neverBounceUsage">-</span></div>
+                                        <div class="usage-item">Total Low-Cost: <span id="lowCostApiCalls">-</span></div>
+                                    </div>
+                                </div>
+                                <div class="usage-category">
+                                    <div class="usage-header">
+                                        <span class="usage-icon">💎</span>
+                                        <span class="usage-title">Premium APIs</span>
+                                    </div>
+                                    <div class="usage-stats">
+                                        <div class="usage-item">LinkedIn (Future): <span id="linkedinUsage">N/A</span></div>
+                                        <div class="usage-item">Total Premium: <span id="expensiveApiCalls">-</span></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Recent Campaigns -->
+                        <div class="settings-card">
+                            <h3>📈 Recent Campaigns</h3>
+                            <div id="recentCampaigns" class="recent-campaigns">
+                                <div class="loading">Loading campaign history...</div>
+                            </div>
+                        </div>
+
+                        <!-- Current Session Stats -->
+                        <div class="settings-card">
+                            <h3>🔄 Current Session</h3>
+                            <div id="currentSessionStats" class="current-session">
+                                <div class="no-session">No active session data</div>
+                            </div>
+                        </div>
+
+                        <!-- System Configuration -->
+                        <div class="settings-card">
+                            <h3>🔧 Configuration</h3>
+                            <div class="config-options">
+                                <div class="config-item">
+                                    <label for="confidenceThreshold">Owner Data Confidence Threshold</label>
+                                    <select id="confidenceThreshold" class="form-select">
+                                        <option value="50">50% - Show all owner data</option>
+                                        <option value="70" selected>70% - High confidence only</option>
+                                        <option value="90">90% - Very high confidence only</option>
+                                    </select>
+                                </div>
+                                <div class="config-item">
+                                    <label for="maxLeadsPerSearch">Maximum Leads Per Search</label>
+                                    <select id="maxLeadsPerSearch" class="form-select">
+                                        <option value="25" selected>25 leads</option>
+                                        <option value="50">50 leads</option>
+                                        <option value="100">100 leads</option>
+                                    </select>
+                                </div>
+                                <div class="config-item">
+                                    <label for="ownerDiscoveryEnabled">Enable Enhanced Owner Discovery</label>
+                                    <input type="checkbox" id="ownerDiscoveryEnabled" checked>
+                                    <span class="checkbox-label">Use Phase 1 multi-source owner discovery</span>
+                                </div>
+                                <div class="config-item">
+                                    <label for="emailVerificationEnabled">Enable Email Verification</label>
+                                    <input type="checkbox" id="emailVerificationEnabled" checked>
+                                    <span class="checkbox-label">Verify emails with NeverBounce (uses API quota)</span>
+                                </div>
+                            </div>
+                            <div class="config-actions">
+                                <button class="btn btn-primary" id="saveSettings">Save Configuration</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

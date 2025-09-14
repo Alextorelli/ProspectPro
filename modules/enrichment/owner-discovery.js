@@ -1,60 +1,44 @@
 /**
  * Business Owner Discovery Module
  * 
- * Uses free and low-cost methods to discover business owner information:
+ * Enhanced with cost-efficient API integration:
  * 1. Website scraping for "About Us", "Team", "Contact" pages
- * 2. Social media profile extraction (LinkedIn, Facebook business pages)
- * 3. Domain WHOIS data for website owners
- * 4. Google search patterns for owner names
- * 5. Yellow Pages enhanced data extraction
+ * 2. State business registry integration (FREE government APIs)
+ * 3. OpenCorporates API integration (FREE tier)
+ * 4. Domain WHOIS data for website owners
+ * 5. Cost-optimized email discovery and verification
+ * 6. Business directory cross-referencing
  */
 
+const CostEfficientEnrichment = require('./cost-efficient-enrichment');
+
 class OwnerDiscovery {
-    constructor() {
+    constructor(apiKeys = {}) {
         this.userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36';
+        
+        // Initialize cost-efficient enrichment with API keys
+        this.costEfficientEnrichment = new CostEfficientEnrichment(apiKeys);
     }
 
     /**
      * Main method to discover owner information for a business
+     * Now integrates with cost-efficient API strategy
      */
     async discoverOwnerInfo(business) {
         try {
-            console.log(`🔍 Discovering owner info for: ${business.name}`);
+            console.log(`🔍 Starting comprehensive owner discovery for: ${business.name}`);
             
-            const ownerInfo = {
-                ownerName: null,
-                ownerEmail: null,
-                ownerPhone: null,
-                ownerLinkedIn: null,
-                confidence: 0,
-                sources: []
-            };
-
-            // Method 1: Website scraping for owner info
-            if (business.website) {
-                const websiteData = await this.scrapeWebsiteForOwner(business.website, business.name);
-                this.mergeOwnerData(ownerInfo, websiteData);
-            }
-
-            // Method 2: Google search for owner patterns
-            const googleData = await this.searchOwnerPatterns(business.name, business.address);
-            this.mergeOwnerData(ownerInfo, googleData);
-
-            // Method 3: Social media discovery
-            const socialData = await this.findSocialProfiles(business.name, business.address);
-            this.mergeOwnerData(ownerInfo, socialData);
-
-            // Method 4: Domain WHOIS (if website available)
-            if (business.website) {
-                const whoisData = await this.getWhoisOwnerInfo(business.website);
-                this.mergeOwnerData(ownerInfo, whoisData);
-            }
-
-            // Calculate confidence score
-            ownerInfo.confidence = this.calculateConfidence(ownerInfo);
-
-            console.log(`✅ Owner discovery complete for ${business.name}: ${ownerInfo.confidence}% confidence`);
-            return ownerInfo;
+            // Step 1: Free website/WHOIS discovery
+            const freeOwnerInfo = await this.discoverFreeOwnerInfo(business);
+            
+            // Step 2: Cost-efficient API enrichment (free sources first, then paid)
+            const enrichmentResult = await this.costEfficientEnrichment.enrichBusinessOwnerData(business);
+            
+            // Step 3: Merge results prioritizing API data over free scraping
+            const finalOwnerInfo = this.mergeEnrichmentResults(freeOwnerInfo, enrichmentResult);
+            
+            console.log(`✅ Owner discovery complete for ${business.name}: Grade ${finalOwnerInfo.qualityGrade}, ${finalOwnerInfo.confidence}% confidence`);
+            return finalOwnerInfo;
 
         } catch (error) {
             console.error(`❌ Owner discovery failed for ${business.name}:`, error.message);
@@ -63,11 +47,85 @@ class OwnerDiscovery {
                 ownerEmail: null,
                 ownerPhone: null,
                 ownerLinkedIn: null,
+                ownerTitle: null,
                 confidence: 0,
+                qualityGrade: 'F',
                 sources: [],
+                estimatedCost: 0,
+                actualCost: 0,
                 error: error.message
             };
         }
+    }
+
+    /**
+     * Free discovery methods (no API costs)
+     */
+    async discoverFreeOwnerInfo(business) {
+        const ownerInfo = {
+            ownerName: null,
+            ownerEmail: null,
+            ownerPhone: null,
+            ownerLinkedIn: null,
+            ownerTitle: null,
+            confidence: 0,
+            sources: []
+        };
+
+        // Method 1: Website scraping for owner info
+        if (business.website) {
+            const websiteData = await this.scrapeWebsiteForOwner(business.website, business.name);
+            this.mergeOwnerData(ownerInfo, websiteData);
+        }
+
+        // Method 2: Domain WHOIS (if website available)
+        if (business.website) {
+            const whoisData = await this.getWhoisOwnerInfo(business.website);
+            this.mergeOwnerData(ownerInfo, whoisData);
+        }
+
+        // Method 3: Business directory cross-referencing
+        const directoryData = await this.searchBusinessDirectories(business.name, business.address);
+        this.mergeOwnerData(ownerInfo, directoryData);
+
+        // Calculate confidence score
+        ownerInfo.confidence = this.calculateConfidence(ownerInfo);
+
+        return ownerInfo;
+    }
+
+    /**
+     * Merge free discovery results with API enrichment results
+     */
+    mergeEnrichmentResults(freeData, enrichmentResult) {
+        const merged = {
+            // Prioritize API data over free scraping
+            ownerName: enrichmentResult.ownerData?.ownerName || freeData.ownerName,
+            ownerEmail: enrichmentResult.ownerData?.ownerEmail || freeData.ownerEmail,
+            ownerPhone: freeData.ownerPhone || enrichmentResult.ownerData?.ownerPhone,
+            ownerLinkedIn: freeData.ownerLinkedIn || enrichmentResult.ownerData?.ownerLinkedIn,
+            ownerTitle: enrichmentResult.ownerData?.ownerTitle || freeData.ownerTitle,
+            
+            // API enrichment metadata
+            confidence: enrichmentResult.confidenceScore,
+            qualityGrade: enrichmentResult.qualityGrade,
+            estimatedCost: enrichmentResult.estimatedCost,
+            actualCost: enrichmentResult.actualCost,
+            
+            // Combine all sources
+            sources: [
+                ...(freeData.sources || []),
+                ...(enrichmentResult.enrichmentSources || [])
+            ],
+            
+            // Additional enrichment data
+            emailVerification: enrichmentResult.ownerData?.emailVerification,
+            officers: enrichmentResult.ownerData?.officers || [],
+            incorporationState: enrichmentResult.ownerData?.incorporationState,
+            companyNumber: enrichmentResult.ownerData?.companyNumber
+        };
+
+        return merged;
     }
 
     /**
@@ -154,6 +212,95 @@ class OwnerDiscovery {
     }
 
     /**
+     * Get session statistics from cost-efficient enrichment
+     */
+    getEnrichmentStats() {
+        return this.costEfficientEnrichment.getSessionStats();
+    }
+
+    /**
+     * Reset enrichment session statistics
+     */
+    resetEnrichmentStats() {
+        this.costEfficientEnrichment.resetSessionStats();
+    }
+
+    /**
+     * Search business directories for owner information
+     */
+    async searchBusinessDirectories(businessName, address) {
+        try {
+            const ownerData = {
+                ownerName: null,
+                ownerEmail: null,
+                ownerPhone: null,
+                sources: ['business_directories']
+            };
+
+            // Search multiple business directories
+            const directories = [
+                'yellowpages.com',
+                'bbb.org',
+                'manta.com',
+                'bizapedia.com'
+            ];
+
+            // This would implement actual directory searches
+            // For now, return placeholder structure
+            return ownerData;
+
+        } catch (error) {
+            console.log('Business directory search failed:', error.message);
+            return { ownerName: null, ownerEmail: null, ownerPhone: null, sources: [] };
+        }
+    }
+
+    /**
+     * Generate potential email addresses and validate them
+     */
+    async generateAndValidateEmails(ownerName, websiteUrl) {
+        try {
+            const ownerData = {
+                ownerEmail: null,
+                sources: ['email_generation']
+            };
+
+            const domain = this.extractDomain(websiteUrl);
+            if (!domain || !ownerName) return ownerData;
+
+            // Generate common email patterns
+            const nameParts = ownerName.toLowerCase().split(' ');
+            const firstName = nameParts[0];
+            const lastName = nameParts[nameParts.length - 1];
+
+            const emailPatterns = [
+                `${firstName}@${domain}`,
+                `${lastName}@${domain}`,
+                `${firstName}.${lastName}@${domain}`,
+                `${firstName[0]}${lastName}@${domain}`,
+                `${firstName}${lastName[0]}@${domain}`,
+                `owner@${domain}`,
+                `ceo@${domain}`,
+                `president@${domain}`
+            ];
+
+            // In production, validate these emails using services like:
+            // - Hunter.io Email Verifier (100 free verifications/month)
+            // - NeverBounce (1000 free verifications/month)
+            // - ZeroBounce (100 free verifications/month)
+            
+            // For now, return the most likely pattern
+            ownerData.ownerEmail = `${firstName}@${domain}`;
+            
+            return ownerData;
+
+        } catch (error) {
+            console.log('Email generation failed:', error.message);
+            return { ownerEmail: null, sources: [] };
+        }
+    }
+
+    /**
      * Get WHOIS information for domain owner
      */
     async getWhoisOwnerInfo(websiteUrl) {
@@ -231,20 +378,33 @@ class OwnerDiscovery {
                 ownerData.ownerPhone = phones[0];
             }
 
-            // Owner name patterns
+            // Owner name and title patterns (enhanced)
             const ownerPatterns = [
-                /owner[:\s]+([a-zA-Z\s]{2,30})/i,
-                /founder[:\s]+([a-zA-Z\s]{2,30})/i,
-                /president[:\s]+([a-zA-Z\s]{2,30})/i,
-                /ceo[:\s]+([a-zA-Z\s]{2,30})/i,
-                /proprietor[:\s]+([a-zA-Z\s]{2,30})/i,
-                /established by[:\s]+([a-zA-Z\s]{2,30})/i
+                /owner[:\s-]+([a-zA-Z\s]{2,30})/i,
+                /founder[:\s-]+([a-zA-Z\s]{2,30})/i,
+                /president[:\s-]+([a-zA-Z\s]{2,30})/i,
+                /ceo[:\s-]+([a-zA-Z\s]{2,30})/i,
+                /proprietor[:\s-]+([a-zA-Z\s]{2,30})/i,
+                /established by[:\s-]+([a-zA-Z\s]{2,30})/i,
+                /founded by[:\s-]+([a-zA-Z\s]{2,30})/i,
+                /managed by[:\s-]+([a-zA-Z\s]{2,30})/i,
+                /contact[:\s-]+([a-zA-Z\s]{2,30})/i
+            ];
+
+            const titlePatterns = [
+                /(owner|founder|president|ceo|proprietor|manager|director)/i
             ];
 
             for (const pattern of ownerPatterns) {
                 const match = text.match(pattern);
                 if (match && match[1]) {
                     ownerData.ownerName = this.cleanOwnerName(match[1]);
+                    
+                    // Try to extract title from the pattern
+                    const titleMatch = pattern.source.match(/(owner|founder|president|ceo|proprietor)/i);
+                    if (titleMatch) {
+                        ownerData.ownerTitle = titleMatch[1].charAt(0).toUpperCase() + titleMatch[1].slice(1);
+                    }
                     break;
                 }
             }
