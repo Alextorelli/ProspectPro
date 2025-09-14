@@ -307,33 +307,49 @@ class ProspectProRealAPI {
     }
 
     exportResults() {
+        console.log('Export function called');
+        console.log('Extraction results:', this.extractionResults);
+        
         if (this.extractionResults.length === 0) {
             alert('No data to export');
             return;
         }
 
-        // Create CSV content
-        const headers = ['Business Name', 'Address', 'Phone', 'Website', 'Source', 'Pre-validation Score'];
-        const csvContent = [
-            headers.join(','),
-            ...this.extractionResults.map(business => [
-                `"${business.name}"`,
-                `"${business.address}"`,
-                `"${business.phone || ''}"`,
-                `"${business.website || ''}"`,
-                business.source,
-                business.preValidationScore || ''
-            ].join(','))
-        ].join('\n');
+        try {
+            // Create CSV content
+            const headers = ['Business Name', 'Address', 'Phone', 'Website', 'Source', 'Pre-validation Score'];
+            const csvContent = [
+                headers.join(','),
+                ...this.extractionResults.map(business => [
+                    `"${business.name}"`,
+                    `"${business.address}"`,
+                    `"${business.phone || ''}"`,
+                    `"${business.website || ''}"`,
+                    business.source,
+                    business.preValidationScore || ''
+                ].join(','))
+            ].join('\n');
 
-        // Download CSV
-        const blob = new Blob([csvContent], { type: 'text/csv' });
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `ProspectPro-Real-Data-${new Date().toISOString().split('T')[0]}.csv`;
-        a.click();
-        window.URL.revokeObjectURL(url);
+            console.log('CSV content generated:', csvContent.substring(0, 200) + '...');
+
+            // Download CSV
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `ProspectPro-Real-Data-${new Date().toISOString().split('T')[0]}.csv`;
+            
+            // Ensure the link is added to the DOM for some browsers
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+            
+            console.log('Export completed successfully');
+        } catch (error) {
+            console.error('Export failed:', error);
+            alert('Export failed: ' + error.message);
+        }
     }
 }
 
