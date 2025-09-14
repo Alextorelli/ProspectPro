@@ -1,0 +1,352 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "ProspectPro Lead Generation Analytics",
+    "uid": "prospect-pro-analytics",
+    "tags": ["prospectpro", "lead-generation", "api-monitoring", "cost-tracking"],
+    "timezone": "browser",
+    "panels": [
+      {
+        "id": 1,
+        "title": "Campaign Overview",
+        "type": "stat",
+        "gridPos": {"h": 6, "w": 6, "x": 0, "y": 0},
+        "targets": [
+          {
+            "expr": "SELECT COUNT(*) as active_campaigns FROM campaigns WHERE status = 'active'",
+            "refId": "A",
+            "rawSql": "SELECT COUNT(*) as value FROM campaigns WHERE status = 'active'",
+            "format": "table",
+            "datasource": {"uid": "${DS_POSTGRESQL}"}
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {"mode": "thresholds"},
+            "thresholds": {
+              "steps": [
+                {"color": "green", "value": null},
+                {"color": "yellow", "value": 10},
+                {"color": "red", "value": 20}
+              ]
+            },
+            "unit": "short"
+          }
+        },
+        "options": {
+          "reduceOptions": {
+            "values": false,
+            "calcs": ["lastNotNull"]
+          },
+          "textMode": "auto",
+          "colorMode": "background"
+        }
+      },
+      {
+        "id": 2,
+        "title": "Total Leads Discovered",
+        "type": "stat",
+        "gridPos": {"h": 6, "w": 6, "x": 6, "y": 0},
+        "targets": [
+          {
+            "rawSql": "SELECT COUNT(*) as value FROM businesses WHERE created_at >= now() - INTERVAL '24 hours'",
+            "format": "table",
+            "datasource": {"uid": "${DS_POSTGRESQL}"}
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {"mode": "palette-classic"},
+            "unit": "short"
+          }
+        }
+      },
+      {
+        "id": 3,
+        "title": "Qualified Leads",
+        "type": "stat", 
+        "gridPos": {"h": 6, "w": 6, "x": 12, "y": 0},
+        "targets": [
+          {
+            "rawSql": "SELECT COUNT(*) as value FROM businesses WHERE is_qualified = true AND created_at >= now() - INTERVAL '24 hours'",
+            "format": "table",
+            "datasource": {"uid": "${DS_POSTGRESQL}"}
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {"mode": "thresholds"},
+            "thresholds": {
+              "steps": [
+                {"color": "red", "value": null},
+                {"color": "yellow", "value": 50},
+                {"color": "green", "value": 100}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 4,
+        "title": "Daily API Costs",
+        "type": "stat",
+        "gridPos": {"h": 6, "w": 6, "x": 18, "y": 0},
+        "targets": [
+          {
+            "rawSql": "SELECT COALESCE(SUM(total_cost), 0) as value FROM api_cost_tracking WHERE DATE(created_at) = CURRENT_DATE",
+            "format": "table",
+            "datasource": {"uid": "${DS_POSTGRESQL}"}
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {"mode": "thresholds"},
+            "thresholds": {
+              "steps": [
+                {"color": "green", "value": null},
+                {"color": "yellow", "value": 25},
+                {"color": "red", "value": 50}
+              ]
+            },
+            "unit": "currencyUSD"
+          }
+        }
+      },
+      {
+        "id": 5,
+        "title": "API Cost Trend",
+        "type": "timeseries",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 6},
+        "targets": [
+          {
+            "rawSql": "SELECT DATE(created_at) as time, SUM(total_cost) as cost FROM api_cost_tracking WHERE created_at >= now() - INTERVAL '30 days' GROUP BY DATE(created_at) ORDER BY DATE(created_at)",
+            "format": "time_series",
+            "datasource": {"uid": "${DS_POSTGRESQL}"}
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {"mode": "palette-classic"},
+            "unit": "currencyUSD",
+            "custom": {
+              "drawStyle": "line",
+              "lineInterpolation": "linear",
+              "pointSize": 4,
+              "showPoints": "auto"
+            }
+          }
+        },
+        "options": {
+          "tooltip": {"mode": "single", "sort": "none"},
+          "legend": {"displayMode": "visible", "placement": "bottom"}
+        }
+      },
+      {
+        "id": 6,
+        "title": "API Service Breakdown",
+        "type": "piechart",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 6},
+        "targets": [
+          {
+            "rawSql": "SELECT api_service as service, SUM(total_cost) as cost FROM api_cost_tracking WHERE created_at >= now() - INTERVAL '7 days' GROUP BY api_service",
+            "format": "table",
+            "datasource": {"uid": "${DS_POSTGRESQL}"}
+          }
+        ],
+        "options": {
+          "reduceOptions": {
+            "calcs": ["lastNotNull"]
+          },
+          "pieType": "pie",
+          "tooltip": {"mode": "single", "sort": "none"},
+          "legend": {"displayMode": "visible", "placement": "right"}
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {"mode": "palette-classic"},
+            "unit": "currencyUSD"
+          }
+        }
+      },
+      {
+        "id": 7,
+        "title": "Lead Qualification Rate",
+        "type": "timeseries",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 14},
+        "targets": [
+          {
+            "rawSql": "SELECT DATE(created_at) as time, COUNT(*) as total_leads, SUM(CASE WHEN is_qualified THEN 1 ELSE 0 END) as qualified_leads, (SUM(CASE WHEN is_qualified THEN 1 ELSE 0 END)::float / COUNT(*)::float * 100) as qualification_rate FROM businesses WHERE created_at >= now() - INTERVAL '30 days' GROUP BY DATE(created_at) ORDER BY DATE(created_at)",
+            "format": "time_series", 
+            "datasource": {"uid": "${DS_POSTGRESQL}"}
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {"mode": "palette-classic"},
+            "unit": "percent",
+            "custom": {
+              "drawStyle": "line",
+              "lineInterpolation": "linear",
+              "pointSize": 5
+            }
+          }
+        }
+      },
+      {
+        "id": 8,
+        "title": "Service Health Status",
+        "type": "table",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 14},
+        "targets": [
+          {
+            "rawSql": "SELECT service_name as \"Service\", status as \"Status\", response_time_ms as \"Response Time (ms)\", error_rate as \"Error Rate (%)\", requests_today as \"Requests Today\", cost_today as \"Cost Today\" FROM service_health_metrics WHERE DATE(timestamp) = CURRENT_DATE ORDER BY timestamp DESC",
+            "format": "table",
+            "datasource": {"uid": "${DS_POSTGRESQL}"}
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "custom": {
+              "align": "auto",
+              "cellOptions": {
+                "type": "auto"
+              }
+            }
+          },
+          "overrides": [
+            {
+              "matcher": {"id": "byName", "options": "Status"},
+              "properties": [
+                {
+                  "id": "custom.cellOptions",
+                  "value": {
+                    "type": "color-background",
+                    "mode": "basic"
+                  }
+                },
+                {
+                  "id": "color",
+                  "value": {
+                    "mode": "thresholds"
+                  }
+                },
+                {
+                  "id": "thresholds",
+                  "value": {
+                    "steps": [
+                      {"color": "red", "value": null},
+                      {"color": "green", "value": "healthy"}
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "id": 9,
+        "title": "Campaign Performance",
+        "type": "table", 
+        "gridPos": {"h": 8, "w": 24, "x": 0, "y": 22},
+        "targets": [
+          {
+            "rawSql": "SELECT c.name as \"Campaign\", c.business_type as \"Business Type\", c.target_location as \"Location\", COUNT(b.id) as \"Leads Found\", SUM(CASE WHEN b.is_qualified THEN 1 ELSE 0 END) as \"Qualified\", ROUND(COALESCE(SUM(au.cost), 0), 2) as \"Cost ($)\", c.status as \"Status\" FROM campaigns c LEFT JOIN businesses b ON c.id = b.campaign_id LEFT JOIN api_usage au ON c.id = au.campaign_id WHERE c.created_at >= now() - INTERVAL '30 days' GROUP BY c.id, c.name, c.business_type, c.target_location, c.status ORDER BY \"Leads Found\" DESC",
+            "format": "table",
+            "datasource": {"uid": "${DS_POSTGRESQL}"}
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "custom": {
+              "align": "auto",
+              "cellOptions": {
+                "type": "auto"
+              }
+            }
+          }
+        }
+      },
+      {
+        "id": 10,
+        "title": "API Response Times",
+        "type": "timeseries",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 30},
+        "targets": [
+          {
+            "rawSql": "SELECT created_at as time, api_service, AVG(avg_response_time_ms) as avg_response FROM api_cost_tracking WHERE created_at >= now() - INTERVAL '24 hours' GROUP BY DATE_TRUNC('hour', created_at), api_service ORDER BY time",
+            "format": "time_series",
+            "datasource": {"uid": "${DS_POSTGRESQL}"}
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {"mode": "palette-classic"},
+            "unit": "ms",
+            "custom": {
+              "drawStyle": "line",
+              "lineInterpolation": "linear"
+            }
+          }
+        }
+      },
+      {
+        "id": 11,
+        "title": "Error Rate by Service",
+        "type": "bargauge",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 30},
+        "targets": [
+          {
+            "rawSql": "SELECT api_service as service, ROUND((SUM(error_count)::float / (SUM(success_count) + SUM(error_count))::float) * 100, 2) as error_rate FROM api_cost_tracking WHERE created_at >= now() - INTERVAL '24 hours' GROUP BY api_service",
+            "format": "table", 
+            "datasource": {"uid": "${DS_POSTGRESQL}"}
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {"mode": "thresholds"},
+            "thresholds": {
+              "steps": [
+                {"color": "green", "value": null},
+                {"color": "yellow", "value": 5},
+                {"color": "red", "value": 15}
+              ]
+            },
+            "unit": "percent"
+          }
+        }
+      }
+    ],
+    "time": {
+      "from": "now-24h",
+      "to": "now"
+    },
+    "timepicker": {},
+    "templating": {
+      "list": [
+        {
+          "current": {
+            "selected": false,
+            "text": "PostgreSQL",
+            "value": "postgresql-uid"
+          },
+          "hide": 0,
+          "includeAll": false,
+          "multi": false,
+          "name": "DS_POSTGRESQL",
+          "options": [],
+          "query": "postgresql",
+          "refresh": 1,
+          "regex": "",
+          "skipUrlSync": false,
+          "type": "datasource"
+        }
+      ]
+    },
+    "refresh": "30s",
+    "schemaVersion": 27,
+    "style": "dark",
+    "version": 1,
+    "weekStart": ""
+  }
+}
