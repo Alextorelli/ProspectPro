@@ -2,9 +2,16 @@
 # Copy these variables to Railway Dashboard > Variables section
 
 # =====================================
-# SUPABASE CONFIGURATION (REQUIRED)
+# SUPABASE CONFIGURATION (SECURITY UPDATE)
 # =====================================
 SUPABASE_URL=https://vvxdprgfltzblwvpedpx.supabase.co
+
+# RECOMMENDED: Create new publishable/secret keys in Supabase Dashboard
+# Go to: https://supabase.com/dashboard/project/_/settings/api-keys/new
+# SUPABASE_PUBLISHABLE_KEY=sb_publishable_[create_new_key]
+# SUPABASE_SECRET_KEY=sb_secret_[create_new_key]
+
+# LEGACY KEYS (temporary - replace with new keys above for better security)
 SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ2eGRwcmdmbHR6Ymx3dnBlZHB4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjQ3MTgzOTksImV4cCI6MjA0MDI5NDM5OX0.TZ9kR6FfNvnZMJF9P6NX6rYSVfM3LRw7BfGK7U6YXwc
 SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ2eGRwcmdmbHR6Ymx3dnBlZHB4Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTcyNDcxODM5OSwiZXhwIjoyMDQwMjk0Mzk5fQ.sOZBWJfb4MvqA2B6dxPCUaGr3zqZCXF7tHv1NjM5QwE
 
