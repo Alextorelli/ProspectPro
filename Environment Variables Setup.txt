@@ -1,0 +1,19 @@
+# Phase 1 - Core Business Validation (Required)
+CALIFORNIA_SOS_API_KEY=your_california_sos_key_here
+SOCRATA_APP_TOKEN=your_socrata_token_here          # Optional but recommended
+SEC_USER_AGENT="ProspectPro Lead Generation Alextorelli28@gmail.com"
+
+# Phase 2 - Enhanced Validation (Optional but recommended)  
+USPTO_API_KEY=5BoTZaXD2hIxrSOxKvtjkLjozBz5VzOA  # Optional
+COURTLISTENER_TOKEN=58cf8cc4c7d660b6e1532ee56019f8585bede7a9 # Optional
+
+# User agent for all government APIs
+API_USER_AGENT="ProspectPro/1.0 (Business Lead Verification; Alextorelli28@gmail.com)"
+
+
+# Optional but recommended for higher quotas
+CALIFORNIA_SOS_API_KEY=optional_for_higher_limits
+SOCRATA_APP_TOKEN=optional_for_ny_and_ct_apis
+USPTO_API_KEY=5BoTZaXD2hIxrSOxKvtjkLjozBz5VzOA
+COURTLISTENER_TOKEN=58cf8cc4c7d660b6e1532ee56019f8585bede7a9
+SEC_USER_AGENT=ProspectPro API Client Alextorelli28@gmail.com
