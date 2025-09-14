@@ -245,6 +245,13 @@ class ProspectProRealAPI {
             });
 
             if (!response.ok) {
+                // Handle insufficient results (206 Partial Content)
+                if (response.status === 206) {
+                    const partialResult = await response.json();
+                    console.log('⚠️ Insufficient results:', partialResult);
+                    this.showInsufficientResults(partialResult);
+                    return;
+                }
                 throw new Error(`API request failed: ${response.status} ${response.statusText}`);
             }
 
@@ -350,16 +357,20 @@ class ProspectProRealAPI {
     }
 
     createBusinessCard(business) {
+        const ownerData = business.ownerData || {};
+        const hasOwnerInfo = ownerData.confidence > 0;
+
         return `
             <div class="business-card">
                 <div class="business-header">
                     <div class="business-name">${business.name}</div>
                     <div class="business-address">${business.address || 'No address available'}</div>
                 </div>
+                
                 <div class="business-contacts">
                     ${business.phone ? `
                         <div class="contact-item">
-                            <span class="contact-label">Phone:</span> ${business.phone}
+                            <span class="contact-label">Business Phone:</span> ${business.phone}
                         </div>
                     ` : ''}
                     ${business.website ? `
@@ -374,14 +385,135 @@ class ProspectProRealAPI {
                         </div>
                     ` : ''}
                 </div>
+
+                ${hasOwnerInfo ? `
+                    <div class="owner-info">
+                        <h4>👤 Owner Information <span class="confidence-badge">${ownerData.confidence}% confidence</span></h4>
+                        ${ownerData.ownerName ? `
+                            <div class="contact-item">
+                                <span class="contact-label">Owner:</span> ${ownerData.ownerName}
+                            </div>
+                        ` : ''}
+                        ${ownerData.ownerEmail ? `
+                            <div class="contact-item">
+                                <span class="contact-label">Owner Email:</span> 
+                                <a href="mailto:${ownerData.ownerEmail}">${ownerData.ownerEmail}</a>
+                            </div>
+                        ` : ''}
+                        ${ownerData.ownerPhone ? `
+                            <div class="contact-item">
+                                <span class="contact-label">Owner Phone:</span> ${ownerData.ownerPhone}
+                            </div>
+                        ` : ''}
+                        ${ownerData.ownerLinkedIn ? `
+                            <div class="contact-item">
+                                <span class="contact-label">LinkedIn:</span> 
+                                <a href="${ownerData.ownerLinkedIn}" target="_blank">View Profile</a>
+                            </div>
+                        ` : ''}
+                        ${ownerData.sources && ownerData.sources.length > 0 ? `
+                            <div class="owner-sources">
+                                <small>Sources: ${ownerData.sources.join(', ')}</small>
+                            </div>
+                        ` : ''}
+                    </div>
+                ` : ''}
+
                 <div class="business-meta">
                     <span class="source-badge">${business.source || 'Unknown'}</span>
                     ${business.preValidationScore ? `
                         <span class="score-badge">${business.preValidationScore}% validated</span>
                     ` : ''}
+                    ${hasOwnerInfo ? `
+                        <span class="owner-badge">👤 Owner data available</span>
+                    ` : ''}
                 </div>
             </div>
         `;
+    }
+
+    showInsufficientResults(result) {
+        const resultsSection = document.getElementById('resultsSection');
+        const businesses = result.businesses || [];
+        const stats = result.stats || {};
+        
+        resultsSection.innerHTML = `
+            <div class="insufficient-results">
+                <div class="insufficient-header">
+                    <h2>⚠️ Insufficient Results Found</h2>
+                    <p><strong>${stats.preValidated || 0}</strong> unique businesses found, but <strong>${stats.requested || 0}</strong> were requested</p>
+                </div>
+
+                <div class="suggestions-card">
+                    <h3>💡 Suggestions to Get More Results</h3>
+                    <ul class="suggestions-list">
+                        ${result.suggestions.map(suggestion => `<li>${suggestion}</li>`).join('')}
+                    </ul>
+                </div>
+
+                <div class="partial-results">
+                    <h3>Available Results (${businesses.length})</h3>
+                    <div class="results-grid">
+                        ${businesses.map(business => this.createBusinessCard(business)).join('')}
+                    </div>
+                </div>
+
+                <div class="insufficient-actions">
+                    <button class="btn btn-outline" id="adjustSearchBtn">
+                        🔧 Adjust Search Parameters
+                    </button>
+                    ${businesses.length > 0 ? `
+                        <button class="btn btn-secondary" id="proceedAnywayBtn">
+                            ✅ Proceed with ${businesses.length} Results
+                        </button>
+                    ` : ''}
+                </div>
+            </div>
+        `;
+
+        resultsSection.classList.remove('hidden');
+
+        // Bind action buttons
+        const adjustBtn = document.getElementById('adjustSearchBtn');
+        const proceedBtn = document.getElementById('proceedAnywayBtn');
+
+        if (adjustBtn) {
+            adjustBtn.addEventListener('click', () => {
+                // Scroll back to search form and highlight suggestions
+                document.querySelector('.search-interface').scrollIntoView({ behavior: 'smooth' });
+                this.highlightSearchSuggestions();
+            });
+        }
+
+        if (proceedBtn) {
+            proceedBtn.addEventListener('click', () => {
+                // Store partial results and show them as normal results
+                this.searchResults = businesses;
+                this.showResults({ 
+                    businesses: businesses, 
+                    stats: stats,
+                    partial: true 
+                });
+            });
+        }
+    }
+
+    highlightSearchSuggestions() {
+        // Temporarily highlight form elements that could help get more results
+        const radiusSelect = document.getElementById('radiusSelect');
+        const typeSelect = document.getElementById('typeSelect');
+        
+        [radiusSelect, typeSelect].forEach(element => {
+            if (element) {
+                element.style.borderColor = '#f59e0b';
+                element.style.boxShadow = '0 0 0 3px rgba(245, 158, 11, 0.2)';
+                
+                setTimeout(() => {
+                    element.style.borderColor = '';
+                    element.style.boxShadow = '';
+                }, 3000);
+            }
+        });
     }
 
     showError(message) {
