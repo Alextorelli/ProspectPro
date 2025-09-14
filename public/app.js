@@ -155,6 +155,12 @@ class ProspectProRealAPI {
             logoLink.addEventListener('click', () => this.goHome());
         }
 
+        // Template tile clicks
+        const localBusinessCard = document.getElementById('localBusinessCard');
+        if (localBusinessCard) {
+            localBusinessCard.addEventListener('click', () => this.selectTemplate('local-business'));
+        }
+
         // Form submission (only bind if form exists)
         const searchForm = document.getElementById('searchForm');
         if (searchForm) {

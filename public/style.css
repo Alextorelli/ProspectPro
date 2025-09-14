@@ -222,6 +222,8 @@ body {
 /* Main Content */
 .main {
     padding: 3rem 0;
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    min-height: calc(100vh - 200px);
 }
 
 .page-header {
@@ -252,29 +254,32 @@ body {
 .templates-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 1.5rem;
+    gap: 2rem;
     margin-bottom: 3rem;
 }
 
 .template-card {
-    background: var(--surface-color);
-    border: 2px solid var(--border-color);
-    border-radius: 0.75rem;
+    background: linear-gradient(135deg, #ffffff 0%, #fafbfc 100%);
+    border: 1px solid #e1e8ed;
+    border-radius: 12px;
     padding: 1.5rem;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.3s ease;
     position: relative;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
 .template-card:hover {
     border-color: var(--primary-color);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(59, 130, 246, 0.12);
+    background: linear-gradient(135deg, #ffffff 0%, #f0f7ff 100%);
 }
 
 .template-card.selected {
     border-color: var(--primary-color);
-    background: rgba(59, 130, 246, 0.05);
+    background: linear-gradient(135deg, #f0f7ff 0%, #e6f3ff 100%);
+    box-shadow: 0 4px 16px rgba(59, 130, 246, 0.15);
 }
 
 .template-header {
@@ -579,11 +584,12 @@ body {
 }
 
 .form-step {
-    background: white;
-    border: 1px solid var(--border-color);
-    border-radius: 0.5rem;
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafe 100%);
+    border: 1px solid #e2e8f1;
+    border-radius: 8px;
     padding: 1.5rem;
     margin-bottom: 1.5rem;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.02);
 }
 
 .form-step h3 {
@@ -654,12 +660,15 @@ body {
 .template-card.disabled {
     opacity: 0.6;
     cursor: not-allowed;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-color: #d6d9dc;
 }
 
 .template-card.disabled:hover {
     transform: none;
-    border-color: var(--border-color);
-    box-shadow: none;
+    border-color: #d6d9dc;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
 }
 
 .template-badge.disabled {
