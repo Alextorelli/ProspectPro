@@ -151,6 +151,7 @@ ALTER TABLE campaigns ENABLE ROW LEVEL SECURITY;
 ALTER TABLE enhanced_leads ENABLE ROW LEVEL SECURITY;  
 ALTER TABLE lead_emails ENABLE ROW LEVEL SECURITY;
 ALTER TABLE lead_social_profiles ENABLE ROW LEVEL SECURITY;
+ALTER TABLE api_usage_log ENABLE ROW LEVEL SECURITY;
 
 -- RLS Policies for multi-tenant security
 
@@ -203,6 +204,21 @@ CREATE POLICY "Users can view social profiles from their leads" ON lead_social_p
       SELECT el.id FROM enhanced_leads el
       JOIN campaigns c ON el.campaign_id = c.id
       WHERE c.user_id = auth.uid()
+    )
+  );
+
+-- Users can view API usage logs from their campaigns
+CREATE POLICY "Users can view API usage from their campaigns" ON api_usage_log
+  FOR SELECT USING (
+    campaign_id IN (
+      SELECT id FROM campaigns WHERE user_id = auth.uid()
+    )
+  );
+
+CREATE POLICY "System can insert API usage logs" ON api_usage_log
+  FOR INSERT WITH CHECK (
+    campaign_id IN (
+      SELECT id FROM campaigns WHERE user_id = auth.uid()
     )
   );
 

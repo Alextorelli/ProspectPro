@@ -42,7 +42,7 @@ Based on research of free visualization tools and your stack requirements, **Gra
 # Select "Free" plan (3 users, 10K series)
 
 # 2. Get your Grafana connection details
-GRAFANA_INSTANCE_URL="https://your-instance.grafana.net"
+GRAFANA_INSTANCE_URL="https://appsmithery.grafana.net"
 GRAFANA_API_KEY="your_api_key_here"  # From API Keys section
 ```
 
