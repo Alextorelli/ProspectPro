@@ -49,17 +49,45 @@ router.post('/discover', async (req, res) => {
 
         const limitedResults = preValidated.slice(0, count);
 
-        console.log(`✅ Business discovery complete: ${limitedResults.length} pre-validated businesses found`);
+        // Stage 5: Enrich with contact details from Google Places
+        console.log(`🔍 Enriching ${limitedResults.length} businesses with contact details...`);
+        const enrichedBusinesses = [];
+        
+        for (const business of limitedResults) {
+            try {
+                // Get detailed contact information
+                if (business.placeId) {
+                    const details = await googlePlacesClient.getPlaceDetails(business.placeId);
+                    enrichedBusinesses.push({
+                        ...business,
+                        phone: details.phone,
+                        website: details.website,
+                        hours: details.hours,
+                        reviews: details.reviews
+                    });
+                } else {
+                    // No placeId (likely from Yellow Pages), keep as is
+                    enrichedBusinesses.push(business);
+                }
+            } catch (error) {
+                console.error(`Failed to enrich ${business.name}:`, error.message);
+                // Keep business without enrichment rather than losing it
+                enrichedBusinesses.push(business);
+            }
+        }
+
+        console.log(`✅ Business discovery complete: ${enrichedBusinesses.length} enriched businesses found`);
 
         res.json({
             success: true,
-            businesses: limitedResults,
+            businesses: enrichedBusinesses,
             stats: {
                 totalFound: allBusinesses.length,
                 preValidated: preValidated.length,
-                returned: limitedResults.length,
+                returned: enrichedBusinesses.length,
                 googleResults: googleResults.length,
-                yellowPagesResults: yellowPagesResults.length
+                yellowPagesResults: yellowPagesResults.length,
+                enriched: enrichedBusinesses.filter(b => b.phone || b.website).length
             },
             searchParams: { query, location, count, batchType }
         });
