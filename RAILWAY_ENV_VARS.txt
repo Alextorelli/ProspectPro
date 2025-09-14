@@ -1,0 +1,93 @@
+# Railway Environment Variables Configuration
+# Copy these variables to Railway Dashboard > Variables section
+
+# =====================================
+# SUPABASE CONFIGURATION (REQUIRED)
+# =====================================
+SUPABASE_URL=https://vvxdprgfltzblwvpedpx.supabase.co
+SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ2eGRwcmdmbHR6Ymx3dnBlZHB4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjQ3MTgzOTksImV4cCI6MjA0MDI5NDM5OX0.TZ9kR6FfNvnZMJF9P6NX6rYSVfM3LRw7BfGK7U6YXwc
+SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ2eGRwcmdmbHR6Ymx3dnBlZHB4Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTcyNDcxODM5OSwiZXhwIjoyMDQwMjk0Mzk5fQ.sOZBWJfb4MvqA2B6dxPCUaGr3zqZCXF7tHv1NjM5QwE
+
+# =====================================
+# REQUIRED API KEYS FOR REAL DATA
+# =====================================
+
+# Google Places API - WORKING
+GOOGLE_PLACES_API_KEY=AIzaSyB3BbYJRUiGSwgyon2iBWQkv6ON3V3eSik
+
+# Core APIs - You mentioned these are configured in Railway
+SCRAPINGDOG_API_KEY=68c368582456a537af2a2247
+HUNTER_IO_API_KEY=your_real_hunter_key_from_railway
+NEVERBOUNCE_API_KEY=private_56e6fb6612fccb12bdf0d237f70e5b96
+
+# =====================================
+# ENHANCED STATE REGISTRY APIS (FREE)
+# =====================================
+
+# Phase 1 - Core Business Validation (Required)
+SOCRATA_APP_TOKEN=optional_for_ny_and_ct_apis
+SEC_USER_AGENT=ProspectPro Lead Generation Alextorelli28@gmail.com
+
+# Phase 2 - Enhanced Validation (Optional but recommended)  
+USPTO_API_KEY=5BoTZaXD2hIxrSOxKvtjkLjozBz5VzOA
+COURTLISTENER_TOKEN=58cf8cc4c7d660b6e1532ee56019f8585bede7a9
+
+# User agent for all government APIs
+API_USER_AGENT=ProspectPro/1.0 (Business Lead Verification; Alextorelli28@gmail.com)
+
+# =====================================
+# AUTHENTICATION & SECURITY
+# =====================================
+
+# JWT Secret for authentication
+JWT_SECRET=production_jwt_secret_key_min_32_chars_change_this
+
+# Personal access token for private deployment
+PERSONAL_ACCESS_TOKEN=6ef913e6d21ad34cc9f68d91ec559c47797b1959a269a549eeef52ddf0af33d2
+
+# =====================================
+# APPLICATION SETTINGS
+# =====================================
+
+NODE_ENV=production
+PORT=3000
+DEBUG_MODE=false
+LOG_LEVEL=info
+
+# Disable auth skip in production
+SKIP_AUTH_IN_DEV=false
+
+# Disable mock responses in production
+MOCK_API_RESPONSES=false
+
+# Disable dev admin in production
+ENABLE_DEV_ADMIN=false
+
+# =====================================
+# COST MANAGEMENT & LIMITS
+# =====================================
+
+DAILY_BUDGET_LIMIT=25.00
+MONTHLY_BUDGET_LIMIT=150.00
+MIN_CONFIDENCE_SCORE=80
+MAX_LEADS_PER_CAMPAIGN=100
+
+# =====================================
+# RAILWAY DEPLOYMENT SETTINGS
+# =====================================
+
+# These are automatically set by Railway
+# RAILWAY_ENVIRONMENT=production
+# RAILWAY_PROJECT_ID=your-project-id
+# RAILWAY_SERVICE_ID=your-service-id
+
+# =====================================
+# INSTRUCTIONS
+# =====================================
+
+# 1. Go to Railway Dashboard > Your Project > Variables
+# 2. Copy each variable name and value above
+# 3. DO NOT include the comments when pasting
+# 4. Make sure to update the JWT_SECRET with a secure random string
+# 5. Verify HUNTER_IO_API_KEY matches what you manually added
+# 6. Test deployment after adding all variables

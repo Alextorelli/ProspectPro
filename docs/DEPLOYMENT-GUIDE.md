@@ -54,8 +54,8 @@ Before deployment, gather these accounts and API keys:
    ```
    Project URL: https://your-project-id.supabase.co
    API Keys:
-   - anon/public: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-   - service_role: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+   - anon/public: [YOUR_ANON_KEY]
+   - service_role: [YOUR_SERVICE_ROLE_KEY]
    ```
 
 ### 2. Get Google Places API Key
@@ -129,8 +129,8 @@ In Railway dashboard, go to **Variables** tab and add:
 ```env
 # Supabase Configuration
 SUPABASE_URL=https://your-project-id.supabase.co
-SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+SUPABASE_ANON_KEY=[YOUR_ANON_KEY]
+SUPABASE_SERVICE_ROLE_KEY=[YOUR_SERVICE_ROLE_KEY]
 
 # API Keys
 GOOGLE_PLACES_API_KEY=AIzaSyBvOkBmhvOr1XKC...

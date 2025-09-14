@@ -3,12 +3,12 @@
 ## ✅ Completed Setup
 
 1. **Supabase Database**
-   - ✅ Project: vvxdprgfltzblwvpedpx
-   - ✅ URL: https://vvxdprgfltzblwvpedpx.supabase.co
+   - ✅ Project: [PROJECT_ID_CONFIGURED]
+   - ✅ URL: https://[PROJECT_ID].supabase.co
    - ✅ Keys configured in secrets file
 
 2. **Google Places API**
-   - ✅ Key: AIzaSyB3BbYJRUiGSwgyon2iBWQkv6ON3V3eSik
+   - ✅ Key: [CONFIGURED IN ENVIRONMENT VARIABLES]
    - ✅ Active and tested
    - ✅ APIs enabled: Places API, Places Details, Geocoding
 

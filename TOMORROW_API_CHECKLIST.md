@@ -26,7 +26,7 @@ This will show you exactly which APIs are working and which need attention.
 
 #### ✅ Google Places API
 - **Status**: Should be working
-- **Key**: `AIzaSyB3BbYJRUiGSwgyon2iBWQkv6ON3V3eSik`
+- **Key**: `[CONFIGURED_IN_ENVIRONMENT]`
 - **Test**: Run script above
 - **If broken**: 
   1. Go to [Google Cloud Console](https://console.cloud.google.com/)
@@ -81,9 +81,9 @@ This will show you exactly which APIs are working and which need attention.
 
 ### Current Variables to Verify:
 ```
-SUPABASE_URL=https://vvxdprgfltzblwvpedpx.supabase.co
-SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-GOOGLE_PLACES_API_KEY=AIzaSyB3BbYJRUiGSwgyon2iBWQkv6ON3V3eSik
+SUPABASE_URL=https://[YOUR_PROJECT_ID].supabase.co
+SUPABASE_ANON_KEY=[YOUR_ANON_KEY]
+GOOGLE_PLACES_API_KEY=[YOUR_GOOGLE_API_KEY]
 SCRAPINGDOG_API_KEY=68c368582456a537af2a2247
 ```
 

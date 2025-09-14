@@ -666,90 +666,56 @@ class ProspectProRealAPI {
         const confidence = business.confidence || 0;
 
         return `
-            <div class="business-card ${qualityGrade.toLowerCase()}-grade">
-                <div class="business-header">
-                    <div class="business-name">${business.name}</div>
-                    <div class="business-address">${business.address || 'No address available'}</div>
-                    <div class="quality-indicators">
-                        <span class="grade-badge grade-${qualityGrade.toLowerCase()}">${qualityGrade}</span>
-                        ${confidence > 0 ? `<span class="confidence-badge">${confidence}% confidence</span>` : ''}
-                        ${business.emailVerification?.isValid ? `<span class="verified-badge">✅ Verified</span>` : ''}
+            <div class="business-list-item ${qualityGrade.toLowerCase()}-grade">
+                <div class="business-main-info">
+                    <div class="business-header-inline">
+                        <span class="business-name">${business.name}</span>
+                        <div class="quality-badges">
+                            <span class="grade-badge grade-${qualityGrade.toLowerCase()}">${qualityGrade}</span>
+                            ${confidence > 0 ? `<span class="confidence-badge">${confidence}%</span>` : ''}
+                            ${business.emailVerification?.isValid ? `<span class="verified-badge">✅</span>` : ''}
+                        </div>
                     </div>
-                </div>
-                
-                <div class="business-contacts">
-                    ${business.phone ? `
-                        <div class="contact-item">
-                            <span class="contact-label">📞 Business Phone:</span> 
-                            <a href="tel:${business.phone}">${business.phone}</a>
+                    
+                    <div class="business-details">
+                        <div class="address-line">📍 ${business.address || 'No address available'}</div>
+                        
+                        <div class="contact-details">
+                            ${business.phone ? `<span class="contact-item">📞 <a href="tel:${business.phone}">${business.phone}</a></span>` : ''}
+                            ${business.website ? `<span class="contact-item">🌐 <a href="${business.website}" target="_blank">Website</a></span>` : ''}
+                            ${business.rating ? `<span class="contact-item">⭐ ${business.rating}/5</span>` : ''}
                         </div>
-                    ` : ''}
-                    ${business.website ? `
-                        <div class="contact-item">
-                            <span class="contact-label">🌐 Website:</span> 
-                            <a href="${business.website}" target="_blank">${business.website}</a>
-                        </div>
-                    ` : ''}
-                    ${business.rating ? `
-                        <div class="contact-item">
-                            <span class="contact-label">⭐ Rating:</span> ${business.rating}/5
-                        </div>
-                    ` : ''}
-                </div>
-
-                ${hasOwnerInfo ? `
-                    <div class="owner-info">
-                        <h4>👤 Owner Information</h4>
-                        ${business.ownerName ? `
-                            <div class="contact-item">
-                                <span class="contact-label">Name:</span> ${business.ownerName}
-                                ${business.ownerTitle ? `<span class="title-badge">${business.ownerTitle}</span>` : ''}
-                            </div>
-                        ` : ''}
-                        ${business.ownerEmail ? `
-                            <div class="contact-item">
-                                <span class="contact-label">📧 Email:</span> 
-                                <a href="mailto:${business.ownerEmail}">${business.ownerEmail}</a>
-                                ${business.emailVerification ? `
-                                    <span class="verification-status ${business.emailVerification.isValid ? 'valid' : 'invalid'}">
-                                        ${business.emailVerification.isValid ? '✅' : '❌'} 
-                                        ${business.emailVerification.confidence}%
+                        
+                        ${hasOwnerInfo ? `
+                            <div class="owner-details">
+                                <span class="owner-label">👤 Owner:</span>
+                                ${business.ownerName ? `<span class="owner-name">${business.ownerName}${business.ownerTitle ? ` (${business.ownerTitle})` : ''}</span>` : ''}
+                                ${business.ownerEmail ? `
+                                    <span class="owner-email">
+                                        📧 <a href="mailto:${business.ownerEmail}">${business.ownerEmail}</a>
+                                        ${business.emailVerification ? `
+                                            <span class="verification-inline ${business.emailVerification.isValid ? 'valid' : 'invalid'}">
+                                                ${business.emailVerification.isValid ? '✅' : '❌'} ${business.emailVerification.confidence}%
+                                            </span>
+                                        ` : ''}
                                     </span>
                                 ` : ''}
+                                ${business.ownerPhone ? `<span class="owner-phone">📞 <a href="tel:${business.ownerPhone}">${business.ownerPhone}</a></span>` : ''}
+                                ${business.ownerLinkedIn ? `<span class="owner-linkedin">💼 <a href="${business.ownerLinkedIn}" target="_blank">LinkedIn</a></span>` : ''}
                             </div>
-                        ` : ''}
-                        ${business.ownerPhone ? `
-                            <div class="contact-item">
-                                <span class="contact-label">📞 Direct:</span> 
-                                <a href="tel:${business.ownerPhone}">${business.ownerPhone}</a>
+                        ` : `
+                            <div class="no-owner-info">
+                                <span class="no-data-badge">👤 No owner data available</span>
                             </div>
-                        ` : ''}
-                        ${business.ownerLinkedIn ? `
-                            <div class="contact-item">
-                                <span class="contact-label">💼 LinkedIn:</span> 
-                                <a href="${business.ownerLinkedIn}" target="_blank">View Profile</a>
-                            </div>
-                        ` : ''}
+                        `}
                     </div>
-                ` : `
-                    <div class="no-owner-info">
-                        <span class="no-data-badge">👤 No owner data available</span>
-                    </div>
-                `}
-
-                <div class="business-meta">
-                    ${business.sources && business.sources.length > 0 ? `
-                        <div class="sources-info">
-                            <small>📊 Sources: ${this.formatSources(business.sources).join(', ')}</small>
-                        </div>
-                    ` : ''}
-                    ${business.incorporationState ? `
-                        <small class="incorporation-info">🏛️ ${business.incorporationState.toUpperCase()}</small>
-                    ` : ''}
-                    ${business.actualCost && business.actualCost > 0 ? `
-                        <small class="cost-info">💰 $${business.actualCost.toFixed(4)}</small>
-                    ` : ''}
                 </div>
+
+                ${business.sources && business.sources.length > 0 ? `
+                    <div class="business-meta">
+                        <small class="sources-info">📊 ${this.formatSources(business.sources).join(', ')}</small>
+                    </div>
+                ` : ''}
             </div>
         `;
     }
