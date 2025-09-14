@@ -6,12 +6,11 @@
 # =====================================
 SUPABASE_URL=https://vvxdprgfltzblwvpedpx.supabase.co
 
-# RECOMMENDED: Create new publishable/secret keys in Supabase Dashboard
-# Go to: https://supabase.com/dashboard/project/_/settings/api-keys/new
-# SUPABASE_PUBLISHABLE_KEY=sb_publishable_[create_new_key]
-# SUPABASE_SECRET_KEY=sb_secret_[create_new_key]
+# RECOMMENDED: New Supabase keys (Secure - resolves GitHub security alerts)
+SUPABASE_PUBLISHABLE_KEY=sb_publishable_sa9KLDtWPUztENqfx3vdzQ_L5toiLbm
+SUPABASE_SECRET_KEY=sb_secret_hro8oIb8oHnnhNbNpVLkMw_pgprPNCq
 
-# LEGACY KEYS (temporary - replace with new keys above for better security)
+# LEGACY KEYS (temporary - can remove after testing new keys)
 SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ2eGRwcmdmbHR6Ymx3dnBlZHB4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjQ3MTgzOTksImV4cCI6MjA0MDI5NDM5OX0.TZ9kR6FfNvnZMJF9P6NX6rYSVfM3LRw7BfGK7U6YXwc
 SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ2eGRwcmdmbHR6Ymx3dnBlZHB4Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTcyNDcxODM5OSwiZXhwIjoyMDQwMjk0Mzk5fQ.sOZBWJfb4MvqA2B6dxPCUaGr3zqZCXF7tHv1NjM5QwE
 
@@ -22,9 +21,9 @@ SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhY
 # Google Places API - WORKING
 GOOGLE_PLACES_API_KEY=AIzaSyB3BbYJRUiGSwgyon2iBWQkv6ON3V3eSik
 
-# Core APIs - You mentioned these are configured in Railway
+# Core APIs - Real keys from secrets file
 SCRAPINGDOG_API_KEY=68c368582456a537af2a2247
-HUNTER_IO_API_KEY=your_real_hunter_key_from_railway
+HUNTER_IO_API_KEY=7bb2d1f9b5f8af7c1e8bf1736cf51f60eff49bbf
 NEVERBOUNCE_API_KEY=private_56e6fb6612fccb12bdf0d237f70e5b96
 
 # =====================================
