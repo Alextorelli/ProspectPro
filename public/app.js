@@ -4,6 +4,8 @@ class ProspectProRealAPI {
         this.baseUrl = window.location.origin;
         this.selectedTemplate = null;
         this.extractionResults = [];
+        // Add authentication token - hardcode for personal use
+        this.accessToken = '6ef913e6d21ad34cc9f68d91ec559c47797b1959a269a549eeef52ddf0af33d2';
 
         this.batchTemplates = {
             'micro-test': { 
@@ -179,7 +181,8 @@ class ProspectProRealAPI {
             const response = await fetch(`${this.baseUrl}/api/business/discover`, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${this.accessToken}`
                 },
                 body: JSON.stringify({
                     query: industry,
