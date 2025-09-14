@@ -383,6 +383,31 @@ body {
     box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
+/* Multi-select dropdown styling */
+.form-group select[multiple] {
+    min-height: 120px;
+    background: white;
+    appearance: none;
+}
+
+.form-group select[multiple] option {
+    padding: 0.5rem;
+    background: white;
+    border: none;
+}
+
+.form-group select[multiple] option:checked {
+    background: var(--primary-color);
+    color: white;
+}
+
+.form-help {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    margin-top: 0.25rem;
+    font-style: italic;
+}
+
 .config-actions {
     text-align: center;
     margin-top: 2rem;

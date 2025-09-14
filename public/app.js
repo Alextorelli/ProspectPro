@@ -130,7 +130,7 @@ class ProspectProRealAPI {
         // Handle category change
         categorySelect.addEventListener('change', (e) => {
             const selectedCategory = e.target.value;
-            typeSelect.innerHTML = '<option value="">Select business type...</option>';
+            typeSelect.innerHTML = '';
             
             if (selectedCategory) {
                 const types = window.BusinessCategories.getTypesForCategory(selectedCategory);
@@ -143,6 +143,10 @@ class ProspectProRealAPI {
                     typeSelect.appendChild(option);
                 });
             } else {
+                const option = document.createElement('option');
+                option.value = '';
+                option.textContent = 'Select category first...';
+                typeSelect.appendChild(option);
                 typeSelect.disabled = true;
             }
         });
@@ -203,25 +207,27 @@ class ProspectProRealAPI {
 
         // Get form values
         const category = categorySelect.value;
-        const businessTypeDisplay = typeSelect.value;
-        const businessType = window.BusinessCategories.getRawTypeForDisplay(businessTypeDisplay);
+        const selectedTypes = Array.from(typeSelect.selectedOptions).map(option => option.value);
+        const businessTypes = selectedTypes.map(displayType => 
+            window.BusinessCategories.getRawTypeForDisplay(displayType)
+        );
         const location = locationInput.value.trim();
         const radius = parseInt(radiusSelect.value);
         const leadCount = this.selectedQuantity || 5;
 
         // Validate form
-        if (!category || !businessType || !location) {
-            alert('Please fill in all required fields');
+        if (!category || selectedTypes.length === 0 || !location) {
+            alert('Please fill in all required fields and select at least one business type');
             return;
         }
 
-        console.log(`🔍 Starting business discovery: "${businessType}" in "${location}" (${radius} miles, ${leadCount} leads)`);
+        console.log(`🔍 Starting business discovery: "${businessTypes.join(', ')}" in "${location}" (${radius} miles, ${leadCount} leads)`);
 
         // Show loading state
         this.setLoadingState(true);
 
         try {
-            // Call the API with new parameters including radius
+            // Call the API with multiple business types
             const response = await fetch(`${this.baseUrl}/api/business/discover`, {
                 method: 'POST',
                 headers: {
@@ -229,7 +235,8 @@ class ProspectProRealAPI {
                     'Authorization': `Bearer ${this.accessToken}`
                 },
                 body: JSON.stringify({
-                    query: businessType,
+                    query: businessTypes.join(', '), // Join multiple types
+                    businessTypes: businessTypes, // Send as array too
                     location: location,
                     radius: radius,
                     count: leadCount,
@@ -312,10 +319,10 @@ class ProspectProRealAPI {
                     <h3>Export Your Leads</h3>
                     <p>Download your verified business leads as a CSV file</p>
                     <div class="results-actions">
-                        <button class="btn btn-outline" onclick="prospectProApp.goHome()">
+                        <button class="btn btn-outline" id="newSearchResultsBtn">
                             ← New Search
                         </button>
-                        <button class="btn btn-primary" onclick="prospectProApp.exportResults()">
+                        <button class="btn btn-primary" id="exportResultsBtn">
                             📄 Export to CSV
                         </button>
                     </div>
@@ -324,6 +331,22 @@ class ProspectProRealAPI {
         `;
 
         resultsSection.classList.remove('hidden');
+
+        // Bind the result action buttons
+        this.bindResultButtons();
+    }
+
+    bindResultButtons() {
+        const newSearchBtn = document.getElementById('newSearchResultsBtn');
+        const exportBtn = document.getElementById('exportResultsBtn');
+
+        if (newSearchBtn) {
+            newSearchBtn.addEventListener('click', () => this.goHome());
+        }
+
+        if (exportBtn) {
+            exportBtn.addEventListener('click', () => this.exportResults());
+        }
     }
 
     createBusinessCard(business) {
