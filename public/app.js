@@ -56,21 +56,39 @@ class ProspectProRealAPI {
 
     async checkApiStatus() {
         try {
-            const response = await fetch(`${this.baseUrl}/health`);
-            const status = await response.json();
+            // First check basic health
+            const healthResponse = await fetch(`${this.baseUrl}/health`);
+            const healthStatus = await healthResponse.json();
+            
+            // Then check detailed API status
+            const statusResponse = await fetch(`${this.baseUrl}/api/status`, {
+                headers: {
+                    'Authorization': `Bearer ${this.accessToken}`
+                }
+            });
+            const detailedStatus = await statusResponse.json();
 
             const statusElement = document.getElementById('apiStatus');
             const statusDot = statusElement.querySelector('.status-dot');
             const statusText = statusElement.querySelector('.status-text');
 
-            const allAPIsReady = Object.values(status.apis).every(api => api === true);
+            console.log('Health Status:', healthStatus);
+            console.log('API Status:', detailedStatus);
 
-            if (allAPIsReady) {
+            // Check if all required APIs are configured
+            const requiredAPIs = detailedStatus.api_keys;
+            const criticalAPIs = ['google_places']; // At minimum, Google Places is required
+            const allCriticalReady = criticalAPIs.every(api => requiredAPIs[api] === true);
+
+            if (detailedStatus.configuration_complete && allCriticalReady) {
                 statusDot.className = 'status-dot status-dot--success';
                 statusText.textContent = 'All APIs Ready';
+            } else if (allCriticalReady) {
+                statusDot.className = 'status-dot status-dot--warning';
+                statusText.textContent = 'Core APIs Ready';
             } else {
                 statusDot.className = 'status-dot status-dot--warning';
-                statusText.textContent = 'Some APIs Not Configured';
+                statusText.textContent = 'APIs Not Fully Configured';
             }
 
         } catch (error) {
