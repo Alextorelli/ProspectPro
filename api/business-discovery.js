@@ -271,7 +271,6 @@ router.post('/usage-report', async (req, res) => {
         });
     }
 });
-});
 
 // Helper function to calculate quality distribution
 function calculateQualityDistribution(businesses) {
