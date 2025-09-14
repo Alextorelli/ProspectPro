@@ -25,7 +25,7 @@ NEVERBOUNCE_API_KEY=private_56e6fb6612fccb12bdf0d237f70e5b96
 # =====================================
 
 # Phase 1 - Core Business Validation (Required)
-SOCRATA_APP_TOKEN=optional_for_ny_and_ct_apis
+SOCRATA_APP_TOKEN=LyweIWl2X0Yls0hdecKgnwd37
 SEC_USER_AGENT=ProspectPro Lead Generation Alextorelli28@gmail.com
 
 # Phase 2 - Enhanced Validation (Optional but recommended)  
