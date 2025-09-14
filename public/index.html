@@ -3,10 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ProspectPro v2.0 - Real API Integration</title>
+    <title>ProspectPro v2.0 - Real Business Data</title>
     <link rel="stylesheet" href="style.css">
+    <script src="business-categories.js"></script>
 </head>
-<body>
+<body data-theme="dark">
     <div class="app">
         <!-- Header -->
         <header class="header">
@@ -15,9 +16,11 @@
                     <div class="header-left">
                         <h1 class="logo">🎯 ProspectPro v2.0</h1>
                         <div class="version-badge">REAL API</div>
-                        <div class="breadcrumb" id="breadcrumb">Real Data Extraction</div>
                     </div>
                     <div class="header-right">
+                        <button class="theme-toggle" id="themeToggle" title="Toggle Theme">
+                            <span class="theme-icon">🌙</span>
+                        </button>
                         <div class="api-status" id="apiStatus">
                             <span class="status-dot"></span>
                             <span class="status-text">Checking APIs...</span>
@@ -43,48 +46,109 @@
         <main class="main">
             <div class="container">
                 <div class="page-header">
-                    <h1>Real Business Lead Generation</h1>
-                    <p>Extract verified contact information using real APIs - zero fake data guaranteed</p>
+                    <h1>Professional Lead Generation Platform</h1>
+                    <p>Extract verified business contact information using real APIs - zero fake data guaranteed</p>
                 </div>
 
-                <!-- Batch Templates -->
-                <div class="batch-templates">
-                    <h2>Choose Your Batch Size</h2>
-                    <div class="templates-grid" id="templatesGrid">
-                        <!-- Templates will be rendered here -->
+                <!-- Tool Selection -->
+                <div class="tools-grid">
+                    <div class="tool-card active" id="businessDiscoveryTool">
+                        <div class="tool-header">
+                            <div class="tool-icon">🏢</div>
+                            <div class="tool-info">
+                                <h3>Business Lead Discovery</h3>
+                                <p>Find and verify business contacts with real data validation</p>
+                            </div>
+                        </div>
+                        <div class="tool-status">
+                            <span class="status-badge status-badge--active">Active</span>
+                        </div>
                     </div>
-                </div>
 
-                <!-- Configuration Panel -->
-                <div class="config-panel" id="configPanel" style="display: none;">
-                    <h2 id="configTitle">Configure Real Data Extraction</h2>
-                    <div class="config-form">
-                        <div class="form-group">
-                            <label>Location</label>
-                            <input type="text" id="locationInput" placeholder="e.g., Austin, TX" value="Austin, TX">
+                    <div class="tool-card disabled" id="consumerDiscoveryTool">
+                        <div class="tool-header">
+                            <div class="tool-icon">👥</div>
+                            <div class="tool-info">
+                                <h3>Consumer Email Lists</h3>
+                                <p>Build targeted consumer email lists for marketing campaigns</p>
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label>Industry</label>
-                            <select id="industrySelect">
-                                <option value="restaurants">Restaurants</option>
-                                <option value="dentists">Dentists</option>
-                                <option value="lawyers">Lawyers</option>
-                                <option value="plumbers">Plumbers</option>
-                                <option value="beauty salons">Beauty Salons</option>
-                            </select>
-                        </div>
-                        <div class="config-actions">
-                            <button class="btn btn--primary" id="startExtractionBtn">Start Real Data Extraction</button>
+                        <div class="tool-status">
+                            <span class="status-badge status-badge--coming-soon">Coming Soon</span>
                         </div>
                     </div>
                 </div>
 
-                <!-- Results Panel -->
-                <div class="results-panel" id="resultsPanel" style="display: none;">
-                    <h2>Real Data Extraction Results</h2>
-                    <div class="results-content" id="resultsContent">
-                        <!-- Results will be rendered here -->
+                <!-- Business Discovery Search Interface -->
+                <div class="search-interface" id="businessDiscoveryInterface">
+                    <div class="search-card">
+                        <div class="search-header">
+                            <h2>Business Discovery Parameters</h2>
+                            <p>Configure your search to find the most relevant business leads</p>
+                        </div>
+
+                        <form class="search-form" id="searchForm">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="categorySelect">Business Category</label>
+                                    <select id="categorySelect" class="form-select" required>
+                                        <option value="">Select a category...</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="typeSelect">Business Type</label>
+                                    <select id="typeSelect" class="form-select" required disabled>
+                                        <option value="">Select category first...</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="locationInput">Location</label>
+                                    <input type="text" id="locationInput" class="form-input" 
+                                           placeholder="City, State or Address" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="radiusSelect">Search Radius</label>
+                                    <select id="radiusSelect" class="form-select">
+                                        <option value="5">5 miles</option>
+                                        <option value="10" selected>10 miles</option>
+                                        <option value="25">25 miles</option>
+                                        <option value="50">50 miles</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="leadCountSelect">Lead Quantity</label>
+                                    <select id="leadCountSelect" class="form-select">
+                                        <option value="3">3 leads (Micro Test)</option>
+                                        <option value="5" selected>5 leads (Small Batch)</option>
+                                        <option value="10">10 leads (Validation Batch)</option>
+                                        <option value="25">25 leads (Production Batch)</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="cost-estimate-label">Estimated Cost</label>
+                                    <div class="cost-estimate" id="costEstimate">$0.42</div>
+                                </div>
+                            </div>
+
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-primary" id="searchButton">
+                                    <span class="btn-text">Start Discovery</span>
+                                    <span class="btn-spinner hidden">🔄</span>
+                                </button>
+                            </div>
+                        </form>
                     </div>
+                </div>
+
+                <!-- Results Section -->
+                <div class="results-section hidden" id="resultsSection">
+                    <!-- Results will be populated here -->
                 </div>
             </div>
         </main>

@@ -1,42 +1,13 @@
-// ProspectPro v2.0 Real API Client
+// ProspectPro v2.0 Real API Client - Redesigned
 class ProspectProRealAPI {
     constructor() {
         this.baseUrl = window.location.origin;
-        this.selectedTemplate = null;
-        this.extractionResults = [];
+        this.selectedTool = 'business-discovery';
+        this.searchResults = [];
         // Add authentication token - hardcode for personal use
         this.accessToken = '6ef913e6d21ad34cc9f68d91ec559c47797b1959a269a549eeef52ddf0af33d2';
-
-        this.batchTemplates = {
-            'micro-test': { 
-                name: 'Micro Test',
-                targetLeads: 3, 
-                maxApiCalls: 15, 
-                estimatedCost: 0.25,
-                description: 'Quick validation test'
-            },
-            'small-batch': { 
-                name: 'Small Batch',
-                targetLeads: 5, 
-                maxApiCalls: 25, 
-                estimatedCost: 0.42,
-                description: 'Standard testing batch'
-            },
-            'validation-batch': { 
-                name: 'Validation Batch',
-                targetLeads: 10, 
-                maxApiCalls: 40, 
-                estimatedCost: 0.68,
-                description: 'Quality validation batch'
-            },
-            'production-batch': { 
-                name: 'Production Batch',
-                targetLeads: 25, 
-                maxApiCalls: 75, 
-                estimatedCost: 1.28,
-                description: 'Full production run'
-            }
-        };
+        
+        this.costPerLead = 0.084; // Estimated cost per lead with enrichment
 
         this.init();
     }
@@ -44,14 +15,40 @@ class ProspectProRealAPI {
     async init() {
         console.log('🚀 ProspectPro Real API Client initialized');
 
+        // Initialize theme
+        this.initTheme();
+
         // Check API status
         await this.checkApiStatus();
 
-        // Render templates
-        this.renderBatchTemplates();
+        // Initialize business categories
+        this.initBusinessCategories();
 
         // Bind events
         this.bindEvents();
+        
+        // Update initial cost estimate
+        this.updateCostEstimate();
+    }
+
+    initTheme() {
+        const themeToggle = document.getElementById('themeToggle');
+        const currentTheme = localStorage.getItem('theme') || 'dark';
+        
+        document.body.setAttribute('data-theme', currentTheme);
+        this.updateThemeIcon(currentTheme);
+        
+        themeToggle.addEventListener('click', () => {
+            const newTheme = document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+            document.body.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            this.updateThemeIcon(newTheme);
+        });
+    }
+
+    updateThemeIcon(theme) {
+        const themeIcon = document.querySelector('.theme-icon');
+        themeIcon.textContent = theme === 'dark' ? '☀️' : '🌙';
     }
 
     async checkApiStatus() {
@@ -102,100 +99,87 @@ class ProspectProRealAPI {
         }
     }
 
-    renderBatchTemplates() {
-        const grid = document.getElementById('templatesGrid');
-        if (!grid) return;
+    initBusinessCategories() {
+        const categorySelect = document.getElementById('categorySelect');
+        const typeSelect = document.getElementById('typeSelect');
 
-        grid.innerHTML = '';
-
-        Object.entries(this.batchTemplates).forEach(([id, template]) => {
-            const templateCard = document.createElement('div');
-            templateCard.className = 'template-card';
-            templateCard.dataset.templateId = id;
-
-            templateCard.innerHTML = `
-                <div class="template-header">
-                    <h3>${template.name}</h3>
-                    <div class="template-badge">Real API</div>
-                </div>
-                <div class="template-stats">
-                    <div class="stat">
-                        <span class="stat-value">${template.targetLeads}</span>
-                        <span class="stat-label">Target Leads</span>
-                    </div>
-                    <div class="stat">
-                        <span class="stat-value">$${template.estimatedCost}</span>
-                        <span class="stat-label">Est. Cost</span>
-                    </div>
-                </div>
-                <p class="template-description">${template.description}</p>
-                <div class="template-details">
-                    <small>Max API calls: ${template.maxApiCalls}</small>
-                </div>
-            `;
-
-            templateCard.addEventListener('click', () => {
-                this.selectTemplate(id, template);
-            });
-
-            grid.appendChild(templateCard);
-        });
-    }
-
-    selectTemplate(templateId, template) {
-        // Remove previous selections
-        document.querySelectorAll('.template-card').forEach(card => {
-            card.classList.remove('selected');
+        // Populate categories
+        const categories = window.BusinessCategories.getCategories();
+        categories.forEach(category => {
+            const option = document.createElement('option');
+            option.value = category;
+            option.textContent = category;
+            categorySelect.appendChild(option);
         });
 
-        // Select current template
-        const selectedCard = document.querySelector(`[data-template-id="${templateId}"]`);
-        if (selectedCard) {
-            selectedCard.classList.add('selected');
-        }
-
-        this.selectedTemplate = { id: templateId, ...template };
-
-        // Show configuration panel
-        this.showConfigPanel();
-    }
-
-    showConfigPanel() {
-        const configPanel = document.getElementById('configPanel');
-        const configTitle = document.getElementById('configTitle');
-
-        if (configPanel && configTitle) {
-            configTitle.textContent = `Configure ${this.selectedTemplate.name}`;
-            configPanel.style.display = 'block';
-            configPanel.scrollIntoView({ behavior: 'smooth' });
-        }
+        // Handle category change
+        categorySelect.addEventListener('change', (e) => {
+            const selectedCategory = e.target.value;
+            typeSelect.innerHTML = '<option value="">Select business type...</option>';
+            
+            if (selectedCategory) {
+                const types = window.BusinessCategories.getTypesForCategory(selectedCategory);
+                typeSelect.disabled = false;
+                
+                types.forEach(type => {
+                    const option = document.createElement('option');
+                    option.value = type;
+                    option.textContent = type;
+                    typeSelect.appendChild(option);
+                });
+            } else {
+                typeSelect.disabled = true;
+            }
+        });
     }
 
     bindEvents() {
-        const startExtractionBtn = document.getElementById('startExtractionBtn');
-        if (startExtractionBtn) {
-            startExtractionBtn.addEventListener('click', () => {
-                this.startRealDataExtraction();
-            });
-        }
+        // Form submission
+        document.getElementById('searchForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            this.handleSearch();
+        });
+
+        // Lead count change
+        document.getElementById('leadCountSelect').addEventListener('change', () => {
+            this.updateCostEstimate();
+        });
     }
 
-    async startRealDataExtraction() {
-        if (!this.selectedTemplate) {
-            alert('Please select a batch template first');
+    updateCostEstimate() {
+        const leadCount = parseInt(document.getElementById('leadCountSelect').value);
+        const estimatedCost = (leadCount * this.costPerLead).toFixed(2);
+        document.getElementById('costEstimate').textContent = `$${estimatedCost}`;
+    }
+
+    async handleSearch() {
+        const categorySelect = document.getElementById('categorySelect');
+        const typeSelect = document.getElementById('typeSelect');
+        const locationInput = document.getElementById('locationInput');
+        const radiusSelect = document.getElementById('radiusSelect');
+        const leadCountSelect = document.getElementById('leadCountSelect');
+
+        // Get form values
+        const category = categorySelect.value;
+        const businessTypeDisplay = typeSelect.value;
+        const businessType = window.BusinessCategories.getRawTypeForDisplay(businessTypeDisplay);
+        const location = locationInput.value.trim();
+        const radius = parseInt(radiusSelect.value);
+        const leadCount = parseInt(leadCountSelect.value);
+
+        // Validate form
+        if (!category || !businessType || !location) {
+            alert('Please fill in all required fields');
             return;
         }
 
-        const location = document.getElementById('locationInput')?.value || 'Austin, TX';
-        const industry = document.getElementById('industrySelect')?.value || 'restaurants';
+        console.log(`🔍 Starting business discovery: "${businessType}" in "${location}" (${radius} miles)`);
 
-        console.log(`🔍 Starting real data extraction: ${industry} in ${location}`);
+        // Show loading state
+        this.setLoadingState(true);
 
         try {
-            // Show loading state
-            this.showLoadingState();
-
-            // Call real API endpoint
+            // Call the API with new parameters including radius
             const response = await fetch(`${this.baseUrl}/api/business/discover`, {
                 method: 'POST',
                 headers: {
@@ -203,10 +187,11 @@ class ProspectProRealAPI {
                     'Authorization': `Bearer ${this.accessToken}`
                 },
                 body: JSON.stringify({
-                    query: industry,
+                    query: businessType,
                     location: location,
-                    count: this.selectedTemplate.targetLeads,
-                    batchType: this.selectedTemplate.id
+                    radius: radius,
+                    count: leadCount,
+                    category: category
                 })
             });
 
@@ -215,120 +200,140 @@ class ProspectProRealAPI {
             }
 
             const result = await response.json();
+            console.log('✅ API Response:', result);
 
-            if (result.success) {
-                this.extractionResults = result.businesses;
-                this.showResults(result);
-            } else {
-                throw new Error(result.message || 'Extraction failed');
-            }
+            // Store results and show them
+            this.searchResults = result.businesses || [];
+            this.showResults(result);
 
         } catch (error) {
-            console.error('Real data extraction failed:', error);
-            this.showError(error.message);
+            console.error('❌ Business discovery failed:', error);
+            this.showError(`Business discovery failed: ${error.message}`);
+        } finally {
+            this.setLoadingState(false);
         }
     }
 
-    showLoadingState() {
-        const resultsPanel = document.getElementById('resultsPanel');
-        const resultsContent = document.getElementById('resultsContent');
+    setLoadingState(isLoading) {
+        const searchButton = document.getElementById('searchButton');
+        const btnText = searchButton.querySelector('.btn-text');
+        const btnSpinner = searchButton.querySelector('.btn-spinner');
 
-        if (resultsPanel && resultsContent) {
-            resultsContent.innerHTML = `
-                <div class="loading-state">
-                    <div class="loading-spinner"></div>
-                    <h3>Extracting Real Business Data</h3>
-                    <p>Making API calls to Google Places, Yellow Pages, and other sources...</p>
-                </div>
-            `;
-            resultsPanel.style.display = 'block';
-            resultsPanel.scrollIntoView({ behavior: 'smooth' });
+        if (isLoading) {
+            searchButton.disabled = true;
+            btnText.style.display = 'none';
+            btnSpinner.classList.remove('hidden');
+        } else {
+            searchButton.disabled = false;
+            btnText.style.display = 'inline';
+            btnSpinner.classList.add('hidden');
         }
     }
 
     showResults(result) {
-        const resultsContent = document.getElementById('resultsContent');
-        if (!resultsContent) return;
-
+        const resultsSection = document.getElementById('resultsSection');
         const businesses = result.businesses || [];
         const stats = result.stats || {};
 
-        let resultsHTML = `
-            <div class="results-summary">
-                <h3>Real Data Extraction Complete</h3>
-                <div class="summary-stats">
-                    <div class="stat">
-                        <span class="stat-value">${businesses.length}</span>
-                        <span class="stat-label">Businesses Found</span>
-                    </div>
-                    <div class="stat">
-                        <span class="stat-value">${stats.googleResults || 0}</span>
-                        <span class="stat-label">Google Places</span>
-                    </div>
-                    <div class="stat">
-                        <span class="stat-value">${stats.yellowPagesResults || 0}</span>
-                        <span class="stat-label">Yellow Pages</span>
-                    </div>
+        // Create results HTML
+        resultsSection.innerHTML = `
+            <div class="results-header">
+                <h2>Business Discovery Results</h2>
+                <p>Found ${businesses.length} verified business leads</p>
+            </div>
+
+            <div class="results-stats">
+                <div class="stat-item">
+                    <div class="stat-value">${stats.returned || 0}</div>
+                    <div class="stat-label">Results</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">${stats.enriched || 0}</div>
+                    <div class="stat-label">Enriched</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">${stats.googleResults || 0}</div>
+                    <div class="stat-label">Google Places</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">${stats.yellowPagesResults || 0}</div>
+                    <div class="stat-label">Yellow Pages</div>
+                </div>
+            </div>
+
+            <div class="results-grid">
+                ${businesses.map(business => this.createBusinessCard(business)).join('')}
+            </div>
+
+            ${businesses.length > 0 ? `
+                <div class="export-section">
+                    <h3>Export Your Leads</h3>
+                    <p>Download your verified business leads as a CSV file</p>
+                    <button class="btn btn-primary" onclick="prospectProApp.exportResults()">
+                        Export to CSV
+                    </button>
+                </div>
+            ` : ''}
+        `;
+
+        resultsSection.classList.remove('hidden');
+    }
+
+    createBusinessCard(business) {
+        return `
+            <div class="business-card">
+                <div class="business-header">
+                    <div class="business-name">${business.name}</div>
+                    <div class="business-address">${business.address || 'No address available'}</div>
+                </div>
+                <div class="business-contacts">
+                    ${business.phone ? `
+                        <div class="contact-item">
+                            <span class="contact-label">Phone:</span> ${business.phone}
+                        </div>
+                    ` : ''}
+                    ${business.website ? `
+                        <div class="contact-item">
+                            <span class="contact-label">Website:</span> 
+                            <a href="${business.website}" target="_blank">${business.website}</a>
+                        </div>
+                    ` : ''}
+                    ${business.rating ? `
+                        <div class="contact-item">
+                            <span class="contact-label">Rating:</span> ${business.rating}/5
+                        </div>
+                    ` : ''}
+                </div>
+                <div class="business-meta">
+                    <span class="source-badge">${business.source || 'Unknown'}</span>
+                    ${business.preValidationScore ? `
+                        <span class="score-badge">${business.preValidationScore}% validated</span>
+                    ` : ''}
                 </div>
             </div>
         `;
-
-        if (businesses.length > 0) {
-            resultsHTML += `
-                <div class="results-list">
-                    <h4>Real Business Contacts</h4>
-                    ${businesses.map(business => `
-                        <div class="business-card">
-                            <div class="business-header">
-                                <h5>${business.name}</h5>
-                                <div class="source-badge">${business.source}</div>
-                            </div>
-                            <div class="business-details">
-                                <p><strong>Address:</strong> ${business.address}</p>
-                                ${business.phone ? `<p><strong>Phone:</strong> ${business.phone}</p>` : ''}
-                                ${business.website ? `<p><strong>Website:</strong> <a href="${business.website}" target="_blank">${business.website}</a></p>` : ''}
-                                ${business.rating ? `<p><strong>Rating:</strong> ${business.rating}/5</p>` : ''}
-                                ${business.preValidationScore ? `<p><strong>Pre-validation Score:</strong> ${business.preValidationScore}%</p>` : ''}
-                            </div>
-                        </div>
-                    `).join('')}
-                </div>
-                <div class="results-actions">
-                    <button class="btn btn--primary" onclick="prospectProApp.exportResults()">Export Real Data</button>
-                </div>
-            `;
-        } else {
-            resultsHTML += `
-                <div class="no-results">
-                    <h4>No businesses found</h4>
-                    <p>Try adjusting your search parameters or selecting a different location.</p>
-                    <p><strong>Note:</strong> We only return real, verified business data - no fake or placeholder results.</p>
-                </div>
-            `;
-        }
-
-        resultsContent.innerHTML = resultsHTML;
     }
 
     showError(message) {
-        const resultsContent = document.getElementById('resultsContent');
-        if (!resultsContent) return;
-
-        resultsContent.innerHTML = `
-            <div class="error-state">
-                <h3>Extraction Failed</h3>
-                <p><strong>Error:</strong> ${message}</p>
-                <p>This system only returns real data from actual APIs. If extraction fails, no fake data will be generated.</p>
-                <button class="btn btn--outline" onclick="location.reload()">Try Again</button>
+        const resultsSection = document.getElementById('resultsSection');
+        resultsSection.innerHTML = `
+            <div class="error-message">
+                <h3>Discovery Failed</h3>
+                <p>${message}</p>
+                <p>This system only returns real data from actual APIs. If discovery fails, no fake data will be generated.</p>
+                <button class="btn btn-secondary" onclick="document.getElementById('resultsSection').classList.add('hidden')">
+                    Try Again
+                </button>
             </div>
         `;
+        resultsSection.classList.remove('hidden');
     }
 
     exportResults() {
         console.log('Export function called');
-        console.log('Extraction results:', this.extractionResults);
+        console.log('Search results:', this.searchResults);
         
-        if (this.extractionResults.length === 0) {
+        if (this.searchResults.length === 0) {
             alert('No data to export');
             return;
         }
@@ -338,12 +343,12 @@ class ProspectProRealAPI {
             const headers = ['Business Name', 'Address', 'Phone', 'Website', 'Source', 'Pre-validation Score'];
             const csvContent = [
                 headers.join(','),
-                ...this.extractionResults.map(business => [
+                ...this.searchResults.map(business => [
                     `"${business.name}"`,
-                    `"${business.address}"`,
+                    `"${business.address || ''}"`,
                     `"${business.phone || ''}"`,
                     `"${business.website || ''}"`,
-                    business.source,
+                    business.source || '',
                     business.preValidationScore || ''
                 ].join(','))
             ].join('\n');
