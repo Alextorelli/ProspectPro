@@ -1,13 +1,53 @@
-require('dotenv').config();
+const const app = express();
+const PORT = process.env.PORT || 8080;
 
-const express = require('express');
+// =====================================
+// PRODUCTION DATABASE CONFIGURATION (NO MOCK DATA)
+// =====================================
+
+let supabase = null;
+const isProduction = process.env.NODE_ENV === 'production';
+
+// Initialize Supabase (REQUIRED - NO MOCK FALLBACKS)
+async function initializeSupabase() {
+  try {
+    if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+      throw new Error('SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are required');
+    }
+    
+    const { createClient } = require('@supabase/supabase-js');
+    supabase = createClient(
+      process.env.SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY
+    );
+    
+    // Test actual database connection
+    const { data, error } = await supabase.from('campaigns').select('count').limit(1);
+    if (error) throw error;
+    
+    console.log('✅ Supabase production database connected successfully');
+    return true;
+    
+  } catch (error) {
+    console.error('❌ Supabase database connection failed:', error.message);
+    
+    if (isProduction) {
+      console.error('🚨 PRODUCTION REQUIRES WORKING DATABASE - NO MOCK DATA ALLOWED');
+      console.error('📋 Required environment variables:');
+      console.error('   - SUPABASE_URL');
+      console.error('   - SUPABASE_SERVICE_ROLE_KEY');
+      console.error('   - GOOGLE_PLACES_API_KEY');
+      process.exit(1); // Exit in production without database
+    }
+    
+    console.warn('⚠️  Development mode: Database connection failed');
+    return false;
+  }
+}s = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
-const { RateLimiterMemory } = require('rate-limiter-flexible');
 const path = require('path');
-
-// Import Supabase configuration
-const { testConnection, initializeDatabase } = require('./config/supabase');
+require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;

@@ -9,10 +9,14 @@
     "test": "node test/test-real-data.js",
     "test:websites": "node test/test-website-validation.js",
     "test:all": "npm run test && npm run test:websites",
-    "validate": "npm run test:all",
+    "test:production": "node scripts/validate-production.js",
+    "validate": "npm run test:all && npm run test:production",
     "setup": "cp .env.example .env && echo 'Please edit .env with your API keys'",
+    "db:init": "node scripts/initialize-database.js",
+    "db:test": "node scripts/initialize-database.js",
     "railway:check": "node debug-railway-imports.js",
-    "build": "echo 'No build step required - Node.js project'"
+    "build": "echo 'No build step required - Node.js project'",
+    "postinstall": "echo 'ProspectPro: Zero mock data policy enforced'"
   },
   "engines": {
     "node": ">=20.0.0",

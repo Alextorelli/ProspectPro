@@ -1,9 +1,9 @@
 {
-  "name": "ProspectPro",
-  "displayName": "Deploy ProspectPro",
-  "description": "Real business lead generation platform with verified contact data. Zero fake data tolerance.",
+  "name": "ProspectPro Production",
+  "displayName": "ProspectPro - Real Business Data Platform",
+  "description": "Lead generation platform with zero mock data - requires Supabase database and real API keys",
   "iconUrl": "https://railway.app/brand/logo-light.png",
-  "repository": "https://github.com/your-username/ProspectPro",
+  "repository": "https://github.com/Alextorelli/ProspectPro",
   "plugins": [
     {
       "type": "web",
@@ -11,65 +11,69 @@
       "config": {
         "build": {
           "commands": [
-            "npm ci"
+            "npm ci --omit=dev"
           ]
         },
         "deploy": {
           "startCommand": "npm start",
           "healthcheckPath": "/health",
-          "restartPolicyType": "on-failure",
+          "restartPolicyType": "ON_FAILURE",
           "restartPolicyMaxRetries": 3
         }
       }
     }
   ],
   "variables": {
-    "SUPABASE_URL": {
-      "description": "Your Supabase project URL (https://your-project-id.supabase.co)",
-      "required": true
+    "NODE_ENV": {
+      "description": "Node environment - MUST be 'production' for Railway",
+      "default": "production"
     },
-    "SUPABASE_ANON_KEY": {
-      "description": "Supabase anonymous/public key from Settings > API",
+    "PORT": {
+      "description": "Server port - Railway auto-configures this",
+      "default": "8080"
+    },
+    "SUPABASE_URL": {
+      "description": "Your Supabase project URL (https://your-project-id.supabase.co) - REQUIRED",
       "required": true
     },
     "SUPABASE_SERVICE_ROLE_KEY": {
-      "description": "Supabase service role key (keep secret!)",
+      "description": "Supabase service role key (keep secret!) - REQUIRED",
+      "required": true
+    },
+    "SUPABASE_ANON_KEY": {
+      "description": "Supabase anonymous/public key from Settings > API - REQUIRED",
       "required": true
     },
     "GOOGLE_PLACES_API_KEY": {
-      "description": "Google Cloud Console Places API key",
+      "description": "Google Cloud Console Places API key - REQUIRED for business discovery",
       "required": true
     },
     "SCRAPINGDOG_API_KEY": {
-      "description": "ScrapingDog API key for website scraping",
-      "required": true
+      "description": "ScrapingDog API key for website scraping - Optional but recommended",
+      "required": false
     },
     "HUNTER_IO_API_KEY": {
-      "description": "Hunter.io API key for email discovery",
-      "required": true  
+      "description": "Hunter.io API key for email discovery - Optional but recommended",
+      "required": false  
     },
     "NEVERBOUNCE_API_KEY": {
-      "description": "NeverBounce API key for email validation",
-      "required": true
+      "description": "NeverBounce API key for email validation - Optional but recommended",
+      "required": false
     },
     "PERSONAL_ACCESS_TOKEN": {
-      "description": "Secure token for API access (generate with: node -e \"console.log(require('crypto').randomBytes(32).toString('hex'))\")",
-      "required": true
+      "description": "32-character hex token for API security: node -e \"console.log(require('crypto').randomBytes(32).toString('hex'))\"",
+      "required": false
     },
     "PERSONAL_USER_ID": {
-      "description": "Your unique user identifier",
-      "default": "railway-user"
+      "description": "Your unique user identifier for campaign attribution",
+      "default": "railway-production-user"
     },
     "PERSONAL_EMAIL": {
-      "description": "Your email address",
-      "required": true
-    },
-    "NODE_ENV": {
-      "description": "Node environment",
-      "default": "production"
+      "description": "Your email address for system notifications",
+      "required": false
     },
     "ALLOWED_ORIGINS": {
-      "description": "Comma-separated list of allowed CORS origins (will be auto-configured)",
+      "description": "Comma-separated CORS origins (auto-configured for Railway)",
       "default": "${{RAILWAY_STATIC_URL}},${{RAILWAY_PUBLIC_DOMAIN}}"
     }
   }
