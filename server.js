@@ -52,9 +52,16 @@ async function initializeSupabase() {
       throw new Error('Missing required Supabase environment variables');
     }
     
-    // Security: Validate API key format (new format starts with sb_)
+    // Security: Validate API key format (new format starts with sb_secret_)
     if (!process.env.SUPABASE_SERVICE_ROLE_KEY.startsWith('sb_')) {
-      console.warn('⚠️  WARNING: Using deprecated Supabase key format. Update to sb_secret_ format for security compliance.');
+      console.warn('⚠️  WARNING: Using legacy Supabase key format.');
+      console.warn('   Recommendation: Update to new Secret Key format (sb_secret_...) for better security.');
+      console.warn('   See: https://github.com/orgs/supabase/discussions/29260');
+      console.warn('   Legacy keys work until late 2026, but migration is recommended.');
+    } else if (process.env.SUPABASE_SERVICE_ROLE_KEY.startsWith('sb_secret_')) {
+      console.log('✅ Using modern Supabase Secret Key format');
+    } else if (process.env.SUPABASE_SERVICE_ROLE_KEY.startsWith('sb_publishable_')) {
+      throw new Error('❌ ERROR: Using Publishable Key for server operations. Use Secret Key (sb_secret_...) instead.');
     }
     
     console.log('Environment check:', sanitizeEnvForLogs());
@@ -463,8 +470,8 @@ async function startServer() {
       } else {
         console.log('📋 Make sure you have set the following environment variables:');
         console.log('   - SUPABASE_URL');
-        console.log('   - SUPABASE_SERVICE_ROLE_KEY');
-        console.log('   - SUPABASE_ANON_KEY');
+        console.log('   - SUPABASE_SERVICE_ROLE_KEY (use Secret Key: sb_secret_...)');
+        console.log('💡 Generate new API keys at: Settings → API → "Generate new API keys"');
         process.exit(1);
       }
     }

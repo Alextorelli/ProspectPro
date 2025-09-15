@@ -68,6 +68,7 @@ ProspectPro is now a production-ready lead generation platform with:
 ## Security & Compliance ✅
 
 - All secrets via environment variables (no hardcoded keys)
+- Modern Supabase API keys (new `sb_secret_` format for enhanced security)
 - HTTPS-only traffic encryption
 - Row Level Security database policies
 - Token-based admin authentication

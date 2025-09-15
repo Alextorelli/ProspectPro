@@ -70,6 +70,7 @@ Track your lead generation performance:
 ## 🔐 Security & Compliance
 
 - ✅ **No hardcoded secrets** - All credentials via environment variables
+- ✅ **Modern Supabase API keys** - Uses new secure `sb_secret_` format
 - ✅ **Row Level Security** - Supabase RLS policies implemented
 - ✅ **Token authentication** - Secure admin dashboard access
 - ✅ **HTTPS only** - All traffic encrypted

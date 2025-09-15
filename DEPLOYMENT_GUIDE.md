@@ -54,9 +54,15 @@ Deploy ProspectPro as a web application that you can access from any browser wit
 
 ### Step 2: Get Database Credentials
 1. In your project dashboard, go to **Settings** → **API**
-2. Copy these values:
+2. **Generate new API keys** (recommended):
+   - Click "Generate new API keys" to create the modern secure keys
+   - Use **Publishable key** (`sb_publishable_...`) for client-side
+   - Use **Secret key** (`sb_secret_...`) for server-side (this app)
+3. Copy these values:
    - **URL**: `https://xxx.supabase.co`
-   - **Service Role Key**: `sb_secret_xxx...` (NOT the anon key)
+   - **Secret Key**: `sb_secret_xxx...` (for server-side operations)
+
+> **Note**: Legacy `anon`/`service_role` keys still work but the new `publishable`/`secret` keys offer better security, rotation capabilities, and are the future-proof choice.
 
 ### Step 3: Import Database Schema
 1. Go to **SQL Editor** in Supabase dashboard
@@ -64,6 +70,22 @@ Deploy ProspectPro as a web application that you can access from any browser wit
 3. Copy and paste the contents of `/database/enhanced-supabase-schema.sql`
 4. Click **Run** to create all tables
 5. Verify tables were created in the **Table Editor**
+
+### 🔑 API Key Types Explained
+
+Supabase now offers **two types of API keys** for better security:
+
+| Key Type | Format | Usage | Security Level |
+|----------|--------|-------|----------------|
+| **Publishable Key** | `sb_publishable_...` | Client-side apps, browsers | Low - Safe to expose |
+| **Secret Key** | `sb_secret_...` | Server-side, backend APIs | High - Keep secure |
+
+**For ProspectPro**: We use the **Secret Key** for server-side operations with full database access.
+
+**Migration from legacy keys**: 
+- Old `anon` key → New `publishable` key
+- Old `service_role` key → New `secret` key  
+- Legacy keys work until late 2026, but new keys are recommended
 
 ---
 
@@ -86,10 +108,12 @@ In your Railway project dashboard:
 | `NODE_ENV` | `production` | `production` |
 | `PORT` | `8080` | `8080` |
 | `SUPABASE_URL` | Your Supabase URL | `https://abc123.supabase.co` |
-| `SUPABASE_SERVICE_ROLE_KEY` | Your service role key | `sb_secret_xxx...` |
+| `SUPABASE_SERVICE_ROLE_KEY` | Your **secret key** | `sb_secret_xxx...` |
 | `GOOGLE_PLACES_API_KEY` | Your Google API key | `AIzaS...` |
 | `PERSONAL_ACCESS_TOKEN` | Create a secure token | `ProspectPro2024_SecureToken123` |
 | `ADMIN_PASSWORD` | Your admin password | `YourSecurePassword123!` |
+
+> **Important**: Use the new **Secret key** (`sb_secret_...`) format, not the legacy service role key. The new format offers better security and rotation capabilities.
 
 **Optional variables** (add if you have the API keys):
 - `HUNTER_IO_API_KEY`
@@ -198,9 +222,23 @@ All maintenance can be done through web interfaces:
 3. **Check build logs**: Look for any error messages in deployment logs
 
 ### Database Connection Issues
-1. **Verify Supabase credentials**: URL and service role key correct
-2. **Check database schema**: Ensure enhanced-supabase-schema.sql was imported
-3. **Test connection**: Use Supabase SQL Editor to run `SELECT 1;`
+1. **Verify Supabase credentials**: URL and secret key correct (should start with `sb_secret_`)
+2. **API key format check**:
+   - ✅ **Recommended**: `sb_secret_...` (new secure format)
+   - ⚠️ **Legacy**: Long JWT format (still works, but update recommended)
+   - ❌ **Wrong**: `sb_publishable_...` (this is for client-side only)
+3. **Check database schema**: Ensure enhanced-supabase-schema.sql was imported
+4. **Test connection**: Use Supabase SQL Editor to run `SELECT 1;`
+
+### API Key Migration
+If you're using **legacy keys** and want to migrate:
+1. Go to **Settings** → **API** in Supabase dashboard
+2. Click "Generate new API keys" 
+3. Copy the new **Secret key** (`sb_secret_...`)
+4. Update `SUPABASE_SERVICE_ROLE_KEY` in Railway variables
+5. Redeploy your app
+
+**Both key formats work simultaneously** - no downtime required for migration.
 
 ### API Costs Too High
 1. **Check admin dashboard**: Review cost breakdown
