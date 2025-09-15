@@ -50,6 +50,18 @@ npm run test    # Validate zero fake data
 npm run validate # Run all tests
 ```
 
+### Real-Time Monitoring
+```bash
+npm start       # Start production server
+# Open browser to: http://localhost:3000/monitoring
+```
+
+Monitor your lead generation campaigns with:
+- **Live cost tracking** with budget alerts
+- **API status monitoring** across all services
+- **Real-time activity feeds** for campaigns
+- **Performance metrics** and success rates
+
 ## 🏗️ Architecture
 
 ### 4-Stage Data Pipeline
@@ -200,6 +212,7 @@ if (apiCall.failed) {
 
 ## 📚 Documentation
 
+- [Monitoring Dashboard](docs/MONITORING_DASHBOARD.md) - Real-time monitoring interface
 - [Real Data Requirements](docs/REAL-DATA-REQUIREMENTS.md)
 - [API Integration Guide](docs/API-INTEGRATION-PATCHES.md)
 - [AI Agent Instructions](.github/copilot-instructions.md)

@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ProspectPro - Real-Time Monitoring Dashboard</title>
+    <link rel="stylesheet" href="dashboard-style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <!-- Header -->
+    <header class="dashboard-header">
+        <div class="header-content">
+            <div class="header-left">
+                <div class="logo-section">
+                    <h1 class="logo">ProspectPro</h1>
+                    <p class="subtitle">Real-Time Monitoring Dashboard</p>
+                </div>
+                <div class="datetime-display">
+                    <span id="currentDateTime"></span>
+                </div>
+                <div class="connection-status">
+                    <div class="connection-indicator" id="dbStatus">
+                        <span class="connection-dot"></span>
+                        <span>Database: <span id="dbStatusText">Connecting...</span></span>
+                    </div>
+                </div>
+            </div>
+            <div class="header-right">
+                <div class="budget-status">
+                    <span class="budget-label">Daily Budget</span>
+                    <div class="budget-progress">
+                        <div class="budget-bar">
+                            <div class="budget-fill" id="dailyBudgetFill"></div>
+                        </div>
+                        <span class="budget-text" id="dailyBudgetText">$0.00 / $25.00 (0%)</span>
+                    </div>
+                </div>
+                <button class="theme-toggle btn btn--outline" id="themeToggle">
+                    <span id="themeIcon">🌙</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Dashboard -->
+    <main class="dashboard-container">
+        <div class="dashboard-grid">
+            <!-- System Status Card -->
+            <div class="card dashboard-card card-large" data-card="system-status">
+                <div class="card__header">
+                    <h3>System Status</h3>
+                    <span class="status status--success">Monitoring Active</span>
+                </div>
+                <div class="card__body">
+                    <div class="system-overview">
+                        <div class="status-item">
+                            <div class="status-icon">🚀</div>
+                            <div class="status-details">
+                                <div class="status-name">Railway App</div>
+                                <div class="status-value" id="railwayStatus">Connected</div>
+                                <div class="status-desc">Production deployment active</div>
+                            </div>
+                        </div>
+                        <div class="status-item">
+                            <div class="status-icon">🗄️</div>
+                            <div class="status-details">
+                                <div class="status-name">Supabase Database</div>
+                                <div class="status-value" id="databaseStatus">Connected</div>
+                                <div class="status-desc">PostgreSQL monitoring ready</div>
+                            </div>
+                        </div>
+                        <div class="status-item">
+                            <div class="status-icon">📊</div>
+                            <div class="status-details">
+                                <div class="status-name">API Monitoring</div>
+                                <div class="status-value">Active</div>
+                                <div class="status-desc">Real-time cost tracking</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="zero-state-message">
+                        <div class="zero-icon">⏳</div>
+                        <h4>Waiting for API Traffic</h4>
+                        <p>All systems connected and ready to monitor. Charts and metrics will populate when your ProspectPro app starts making API calls.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Real Cost Tracking Card -->
+            <div class="card dashboard-card card-large" data-card="cost-tracking">
+                <div class="card__header">
+                    <h3>Real Cost Tracking</h3>
+                    <div class="live-indicator">
+                        <span class="live-dot"></span>
+                        <span>Live</span>
+                    </div>
+                </div>
+                <div class="card__body">
+                    <div class="cost-summary">
+                        <div class="cost-item">
+                            <span class="cost-label">Today's Actual Spend</span>
+                            <span class="cost-value" id="todayCost">$0.00</span>
+                            <span class="cost-percentage">0% of $25.00 limit</span>
+                        </div>
+                        <div class="cost-item">
+                            <span class="cost-label">Monthly Actual Spend</span>
+                            <span class="cost-value" id="monthlyCost">$0.00</span>
+                            <span class="cost-percentage">0% of $150.00 limit</span>
+                        </div>
+                    </div>
+                    
+                    <div class="provider-breakdown">
+                        <h4>API Provider Costs (Real-Time)</h4>
+                        <div class="provider-list">
+                            <div class="provider-item">
+                                <span class="provider-name">Google Places</span>
+                                <span class="provider-cost" id="googlePlacesCost">$0.00</span>
+                                <span class="provider-status status--success">Ready</span>
+                            </div>
+                            <div class="provider-item">
+                                <span class="provider-name">Scrapingdog</span>
+                                <span class="provider-cost" id="scrapingdogCost">$0.00</span>
+                                <span class="provider-status status--success">Ready</span>
+                            </div>
+                            <div class="provider-item">
+                                <span class="provider-name">Hunter.io</span>
+                                <span class="provider-cost" id="hunterCost">Free Tier</span>
+                                <span class="provider-status status--success">Ready</span>
+                            </div>
+                            <div class="provider-item">
+                                <span class="provider-name">NeverBounce</span>
+                                <span class="provider-cost" id="neverbounceCost">Free Tier</span>
+                                <span class="provider-status status--success">Ready</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="chart-container" style="position: relative; height: 200px;">
+                        <canvas id="costTrendChart"></canvas>
+                        <div class="chart-overlay" id="chartOverlay">
+                            <div class="chart-message">
+                                <span>📊</span>
+                                <p>Cost trend chart will appear when API usage begins</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- API Connection Status Card -->
+            <div class="card dashboard-card" data-card="api-connections">
+                <div class="card__header">
+                    <h3>API Connections</h3>
+                    <button class="btn btn--sm btn--outline" id="testConnections">Test All</button>
+                </div>
+                <div class="card__body">
+                    <div class="api-list">
+                        <div class="api-connection">
+                            <div class="api-icon">🗺️</div>
+                            <div class="api-details">
+                                <div class="api-name">Google Places API</div>
+                                <div class="api-key">Key: AIza...eSik</div>
+                                <div class="api-pricing">$0.032/search • $0.017/details</div>
+                            </div>
+                            <div class="connection-status">
+                                <span class="status status--warning" id="googleStatus">Testing...</span>
+                            </div>
+                        </div>
+                        
+                        <div class="api-connection">
+                            <div class="api-icon">🕷️</div>
+                            <div class="api-details">
+                                <div class="api-name">Scrapingdog</div>
+                                <div class="api-key">Key: 68c3...2247</div>
+                                <div class="api-pricing">$0.002/scrape</div>
+                            </div>
+                            <div class="connection-status">
+                                <span class="status status--warning" id="scrapingdogStatus">Testing...</span>
+                            </div>
+                        </div>
+                        
+                        <div class="api-connection">
+                            <div class="api-icon">🎯</div>
+                            <div class="api-details">
+                                <div class="api-name">Hunter.io</div>
+                                <div class="api-key">Key: 7bb2...9bbf</div>
+                                <div class="api-pricing">25 free searches/month</div>
+                            </div>
+                            <div class="connection-status">
+                                <span class="status status--warning" id="hunterStatus">Testing...</span>
+                            </div>
+                        </div>
+                        
+                        <div class="api-connection">
+                            <div class="api-icon">✉️</div>
+                            <div class="api-details">
+                                <div class="api-name">NeverBounce</div>
+                                <div class="api-key">Key: priv...5b96</div>
+                                <div class="api-pricing">1000 free verifications/month</div>
+                            </div>
+                            <div class="connection-status">
+                                <span class="status status--warning" id="neverBounceStatus">Testing...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Real Activity Monitor Card -->
+            <div class="card dashboard-card" data-card="activity-monitor">
+                <div class="card__header">
+                    <h3>Real Activity Monitor</h3>
+                    <select class="form-control" id="activityFilter">
+                        <option value="all">All Activity</option>
+                        <option value="API_CALL">API Calls</option>
+                        <option value="SYSTEM">System Events</option>
+                    </select>
+                </div>
+                <div class="card__body">
+                    <div class="activity-feed" id="activityFeed">
+                        <div class="no-activity-message">
+                            <div class="no-activity-icon">🔄</div>
+                            <h4>No API Activity Yet</h4>
+                            <p>Activity feed will show real API calls when your ProspectPro application starts running.</p>
+                            <div class="last-check">
+                                <small>Last check: <span id="lastCheckTime">Just now</span></small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Lead Pipeline (Zero State) Card -->
+            <div class="card dashboard-card" data-card="lead-pipeline">
+                <div class="card__header">
+                    <h3>Lead Generation Pipeline</h3>
+                </div>
+                <div class="card__body">
+                    <div class="pipeline-zero-state">
+                        <div class="pipeline-icon">🎯</div>
+                        <h4>Lead Pipeline Ready</h4>
+                        <p>Lead generation metrics will populate here when your ProspectPro app discovers and processes businesses.</p>
+                        
+                        <div class="pipeline-preview">
+                            <div class="pipeline-step">
+                                <div class="step-icon">🔍</div>
+                                <div class="step-name">Discovery</div>
+                                <div class="step-count">0</div>
+                            </div>
+                            <div class="pipeline-step">
+                                <div class="step-icon">🌐</div>
+                                <div class="step-name">Websites Scraped</div>
+                                <div class="step-count">0</div>
+                            </div>
+                            <div class="pipeline-step">
+                                <div class="step-icon">📧</div>
+                                <div class="step-name">Emails Found</div>
+                                <div class="step-count">0</div>
+                            </div>
+                            <div class="pipeline-step">
+                                <div class="step-icon">✅</div>
+                                <div class="step-name">Verified Leads</div>
+                                <div class="step-count">0</div>
+                            </div>
+                        </div>
+                        
+                        <div class="cost-per-lead">
+                            <span class="cpl-label">Cost per qualified lead:</span>
+                            <span class="cpl-value">$0.00</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Budget & Alerts Configuration -->
+            <div class="card dashboard-card" data-card="budget-config">
+                <div class="card__header">
+                    <h3>Budget & Alerts</h3>
+                </div>
+                <div class="card__body">
+                    <div class="budget-config">
+                        <div class="budget-item">
+                            <label class="form-label">Daily Budget Limit</label>
+                            <input type="range" class="slider" id="dailyBudgetSlider" 
+                                   min="10" max="100" value="25" step="5">
+                            <div class="budget-status-bar">
+                                <span class="budget-used">$0.00</span>
+                                <span class="budget-remaining">of $<span id="dailyBudgetValue">25</span>.00</span>
+                            </div>
+                        </div>
+                        
+                        <div class="budget-item">
+                            <label class="form-label">Monthly Budget Limit</label>
+                            <input type="range" class="slider" id="monthlyBudgetSlider" 
+                                   min="50" max="500" value="150" step="25">
+                            <div class="budget-status-bar">
+                                <span class="budget-used">$0.00</span>
+                                <span class="budget-remaining">of $<span id="monthlyBudgetValue">150</span>.00</span>
+                            </div>
+                        </div>
+                        
+                        <div class="alert-settings">
+                            <h4>Alert Settings</h4>
+                            <div class="alert-item">
+                                <label>Warning at: <span id="warningThreshold">80</span>% of budget</label>
+                                <input type="range" class="slider" id="warningSlider" min="50" max="95" value="80" step="5">
+                            </div>
+                            <div class="alert-item">
+                                <label>Critical at: <span id="criticalThreshold">95</span>% of budget</label>
+                                <input type="range" class="slider" id="criticalSlider" min="80" max="99" value="95" step="1">
+                            </div>
+                            <div class="alert-email">
+                                <span class="email-icon">📧</span>
+                                <span>alextorelli28@gmail.com</span>
+                            </div>
+                        </div>
+                        
+                        <button class="btn btn--primary btn--full-width" id="saveConfig">Save Configuration</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal for detailed views -->
+    <div class="modal hidden" id="detailModal">
+        <div class="modal-overlay"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">Details</h3>
+                <button class="modal-close" id="modalClose">×</button>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <!-- Content will be populated by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <script src="dashboard-app.js"></script>
+</body>
+</html>

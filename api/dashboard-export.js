@@ -5,7 +5,22 @@
 
 const express = require('express');
 const { createClient } = require('@supabase/supabase-js');
-const ProspectProMetricsClient = require('./prospectpro-metrics-client');
+const path = require('path');
+
+// Robust import for Railway deployment compatibility
+let ProspectProMetricsClient;
+try {
+  ProspectProMetricsClient = require('../modules/api-clients/prospectpro-metrics-client');
+} catch (error) {
+  console.error('Failed to import with relative path, trying absolute path...', error.message);
+  try {
+    const absolutePath = path.resolve(__dirname, '..', 'modules', 'api-clients', 'prospectpro-metrics-client');
+    ProspectProMetricsClient = require(absolutePath);
+  } catch (absoluteError) {
+    console.error('Failed to import with absolute path:', absoluteError.message);
+    throw new Error('Cannot import ProspectProMetricsClient: ' + absoluteError.message);
+  }
+}
 
 class DashboardExportService {
   constructor(supabaseClient) {

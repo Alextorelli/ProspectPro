@@ -177,6 +177,11 @@ app.use('/api/dashboard', createDashboardExportRoutes(supabaseClient));
 // Serve static files from public directory
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Monitoring dashboard route
+app.get('/monitoring', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'monitoring', 'index.html'));
+});
+
 // Handle SPA routing - serve index.html for non-API routes
 app.get('*', (req, res, next) => {
   // Skip API routes

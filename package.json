@@ -10,7 +10,13 @@
     "test:websites": "node test/test-website-validation.js",
     "test:all": "npm run test && npm run test:websites",
     "validate": "npm run test:all",
-    "setup": "cp .env.example .env && echo 'Please edit .env with your API keys'"
+    "setup": "cp .env.example .env && echo 'Please edit .env with your API keys'",
+    "railway:check": "node debug-railway-imports.js",
+    "build": "echo 'No build step required - Node.js project'"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.57.4",

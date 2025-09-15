@@ -1,50 +1,61 @@
-# ProspectPro Monitoring & Analytics Setup
+# ProspectPro Monitoring
 
 ## Overview
-Complete monitoring and analytics integration for ProspectPro using Supabase database and Grafana dashboards. This setup provides real-time insights into lead generation campaigns, API costs, service health, and performance metrics.
 
-## Components
-- **Database Monitoring Schema**: PostgreSQL tables for tracking metrics
-- **Grafana Dashboards**: Professional analytics and visualization  
-- **Real-time Queries**: Direct SQL queries for monitoring data
-- **API Integration**: Enhanced Railway app with monitoring endpoints
+ProspectPro uses a **lightweight HTML/CSS/JavaScript dashboard** for real-time monitoring instead of complex Grafana setups.
 
-## Quick Start
-1. [Deploy Database Schema](supabase-deployment.md)
-2. [Configure Grafana Integration](grafana-setup.md)
-3. [Set Up Monitoring Queries](monitoring-queries.md)
-4. [Railway App Configuration](railway-integration.md)
+## Quick Access
 
-## Documentation Structure
-```
-docs/monitoring/
-├── README.md                    # This overview file
-├── supabase-deployment.md       # Database deployment guide
-├── grafana-setup.md             # Grafana configuration  
-├── monitoring-queries.md        # SQL queries for analytics
-├── railway-integration.md       # Railway app setup
-├── dashboards/                  # Dashboard configurations
-│   ├── prospectpro-main.json   # Main ProspectPro dashboard
-│   └── system-health.json      # System monitoring dashboard
-└── sql/                        # Database schema files
-    ├── monitoring-schema.sql   # Main monitoring tables
-    └── sample-queries.sql     # Example analytics queries
+```bash
+npm start
+# Open browser to: http://localhost:3000/monitoring
 ```
 
-## Features After Setup
-- ✅ **Real-time Campaign Analytics** - Track lead generation progress
-- ✅ **API Cost Monitoring** - Monitor spending across all services
-- ✅ **Service Health Dashboard** - Track API performance and uptime
-- ✅ **Lead Qualification Metrics** - Analyze conversion rates and quality
-- ✅ **Professional Visualizations** - Export-ready charts and graphs
+## What's Included
 
-## Prerequisites
-- Supabase database with existing ProspectPro schema
-- Grafana Cloud account (free tier available)
-- Environment variables configured (see `.env.example`)
-- Basic PostgreSQL knowledge for customization
+### Real-Time Dashboard
+- **System Status**: Live API connectivity checks
+- **Cost Tracking**: Real-time spend monitoring with budget alerts  
+- **Activity Feed**: Live campaign and discovery events
+- **Performance Metrics**: Success rates, response times, error tracking
 
-## Support
-- Issues: See troubleshooting sections in each guide
-- Updates: Check individual component documentation
-- Questions: Follow the step-by-step guides in order
+### Direct API Integration
+- Google Places API monitoring
+- Scrapingdog scraping status
+- Hunter.io email discovery tracking
+- NeverBounce validation monitoring
+- Supabase database operations
+
+## Architecture
+
+```
+public/monitoring/
+├── index.html          # Dashboard interface
+├── dashboard-app.js    # Real-time monitoring logic
+└── dashboard-style.css # Professional styling
+```
+
+**Backend Integration:**
+- Express.js `/monitoring` route
+- Direct Supabase connections
+- Zero external monitoring dependencies
+
+## Documentation
+
+📋 **Complete Guide**: [MONITORING_DASHBOARD.md](../MONITORING_DASHBOARD.md)
+
+## Migration from Grafana
+
+**Previous Setup**: Complex Grafana + Infinity plugin configuration  
+**Current Setup**: Simple HTML dashboard with direct API connections
+
+**Benefits of New Approach:**
+- ✅ Zero external dependencies
+- ✅ Instant deployment with main app
+- ✅ Real-time API monitoring
+- ✅ Mobile-responsive design
+- ✅ No complex configuration required
+
+---
+
+*This simplified approach replaces all previous Grafana monitoring implementations for improved reliability and ease of deployment.*
