@@ -1,17 +1,31 @@
-# 🎯 ProspectPro - Real Lead Generation Platform
+# 🎯 ProspectPro - Enhanced Multi-Source Lead Generation Platform
 
-**Zero fake data. Real business leads. Web-based interface.**
+**Zero fake data. Real business intelligence. 4-stage validation pipeline.**
 
-ProspectPro is a cost-optimized lead generation platform that discovers real businesses using Google Places API, enriches contact data, and provides verified leads through an easy-to-use web interface.
+ProspectPro is a premium lead generation platform that discovers and validates real businesses through multiple data sources including Google Places API, government registries, email verification services, and property intelligence. Built for cost efficiency with smart pre-validation filtering.
 
-## ✨ Features
+## ✨ Enhanced Features
 
-- 🌐 **Web-Based Interface** - No command line needed, access from any browser
-- 🎯 **Real Business Data** - Google Places API integration, zero fake/mock data
-- 📊 **Admin Dashboard** - Real-time cost tracking and business metrics
-- 💰 **Cost Optimization** - Budget monitoring with automatic alerts
-- 🔐 **Secure & Compliant** - Railway/Supabase security best practices
-- 📱 **Mobile Responsive** - Works on desktop, tablet, and mobile
+### 🔍 4-Stage Discovery Pipeline
+- **Stage 1**: Business discovery via Google Places + Yellow Pages
+- **Stage 2**: Contact enrichment via Hunter.io + website scraping  
+- **Stage 3**: Government registry validation (CA SOS, NY SOS, Tax Records)
+- **Stage 4**: Email verification + quality scoring (0-100%)
+
+### 🎯 Multi-Source Data Integration
+- 🌐 **Google Places API** - Primary business discovery
+- 📧 **Hunter.io** - Email discovery and verification  
+- ✅ **NeverBounce** - Email deliverability validation
+- 🏛️ **Government Registries** - Business entity verification (FREE)
+- 🏠 **Property Intelligence** - Address and ownership validation (FREE)
+- 🌐 **Website Scraping** - Contact page extraction
+
+### 💰 Cost Optimization Features
+- **Pre-validation filtering** reduces expensive API calls by 60%+
+- **Smart budget management** with real-time cost tracking
+- **Quality thresholds** prevent low-value lead processing
+- **Free government APIs** maximize validation without cost
+- **Bulk processing** optimization for enterprise campaigns
 
 ## 🚀 Quick Start
 

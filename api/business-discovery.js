@@ -1,29 +1,33 @@
 const express = require('express');
 const GooglePlacesClient = require('../modules/api-clients/google-places');
-const YellowPagesScraper = require('../modules/scrapers/yellow-pages-scraper');
-const PreValidationScorer = require('../modules/validators/pre-validation');
-const OwnerDiscovery = require('../modules/enrichment/owner-discovery');
+const EnhancedLeadDiscovery = require('../modules/enhanced-lead-discovery');
 const CampaignLogger = require('../modules/logging/campaign-logger');
 const router = express.Router();
 
-// Initialize components with API keys from environment
+// Initialize enhanced discovery algorithm with all API keys
 const apiKeys = {
-    hunter: process.env.HUNTER_IO_API_KEY,
+    hunterIO: process.env.HUNTER_IO_API_KEY,
     neverBounce: process.env.NEVERBOUNCE_API_KEY,
-    openCorporates: process.env.OPENCORPORATES_API_KEY
+    googlePlaces: process.env.GOOGLE_PLACES_API_KEY
 };
 
-const googlePlacesClient = new GooglePlacesClient(process.env.GOOGLE_PLACES_API_KEY);
-const yellowPagesScraper = new YellowPagesScraper();
-const preValidationScorer = new PreValidationScorer();
-const ownerDiscovery = new OwnerDiscovery(apiKeys);
+const googlePlacesClient = new GooglePlacesClient(apiKeys.googlePlaces);
+const enhancedDiscovery = new EnhancedLeadDiscovery(apiKeys);
 const campaignLogger = new CampaignLogger();
 
 // POST /api/business/discover
 router.post('/discover', async (req, res) => {
     try {
-        const { query, location, count = 20, batchType = 'small-batch' } = req.body;
+        const { 
+            query, 
+            location, 
+            count = 20, 
+            budgetLimit = 25.00, 
+            qualityThreshold = 75,
+            batchType = 'cost-optimized' 
+        } = req.body;
 
+        // Validate required parameters
         if (!query || !location) {
             return res.status(400).json({
                 error: 'Query and location are required',
@@ -31,24 +35,110 @@ router.post('/discover', async (req, res) => {
             });
         }
 
-        console.log(`🔍 Starting real business discovery: "${query}" in "${location}"`);
+        // Validate API keys for enhanced features
+        const missingKeys = [];
+        if (!apiKeys.googlePlaces) missingKeys.push('GOOGLE_PLACES_API_KEY');
+        if (!apiKeys.hunterIO) missingKeys.push('HUNTER_IO_API_KEY (recommended)');
+        if (!apiKeys.neverBounce) missingKeys.push('NEVERBOUNCE_API_KEY (recommended)');
 
-        // Stage 1: Google Places Text Search
+        if (!apiKeys.googlePlaces) {
+            return res.status(500).json({
+                error: 'Google Places API key is required',
+                missingKeys
+            });
+        }
+
+        console.log(`🚀 Enhanced business discovery: "${query}" in "${location}"`);
+        console.log(`💰 Budget: $${budgetLimit}, Quality threshold: ${qualityThreshold}%, Count: ${count}`);
+
+        const startTime = Date.now();
+
+        // Stage 1: Google Places Discovery (Primary Source)
         const googleResults = await googlePlacesClient.textSearch({
             query: `${query} in ${location}`,
             type: 'establishment'
         });
 
-        // Stage 2: Yellow Pages Scraping (supplemental)
-        const yellowPagesResults = await yellowPagesScraper.search(query, location, count);
+        if (!googleResults || googleResults.length === 0) {
+            return res.json({
+                success: false,
+                message: 'No businesses found for the specified query and location',
+                results: [],
+                totalCost: 0,
+                processingTime: Date.now() - startTime
+            });
+        }
 
-        // Stage 3: Merge and deduplicate
-        const mergedBusinesses = mergeBusinessSources(googleResults, yellowPagesResults);
-        const allBusinesses = deduplicateBusinesses(mergedBusinesses);
+        console.log(`🔍 Found ${googleResults.length} businesses from Google Places`);
 
-        // Stage 4: Pre-validate each business BEFORE expensive API calls
-        const preValidated = [];
-        for (const business of allBusinesses) {
+        // Stage 2-4: Enhanced Multi-Source Validation Pipeline
+        const discoveryOptions = {
+            budgetLimit,
+            qualityThreshold,
+            maxResults: count,
+            prioritizeLocalBusinesses: true,
+            enablePropertyIntelligence: true,
+            enableRegistryValidation: true
+        };
+
+        const enhancedResults = await enhancedDiscovery.discoverAndValidateLeads(
+            googleResults, 
+            discoveryOptions
+        );
+
+        // Log campaign results
+        await campaignLogger.logCampaign({
+            query,
+            location,
+            totalBusinesses: googleResults.length,
+            qualifiedLeads: enhancedResults.leads.length,
+            totalCost: enhancedResults.totalCost,
+            qualityMetrics: enhancedResults.qualityMetrics,
+            usageStats: enhancedResults.usageStats,
+            processingTime: Date.now() - startTime,
+            timestamp: new Date().toISOString()
+        });
+
+        // Return enhanced results with full transparency
+        res.json({
+            success: true,
+            results: enhancedResults.leads,
+            metadata: {
+                totalProcessed: enhancedResults.totalProcessed,
+                totalQualified: enhancedResults.leads.length,
+                qualificationRate: Math.round((enhancedResults.leads.length / enhancedResults.totalProcessed) * 100),
+                averageConfidence: enhancedResults.qualityMetrics.averageConfidence,
+                totalCost: enhancedResults.totalCost,
+                costPerLead: enhancedResults.leads.length > 0 ? 
+                    (enhancedResults.totalCost / enhancedResults.leads.length).toFixed(3) : 0,
+                processingTime: Date.now() - startTime,
+                budgetUtilization: Math.round((enhancedResults.totalCost / budgetLimit) * 100)
+            },
+            qualityBreakdown: enhancedResults.qualityMetrics,
+            apiUsage: enhancedResults.usageStats,
+            dataEnhancements: {
+                businessRegistrationChecks: enhancedResults.qualityMetrics.registrationVerified || 0,
+                websiteValidations: enhancedResults.qualityMetrics.websitesAccessible || 0,
+                emailVerifications: enhancedResults.qualityMetrics.emailsVerified || 0,
+                propertyIntelligence: enhancedResults.qualityMetrics.propertiesFound || 0
+            }
+        });
+
+    } catch (error) {
+        console.error('❌ Enhanced business discovery failed:', error);
+        
+        res.status(500).json({
+            success: false,
+            error: error.message,
+            recommendations: [
+                'Check API key configuration',
+                'Verify budget limits and thresholds',
+                'Ensure network connectivity to external APIs',
+                'Review query format and location specificity'
+            ]
+        });
+    }
+});
             const score = await preValidationScorer.score(business);
             if (score >= 70) { // Only proceed with high-scoring businesses
                 preValidated.push({

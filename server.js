@@ -25,8 +25,10 @@ function sanitizeEnvForLogs() {
     'GOOGLE_PLACES_API_KEY', 
     'HUNTER_IO_API_KEY',
     'NEVERBOUNCE_API_KEY',
+    'SCRAPINGDOG_API_KEY',
     'JWT_SECRET',
-    'PERSONAL_ACCESS_TOKEN'
+    'PERSONAL_ACCESS_TOKEN',
+    'ADMIN_PASSWORD'
   ];
   
   Object.keys(process.env).forEach(key => {
@@ -471,6 +473,9 @@ async function startServer() {
         console.log('📋 Make sure you have set the following environment variables:');
         console.log('   - SUPABASE_URL');
         console.log('   - SUPABASE_SERVICE_ROLE_KEY (use Secret Key: sb_secret_...)');
+        console.log('   - GOOGLE_PLACES_API_KEY (required for business discovery)');
+        console.log('   - HUNTER_IO_API_KEY (required for email discovery)');
+        console.log('   - NEVERBOUNCE_API_KEY (required for email validation)');
         console.log('💡 Generate new API keys at: Settings → API → "Generate new API keys"');
         process.exit(1);
       }
