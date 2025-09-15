@@ -157,18 +157,12 @@ app.get('/api/status', async (req, res) => {
 
 // Import API routes
 const businessDiscoveryRouter = require('./api/business-discovery');
-const { createDashboardExportRoutes } = require('./api/dashboard-export');
-
-// Create Supabase client for dashboard exports
-const { createClient } = require('@supabase/supabase-js');
-const supabaseClient = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY
-);
+// Use simplified business dashboard instead of complex monitoring
+const { createSimplifiedDashboardRoutes } = require('./api/simplified-business-dashboard');
 
 // Mount API routes
 app.use('/api/business', businessDiscoveryRouter);
-app.use('/api/dashboard', createDashboardExportRoutes(supabaseClient));
+app.use('/', createSimplifiedDashboardRoutes()); // Business metrics only
 
 // =====================================
 // STATIC FILE SERVING
@@ -177,9 +171,14 @@ app.use('/api/dashboard', createDashboardExportRoutes(supabaseClient));
 // Serve static files from public directory
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Monitoring dashboard route
+// Simplified business dashboard route (Railway handles infrastructure)
 app.get('/monitoring', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'monitoring', 'index.html'));
+  res.sendFile(path.join(__dirname, 'public', 'business-dashboard.html'));
+});
+
+// Main dashboard route
+app.get('/dashboard', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'business-dashboard.html'));
 });
 
 // Handle SPA routing - serve index.html for non-API routes
