@@ -4,8 +4,8 @@ class ProspectProRealAPI {
         this.baseUrl = window.location.origin;
         this.selectedTool = 'business-discovery';
         this.searchResults = [];
-        // Add authentication token - hardcode for personal use
-        this.accessToken = '6ef913e6d21ad34cc9f68d91ec559c47797b1959a269a549eeef52ddf0af33d2';
+        // SECURITY: Access token will be provided by authenticated session
+        this.accessToken = window.PERSONAL_ACCESS_TOKEN || 'UNAUTHORIZED';
         
         this.costPerLead = 0.084; // Base estimated cost per lead with enrichment
         this.campaignRunning = false; // Track campaign status

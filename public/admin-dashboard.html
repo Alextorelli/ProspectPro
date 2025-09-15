@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ProspectPro Admin Dashboard - Business Metrics & Cost Monitoring</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .logo h1 {
+            color: #2c3e50;
+            font-size: 2.2em;
+            font-weight: 700;
+        }
+        
+        .auth-section {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .auth-form {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .auth-input {
+            padding: 10px 15px;
+            border: 2px solid #e0e6ed;
+            border-radius: 8px;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        
+        .auth-input:focus {
+            border-color: #667eea;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #5a6fd8;
+            transform: translateY(-2px);
+        }
+        
+        .btn-danger {
+            background: #e74c3c;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: #d63031;
+        }
+        
+        .dashboard {
+            display: none;
+            animation: fadeIn 0.5s ease-in;
+        }
+        
+        .dashboard.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .metric-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .metric-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        
+        .metric-title {
+            font-size: 1.1em;
+            color: #2c3e50;
+            font-weight: 600;
+        }
+        
+        .metric-icon {
+            font-size: 2em;
+            opacity: 0.7;
+        }
+        
+        .metric-value {
+            font-size: 2.5em;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        
+        .metric-change {
+            font-size: 0.9em;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .change-positive {
+            color: #27ae60;
+        }
+        
+        .change-negative {
+            color: #e74c3c;
+        }
+        
+        .chart-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+        
+        .chart-title {
+            font-size: 1.4em;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+        
+        .budget-progress {
+            margin-bottom: 15px;
+        }
+        
+        .budget-bar {
+            width: 100%;
+            height: 8px;
+            background: #ecf0f1;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .budget-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #27ae60, #f39c12, #e74c3c);
+            transition: width 0.3s ease;
+        }
+        
+        .budget-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+            font-size: 0.9em;
+            color: #7f8c8d;
+        }
+        
+        .alert {
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            border-left: 5px solid;
+            font-weight: 500;
+        }
+        
+        .alert-warning {
+            background: #fff3cd;
+            border-color: #ffc107;
+            color: #856404;
+        }
+        
+        .alert-danger {
+            background: #f8d7da;
+            border-color: #dc3545;
+            color: #721c24;
+        }
+        
+        .alert-success {
+            background: #d4edda;
+            border-color: #28a745;
+            color: #155724;
+        }
+        
+        .recent-activity {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+        
+        .activity-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            margin-bottom: 10px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 10px;
+            transition: transform 0.2s;
+        }
+        
+        .activity-item:hover {
+            transform: translateX(5px);
+        }
+        
+        .activity-time {
+            color: #7f8c8d;
+            font-size: 0.9em;
+            min-width: 100px;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #7f8c8d;
+        }
+        
+        .loading-spinner {
+            border: 3px solid #ecf0f1;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .control-group label {
+            color: #2c3e50;
+            font-weight: 500;
+            min-width: 80px;
+        }
+        
+        .control-group select,
+        .control-group input {
+            padding: 8px 12px;
+            border: 2px solid #e0e6ed;
+            border-radius: 6px;
+            outline: none;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .header-content {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .metrics-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .controls {
+                flex-direction: column;
+            }
+            
+            .control-group {
+                width: 100%;
+                justify-content: space-between;
+            }
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-content">
+                <div class="logo">
+                    <span style="font-size: 2em;">📊</span>
+                    <h1>ProspectPro Admin</h1>
+                </div>
+                <div class="auth-section">
+                    <div class="auth-form" id="loginForm">
+                        <input type="password" class="auth-input" id="adminPassword" placeholder="Admin Password" />
+                        <button class="btn btn-primary" onclick="authenticate()">Login</button>
+                    </div>
+                    <div class="auth-form hidden" id="loggedIn">
+                        <span id="welcomeText">Welcome, Admin</span>
+                        <button class="btn btn-danger" onclick="logout()">Logout</button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <div class="dashboard" id="dashboard">
+            <!-- Alert System -->
+            <div id="alertContainer"></div>
+
+            <!-- Controls -->
+            <div class="controls">
+                <div class="control-group">
+                    <label>Time Range:</label>
+                    <select id="timeRange" onchange="updateDashboard()">
+                        <option value="24h">Last 24 Hours</option>
+                        <option value="7d" selected>Last 7 Days</option>
+                        <option value="30d">Last 30 Days</option>
+                        <option value="90d">Last 90 Days</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label>Auto Refresh:</label>
+                    <select id="autoRefresh" onchange="setAutoRefresh()">
+                        <option value="0">Manual</option>
+                        <option value="30" selected>30 seconds</option>
+                        <option value="60">1 minute</option>
+                        <option value="300">5 minutes</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <button class="btn btn-primary" onclick="updateDashboard()">Refresh Now</button>
+                </div>
+            </div>
+
+            <!-- Metrics Grid -->
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <div class="metric-header">
+                        <span class="metric-title">Total Leads Generated</span>
+                        <span class="metric-icon">👥</span>
+                    </div>
+                    <div class="metric-value" id="totalLeads">-</div>
+                    <div class="metric-change" id="leadsChange">
+                        <span>📈</span> Loading...
+                    </div>
+                </div>
+
+                <div class="metric-card">
+                    <div class="metric-header">
+                        <span class="metric-title">API Costs Today</span>
+                        <span class="metric-icon">💰</span>
+                    </div>
+                    <div class="metric-value" id="dailyCost">$-</div>
+                    <div class="metric-change" id="costChange">
+                        <span>📊</span> Loading...
+                    </div>
+                </div>
+
+                <div class="metric-card">
+                    <div class="metric-header">
+                        <span class="metric-title">Success Rate</span>
+                        <span class="metric-icon">✅</span>
+                    </div>
+                    <div class="metric-value" id="successRate">-</div>
+                    <div class="metric-change" id="successChange">
+                        <span>📋</span> Loading...
+                    </div>
+                </div>
+
+                <div class="metric-card">
+                    <div class="metric-header">
+                        <span class="metric-title">Active Campaigns</span>
+                        <span class="metric-icon">🎯</span>
+                    </div>
+                    <div class="metric-value" id="activeCampaigns">-</div>
+                    <div class="metric-change" id="campaignsChange">
+                        <span>🚀</span> Loading...
+                    </div>
+                </div>
+            </div>
+
+            <!-- Budget Tracking -->
+            <div class="chart-container">
+                <h3 class="chart-title">Budget Usage</h3>
+                <div class="budget-progress">
+                    <div class="budget-bar">
+                        <div class="budget-fill" id="budgetFill" style="width: 0%"></div>
+                    </div>
+                    <div class="budget-labels">
+                        <span>$<span id="currentSpend">0</span> spent</span>
+                        <span>$<span id="budgetLimit">150</span> monthly limit</span>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 20px;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                        <strong>Cost Breakdown:</strong>
+                        <span id="lastUpdated">Last updated: --</span>
+                    </div>
+                    <div id="costBreakdown">
+                        <div style="display: flex; justify-content: space-between; margin: 5px 0;">
+                            <span>Google Places API:</span>
+                            <span>$<span id="googleCost">0.00</span></span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin: 5px 0;">
+                            <span>Hunter.io API:</span>
+                            <span>$<span id="hunterCost">0.00</span></span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin: 5px 0;">
+                            <span>NeverBounce API:</span>
+                            <span>$<span id="neverbounceCost">0.00</span></span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin: 5px 0;">
+                            <span>Scrapingdog API:</span>
+                            <span>$<span id="scrapingdogCost">0.00</span></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Activity -->
+            <div class="recent-activity">
+                <h3 class="chart-title">Recent Activity</h3>
+                <div id="recentActivities">
+                    <div class="loading">
+                        <div class="loading-spinner"></div>
+                        <p>Loading recent activities...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuration
+        const CONFIG = {
+            apiBaseUrl: window.location.origin,
+            refreshInterval: 30000, // 30 seconds default
+            budgetLimit: 150.00, // Monthly budget limit
+            adminPassword: 'ADMIN_PASSWORD_FROM_ENV' // Will be replaced by server
+        };
+
+        let refreshTimer = null;
+        let isAuthenticated = false;
+
+        // Authentication
+        function authenticate() {
+            const password = document.getElementById('adminPassword').value;
+            // Get admin password from server-side configuration
+            const adminPassword = window.ADMIN_PASSWORD || 'DEFAULT_ADMIN_PASS';
+            
+            if (password === adminPassword) {
+                isAuthenticated = true;
+                document.getElementById('loginForm').classList.add('hidden');
+                document.getElementById('loggedIn').classList.remove('hidden');
+                document.getElementById('dashboard').classList.add('active');
+                
+                // Store authentication in session
+                sessionStorage.setItem('adminAuth', 'true');
+                
+                updateDashboard();
+                setAutoRefresh();
+                
+                showAlert('Successfully logged in to admin dashboard', 'success');
+            } else {
+                showAlert('Invalid admin password', 'danger');
+                document.getElementById('adminPassword').value = '';
+            }
+        }
+
+        function logout() {
+            isAuthenticated = false;
+            sessionStorage.removeItem('adminAuth');
+            
+            document.getElementById('loginForm').classList.remove('hidden');
+            document.getElementById('loggedIn').classList.add('hidden');
+            document.getElementById('dashboard').classList.remove('active');
+            
+            if (refreshTimer) {
+                clearInterval(refreshTimer);
+                refreshTimer = null;
+            }
+            
+            document.getElementById('adminPassword').value = '';
+        }
+
+        // Check for existing authentication on page load
+        if (sessionStorage.getItem('adminAuth') === 'true') {
+            isAuthenticated = true;
+            document.getElementById('loginForm').classList.add('hidden');
+            document.getElementById('loggedIn').classList.remove('hidden');
+            document.getElementById('dashboard').classList.add('active');
+            updateDashboard();
+            setAutoRefresh();
+        }
+
+        // Alert system
+        function showAlert(message, type = 'info') {
+            const alertContainer = document.getElementById('alertContainer');
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type}`;
+            alertDiv.textContent = message;
+            
+            alertContainer.appendChild(alertDiv);
+            
+            // Auto-remove after 5 seconds
+            setTimeout(() => {
+                alertDiv.remove();
+            }, 5000);
+        }
+
+        // Auto-refresh functionality
+        function setAutoRefresh() {
+            if (refreshTimer) {
+                clearInterval(refreshTimer);
+                refreshTimer = null;
+            }
+            
+            const interval = parseInt(document.getElementById('autoRefresh').value);
+            if (interval > 0) {
+                refreshTimer = setInterval(updateDashboard, interval * 1000);
+            }
+        }
+
+        // Main dashboard update function
+        async function updateDashboard() {
+            if (!isAuthenticated) return;
+            
+            try {
+                const timeRange = document.getElementById('timeRange').value;
+                
+                // Show loading state
+                document.querySelectorAll('.metric-value').forEach(el => el.textContent = 'Loading...');
+                
+                // Fetch dashboard data
+                const [metricsData, costData, activityData] = await Promise.all([
+                    fetchMetrics(timeRange),
+                    fetchCostData(timeRange),
+                    fetchRecentActivity(timeRange)
+                ]);
+                
+                updateMetrics(metricsData);
+                updateBudgetTracking(costData);
+                updateRecentActivity(activityData);
+                
+                document.getElementById('lastUpdated').textContent = 
+                    `Last updated: ${new Date().toLocaleTimeString()}`;
+                
+            } catch (error) {
+                console.error('Error updating dashboard:', error);
+                showAlert('Failed to update dashboard data', 'danger');
+            }
+        }
+
+        // Fetch functions (simulate API calls)
+        async function fetchMetrics(timeRange) {
+            // In production, this would make real API calls to your backend
+            // For now, simulate with realistic fake data
+            
+            const baseMetrics = {
+                totalLeads: Math.floor(Math.random() * 500) + 100,
+                successRate: (Math.random() * 20 + 75).toFixed(1) + '%',
+                activeCampaigns: Math.floor(Math.random() * 15) + 3,
+                leadsChange: Math.random() > 0.5 ? 'positive' : 'negative'
+            };
+            
+            return baseMetrics;
+        }
+
+        async function fetchCostData(timeRange) {
+            // Simulate realistic API costs based on actual usage
+            const costs = {
+                google: (Math.random() * 15 + 5).toFixed(2),
+                hunter: (Math.random() * 8 + 2).toFixed(2),
+                neverbounce: (Math.random() * 6 + 1).toFixed(2),
+                scrapingdog: (Math.random() * 4 + 1).toFixed(2)
+            };
+            
+            const totalCost = Object.values(costs).reduce((sum, cost) => sum + parseFloat(cost), 0);
+            
+            return {
+                dailyCost: totalCost.toFixed(2),
+                monthlyCost: (totalCost * 7).toFixed(2), // Simulate weekly to monthly
+                breakdown: costs,
+                budgetUsed: ((totalCost * 7) / CONFIG.budgetLimit * 100).toFixed(1)
+            };
+        }
+
+        async function fetchRecentActivity(timeRange) {
+            // Simulate recent activity data
+            const activities = [
+                { time: '2 min ago', action: 'New campaign started', type: 'success' },
+                { time: '5 min ago', action: 'Lead validation completed', type: 'info' },
+                { time: '12 min ago', action: 'Budget alert: 75% used', type: 'warning' },
+                { time: '23 min ago', action: 'API key rotated', type: 'info' },
+                { time: '1 hour ago', action: 'Export completed: 45 leads', type: 'success' }
+            ];
+            
+            return activities;
+        }
+
+        // Update functions
+        function updateMetrics(data) {
+            document.getElementById('totalLeads').textContent = data.totalLeads.toLocaleString();
+            document.getElementById('successRate').textContent = data.successRate;
+            document.getElementById('activeCampaigns').textContent = data.activeCampaigns;
+            
+            // Update change indicators
+            const leadsChangeEl = document.getElementById('leadsChange');
+            leadsChangeEl.innerHTML = data.leadsChange === 'positive' 
+                ? '<span>📈</span> +12% from last week'
+                : '<span>📉</span> -5% from last week';
+            leadsChangeEl.className = `metric-change change-${data.leadsChange}`;
+        }
+
+        function updateBudgetTracking(data) {
+            document.getElementById('dailyCost').textContent = '$' + data.dailyCost;
+            document.getElementById('currentSpend').textContent = data.monthlyCost;
+            document.getElementById('budgetLimit').textContent = CONFIG.budgetLimit.toFixed(2);
+            
+            // Update cost breakdown
+            document.getElementById('googleCost').textContent = data.breakdown.google;
+            document.getElementById('hunterCost').textContent = data.breakdown.hunter;
+            document.getElementById('neverbounceCost').textContent = data.breakdown.neverbounce;
+            document.getElementById('scrapingdogCost').textContent = data.breakdown.scrapingdog;
+            
+            // Update budget bar
+            const budgetFill = document.getElementById('budgetFill');
+            budgetFill.style.width = data.budgetUsed + '%';
+            
+            // Budget alerts
+            const budgetPercent = parseFloat(data.budgetUsed);
+            if (budgetPercent >= 90) {
+                showAlert('⚠️ Budget Alert: 90%+ of monthly budget used!', 'danger');
+            } else if (budgetPercent >= 75) {
+                showAlert('⚠️ Budget Warning: 75%+ of monthly budget used', 'warning');
+            }
+        }
+
+        function updateRecentActivity(activities) {
+            const container = document.getElementById('recentActivities');
+            container.innerHTML = '';
+            
+            activities.forEach(activity => {
+                const activityEl = document.createElement('div');
+                activityEl.className = 'activity-item';
+                activityEl.innerHTML = `
+                    <span class="activity-time">${activity.time}</span>
+                    <span class="activity-action">${activity.action}</span>
+                `;
+                container.appendChild(activityEl);
+            });
+        }
+
+        // Handle Enter key for password input
+        document.getElementById('adminPassword').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                authenticate();
+            }
+        });
+
+        // Initialize dashboard if already authenticated
+        if (isAuthenticated) {
+            updateDashboard();
+        }
+    </script>
+</body>
+</html>

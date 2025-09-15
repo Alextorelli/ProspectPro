@@ -1,0 +1,56 @@
+# ProspectPro Railway Configuration
+# Production-ready deployment with security, monitoring, and cost optimization
+
+[build]
+builder = "NIXPACKS"
+buildCommand = "npm ci --only=production"
+watchPaths = ["server.js", "modules/**", "api/**", "public/**", "package.json"]
+
+[deploy]
+# Health check configuration for zero-downtime deployments
+healthcheckPath = "/health"
+healthcheckTimeout = 300
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 3
+numReplicas = 1
+
+# Pre-deploy security and environment validation
+preDeployCommand = ["node scripts/validate-environment.js"]
+
+# Production start command with monitoring
+startCommand = "node server.js"
+
+# Sleep configuration for cost optimization
+sleepApplication = false  # Keep alive for production monitoring
+staticUrl = true         # Enable static URL for consistent monitoring
+
+# Environment variables (Railway will inject from project settings)
+[environment]
+NODE_ENV = "production"
+PORT = "8080"
+
+# Railway automatically injects these from your project settings:
+# SUPABASE_URL = "${{SUPABASE_URL}}"
+# SUPABASE_SERVICE_ROLE_KEY = "${{SUPABASE_SERVICE_ROLE_KEY}}"  
+# GOOGLE_PLACES_API_KEY = "${{GOOGLE_PLACES_API_KEY}}"
+
+# Resource monitoring and alerting
+[observability]
+enabled = true
+alertOnHighCPU = true
+alertOnHighMemory = true  
+alertOnErrors = true
+
+# Enable Railway's native analytics and cost monitoring
+enableMetrics = true
+enableLogs = true
+logLevel = "info"
+
+# Admin dashboard configuration
+[admin]
+# Custom admin dashboard available at /admin-dashboard.html
+# Requires authentication via PERSONAL_ACCESS_TOKEN
+dashboardPath = "/admin-dashboard.html"
+enableBusinessMetrics = true
+enableCostTracking = true
+budgetAlerts = true

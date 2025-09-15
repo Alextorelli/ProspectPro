@@ -1,4 +1,11 @@
-const const app = express();
+require('dotenv').config();
+
+const express = require('express');
+const path = require('path');
+const { createClient } = require('@supabase/supabase-js');
+const { Client } = require('@googlemaps/google-maps-services-js');
+
+const app = express();
 const PORT = process.env.PORT || 8080;
 
 // =====================================
@@ -9,39 +16,106 @@ let supabase = null;
 const isProduction = process.env.NODE_ENV === 'production';
 
 // Initialize Supabase (REQUIRED - NO MOCK FALLBACKS)
+// Security: Check for sensitive environment variables in logs
+function sanitizeEnvForLogs() {
+  const sanitized = {};
+  const sensitiveKeys = [
+    'SUPABASE_SERVICE_ROLE_KEY', 
+    'SUPABASE_PUBLISHABLE_KEY',
+    'GOOGLE_PLACES_API_KEY', 
+    'HUNTER_IO_API_KEY',
+    'NEVERBOUNCE_API_KEY',
+    'JWT_SECRET',
+    'PERSONAL_ACCESS_TOKEN'
+  ];
+  
+  Object.keys(process.env).forEach(key => {
+    if (sensitiveKeys.some(sensitive => key.includes(sensitive))) {
+      sanitized[key] = key.includes('SUPABASE') 
+        ? `${process.env[key]?.substring(0, 8)}...`
+        : 'REDACTED';
+    } else if (!key.includes('NODE_') && !key.includes('PATH')) {
+      sanitized[key] = process.env[key];
+    }
+  });
+  
+  return sanitized;
+}
+
+// Enhanced Supabase initialization with proper secret key handling
 async function initializeSupabase() {
   try {
+    console.log('🔐 Initializing Supabase with security compliance...');
+    
+    // Validate environment variables
     if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
-      throw new Error('SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are required');
+      throw new Error('Missing required Supabase environment variables');
     }
     
-    const { createClient } = require('@supabase/supabase-js');
+    // Security: Validate API key format (new format starts with sb_)
+    if (!process.env.SUPABASE_SERVICE_ROLE_KEY.startsWith('sb_')) {
+      console.warn('⚠️  WARNING: Using deprecated Supabase key format. Update to sb_secret_ format for security compliance.');
+    }
+    
+    console.log('Environment check:', sanitizeEnvForLogs());
+    
+    // Use service role key for server-side operations
     supabase = createClient(
       process.env.SUPABASE_URL,
-      process.env.SUPABASE_SERVICE_ROLE_KEY
+      process.env.SUPABASE_SERVICE_ROLE_KEY,
+      {
+        auth: {
+          autoRefreshToken: false,
+          persistSession: false
+        },
+        db: {
+          schema: 'public'
+        }
+      }
     );
-    
-    // Test actual database connection
-    const { data, error } = await supabase.from('campaigns').select('count').limit(1);
-    if (error) throw error;
-    
-    console.log('✅ Supabase production database connected successfully');
-    return true;
-    
-  } catch (error) {
-    console.error('❌ Supabase database connection failed:', error.message);
-    
-    if (isProduction) {
-      console.error('🚨 PRODUCTION REQUIRES WORKING DATABASE - NO MOCK DATA ALLOWED');
-      console.error('📋 Required environment variables:');
-      console.error('   - SUPABASE_URL');
-      console.error('   - SUPABASE_SERVICE_ROLE_KEY');
-      console.error('   - GOOGLE_PLACES_API_KEY');
-      process.exit(1); // Exit in production without database
+
+    // Test connection and create system user
+    const { data: testData, error: testError } = await supabase
+      .from('campaigns')
+      .select('count')
+      .limit(1);
+
+    if (testError) {
+      console.error('❌ Supabase connection test failed:', testError.message);
+      throw testError;
     }
+
+    // Create or verify system user exists
+    const { data: systemUser, error: userError } = await supabase
+      .from('users')
+      .upsert([
+        {
+          id: SYSTEM_USER_ID,
+          email: 'system@prospectpro.internal',
+          name: 'ProspectPro System',
+          role: 'system',
+          created_at: new Date().toISOString()
+        }
+      ], {
+        onConflict: 'id',
+        ignoreDuplicates: true
+      })
+      .select()
+      .single();
+
+    if (userError && userError.code !== '23505') { // Ignore duplicate key error
+      console.error('❌ System user creation failed:', userError.message);
+      throw userError;
+    }
+
+    console.log('✅ Supabase initialized successfully');
+    console.log(`✅ System user verified: ${SYSTEM_USER_ID}`);
     
-    console.warn('⚠️  Development mode: Database connection failed');
-    return false;
+    return true;
+
+  } catch (error) {
+    console.error('❌ Supabase initialization failed:', error.message);
+    throw error;
   }
 }s = require('express');
 const cors = require('cors');
@@ -148,15 +222,124 @@ app.use('/api', authMiddleware);
 // HEALTH CHECK & STATUS
 // =====================================
 
+// Health check endpoint for Railway monitoring
 app.get('/health', (req, res) => {
-  res.json({
-    status: 'ok',
+  res.status(200).json({
+    status: 'healthy',
     timestamp: new Date().toISOString(),
-    version: '2.0.0',
     environment: process.env.NODE_ENV,
-    supabase: 'connected' // We'll update this after connection test
+    database: supabase ? 'connected' : 'disconnected',
+    version: '1.0.0'
   });
 });
+
+// Admin dashboard route with authentication and secure password injection
+app.get('/admin-dashboard.html', (req, res) => {
+  // Simple token-based authentication
+  const token = req.query.token || req.headers.authorization?.replace('Bearer ', '');
+  
+  if (!token || token !== process.env.PERSONAL_ACCESS_TOKEN) {
+    return res.status(401).json({ error: 'Unauthorized: Invalid admin token' });
+  }
+  
+  // Read the admin dashboard HTML and inject secure configuration
+  const fs = require('fs');
+  let dashboardHtml = fs.readFileSync(path.join(__dirname, 'public', 'admin-dashboard.html'), 'utf8');
+  
+  // Inject secure admin password from environment
+  const adminPassword = process.env.ADMIN_PASSWORD || 'ProspectPro2024!';
+  dashboardHtml = dashboardHtml.replace(
+    'window.ADMIN_PASSWORD || \'DEFAULT_ADMIN_PASS\'',
+    `'${adminPassword}'`
+  );
+  
+  res.send(dashboardHtml);
+});
+
+// Admin API endpoints for dashboard data
+app.get('/api/admin/metrics', async (req, res) => {
+  try {
+    // Authenticate admin request
+    const token = req.query.token || req.headers.authorization?.replace('Bearer ', '');
+    if (!token || token !== process.env.PERSONAL_ACCESS_TOKEN) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+    
+    if (!supabase) {
+      return res.status(503).json({ error: 'Database not available' });
+    }
+    
+    const timeRange = req.query.range || '7d';
+    const timeFilter = getTimeFilter(timeRange);
+    
+    // Fetch business metrics
+    const [leadsResult, campaignsResult, costsResult] = await Promise.all([
+      supabase.from('enhanced_leads').select('*').gte('created_at', timeFilter),
+      supabase.from('campaigns').select('*').gte('created_at', timeFilter),  
+      supabase.from('api_costs').select('*').gte('created_at', timeFilter)
+    ]);
+    
+    // Calculate metrics
+    const totalLeads = leadsResult.data?.length || 0;
+    const activeCampaigns = campaignsResult.data?.filter(c => c.status === 'active').length || 0;
+    const qualifiedLeads = leadsResult.data?.filter(l => l.is_qualified).length || 0;
+    const successRate = totalLeads > 0 ? ((qualifiedLeads / totalLeads) * 100).toFixed(1) : '0';
+    
+    // Calculate costs
+    const totalCosts = costsResult.data?.reduce((sum, cost) => sum + parseFloat(cost.amount || 0), 0) || 0;
+    const costBreakdown = calculateCostBreakdown(costsResult.data || []);
+    
+    res.json({
+      totalLeads,
+      activeCampaigns,
+      successRate: `${successRate}%`,
+      dailyCost: totalCosts.toFixed(2),
+      costBreakdown,
+      lastUpdated: new Date().toISOString()
+    });
+    
+  } catch (error) {
+    console.error('Admin metrics error:', error);
+    res.status(500).json({ error: 'Failed to fetch metrics' });
+  }
+});
+
+// Helper function to calculate time filters
+function getTimeFilter(range) {
+  const now = new Date();
+  switch (range) {
+    case '24h': return new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString();
+    case '7d': return new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString();
+    case '30d': return new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString();
+    case '90d': return new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000).toISOString();
+    default: return new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString();
+  }
+}
+
+// Helper function to calculate cost breakdown by API
+function calculateCostBreakdown(costs) {
+  const breakdown = {
+    google: 0,
+    hunter: 0,
+    neverbounce: 0,
+    scrapingdog: 0
+  };
+  
+  costs.forEach(cost => {
+    const service = cost.service?.toLowerCase() || '';
+    if (service.includes('google')) breakdown.google += parseFloat(cost.amount || 0);
+    else if (service.includes('hunter')) breakdown.hunter += parseFloat(cost.amount || 0);
+    else if (service.includes('neverbounce')) breakdown.neverbounce += parseFloat(cost.amount || 0);
+    else if (service.includes('scrapingdog')) breakdown.scrapingdog += parseFloat(cost.amount || 0);
+  });
+  
+  return {
+    google: breakdown.google.toFixed(2),
+    hunter: breakdown.hunter.toFixed(2), 
+    neverbounce: breakdown.neverbounce.toFixed(2),
+    scrapingdog: breakdown.scrapingdog.toFixed(2)
+  };
+}
 
 app.get('/api/status', async (req, res) => {
   try {

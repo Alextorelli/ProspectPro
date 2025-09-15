@@ -16,13 +16,20 @@
     "db:test": "node scripts/initialize-database.js",
     "railway:check": "node debug-railway-imports.js",
     "build": "echo 'No build step required - Node.js project'",
-    "postinstall": "echo 'ProspectPro: Zero mock data policy enforced'"
+    "postinstall": "echo 'ProspectPro: Zero mock data policy enforced'",
+    "security:audit": "node scripts/security-audit.js",
+    "env:validate": "node scripts/validate-environment.js",
+    "deployment:ready": "node scripts/deployment-readiness.js",
+    "railway:deploy": "railway up",
+    "railway:logs": "railway logs",
+    "admin:dashboard": "echo 'Admin dashboard available at /admin-dashboard.html with PERSONAL_ACCESS_TOKEN'"
   },
   "engines": {
     "node": ">=20.0.0",
     "npm": ">=9.0.0"
   },
   "dependencies": {
+    "@googlemaps/google-maps-services-js": "^3.4.2",
     "@supabase/supabase-js": "^2.57.4",
     "axios": "^1.12.2",
     "bcryptjs": "^2.4.3",
