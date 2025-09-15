@@ -10,33 +10,51 @@ Configure your existing Grafana Cloud account to connect to your Supabase databa
 
 ## Step 1: Configure PostgreSQL Data Source
 
-### 1.1 Get Supabase Connection Details
-From your Supabase project dashboard:
+### 1.1 Get Supabase Connection Details (Detailed Steps)
 
-1. Go to **Settings → Database**
-2. Find **Connection string** section
-3. Use **URI** format for Grafana
+**Step-by-Step for New Supabase Dashboard:**
 
-**Connection Format:**
-```
-Host: db.{PROJECT_REF}.supabase.co
-Database: postgres
+1. **Login to Supabase**: https://supabase.com/dashboard/projects
+2. **Select your ProspectPro project** (vvxdprgfltzblwvpedpx)
+3. **Navigate to Project Settings**:
+   - Click the **"Settings"** icon (⚙️) in the left sidebar (bottom)
+   - OR click your project name → **"Settings"**
+
+4. **Find Database Connection Info**:
+   - In Settings, click **"Database"** tab
+   - Look for **"Connection parameters"** section
+   - OR look for **"Connection pooling"** section
+   - You'll see connection details like:
+
+**Your Exact Connection Details:**
+```yaml
+Host: db.vvxdprgfltzblwvpedpx.supabase.co
+Database: postgres  
 Username: postgres
-Password: {YOUR_DB_PASSWORD}
 Port: 5432
-SSL Mode: require
+Password: [Your database password from setup]
 ```
+
+**Alternative Method - API Settings:**
+1. In Settings, click **"API"** tab
+2. Find **"Project URL"**: `https://vvxdprgfltzblwvpedpx.supabase.co`
+3. Database host is: `db.vvxdprgfltzblwvpedpx.supabase.co`
+
+**If you don't see "Connection String" option:**
+- Look for **"Connection parameters"**
+- OR check **"Database"** → **"Connection pooling"**  
+- OR use the **API URL** format: change `https://` to `db.` for database host
 
 ### 1.2 Add Data Source in Grafana
 
 1. **Login to Grafana**: https://appsmithery.grafana.net/
-2. **Navigate**: Configuration → Data Sources
-3. **Add data source**: Select "PostgreSQL"
+2. **Navigate**: Administration → Data Sources (or Configuration → Data Sources)
+3. **Add data source**: Click "Add data source" → Select "PostgreSQL"
 4. **Configure connection**:
 
 ```yaml
 Name: ProspectPro-Supabase
-Host: db.{YOUR_PROJECT_REF}.supabase.co:5432
+Host: db.vvxdprgfltzblwvpedpx.supabase.co:5432
 Database: postgres
 User: postgres
 Password: {YOUR_DB_PASSWORD}
@@ -44,6 +62,73 @@ SSL Mode: require
 Version: 12+
 TimescaleDB: No
 ```
+
+**SSL Configuration (IMPORTANT):**
+- **TLS/SSL Mode**: `require`
+- **TLS/SSL Method**: `file-path`
+- **TLS/SSL Root Certificate**: Upload `config/supabase-ca-2021.crt` from your repo
+
+### 1.2a Detailed Grafana Configuration Steps
+
+**Step 1: Access Data Sources**
+1. In Grafana, look for the **gear icon (⚙️)** in left sidebar
+2. Click **"Data sources"** 
+3. OR go to **"Administration"** → **"Data sources"** in newer Grafana versions
+
+**Step 2: Add PostgreSQL Data Source**
+1. Click **"Add data source"** button
+2. Search for **"PostgreSQL"** and click it
+3. Fill in these EXACT values:
+
+**Basic Settings:**
+```
+Name: ProspectPro-Production
+Default: ✅ (check this box)
+```
+
+**PostgreSQL Connection:**
+```
+Host: db.vvxdprgfltzblwvpedpx.supabase.co:5432
+Database: postgres
+User: postgres
+Password: [Your Supabase database password]
+```
+
+**SSL Settings:**
+```
+SSL Mode: require
+TLS/SSL Method: file-path
+TLS/SSL Root Certificate: [Upload config/supabase-ca-2021.crt]
+```
+
+**Advanced Settings:**
+```
+Version: 12+
+TimescaleDB: No
+Max open connections: 5
+Max idle connections: 2
+Max connection lifetime: 14400
+```
+
+**Step 3: Get Your Database Password**
+
+If you don't remember your database password:
+
+1. **Go to Supabase Dashboard**: https://supabase.com/dashboard/projects
+2. **Select your project**: vvxdprgfltzblwvpedpx
+3. **Settings → Database**
+4. **Look for "Database password"** section
+5. **Reset password if needed**: Click "Generate new password"
+6. **Copy the password** and use it in Grafana
+
+**Alternative: Use Connection URI Method**
+1. In Supabase Settings → Database
+2. Look for **"URI"** tab
+3. Copy the connection string like:
+   ```
+   postgresql://postgres:[password]@db.vvxdprgfltzblwvpedpx.supabase.co:5432/postgres
+   ```
+4. In Grafana, you can use this full URI in the "Host" field
 
 ### 1.3 Test Connection
 Click **Save & test** - you should see "Database Connection OK"
