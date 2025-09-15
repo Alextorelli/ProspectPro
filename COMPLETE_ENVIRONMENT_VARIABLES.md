@@ -4,168 +4,237 @@
 
 This document provides comprehensive documentation for ALL environment variables used across all builds of ProspectPro, including monitoring, dashboard integration, and production deployment configurations.
 
-## Core API Configuration
+**Last Updated**: September 14, 2025  
+**Applies to**: All ProspectPro builds (Development, Production, Railway, Monitoring)  
+**Current Variables Count**: 65+ variables across 8 categories
 
-### Google Places API
+## ⚠️ Critical Variables for Railway Production
+
+### 🗄️ Database Configuration (REQUIRED)
 ```env
-# Required for business discovery
-GOOGLE_PLACES_API_KEY=your_google_places_api_key_here
-# Cost: ~$0.032 per search, $0.017 per details request
+# Supabase Database - CRITICAL for all functionality
+SUPABASE_URL=https://vvxdprgfltzblwvpedpx.supabase.co
+SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ2eGRwcmdmbHR6Ymx3dnBlZHB4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjQ3MTgzOTksImV4cCI6MjA0MDI5NDM5OX0.TZ9kR6FfNvnZMJF9P6NX6rYSVfM3LRw7BfGK7U6YXwc
+SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ2eGRwcmdmbHR6Ymx3dnBlZHB4Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTcyNDcxODM5OSwiZXhwIjoyMDQwMjk0Mzk5fQ.sOZBWJfb4MvqA2B6dxPCUaGr3zqZCXF7tHv1NjM5QwE
 ```
 
-### Email Discovery & Verification
+### 🔑 Core API Keys (REQUIRED)
 ```env
-# Hunter.io for email discovery
-HUNTER_API_KEY=your_hunter_api_key_here
+# Lead Generation APIs - CRITICAL for business discovery
+GOOGLE_PLACES_API_KEY=AIzaSyB3BbYJRUiGSwgyon2iBWQkv6ON3V3eSik
+# Cost: ~$0.032 per search, $0.017 per details request
+
+SCRAPINGDOG_API_KEY=68c368582456a537af2a2247  
+# Cost: $0.0008 per request, $5/month for 1,000 requests
+
+HUNTER_IO_API_KEY=7bb2d1f9b5f8af7c1e8bf1736cf51f60eff49bbf
 # Cost: $49/month for 1,000 searches, $99/month for 5,000 searches
 
-# NeverBounce for email verification
-NEVERBOUNCE_API_KEY=your_neverbounce_api_key_here  
+NEVERBOUNCE_API_KEY=private_56e6fb6612fccb12bdf0d237f70e5b96
 # Cost: $0.008 per verification, 1000 free verifications/month
 ```
 
-### Web Scraping
+### 🏛️ Government Registry APIs (Optional Enhancement)
 ```env
-# ScrapingDog for advanced web scraping
-SCRAPINGDOG_API_KEY=your_scrapingdog_api_key_here
-# Cost: $5/month for 1,000 requests, $25/month for 10,000 requests
-
-# Alternative: ScrapingBee
-SCRAPINGBEE_API_KEY=your_scrapingbee_api_key_here
-# Cost: $29/month for 1,000 requests
+# State Registry Validation - Enhanced Data Quality
+SOCRATA_APP_TOKEN=LyweIWl2X0Yls0hdecKgnwd37
+SEC_USER_AGENT=ProspectPro Lead Generation Alextorelli28@gmail.com
+USPTO_API_KEY=5BoTZaXD2hIxrSOxKvtjkLjozBz5VzOA
+COURTLISTENER_TOKEN=58cf8cc4c7d660b6e1532ee56019f8585bede7a9
+API_USER_AGENT=ProspectPro/1.0 (Business Lead Verification; Alextorelli28@gmail.com)
 ```
 
-## Database Configuration
-
-### Supabase Database
+### 🔐 Security & Authentication (REQUIRED)
 ```env
-# Primary database for lead storage and analytics
-SUPABASE_URL=https://your-project-ref.supabase.co
-SUPABASE_ANON_KEY=your_supabase_anon_key_here
-SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key_here
-
-# Database connection settings
-DATABASE_URL=postgresql://postgres:[password]@db.[ref].supabase.co:5432/postgres
-DB_HOST=db.your-project-ref.supabase.co
-DB_PORT=5432
-DB_NAME=postgres
-DB_USER=postgres
-DB_PASSWORD=your_database_password_here
+# Application Security - REQUIRED for Railway production
+JWT_SECRET=production_jwt_secret_change_this_in_production_min_32_characters
+PERSONAL_ACCESS_TOKEN=6ef913e6d21ad34cc9f68d91ec559c47797b1959a269a549eeef52ddf0af33d2
 ```
 
-## Monitoring & Analytics
-
-### Dashboard Configuration
+### ⚙️ Production Environment (REQUIRED)
 ```env
-# Grafana Dashboard Integration
-GRAFANA_URL=https://yourusername.grafana.net
-GRAFANA_API_TOKEN=your_grafana_api_token_here
-GRAFANA_ORG_ID=1
-
-# Dashboard refresh intervals (seconds)
-METRICS_COLLECTION_INTERVAL=60
-HEALTH_CHECK_INTERVAL=300
-DASHBOARD_REFRESH_INTERVAL=30
-```
-
-### Real-time Monitoring
-```env
-# WebSocket configuration for real-time updates
-ENABLE_REALTIME_MONITORING=true
-WEBSOCKET_PORT=8080
-WEBSOCKET_HEARTBEAT_INTERVAL=30000
-
-# Alert thresholds
-COST_ALERT_THRESHOLD=50.00
-QUALIFICATION_RATE_ALERT=70
-API_ERROR_RATE_THRESHOLD=5
-```
-
-## Production Deployment
-
-### Railway Configuration
-```env
-# Railway deployment settings
-RAILWAY_ENVIRONMENT=production
-RAILWAY_PROJECT_NAME=prospectpro-real-api
-PORT=3000
-
-# Public URL for API callbacks
-PUBLIC_URL=https://your-railway-app.up.railway.app
-```
-
-### Server Configuration
-```env
-# Application settings
+# Railway Production Settings - REQUIRED
 NODE_ENV=production
-SERVER_PORT=3000
-API_BASE_URL=/api
-STATIC_FILES_PATH=./public
-
-# CORS settings
-CORS_ORIGIN=https://your-domain.com
-ALLOWED_ORIGINS=https://your-domain.com,https://your-railway-app.up.railway.app
+PORT=3000  
+DEBUG_MODE=false
+LOG_LEVEL=info
+SKIP_AUTH_IN_DEV=false
+MOCK_API_RESPONSES=false
+ENABLE_DEV_ADMIN=false
 ```
 
-## Application Limits & Controls
+## 📊 New Monitoring System Variables (September 2025)
 
-### Cost Management
+### Monitoring Core Configuration (REQUIRED for new features)
 ```env
-# Daily spending limits
-DAILY_COST_LIMIT=50.00
-COST_PER_LEAD_LIMIT=2.00
-WEEKLY_BUDGET_LIMIT=300.00
-MONTHLY_BUDGET_LIMIT=1200.00
-
-# API quota management
-MAX_GOOGLE_PLACES_CALLS_PER_DAY=1000
-MAX_HUNTER_CALLS_PER_DAY=100
-MAX_SCRAPINGDOG_CALLS_PER_DAY=500
+# Monitoring System - REQUIRED for analytics dashboard
+ENABLE_MONITORING=true
+ENABLE_REAL_TIME_MONITORING=true
+ENABLE_CAMPAIGN_ANALYTICS=true
+MONITORING_ENDPOINT=/api/monitoring
+REALTIME_UPDATES=true
+ANALYTICS_CACHE_TTL=300
+MAX_DASHBOARD_QUERIES=50
 ```
 
-### Quality Controls
+### Dashboard Configuration (REQUIRED)
 ```env
-# Lead qualification settings
-MIN_CONFIDENCE_THRESHOLD=80
-QUALIFICATION_RATE_THRESHOLD=70
-EMAIL_VERIFICATION_ENABLED=true
-WEBSITE_VALIDATION_ENABLED=true
-
-# Campaign limits
-MAX_LEADS_PER_CAMPAIGN=50
-MAX_CAMPAIGNS_PER_DAY=10
-MAX_CONCURRENT_CAMPAIGNS=3
+# Dashboard UI Settings - REQUIRED for monitoring dashboard
+DASHBOARD_REFRESH_INTERVAL_MS=30000
+MAX_ACTIVITY_FEED_ITEMS=20
+STATS_UPDATE_INTERVAL_MS=60000
+MAX_CONCURRENT_DB_CONNECTIONS=10
 ```
 
-## Security & Authentication
-
-### API Security
+### Budget & Cost Controls (REQUIRED)
 ```env
-# JWT configuration (if implementing authentication)
-JWT_SECRET=your_super_secure_jwt_secret_here
-JWT_EXPIRES_IN=24h
-JWT_REFRESH_EXPIRES_IN=7d
-
-# Rate limiting
-RATE_LIMIT_WINDOW_MS=900000
-RATE_LIMIT_MAX_REQUESTS=100
+# Cost Management - REQUIRED for budget tracking
+DAILY_BUDGET_LIMIT=25.00
+MONTHLY_BUDGET_LIMIT=150.00
+MIN_CONFIDENCE_SCORE=80
+MAX_LEADS_PER_CAMPAIGN=100
+ENABLE_COST_ALERTS=true
+ENABLE_BUDGET_ALERTS=true
+BUDGET_WARNING_THRESHOLD=80
+BUDGET_CRITICAL_THRESHOLD=95
+AUTO_PAUSE_ON_BUDGET_EXCEEDED=true
 ```
 
-### Data Protection
+### Enhanced API Settings (REQUIRED for optimization)
 ```env
-# Encryption keys for sensitive data
-DATA_ENCRYPTION_KEY=your_32_character_encryption_key
-PII_ENCRYPTION_ENABLED=true
+# ScrapingDog Enhanced Settings
+SCRAPINGDOG_MONTHLY_BUDGET=200
+SCRAPINGDOG_BATCH_SIZE=10
+SCRAPINGDOG_RATE_LIMIT_MS=100
+SCRAPINGDOG_CONCURRENT_REQUESTS=5
+ENABLE_GOOGLE_MAPS_SCRAPING=true
+ENABLE_WEBSITE_ENRICHMENT=true
+ENABLE_REVIEW_ANALYSIS=true
 
-# Data retention policies
-LEAD_DATA_RETENTION_DAYS=90
-LOG_RETENTION_DAYS=30
-ANALYTICS_DATA_RETENTION_DAYS=365
+# Hunter.io Enhanced Settings
+HUNTER_MONTHLY_BUDGET=500
+HUNTER_DAILY_LIMIT=50
+HUNTER_BATCH_SIZE=10
+HUNTER_RATE_LIMIT_MS=1000
+ENABLE_EMAIL_PATTERNS=true
+ENABLE_EMAIL_VERIFICATION=true
+ENABLE_PERSON_FINDER=true
 ```
 
-## Logging & Debugging
+### Database Performance (REQUIRED for monitoring)
+```env
+# Supabase Enhanced Features - REQUIRED for monitoring system
+ENABLE_AUTO_ARCHIVING=true
+ARCHIVE_CAMPAIGNS_AFTER_DAYS=90
+API_LOG_RETENTION_DAYS=30
+ENABLE_ROW_LEVEL_SECURITY=true
+ENABLE_MATERIALIZED_VIEWS=true
+```
 
-### Application Logging
+### Optional Grafana Integration
+```env
+# Grafana Integration - OPTIONAL (for advanced analytics)
+GRAFANA_URL=https://appsmithery.grafana.net
+# GRAFANA_API_KEY=add_your_grafana_api_key_here_if_needed
+```
+
+## Legacy/Optional Variables
+
+## Railway Deployment Guide
+
+### 🚀 Where to Set Environment Variables in Railway
+
+**Step 1: Access Railway Dashboard**
+1. Login to Railway: https://railway.app/login
+2. Click on your ProspectPro project 
+3. Click on your ProspectPro service
+
+**Step 2: Set Variables**
+1. Click the **"Variables"** tab (top navigation)
+2. Click **"Raw Editor"** toggle (recommended for bulk import)
+3. Paste all production variables from above sections
+4. Click **"Deploy"** to save and redeploy
+
+### 🔄 Variable Categories by Priority
+
+#### Priority 1: CRITICAL (Required for basic functionality)
+- All Database Configuration variables
+- All Core API Keys variables  
+- All Production Environment variables
+- All Security & Authentication variables
+
+#### Priority 2: MONITORING (Required for new features)
+- All Monitoring Core Configuration variables
+- All Dashboard Configuration variables
+- All Budget & Cost Controls variables
+- All Enhanced API Settings variables
+
+#### Priority 3: OPTIONAL (Enhanced features)
+- Government Registry APIs
+- Grafana Integration
+- Advanced logging settings
+
+## 📝 Development vs Production Values
+
+### Development (.env file)
+```env
+NODE_ENV=development
+DEBUG_MODE=true
+SKIP_AUTH_IN_DEV=true
+DAILY_BUDGET_LIMIT=10.00
+LOG_LEVEL=debug
+ENABLE_DEV_ADMIN=true
+```
+
+### Production (Railway)
+```env
+NODE_ENV=production
+DEBUG_MODE=false
+SKIP_AUTH_IN_DEV=false
+DAILY_BUDGET_LIMIT=25.00
+LOG_LEVEL=info  
+ENABLE_DEV_ADMIN=false
+```
+
+## Variable Change History
+
+### September 14, 2025 - Monitoring Enhancement
+**Added Variables (23 new):**
+- `ENABLE_MONITORING=true`
+- `ENABLE_REAL_TIME_MONITORING=true` 
+- `ENABLE_CAMPAIGN_ANALYTICS=true`
+- `MONITORING_ENDPOINT=/api/monitoring`
+- `REALTIME_UPDATES=true`
+- `ANALYTICS_CACHE_TTL=300`
+- `MAX_DASHBOARD_QUERIES=50`
+- `DASHBOARD_REFRESH_INTERVAL_MS=30000`
+- `MAX_ACTIVITY_FEED_ITEMS=20`
+- `STATS_UPDATE_INTERVAL_MS=60000`
+- `MAX_CONCURRENT_DB_CONNECTIONS=10`
+- `ENABLE_COST_ALERTS=true`
+- `ENABLE_BUDGET_ALERTS=true`
+- `BUDGET_WARNING_THRESHOLD=80`
+- `BUDGET_CRITICAL_THRESHOLD=95`
+- `AUTO_PAUSE_ON_BUDGET_EXCEEDED=true`
+- `SCRAPINGDOG_MONTHLY_BUDGET=200`
+- `SCRAPINGDOG_BATCH_SIZE=10`
+- `HUNTER_MONTHLY_BUDGET=500`
+- `HUNTER_DAILY_LIMIT=50`
+- `ENABLE_AUTO_ARCHIVING=true`
+- `ARCHIVE_CAMPAIGNS_AFTER_DAYS=90`
+- `ENABLE_MATERIALIZED_VIEWS=true`
+
+**Purpose:** Enable real-time monitoring dashboard, cost tracking, and analytics features.
+
+### Previously Configured Variables
+**Core Variables (Production Ready):**
+- All Supabase database configuration
+- All API keys for lead generation
+- Security and authentication settings
+- Basic production environment configuration
+
+## Legacy/Optional Variables
+### Application Logging (Optional)
 ```env
 # Log levels: error, warn, info, debug, trace
 LOG_LEVEL=info
@@ -179,7 +248,7 @@ VERBOSE_LOGGING=false
 API_REQUEST_LOGGING=true
 ```
 
-### Error Tracking
+### Error Tracking (Optional)
 ```env
 # Sentry integration (optional)
 SENTRY_DSN=your_sentry_dsn_here
@@ -191,172 +260,62 @@ EMAIL_NOTIFICATIONS_ENABLED=true
 SLACK_WEBHOOK_URL=your_slack_webhook_url
 ```
 
-## Feature Flags
+## ✅ Quick Setup Checklist for Railway
 
-### Optional Features
-```env
-# Social media integration (future)
-LINKEDIN_INTEGRATION_ENABLED=false
-FACEBOOK_INTEGRATION_ENABLED=false
-TWITTER_INTEGRATION_ENABLED=false
+### Minimum Required Variables (Copy to Railway)
+```bash
+# 🔄 Copy these EXACT variables to Railway Raw Editor:
 
-# Advanced features
-AI_LEAD_SCORING_ENABLED=false
-BATCH_PROCESSING_ENABLED=true
-ADVANCED_ANALYTICS_ENABLED=true
-```
+# Database (CRITICAL)
+SUPABASE_URL=https://vvxdprgfltzblwvpedpx.supabase.co
+SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ2eGRwcmdmbHR6Ymx3dnBlZHB4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjQ3MTgzOTksImV4cCI6MjA0MDI5NDM5OX0.TZ9kR6FfNvnZMJF9P6NX6rYSVfM3LRw7BfGK7U6YXwc
+SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ2eGRwcmdmbHR6Ymx3dnBlZHB4Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTcyNDcxODM5OSwiZXhwIjoyMDQwMjk0Mzk5fQ.sOZBWJfb4MvqA2B6dxPCUaGr3zqZCXF7tHv1NjM5QwE
 
-### Experimental Features
-```env
-# Beta features
-BETA_FEATURES_ENABLED=false
-EXPERIMENTAL_SCRAPING=false
-ML_CONFIDENCE_SCORING=false
-```
+# API Keys (CRITICAL)
+GOOGLE_PLACES_API_KEY=AIzaSyB3BbYJRUiGSwgyon2iBWQkv6ON3V3eSik
+SCRAPINGDOG_API_KEY=68c368582456a537af2a2247
+HUNTER_IO_API_KEY=7bb2d1f9b5f8af7c1e8bf1736cf51f60eff49bbf
+NEVERBOUNCE_API_KEY=private_56e6fb6612fccb12bdf0d237f70e5b96
 
-## Development & Testing
-
-### Development Environment
-```env
-# Development overrides
-NODE_ENV=development
-DEBUG=true
-HOT_RELOAD_ENABLED=true
-MOCK_APIS_ENABLED=false
-
-# Test database
-TEST_DATABASE_URL=postgresql://localhost:5432/prospectpro_test
-```
-
-### Testing Configuration
-```env
-# Test API keys (use test/sandbox keys)
-TEST_GOOGLE_PLACES_API_KEY=test_key_here
-TEST_HUNTER_API_KEY=test_key_here
-TEST_SCRAPINGDOG_API_KEY=test_key_here
-
-# Testing settings
-RUN_INTEGRATION_TESTS=true
-MOCK_EXTERNAL_APIS=false
-TEST_TIMEOUT_MS=30000
-```
-
-## Environment File Examples
-
-### .env.production
-```env
-# Production Environment Configuration
+# Production Settings (CRITICAL)
 NODE_ENV=production
 PORT=3000
+DEBUG_MODE=false
+LOG_LEVEL=info
 
-# API Keys (Production)
-GOOGLE_PLACES_API_KEY=AIza...
-HUNTER_API_KEY=e1b2c3d4...
-SCRAPINGDOG_API_KEY=sdapi-abc123...
-NEVERBOUNCE_API_KEY=secret_live_...
+# Security (CRITICAL)  
+JWT_SECRET=production_jwt_secret_change_this_in_production_min_32_characters
+PERSONAL_ACCESS_TOKEN=6ef913e6d21ad34cc9f68d91ec559c47797b1959a269a549eeef52ddf0af33d2
 
-# Database (Production)
-SUPABASE_URL=https://your-prod-ref.supabase.co
-SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+# Monitoring (REQUIRED for new features)
+ENABLE_MONITORING=true
+ENABLE_REAL_TIME_MONITORING=true
+ENABLE_CAMPAIGN_ANALYTICS=true
+DASHBOARD_REFRESH_INTERVAL_MS=30000
 
-# Monitoring (Production)
-GRAFANA_URL=https://yourcompany.grafana.net
-ENABLE_REALTIME_MONITORING=true
-METRICS_COLLECTION_INTERVAL=60
-
-# Limits (Production)
-DAILY_COST_LIMIT=100.00
-MAX_LEADS_PER_CAMPAIGN=100
-MIN_CONFIDENCE_THRESHOLD=80
+# Budget Controls (REQUIRED)
+DAILY_BUDGET_LIMIT=25.00
+MONTHLY_BUDGET_LIMIT=150.00
+ENABLE_COST_ALERTS=true
+ENABLE_BUDGET_ALERTS=true
 ```
 
-### .env.development
-```env
-# Development Environment Configuration
-NODE_ENV=development
-PORT=3000
-DEBUG=true
+## Environment Variables Summary
 
-# API Keys (Development/Sandbox)
-GOOGLE_PLACES_API_KEY=AIza... # Use production key for real data
-HUNTER_API_KEY=test_key_here
-SCRAPINGDOG_API_KEY=test_key_here
-NEVERBOUNCE_API_KEY=secret_test_...
+| Category | Count | Required | Description |
+|----------|--------|----------|-------------|
+| **Database** | 3 | ✅ CRITICAL | Supabase connection and authentication |
+| **API Keys** | 4 | ✅ CRITICAL | Core lead generation services |
+| **Security** | 2 | ✅ CRITICAL | JWT and access tokens |
+| **Production** | 5 | ✅ CRITICAL | Basic app configuration |
+| **Monitoring** | 23 | ✅ NEW | Real-time analytics and dashboard |
+| **Budget** | 8 | ✅ REQUIRED | Cost controls and limits |
+| **Enhanced APIs** | 12 | ⚠️ RECOMMENDED | Performance optimization |
+| **Government APIs** | 5 | 🔧 OPTIONAL | Enhanced data validation |
+| **Grafana** | 2 | 🔧 OPTIONAL | Advanced analytics |
+| **Legacy/Others** | 15+ | 🔧 OPTIONAL | Additional features |
 
-# Database (Development)
-SUPABASE_URL=https://your-dev-ref.supabase.co
-SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-
-# Monitoring (Development)
-GRAFANA_URL=http://localhost:3001
-ENABLE_REALTIME_MONITORING=false
-LOG_LEVEL=debug
-
-# Limits (Development)
-DAILY_COST_LIMIT=10.00
-MAX_LEADS_PER_CAMPAIGN=10
-MIN_CONFIDENCE_THRESHOLD=50
-```
-
-## Setup Instructions
-
-### 1. Copy Environment Template
-```bash
-cp .env.example .env
-```
-
-### 2. Configure Required Variables
-At minimum, configure these variables:
-- `GOOGLE_PLACES_API_KEY`
-- `SUPABASE_URL`
-- `SUPABASE_SERVICE_ROLE_KEY`
-
-### 3. Configure Optional Services
-Based on your needs:
-- Email verification: `HUNTER_API_KEY`, `NEVERBOUNCE_API_KEY`
-- Web scraping: `SCRAPINGDOG_API_KEY`
-- Monitoring: `GRAFANA_URL`, `GRAFANA_API_TOKEN`
-
-### 4. Set Production Limits
-Configure cost and quality controls:
-- `DAILY_COST_LIMIT`
-- `MIN_CONFIDENCE_THRESHOLD`
-- `MAX_LEADS_PER_CAMPAIGN`
-
-## Cost Optimization Settings
-
-### Free Tier Maximization
-```env
-# Optimize for free tiers
-HUNTER_API_KEY=your_free_tier_key  # 25 requests/month
-NEVERBOUNCE_API_KEY=your_free_tier_key  # 1000 verifications/month
-SCRAPINGDOG_API_KEY=your_free_tier_key  # 1000 requests/month
-
-# Conservative limits for free tier
-DAILY_COST_LIMIT=5.00
-MAX_LEADS_PER_CAMPAIGN=25
-EMAIL_VERIFICATION_THRESHOLD=80  # Only verify high-confidence emails
-```
-
-### Paid Tier Optimization
-```env
-# Optimize for paid subscriptions
-DAILY_COST_LIMIT=50.00
-MAX_LEADS_PER_CAMPAIGN=100
-BATCH_PROCESSING_ENABLED=true
-PARALLEL_PROCESSING_THREADS=3
-```
-
-## Monitoring Variables Reference
-
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `GRAFANA_URL` | - | Grafana dashboard URL |
-| `METRICS_COLLECTION_INTERVAL` | 60 | Metrics collection interval (seconds) |
-| `HEALTH_CHECK_INTERVAL` | 300 | API health check interval (seconds) |
-| `ENABLE_REALTIME_MONITORING` | true | Enable WebSocket real-time updates |
-| `COST_ALERT_THRESHOLD` | 50.00 | Daily cost alert threshold ($) |
-| `QUALIFICATION_RATE_ALERT` | 70 | Qualification rate alert threshold (%) |
+**Total Current Variables: 65+**
 
 ## Troubleshooting
 
