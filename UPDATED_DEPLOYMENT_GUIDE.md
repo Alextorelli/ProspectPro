@@ -280,7 +280,7 @@ const campaignConfig = {
 
 **No setup required** - free GIS service
 
-## 📊 Quality Assurance & Validation
+## 📊 Quality Assurance Standards
 
 ### Data Quality Standards
 

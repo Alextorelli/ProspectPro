@@ -3,11 +3,11 @@
  * Integrates multiple data sources with cost optimization and intelligent pre-validation
  */
 
-const CaliforniaSOS = require('../api-clients/california-sos-client');
-const NewYorkSOS = require('../api-clients/newyork-sos-client');
-const NYTaxParcels = require('../api-clients/ny-tax-parcels-client');
-const HunterIOClient = require('../api-clients/hunter-io');
-const NeverBounceClient = require('../api-clients/neverbounce');
+const CaliforniaSOS = require('./api-clients/california-sos-client');
+const NewYorkSOS = require('./api-clients/newyork-sos-client');
+const NYTaxParcels = require('./api-clients/ny-tax-parcels-client');
+const HunterIOClient = require('./api-clients/hunter-io');
+const NeverBounceClient = require('./api-clients/neverbounce');
 
 class EnhancedLeadDiscovery {
   constructor(apiKeys = {}) {
