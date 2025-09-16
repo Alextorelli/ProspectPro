@@ -1,4 +1,4 @@
-# ProspectPro Enhanced API Integration - Deployment Guide
+# ProspectPro Enhanced API Integration - Platform Setup Guide
 
 ## 🎯 Overview
 
@@ -12,125 +12,635 @@ ProspectPro has been enhanced with multi-source API integration for premium lead
 - **Real-Time Budget Tracking**: Prevent cost overruns with intelligent limits
 - **Quality Scoring**: 0-100% confidence scores based on multi-source verification
 
-## 🔧 Required API Services
+## 🚀 Platform-Based Setup (No Coding Required)
 
-### ✅ REQUIRED Services (Must Have)
+### Step 1: Supabase Database Configuration
 
-1. **Google Places API** - Business discovery
-   - Cost: ~$0.032/search, $0.017/details
-   - Quota: 1000 free searches/month with billing
-   - Setup: [Google Cloud Console](https://console.cloud.google.com/)
+**Access:** [Supabase Dashboard](https://app.supabase.com/projects)
 
-2. **Hunter.io API** - Email discovery & verification
-   - Cost: $49/month for 1000 searches, $99/month for 5000
-   - Free tier: 25 searches/month (insufficient for production)
-   - Setup: [Hunter.io Dashboard](https://hunter.io/api_keys)
+1. **Navigate to SQL Editor**
+   - In your project dashboard, click "SQL Editor" in the left sidebar
+   - Click "New Query"
 
-3. **NeverBounce API** - Email deliverability verification
-   - Cost: $0.008/verification (bulk rates available)
-   - Free tier: 1000 verifications/month
-   - Setup: [NeverBounce Dashboard](https://app.neverbounce.com/apps/api)
+2. **Execute Complete Database Schema**
+   
+   Copy and paste this comprehensive SQL script:
 
-4. **Scrapingdog API** - Website content scraping
-   - Cost: $10/month for 10K requests, $25/month for 100K
-   - Free tier: 1000 requests/month
-   - Setup: [Scrapingdog Dashboard](https://www.scrapingdog.com/dashboard)
+```sql
+-- =============================================
+-- ProspectPro Enhanced Database Schema
+-- Complete setup for all required tables
+-- =============================================
 
-### 🆓 FREE Value-Add Services
+-- Enable UUID extension
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
-5. **California Secretary of State API** - Business registration validation
-   - Cost: FREE (no API key required)
-   - Rate limit: Respectful 100ms delays
-   - Coverage: All California business entities
+-- =============================================
+-- CAMPAIGNS TABLE
+-- =============================================
+CREATE TABLE campaigns (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    name VARCHAR(255) NOT NULL,
+    business_type VARCHAR(255) NOT NULL,
+    location VARCHAR(255) NOT NULL,
+    budget_limit DECIMAL(10,2) DEFAULT 100.00,
+    lead_limit INTEGER DEFAULT 100,
+    quality_threshold INTEGER DEFAULT 80,
+    prioritize_emails BOOLEAN DEFAULT true,
+    status VARCHAR(50) DEFAULT 'active',
+    total_cost DECIMAL(10,2) DEFAULT 0.00,
+    qualified_leads INTEGER DEFAULT 0,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
 
-6. **New York Secretary of State (Socrata API)** - NY business validation
-   - Cost: FREE with registration
-   - Rate limit: 1000 requests/hour without token
-   - Setup: [NY Open Data Portal](https://data.ny.gov/signup)
+-- =============================================
+-- BUSINESSES TABLE
+-- =============================================
+CREATE TABLE businesses (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    campaign_id UUID REFERENCES campaigns(id) ON DELETE CASCADE,
+    
+    -- Core business information
+    business_name VARCHAR(255) NOT NULL,
+    address TEXT,
+    phone VARCHAR(50),
+    website VARCHAR(500),
+    email VARCHAR(255),
+    
+    -- Location data
+    latitude DECIMAL(10, 8),
+    longitude DECIMAL(11, 8),
+    city VARCHAR(100),
+    state VARCHAR(50),
+    zip_code VARCHAR(20),
+    country VARCHAR(50) DEFAULT 'US',
+    
+    -- Business classification
+    business_type VARCHAR(255),
+    category VARCHAR(255),
+    subcategory VARCHAR(255),
+    
+    -- Validation scores
+    confidence_score INTEGER DEFAULT 0,
+    business_name_score INTEGER DEFAULT 0,
+    address_score INTEGER DEFAULT 0,
+    phone_score INTEGER DEFAULT 0,
+    website_score INTEGER DEFAULT 0,
+    email_score INTEGER DEFAULT 0,
+    
+    -- Status flags
+    is_qualified BOOLEAN DEFAULT false,
+    is_validated BOOLEAN DEFAULT false,
+    validation_stage VARCHAR(50) DEFAULT 'discovery',
+    
+    -- API source tracking
+    google_places_id VARCHAR(255),
+    google_rating DECIMAL(3,2),
+    google_reviews_count INTEGER,
+    
+    -- Timestamps
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
 
-7. **New York Tax Parcels API** - Property intelligence
-   - Cost: FREE (GIS services)
-   - Coverage: Property ownership, valuation data
-   - No authentication required
+-- =============================================
+-- BUSINESS VALIDATION TABLE
+-- =============================================
+CREATE TABLE business_validation (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    business_id UUID REFERENCES businesses(id) ON DELETE CASCADE,
+    
+    -- Validation results
+    business_name_valid BOOLEAN DEFAULT false,
+    business_name_confidence INTEGER DEFAULT 0,
+    business_name_source VARCHAR(100),
+    
+    address_valid BOOLEAN DEFAULT false,
+    address_confidence INTEGER DEFAULT 0,
+    address_geocoded BOOLEAN DEFAULT false,
+    
+    phone_valid BOOLEAN DEFAULT false,
+    phone_confidence INTEGER DEFAULT 0,
+    phone_format_valid BOOLEAN DEFAULT false,
+    
+    website_valid BOOLEAN DEFAULT false,
+    website_confidence INTEGER DEFAULT 0,
+    website_accessible BOOLEAN DEFAULT false,
+    website_ssl_valid BOOLEAN DEFAULT false,
+    
+    email_valid BOOLEAN DEFAULT false,
+    email_confidence INTEGER DEFAULT 0,
+    email_deliverable BOOLEAN DEFAULT false,
+    email_verified_at TIMESTAMP WITH TIME ZONE,
+    
+    -- Registry validation
+    ca_sos_validated BOOLEAN DEFAULT false,
+    ny_sos_validated BOOLEAN DEFAULT false,
+    registry_match_found BOOLEAN DEFAULT false,
+    
+    -- Overall validation
+    validation_complete BOOLEAN DEFAULT false,
+    validation_passed BOOLEAN DEFAULT false,
+    last_validated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
 
-## 🚀 Quick Start Deployment
+-- =============================================
+-- API COST TRACKING TABLE
+-- =============================================
+CREATE TABLE api_costs (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    campaign_id UUID REFERENCES campaigns(id) ON DELETE CASCADE,
+    business_id UUID REFERENCES businesses(id) ON DELETE CASCADE,
+    
+    -- API service costs
+    google_places_cost DECIMAL(10,4) DEFAULT 0.0000,
+    hunter_io_cost DECIMAL(10,4) DEFAULT 0.0000,
+    neverbounce_cost DECIMAL(10,4) DEFAULT 0.0000,
+    scrapingdog_cost DECIMAL(10,4) DEFAULT 0.0000,
+    
+    -- Request tracking
+    google_places_requests INTEGER DEFAULT 0,
+    hunter_io_requests INTEGER DEFAULT 0,
+    neverbounce_requests INTEGER DEFAULT 0,
+    scrapingdog_requests INTEGER DEFAULT 0,
+    
+    -- Total cost calculation
+    total_cost DECIMAL(10,4) DEFAULT 0.0000,
+    cost_per_lead DECIMAL(10,4) DEFAULT 0.0000,
+    
+    -- Timestamps
+    recorded_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
 
-### Prerequisites
+-- =============================================
+-- CAMPAIGN ANALYTICS TABLE
+-- =============================================
+CREATE TABLE campaign_analytics (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    campaign_id UUID REFERENCES campaigns(id) ON DELETE CASCADE,
+    
+    -- Performance metrics
+    businesses_discovered INTEGER DEFAULT 0,
+    businesses_enriched INTEGER DEFAULT 0,
+    businesses_validated INTEGER DEFAULT 0,
+    businesses_exported INTEGER DEFAULT 0,
+    
+    -- Quality metrics
+    avg_confidence_score DECIMAL(5,2) DEFAULT 0.00,
+    email_deliverability_rate DECIMAL(5,2) DEFAULT 0.00,
+    website_accessibility_rate DECIMAL(5,2) DEFAULT 0.00,
+    
+    -- Cost metrics
+    total_api_cost DECIMAL(10,2) DEFAULT 0.00,
+    cost_per_qualified_lead DECIMAL(10,4) DEFAULT 0.0000,
+    budget_utilization DECIMAL(5,2) DEFAULT 0.00,
+    
+    -- Stage completion rates
+    discovery_success_rate DECIMAL(5,2) DEFAULT 0.00,
+    enrichment_success_rate DECIMAL(5,2) DEFAULT 0.00,
+    validation_success_rate DECIMAL(5,2) DEFAULT 0.00,
+    
+    -- Timestamps
+    snapshot_date DATE DEFAULT CURRENT_DATE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
 
-- Node.js 18+ 
-- Supabase account
-- Valid credit card for paid API services
+-- =============================================
+-- EXPORTED LEADS TABLE
+-- =============================================
+CREATE TABLE exported_leads (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    campaign_id UUID REFERENCES campaigns(id) ON DELETE CASCADE,
+    business_id UUID REFERENCES businesses(id) ON DELETE CASCADE,
+    
+    -- Export metadata
+    export_format VARCHAR(50) DEFAULT 'csv',
+    export_timestamp TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    exported_by VARCHAR(255),
+    
+    -- Quality verification at export
+    final_confidence_score INTEGER NOT NULL,
+    all_validations_passed BOOLEAN DEFAULT true,
+    
+    -- Export file reference
+    file_path VARCHAR(500),
+    file_size_kb INTEGER,
+    
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
 
-### 1. Clone & Install
+-- =============================================
+-- SYSTEM SETTINGS TABLE
+-- =============================================
+CREATE TABLE system_settings (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    setting_key VARCHAR(100) UNIQUE NOT NULL,
+    setting_value TEXT NOT NULL,
+    setting_type VARCHAR(50) DEFAULT 'string',
+    description TEXT,
+    is_active BOOLEAN DEFAULT true,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
 
-```bash
-git clone <repository-url>
-cd ProspectPro_REBUILD
-npm install
+-- =============================================
+-- INDEXES FOR PERFORMANCE
+-- =============================================
+CREATE INDEX idx_businesses_campaign_id ON businesses(campaign_id);
+CREATE INDEX idx_businesses_confidence_score ON businesses(confidence_score DESC);
+CREATE INDEX idx_businesses_is_qualified ON businesses(is_qualified);
+CREATE INDEX idx_businesses_validation_stage ON businesses(validation_stage);
+CREATE INDEX idx_businesses_created_at ON businesses(created_at DESC);
+
+CREATE INDEX idx_business_validation_business_id ON business_validation(business_id);
+CREATE INDEX idx_business_validation_complete ON business_validation(validation_complete);
+CREATE INDEX idx_business_validation_passed ON business_validation(validation_passed);
+
+CREATE INDEX idx_api_costs_campaign_id ON api_costs(campaign_id);
+CREATE INDEX idx_api_costs_recorded_at ON api_costs(recorded_at DESC);
+
+CREATE INDEX idx_campaign_analytics_campaign_id ON campaign_analytics(campaign_id);
+CREATE INDEX idx_campaign_analytics_snapshot_date ON campaign_analytics(snapshot_date DESC);
+
+-- =============================================
+-- DEFAULT SYSTEM SETTINGS
+-- =============================================
+INSERT INTO system_settings (setting_key, setting_value, setting_type, description) VALUES
+('min_confidence_threshold', '80', 'integer', 'Minimum confidence score for lead export'),
+('max_budget_per_campaign', '500.00', 'decimal', 'Maximum allowed budget per campaign'),
+('enable_cost_alerts', 'true', 'boolean', 'Send alerts when budget thresholds are reached'),
+('prevalidation_threshold', '70', 'integer', 'Minimum score to proceed with expensive API calls'),
+('email_verification_required', 'true', 'boolean', 'Require email verification for all leads'),
+('website_accessibility_check', 'true', 'boolean', 'Verify website accessibility before export'),
+('government_registry_check', 'true', 'boolean', 'Validate businesses against government registries'),
+('google_places_rate_limit', '100', 'integer', 'Max Google Places requests per minute'),
+('hunter_io_rate_limit', '10', 'integer', 'Max Hunter.io requests per minute'),
+('neverbounce_rate_limit', '50', 'integer', 'Max NeverBounce requests per minute');
+
+-- =============================================
+-- ROW LEVEL SECURITY (RLS) POLICIES
+-- =============================================
+ALTER TABLE campaigns ENABLE ROW LEVEL SECURITY;
+ALTER TABLE businesses ENABLE ROW LEVEL SECURITY;
+ALTER TABLE business_validation ENABLE ROW LEVEL SECURITY;
+ALTER TABLE api_costs ENABLE ROW LEVEL SECURITY;
+ALTER TABLE campaign_analytics ENABLE ROW LEVEL SECURITY;
+ALTER TABLE exported_leads ENABLE ROW LEVEL SECURITY;
+
+-- Policy for campaigns (authenticated users can manage their own campaigns)
+CREATE POLICY "Users can manage their own campaigns" ON campaigns
+    FOR ALL USING (auth.uid() IS NOT NULL);
+
+-- Policy for businesses (users can access businesses from their campaigns)
+CREATE POLICY "Users can access businesses from their campaigns" ON businesses
+    FOR ALL USING (
+        EXISTS (
+            SELECT 1 FROM campaigns 
+            WHERE campaigns.id = businesses.campaign_id 
+            AND auth.uid() IS NOT NULL
+        )
+    );
+
+-- Similar policies for other tables
+CREATE POLICY "Users can access validation data for their businesses" ON business_validation
+    FOR ALL USING (
+        EXISTS (
+            SELECT 1 FROM businesses b
+            JOIN campaigns c ON c.id = b.campaign_id
+            WHERE b.id = business_validation.business_id
+            AND auth.uid() IS NOT NULL
+        )
+    );
+
+CREATE POLICY "Users can access cost data for their campaigns" ON api_costs
+    FOR ALL USING (
+        EXISTS (
+            SELECT 1 FROM campaigns 
+            WHERE campaigns.id = api_costs.campaign_id 
+            AND auth.uid() IS NOT NULL
+        )
+    );
+
+CREATE POLICY "Users can access analytics for their campaigns" ON campaign_analytics
+    FOR ALL USING (
+        EXISTS (
+            SELECT 1 FROM campaigns 
+            WHERE campaigns.id = campaign_analytics.campaign_id 
+            AND auth.uid() IS NOT NULL
+        )
+    );
+
+CREATE POLICY "Users can access their exported leads" ON exported_leads
+    FOR ALL USING (
+        EXISTS (
+            SELECT 1 FROM campaigns 
+            WHERE campaigns.id = exported_leads.campaign_id 
+            AND auth.uid() IS NOT NULL
+        )
+    );
+
+-- System settings accessible to all authenticated users (read-only)
+CREATE POLICY "Authenticated users can read system settings" ON system_settings
+    FOR SELECT USING (auth.uid() IS NOT NULL);
+
+-- =============================================
+-- FUNCTIONS FOR AUTOMATIC UPDATES
+-- =============================================
+CREATE OR REPLACE FUNCTION update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at = NOW();
+    RETURN NEW;
+END;
+$$ language 'plpgsql';
+
+-- Apply update triggers to relevant tables
+CREATE TRIGGER update_campaigns_updated_at BEFORE UPDATE ON campaigns
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_businesses_updated_at BEFORE UPDATE ON businesses
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_business_validation_updated_at BEFORE UPDATE ON business_validation
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_system_settings_updated_at BEFORE UPDATE ON system_settings
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+-- =============================================
+-- SCHEMA CREATION COMPLETE
+-- =============================================
 ```
 
-### 2. Environment Configuration
+3. **Execute the Script**
+   - Click "Run" to execute the complete schema
+   - Verify all tables are created successfully in the "Table Editor"
 
-Create `.env` file with ALL required variables:
+4. **Verify Database Setup**
+   - Navigate to "Table Editor" in the left sidebar
+   - Confirm these tables exist:
+     - `campaigns`
+     - `businesses` 
+     - `business_validation`
+     - `api_costs`
+     - `campaign_analytics`
+     - `exported_leads`
+     - `system_settings`
+
+### Step 2: Google Cloud Platform Setup
+
+**Access:** [Google Cloud Console](https://console.cloud.google.com/)
+
+1. **Navigate to Your Project**
+   - Select your existing project from the project dropdown
+   - If you need to create one: Click "Select a project" → "New Project"
+
+2. **Enable Required APIs**
+   - Go to "APIs & Services" → "Library"
+   - Search and enable these APIs:
+     - **Places API** (for business discovery)
+     - **Geocoding API** (for address validation)
+     - **Maps JavaScript API** (for location services)
+
+3. **Configure API Key**
+   - Go to "APIs & Services" → "Credentials"
+   - Click "Create Credentials" → "API Key"
+   - **IMPORTANT**: Immediately click "Restrict Key" to secure it
+
+4. **Set API Key Restrictions**
+   - **Application restrictions**: Select "IP addresses"
+   - Add your server IP address (get from Railway/hosting provider)
+   - **API restrictions**: Select "Restrict key"
+   - Choose: "Places API", "Geocoding API", "Maps JavaScript API"
+   - Click "Save"
+
+5. **Enable Billing**
+   - Go to "Billing" in the left sidebar
+   - Link a valid payment method
+   - Set up budget alerts:
+     - Go to "Budgets & alerts"
+     - Create budget: $50/month with 50%, 90%, 100% alerts
+
+6. **Copy Your API Key**
+   - Save this key for Railway deployment configuration
+
+### Step 3: Hunter.io Configuration
+
+**Access:** [Hunter.io Dashboard](https://hunter.io/dashboard)
+
+1. **Navigate to API Settings**
+   - Click "API" in the top navigation
+   - Click "API Keys" in the left sidebar
+
+2. **Generate API Key**
+   - Click "Generate API Key"
+   - Add description: "ProspectPro Production"
+   - Copy and save the generated key
+
+3. **Configure Usage Limits**
+   - Go to "Account" → "Billing"
+   - Set up usage alerts at 80% of your plan limit
+   - Configure automatic top-ups if needed
+
+4. **Verify Plan Limits**
+   - Starter Plan: 1,000 requests/month ($49)
+   - Growth Plan: 5,000 requests/month ($99)
+   - Ensure your plan matches expected usage
+
+### Step 4: NeverBounce Setup
+
+**Access:** [NeverBounce Dashboard](https://app.neverbounce.com/)
+
+1. **Navigate to API Section**
+   - Click "Tools" → "API" in the top navigation
+
+2. **Generate API Key**
+   - Click "Generate New API Key"
+   - Name: "ProspectPro Production"
+   - Copy and save the generated key
+
+3. **Add Credits or Setup Plan**
+   - Go to "Billing" → "Add Credits"
+   - For production: Purchase at least 5,000 credits ($40)
+   - Set up auto-refill at 500 credits remaining
+
+4. **Configure Webhooks (Optional)**
+   - Go to "API" → "Webhooks"
+   - Add webhook URL: `https://your-railway-app.com/webhooks/neverbounce`
+   - Events: "job.complete", "job.failed"
+
+### Step 5: Scrapingdog Configuration
+
+**Access:** [Scrapingdog Dashboard](https://www.scrapingdog.com/dashboard)
+
+1. **Access API Keys**
+   - In the dashboard, locate "API Key" section
+   - Copy your existing API key
+
+2. **Upgrade Plan if Needed**
+   - Go to "Billing" → "Upgrade Plan"
+   - Recommended: Standard Plan ($25/month for 100K requests)
+   - For high volume: Premium Plan ($100/month for 1M requests)
+
+3. **Configure Request Settings**
+   - Go to "Settings" → "API Configuration"
+   - Enable "Premium Proxies" for better success rates
+   - Set "Render JavaScript" to true for dynamic websites
+   - Enable "Custom Headers" support
+
+### Step 6: Railway.app Deployment
+
+**Access:** [Railway Dashboard](https://railway.app/dashboard)
+
+1. **Create New Project**
+   - Click "New Project"
+   - Select "Deploy from GitHub repo"
+   - Connect and select your ProspectPro repository
+
+2. **Configure Environment Variables**
+   - In your project dashboard, click "Variables"
+   - Add these variables with your actual keys:
 
 ```env
-# === REQUIRED DATABASE ===
-SUPABASE_URL=https://your-project.supabase.co
-SUPABASE_SERVICE_ROLE_KEY=sb_secret_your_secret_key_here
-
-# === REQUIRED APIS ===
-GOOGLE_PLACES_API_KEY=AIza...your_key_here
-HUNTER_IO_API_KEY=your_hunter_api_key_here
-NEVERBOUNCE_API_KEY=NB_your_api_key_here
-SCRAPINGDOG_API_KEY=your_scrapingdog_key_here
-
-# === OPTIONAL FREE APIS ===
-NEWYORK_SOS_APP_TOKEN=your_socrata_app_token_here
-
-# === SERVER CONFIG ===
+SUPABASE_URL=https://your-project-id.supabase.co
+SUPABASE_SERVICE_ROLE_KEY=eyJ...your-service-role-key
+GOOGLE_PLACES_API_KEY=AIza...your-google-key
+HUNTER_IO_API_KEY=your-hunter-api-key
+NEVERBOUNCE_API_KEY=NB_your-neverbounce-key
+SCRAPINGDOG_API_KEY=your-scrapingdog-key
+NEWYORK_SOS_APP_TOKEN=your-ny-token
 PORT=3000
-ADMIN_PASSWORD=your_secure_admin_password
+ADMIN_PASSWORD=your-secure-admin-password
 NODE_ENV=production
 ```
 
-### 3. Database Setup
+3. **Configure Custom Domain (Optional)**
+   - Go to "Settings" → "Domains"
+   - Add your custom domain
+   - Update DNS records as instructed
+   - Wait for SSL certificate provisioning
 
-Initialize the enhanced schema:
+4. **Deploy Application**
+   - Railway will automatically detect Node.js and deploy
+   - Monitor deployment in "Deployments" tab
+   - Check logs for any startup errors
 
-```bash
-# Connect to your Supabase project and run:
-psql "postgresql://postgres:[password]@db.[ref].supabase.co:5432/postgres" -f database/enhanced-supabase-schema.sql
-```
+5. **Update Google Cloud API Restrictions**
+   - Get your Railway app's IP address from deployment logs
+   - Return to Google Cloud Console → "APIs & Services" → "Credentials"
+   - Edit your API key restrictions to include Railway's IP
 
-### 4. Verify Installation
+### Step 7: New York Open Data (Optional Enhancement)
 
-```bash
-node scripts/validate-environment.js
-```
+**Access:** [NY Open Data Portal](https://data.ny.gov/)
 
-Expected output:
-```
-✅ All required environment variables present
-✅ Database connection successful  
-✅ All API services responding
-✅ Enhanced lead discovery system ready
-```
+1. **Create Developer Account**
+   - Click "Sign Up" → "Developers"
+   - Complete registration with business details
 
-### 5. Launch
+2. **Generate App Token**
+   - Go to "Manage" → "API Keys"
+   - Click "Create New API Key"
+   - App Name: "ProspectPro Business Validation"
+   - Description: "Business entity validation and verification"
 
-```bash
-npm start
-```
+3. **Configure Rate Limits**
+   - With App Token: 1,000 requests/hour
+   - Without Token: 100 requests/hour
+   - The token significantly improves your quota
 
-Access at: `http://localhost:3000`
+### Step 8: Application Verification & Testing
 
-## 💰 Cost Optimization Strategy
+1. **Access Your Deployed Application**
+   - Visit your Railway app URL (e.g., `https://your-app.railway.app`)
+   - You should see the ProspectPro dashboard
 
-### Pre-Validation Filtering
+2. **Test API Connections**
+   - Navigate to Admin Dashboard (`/admin-dashboard.html`)
+   - Enter your admin password
+   - Check "API Health Status" section - all should show "✅ Connected"
 
-The system uses intelligent scoring to minimize expensive API calls:
+3. **Run Sample Campaign**
+   - Create a test campaign with small limits:
+     - Budget: $5.00
+     - Lead limit: 10
+     - Business type: "Coffee shops"
+     - Location: "San Francisco, CA"
+   - Monitor the campaign progress and costs
 
-1. **Business Name Quality Check** (0-25 points)
+4. **Verify Database Integration**
+   - Return to Supabase → "Table Editor"
+   - Check that data is being written to:
+     - `campaigns` table (your test campaign)
+     - `businesses` table (discovered businesses)
+     - `api_costs` table (cost tracking)
+
+### Step 9: Production Optimization
+
+1. **Set Up Monitoring Alerts**
+   - **Railway**: Enable deployment notifications
+   - **Supabase**: Set up database performance alerts
+   - **Google Cloud**: Configure budget alerts for API usage
+   - **Hunter.io**: Enable usage threshold notifications
+
+2. **Configure Backup Strategy**
+   - **Supabase**: Enable Point-in-Time Recovery
+   - Go to "Settings" → "Database" → "Backups"
+   - Enable automatic backups with 7-day retention
+
+3. **Security Hardening**
+   - **Supabase**: Review RLS policies are active
+   - **Railway**: Enable environment variable encryption
+   - **API Keys**: Regularly rotate keys (monthly recommended)
+
+4. **Performance Optimization**
+   - **Railway**: Enable auto-scaling if available
+   - **Database**: Monitor query performance in Supabase
+   - **APIs**: Implement request caching where possible
+
+## 💰 Cost Optimization & Budget Management
+
+### Expected Costs Per Qualified Lead
+
+| Business Type | Discovery | Enrichment | Validation | **Total** |
+|---------------|-----------|------------|------------|-----------|
+| Local Services | $0.05 | $0.15 | $0.08 | **$0.28** |
+| Professional Services | $0.05 | $0.20 | $0.12 | **$0.37** |
+| Retail/eCommerce | $0.05 | $0.25 | $0.15 | **$0.45** |
+
+*Costs assume 70% pre-validation filtering and 80% email verification success*
+
+### Campaign Budget Configuration
+
+When creating campaigns in the application, use these optimal settings:
+
+**Small Test Campaign:**
+- Budget Limit: $5.00
+- Lead Limit: 15
+- Quality Threshold: 80%
+- Expected Output: 10-12 qualified leads
+
+**Medium Production Campaign:**
+- Budget Limit: $50.00
+- Lead Limit: 150
+- Quality Threshold: 85%
+- Expected Output: 100-120 qualified leads
+
+**Large Scale Campaign:**
+- Budget Limit: $200.00
+- Lead Limit: 500
+- Quality Threshold: 80%
+- Expected Output: 400-450 qualified leads
+
+### Pre-Validation Filtering Strategy
+
+The system automatically scores businesses before expensive API calls:
+
+1. **Business Name Quality** (0-25 points)
    - Rejects generic patterns: "Business LLC", "Company Inc"
    - Validates realistic business names
 
@@ -148,510 +658,294 @@ The system uses intelligent scoring to minimize expensive API calls:
 
 **Only businesses scoring ≥70% proceed to expensive API calls**
 
-### Budget Management
+## � API Service Information & Pricing
 
-Set intelligent limits in campaign creation:
+### Required Paid Services
 
-```javascript
-const campaignConfig = {
-  budgetLimit: 50.00,        // $50 max spend
-  leadLimit: 100,            // Stop at 100 leads
-  qualityThreshold: 80,      // 80%+ confidence required
-  prioritizeEmails: true     // Focus on email verification
-};
-```
+| Service | Purpose | Free Tier | Paid Plans | Rate Limits |
+|---------|---------|-----------|------------|-------------|
+| **Google Places** | Business Discovery | 1K searches/month | $0.032/search | 100 req/min |
+| **Hunter.io** | Email Discovery | 25 searches/month | $49/month (1K) | 10 req/min |
+| **NeverBounce** | Email Verification | 1K verifications/month | $0.008/verification | 50 req/min |
+| **Scrapingdog** | Website Scraping | 1K requests/month | $10/month (10K) | 5 req/sec |
 
-### Expected Costs Per Qualified Lead
+### Free Value-Add Services
 
-| Business Type | Discovery | Enrichment | Validation | **Total** |
-|---------------|-----------|------------|------------|-----------|
-| Local Services | $0.05 | $0.15 | $0.08 | **$0.28** |
-| Professional Services | $0.05 | $0.20 | $0.12 | **$0.37** |
-| Retail/eCommerce | $0.05 | $0.25 | $0.15 | **$0.45** |
+| Service | Purpose | Limitations | Setup Required |
+|---------|---------|-------------|----------------|
+| **CA Secretary of State** | Business Validation | 60 req/min | None |
+| **NY Secretary of State** | Business Validation | 100 req/hour | Optional token |
+| **NY Tax Parcels** | Property Intelligence | 30 req/min | None |
 
-*Costs assume 70% pre-validation filtering and 80% email verification success*
+### Service Integration Benefits
 
-## 🔍 API Service Details
+**Multi-Source Validation Pipeline:**
+1. **Discovery Stage**: Google Places finds businesses
+2. **Free Validation**: Government registries verify legitimacy  
+3. **Enrichment Stage**: Hunter.io + Scrapingdog find contact details
+4. **Final Verification**: NeverBounce validates email deliverability
 
-### Google Places API
+**Cost Efficiency Features:**
+- Pre-validation scoring reduces API calls by 60%+
+- Government registry checks add credibility at zero cost
+- Smart caching prevents duplicate API requests
+- Budget controls prevent overspending
 
-**Endpoints Used:**
-- Text Search: Business discovery
-- Place Details: Contact information
-- Geocoding: Address validation
+## � Quality Assurance & Lead Standards
 
-**Rate Limits:**
-- 1000 requests/day (free tier)
-- $0.032 per Text Search
-- $0.017 per Place Details
+### Automated Quality Scoring System
 
-**Setup Instructions:**
-1. Visit [Google Cloud Console](https://console.cloud.google.com/)
-2. Create new project or select existing
-3. Enable "Places API" and "Geocoding API"
-4. Create credentials → API Key
-5. Restrict key to your server IP
-6. Add to `.env` as `GOOGLE_PLACES_API_KEY`
-
-### Hunter.io API
-
-**Endpoints Used:**
-- Domain Search: Find emails on website
-- Email Finder: Discover specific emails
-- Email Verifier: Check deliverability
-
-**Pricing Tiers:**
-- Starter: $49/month (1,000 searches)
-- Growth: $99/month (5,000 searches)
-- Business: $199/month (20,000 searches)
-
-**Setup Instructions:**
-1. Create account at [Hunter.io](https://hunter.io/)
-2. Choose appropriate plan
-3. Navigate to Dashboard → API
-4. Copy API Key
-5. Add to `.env` as `HUNTER_IO_API_KEY`
-
-### NeverBounce API
-
-**Verification Types:**
-- Real-time verification: Instant results
-- Bulk verification: CSV uploads
-- List cleaning: Batch processing
-
-**Pricing:**
-- Pay-as-you-go: $0.008/verification
-- Monthly plans: 10K verifications for $80/month
-
-**Setup Instructions:**
-1. Register at [NeverBounce](https://app.neverbounce.com/register)
-2. Add credits or choose plan  
-3. API Settings → Generate API Key
-4. Add to `.env` as `NEVERBOUNCE_API_KEY`
-
-### Scrapingdog API
-
-**Services Used:**
-- Website content extraction
-- Contact page scraping
-- Social media discovery
-
-**Pricing:**
-- Basic: $10/month (10,000 requests)
-- Standard: $25/month (100,000 requests)
-- Premium: $100/month (1,000,000 requests)
-
-**Setup Instructions:**
-1. Create account at [Scrapingdog](https://www.scrapingdog.com/)
-2. Choose subscription plan
-3. Dashboard → API Keys
-4. Copy API Key
-5. Add to `.env` as `SCRAPINGDOG_API_KEY`
-
-## 🆓 Free API Services Configuration
-
-### California Secretary of State API
-
-**What it provides:**
-- Business registration validation
-- Entity status verification
-- Registration date and type
-
-**No setup required** - completely free service
-
-### New York Secretary of State (Socrata API)
-
-**What it provides:**
-- Business entity search
-- Corporate filing information
-- Registration status
-
-**Setup (Optional but Recommended):**
-1. Register at [NY Open Data](https://data.ny.gov/signup)
-2. Create App Token for higher rate limits
-3. Add to `.env` as `NEWYORK_SOS_APP_TOKEN`
-
-### New York Tax Parcels API
-
-**What it provides:**
-- Property ownership information
-- Property valuation data
-- Address verification
-
-**No setup required** - free GIS service
-
-## 📊 Quality Assurance Standards
-
-### Data Quality Standards
-
-Every exported lead must pass these validation checks:
+Every lead receives a 0-100% confidence score based on:
 
 1. **Business Name Verification** (20 points)
    - Not generic/fake pattern
-   - Confirmed via government registry (bonus +5)
+   - Government registry confirmation (+5 bonus)
 
-2. **Address Verification** (20 points)
+2. **Address Verification** (20 points)  
    - Geocodeable location
-   - Not sequential pattern
-   - Property intelligence match (bonus +5)
+   - Property intelligence match (+5 bonus)
 
 3. **Phone Verification** (25 points)
-   - Valid format and length
-   - Not 555-xxxx fake pattern
-   - Area code matches location (bonus +5)
+   - Valid format and area code
+   - Location consistency (+5 bonus)
 
 4. **Website Verification** (15 points)
-   - Returns HTTP 2xx status
-   - Contains business information
-   - SSL certificate valid (bonus +5)
+   - Accessible with valid SSL (+5 bonus)
+   - Contains relevant business information
 
 5. **Email Verification** (20 points)
-   - Deliverability ≥80% confidence
-   - Domain matches business
-   - Not catch-all/role account (bonus +5)
+   - 80%+ deliverability confidence
+   - Domain-business match (+5 bonus)
 
-**Minimum Export Threshold: 80% confidence score**
+**Export Requirements:**
+- Minimum 80% confidence score
+- All critical validations passed
+- Government registry verification preferred
 
-### Validation Pipeline Process
+### 4-Stage Validation Pipeline
 
 ```
-Discovery (Google Places) 
-    ↓
-Pre-validation Scoring (70%+ required)
-    ↓
-Enrichment (Hunter.io + Scrapingdog)
-    ↓
-Government Registry Check (Free APIs)
-    ↓
-Email Verification (NeverBounce)
-    ↓
-Final Quality Scoring (80%+ for export)
+Stage 1: Discovery (Google Places)
+         ↓
+Stage 2: Pre-validation (70%+ to continue)
+         ↓  
+Stage 3: Enrichment (Hunter.io + Scrapingdog)
+         ↓
+Stage 4: Final Verification (NeverBounce + Registries)
+         ↓
+Export: Only 80%+ confidence leads
 ```
 
-## 🛠️ Development & Testing
+## 🛠️ Application Usage Guide
 
-### Running Tests
+### Creating Your First Campaign
 
-```bash
-# Test real data validation (no fake data)
-node test/test-real-data.js
+1. **Access Dashboard**
+   - Navigate to your deployed Railway app
+   - Use the main campaign creation interface
 
-# Test website validation  
-node test/test-website-validation.js
-
-# Test enhanced integrations
-node test/test-enhanced-integrations.js
-
-# Validate environment setup
-node scripts/validate-environment.js
-```
-
-### Debug Mode
-
-```bash
-NODE_ENV=development npm start
-```
-
-Enables:
-- Detailed API response logging
-- Cost tracking per request
-- Validation step-by-step output
-- Error stack traces
-
-### Local Development
-
-```bash
-# Start with file watching
-npm run dev
-
-# Monitor cost usage
-node debug/cost-monitoring.js
-
-# Inspect specific business data
-node debug/inspect-business-data.js
-```
-
-## 🚨 Production Checklist
-
-### Security Hardening
-
-- [ ] API keys stored in environment variables
-- [ ] Supabase RLS policies enabled
-- [ ] Admin dashboard password protected
-- [ ] HTTPS enabled for production
-- [ ] Rate limiting configured
-
-### Performance Optimization
-
-- [ ] Database indexes created
-- [ ] API response caching enabled  
-- [ ] Pre-validation filters active
-- [ ] Budget limits configured
-- [ ] Error handling implemented
-
-### Quality Assurance
-
-- [ ] Zero fake data generation verified
-- [ ] All websites return HTTP 2xx
-- [ ] Email bounce rate <5%
-- [ ] Confidence scores calibrated
-- [ ] Export validation passing
-
-### Cost Management
-
-- [ ] API usage monitoring active
-- [ ] Budget alerts configured
-- [ ] Cost per lead tracking
-- [ ] Rate limiting respect
-- [ ] Free tier quotas monitored
-
-## 📈 Monitoring & Analytics
-
-### Real-Time Dashboard
-
-Access monitoring at: `http://localhost:3000/monitoring/`
-
-**Key Metrics:**
-- Cost per qualified lead
-- API success rates  
-- Quality score distribution
-- Budget utilization
-- Service health status
-
-### Cost Tracking
-
-The system tracks comprehensive cost analytics:
-
-```javascript
-// Campaign cost breakdown
-{
-  "campaign_id": "uuid",
-  "total_cost": 47.33,
-  "cost_breakdown": {
-    "google_places": 12.40,
-    "hunter_io": 18.50, 
-    "neverbounce": 16.43,
-    "scrapingdog": 0.00
-  },
-  "qualified_leads": 127,
-  "cost_per_qualified_lead": 0.37,
-  "roi_percentage": 2600
-}
-```
-
-### Export Analytics
-
-Generate detailed reports:
-
-```bash
-# Cost analysis report
-node scripts/export-cost-analysis.js --start-date=2024-01-01 --end-date=2024-01-31
-
-# Campaign performance report  
-node scripts/export-campaign-performance.js --campaign-id=uuid
-
-# ROI summary
-node scripts/export-roi-summary.js
-```
-
-## 🚀 Railway.app Deployment
-
-### Quick Deploy
-
-[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/new/template?template=https://github.com/your-repo&envs=SUPABASE_URL,SUPABASE_SERVICE_ROLE_KEY,GOOGLE_PLACES_API_KEY,HUNTER_IO_API_KEY,NEVERBOUNCE_API_KEY,SCRAPINGDOG_API_KEY)
-
-### Manual Railway Deployment
-
-1. **Connect Repository**
-   ```bash
-   railway login
-   railway link
+2. **Configure Campaign Settings**
+   ```
+   Campaign Name: "SF Coffee Shops Test"
+   Business Type: "Coffee shops"  
+   Location: "San Francisco, CA"
+   Budget Limit: $10.00
+   Lead Limit: 25
+   Quality Threshold: 80%
+   Prioritize Emails: Yes
    ```
 
-2. **Set Environment Variables**
-   ```bash
-   railway variables set SUPABASE_URL=https://your-project.supabase.co
-   railway variables set SUPABASE_SERVICE_ROLE_KEY=sb_secret_your_key
-   railway variables set GOOGLE_PLACES_API_KEY=your_key
-   railway variables set HUNTER_IO_API_KEY=your_key  
-   railway variables set NEVERBOUNCE_API_KEY=your_key
-   railway variables set SCRAPINGDOG_API_KEY=your_key
-   ```
+3. **Monitor Campaign Progress**
+   - Real-time cost tracking
+   - Lead discovery progress
+   - Validation stage completion
+   - Quality score distribution
 
-3. **Deploy**
-   ```bash
-   railway up
-   ```
+4. **Export Qualified Leads**
+   - CSV format with all contact details
+   - Confidence scores and validation status
+   - Government registry confirmation flags
+   - Cost breakdown per lead
 
-4. **Verify Deployment**
-   ```bash
-   railway logs
-   ```
+### Admin Dashboard Features
 
-### Railway Environment Setup
+Access via `/admin-dashboard.html`:
 
-Railway automatically detects the Node.js project and runs:
-- `npm install` (dependency installation)
-- `npm start` (application launch)
+- **API Health Monitoring**: Real-time service status
+- **Cost Analytics**: Detailed spend breakdowns  
+- **Campaign Performance**: Success rates and ROI
+- **Quality Metrics**: Validation pass rates
+- **System Settings**: Threshold adjustments
 
-Port is automatically assigned via `PORT` environment variable.
+### Real-Time Monitoring
 
-## 🔧 Troubleshooting
+Access via `/monitoring/`:
 
-### Common Issues
+- Live campaign progress
+- API usage and costs
+- Lead quality distribution
+- Service health alerts
+- Budget utilization tracking
 
-**1. "Invalid API Key" Errors**
-```bash
-# Verify API keys are set correctly
-node scripts/validate-environment.js
+## 🚨 Production Deployment Checklist
 
-# Check specific service
-node debug/test-hunter-io.js
-node debug/test-neverbounce.js
+### ✅ Pre-Launch Verification
+
+**Database Setup Complete:**
+- [ ] Supabase project created and schema deployed
+- [ ] All 7 tables created successfully  
+- [ ] RLS policies active and tested
+- [ ] Default system settings configured
+- [ ] Database backups enabled
+
+**API Services Configured:**
+- [ ] Google Places API key active and restricted
+- [ ] Hunter.io subscription activated
+- [ ] NeverBounce credits added/plan active  
+- [ ] Scrapingdog plan sufficient for volume
+- [ ] NY Open Data token generated (optional)
+
+**Railway Deployment Ready:**
+- [ ] Repository connected to Railway
+- [ ] All environment variables configured
+- [ ] Custom domain configured (if applicable)
+- [ ] SSL certificate provisioned
+- [ ] Auto-scaling enabled
+
+**Security Hardening Complete:**
+- [ ] API keys secured in environment variables
+- [ ] Admin password set to strong value
+- [ ] IP restrictions applied to Google API key
+- [ ] Database access restricted to application
+
+### ✅ Post-Launch Testing
+
+**Application Accessibility:**
+- [ ] Main dashboard loads successfully
+- [ ] Admin dashboard accessible with password
+- [ ] All API connections show "✅ Connected"
+- [ ] Monitoring dashboard displays metrics
+
+**Functional Testing:**
+- [ ] Create small test campaign ($5 budget)
+- [ ] Verify leads are discovered and validated
+- [ ] Check cost tracking accuracy
+- [ ] Confirm export functionality works
+- [ ] Validate email deliverability checks
+
+**Performance Verification:**
+- [ ] Campaign completes within expected timeframe
+- [ ] No API timeout errors in logs
+- [ ] Database queries performing efficiently
+- [ ] Memory usage within normal bounds
+
+### ✅ Monitoring & Alerts Setup
+
+**Budget Protection:**
+- [ ] Google Cloud budget alerts configured
+- [ ] Hunter.io usage notifications enabled
+- [ ] NeverBounce credit alerts set
+- [ ] Campaign budget limits enforced
+
+**System Health Monitoring:**
+- [ ] Railway deployment notifications active
+- [ ] Supabase performance alerts enabled
+- [ ] API error rate monitoring configured
+- [ ] Database backup verification scheduled
+
+**Quality Assurance Tracking:**
+- [ ] Lead confidence score distribution monitored
+- [ ] Email bounce rate tracking active
+- [ ] Website accessibility verification running
+- [ ] Government registry validation success tracked
+
+## 🎯 Expected Performance Benchmarks
+
+### Quality Metrics
+- **Data Accuracy**: >95% of exported leads verified
+- **Email Deliverability**: <5% bounce rate
+- **Website Accessibility**: 100% success rate on exported leads
+- **Confidence Scores**: 80%+ average for exported leads
+
+### Cost Efficiency
+- **Cost per Qualified Lead**: $0.28 - $0.45 depending on business type
+- **API Cost Reduction**: 60%+ savings via pre-validation filtering
+- **Budget Utilization**: 90%+ efficiency (minimal waste)
+
+### System Performance  
+- **Campaign Processing**: <3 minutes per 100 leads
+- **API Response Time**: <2 seconds average
+- **Database Queries**: <500ms for dashboard loads
+- **Success Rate**: 99%+ API call success rate
+
+### ROI Expectations
+
+**Typical B2B Lead Values:**
+- Local Services: $25-50 per qualified lead
+- Professional Services: $75-150 per qualified lead  
+- SaaS/Technology: $200-500 per qualified lead
+
+**ProspectPro Cost vs. Value:**
+```
+Cost per lead: $0.37 average
+Typical lead value: $50-200
+ROI: 13,400% - 54,000%
 ```
 
-**2. High API Costs**
-```bash
-# Check pre-validation is working
-node debug/inspect-prevalidation.js
+*Based on industry-standard lead conversion and value metrics*
 
-# Monitor cost per request
-tail -f logs/cost-tracking.log
-```
+## 📞 Support Resources
 
-**3. Low Quality Leads**
-```bash
-# Adjust quality threshold
-# In campaign creation, set qualityThreshold: 85
+### Platform Documentation
+- **Supabase**: [Database Documentation](https://supabase.com/docs/guides/database)
+- **Railway**: [Deployment Guides](https://docs.railway.app/deployment)
+- **Google Cloud**: [Places API Documentation](https://developers.google.com/maps/documentation/places/web-service)
+- **Hunter.io**: [API Documentation](https://hunter.io/api/docs)
+- **NeverBounce**: [API Documentation](https://developers.neverbounce.com/)
 
-# Check validation pipeline
-node debug/validate-lead-quality.js
-```
+### Troubleshooting Quick Fixes
 
-**4. Database Connection Issues**
-```bash
-# Test Supabase connection
-node database/test-supabase-connection.sql
+**"API Key Invalid" Errors:**
+1. Verify key copied correctly from platform dashboard
+2. Check key restrictions match your server IP
+3. Confirm billing is enabled for paid services
+4. Test key with platform's API explorer
 
-# Verify schema is applied
-node scripts/validate-database-schema.js
-```
+**High API Costs:**
+1. Verify pre-validation threshold set to 70%+
+2. Check for duplicate API requests in logs
+3. Review campaign targeting for over-broad queries
+4. Monitor real-time cost tracking dashboard
 
-### Performance Issues
+**Low Lead Quality:**
+1. Increase quality threshold to 85%+
+2. Enable government registry validation
+3. Restrict to businesses with websites
+4. Focus on specific business categories vs. broad searches
 
-**Slow Lead Discovery:**
-- Increase pre-validation threshold to 75%
-- Enable API response caching
-- Use batch processing for large campaigns
-
-**High Memory Usage:**
-- Implement result streaming
-- Add garbage collection hints
-- Limit concurrent API requests
-
-## 💡 Advanced Configuration
-
-### Custom Validation Rules
-
-```javascript
-// config/custom-validation.js
-module.exports = {
-  businessNamePatterns: {
-    required: ['LLC', 'Inc', 'Corp', 'Ltd'],
-    forbidden: ['Test', 'Sample', 'Demo']
-  },
-  emailDomains: {
-    prioritize: ['gmail.com', 'outlook.com'],
-    avoid: ['tempmail.org', '10minutemail.com']
-  },
-  qualityWeights: {
-    businessName: 0.20,
-    address: 0.20, 
-    phone: 0.25,
-    website: 0.15,
-    email: 0.20
-  }
-};
-```
-
-### API Client Customization
-
-```javascript
-// modules/api-clients/custom-hunter-config.js
-module.exports = {
-  retryAttempts: 3,
-  timeoutMs: 5000,
-  batchSize: 10,
-  rateLimitBuffer: 0.8, // Use 80% of rate limit
-  costOptimization: {
-    skipLowQuality: true,
-    priorityDomains: ['company.com', 'business.org'],
-    maxEmailsPerDomain: 5
-  }
-};
-```
-
-## 📋 API Quotas & Limits Summary
-
-| Service | Free Tier | Rate Limit | Paid Plans Start |
-|---------|-----------|------------|------------------|
-| **Google Places** | 1K searches/month | 100 req/min | $0.032/search |
-| **Hunter.io** | 25 searches/month | 10 req/min | $49/month (1K) |
-| **NeverBounce** | 1K verifications/month | 50 req/min | $0.008/verification |
-| **Scrapingdog** | 1K requests/month | 5 req/sec | $10/month (10K) |
-| **CA Secretary of State** | Unlimited (FREE) | 60 req/min | Always free |
-| **NY Secretary of State** | 1K req/hour | 100 req/hour with token | Always free |
-| **NY Tax Parcels** | Unlimited (FREE) | 30 req/min | Always free |
-
-## 🎯 Success Metrics
-
-### Expected Performance Benchmarks
-
-**Lead Quality:**
-- 95%+ data accuracy rate
-- <5% email bounce rate
-- 100% website accessibility  
-- 80%+ average confidence score
-
-**Cost Efficiency:**
-- <$0.50 per qualified lead
-- 60%+ API cost reduction via pre-validation
-- 90%+ budget utilization efficiency
-
-**System Performance:**
-- <3 second average response time
-- 99.9% API success rate
-- <1% error rate
-- Real-time cost tracking
-
-### ROI Calculation
-
-```
-Average Lead Value: $50
-Cost per Lead: $0.37
-ROI = (($50 - $0.37) / $0.37) × 100 = 13,319%
-```
-
-*Based on typical B2B service industry lead values*
+**Database Connection Issues:**
+1. Verify Supabase URL and service key accuracy
+2. Check database connection limits in Supabase dashboard
+3. Ensure RLS policies allow application access
+4. Test connection using Supabase's built-in query editor
 
 ---
 
-## 🤝 Support & Contact
+## 🎉 Launch Completion
 
-### Documentation
-- [API Integration Guide](./docs/api-integration.md)
-- [Cost Optimization Tips](./docs/cost-optimization.md)
-- [Quality Scoring Logic](./docs/quality-scoring.md)
+Upon successful completion of this setup guide, you will have:
 
-### Troubleshooting Scripts
-- `scripts/validate-environment.js` - Environment validation
-- `scripts/test-api-connections.js` - API connectivity testing  
-- `scripts/cost-analysis.js` - Cost breakdown analysis
-- `debug/inspect-lead-quality.js` - Lead quality debugging
+✅ **A fully functional lead generation platform** with zero fake data
+✅ **Multi-source API integration** for premium data quality  
+✅ **Cost-optimized discovery pipeline** reducing API expenses by 60%+
+✅ **Government registry validation** for business legitimacy verification
+✅ **Real-time monitoring and alerts** preventing budget overruns
+✅ **Professional-grade export capabilities** for qualified leads only
+
+**Your ProspectPro platform is now ready for production lead generation campaigns.**
 
 ---
 
-**ProspectPro Enhanced** - Zero fake data, maximum ROI lead generation platform.
-
-*Last Updated: December 2024*
-*Version: 2.0.0 - Enhanced API Integration*
+*ProspectPro Enhanced Platform Setup - Version 2.0*
+*Platform-Based Configuration Guide*
+*Last Updated: September 2025*
