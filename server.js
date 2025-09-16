@@ -17,6 +17,19 @@ const { Client } = require('@googlemaps/google-maps-services-js');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const BOOT_TS = Date.now();
+let lastRequestAt = null;
+let totalRequests = 0;
+
+// Basic request logger (lightweight; avoid heavy body logs)
+app.use((req, res, next) => {
+  lastRequestAt = Date.now();
+  totalRequests++;
+  if (totalRequests <= 50 || totalRequests % 500 === 0) {
+    console.log(`➡️  ${req.method} ${req.url} q=${Object.keys(req.query).length} total=${totalRequests}`);
+  }
+  next();
+});
 
 // =====================================
 // MIDDLEWARE SETUP
@@ -293,7 +306,24 @@ app.get('/diag', async (req, res) => {
     lastDiagnostics: getLastSupabaseDiagnostics(),
     environment: buildSanitizedEnv(),
     pid: process.pid,
-    uptimeSeconds: process.uptime()
+    uptimeSeconds: process.uptime(),
+    bootTimeIso: new Date(BOOT_TS).toISOString(),
+    totalRequests,
+    lastRequestAt: lastRequestAt ? new Date(lastRequestAt).toISOString() : null,
+    memory: process.memoryUsage()
+  });
+});
+
+// Lightweight environment snapshot (sanitized)
+app.get('/env-snapshot', (req, res) => {
+  res.json({
+    ts: new Date().toISOString(),
+    env: buildSanitizedEnv(),
+    metrics: {
+      totalRequests,
+      lastRequestAt,
+      uptimeSeconds: process.uptime()
+    }
   });
 });
 
@@ -385,6 +415,9 @@ app.listen(PORT, '0.0.0.0', () => {
   console.log(`📊 Health: http://localhost:${PORT}/health`);
   console.log(`🛠️ Diagnostics: http://localhost:${PORT}/diag`);
   console.log('⏳ Running initial Supabase diagnostics...');
+  if (process.env.NODE_ENV === 'production' && !process.env.PORT) {
+    console.warn('⚠️  PORT not explicitly set by platform variable. Assuming Railway injected it. If mismatch persists, verify Railway exposes PORT env.');
+  }
   // Heartbeat every 120s for liveness visibility
   setInterval(() => {
     const diag = getLastSupabaseDiagnostics();
