@@ -406,16 +406,17 @@ app.get('/diag', async (req, res) => {
     ranTest = true;
   }
   const diag = getLastSupabaseDiagnostics ? getLastSupabaseDiagnostics() : null;
-  res.json({
+  const response = {
     service: 'ProspectPro',
     timestamp: new Date().toISOString(),
-    supabase: diag || { note: 'No diagnostics yet. Hit /api/status or /diag?force=true to run.' },
     forced: ranTest,
     environment: buildSanitizedEnv(),
     pid: process.pid,
     memory: process.memoryUsage(),
     uptimeSeconds: process.uptime()
-  });
+  };
+  if (diag) response.supabase = diag; else response.supabase = { note: 'No diagnostics yet. Hit /api/status or /diag?force=true to run.' };
+  res.json(response);
 });
 
 // =====================================
@@ -502,7 +503,18 @@ async function startServer() {
     
     if (!dbConnected) {
       console.error('❌ Supabase connection failed.');
-      if (process.env.NODE_ENV === 'development' || process.env.SKIP_AUTH_IN_DEV === 'true') {
+      const degradedAllowed = process.env.ALLOW_DEGRADED_START === 'true';
+      if (degradedAllowed) {
+        console.warn('🟠 Starting in DEGRADED MODE (no database) because ALLOW_DEGRADED_START=true');
+        // Schedule periodic re-check every 60s
+        setInterval(async () => {
+          console.log('🔁 Re-attempting Supabase diagnostics (degraded mode)...');
+          const ok = await centralTestConnection();
+          if (ok) {
+            console.log('🟢 Supabase connectivity restored. Consider removing ALLOW_DEGRADED_START for strict mode.');
+          }
+        }, 60000).unref();
+      } else if (process.env.NODE_ENV === 'development' || process.env.SKIP_AUTH_IN_DEV === 'true') {
         console.log('⚠️  Continuing in development mode without Supabase...');
       } else {
         console.log('📋 Make sure you have set the following environment variables:');
@@ -512,6 +524,7 @@ async function startServer() {
         console.log('   - HUNTER_IO_API_KEY (required for email discovery)');
         console.log('   - NEVERBOUNCE_API_KEY (required for email validation)');
         console.log('💡 Generate new API keys at: Settings → API → "Generate new API keys"');
+        console.log('💤 Set ALLOW_DEGRADED_START=true to keep container alive for diagnostics.');
         process.exit(1);
       }
     }
@@ -553,6 +566,10 @@ async function startServer() {
       console.log(`✅ ProspectPro server running on port ${PORT}`);
       console.log(`🌐 Environment: ${process.env.NODE_ENV || 'development'}`);
       console.log(`📊 Health check: http://localhost:${PORT}/health`);
+      console.log(`🛠️  Diagnostics: http://localhost:${PORT}/diag`);
+      if (process.env.ALLOW_DEGRADED_START === 'true') {
+        console.log('🟠 Running WITHOUT Supabase (DEGRADED MODE)');
+      }
       console.log(`🎯 Frontend: http://localhost:${PORT}`);
       console.log('========================================');
       console.log('🎉 ProspectPro is ready for real business data!');

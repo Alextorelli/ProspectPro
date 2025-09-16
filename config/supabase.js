@@ -140,10 +140,51 @@ const testConnection = async (options = {}) => {
     return true;
   } catch (error) {
     diagnostics.error = error.message || String(error);
+    diagnostics.errorDetail = {
+      name: error.name,
+      stack: error.stack,
+      ...(error.status && { status: error.status }),
+      ...(error.code && { code: error.code }),
+      ...(error.details && { details: error.details }),
+      ...(error.hint && { hint: error.hint })
+    };
+    // Additional network probes
+    try {
+      const urlObj = new URL(supabaseUrl);
+      diagnostics.network.host = urlObj.hostname;
+      // Lazy DNS via fetch to root (HEAD)
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 3000);
+      try {
+        const rootRes = await fetch(supabaseUrl, { method: 'HEAD', signal: controller.signal });
+        diagnostics.network.rootStatus = rootRes.status;
+      } catch (e) {
+        diagnostics.network.rootError = e.message;
+      } finally { clearTimeout(timeout); }
+      // REST endpoint probe
+      const restUrl = supabaseUrl.replace(/\/$/, '') + '/rest/v1';
+      try {
+        const restController = new AbortController();
+        const restTimeout = setTimeout(() => restController.abort(), 3000);
+        const restRes = await fetch(restUrl, { method: 'GET', signal: restController.signal });
+        clearTimeout(restTimeout);
+        diagnostics.network.restStatus = restRes.status;
+      } catch (e) {
+        diagnostics.network.restError = e.message;
+      }
+    } catch (probeErr) {
+      diagnostics.network.probeError = probeErr.message;
+    }
     diagnostics.durationMs = Date.now() - start;
     diagnostics.success = false;
     lastSupabaseDiagnostics = diagnostics;
     console.error('❌ Supabase connection failed:', diagnostics.error, `(${diagnostics.durationMs}ms)`);
+    if (diagnostics.errorDetail) {
+      console.error('   ↳ Error detail:', JSON.stringify(diagnostics.errorDetail));
+    }
+    if (diagnostics.network) {
+      console.error('   ↳ Network probe:', JSON.stringify(diagnostics.network));
+    }
     return false;
   }
 };
