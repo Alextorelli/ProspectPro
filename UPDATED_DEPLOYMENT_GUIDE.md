@@ -510,6 +510,13 @@ SUPABASE_URL=https://your-project-id.supabase.co
 SUPABASE_SERVICE_ROLE_KEY=eyJ...your-service-role-key
 # NOTE: Use PUBLISHABLE key for client-side access, SERVICE_ROLE for server-side
 SUPABASE_ANON_KEY=eyJ...your-anon-public-key
+
+# ⚡ CONNECTION POOLING OPTIMIZATION (RECOMMENDED)
+# Use Transaction Pooler for optimal Railway performance
+SUPABASE_DATABASE_URL_TRANSACTION=postgresql://postgres:[your_password]@db.sriycekxdqnesdsgwiuc.supabase.co:6543/postgres
+SUPABASE_DATABASE_URL_SESSION=postgresql://postgres:[your_password]@db.sriycekxdqnesdsgwiuc.supabase.co:5432/postgres
+SUPABASE_POOL_MODE=transaction
+
 GOOGLE_PLACES_API_KEY=AIza...your-google-key
 HUNTER_IO_API_KEY=your-hunter-api-key
 NEVERBOUNCE_API_KEY=NB_your-neverbounce-key
@@ -519,6 +526,17 @@ PORT=3000
 ADMIN_PASSWORD=your-secure-admin-password
 NODE_ENV=production
 ```
+
+   **⚡ Connection Pooling Configuration:**
+   - **Transaction Pooler** (Port 6543): Optimal for Railway stateless deployment
+   - **Session Pooler** (Port 5432): IPv4 compatible fallback option
+   - **Direct Connection**: Only for development/debugging
+   
+   **How to get your database password:**
+   1. Go to Supabase Dashboard → Settings → Database
+   2. Scroll to "Connection string" section
+   3. Select "Postgres" tab
+   4. Copy the password from the connection string
 
 3. **Configure Custom Domain (Optional)**
    - Go to "Settings" → "Domains"

@@ -115,6 +115,23 @@ In your Railway project dashboard:
 
 > **Important**: Use the new **Secret key** (`sb_secret_...`) format, not the legacy service role key. The new format offers better security and rotation capabilities.
 
+### 🚀 **Connection Pooling Optimization (Recommended)**
+
+For optimal performance on Railway, add these additional variables:
+
+| Variable Name | Value | Purpose |
+|---------------|-------|---------|
+| `SUPABASE_POOL_MODE` | `transaction` | Optimal for Railway stateless deployment |
+| `SUPABASE_DATABASE_URL_TRANSACTION` | `postgresql://postgres:[password]@db.[your-ref].supabase.co:6543/postgres` | Transaction pooler (port 6543) |
+| `SUPABASE_DATABASE_URL_SESSION` | `postgresql://postgres:[password]@db.[your-ref].supabase.co:5432/postgres` | Session pooler fallback (port 5432) |
+
+**How to get your database password:**
+1. Go to Supabase Dashboard → Settings → Database
+2. Scroll to "Connection string" section  
+3. Select "Postgres" tab
+4. Copy the password from the connection string
+5. Replace `[password]` and `[your-ref]` in the URLs above
+
 **Optional variables** (add if you have the API keys):
 - `HUNTER_IO_API_KEY`
 - `NEVERBOUNCE_API_KEY`

@@ -1,5 +1,5 @@
 # ProspectPro Railway Configuration
-# Production-ready deployment with security, monitoring, and cost optimization
+# Production-ready deployment with Supabase Transaction Pooling optimization
 
 [build]
 builder = "NIXPACKS"
@@ -8,6 +8,7 @@ watchPaths = ["server.js", "modules/**", "api/**", "public/**", "package.json"]
 
 [deploy]
 # Health check configuration for zero-downtime deployments
+# Increased timeout to allow for connection pool warmup
 healthcheckPath = "/health"
 healthcheckTimeout = 90
 restartPolicyType = "ON_FAILURE"
@@ -25,11 +26,17 @@ staticUrl = true         # Enable static URL for consistent monitoring
 [environment]
 NODE_ENV = "production"
 PORT = "8080"
+# Optimize for Transaction Pooler (best for Railway stateless deployment)
+SUPABASE_POOL_MODE = "transaction"
 
 # Railway automatically injects these from your project settings:
 # SUPABASE_URL = "${{SUPABASE_URL}}"
 # SUPABASE_SERVICE_ROLE_KEY = "${{SUPABASE_SERVICE_ROLE_KEY}}"  
 # GOOGLE_PLACES_API_KEY = "${{GOOGLE_PLACES_API_KEY}}"
+#
+# For optimal performance, also set in Railway dashboard:
+# SUPABASE_DATABASE_URL_TRANSACTION = "postgresql://postgres:[password]@db.sriycekxdqnesdsgwiuc.supabase.co:6543/postgres"
+# SUPABASE_DATABASE_URL_SESSION = "postgresql://postgres:[password]@db.sriycekxdqnesdsgwiuc.supabase.co:5432/postgres" (fallback)
 
 # Resource monitoring and alerting
 [observability]
