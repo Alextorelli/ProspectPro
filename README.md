@@ -71,7 +71,7 @@ Optional: `SUPABASE_DB_POOLER_URL` only for external raw Postgres tools — NOT 
 
 **Estimated cost per qualified lead: $0.08 - $0.15**
 
-## 🌐 Web Access & Diagnostics
+## 🌐 Web Access & Monitoring
 
 ### Main Application
 - **Lead generation interface** with industry/location filters
@@ -82,12 +82,39 @@ Optional: `SUPABASE_DB_POOLER_URL` only for external raw Postgres tools — NOT 
 ### Admin Dashboard
 Provides cost tracking, budget alerts, quality metrics, and usage analytics.
 
-### Operational Diagnostics
+### 📊 Enhanced Monitoring & Diagnostics
+
 | Endpoint | Purpose |
 |----------|---------|
 | `/health` | Fast JSON status: ok / degraded / error + summary |
 | `/diag` | Full Supabase diagnostics snapshot |
-| `/diag?force=true` | Re-run diagnostics immediately |
+| `/metrics` | **NEW** Prometheus metrics for monitoring |
+| `/boot-report` | **NEW** Detailed startup phase diagnostics |
+| `/loop-metrics` | **NEW** Event loop performance metrics |
+
+#### 🔍 Boot Phase Debugging
+The application now includes comprehensive startup instrumentation:
+- **Phase tracking** - Monitor each startup phase with timing
+- **Error context** - Detailed error reporting with stack traces  
+- **Performance metrics** - Startup efficiency and overhead analysis
+- **Health reporting** - Real-time boot status with 75%+ success rate
+
+#### 📈 Prometheus Metrics
+Comprehensive business and infrastructure monitoring with 20+ custom metrics:
+- **HTTP requests** - Response times, status codes, endpoint usage
+- **Supabase operations** - Connection health, query performance, error rates
+- **API costs** - Real-time cost tracking across all services
+- **Business discovery** - Lead generation rates, qualification success
+- **Campaign metrics** - User activity, export volumes, search patterns
+- **Security events** - Rate limiting triggers, authentication attempts
+
+#### 🛡️ Security Hardening
+Enhanced security middleware protecting all endpoints:
+- **Helmet security headers** - CSRF, XSS, and clickjacking protection
+- **CORS policies** - Controlled cross-origin access
+- **Rate limiting** - 100 requests/15min general, 10/hour for expensive operations
+- **Admin authentication** - Token-based access control
+- **Input validation** - Request sanitization and validation
 
 Degraded mode allows the server to stay online for investigation when the DB is unreachable. Enable by setting `ALLOW_DEGRADED_START=true` before deploy; disable once stable.
 
@@ -100,18 +127,31 @@ Track your lead generation performance:
 - **Cost per lead** optimization tracking
 - **Budget usage** with automatic alerts
 
-## 🔐 Security & Compliance
+## 🔐 Enhanced Security & Compliance
 
 - ✅ **No hardcoded secrets** - All credentials via environment variables
 - ✅ **Modern Supabase API keys** - Uses new secure `sb_secret_` format
-- ✅ **Row Level Security** - Supabase RLS policies implemented
+- ✅ **Row Level Security** - Comprehensive RLS policies for zero-trust isolation
 - ✅ **Token authentication** - Secure admin dashboard access
 - ✅ **HTTPS only** - All traffic encrypted
 - ✅ **Railway compliance** - Modern security best practices
+- ✅ **Security middleware** - Helmet headers, CORS, rate limiting
+- ✅ **Input validation** - Request sanitization and XSS protection
+- ✅ **Authentication hardening** - Admin token validation with rate limits
+
+### 🛡️ Row Level Security (RLS)
+Complete zero-trust user isolation with:
+- **User-scoped policies** - All data isolated by authenticated user ID
+- **Campaign ownership** - Users can only access their own campaigns
+- **Lead privacy** - Business data restricted to campaign owners
+- **Admin separation** - Administrative functions require special privileges
+- **Performance optimization** - Indexed RLS policies for query efficiency
 
 ## 📚 Documentation
 
 - **[Deployment Guide](DEPLOYMENT_GUIDE.md)** - Complete setup instructions
+- **[Security Guide](SECURITY.md)** - Comprehensive security features and RLS implementation
+- **[Monitoring Guide](MONITORING.md)** - Prometheus metrics and observability
 - **Admin Dashboard** - Access at `/admin-dashboard.html?token=YOUR_TOKEN`
 - **API Documentation** - Built-in at `/api/docs`
 

@@ -194,12 +194,26 @@ async function testConnection(options = {}) {
   return diag;
 }
 
-function getLastSupabaseDiagnostics() { return lastSupabaseDiagnostics; }
+function getLastSupabaseDiagnostics() { 
+  return lastSupabaseDiagnostics; 
+}
+
+function setLastSupabaseDiagnostics(diagnostics) {
+  lastSupabaseDiagnostics = diagnostics;
+  return diagnostics;
+}
+
+// Helper function to resolve Supabase key with precedence
+function resolveSupabaseKey() {
+  return selectSupabaseKey();
+}
 
 module.exports = {
   testConnection,
   getLastSupabaseDiagnostics,
+  setLastSupabaseDiagnostics,
   getSupabaseClient,
+  resolveSupabaseKey,
   supabaseUrl,
   supabaseDbPoolerUrl
 };

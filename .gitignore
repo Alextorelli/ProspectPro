@@ -24,6 +24,8 @@ railway-config-production.json
 # Logs
 *.log
 logs/
+boot-*.log
+diagnostic-*.json
 
 # Runtime data
 pids/
@@ -54,6 +56,7 @@ Thumbs.db
 # Temporary files
 *.tmp
 *.temp
+debug-*.js
 
 # Backup files
 *.backup
@@ -73,6 +76,10 @@ Thumbs.db
 # Cache directories
 .cache/
 .parcel-cache/
+
+# Monitoring and metrics
+prometheus-data/
+grafana-data/
 
 # Other
 .git/

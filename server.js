@@ -5,22 +5,60 @@ try {
   console.warn('⚠️  dotenv not loaded (likely fine in production):', e.message);
 }
 
+// Initialize Boot Phase Debugger first
+const { BootPhaseDebugger } = require('./modules/boot-debugger');
+const bootDebugger = new BootPhaseDebugger();
+
+bootDebugger.startPhase('dependencies-load', 'Loading core dependencies and modules');
+
 const express = require('express');
 const path = require('path');
+
 // Import enhanced Supabase diagnostics & lazy client
 const {
   testConnection,
   getLastSupabaseDiagnostics,
-  getSupabaseClient
+  getSupabaseClient,
+  setLastSupabaseDiagnostics
 } = require('./config/supabase');
+
+// Import new monitoring and security systems
+const { ProspectProMetrics } = require('./modules/prometheus-metrics');
+const { SecurityHardening } = require('./modules/security-hardening');
+
 const { Client } = require('@googlemaps/google-maps-services-js');
+
+bootDebugger.endPhase(true);
+
+// =====================================
+// CORE SYSTEM INITIALIZATION
+// =====================================
+
+bootDebugger.startPhase('core-init', 'Initializing Express app and core systems');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Initialize monitoring and security systems
+const metrics = new ProspectProMetrics();
+const security = new SecurityHardening();
+
+bootDebugger.endPhase(true);
+
 // =====================================
 // MIDDLEWARE SETUP
 // =====================================
+
+bootDebugger.startPhase('middleware-setup', 'Configuring security and application middleware');
+
+// Get security middleware
+const securityMiddleware = security.getMiddleware();
+
+// Apply security middleware first
+securityMiddleware.general.forEach(middleware => app.use(middleware));
+
+// Add metrics middleware
+app.use(metrics.getHttpMetricsMiddleware());
 
 // Body parsing middleware
 app.use(express.json({ limit: '10mb' }));
@@ -29,21 +67,32 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 // Static files
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Security logging
+app.use(security.getSecurityLogger());
+
 // Flag & diagnostics storage
 let degradedMode = false;
 let startupDiagnostics = null;
+
+bootDebugger.endPhase(true);
 
 // =====================================
 // GOOGLE PLACES API SETUP
 // =====================================
 
-const googlePlacesClient = new Client({})
+bootDebugger.startPhase('google-places-init', 'Initializing Google Places API client');
+
+const googlePlacesClient = new Client({});
+
+bootDebugger.endPhase(true);
 
 // =====================================
 // AUTHENTICATION MIDDLEWARE
 // =====================================
 
-// Simple auth middleware for API routes
+bootDebugger.startPhase('auth-setup', 'Setting up authentication middleware');
+
+// Enhanced auth middleware for API routes
 const authMiddleware = (req, res, next) => {
   // Skip auth in development if configured
   if (process.env.NODE_ENV !== 'production' && process.env.SKIP_AUTH_IN_DEV === 'true') {
@@ -57,6 +106,9 @@ const authMiddleware = (req, res, next) => {
     const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
 
     if (!token || token !== process.env.PERSONAL_ACCESS_TOKEN) {
+      // Record failed authentication
+      metrics.recordError('auth_failure', 'api_auth', 'warning');
+      
       return res.status(401).json({ 
         error: 'Unauthorized access',
         message: 'Valid access token required'
@@ -73,78 +125,142 @@ const authMiddleware = (req, res, next) => {
   next();
 };
 
-// Apply auth middleware to API routes
-app.use('/api', authMiddleware);
+// Apply auth middleware with rate limiting to API routes
+app.use('/api', securityMiddleware.apiLimiter, authMiddleware);
+
+bootDebugger.endPhase(true);
 
 // =====================================
-// HEALTH CHECK & STATUS
+// ENHANCED HEALTH CHECK & STATUS ENDPOINTS
 // =====================================
 
-// Health check endpoint for Railway monitoring
+bootDebugger.startPhase('health-endpoints', 'Setting up health check and monitoring endpoints');
+
+// Prometheus metrics endpoint
+app.get('/metrics', async (req, res) => {
+  try {
+    res.set('Content-Type', 'text/plain; version=0.0.4; charset=utf-8');
+    const metricsData = await metrics.getMetrics();
+    res.send(metricsData);
+  } catch (error) {
+    console.error('Metrics endpoint error:', error);
+    metrics.recordError('metrics_endpoint', 'monitoring', 'error');
+    res.status(500).send('# Error generating metrics\n');
+  }
+});
+
+// Boot phase report endpoint
+app.get('/boot-report', (req, res) => {
+  const report = bootDebugger.getPhaseReport();
+  res.json({
+    ...report,
+    securityStatus: security.getSecurityStatus(),
+    metricsStatus: metrics.getMetricsSummary()
+  });
+});
+
+// Health check endpoint for Railway monitoring (enhanced)
 app.get('/health', (req, res) => {
   const diag = startupDiagnostics || getLastSupabaseDiagnostics();
-  if (!diag) return res.status(200).json({ status: 'starting', degradedMode });
+  const bootHealth = bootDebugger.getHealthStatus();
+  
+  if (!diag) return res.status(200).json({ 
+    status: 'starting', 
+    degradedMode,
+    bootStatus: bootHealth
+  });
+  
   const payload = {
     status: diag.success ? 'ok' : (degradedMode ? 'degraded' : 'error'),
     degradedMode,
     timestamp: new Date().toISOString(),
     environment: process.env.NODE_ENV,
-    version: '1.0.0',
+    version: '2.0.0',
+    bootHealth,
     supabase: {
       success: diag.success,
       error: diag.success ? null : diag.error,
       authStatus: diag.authProbe?.status,
       recommendations: diag.recommendations,
       durationMs: diag.durationMs
-    }
+    },
+    security: security.getSecurityStatus()
   };
   res.status(200).json(payload);
 });
 
 // Lightweight liveness probe (no DB work)
 app.get('/live', (req, res) => {
-  res.json({ status: 'alive', ts: Date.now(), pid: process.pid });
+  const bootHealth = bootDebugger.getHealthStatus();
+  res.json({ 
+    status: 'alive', 
+    ts: Date.now(), 
+    pid: process.pid,
+    uptime: process.uptime(),
+    bootId: bootHealth.bootId
+  });
 });
 
 // Readiness probe requires a successful privileged (secret/service) connection
 app.get('/ready', async (req, res) => {
+  const start = Date.now();
+  
   if (req.query.force === 'true' || !getLastSupabaseDiagnostics()) {
-    await testConnection();
+    const testDiag = await testConnection();
+    metrics.recordSupabaseConnection(
+      testDiag.durationMs, 
+      testDiag.success, 
+      testDiag.authMode, 
+      testDiag.failureCategory
+    );
   }
+  
   const diag = getLastSupabaseDiagnostics();
   if (diag && diag.success && /privileged/.test(diag.authMode || '')) {
-    return res.json({ status: 'ready', mode: diag.authMode, durationMs: diag.durationMs });
+    return res.json({ 
+      status: 'ready', 
+      mode: diag.authMode, 
+      durationMs: diag.durationMs,
+      checkDuration: Date.now() - start
+    });
   }
+  
+  // Record failed readiness check
+  metrics.recordError('readiness_check', 'health_endpoint', 'warning');
+  
   res.status(503).json({
     status: 'not-ready',
     degradedMode,
     reason: diag?.failureCategory || diag?.error || 'no-diagnostics',
     authMode: diag?.authMode,
-    recommendations: diag?.recommendations || []
+    recommendations: diag?.recommendations || [],
+    checkDuration: Date.now() - start
   });
 });
 
-// Environment + runtime snapshot (no secrets leaked beyond redaction)
+// Environment + runtime snapshot (enhanced with boot info)
 app.get('/env-snapshot', (req, res) => {
+  const bootReport = bootDebugger.getPhaseReport();
   res.json({
     portConfigured: PORT,
     nodeVersion: process.version,
     platform: process.platform,
     memory: process.memoryUsage(),
     uptimeSeconds: process.uptime(),
+    bootInfo: {
+      bootId: bootReport.bootId,
+      totalBootTime: bootReport.totalBootTime,
+      successRate: bootReport.successRate,
+      failedPhases: bootReport.failedPhases
+    },
     envKeys: Object.keys(process.env).filter(k => /SUPABASE|GOOGLE|HUNTER|NEVERBOUNCE|SCRAPINGDOG|PORT|NODE_ENV/.test(k)),
-    diagnostics: getLastSupabaseDiagnostics()
+    diagnostics: getLastSupabaseDiagnostics(),
+    securityStatus: security.getSecurityStatus()
   });
 });
 
-// Admin dashboard route with authentication and secure password injection
-app.get('/admin-dashboard.html', (req, res) => {
-  // Simple token-based authentication
-  const token = req.query.token || req.headers.authorization?.replace('Bearer ', '');
-  
-  if (!token || token !== process.env.PERSONAL_ACCESS_TOKEN) {
-    return res.status(401).json({ error: 'Unauthorized: Invalid admin token' });
-  }
+// Admin dashboard route with enhanced authentication
+app.get('/admin-dashboard.html', securityMiddleware.adminLimiter, security.getAdminAuthMiddleware(), (req, res) => {
   
   // Read the admin dashboard HTML and inject secure configuration
   const fs = require('fs');
@@ -389,33 +505,51 @@ app.use((error, req, res, next) => {
 });
 
 // =====================================
-// SERVER STARTUP
+// ENHANCED SERVER STARTUP
 // =====================================
 
+bootDebugger.startPhase('server-bind', 'Binding server to network port');
+
 // Early bind server then run diagnostics async
-app.listen(PORT, '0.0.0.0', () => {
+const server = app.listen(PORT, '0.0.0.0', () => {
+  bootDebugger.endPhase(true);
+  
   console.log(`🚀 ProspectPro server listening on port ${PORT} (host: 0.0.0.0)`);
   console.log(`📊 Health: http://localhost:${PORT}/health`);
-  console.log(`🛠️ Diagnostics: http://localhost:${PORT}/diag`);
+  console.log(`� Metrics: http://localhost:${PORT}/metrics`);
+  console.log(`🔧 Boot Report: http://localhost:${PORT}/boot-report`);
+  console.log(`�🛠️ Diagnostics: http://localhost:${PORT}/diag`);
   console.log('⏳ Running initial Supabase diagnostics...');
-  // Heartbeat every 120s for liveness visibility
+
+  bootDebugger.endPhase(true);
+
+  // Enhanced heartbeat every 120s for liveness visibility
   setInterval(() => {
     const diag = getLastSupabaseDiagnostics();
-    console.log(`❤️  Heartbeat | uptime=${process.uptime().toFixed(0)}s | degraded=${degradedMode} | supabase=${diag ? (diag.success ? 'ok' : 'err') : 'pending'}`);
+    const bootHealth = bootDebugger.getHealthStatus();
+    console.log(`❤️  Heartbeat | uptime=${process.uptime().toFixed(0)}s | degraded=${degradedMode} | supabase=${diag ? (diag.success ? 'ok' : 'err') : 'pending'} | boot=${bootHealth.status}`);
+    
+    // Update uptime metric
+    metrics.uptime.set(process.uptime());
   }, 120000).unref();
 
-  // Global error safety nets
+  // Enhanced global error safety nets with metrics
   process.on('unhandledRejection', (reason, p) => {
     console.error('🧨 Unhandled Promise Rejection:', reason);
+    metrics.recordError('unhandled_rejection', 'process', 'critical', reason);
   });
+  
   process.on('uncaughtException', (err) => {
     console.error('🔥 Uncaught Exception:', err.stack || err.message);
+    metrics.recordError('uncaught_exception', 'process', 'critical', err);
   });
+  
   process.on('exit', (code) => {
-    console.error('⚰️  Process exiting with code', code, 'uptimeSeconds=', process.uptime());
+    const finalReport = bootDebugger.logFinalReport();
+    console.error(`⚰️  Process exiting with code ${code}, uptime: ${process.uptime().toFixed(0)}s`);
   });
 
-  // Event loop delay monitor (coarse) for diagnosing stalls
+  // Enhanced event loop delay monitor with metrics
   const loopIntervals = [];
   let lastTick = Date.now();
   setInterval(() => {
@@ -424,32 +558,108 @@ app.listen(PORT, '0.0.0.0', () => {
     lastTick = now;
     loopIntervals.push(delay);
     if (loopIntervals.length > 60) loopIntervals.shift();
+    
+    // Record concerning delays
+    if (delay > 500) {
+      console.warn(`🐌 Event loop delay: ${delay}ms`);
+      metrics.recordError('event_loop_delay', 'nodejs', 'warning');
+    }
   }, 1000).unref();
 
   app.get('/loop-metrics', (req, res) => {
     const recent = [...loopIntervals];
     const max = Math.max(0, ...recent);
     const avg = recent.length ? recent.reduce((a,b)=>a+b,0)/recent.length : 0;
-    res.json({ sampleCount: recent.length, maxDelayMs: max, avgDelayMs: avg.toFixed(2) });
+    res.json({ 
+      sampleCount: recent.length, 
+      maxDelayMs: max, 
+      avgDelayMs: avg.toFixed(2),
+      concerningDelays: recent.filter(d => d > 500).length
+    });
   });
-  (async () => {
-    startupDiagnostics = await testConnection();
-    if (!startupDiagnostics.success) {
-      degradedMode = true;
-      console.error('🔴 Initial Supabase check failed. Continuing in degraded mode (will NOT exit).');
-      console.warn('🟠 Periodic retry every 60s enabled.');
-      setInterval(async () => {
-        const d = await testConnection();
-        if (d.success && degradedMode) {
-          degradedMode = false;
-          console.log('🟢 Supabase connectivity restored.');
-        }
-      }, 60000).unref();
-    } else {
-      console.log('✅ Supabase connectivity established.');
-    }
-  })();
+
+  // Start async boot phases
+  performAsyncBootPhases();
 });
+
+// Enhanced async boot phases with comprehensive monitoring
+async function performAsyncBootPhases() {
+  bootDebugger.startPhase('supabase-test', 'Testing Supabase connectivity and authentication');
+  const start = Date.now();
+  
+  try {
+    startupDiagnostics = await testConnection();
+    const duration = Date.now() - start;
+    
+    // Record comprehensive metrics
+    metrics.recordSupabaseConnection(
+      duration, 
+      startupDiagnostics.success, 
+      startupDiagnostics.authMode, 
+      startupDiagnostics.failureCategory
+    );
+    
+    if (!startupDiagnostics.success) {
+      degradedMode = process.env.ALLOW_DEGRADED_START === 'true';
+      
+      if (!degradedMode) {
+        bootDebugger.endPhase(false, new Error(startupDiagnostics.error));
+        console.error('🔴 Critical: Supabase connection failed and degraded mode disabled');
+        metrics.recordError('startup_failure', 'supabase', 'critical');
+        process.exit(1);
+      } else {
+        bootDebugger.endPhase(false, new Error(`Degraded mode: ${startupDiagnostics.error}`));
+        console.error('🟠 Warning: Supabase connection failed. Continuing in degraded mode.');
+        console.warn('🟠 Periodic retry every 60s enabled.');
+        
+        // Setup retry logic with metrics
+        setInterval(async () => {
+          const retryStart = Date.now();
+          const d = await testConnection();
+          const retryDuration = Date.now() - retryStart;
+          
+          metrics.recordSupabaseConnection(retryDuration, d.success, d.authMode, d.failureCategory);
+          
+          if (d.success && degradedMode) {
+            degradedMode = false;
+            console.log('🟢 Supabase connectivity restored from degraded mode.');
+            bootDebugger.addMilestone('supabase-recovery', { previouslyDegraded: true });
+          }
+        }, 60000).unref();
+      }
+    } else {
+      degradedMode = false;
+      bootDebugger.endPhase(true);
+      console.log('✅ Supabase connectivity established.');
+      bootDebugger.addMilestone('supabase-ready', { authMode: startupDiagnostics.authMode });
+    }
+    
+  } catch (error) {
+    const duration = Date.now() - start;
+    metrics.recordSupabaseConnection(duration, false, 'unknown', 'exception');
+    metrics.recordError('supabase_connection', 'startup', 'critical', error);
+    bootDebugger.endPhase(false, error);
+    
+    if (process.env.ALLOW_DEGRADED_START !== 'true') {
+      console.error('🔥 Fatal: Supabase connection threw exception and degraded mode disabled');
+      process.exit(1);
+    }
+  }
+
+  // Record final boot metrics
+  const finalReport = bootDebugger.logFinalReport();
+  metrics.recordBootComplete(finalReport.totalBootTime);
+  
+  // Record individual boot phase metrics
+  finalReport.phases.forEach(phase => {
+    metrics.recordBootPhase(phase.name, phase.success ? 'success' : 'failed', phase.duration);
+  });
+  
+  bootDebugger.addMilestone('startup-complete', { 
+    totalPhases: finalReport.phaseCount,
+    successRate: finalReport.successRate
+  });
+}
 
 // Graceful shutdown
 process.on('SIGTERM', () => {
