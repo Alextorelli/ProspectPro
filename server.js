@@ -348,6 +348,19 @@ app.listen(PORT, () => {
   console.log(`📊 Health: http://localhost:${PORT}/health`);
   console.log(`🛠️ Diagnostics: http://localhost:${PORT}/diag`);
   console.log('⏳ Running initial Supabase diagnostics...');
+  // Heartbeat every 120s for liveness visibility
+  setInterval(() => {
+    const diag = getLastSupabaseDiagnostics();
+    console.log(`❤️  Heartbeat | uptime=${process.uptime().toFixed(0)}s | degraded=${degradedMode} | supabase=${diag ? (diag.success ? 'ok' : 'err') : 'pending'}`);
+  }, 120000).unref();
+
+  // Global error safety nets
+  process.on('unhandledRejection', (reason, p) => {
+    console.error('🧨 Unhandled Promise Rejection:', reason);
+  });
+  process.on('uncaughtException', (err) => {
+    console.error('🔥 Uncaught Exception:', err.stack || err.message);
+  });
   (async () => {
     startupDiagnostics = await testConnection();
     if (!startupDiagnostics.success) {
@@ -363,8 +376,8 @@ app.listen(PORT, () => {
           }
         }, 60000).unref();
       } else {
-        console.error('❌ Exiting (no degraded allowance)');
-        process.exit(1);
+        console.error('❌ Exiting (no degraded allowance) in 5s after logging window...');
+        setTimeout(() => process.exit(1), 5000).unref();
       }
     } else {
       console.log('✅ Supabase connectivity established.');

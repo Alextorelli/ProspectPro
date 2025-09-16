@@ -115,6 +115,15 @@ In your Railway project dashboard:
 
 > **Important**: Use the new **Secret key** (`sb_secret_...`) format, not the legacy service role key. The new format offers better security and rotation capabilities.
 
+### Supabase Key Selection Order
+The server automatically selects the first available key in this order:
+1. `SUPABASE_SECRET_KEY`
+2. `SUPABASE_SERVICE_ROLE_KEY`
+3. `SUPABASE_ANON_KEY`
+4. `SUPABASE_PUBLISHABLE_KEY`
+
+Provide the most privileged safe server-side key available (prefer `sb_secret_...`).
+
 **Optional variables** (add if you have the API keys):
 - `HUNTER_IO_API_KEY`
 - `NEVERBOUNCE_API_KEY`
@@ -229,6 +238,31 @@ All maintenance can be done through web interfaces:
    - ❌ **Wrong**: `sb_publishable_...` (this is for client-side only)
 3. **Check database schema**: Ensure enhanced-supabase-schema.sql was imported
 4. **Test connection**: Use Supabase SQL Editor to run `SELECT 1;`
+
+### Runtime Diagnostics & Degraded Mode
+ProspectPro now exposes operational diagnostics endpoints:
+
+| Endpoint | Purpose |
+|----------|---------|
+| `/health` | Lightweight status (ok / degraded / error) |
+| `/diag` | Full diagnostics summary (key detection, network probes, auth probe, table probe) |
+| `/diag?force=true` | Force immediate re-run of diagnostics |
+
+If initial Supabase connectivity fails the process normally exits. Set `ALLOW_DEGRADED_START=true` to keep the container alive for investigation. Once `/health` reports `ok`, remove this variable for stricter future deploys.
+
+Typical degraded `/health` response excerpt:
+```
+{
+   "status": "degraded",
+   "supabase": {
+      "success": false,
+      "error": "SUPABASE_URL missing",
+      "recommendations": ["Set SUPABASE_URL=https://<ref>.supabase.co"]
+   }
+}
+```
+
+Use `/diag?force=true` after updating environment variables to confirm recovery without waiting for a restart.
 
 ### API Key Migration
 If you're using **legacy keys** and want to migrate:

@@ -29,11 +29,12 @@ ProspectPro is a premium lead generation platform that discovers and validates r
 
 ## 🚀 Quick Start
 
-1. **Deploy to Railway** - See [Railway + Supabase Setup Guide](RAILWAY_SUPABASE_SETUP.md)
-2. **Configure Supabase** - Use Transaction Pooler for optimal performance  
-3. **Add API Keys** - Follow [Deployment Guide](DEPLOYMENT_GUIDE.md)
-4. **Access your app** at `https://your-app.railway.app`
-5. **Monitor & generate leads** via admin dashboard
+1. **Deploy to Railway** – Refer to the consolidated [Deployment Guide](DEPLOYMENT_GUIDE.md)
+2. **Configure Supabase** – Set `SUPABASE_URL` (HTTPS) + `SUPABASE_SERVICE_ROLE_KEY` (or `SUPABASE_SECRET_KEY` new format)
+3. **Add API Keys** – Google Places required; others optional but recommended
+4. **(Optional) Enable degraded mode** by setting `ALLOW_DEGRADED_START=true` to keep container alive while fixing DB config
+5. **Access your app** at `https://your-app.railway.app`
+6. **Diagnostics**: Visit `/health` (quick) or `/diag` (full) for connection analysis
 
 ## 📋 What You'll Need
 
@@ -42,10 +43,16 @@ ProspectPro is a premium lead generation platform that discovers and validates r
 - [Supabase](https://supabase.com) - PostgreSQL database (free tier: 500MB)
 - [Google Cloud](https://console.cloud.google.com) - Places API
 
-### Recommended Connection Setup
-- **SUPABASE_URL (REQUIRED)**: `https://<project-ref>.supabase.co` (API base for supabase-js)
-- **SUPABASE_DB_POOLER_URL (Optional)**: `postgresql://postgres.<ref>:<password>@aws-0-<region>.pooler.supabase.com:6543/postgres`
-- **Why split?** The JS client needs the HTTPS base; Postgres pooler URL is only for raw SQL/migrations.
+### Connection & Key Precedence
+Environment variables used by the server (in order of selection for Supabase client):
+1. `SUPABASE_SECRET_KEY` (new secure key)
+2. `SUPABASE_SERVICE_ROLE_KEY` (legacy service role)
+3. `SUPABASE_ANON_KEY` (fallback / reduced capability)
+4. `SUPABASE_PUBLISHABLE_KEY` (last resort; limited access)
+
+Required: `SUPABASE_URL` must be the HTTPS API root (`https://<ref>.supabase.co`).
+
+Optional: `SUPABASE_DB_POOLER_URL` only for external raw Postgres tools — NOT used by `supabase-js`.
 
 ### API Keys (Some Free Tiers Available)
 - **Google Places API** (Required) - ~$0.032 per search
@@ -64,7 +71,7 @@ ProspectPro is a premium lead generation platform that discovers and validates r
 
 **Estimated cost per qualified lead: $0.08 - $0.15**
 
-## � Web Access
+## 🌐 Web Access & Diagnostics
 
 ### Main Application
 - **Lead generation interface** with industry/location filters
@@ -73,10 +80,16 @@ ProspectPro is a premium lead generation platform that discovers and validates r
 - **Quality scoring** with confidence ratings
 
 ### Admin Dashboard
-- **Real-time cost tracking** by API service
-- **Budget monitoring** with 75%/90% alerts  
-- **Lead quality metrics** and success rates
-- **Monthly/daily usage analytics**
+Provides cost tracking, budget alerts, quality metrics, and usage analytics.
+
+### Operational Diagnostics
+| Endpoint | Purpose |
+|----------|---------|
+| `/health` | Fast JSON status: ok / degraded / error + summary |
+| `/diag` | Full Supabase diagnostics snapshot |
+| `/diag?force=true` | Re-run diagnostics immediately |
+
+Degraded mode allows the server to stay online for investigation when the DB is unreachable. Enable by setting `ALLOW_DEGRADED_START=true` before deploy; disable once stable.
 
 ## 📊 Business Metrics
 
@@ -96,7 +109,7 @@ Track your lead generation performance:
 - ✅ **HTTPS only** - All traffic encrypted
 - ✅ **Railway compliance** - Modern security best practices
 
-## � Documentation
+## 📚 Documentation
 
 - **[Deployment Guide](DEPLOYMENT_GUIDE.md)** - Complete setup instructions
 - **Admin Dashboard** - Access at `/admin-dashboard.html?token=YOUR_TOKEN`
@@ -121,4 +134,13 @@ Everything can be managed through web interfaces - no need to run terminal comma
 
 ---
 
-**🚀 Ready to generate real leads? Start with the [Deployment Guide](DEPLOYMENT_GUIDE.md)**
+### Degraded Mode Workflow
+1. Deploy with misconfigured or pending Supabase creds + `ALLOW_DEGRADED_START=true`
+2. Hit `/diag` to view: key presence, network reachability, REST auth probe, table probe
+3. Correct env vars in Railway → redeploy (or just update variables and restart)
+4. Once `/health` shows `status: ok`, remove `ALLOW_DEGRADED_START` for stricter future starts
+
+### Crash Prevention Enhancements
+Global handlers (`unhandledRejection`, `uncaughtException`) and a heartbeat log every 2 minutes reduce silent failures and aid log-based monitoring.
+
+**🚀 Ready to generate real leads? Start with the updated [Deployment Guide](DEPLOYMENT_GUIDE.md)**

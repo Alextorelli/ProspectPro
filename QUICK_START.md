@@ -30,7 +30,12 @@ ProspectPro is now a production-ready lead generation platform with:
 - **`api/business-discovery.js`** - Real Google Places API integration
 - **`modules/api-clients/`** - All external API clients (Google, Hunter.io, NeverBounce)
 
-## Deployment in 3 Steps
+## Deployment in 4 Steps
+
+1. **Setup accounts** (Railway, Supabase, Google Cloud)
+2. **Configure env vars**: `SUPABASE_URL` + secure key (`SUPABASE_SECRET_KEY` or `SUPABASE_SERVICE_ROLE_KEY`)
+3. *(Optional)* Add `ALLOW_DEGRADED_START=true` for first deploy to inspect `/diag` if DB misconfig occurs
+4. **Access your app** at `https://your-app.railway.app`
 
 1. **Setup accounts** (Railway, Supabase, Google Cloud)
 2. **Follow DEPLOYMENT_GUIDE.md** - Web dashboard setup only
@@ -73,6 +78,16 @@ ProspectPro is now a production-ready lead generation platform with:
 - Row Level Security database policies
 - Token-based admin authentication
 - Railway security best practices
+
+## Diagnostics & Degraded Mode
+
+| Endpoint | Use |
+|----------|-----|
+| `/health` | Quick JSON status (ok / degraded / error) |
+| `/diag` | Full Supabase diagnostics snapshot |
+| `/diag?force=true` | Force re-run diagnostics |
+
+Set `ALLOW_DEGRADED_START=true` to keep the service online while fixing env vars; remove once stable.
 
 ## Zero Command Line
 
