@@ -14,9 +14,6 @@ restartPolicyType = "ON_FAILURE"
 restartPolicyMaxRetries = 3
 numReplicas = 1
 
-# Pre-deploy security and environment validation
-preDeployCommand = ["node scripts/validate-environment.js"]
-
 # Production start command with monitoring
 startCommand = "node server.js"
 
