@@ -1,4 +1,6 @@
-# ProspectPro Enhanced API Integration - Platform Setup Guide
+# (Deprecated) ProspectPro Enhanced API Integration - Platform Setup Guide
+
+> NOTE: This extended guide has been superseded by the consolidated `DEPLOYMENT_GUIDE.md` plus `README.md` diagnostics sections. Retained here temporarily for reference. New deployments should follow `DEPLOYMENT_GUIDE.md` which includes key precedence, diagnostics endpoints (`/health`, `/diag`), and degraded mode instructions (`ALLOW_DEGRADED_START`).
 
 ## 🎯 Overview
 
