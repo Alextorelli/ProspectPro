@@ -145,6 +145,40 @@ async function initializeSupabase() {
 
 const googlePlacesClient = new Client({})
 
+// =====================================
+// AUTHENTICATION MIDDLEWARE
+// =====================================
+
+// Simple auth middleware for API routes
+const authMiddleware = (req, res, next) => {
+  // Skip auth in development if configured
+  if (process.env.NODE_ENV !== 'production' && process.env.SKIP_AUTH_IN_DEV === 'true') {
+    req.user = { id: 'dev-user-id', email: 'dev@example.com' };
+    return next();
+  }
+
+  // Check for personal access token in production
+  if (process.env.NODE_ENV === 'production') {
+    const authHeader = req.headers.authorization;
+    const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
+
+    if (!token || token !== process.env.PERSONAL_ACCESS_TOKEN) {
+      return res.status(401).json({ 
+        error: 'Unauthorized access',
+        message: 'Valid access token required'
+      });
+    }
+
+    // For personal use, set a default user
+    req.user = { 
+      id: process.env.PERSONAL_USER_ID || 'personal-user',
+      email: process.env.PERSONAL_EMAIL || 'personal@example.com'
+    };
+  }
+
+  next();
+};
+
 // Apply auth middleware to API routes
 app.use('/api', authMiddleware);
 
