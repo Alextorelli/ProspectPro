@@ -29,8 +29,8 @@
       "default": "production"
     },
     "PORT": {
-      "description": "Server port - Railway auto-configures this",
-      "default": "8080"
+      "description": "Server port - Railway auto-configures this, do not override",
+      "default": "3000"
     },
     "SUPABASE_URL": {
       "description": "Your Supabase project URL (https://your-project-id.supabase.co) - REQUIRED",
