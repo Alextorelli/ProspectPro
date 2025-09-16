@@ -2,11 +2,11 @@ require('dotenv').config();
 
 const express = require('express');
 const path = require('path');
-const { createClient } = require('@supabase/supabase-js');
-// Import enhanced Supabase diagnostics (will refactor duplication later)
+// Import enhanced Supabase diagnostics & lazy client
 const {
-  testConnection: centralTestConnection,
-  getLastSupabaseDiagnostics
+  testConnection,
+  getLastSupabaseDiagnostics,
+  getSupabaseClient
 } = require('./config/supabase');
 const { Client } = require('@googlemaps/google-maps-services-js');
 
@@ -24,145 +24,9 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 // Static files
 app.use(express.static(path.join(__dirname, 'public')));
 
-// =====================================
-// PRODUCTION DATABASE CONFIGURATION (NO MOCK DATA)
-// =====================================
-
-let supabase = null;
-const isProduction = process.env.NODE_ENV === 'production';
-
-// System user ID for internal operations
-const SYSTEM_USER_ID = 'system-prospect-pro';
-
-// Initialize Supabase (REQUIRED - NO MOCK FALLBACKS)
-// Security: Check for sensitive environment variables in logs
-function sanitizeEnvForLogs() {
-  const sanitized = {};
-  const sensitiveKeys = [
-    'SUPABASE_SERVICE_ROLE_KEY', 
-    'SUPABASE_PUBLISHABLE_KEY',
-    'GOOGLE_PLACES_API_KEY', 
-    'HUNTER_IO_API_KEY',
-    'NEVERBOUNCE_API_KEY',
-    'SCRAPINGDOG_API_KEY',
-    'JWT_SECRET',
-    'PERSONAL_ACCESS_TOKEN',
-    'ADMIN_PASSWORD'
-  ];
-  
-  Object.keys(process.env).forEach(key => {
-    if (sensitiveKeys.some(sensitive => key.includes(sensitive))) {
-      sanitized[key] = key.includes('SUPABASE') 
-        ? `${process.env[key]?.substring(0, 8)}...`
-        : 'REDACTED';
-    } else if (!key.includes('NODE_') && !key.includes('PATH')) {
-      sanitized[key] = process.env[key];
-    }
-  });
-  
-  return sanitized;
-}
-
-// Enhanced Supabase initialization with proper secret key handling
-async function initializeSupabase() {
-  try {
-    console.log('🔐 Initializing Supabase with security compliance...');
-    
-    // Validate environment variables
-    if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
-      throw new Error('Missing required Supabase environment variables');
-    }
-    
-    // Security: Validate API key format (new format starts with sb_secret_)
-    if (!process.env.SUPABASE_SERVICE_ROLE_KEY.startsWith('sb_')) {
-      console.warn('⚠️  WARNING: Using legacy Supabase key format.');
-      console.warn('   Recommendation: Update to new Secret Key format (sb_secret_...) for better security.');
-      console.warn('   See: https://github.com/orgs/supabase/discussions/29260');
-      console.warn('   Legacy keys work until late 2026, but migration is recommended.');
-    } else if (process.env.SUPABASE_SERVICE_ROLE_KEY.startsWith('sb_secret_')) {
-      console.log('✅ Using modern Supabase Secret Key format');
-    } else if (process.env.SUPABASE_SERVICE_ROLE_KEY.startsWith('sb_publishable_')) {
-      throw new Error('❌ ERROR: Using Publishable Key for server operations. Use Secret Key (sb_secret_...) instead.');
-    }
-    
-    console.log('Environment check:', sanitizeEnvForLogs());
-    
-    // Use service role key for server-side operations
-    supabase = createClient(
-      process.env.SUPABASE_URL,
-      process.env.SUPABASE_SERVICE_ROLE_KEY,
-      {
-        auth: {
-          autoRefreshToken: false,
-          persistSession: false
-        },
-        db: {
-          schema: 'public'
-        },
-        // Optimized for Railway deployment with Transaction Pooler
-        global: {
-          headers: {
-            'Connection': 'keep-alive',
-            'Keep-Alive': 'timeout=60'
-          }
-        },
-        // Configure for PostgreSQL direct connections (when using pooler URLs)
-        realtime: {
-          params: {
-            eventsPerSecond: 10
-          }
-        }
-      }
-    );
-
-    // Test connection and create system user
-    const { data: testData, error: testError } = await supabase
-      .from('campaigns')
-      .select('count')
-      .limit(1);
-
-    if (testError) {
-      console.error('❌ Supabase connection test failed:', testError.message);
-      throw testError;
-    }
-
-    // Create or verify system user exists
-    const { data: systemUser, error: userError } = await supabase
-      .from('users')
-      .upsert([
-        {
-          id: SYSTEM_USER_ID,
-          email: 'system@prospectpro.internal',
-          name: 'ProspectPro System',
-          role: 'system',
-          created_at: new Date().toISOString()
-        }
-      ], {
-        onConflict: 'id',
-        ignoreDuplicates: true
-      })
-      .select()
-      .single();
-
-    if (userError && userError.code !== '23505') { // Ignore duplicate key error
-      console.error('❌ System user creation failed:', userError.message);
-      throw userError;
-    }
-
-    console.log('✅ Supabase initialized successfully');
-    console.log(`✅ System user verified: ${SYSTEM_USER_ID}`);
-    
-    return true;
-
-  } catch (error) {
-    console.error('❌ Supabase initialization failed:', error.message);
-    throw error;
-  }
-}
-
-// Test database connection function
-// Legacy testConnection retained for backward compatibility; now proxies to central test
-async function testConnection() { return centralTestConnection(); }
+// Flag & diagnostics storage
+let degradedMode = false;
+let startupDiagnostics = null;
 
 // =====================================
 // GOOGLE PLACES API SETUP
@@ -213,20 +77,23 @@ app.use('/api', authMiddleware);
 
 // Health check endpoint for Railway monitoring
 app.get('/health', (req, res) => {
-  const diag = getLastSupabaseDiagnostics ? getLastSupabaseDiagnostics() : null;
-  res.status(200).json({
-    status: 'healthy',
+  const diag = startupDiagnostics || getLastSupabaseDiagnostics();
+  if (!diag) return res.status(200).json({ status: 'starting', degradedMode });
+  const payload = {
+    status: diag.success ? 'ok' : (degradedMode ? 'degraded' : 'error'),
+    degradedMode,
     timestamp: new Date().toISOString(),
     environment: process.env.NODE_ENV,
-    database: diag ? (diag.success ? 'connected' : 'error') : (supabase ? 'unknown' : 'disconnected'),
     version: '1.0.0',
-    supabase: diag ? {
+    supabase: {
       success: diag.success,
-      lastChecked: diag.startedAt,
-      durationMs: diag.durationMs,
-      error: diag.success ? null : diag.error
-    } : { note: 'No diagnostics run yet' }
-  });
+      error: diag.success ? null : diag.error,
+      authStatus: diag.authProbe?.status,
+      recommendations: diag.recommendations,
+      durationMs: diag.durationMs
+    }
+  };
+  res.status(200).json(payload);
 });
 
 // Admin dashboard route with authentication and secure password injection
@@ -261,9 +128,8 @@ app.get('/api/admin/metrics', async (req, res) => {
       return res.status(401).json({ error: 'Unauthorized' });
     }
     
-    if (!supabase) {
-      return res.status(503).json({ error: 'Database not available' });
-    }
+    const supabase = getSupabaseClient();
+    if (!supabase) return res.status(503).json({ error: 'Database not available' });
     
     const timeRange = req.query.range || '7d';
     const timeFilter = getTimeFilter(timeRange);
@@ -338,36 +204,24 @@ function calculateCostBreakdown(costs) {
 }
 
 app.get('/api/status', async (req, res) => {
-  try {
-    // Test database connection
-  const dbConnected = await testConnection();
-    
-    // Check API key configuration
-    const apiKeysConfigured = {
-      google_places: !!process.env.GOOGLE_PLACES_API_KEY,
-      scrapingdog: !!process.env.SCRAPINGDOG_API_KEY,
-      hunter_io: !!process.env.HUNTER_IO_API_KEY,
-      neverbounce: !!process.env.NEVERBOUNCE_API_KEY
-    };
-
-    const allApiKeysSet = Object.values(apiKeysConfigured).every(Boolean);
-
-    res.json({
-      status: 'operational',
-      database: dbConnected ? 'connected' : 'disconnected',
-      api_keys: apiKeysConfigured,
-      configuration_complete: dbConnected && allApiKeysSet,
-      version: '2.0.0',
-      timestamp: new Date().toISOString()
-    });
-
-  } catch (error) {
-    res.status(500).json({
-      status: 'error',
-      error: error.message,
-      timestamp: new Date().toISOString()
-    });
-  }
+  const diag = getLastSupabaseDiagnostics();
+  const apiKeysConfigured = {
+    google_places: !!process.env.GOOGLE_PLACES_API_KEY,
+    scrapingdog: !!process.env.SCRAPINGDOG_API_KEY,
+    hunter_io: !!process.env.HUNTER_IO_API_KEY,
+    neverbounce: !!process.env.NEVERBOUNCE_API_KEY
+  };
+  const allApiKeysSet = Object.values(apiKeysConfigured).every(Boolean);
+  res.json({
+    status: diag ? (diag.success ? 'operational' : (degradedMode ? 'degraded' : 'db-error')) : 'starting',
+    database: diag ? (diag.success ? 'connected' : 'error') : 'unknown',
+    degradedMode,
+    api_keys: apiKeysConfigured,
+    configuration_complete: !!diag && diag.success && allApiKeysSet,
+    version: '2.0.0',
+    timestamp: new Date().toISOString(),
+    supabase: diag || { note: 'no diagnostics yet' }
+  });
 });
 
 // =====================================
@@ -399,24 +253,20 @@ function buildSanitizedEnv() {
 }
 
 app.get('/diag', async (req, res) => {
-  const force = req.query.force === 'true';
-  let ranTest = false;
-  if (force) {
-    await centralTestConnection();
-    ranTest = true;
+  if (req.query.force === 'true') {
+    startupDiagnostics = await testConnection();
+    degradedMode = !startupDiagnostics.success;
   }
-  const diag = getLastSupabaseDiagnostics ? getLastSupabaseDiagnostics() : null;
-  const response = {
+  res.json({
     service: 'ProspectPro',
     timestamp: new Date().toISOString(),
-    forced: ranTest,
+    degradedMode,
+    startupDiagnostics,
+    lastDiagnostics: getLastSupabaseDiagnostics(),
     environment: buildSanitizedEnv(),
     pid: process.pid,
-    memory: process.memoryUsage(),
     uptimeSeconds: process.uptime()
-  };
-  if (diag) response.supabase = diag; else response.supabase = { note: 'No diagnostics yet. Hit /api/status or /diag?force=true to run.' };
-  res.json(response);
+  });
 });
 
 // =====================================
@@ -492,104 +342,37 @@ app.use((error, req, res, next) => {
 // SERVER STARTUP
 // =====================================
 
-async function startServer() {
-  try {
-    console.log('🚀 Starting ProspectPro Real API Server...');
-    console.log('========================================');
-
-    // Test Supabase connection
-    console.log('🔌 Testing Supabase connection...');
-  const dbConnected = await testConnection();
-    
-    if (!dbConnected) {
-      console.error('❌ Supabase connection failed.');
-      const degradedAllowed = process.env.ALLOW_DEGRADED_START === 'true';
-      if (degradedAllowed) {
-        console.warn('🟠 Starting in DEGRADED MODE (no database) because ALLOW_DEGRADED_START=true');
-        // Schedule periodic re-check every 60s
+// Early bind server then run diagnostics async
+app.listen(PORT, () => {
+  console.log(`🚀 ProspectPro server listening on port ${PORT}`);
+  console.log(`📊 Health: http://localhost:${PORT}/health`);
+  console.log(`🛠️ Diagnostics: http://localhost:${PORT}/diag`);
+  console.log('⏳ Running initial Supabase diagnostics...');
+  (async () => {
+    startupDiagnostics = await testConnection();
+    if (!startupDiagnostics.success) {
+      degradedMode = true;
+      console.error('🔴 Initial Supabase check failed. Set ALLOW_DEGRADED_START=true to suppress hard exits.');
+      if (process.env.ALLOW_DEGRADED_START === 'true') {
+        console.warn('🟠 Degraded mode active. Will retry every 60s.');
         setInterval(async () => {
-          console.log('🔁 Re-attempting Supabase diagnostics (degraded mode)...');
-          const ok = await centralTestConnection();
-          if (ok) {
-            console.log('🟢 Supabase connectivity restored. Consider removing ALLOW_DEGRADED_START for strict mode.');
+          const d = await testConnection();
+          if (d.success && degradedMode) {
+            degradedMode = false;
+            console.log('🟢 Supabase connectivity restored.');
           }
         }, 60000).unref();
-      } else if (process.env.NODE_ENV === 'development' || process.env.SKIP_AUTH_IN_DEV === 'true') {
-        console.log('⚠️  Continuing in development mode without Supabase...');
       } else {
-        console.log('📋 Make sure you have set the following environment variables:');
-        console.log('   - SUPABASE_URL');
-        console.log('   - SUPABASE_SERVICE_ROLE_KEY (use Secret Key: sb_secret_...)');
-        console.log('   - GOOGLE_PLACES_API_KEY (required for business discovery)');
-        console.log('   - HUNTER_IO_API_KEY (required for email discovery)');
-        console.log('   - NEVERBOUNCE_API_KEY (required for email validation)');
-        console.log('💡 Generate new API keys at: Settings → API → "Generate new API keys"');
-        console.log('💤 Set ALLOW_DEGRADED_START=true to keep container alive for diagnostics.');
+        console.error('❌ Exiting (no degraded allowance)');
         process.exit(1);
       }
-    }
-
-    // Initialize database schema
-    console.log('🏗️  Checking database schema...');
-    if (dbConnected) {
-      const schemaReady = await initializeDatabase();
-      
-      if (!schemaReady) {
-        console.warn('⚠️  Database schema may need initialization.');
-        console.log('📋 Please run the SQL schema in your Supabase dashboard:');
-        console.log('   File: docs/supabase-schema.sql');
-        console.log('   URL: https://app.supabase.com/project/[your-project]/sql');
-      }
     } else {
-      console.log('⚠️  Skipping schema check (no database connection)');
+      console.log('✅ Supabase connectivity established.');
     }
+  })();
+});
 
-    // Check API key configuration
-    const requiredApiKeys = [
-      'GOOGLE_PLACES_API_KEY',
-      'SCRAPINGDOG_API_KEY', 
-      'HUNTER_IO_API_KEY',
-      'NEVERBOUNCE_API_KEY'
-    ];
-
-    const missingKeys = requiredApiKeys.filter(key => !process.env[key]);
-    
-    if (missingKeys.length > 0) {
-      console.warn('⚠️  Missing API keys:', missingKeys.join(', '));
-      console.log('📋 Add these to your .env file for full functionality');
-    } else {
-      console.log('✅ All API keys configured');
-    }
-
-    // Start the server
-    app.listen(PORT, () => {
-      console.log(`✅ ProspectPro server running on port ${PORT}`);
-      console.log(`🌐 Environment: ${process.env.NODE_ENV || 'development'}`);
-      console.log(`📊 Health check: http://localhost:${PORT}/health`);
-      console.log(`🛠️  Diagnostics: http://localhost:${PORT}/diag`);
-      if (process.env.ALLOW_DEGRADED_START === 'true') {
-        console.log('🟠 Running WITHOUT Supabase (DEGRADED MODE)');
-      }
-      console.log(`🎯 Frontend: http://localhost:${PORT}`);
-      console.log('========================================');
-      console.log('🎉 ProspectPro is ready for real business data!');
-      
-      if (process.env.NODE_ENV !== 'production') {
-        console.log('');
-        console.log('� Development Mode Tips:');
-        console.log('- Run "npm run test" to validate zero fake data');
-        console.log('- Run "npm run test:websites" to test URL validation');
-        console.log('- Check /api/status for configuration status');
-      }
-    });
-
-  } catch (error) {
-    console.error('❌ Failed to start server:', error.message);
-    process.exit(1);
-  }
-}
-
-// Handle graceful shutdown
+// Graceful shutdown
 process.on('SIGTERM', () => {
   console.log('🛑 SIGTERM received, shutting down gracefully...');
   process.exit(0);
@@ -599,8 +382,5 @@ process.on('SIGINT', () => {
   console.log('🛑 SIGINT received, shutting down gracefully...');
   process.exit(0);
 });
-
-// Start the server
-startServer();
 
 module.exports = app;
