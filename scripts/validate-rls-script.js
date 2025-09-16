@@ -45,6 +45,7 @@ try {
     "lead_qualification_metrics",
     "service_health_metrics",
     "dashboard_exports",
+    "system_settings",
   ];
 
   const missingTables = requiredTables.filter(

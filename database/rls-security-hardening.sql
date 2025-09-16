@@ -18,6 +18,7 @@ ALTER TABLE IF EXISTS public.api_cost_tracking ENABLE ROW LEVEL SECURITY;
 ALTER TABLE IF EXISTS public.lead_qualification_metrics ENABLE ROW LEVEL SECURITY;
 ALTER TABLE IF EXISTS public.service_health_metrics ENABLE ROW LEVEL SECURITY;
 ALTER TABLE IF EXISTS public.dashboard_exports ENABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS public.system_settings ENABLE ROW LEVEL SECURITY;
 
 -- Log RLS enablement
 DO $$
@@ -42,7 +43,8 @@ BEGIN
           AND tablename IN ('enhanced_leads', 'lead_emails', 'lead_social_profiles', 
                            'campaigns', 'api_usage_log', 'campaign_analytics', 
                            'api_cost_tracking', 'lead_qualification_metrics',
-                           'service_health_metrics', 'dashboard_exports')
+                           'service_health_metrics', 'dashboard_exports',
+                           'system_settings')
     LOOP
         EXECUTE format('DROP POLICY IF EXISTS %I ON %I.%I', 
                       pol_record.policyname, 
@@ -385,6 +387,14 @@ CREATE POLICY "exports_delete_via_campaign" ON public.dashboard_exports
     )
   );
 
+-- ===========================================
+-- SYSTEM_SETTINGS TABLE: Direct user access
+-- ===========================================
+CREATE POLICY "system_settings_all_operations" ON public.system_settings
+  FOR ALL TO authenticated
+  USING (user_id = auth.uid())
+  WITH CHECK (user_id = auth.uid());
+
 DO $$
 BEGIN
   RAISE NOTICE 'Phase 3 Complete: Created secure user-isolated policies for all existing tables';
@@ -421,6 +431,12 @@ CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_cost_tracking_campaign_id
 
 CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_dashboard_exports_campaign_id 
   ON public.dashboard_exports(campaign_id) WHERE campaign_id IS NOT NULL;
+
+CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_system_settings_user_id
+  ON public.system_settings(user_id);
+
+CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_system_settings_user_setting
+  ON public.system_settings(user_id, setting_key);
 
 CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_qualification_lead_id 
   ON public.lead_qualification_metrics(lead_id) WHERE lead_id IS NOT NULL;
@@ -585,20 +601,7 @@ BEGIN
     RAISE NOTICE '- lead_qualification_metrics (via lead->campaign chain)';
     RAISE NOTICE '- service_health_metrics (read-only for all users)';
     RAISE NOTICE '- dashboard_exports (via campaign ownership)';
-    RAISE NOTICE '';
-    RAISE NOTICE 'Next Steps:';
-    RAISE NOTICE '1. Create database tables using enhanced-supabase-schema.sql';
-    RAISE NOTICE '2. Test application functionality with RLS enabled';
-    RAISE NOTICE '3. Monitor policy performance in production';
-    RAISE NOTICE '4. Review access logs for anomalies';SE NOTICE '- lead_emails (via lead->campaign chain)';
-    RAISE NOTICE '- lead_social_profiles (via lead->campaign chain)';
-    RAISE NOTICE '- campaigns (direct user ownership)';
-    RAISE NOTICE '- api_usage_log (via campaign ownership)';
-    RAISE NOTICE '- campaign_analytics (via campaign ownership)';
-    RAISE NOTICE '- api_cost_tracking (via campaign ownership)';
-    RAISE NOTICE '- lead_qualification_metrics (via lead->campaign chain)';
-    RAISE NOTICE '- service_health_metrics (read-only for all users)';
-    RAISE NOTICE '- dashboard_exports (via campaign ownership)';
+    RAISE NOTICE '- system_settings (direct user ownership)';
     RAISE NOTICE '';
     RAISE NOTICE 'Next Steps:';
     RAISE NOTICE '1. Create database tables using enhanced-supabase-schema.sql';

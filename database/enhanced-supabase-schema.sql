@@ -584,6 +584,22 @@ CREATE TABLE IF NOT EXISTS dashboard_exports (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT now()
 );
 
+-- System settings table for user preferences and configurations
+CREATE TABLE IF NOT EXISTS system_settings (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID NOT NULL,
+  setting_key VARCHAR(100) NOT NULL,
+  setting_value TEXT NOT NULL,
+  setting_type VARCHAR(50) DEFAULT 'string',
+  description TEXT,
+  is_active BOOLEAN DEFAULT true,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
+  
+  -- Constraints
+  CONSTRAINT system_settings_setting_key_user_unique UNIQUE (setting_key, user_id)
+);
+
 -- Indexes for monitoring dashboard performance
 CREATE INDEX IF NOT EXISTS idx_campaign_analytics_campaign_date ON campaign_analytics(campaign_id, DATE(timestamp));
 CREATE INDEX IF NOT EXISTS idx_campaign_analytics_metric_type ON campaign_analytics(metric_type, timestamp DESC);
@@ -593,6 +609,8 @@ CREATE INDEX IF NOT EXISTS idx_lead_qualification_date ON lead_qualification_met
 CREATE INDEX IF NOT EXISTS idx_lead_qualification_campaign ON lead_qualification_metrics(campaign_id, date DESC);
 CREATE INDEX IF NOT EXISTS idx_service_health_service_timestamp ON service_health_metrics(service_name, timestamp DESC);
 CREATE INDEX IF NOT EXISTS idx_dashboard_exports_user_created ON dashboard_exports(user_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_system_settings_user_id ON system_settings(user_id);
+CREATE INDEX IF NOT EXISTS idx_system_settings_user_setting ON system_settings(user_id, setting_key);
 
 -- ============================================================================
 -- MONITORING DASHBOARD FUNCTIONS
