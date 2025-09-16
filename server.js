@@ -29,6 +29,9 @@ app.use(express.static(path.join(__dirname, 'public')));
 // Remove local re-initialization logic to avoid duplication and undefined references
 const isProduction = process.env.NODE_ENV === 'production';
 
+// System user ID for internal operations
+const SYSTEM_USER_ID = 'system-prospect-pro';
+
 // Initialize Supabase (REQUIRED - NO MOCK FALLBACKS)
 // Security: Check for sensitive environment variables in logs
 function sanitizeEnvForLogs() {
@@ -60,6 +63,31 @@ function sanitizeEnvForLogs() {
 
 // Enhanced Supabase initialization with proper secret key handling
 // Removed duplicate initializeSupabase logic; rely on config/supabase.js for initialization & connection testing
+
+// Test database connection function
+async function testConnection() {
+  try {
+    if (!supabase) {
+      await initializeSupabase();
+    }
+    
+    // Simple connection test
+    const { data, error } = await supabase
+      .from('campaigns')
+      .select('count')
+      .limit(1);
+
+    if (error) {
+      console.error('❌ Database connection test failed:', error.message);
+      return false;
+    }
+
+    return true;
+  } catch (error) {
+    console.error('❌ Database connection error:', error.message);
+    return false;
+  }
+}
 
 // =====================================
 // GOOGLE PLACES API SETUP
