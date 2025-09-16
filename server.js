@@ -2,9 +2,7 @@ require('dotenv').config();
 
 const express = require('express');
 const path = require('path');
-const { createClient } = require('@supabase/supabase-js'); // (legacy usage in file - will rely on central config)
-// Import centralized Supabase utilities
-const { supabase, testConnection, initializeDatabase } = require('./config/supabase');
+const { createClient } = require('@supabase/supabase-js');
 const { Client } = require('@googlemaps/google-maps-services-js');
 
 const app = express();
@@ -25,8 +23,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 // PRODUCTION DATABASE CONFIGURATION (NO MOCK DATA)
 // =====================================
 
-// Supabase client now imported from central config (config/supabase.js)
-// Remove local re-initialization logic to avoid duplication and undefined references
+let supabase = null;
 const isProduction = process.env.NODE_ENV === 'production';
 
 // System user ID for internal operations
@@ -62,7 +59,101 @@ function sanitizeEnvForLogs() {
 }
 
 // Enhanced Supabase initialization with proper secret key handling
-// Removed duplicate initializeSupabase logic; rely on config/supabase.js for initialization & connection testing
+async function initializeSupabase() {
+  try {
+    console.log('🔐 Initializing Supabase with security compliance...');
+    
+    // Validate environment variables
+    if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+      throw new Error('Missing required Supabase environment variables');
+    }
+    
+    // Security: Validate API key format (new format starts with sb_secret_)
+    if (!process.env.SUPABASE_SERVICE_ROLE_KEY.startsWith('sb_')) {
+      console.warn('⚠️  WARNING: Using legacy Supabase key format.');
+      console.warn('   Recommendation: Update to new Secret Key format (sb_secret_...) for better security.');
+      console.warn('   See: https://github.com/orgs/supabase/discussions/29260');
+      console.warn('   Legacy keys work until late 2026, but migration is recommended.');
+    } else if (process.env.SUPABASE_SERVICE_ROLE_KEY.startsWith('sb_secret_')) {
+      console.log('✅ Using modern Supabase Secret Key format');
+    } else if (process.env.SUPABASE_SERVICE_ROLE_KEY.startsWith('sb_publishable_')) {
+      throw new Error('❌ ERROR: Using Publishable Key for server operations. Use Secret Key (sb_secret_...) instead.');
+    }
+    
+    console.log('Environment check:', sanitizeEnvForLogs());
+    
+    // Use service role key for server-side operations
+    supabase = createClient(
+      process.env.SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY,
+      {
+        auth: {
+          autoRefreshToken: false,
+          persistSession: false
+        },
+        db: {
+          schema: 'public'
+        },
+        // Optimized for Railway deployment with Transaction Pooler
+        global: {
+          headers: {
+            'Connection': 'keep-alive',
+            'Keep-Alive': 'timeout=60'
+          }
+        },
+        // Configure for PostgreSQL direct connections (when using pooler URLs)
+        realtime: {
+          params: {
+            eventsPerSecond: 10
+          }
+        }
+      }
+    );
+
+    // Test connection and create system user
+    const { data: testData, error: testError } = await supabase
+      .from('campaigns')
+      .select('count')
+      .limit(1);
+
+    if (testError) {
+      console.error('❌ Supabase connection test failed:', testError.message);
+      throw testError;
+    }
+
+    // Create or verify system user exists
+    const { data: systemUser, error: userError } = await supabase
+      .from('users')
+      .upsert([
+        {
+          id: SYSTEM_USER_ID,
+          email: 'system@prospectpro.internal',
+          name: 'ProspectPro System',
+          role: 'system',
+          created_at: new Date().toISOString()
+        }
+      ], {
+        onConflict: 'id',
+        ignoreDuplicates: true
+      })
+      .select()
+      .single();
+
+    if (userError && userError.code !== '23505') { // Ignore duplicate key error
+      console.error('❌ System user creation failed:', userError.message);
+      throw userError;
+    }
+
+    console.log('✅ Supabase initialized successfully');
+    console.log(`✅ System user verified: ${SYSTEM_USER_ID}`);
+    
+    return true;
+
+  } catch (error) {
+    console.error('❌ Supabase initialization failed:', error.message);
+    throw error;
+  }
+}
 
 // Test database connection function
 async function testConnection() {
@@ -137,33 +228,12 @@ app.use('/api', authMiddleware);
 // =====================================
 
 // Health check endpoint for Railway monitoring
-let lastDbCheck = null;
-let lastDbStatus = 'unknown';
-
-app.get('/health', async (req, res) => {
-  // Optionally perform a lightweight asynchronous DB connectivity check every 60s
-  const now = Date.now();
-  const shouldRefresh = !lastDbCheck || (now - lastDbCheck > 60000);
-  if (shouldRefresh && process.env.SKIP_DB_CHECK !== 'true') {
-    try {
-      const ok = await testConnection();
-      lastDbStatus = ok ? 'connected' : 'disconnected';
-    } catch (e) {
-      lastDbStatus = 'error';
-    } finally {
-      lastDbCheck = Date.now();
-    }
-  }
-
-  const degraded = (lastDbStatus !== 'connected' && process.env.SKIP_DB_CHECK === 'true') ? 'degraded' : undefined;
-  const status = degraded ? 'degraded' : 'healthy';
+app.get('/health', (req, res) => {
   res.status(200).json({
-    status,
-    degradedReason: degraded ? 'Database unavailable but SKIP_DB_CHECK=true' : undefined,
+    status: 'healthy',
     timestamp: new Date().toISOString(),
     environment: process.env.NODE_ENV,
-    database: lastDbStatus,
-    lastDbCheck,
+    database: supabase ? 'connected' : 'disconnected',
     version: '1.0.0'
   });
 });

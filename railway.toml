@@ -1,5 +1,5 @@
 # ProspectPro Railway Configuration
-# Production-ready deployment with security, monitoring, and cost optimization
+# Production-ready deployment with Supabase Transaction Pooler integration
 
 [build]
 builder = "NIXPACKS"
@@ -14,10 +14,10 @@ restartPolicyType = "ON_FAILURE"
 restartPolicyMaxRetries = 3
 numReplicas = 1
 
-# Production start command with monitoring
+# Production start command with optimized settings
 startCommand = "node server.js"
 
-# Sleep configuration for cost optimization
+# Sleep configuration for cost optimization  
 sleepApplication = false  # Keep alive for production monitoring
 staticUrl = true         # Enable static URL for consistent monitoring
 
@@ -26,10 +26,11 @@ staticUrl = true         # Enable static URL for consistent monitoring
 NODE_ENV = "production"
 PORT = "8080"
 
-# Railway automatically injects these from your project settings:
-# SUPABASE_URL = "${{SUPABASE_URL}}"
-# SUPABASE_SERVICE_ROLE_KEY = "${{SUPABASE_SERVICE_ROLE_KEY}}"  
-# GOOGLE_PLACES_API_KEY = "${{GOOGLE_PLACES_API_KEY}}"
+# Supabase Configuration Notes:
+# Use Transaction Pooler URL format in Railway environment variables:
+# SUPABASE_URL = "postgresql://postgres.[ref]:[password]@aws-0-[region].pooler.supabase.com:6543/postgres"
+# SUPABASE_SERVICE_ROLE_KEY = "sb_secret_your_key_here"
+# SUPABASE_ANON_KEY = "your_anon_key_here"
 
 # Resource monitoring and alerting
 [observability]

@@ -29,17 +29,23 @@ ProspectPro is a premium lead generation platform that discovers and validates r
 
 ## 🚀 Quick Start
 
-1. **Deploy in 30 minutes** following the [Deployment Guide](DEPLOYMENT_GUIDE.md)
-2. **Access your web app** at `https://your-app.railway.app`
-3. **Monitor costs** via admin dashboard
-4. **Generate leads** through point-and-click interface
+1. **Deploy to Railway** - See [Railway + Supabase Setup Guide](RAILWAY_SUPABASE_SETUP.md)
+2. **Configure Supabase** - Use Transaction Pooler for optimal performance  
+3. **Add API Keys** - Follow [Deployment Guide](DEPLOYMENT_GUIDE.md)
+4. **Access your app** at `https://your-app.railway.app`
+5. **Monitor & generate leads** via admin dashboard
 
 ## 📋 What You'll Need
 
 ### Free Accounts
-- [Railway](https://railway.app) - Web hosting
-- [Supabase](https://supabase.com) - Database
+- [Railway](https://railway.app) - Web hosting ($5/month after free tier)
+- [Supabase](https://supabase.com) - PostgreSQL database (free tier: 500MB)
 - [Google Cloud](https://console.cloud.google.com) - Places API
+
+### Recommended Connection Setup
+- **Supabase**: Use Transaction Pooler for Railway deployment
+- **Format**: `postgresql://postgres.[ref]:[password]@aws-0-[region].pooler.supabase.com:6543/postgres`
+- **Why**: Optimized for stateless applications, better connection efficiency
 
 ### API Keys (Some Free Tiers Available)
 - **Google Places API** (Required) - ~$0.032 per search
