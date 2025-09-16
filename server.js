@@ -1,4 +1,9 @@
-require('dotenv').config();
+// Load environment early; ignore if missing (Railway injects vars directly)
+try {
+  require('dotenv').config();
+} catch (e) {
+  console.warn('⚠️  dotenv not loaded (likely fine in production):', e.message);
+}
 
 const express = require('express');
 const path = require('path');
@@ -297,7 +302,16 @@ app.get('/diag', async (req, res) => {
 // =====================================
 
 // Import API routes
-const businessDiscoveryRouter = require('./api/business-discovery');
+let businessDiscoveryRouter;
+try {
+  businessDiscoveryRouter = require('./api/business-discovery');
+} catch (e) {
+  console.error('Failed to load business-discovery router:', e.stack || e.message);
+  // Provide a stub router so app still responds
+  const r = require('express').Router();
+  r.use((req, res) => res.status(500).json({ error: 'business-discovery module failed to load', message: e.message }));
+  businessDiscoveryRouter = r;
+}
 // Use simplified business dashboard instead of complex monitoring
 const { createSimplifiedDashboardRoutes } = require('./api/simplified-business-dashboard');
 
@@ -388,20 +402,15 @@ app.listen(PORT, '0.0.0.0', () => {
     startupDiagnostics = await testConnection();
     if (!startupDiagnostics.success) {
       degradedMode = true;
-      console.error('🔴 Initial Supabase check failed. Set ALLOW_DEGRADED_START=true to suppress hard exits.');
-      if (process.env.ALLOW_DEGRADED_START === 'true') {
-        console.warn('🟠 Degraded mode active. Will retry every 60s.');
-        setInterval(async () => {
-          const d = await testConnection();
-          if (d.success && degradedMode) {
-            degradedMode = false;
-            console.log('🟢 Supabase connectivity restored.');
-          }
-        }, 60000).unref();
-      } else {
-        console.error('❌ Exiting (no degraded allowance) in 5s after logging window...');
-        setTimeout(() => process.exit(1), 5000).unref();
-      }
+      console.error('🔴 Initial Supabase check failed. Continuing in degraded mode (will NOT exit).');
+      console.warn('🟠 Periodic retry every 60s enabled.');
+      setInterval(async () => {
+        const d = await testConnection();
+        if (d.success && degradedMode) {
+          degradedMode = false;
+          console.log('🟢 Supabase connectivity restored.');
+        }
+      }, 60000).unref();
     } else {
       console.log('✅ Supabase connectivity established.');
     }
