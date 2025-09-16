@@ -25,12 +25,203 @@ ProspectPro is a lead generation platform being rebuilt to eliminate ALL fake da
 
 ### PROHIBITED Patterns (Remove immediately if found):
 
+````javascript
+# ProspectPro AI Coding Agent Instructions
+
+## Project Overview
+
+ProspectPro is a Node.js/Express lead generation platform with **zero tolerance for fake business data**. Built for Railway deployment with Supabase PostgreSQL backend, it processes real business data through a 4-stage validation pipeline: Discovery → Enrichment → Validation → Export.
+
+## Critical Architecture
+
+### Server Bootstrap Pattern (server.js)
+- **Graceful degraded mode**: `ALLOW_DEGRADED_START=true` keeps server alive during DB issues
+- **Comprehensive health endpoints**: `/health` (fast), `/diag` (full diagnostics), `/ready` (DB required)
+- **Import pattern**: Always use defensive `require()` with stub fallbacks for missing modules
+
 ```javascript
-// ❌ NEVER DO THIS:
-const fakeBusinesses = ["Artisan Bistro", "Downtown Café"];
-const fakeAddresses = ["100 Main St", "110 Main St", "120 Main St"];
-const fakePhones = ["(512) 555-0123", "(000) 123-4567"];
+// ✅ CORRECT: Defensive imports with graceful degradation
+let businessDiscoveryRouter;
+try {
+  businessDiscoveryRouter = require('./api/business-discovery');
+} catch (e) {
+  console.error('Failed to load business-discovery router:', e);
+  const r = require('express').Router();
+  r.use((req, res) => res.status(500).json({ error: 'Module failed to load' }));
+  businessDiscoveryRouter = r;
+}
+````
+
+### Supabase Connection Management (config/supabase.js)
+
+- **Key precedence**: `SUPABASE_SECRET_KEY` → `SUPABASE_SERVICE_ROLE_KEY` → `SUPABASE_ANON_KEY` → `SUPABASE_PUBLISHABLE_KEY`
+- **Lazy client initialization**: Only create client when needed, cache instance
+- **Diagnostic system**: `testConnection()` returns detailed failure categorization with remediation steps
+
+```javascript
+// Key pattern for diagnostics functions
+function getLastSupabaseDiagnostics() {
+  return lastSupabaseDiagnostics;
+}
+function setLastSupabaseDiagnostics(diag) {
+  lastSupabaseDiagnostics = diag;
+}
+// ⚠️ CRITICAL: Always export these functions or server.js imports will fail
 ```
+
+### 4-Stage Lead Processing Pipeline (modules/enhanced-lead-discovery.js)
+
+1. **Pre-validation** (0-100 score): Filter out obviously fake data before expensive API calls
+2. **Registry Validation** (FREE): California SOS, NY SOS, tax records cross-reference
+3. **Email Discovery** (PAID): Hunter.io domain search with cost optimization
+4. **Email Verification** (PAID): NeverBounce deliverability with 80%+ confidence threshold
+
+## Zero Fake Data Enforcement
+
+### Prohibited Patterns
+
+```javascript
+// ❌ NEVER: Hardcoded business arrays
+const fakeBusinesses = ["Artisan Bistro", "Downtown Café"];
+// ❌ NEVER: Sequential fake addresses
+const addresses = ["100 Main St", "110 Main St", "120 Main St"];
+// ❌ NEVER: 555/000 phone numbers
+const phones = ["(555) 123-4567", "(000) 123-4567"];
+```
+
+### Required Validation Standards
+
+- **Website validation**: Must return HTTP 200-399 status codes
+- **Email verification**: NeverBounce confidence ≥80% OR manual domain validation
+- **Phone format**: US 10-digit, exclude 555/000/111 area codes
+- **Address geocoding**: Must resolve to real coordinates (not sequential patterns)
+
+## Cost Optimization Patterns
+
+### Budget-Aware Processing
+
+```javascript
+// Always check budget before expensive operations
+if (this.totalCost >= budgetLimit) {
+  console.warn(`⚠️ Budget limit reached: $${this.totalCost.toFixed(2)}`);
+  break;
+}
+```
+
+### API Cost Tracking (per modules/enhanced-lead-discovery.js)
+
+- Google Places: ~$0.032/search, $0.017/details
+- Hunter.io: ~$0.04/domain search (25 free/month)
+- NeverBounce: ~$0.008/verification (1000 free/month)
+
+## Database Schema Conventions (database/enhanced-supabase-schema.sql)
+
+### Core Tables
+
+- `enhanced_leads`: Main business records with confidence scoring (0-100)
+- `campaigns`: User session tracking with cost attribution
+- `api_costs`: Per-request cost tracking for budget management
+- `validation_results`: Multi-source validation outcomes
+
+### RLS Security Pattern
+
+```sql
+-- Enable RLS on all tables
+ALTER TABLE table_name ENABLE ROW LEVEL SECURITY;
+-- User isolation with auth.uid()
+CREATE POLICY "Users can only see own data" ON table_name
+FOR ALL USING (auth.uid() = user_id);
+```
+
+## Development Workflows
+
+### Local Development
+
+```bash
+npm install
+cp .env.example .env  # Configure SUPABASE_URL + SUPABASE_SECRET_KEY
+npm run dev           # Starts with nodemon on port 3000
+```
+
+### Railway Deployment Testing
+
+```bash
+# Test diagnostics without deployment
+SUPABASE_URL=your_url SUPABASE_SECRET_KEY=your_key node server.js
+# Check health endpoints
+curl localhost:3000/health
+curl localhost:3000/diag
+```
+
+### Data Validation Testing
+
+```bash
+node test/test-real-data.js         # Verify zero fake data patterns
+node test/test-website-validation.js # Test all URLs return 200-399
+```
+
+## Error Handling Standards
+
+### API Client Pattern
+
+```javascript
+// ✅ CORRECT: Never fallback to fake data
+try {
+  const realData = await apiClient.search(query);
+  if (!realData || realData.length === 0) {
+    throw new Error("No real data available for query");
+  }
+  return realData;
+} catch (error) {
+  console.error("API failed:", error.message);
+  throw error; // Propagate, don't mask with fake data
+}
+```
+
+### Server Resilience (server.js patterns)
+
+- Global error handlers for `unhandledRejection`, `uncaughtException`
+- Heartbeat logging every 120s for Railway monitoring
+- Event loop delay monitoring at `/loop-metrics`
+
+## File-Specific Implementation Notes
+
+### `/api/business-discovery.js`
+
+- Uses `EnhancedLeadDiscovery` class with budget limits
+- Returns comprehensive metadata: cost per lead, processing time, qualification rate
+- Implements campaign logging to `campaigns` table via `CampaignLogger`
+
+### `/modules/validators/data-validator.js`
+
+- Comprehensive fake pattern detection with regex arrays
+- Website accessibility testing with 10s timeout
+- DNS resolution validation for domain existence
+- NeverBounce integration with confidence scoring
+
+### `/public/` Frontend
+
+- Vanilla JS with real-time cost display
+- Admin dashboard at `/admin-dashboard.html?token=PERSONAL_ACCESS_TOKEN`
+- Business intelligence dashboard with campaign metrics
+
+## Railway Production Considerations
+
+### Environment Variables
+
+- `ALLOW_DEGRADED_START=true` for initial deployment debugging
+- `PERSONAL_ACCESS_TOKEN` for admin dashboard authentication
+- `PORT` automatically set by Railway (bind to `0.0.0.0`)
+
+### Monitoring Endpoints
+
+- `/health`: Railway health checks with degraded mode support
+- `/diag`: Full Supabase connection diagnostics with sanitized environment
+- `/ready`: Kubernetes-style readiness probe requiring privileged DB connection
+
+This platform prioritizes data authenticity, cost efficiency, and production reliability over development convenience.
+
+````
 
 ### Required Real Data Sources:
 
@@ -49,7 +240,7 @@ cd ProspectPro-Real-API-Package
 npm install
 cp .env.example .env    # Add real API keys
 npm run dev            # Start development server
-```
+````
 
 ### Testing Critical Validations:
 
