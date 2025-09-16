@@ -29,30 +29,17 @@ ProspectPro is a premium lead generation platform that discovers and validates r
 
 ## 🚀 Quick Start
 
-1. **Deploy to Railway** – Refer to the consolidated [Deployment Guide](DEPLOYMENT_GUIDE.md)
-2. **Configure Supabase** – Set `SUPABASE_URL` (HTTPS) + `SUPABASE_SECRET_KEY` (preferred new format) or `SUPABASE_SERVICE_ROLE_KEY` (legacy)
-3. **Add API Keys** – Google Places required; others optional but recommended
-4. **(Optional) Enable degraded mode** by setting `ALLOW_DEGRADED_START=true` to keep container alive while fixing DB config
-5. **Access your app** at `https://your-app.railway.app`
-6. **Diagnostics**: Visit `/health` (quick) or `/diag` (full) for connection analysis
+1. **Deploy in 30 minutes** following the [Deployment Guide](DEPLOYMENT_GUIDE.md)
+2. **Access your web app** at `https://your-app.railway.app`
+3. **Monitor costs** via admin dashboard
+4. **Generate leads** through point-and-click interface
 
 ## 📋 What You'll Need
 
 ### Free Accounts
-- [Railway](https://railway.app) - Web hosting ($5/month after free tier)
-- [Supabase](https://supabase.com) - PostgreSQL database (free tier: 500MB)
+- [Railway](https://railway.app) - Web hosting
+- [Supabase](https://supabase.com) - Database
 - [Google Cloud](https://console.cloud.google.com) - Places API
-
-### Connection & Key Precedence
-Environment variables used by the server (in order of selection for Supabase client):
-1. `SUPABASE_SECRET_KEY` (preferred new secure format: sb_secret_...)
-2. `SUPABASE_SERVICE_ROLE_KEY` (legacy service role: eyJ... JWT format)
-3. `SUPABASE_ANON_KEY` (fallback / reduced capability)
-4. `SUPABASE_PUBLISHABLE_KEY` (last resort; limited access)
-
-Required: `SUPABASE_URL` must be the HTTPS API root (`https://<ref>.supabase.co`).
-
-Optional: `SUPABASE_DB_POOLER_URL` only for external raw Postgres tools — NOT used by `supabase-js`.
 
 ### API Keys (Some Free Tiers Available)
 - **Google Places API** (Required) - ~$0.032 per search
@@ -71,7 +58,7 @@ Optional: `SUPABASE_DB_POOLER_URL` only for external raw Postgres tools — NOT 
 
 **Estimated cost per qualified lead: $0.08 - $0.15**
 
-## 🌐 Web Access & Diagnostics
+## � Web Access
 
 ### Main Application
 - **Lead generation interface** with industry/location filters
@@ -80,16 +67,10 @@ Optional: `SUPABASE_DB_POOLER_URL` only for external raw Postgres tools — NOT 
 - **Quality scoring** with confidence ratings
 
 ### Admin Dashboard
-Provides cost tracking, budget alerts, quality metrics, and usage analytics.
-
-### Operational Diagnostics
-| Endpoint | Purpose |
-|----------|---------|
-| `/health` | Fast JSON status: ok / degraded / error + summary |
-| `/diag` | Full Supabase diagnostics snapshot |
-| `/diag?force=true` | Re-run diagnostics immediately |
-
-Degraded mode allows the server to stay online for investigation when the DB is unreachable. Enable by setting `ALLOW_DEGRADED_START=true` before deploy; disable once stable.
+- **Real-time cost tracking** by API service
+- **Budget monitoring** with 75%/90% alerts  
+- **Lead quality metrics** and success rates
+- **Monthly/daily usage analytics**
 
 ## 📊 Business Metrics
 
@@ -109,7 +90,7 @@ Track your lead generation performance:
 - ✅ **HTTPS only** - All traffic encrypted
 - ✅ **Railway compliance** - Modern security best practices
 
-## 📚 Documentation
+## � Documentation
 
 - **[Deployment Guide](DEPLOYMENT_GUIDE.md)** - Complete setup instructions
 - **Admin Dashboard** - Access at `/admin-dashboard.html?token=YOUR_TOKEN`
@@ -134,13 +115,4 @@ Everything can be managed through web interfaces - no need to run terminal comma
 
 ---
 
-### Degraded Mode Workflow
-1. Deploy with misconfigured or pending Supabase creds + `ALLOW_DEGRADED_START=true`
-2. Hit `/diag` to view: key presence, network reachability, REST auth probe, table probe
-3. Correct env vars in Railway → redeploy (or just update variables and restart)
-4. Once `/health` shows `status: ok`, remove `ALLOW_DEGRADED_START` for stricter future starts
-
-### Crash Prevention Enhancements
-Global handlers (`unhandledRejection`, `uncaughtException`) and a heartbeat log every 2 minutes reduce silent failures and aid log-based monitoring.
-
-**🚀 Ready to generate real leads? Start with the updated [Deployment Guide](DEPLOYMENT_GUIDE.md)**
+**🚀 Ready to generate real leads? Start with the [Deployment Guide](DEPLOYMENT_GUIDE.md)**

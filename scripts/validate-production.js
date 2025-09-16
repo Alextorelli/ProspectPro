@@ -242,13 +242,12 @@ async function validateProductionDeployment() {
     }
     
     // Test 5: Database Direct Validation (if available)
-    const supabaseKey = process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
-    if (process.env.SUPABASE_URL && supabaseKey) {
+    if (process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY) {
       log('blue', '💾 Testing direct database validation...');
       
       const supabase = createClient(
         process.env.SUPABASE_URL,
-        supabaseKey
+        process.env.SUPABASE_SERVICE_ROLE_KEY
       );
       
       // Check for mock data in database

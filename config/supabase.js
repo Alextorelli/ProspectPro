@@ -1,205 +1,148 @@
-// ---------------- New Enhanced Diagnostics & Lazy Client -----------------
+const { createClient } = require('@supabase/supabase-js');
+
+// Validate required environment variables
+// Note: We now prefer publishable and secret keys over legacy JWT keys
+const requiredEnvVars = [
+  'SUPABASE_URL',
+  'SUPABASE_SERVICE_ROLE_KEY',  // Keep for backwards compatibility until migration
+  'SUPABASE_ANON_KEY'           // Keep for backwards compatibility until migration
+];
+
+const missingEnvVars = requiredEnvVars.filter(envVar => !process.env[envVar]);
+
+if (missingEnvVars.length > 0) {
+  console.error('❌ Missing required Supabase environment variables:', missingEnvVars.join(', '));
+  console.error('📋 Please check your .env file and ensure all Supabase credentials are set');
+  console.error('⚠️  Consider upgrading to new Supabase publishable/secret keys for better security');
+  process.exit(1);
+}
+
 const supabaseUrl = process.env.SUPABASE_URL;
-const supabaseDbPoolerUrl = process.env.SUPABASE_DB_POOLER_URL;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const supabaseAnonKey = process.env.SUPABASE_ANON_KEY;
 
-function serializeError(err) {
-  if (!err) return null;
-  if (err instanceof Error) {
-    return {
-      name: err.name,
-      message: err.message,
-      stack: err.stack,
-      ...Object.fromEntries(Object.getOwnPropertyNames(err).map(p => [p, err[p]]))
-    };
-  }
-  try { return JSON.parse(JSON.stringify(err)); } catch { return { raw: String(err) }; }
+// Check if we have new-style keys (recommended)
+const hasPublishableKey = process.env.SUPABASE_PUBLISHABLE_KEY;
+const hasSecretKey = process.env.SUPABASE_SECRET_KEY;
+
+if (hasPublishableKey && hasSecretKey) {
+  console.log('✅ Using new Supabase publishable/secret keys (recommended)');
+} else {
+  console.log('⚠️  Using legacy JWT-based keys. Consider upgrading to publishable/secret keys');
+  console.log('   See: https://supabase.com/dashboard/project/_/settings/api-keys/new');
 }
 
-// Unified key precedence now accounts for publishable & NEXT_PUBLIC keys
-function selectSupabaseKey() {
-  const secret = process.env.SUPABASE_SECRET_KEY; // new preferred secret
-  const service = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY; // legacy / alt
-  const anon = process.env.SUPABASE_ANON_KEY; // legacy public
-  const publishable = process.env.SUPABASE_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY; // public new style
-  let key = null; let reason = null;
-  if (secret) { key = secret; reason = 'secret'; }
-  else if (service) { key = service; reason = 'service_role'; }
-  else if (anon) { key = anon; reason = 'anon'; }
-  else if (publishable) { key = publishable; reason = 'publishable'; }
-  return {
-    key,
-    reason,
-    hasAnon: !!anon,
-    hasService: !!service,
-    hasSecret: !!secret,
-    hasPublishable: !!publishable,
-    preview: key ? key.slice(0, 8) + '...' : null
-  };
-}
-
-let supabaseClientInstance = null;
-let lastSupabaseDiagnostics = null;
-
-function getSupabaseClient() {
-  if (supabaseClientInstance) return supabaseClientInstance;
-  if (!supabaseUrl) return null;
-  const sel = selectSupabaseKey();
-  if (!sel.key) return null;
-  const { createClient } = require('@supabase/supabase-js');
-  supabaseClientInstance = createClient(supabaseUrl, sel.key, {
-    auth: { autoRefreshToken: false, persistSession: false },
-    global: { headers: { 'X-Client-Info': 'ProspectPro-Server' } }
-  });
-  return supabaseClientInstance;
-}
-
-async function testConnection(options = {}) {
-  const startedAt = new Date().toISOString();
-  const t0 = Date.now();
-  const sel = selectSupabaseKey();
-  const diag = {
-    startedAt,
-    supabaseUrl,
-  keySelected: sel.reason,
-    keyPresent: !!sel.key,
-    keyPreview: sel.preview,
-    hasAnon: sel.hasAnon,
-    hasService: sel.hasService,
-    hasSecret: sel.hasSecret,
-    hasPublishable: sel.hasPublishable,
-  authMode: /secret|service_role/.test(sel.reason || '') ? 'privileged' : 'public',
-  failureCategory: null,
-    success: false,
-    durationMs: null,
-    error: null,
-    errorDetail: null,
-    network: {},
-    authProbe: {},
-    tableProbe: {},
-    recommendations: []
-  };
-
-  if (!supabaseUrl) {
-    diag.error = 'SUPABASE_URL missing';
-    diag.recommendations.push('Set SUPABASE_URL=https://<ref>.supabase.co');
-    diag.durationMs = Date.now() - t0;
-    lastSupabaseDiagnostics = diag;
-    return diag;
-  }
-  if (!sel.key) {
-    diag.error = 'No API key found';
-    diag.recommendations.push('Provide SUPABASE_SECRET_KEY (preferred) or legacy SERVICE_ROLE key.');
-    diag.durationMs = Date.now() - t0;
-    lastSupabaseDiagnostics = diag;
-    return diag;
-  }
-
-  // Network probes
-  const fetchFn = global.fetch || (await import('node-fetch')).default;
-  const host = supabaseUrl.replace(/^https?:\/\//, '').replace(/\/$/, '');
-  diag.network.host = host;
-
-  async function safeFetch(label, url, init) {
-    try {
-      const res = await fetchFn(url, { method: 'GET', ...init });
-      const text = await res.text();
-      return { label, status: res.status, ok: res.ok, snippet: text.slice(0, 120) };
-    } catch (e) {
-      return { label, error: serializeError(e) };
+// Service role client for server-side operations (full database access)
+// Use secret key if available, fallback to service_role JWT
+const serviceKey = hasSecretKey ? process.env.SUPABASE_SECRET_KEY : supabaseServiceKey;
+const supabase = createClient(supabaseUrl, serviceKey, {
+  auth: {
+    autoRefreshToken: false,
+    persistSession: false
+  },
+  global: {
+    headers: {
+      'User-Agent': 'ProspectPro/1.0 Server'
     }
   }
+});
 
-  diag.network.root = await safeFetch('root', supabaseUrl);
-  diag.network.restNoAuth = await safeFetch('restNoAuth', `${supabaseUrl}/rest/v1/`);
-
-  // Auth probe
-  try {
-    const authRes = await fetchFn(`${supabaseUrl}/rest/v1/`, {
-      headers: { apikey: sel.key, Authorization: `Bearer ${sel.key}` }
-    });
-    diag.authProbe.status = authRes.status;
-    if (authRes.status === 401) {
-      diag.failureCategory = diag.failureCategory || 'unauthorized-rest-root';
-      diag.recommendations.push('401 on manual REST probe: key invalid OR insufficient (publishable without policy).');
-    } else if (authRes.status === 404) {
-      // Some deployments may 404 root rest path depending on gateway behavior
-      diag.recommendations.push('REST root 404 (may be normal).');
+// Public client for browser-safe operations
+// Use publishable key if available, fallback to anon JWT
+const publicKey = hasPublishableKey ? process.env.SUPABASE_PUBLISHABLE_KEY : supabaseAnonKey;
+const supabaseAnon = createClient(supabaseUrl, publicKey, {
+  auth: {
+    autoRefreshToken: true,
+    persistSession: true
+  },
+  global: {
+    headers: {
+      'User-Agent': 'ProspectPro/1.0 Client'
     }
-  } catch (e) {
-    diag.authProbe.error = serializeError(e);
-    diag.recommendations.push('Manual REST probe network failure');
   }
+});
 
-  // Supabase JS query
-  let client;
-  try {
-    client = getSupabaseClient();
-    if (!client) {
-      diag.error = 'Client creation failed';
-      diag.durationMs = Date.now() - t0;
-      lastSupabaseDiagnostics = diag;
-      return diag;
-    }
-  } catch (e) {
-    diag.error = 'createClient threw';
-    diag.errorDetail = serializeError(e);
-    diag.durationMs = Date.now() - t0;
-    lastSupabaseDiagnostics = diag;
-    return diag;
-  }
-
-  try {
-    const { error, count } = await client
-      .from('campaigns')
-      .select('id', { count: 'exact', head: true });
-    diag.tableProbe.table = 'campaigns';
-    diag.tableProbe.count = count ?? null;
-    if (error) {
-      diag.tableProbe.error = serializeError(error);
-      diag.error = 'Table probe failed';
-      if (error.code === 'PGRST301' || /api key/i.test(error.message || '')) {
-        diag.failureCategory = 'invalid-key';
-        diag.recommendations.push('REST 401 (PGRST301): invalid / revoked Supabase key. Rotate key.');
-      } else if (error.code === '42P01') {
-        diag.failureCategory = 'missing-table';
-        diag.recommendations.push('Table campaigns missing. Run schema migrations.');
-      } else if (/permission|rls/i.test(error.message || '')) {
-        diag.failureCategory = 'rls-block';
-        if (diag.authMode === 'public') {
-          diag.recommendations.push('RLS blocking public key. Use SUPABASE_SECRET_KEY or add policies for publishable key.');
-        } else {
-          diag.recommendations.push('RLS blocked even with privileged key—review policies.');
-        }
-      } else {
-        diag.failureCategory = 'other-error';
-        diag.recommendations.push('Unexpected PostgREST error; inspect details.');
+// Create authenticated client for specific user operations
+const createUserClient = (accessToken) => {
+  return createClient(supabaseUrl, publicKey, {
+    global: {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        'User-Agent': 'ProspectPro/1.0 User'
       }
-    } else {
-      diag.success = true;
     }
-  } catch (e) {
-    diag.error = 'Query threw';
-    diag.errorDetail = serializeError(e);
-    diag.recommendations.push('Low-level fetch failure in supabase-js');
-    diag.failureCategory = diag.failureCategory || 'query-throw';
-  }
+  });
+};
 
-  diag.durationMs = Date.now() - t0;
-  lastSupabaseDiagnostics = diag;
-  if (diag.success) {
-    console.log(`✅ Supabase connectivity OK (${diag.durationMs}ms) [mode=${diag.authMode}]`);
-  } else {
-    console.error('❌ Supabase connectivity issue:', diag.error, `(${diag.durationMs}ms)`, 'category=', diag.failureCategory);
+// Test database connection
+const testConnection = async () => {
+  try {
+    const { data, error } = await supabase
+      .from('campaigns')
+      .select('count', { count: 'exact', head: true });
+    
+    if (error) throw error;
+    
+    console.log('✅ Supabase connection successful');
+    return true;
+  } catch (error) {
+    console.error('❌ Supabase connection failed:', error.message);
+    return false;
   }
-  return diag;
-}
+};
 
-function getLastSupabaseDiagnostics() { return lastSupabaseDiagnostics; }
+// Initialize database tables if they don't exist
+const initializeDatabase = async () => {
+  try {
+    console.log('🔧 Initializing ProspectPro database schema...');
+    
+    // Check if tables exist by trying to query them
+    const tables = ['campaigns', 'businesses', 'api_usage', 'user_settings'];
+    const tableChecks = [];
+    
+    for (const table of tables) {
+      try {
+        const { data, error } = await supabase
+          .from(table)
+          .select('*')
+          .limit(1);
+        
+        if (!error) {
+          console.log(`✅ Table '${table}' exists`);
+          tableChecks.push(true);
+        } else {
+          console.log(`❌ Table '${table}' missing or inaccessible`);
+          tableChecks.push(false);
+        }
+      } catch (err) {
+        console.log(`❌ Table '${table}' check failed:`, err.message);
+        tableChecks.push(false);
+      }
+    }
+    
+    const allTablesExist = tableChecks.every(check => check === true);
+    
+    if (!allTablesExist) {
+      console.log('⚠️  Some tables are missing. Please run the schema SQL in your Supabase dashboard:');
+      console.log('📂 See: docs/supabase-schema.sql');
+      return false;
+    }
+    
+    console.log('✅ All database tables are ready');
+    return true;
+    
+  } catch (error) {
+    console.error('❌ Database initialization failed:', error.message);
+    return false;
+  }
+};
 
 module.exports = {
+  supabase,
+  supabaseAnon,
+  createUserClient,
   testConnection,
-  getLastSupabaseDiagnostics,
-  getSupabaseClient,
+  initializeDatabase,
   supabaseUrl,
-  supabaseDbPoolerUrl
+  supabaseAnonKey
 };

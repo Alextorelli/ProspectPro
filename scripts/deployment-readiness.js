@@ -116,26 +116,14 @@ async function checkDeploymentReadiness() {
   
   const requiredEnvVars = [
     'SUPABASE_URL',
-    'SUPABASE_SECRET_KEY', // preferred 
+    'SUPABASE_SERVICE_ROLE_KEY',
     'GOOGLE_PLACES_API_KEY',
     'PERSONAL_ACCESS_TOKEN'
   ];
   
-  // Also check for legacy key as fallback
-  const hasSupabaseKey = process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
-  
   let envConfigured = 0;
   requiredEnvVars.forEach(envVar => {
-    if (envVar === 'SUPABASE_SECRET_KEY') {
-      // Check for either new or legacy key
-      if (hasSupabaseKey) {
-        const keyType = process.env.SUPABASE_SECRET_KEY ? 'SUPABASE_SECRET_KEY (new)' : 'SUPABASE_SERVICE_ROLE_KEY (legacy)';
-        log('green', `✅ ${keyType}: Configured`);
-        envConfigured++;
-      } else {
-        log('yellow', `⚠️  SUPABASE_SECRET_KEY or SUPABASE_SERVICE_ROLE_KEY: Not set (configure in Railway)`);
-      }
-    } else if (process.env[envVar]) {
+    if (process.env[envVar]) {
       log('green', `✅ ${envVar}: Configured`);
       envConfigured++;
     } else {
@@ -215,7 +203,7 @@ async function checkDeploymentReadiness() {
     log('cyan', '\n🚀 Next Steps:');
     log('cyan', '1. Set environment variables in Railway dashboard:');
     log('yellow', '   - SUPABASE_URL');
-    log('yellow', '   - SUPABASE_SECRET_KEY (sb_secret_ format preferred)');
+    log('yellow', '   - SUPABASE_SERVICE_ROLE_KEY (sb_secret_ format)');
     log('yellow', '   - GOOGLE_PLACES_API_KEY');
     log('yellow', '   - PERSONAL_ACCESS_TOKEN (for admin dashboard)');
     
