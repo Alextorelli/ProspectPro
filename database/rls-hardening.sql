@@ -12,15 +12,21 @@ ALTER TABLE public.campaign_analytics ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.exported_leads ENABLE ROW LEVEL SECURITY;
 
 -- 2. Drop overly permissive public policies (examples; adjust names if different)
-DROP POLICY IF EXISTS "Users can manage their own campaigns" ON public.campaigns;
-DROP POLICY IF EXISTS "Authenticated users can read system settings" ON public.system_settings;
+DROP POLICY
+IF EXISTS "Users can manage their own campaigns" ON public.campaigns;
+DROP POLICY
+IF EXISTS "Authenticated users can read system settings" ON public.system_settings;
 
 -- 3. Re-create scoped policies (example user-based model)
 -- NOTE: Replace user_id with actual FK column if present; if not, adapt to campaign ownership model.
 
 -- System settings: read-only to authenticated users
 CREATE POLICY "system_settings_select" ON public.system_settings
-  FOR SELECT TO authenticated USING ((SELECT auth.uid()) IS NOT NULL);
+  FOR
+SELECT TO authenticated
+USING
+((SELECT auth.uid())
+IS NOT NULL);
 
 -- Campaigns: owner-only full access (assumes a user_id column exists; if not, skip WITH CHECK until added)
 -- IF campaigns lacks user_id, you must first add it or implement tenant scoping.
