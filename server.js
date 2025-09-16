@@ -9,6 +9,17 @@ const app = express();
 const PORT = process.env.PORT || 8080;
 
 // =====================================
+// MIDDLEWARE SETUP
+// =====================================
+
+// Body parsing middleware
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// Static files
+app.use(express.static(path.join(__dirname, 'public')));
+
+// =====================================
 // PRODUCTION DATABASE CONFIGURATION (NO MOCK DATA)
 // =====================================
 
@@ -126,103 +137,13 @@ async function initializeSupabase() {
     console.error('❌ Supabase initialization failed:', error.message);
     throw error;
   }
-}s = require('express');
-const cors = require('cors');
-const helmet = require('helmet');
-const path = require('path');
-require('dotenv').config();
-
-const app = express();
-const PORT = process.env.PORT || 3000;
+}
 
 // =====================================
-// SECURITY & MIDDLEWARE SETUP
+// GOOGLE PLACES API SETUP
 // =====================================
 
-// Security headers
-app.use(helmet({
-  contentSecurityPolicy: {
-    directives: {
-      defaultSrc: ["'self'"],
-      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
-      fontSrc: ["'self'", "https://fonts.gstatic.com"],
-      scriptSrc: ["'self'"],
-      objectSrc: ["'none'"],
-      upgradeInsecureRequests: [],
-    },
-  },
-}));
-
-// CORS configuration
-const allowedOrigins = process.env.ALLOWED_ORIGINS 
-  ? process.env.ALLOWED_ORIGINS.split(',')
-  : ['http://localhost:3000'];
-
-app.use(cors({
-  origin: process.env.NODE_ENV === 'production' 
-    ? allowedOrigins 
-    : true,
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
-}));
-
-// Rate limiting
-const rateLimiter = new RateLimiterMemory({
-  keyPrefix: 'prospect-pro-api',
-  points: process.env.NODE_ENV === 'production' ? 100 : 1000, // requests
-  duration: 60, // per 60 seconds
-});
-
-app.use(async (req, res, next) => {
-  try {
-    await rateLimiter.consume(req.ip);
-    next();
-  } catch (rejRes) {
-    res.status(429).json({
-      error: 'Too many requests',
-      retryAfter: Math.round(rejRes.msBeforeNext / 1000) || 1,
-    });
-  }
-});
-
-// Body parsing middleware
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
-
-// =====================================
-// AUTHENTICATION MIDDLEWARE
-// =====================================
-
-// Simple auth for personal use in production
-const authMiddleware = (req, res, next) => {
-  // Skip auth in development if configured
-  if (process.env.NODE_ENV !== 'production' && process.env.SKIP_AUTH_IN_DEV === 'true') {
-    req.user = { id: 'dev-user-id', email: 'dev@example.com' }; // Mock user for development
-    return next();
-  }
-
-  // Check for personal access token in production
-  if (process.env.NODE_ENV === 'production') {
-    const authHeader = req.headers.authorization;
-    const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
-
-    if (!token || token !== process.env.PERSONAL_ACCESS_TOKEN) {
-      return res.status(401).json({ 
-        error: 'Unauthorized access',
-        message: 'Valid access token required'
-      });
-    }
-
-    // For personal use, we can set a default user
-    req.user = { 
-      id: process.env.PERSONAL_USER_ID || 'personal-user',
-      email: process.env.PERSONAL_EMAIL || 'personal@example.com'
-    };
-  }
-
-  next();
-};
+const googlePlacesClient = new Client({})
 
 // Apply auth middleware to API routes
 app.use('/api', authMiddleware);
