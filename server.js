@@ -11,7 +11,7 @@ const {
 const { Client } = require('@googlemaps/google-maps-services-js');
 
 const app = express();
-const PORT = process.env.PORT || 8080;
+const PORT = process.env.PORT || 3000;
 
 // =====================================
 // MIDDLEWARE SETUP
@@ -343,8 +343,8 @@ app.use((error, req, res, next) => {
 // =====================================
 
 // Early bind server then run diagnostics async
-app.listen(PORT, () => {
-  console.log(`🚀 ProspectPro server listening on port ${PORT}`);
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`🚀 ProspectPro server listening on port ${PORT} (host: 0.0.0.0)`);
   console.log(`📊 Health: http://localhost:${PORT}/health`);
   console.log(`🛠️ Diagnostics: http://localhost:${PORT}/diag`);
   console.log('⏳ Running initial Supabase diagnostics...');
