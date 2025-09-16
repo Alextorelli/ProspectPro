@@ -167,7 +167,13 @@ app.get('/health', (req, res) => {
   if (!diag) return res.status(200).json({ 
     status: 'starting', 
     degradedMode,
-    bootStatus: bootHealth
+    bootStatus: bootHealth,
+    environment: {
+      nodeEnv: process.env.NODE_ENV,
+      port: PORT,
+      platform: process.platform,
+      nodeVersion: process.version
+    }
   });
   
   const payload = {
@@ -177,6 +183,14 @@ app.get('/health', (req, res) => {
     environment: process.env.NODE_ENV,
     version: '2.0.0',
     bootHealth,
+    deployment: {
+      port: PORT,
+      platform: process.platform,
+      nodeVersion: process.version,
+      uptime: process.uptime(),
+      allowDegraded: process.env.ALLOW_DEGRADED_START === 'true',
+      envVarsDetected: Object.keys(process.env).filter(k => /SUPABASE|GOOGLE|HUNTER|NEVERBOUNCE|SCRAPINGDOG|PORT|NODE_ENV/.test(k)).length
+    },
     supabase: {
       success: diag.success,
       error: diag.success ? null : diag.error,
@@ -410,20 +424,53 @@ function buildSanitizedEnv() {
 }
 
 app.get('/diag', async (req, res) => {
+  const bootReport = bootDebugger.getPhaseReport();
+  
   if (req.query.force === 'true') {
+    console.log('🔄 Forcing fresh Supabase diagnostics...');
     startupDiagnostics = await testConnection();
     degradedMode = !startupDiagnostics.success;
   }
-  res.json({
+  
+  const diagnosticData = {
     service: 'ProspectPro',
     timestamp: new Date().toISOString(),
-    degradedMode,
-    startupDiagnostics,
-    lastDiagnostics: getLastSupabaseDiagnostics(),
+    deployment: {
+      platform: process.platform,
+      nodeVersion: process.version,
+      port: PORT,
+      pid: process.pid,
+      uptimeSeconds: process.uptime(),
+      memoryUsage: process.memoryUsage(),
+      degradedMode,
+      allowDegraded: process.env.ALLOW_DEGRADED_START === 'true'
+    },
+    boot: {
+      bootId: bootReport.bootId,
+      totalBootTime: bootReport.totalBootTime,
+      successRate: bootReport.successRate,
+      failedPhases: bootReport.failedPhases,
+      phases: bootReport.phases.map(p => ({
+        name: p.name,
+        success: p.success,
+        duration: p.duration,
+        description: p.description
+      }))
+    },
+    supabase: {
+      startup: startupDiagnostics,
+      current: getLastSupabaseDiagnostics()
+    },
     environment: buildSanitizedEnv(),
-    pid: process.pid,
-    uptimeSeconds: process.uptime()
-  });
+    railwaySpecific: {
+      envDetected: !!process.env.RAILWAY_ENVIRONMENT,
+      publicDomain: process.env.RAILWAY_PUBLIC_DOMAIN || 'not-set',
+      serviceId: process.env.RAILWAY_SERVICE_ID || 'not-set',
+      environmentId: process.env.RAILWAY_ENVIRONMENT_ID || 'not-set'
+    }
+  };
+  
+  res.json(diagnosticData);
 });
 
 // =====================================
@@ -584,6 +631,15 @@ const server = app.listen(PORT, '0.0.0.0', () => {
 
 // Enhanced async boot phases with comprehensive monitoring
 async function performAsyncBootPhases() {
+  // Pre-connection environment diagnostics
+  console.log(`🔍 Pre-Connection Diagnostics:`);
+  console.log(`   - SUPABASE_URL: ${process.env.SUPABASE_URL ? 'SET' : 'MISSING'}`);
+  console.log(`   - SUPABASE_SECRET_KEY: ${process.env.SUPABASE_SECRET_KEY ? 'SET' : 'MISSING'}`);
+  console.log(`   - SUPABASE_SERVICE_ROLE_KEY: ${process.env.SUPABASE_SERVICE_ROLE_KEY ? 'SET' : 'MISSING'}`);
+  console.log(`   - SUPABASE_ANON_KEY: ${process.env.SUPABASE_ANON_KEY ? 'SET' : 'MISSING'}`);
+  console.log(`   - Process UID: ${process.getuid ? process.getuid() : 'N/A'}`);
+  console.log(`   - Memory Usage: ${JSON.stringify(process.memoryUsage())}`);
+  
   bootDebugger.startPhase('supabase-test', 'Testing Supabase connectivity and authentication');
   const start = Date.now();
   
@@ -611,6 +667,12 @@ async function performAsyncBootPhases() {
         bootDebugger.endPhase(false, new Error(`Degraded mode: ${startupDiagnostics.error}`));
         console.error('🟠 Warning: Supabase connection failed. Continuing in degraded mode.');
         console.warn('🟠 Periodic retry every 60s enabled.');
+        console.warn('🟠 Service will remain alive for debugging Railway deployment.');
+        console.warn(`🟠 Debug Info:`);
+        console.warn(`   - Failure: ${startupDiagnostics.error}`);
+        console.warn(`   - Recommendations: ${JSON.stringify(startupDiagnostics.recommendations || [])}`);
+        console.warn(`   - Auth Mode: ${startupDiagnostics.authMode || 'unknown'}`);
+        console.warn(`   - Duration: ${startupDiagnostics.durationMs || 'N/A'}ms`);
         
         // Setup retry logic with metrics
         setInterval(async () => {
@@ -640,9 +702,19 @@ async function performAsyncBootPhases() {
     metrics.recordError('supabase_connection', 'startup', 'critical', error);
     bootDebugger.endPhase(false, error);
     
+    console.error('🔥 Exception during Supabase connection test:');
+    console.error(`   - Error: ${error.message}`);
+    console.error(`   - Stack: ${error.stack}`);
+    console.error(`   - Duration: ${duration}ms`);
+    
     if (process.env.ALLOW_DEGRADED_START !== 'true') {
       console.error('🔥 Fatal: Supabase connection threw exception and degraded mode disabled');
+      console.error('🔥 Set ALLOW_DEGRADED_START=true to continue deployment without DB');
       process.exit(1);
+    } else {
+      degradedMode = true;
+      console.error('🟠 Continuing in degraded mode due to connection exception');
+      console.error('🟠 Service endpoints will still respond for debugging');
     }
   }
 

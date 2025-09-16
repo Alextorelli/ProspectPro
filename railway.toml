@@ -24,6 +24,8 @@ staticUrl = true         # Enable static URL for consistent monitoring
 # Environment variables (Railway will inject from project settings)
 [environment]
 NODE_ENV = "production"
+# For initial deployment debugging - remove once stable
+ALLOW_DEGRADED_START = "true"
 # PORT is automatically provided by Railway - do not override
 
 # Supabase Configuration Notes:
