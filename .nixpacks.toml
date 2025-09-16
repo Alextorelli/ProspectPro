@@ -1,0 +1,8 @@
+[variables]
+NODE_ENV = "production"
+
+[phases.build]
+cmds = ["npm ci"]
+
+[phases.start]
+cmd = "node server.js"

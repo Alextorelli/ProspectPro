@@ -508,6 +508,8 @@ CREATE TRIGGER update_system_settings_updated_at BEFORE UPDATE ON system_setting
 ```env
 SUPABASE_URL=https://your-project-id.supabase.co
 SUPABASE_SERVICE_ROLE_KEY=eyJ...your-service-role-key
+# NOTE: Use PUBLISHABLE key for client-side access, SERVICE_ROLE for server-side
+SUPABASE_ANON_KEY=eyJ...your-anon-public-key
 GOOGLE_PLACES_API_KEY=AIza...your-google-key
 HUNTER_IO_API_KEY=your-hunter-api-key
 NEVERBOUNCE_API_KEY=NB_your-neverbounce-key
@@ -526,13 +528,17 @@ NODE_ENV=production
 
 4. **Deploy Application**
    - Railway will automatically detect Node.js and deploy
+   - **Build Fix**: The `.nixpacks.toml` file prevents cache conflicts during build
    - Monitor deployment in "Deployments" tab
    - Check logs for any startup errors
+   - **Expected build time**: 2-3 minutes without cache conflicts
 
 5. **Update Google Cloud API Restrictions**
-   - Get your Railway app's IP address from deployment logs
+   - Get your Railway app's domain from deployment (e.g., `your-app-abc123.railway.app`)
    - Return to Google Cloud Console → "APIs & Services" → "Credentials"
-   - Edit your API key restrictions to include Railway's IP
+   - Edit your API key restrictions:
+     - **Application restrictions**: HTTP referrers (websites)
+     - **Website restrictions**: `https://your-app-abc123.railway.app/*`
 
 ### Step 7: New York Open Data (Optional Enhancement)
 
@@ -559,12 +565,17 @@ NODE_ENV=production
    - Visit your Railway app URL (e.g., `https://your-app.railway.app`)
    - You should see the ProspectPro dashboard
 
-2. **Test API Connections**
+2. **Verify Supabase Key Configuration**
+   - **If using PUBLISHABLE key**: Client-side features work, server-side may be limited
+   - **If using SERVICE_ROLE key**: Full server-side access to database
+   - **For production**: Use SERVICE_ROLE key for comprehensive database access
+
+3. **Test API Connections**
    - Navigate to Admin Dashboard (`/admin-dashboard.html`)
    - Enter your admin password
    - Check "API Health Status" section - all should show "✅ Connected"
 
-3. **Run Sample Campaign**
+4. **Run Sample Campaign**
    - Create a test campaign with small limits:
      - Budget: $5.00
      - Lead limit: 10
@@ -572,7 +583,7 @@ NODE_ENV=production
      - Location: "San Francisco, CA"
    - Monitor the campaign progress and costs
 
-4. **Verify Database Integration**
+5. **Verify Database Integration**
    - Return to Supabase → "Table Editor"
    - Check that data is being written to:
      - `campaigns` table (your test campaign)
