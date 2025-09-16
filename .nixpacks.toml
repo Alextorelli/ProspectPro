@@ -1,8 +1,14 @@
 [variables]
 NODE_ENV = "production"
 
-[phases.build]
+[phases.setup]
+nixPkgs = ["nodejs_22", "npm-9_x"]
+
+[phases.install]
 cmds = ["npm ci"]
+
+[phases.build]
+# Skip the problematic production build step
 
 [phases.start]
 cmd = "node server.js"

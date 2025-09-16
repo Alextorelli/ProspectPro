@@ -527,11 +527,11 @@ NODE_ENV=production
    - Wait for SSL certificate provisioning
 
 4. **Deploy Application**
-   - Railway will automatically detect Node.js and deploy
-   - **Build Fix**: The `.nixpacks.toml` file prevents cache conflicts during build
+   - Railway will automatically detect the custom Dockerfile and use it instead of Nixpacks
+   - **Build Fix**: The custom Dockerfile prevents cache conflicts
    - Monitor deployment in "Deployments" tab
-   - Check logs for any startup errors
-   - **Expected build time**: 2-3 minutes without cache conflicts
+   - Check logs for successful Docker build
+   - **Expected build time**: 3-4 minutes with Docker build
 
 5. **Update Google Cloud API Restrictions**
    - Get your Railway app's domain from deployment (e.g., `your-app-abc123.railway.app`)
