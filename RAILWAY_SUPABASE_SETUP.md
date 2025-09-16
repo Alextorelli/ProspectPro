@@ -26,7 +26,7 @@ In your Railway project dashboard, set these environment variables:
 ```bash
 # Required for supabase-js client
 SUPABASE_URL=https://<project-ref>.supabase.co
-SUPABASE_SERVICE_ROLE_KEY=sb_secret_your_actual_secret_key_here
+SUPABASE_SECRET_KEY=sb_secret_your_actual_secret_key_here
 SUPABASE_ANON_KEY=your_anon_key_here
 
 # Optional: For raw Postgres access (DO NOT use for supabase-js)
@@ -77,7 +77,7 @@ NODE_ENV=production
 1. **Update Railway Environment Variables** (project dashboard → Variables):
    ```bash
    SUPABASE_URL=https://<project-ref>.supabase.co
-   SUPABASE_SERVICE_ROLE_KEY=sb_secret_...
+   SUPABASE_SECRET_KEY=sb_secret_...
    SUPABASE_ANON_KEY=sb_anon_...
    SUPABASE_DB_POOLER_URL=postgresql://postgres.<ref>:<password>@aws-0-<region>.pooler.supabase.com:6543/postgres
    ```

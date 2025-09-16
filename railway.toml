@@ -27,10 +27,10 @@ NODE_ENV = "production"
 # PORT is automatically provided by Railway - do not override
 
 # Supabase Configuration Notes:
-# Use Transaction Pooler URL format in Railway environment variables:
-# SUPABASE_URL = "postgresql://postgres.[ref]:[password]@aws-0-[region].pooler.supabase.com:6543/postgres"
-# SUPABASE_SERVICE_ROLE_KEY = "sb_secret_your_key_here"
-# SUPABASE_ANON_KEY = "your_anon_key_here"
+# Use HTTPS API URL format in Railway environment variables:
+# SUPABASE_URL = "https://your-project-ref.supabase.co"
+# SUPABASE_SECRET_KEY = "sb_secret_your_actual_key_here" (preferred)
+# Alternative legacy: SUPABASE_SERVICE_ROLE_KEY = "eyJ..." (still supported)
 
 # Resource monitoring and alerting
 [observability]

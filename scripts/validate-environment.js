@@ -32,7 +32,8 @@ function validateSecretSecurity() {
   
   // Check for exposed secrets in environment
   const sensitiveKeys = [
-    'SUPABASE_SERVICE_ROLE_KEY',
+    'SUPABASE_SECRET_KEY',
+    'SUPABASE_SERVICE_ROLE_KEY', 
     'GOOGLE_PLACES_API_KEY', 
     'HUNTER_IO_API_KEY',
     'NEVERBOUNCE_API_KEY'
@@ -123,7 +124,8 @@ async function testSupabaseConnection() {
   log('blue', '🔌 Testing Supabase connection...');
   
   try {
-    if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    const supabaseKey = process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
+    if (!process.env.SUPABASE_URL || !supabaseKey) {
       throw new Error('Supabase credentials not configured');
     }
     
@@ -132,7 +134,7 @@ async function testSupabaseConnection() {
     
     const supabase = createClient(
       process.env.SUPABASE_URL,
-      process.env.SUPABASE_SERVICE_ROLE_KEY,
+      supabaseKey,
       {
         auth: {
           autoRefreshToken: false,

@@ -30,11 +30,16 @@ async function initializeDatabase() {
   // Validate environment variables
   const requiredVars = [
     'SUPABASE_URL',
-    'SUPABASE_SERVICE_ROLE_KEY',
     'SUPABASE_ANON_KEY'
   ];
   
   const missingVars = requiredVars.filter(key => !process.env[key]);
+  
+  // Check for either new or legacy Supabase key
+  const supabaseKey = process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!supabaseKey) {
+    missingVars.push('SUPABASE_SECRET_KEY (or SUPABASE_SERVICE_ROLE_KEY)');
+  }
   
   if (missingVars.length > 0) {
     log('red', '❌ Missing required environment variables:');
@@ -50,7 +55,7 @@ async function initializeDatabase() {
     log('blue', '🔌 Connecting to Supabase...');
     const supabase = createClient(
       process.env.SUPABASE_URL,
-      process.env.SUPABASE_SERVICE_ROLE_KEY
+      supabaseKey
     );
     
     // Test basic connection

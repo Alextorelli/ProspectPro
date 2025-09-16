@@ -30,7 +30,7 @@ ProspectPro is a premium lead generation platform that discovers and validates r
 ## 🚀 Quick Start
 
 1. **Deploy to Railway** – Refer to the consolidated [Deployment Guide](DEPLOYMENT_GUIDE.md)
-2. **Configure Supabase** – Set `SUPABASE_URL` (HTTPS) + `SUPABASE_SERVICE_ROLE_KEY` (or `SUPABASE_SECRET_KEY` new format)
+2. **Configure Supabase** – Set `SUPABASE_URL` (HTTPS) + `SUPABASE_SECRET_KEY` (preferred new format) or `SUPABASE_SERVICE_ROLE_KEY` (legacy)
 3. **Add API Keys** – Google Places required; others optional but recommended
 4. **(Optional) Enable degraded mode** by setting `ALLOW_DEGRADED_START=true` to keep container alive while fixing DB config
 5. **Access your app** at `https://your-app.railway.app`
@@ -45,8 +45,8 @@ ProspectPro is a premium lead generation platform that discovers and validates r
 
 ### Connection & Key Precedence
 Environment variables used by the server (in order of selection for Supabase client):
-1. `SUPABASE_SECRET_KEY` (new secure key)
-2. `SUPABASE_SERVICE_ROLE_KEY` (legacy service role)
+1. `SUPABASE_SECRET_KEY` (preferred new secure format: sb_secret_...)
+2. `SUPABASE_SERVICE_ROLE_KEY` (legacy service role: eyJ... JWT format)
 3. `SUPABASE_ANON_KEY` (fallback / reduced capability)
 4. `SUPABASE_PUBLISHABLE_KEY` (last resort; limited access)
 

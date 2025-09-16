@@ -33,13 +33,10 @@ ProspectPro is now a production-ready lead generation platform with:
 ## Deployment in 4 Steps
 
 1. **Setup accounts** (Railway, Supabase, Google Cloud)
-2. **Configure env vars**: `SUPABASE_URL` + secure key (`SUPABASE_SECRET_KEY` or `SUPABASE_SERVICE_ROLE_KEY`)
-3. *(Optional)* Add `ALLOW_DEGRADED_START=true` for first deploy to inspect `/diag` if DB misconfig occurs
-4. **Access your app** at `https://your-app.railway.app`
-
-1. **Setup accounts** (Railway, Supabase, Google Cloud)
-2. **Follow DEPLOYMENT_GUIDE.md** - Web dashboard setup only
+2. **Configure env vars**: `SUPABASE_URL` + secure key (`SUPABASE_SECRET_KEY` preferred, fallback to `SUPABASE_SERVICE_ROLE_KEY`)
 3. **Access your app** at `https://your-app.railway.app`
+
+*(Optional)* Add `ALLOW_DEGRADED_START=true` for first deploy to inspect `/diag` if DB misconfig occurs
 
 ## Key Features
 
@@ -73,7 +70,7 @@ ProspectPro is now a production-ready lead generation platform with:
 ## Security & Compliance ✅
 
 - All secrets via environment variables (no hardcoded keys)
-- Modern Supabase API keys (new `sb_secret_` format for enhanced security)
+- Modern Supabase API keys (new `sb_secret_` format preferred over legacy JWT tokens)
 - HTTPS-only traffic encryption
 - Row Level Security database policies
 - Token-based admin authentication

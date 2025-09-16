@@ -5,7 +5,10 @@ Deploy ProspectPro as a web application that you can access from any browser wit
 
 ---
 
-## 📋 Quick Start Summary
+33. **Copy the new Secret key** (`sb_secret_...`)
+4. **Update `SUPABASE_SECRET_KEY` in Railway variables**
+5. Redeploy your app*Copy the new Secret key** (`sb_secret_...`)
+4. Update `SUPABASE_SECRET_KEY` in Railway variables 📋 Quick Start Summary
 
 **What you'll get:**
 - 🌐 **Web-based interface** at `https://your-app-name.railway.app`
@@ -108,21 +111,21 @@ In your Railway project dashboard:
 | `NODE_ENV` | `production` | `production` |
 | `PORT` | `8080` | `8080` |
 | `SUPABASE_URL` | Your Supabase URL | `https://abc123.supabase.co` |
-| `SUPABASE_SERVICE_ROLE_KEY` | Your **secret key** | `sb_secret_xxx...` |
+| `SUPABASE_SECRET_KEY` | Your **new secret key** | `sb_secret_xxx...` |
 | `GOOGLE_PLACES_API_KEY` | Your Google API key | `AIzaS...` |
 | `PERSONAL_ACCESS_TOKEN` | Create a secure token | `ProspectPro2024_SecureToken123` |
 | `ADMIN_PASSWORD` | Your admin password | `YourSecurePassword123!` |
 
-> **Important**: Use the new **Secret key** (`sb_secret_...`) format, not the legacy service role key. The new format offers better security and rotation capabilities.
+> **Important**: Use the new **Secret key** (`sb_secret_...`) format for better security. The legacy JWT service role key is still supported but deprecated.
 
 ### Supabase Key Selection Order
 The server automatically selects the first available key in this order:
-1. `SUPABASE_SECRET_KEY`
-2. `SUPABASE_SERVICE_ROLE_KEY`
+1. `SUPABASE_SECRET_KEY` (preferred: sb_secret_...)
+2. `SUPABASE_SERVICE_ROLE_KEY` (legacy: eyJ... JWT)
 3. `SUPABASE_ANON_KEY`
 4. `SUPABASE_PUBLISHABLE_KEY`
 
-Provide the most privileged safe server-side key available (prefer `sb_secret_...`).
+Use the **Secret key** (`sb_secret_...`) from Supabase → Settings → API → Secret keys.
 
 **Optional variables** (add if you have the API keys):
 - `HUNTER_IO_API_KEY`
@@ -269,7 +272,7 @@ If you're using **legacy keys** and want to migrate:
 1. Go to **Settings** → **API** in Supabase dashboard
 2. Click "Generate new API keys" 
 3. Copy the new **Secret key** (`sb_secret_...`)
-4. Update `SUPABASE_SERVICE_ROLE_KEY` in Railway variables
+4. **Update `SUPABASE_SECRET_KEY` in Railway variables**
 5. Redeploy your app
 
 **Both key formats work simultaneously** - no downtime required for migration.
