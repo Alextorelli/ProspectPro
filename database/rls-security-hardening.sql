@@ -145,6 +145,33 @@ CREATE POLICY "lead_emails_insert_via_ownership" ON public.lead_emails
     )
   );
 
+CREATE POLICY "lead_emails_update_via_ownership" ON public.lead_emails
+  FOR UPDATE TO authenticated
+  USING (
+    EXISTS (
+      SELECT 1 FROM public.enhanced_leads el
+      JOIN public.campaigns c ON c.id = el.campaign_id
+      WHERE el.id = lead_emails.lead_id AND c.user_id = auth.uid()
+    )
+  )
+  WITH CHECK (
+    EXISTS (
+      SELECT 1 FROM public.enhanced_leads el
+      JOIN public.campaigns c ON c.id = el.campaign_id
+      WHERE el.id = lead_id AND c.user_id = auth.uid()
+    )
+  );
+
+CREATE POLICY "lead_emails_delete_via_ownership" ON public.lead_emails
+  FOR DELETE TO authenticated
+  USING (
+    EXISTS (
+      SELECT 1 FROM public.enhanced_leads el
+      JOIN public.campaigns c ON c.id = el.campaign_id
+      WHERE el.id = lead_emails.lead_id AND c.user_id = auth.uid()
+    )
+  );
+
 -- LEAD_SOCIAL_PROFILES TABLE: Access via enhanced_leads->campaign ownership chain
 CREATE POLICY "lead_social_select_via_ownership" ON public.lead_social_profiles
   FOR SELECT TO authenticated
@@ -163,6 +190,33 @@ CREATE POLICY "lead_social_insert_via_ownership" ON public.lead_social_profiles
       SELECT 1 FROM public.enhanced_leads el
       JOIN public.campaigns c ON c.id = el.campaign_id
       WHERE el.id = lead_id AND c.user_id = auth.uid()
+    )
+  );
+
+CREATE POLICY "lead_social_update_via_ownership" ON public.lead_social_profiles
+  FOR UPDATE TO authenticated
+  USING (
+    EXISTS (
+      SELECT 1 FROM public.enhanced_leads el
+      JOIN public.campaigns c ON c.id = el.campaign_id
+      WHERE el.id = lead_social_profiles.lead_id AND c.user_id = auth.uid()
+    )
+  )
+  WITH CHECK (
+    EXISTS (
+      SELECT 1 FROM public.enhanced_leads el
+      JOIN public.campaigns c ON c.id = el.campaign_id
+      WHERE el.id = lead_id AND c.user_id = auth.uid()
+    )
+  );
+
+CREATE POLICY "lead_social_delete_via_ownership" ON public.lead_social_profiles
+  FOR DELETE TO authenticated
+  USING (
+    EXISTS (
+      SELECT 1 FROM public.enhanced_leads el
+      JOIN public.campaigns c ON c.id = el.campaign_id
+      WHERE el.id = lead_social_profiles.lead_id AND c.user_id = auth.uid()
     )
   );
 
@@ -206,6 +260,30 @@ CREATE POLICY "analytics_insert_via_campaign" ON public.campaign_analytics
     )
   );
 
+CREATE POLICY "analytics_update_via_campaign" ON public.campaign_analytics
+  FOR UPDATE TO authenticated
+  USING (
+    EXISTS (
+      SELECT 1 FROM public.campaigns c
+      WHERE c.id = campaign_analytics.campaign_id AND c.user_id = auth.uid()
+    )
+  )
+  WITH CHECK (
+    EXISTS (
+      SELECT 1 FROM public.campaigns c
+      WHERE c.id = campaign_id AND c.user_id = auth.uid()
+    )
+  );
+
+CREATE POLICY "analytics_delete_via_campaign" ON public.campaign_analytics
+  FOR DELETE TO authenticated
+  USING (
+    EXISTS (
+      SELECT 1 FROM public.campaigns c
+      WHERE c.id = campaign_analytics.campaign_id AND c.user_id = auth.uid()
+    )
+  );
+
 -- API_COST_TRACKING TABLE: Access via campaign ownership
 CREATE POLICY "cost_tracking_select_via_campaign" ON public.api_cost_tracking
   FOR SELECT TO authenticated
@@ -227,10 +305,37 @@ CREATE POLICY "cost_tracking_insert_via_campaign" ON public.api_cost_tracking
     )
   );
 
+-- LEAD_QUALIFICATION_METRICS TABLE: Access via enhanced_leads->campaign ownership
+CREATE POLICY "qualification_select_via_ownership" ON public.lead_qualification_metrics
+  FOR SELECT TO authenticated
+  USING (
+    EXISTS (
+      SELECT 1 FROM public.enhanced_leads el
+      JOIN public.campaigns c ON c.id = el.campaign_id
+      WHERE el.id = lead_qualification_metrics.lead_id AND c.user_id = auth.uid()
+    )
+  );
+
+CREATE POLICY "qualification_insert_via_ownership" ON public.lead_qualification_metrics
+  FOR INSERT TO authenticated
+  WITH CHECK (
+    EXISTS (
+      SELECT 1 FROM public.enhanced_leads el
+      JOIN public.campaigns c ON c.id = el.campaign_id
+      WHERE el.id = lead_id AND c.user_id = auth.uid()
+    )
+  );
+
 -- SERVICE_HEALTH_METRICS TABLE: Read-only for authenticated users (system metrics)
 CREATE POLICY "health_metrics_read_authenticated" ON public.service_health_metrics
   FOR SELECT TO authenticated
   USING (true);
+
+-- Restrict service health metrics modifications to service role only
+CREATE POLICY "health_metrics_modify_service_only" ON public.service_health_metrics
+  FOR ALL TO service_role
+  USING (true)
+  WITH CHECK (true);
 
 -- DASHBOARD_EXPORTS TABLE: Access via campaign ownership
 CREATE POLICY "exports_select_via_campaign" ON public.dashboard_exports
@@ -250,6 +355,33 @@ CREATE POLICY "exports_insert_via_campaign" ON public.dashboard_exports
     EXISTS (
       SELECT 1 FROM public.campaigns c
       WHERE c.id = campaign_id AND c.user_id = auth.uid()
+    )
+  );
+
+CREATE POLICY "exports_update_via_campaign" ON public.dashboard_exports
+  FOR UPDATE TO authenticated
+  USING (
+    campaign_id IS NULL OR
+    EXISTS (
+      SELECT 1 FROM public.campaigns c
+      WHERE c.id = dashboard_exports.campaign_id AND c.user_id = auth.uid()
+    )
+  )
+  WITH CHECK (
+    campaign_id IS NULL OR
+    EXISTS (
+      SELECT 1 FROM public.campaigns c
+      WHERE c.id = campaign_id AND c.user_id = auth.uid()
+    )
+  );
+
+CREATE POLICY "exports_delete_via_campaign" ON public.dashboard_exports
+  FOR DELETE TO authenticated
+  USING (
+    campaign_id IS NULL OR
+    EXISTS (
+      SELECT 1 FROM public.campaigns c
+      WHERE c.id = dashboard_exports.campaign_id AND c.user_id = auth.uid()
     )
   );
 
@@ -289,6 +421,9 @@ CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_cost_tracking_campaign_id
 
 CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_dashboard_exports_campaign_id 
   ON public.dashboard_exports(campaign_id) WHERE campaign_id IS NOT NULL;
+
+CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_qualification_lead_id 
+  ON public.lead_qualification_metrics(lead_id) WHERE lead_id IS NOT NULL;
 
 -- Composite indexes for common query patterns
 CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_enhanced_leads_campaign_created 
@@ -338,7 +473,7 @@ LANGUAGE sql
 SECURITY DEFINER
 SET search_path = ''
 AS $$
-  SELECT auth.uid();
+  SELECT (auth.uid())::uuid;
 $$;
 
 DO $$
@@ -442,6 +577,20 @@ BEGIN
     RAISE NOTICE 'Supported Tables:';
     RAISE NOTICE '- enhanced_leads (via campaign ownership)';
     RAISE NOTICE '- lead_emails (via lead->campaign chain)';
+    RAISE NOTICE '- lead_social_profiles (via lead->campaign chain)';
+    RAISE NOTICE '- campaigns (direct user ownership)';
+    RAISE NOTICE '- api_usage_log (via campaign ownership)';
+    RAISE NOTICE '- campaign_analytics (via campaign ownership)';
+    RAISE NOTICE '- api_cost_tracking (via campaign ownership)';
+    RAISE NOTICE '- lead_qualification_metrics (via lead->campaign chain)';
+    RAISE NOTICE '- service_health_metrics (read-only for all users)';
+    RAISE NOTICE '- dashboard_exports (via campaign ownership)';
+    RAISE NOTICE '';
+    RAISE NOTICE 'Next Steps:';
+    RAISE NOTICE '1. Create database tables using enhanced-supabase-schema.sql';
+    RAISE NOTICE '2. Test application functionality with RLS enabled';
+    RAISE NOTICE '3. Monitor policy performance in production';
+    RAISE NOTICE '4. Review access logs for anomalies';SE NOTICE '- lead_emails (via lead->campaign chain)';
     RAISE NOTICE '- lead_social_profiles (via lead->campaign chain)';
     RAISE NOTICE '- campaigns (direct user ownership)';
     RAISE NOTICE '- api_usage_log (via campaign ownership)';

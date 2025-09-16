@@ -112,10 +112,17 @@ class SecurityHardening {
             return callback(null, true);
           }
 
+          // Debug: Log origin for troubleshooting
+          console.log(
+            `🔍 CORS origin check: "${origin}" - Allowed: [${this.securityConfig.allowedOrigins.join(
+              ", "
+            )}]`
+          );
+
           if (this.securityConfig.allowedOrigins.includes(origin)) {
             callback(null, true);
           } else {
-            console.warn(`🚫 CORS blocked: ${origin}`);
+            console.warn(`🚫 CORS blocked: "${origin}"`);
             callback(new Error("CORS: Origin not allowed"));
           }
         },
