@@ -27,28 +27,8 @@ NODE_ENV = "production"
 # PORT is automatically provided by Railway - do not override
 
 # Supabase Configuration Notes:
-# Use HTTPS API URL format in Railway environment variables:
-# SUPABASE_URL = "https://your-project-ref.supabase.co"
-# SUPABASE_SECRET_KEY = "sb_secret_your_actual_key_here" (preferred)
-# Alternative legacy: SUPABASE_SERVICE_ROLE_KEY = "eyJ..." (still supported)
-
-# Resource monitoring and alerting
-[observability]
-enabled = true
-alertOnHighCPU = true
-alertOnHighMemory = true  
-alertOnErrors = true
-
-# Enable Railway's native analytics and cost monitoring
-enableMetrics = true
-enableLogs = true
-logLevel = "info"
-
-# Admin dashboard configuration
-[admin]
-# Custom admin dashboard available at /admin-dashboard.html
-# Requires authentication via PERSONAL_ACCESS_TOKEN
-dashboardPath = "/admin-dashboard.html"
-enableBusinessMetrics = true
-enableCostTracking = true
-budgetAlerts = true
+# Set these in Railway's Environment Variables UI:
+# SUPABASE_URL = "https://your-project-ref.supabase.co"  
+# SUPABASE_SECRET_KEY = "sb_secret_your_actual_key_here"
+# GOOGLE_PLACES_API_KEY = "your_google_api_key"
+# PERSONAL_ACCESS_TOKEN = "your_admin_token"
