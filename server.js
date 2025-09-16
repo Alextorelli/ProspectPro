@@ -96,6 +96,29 @@ app.get('/health', (req, res) => {
   res.status(200).json(payload);
 });
 
+// Lightweight liveness probe (no DB work)
+app.get('/live', (req, res) => {
+  res.json({ status: 'alive', ts: Date.now(), pid: process.pid });
+});
+
+// Readiness probe requires a successful privileged (secret/service) connection
+app.get('/ready', async (req, res) => {
+  if (req.query.force === 'true' || !getLastSupabaseDiagnostics()) {
+    await testConnection();
+  }
+  const diag = getLastSupabaseDiagnostics();
+  if (diag && diag.success && /privileged/.test(diag.authMode || '')) {
+    return res.json({ status: 'ready', mode: diag.authMode, durationMs: diag.durationMs });
+  }
+  res.status(503).json({
+    status: 'not-ready',
+    degradedMode,
+    reason: diag?.failureCategory || diag?.error || 'no-diagnostics',
+    authMode: diag?.authMode,
+    recommendations: diag?.recommendations || []
+  });
+});
+
 // Admin dashboard route with authentication and secure password injection
 app.get('/admin-dashboard.html', (req, res) => {
   // Simple token-based authentication

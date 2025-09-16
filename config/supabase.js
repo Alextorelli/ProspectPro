@@ -15,22 +15,22 @@ function serializeError(err) {
   try { return JSON.parse(JSON.stringify(err)); } catch { return { raw: String(err) }; }
 }
 
+// Unified key precedence now accounts for publishable & NEXT_PUBLIC keys
 function selectSupabaseKey() {
-  const sr = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  const anon = process.env.SUPABASE_ANON_KEY;
-  const secret = process.env.SUPABASE_SECRET_KEY; // new style
-  const publishable = process.env.SUPABASE_PUBLISHABLE_KEY; // new style
-  let key = null;
-  let reason = null;
-  if (secret) { key = secret; reason = 'secret_key'; }
-  else if (sr) { key = sr; reason = 'service_role'; }
+  const secret = process.env.SUPABASE_SECRET_KEY; // new preferred secret
+  const service = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY; // legacy / alt
+  const anon = process.env.SUPABASE_ANON_KEY; // legacy public
+  const publishable = process.env.SUPABASE_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY; // public new style
+  let key = null; let reason = null;
+  if (secret) { key = secret; reason = 'secret'; }
+  else if (service) { key = service; reason = 'service_role'; }
   else if (anon) { key = anon; reason = 'anon'; }
   else if (publishable) { key = publishable; reason = 'publishable'; }
   return {
     key,
     reason,
     hasAnon: !!anon,
-    hasService: !!sr,
+    hasService: !!service,
     hasSecret: !!secret,
     hasPublishable: !!publishable,
     preview: key ? key.slice(0, 8) + '...' : null
@@ -60,13 +60,15 @@ async function testConnection(options = {}) {
   const diag = {
     startedAt,
     supabaseUrl,
-    keySelected: sel.reason,
+  keySelected: sel.reason,
     keyPresent: !!sel.key,
     keyPreview: sel.preview,
     hasAnon: sel.hasAnon,
     hasService: sel.hasService,
     hasSecret: sel.hasSecret,
     hasPublishable: sel.hasPublishable,
+  authMode: /secret|service_role/.test(sel.reason || '') ? 'privileged' : 'public',
+  failureCategory: null,
     success: false,
     durationMs: null,
     error: null,
@@ -86,7 +88,7 @@ async function testConnection(options = {}) {
   }
   if (!sel.key) {
     diag.error = 'No API key found';
-    diag.recommendations.push('Provide SUPABASE_SERVICE_ROLE_KEY (preferred) or SUPABASE_ANON_KEY');
+    diag.recommendations.push('Provide SUPABASE_SECRET_KEY (preferred) or legacy SERVICE_ROLE key.');
     diag.durationMs = Date.now() - t0;
     lastSupabaseDiagnostics = diag;
     return diag;
@@ -117,7 +119,11 @@ async function testConnection(options = {}) {
     });
     diag.authProbe.status = authRes.status;
     if (authRes.status === 401) {
-      diag.recommendations.push('401 on manual REST probe: verify key validity.');
+      diag.failureCategory = diag.failureCategory || 'unauthorized-rest-root';
+      diag.recommendations.push('401 on manual REST probe: key invalid OR insufficient (publishable without policy).');
+    } else if (authRes.status === 404) {
+      // Some deployments may 404 root rest path depending on gateway behavior
+      diag.recommendations.push('REST root 404 (may be normal).');
     }
   } catch (e) {
     diag.authProbe.error = serializeError(e);
@@ -152,10 +158,20 @@ async function testConnection(options = {}) {
       diag.tableProbe.error = serializeError(error);
       diag.error = 'Table probe failed';
       if (error.code === 'PGRST301' || /api key/i.test(error.message || '')) {
-        diag.recommendations.push('REST 401 (PGRST301): wrong or missing key.');
+        diag.failureCategory = 'invalid-key';
+        diag.recommendations.push('REST 401 (PGRST301): invalid / revoked Supabase key. Rotate key.');
       } else if (error.code === '42P01') {
-        diag.recommendations.push('Table campaigns missing. Run migrations.');
+        diag.failureCategory = 'missing-table';
+        diag.recommendations.push('Table campaigns missing. Run schema migrations.');
+      } else if (/permission|rls/i.test(error.message || '')) {
+        diag.failureCategory = 'rls-block';
+        if (diag.authMode === 'public') {
+          diag.recommendations.push('RLS blocking public key. Use SUPABASE_SECRET_KEY or add policies for publishable key.');
+        } else {
+          diag.recommendations.push('RLS blocked even with privileged key—review policies.');
+        }
       } else {
+        diag.failureCategory = 'other-error';
         diag.recommendations.push('Unexpected PostgREST error; inspect details.');
       }
     } else {
@@ -165,14 +181,15 @@ async function testConnection(options = {}) {
     diag.error = 'Query threw';
     diag.errorDetail = serializeError(e);
     diag.recommendations.push('Low-level fetch failure in supabase-js');
+    diag.failureCategory = diag.failureCategory || 'query-throw';
   }
 
   diag.durationMs = Date.now() - t0;
   lastSupabaseDiagnostics = diag;
   if (diag.success) {
-    console.log(`✅ Supabase connectivity OK (${diag.durationMs}ms)`);
+    console.log(`✅ Supabase connectivity OK (${diag.durationMs}ms) [mode=${diag.authMode}]`);
   } else {
-    console.error('❌ Supabase connectivity issue:', diag.error, `(${diag.durationMs}ms)`);
+    console.error('❌ Supabase connectivity issue:', diag.error, `(${diag.durationMs}ms)`, 'category=', diag.failureCategory);
   }
   return diag;
 }
