@@ -3,6 +3,11 @@ require('dotenv').config();
 const express = require('express');
 const path = require('path');
 const { createClient } = require('@supabase/supabase-js');
+// Import enhanced Supabase diagnostics (will refactor duplication later)
+const {
+  testConnection: centralTestConnection,
+  getLastSupabaseDiagnostics
+} = require('./config/supabase');
 const { Client } = require('@googlemaps/google-maps-services-js');
 
 const app = express();
@@ -156,29 +161,8 @@ async function initializeSupabase() {
 }
 
 // Test database connection function
-async function testConnection() {
-  try {
-    if (!supabase) {
-      await initializeSupabase();
-    }
-    
-    // Simple connection test
-    const { data, error } = await supabase
-      .from('campaigns')
-      .select('count')
-      .limit(1);
-
-    if (error) {
-      console.error('❌ Database connection test failed:', error.message);
-      return false;
-    }
-
-    return true;
-  } catch (error) {
-    console.error('❌ Database connection error:', error.message);
-    return false;
-  }
-}
+// Legacy testConnection retained for backward compatibility; now proxies to central test
+async function testConnection() { return centralTestConnection(); }
 
 // =====================================
 // GOOGLE PLACES API SETUP
@@ -229,12 +213,19 @@ app.use('/api', authMiddleware);
 
 // Health check endpoint for Railway monitoring
 app.get('/health', (req, res) => {
+  const diag = getLastSupabaseDiagnostics ? getLastSupabaseDiagnostics() : null;
   res.status(200).json({
     status: 'healthy',
     timestamp: new Date().toISOString(),
     environment: process.env.NODE_ENV,
-    database: supabase ? 'connected' : 'disconnected',
-    version: '1.0.0'
+    database: diag ? (diag.success ? 'connected' : 'error') : (supabase ? 'unknown' : 'disconnected'),
+    version: '1.0.0',
+    supabase: diag ? {
+      success: diag.success,
+      lastChecked: diag.startedAt,
+      durationMs: diag.durationMs,
+      error: diag.success ? null : diag.error
+    } : { note: 'No diagnostics run yet' }
   });
 });
 
@@ -349,7 +340,7 @@ function calculateCostBreakdown(costs) {
 app.get('/api/status', async (req, res) => {
   try {
     // Test database connection
-    const dbConnected = await testConnection();
+  const dbConnected = await testConnection();
     
     // Check API key configuration
     const apiKeysConfigured = {
@@ -377,6 +368,54 @@ app.get('/api/status', async (req, res) => {
       timestamp: new Date().toISOString()
     });
   }
+});
+
+// =====================================
+// DIAGNOSTICS ENDPOINT (SANITIZED)
+// =====================================
+
+function redactValue(val) {
+  if (val == null) return val;
+  const str = String(val);
+  if (str.length <= 6) return str[0] + '***';
+  return str.slice(0, 4) + '...' + str.slice(-4);
+}
+
+const SENSITIVE_KEYS = [
+  'SUPABASE', 'GOOGLE', 'HUNTER', 'NEVERBOUNCE', 'SCRAPINGDOG', 'JWT', 'PASSWORD', 'TOKEN', 'KEY', 'SECRET'
+];
+
+function buildSanitizedEnv() {
+  const out = {};
+  for (const [k,v] of Object.entries(process.env)) {
+    if (SENSITIVE_KEYS.some(s => k.includes(s))) {
+      out[k] = redactValue(v);
+    }
+    else if (!k.startsWith('NODE_') && !k.startsWith('PATH')) {
+      out[k] = v;
+    }
+  }
+  return out;
+}
+
+app.get('/diag', async (req, res) => {
+  const force = req.query.force === 'true';
+  let ranTest = false;
+  if (force) {
+    await centralTestConnection();
+    ranTest = true;
+  }
+  const diag = getLastSupabaseDiagnostics ? getLastSupabaseDiagnostics() : null;
+  res.json({
+    service: 'ProspectPro',
+    timestamp: new Date().toISOString(),
+    supabase: diag || { note: 'No diagnostics yet. Hit /api/status or /diag?force=true to run.' },
+    forced: ranTest,
+    environment: buildSanitizedEnv(),
+    pid: process.pid,
+    memory: process.memoryUsage(),
+    uptimeSeconds: process.uptime()
+  });
 });
 
 // =====================================
@@ -459,7 +498,7 @@ async function startServer() {
 
     // Test Supabase connection
     console.log('🔌 Testing Supabase connection...');
-    const dbConnected = await testConnection();
+  const dbConnected = await testConnection();
     
     if (!dbConnected) {
       console.error('❌ Supabase connection failed.');

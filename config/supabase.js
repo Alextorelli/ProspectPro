@@ -89,19 +89,61 @@ const createUserClient = (accessToken) => {
   });
 };
 
-// Test database connection
-const testConnection = async () => {
+// Holds last diagnostics result
+let lastSupabaseDiagnostics = null;
+
+// Internal utility to redact secrets safely
+function redact(value) {
+  if (!value || typeof value !== 'string') return value;
+  if (value.length <= 10) return value.slice(0, 3) + '***';
+  return value.slice(0, 6) + '...' + value.slice(-4);
+}
+
+// Test database connection with enhanced diagnostics
+const testConnection = async (options = {}) => {
+  const diagnostics = {
+    startedAt: new Date().toISOString(),
+    supabaseUrl,
+    supabaseUrlRedacted: redact(supabaseUrl),
+    network: {},
+    query: {},
+    healthEndpoint: {},
+    success: false,
+    durationMs: null,
+    error: null
+  };
+  const start = Date.now();
   try {
-    const { data, error } = await supabase
+    // Low-level health probe to auth service (very lightweight)
+    const healthUrl = supabaseUrl.replace(/\/$/, '') + '/auth/v1/health';
+    try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), options.healthTimeoutMs || 4000);
+      const res = await fetch(healthUrl, { method: 'GET', signal: controller.signal });
+      clearTimeout(timeout);
+      diagnostics.healthEndpoint.status = res.status;
+      diagnostics.healthEndpoint.ok = res.ok;
+    } catch (e) {
+      diagnostics.healthEndpoint.error = e.message;
+    }
+
+    // Primary query test
+    const { error, count } = await supabase
       .from('campaigns')
-      .select('count', { count: 'exact', head: true });
-    
+      .select('id', { count: 'exact', head: true });
     if (error) throw error;
-    
-    console.log('✅ Supabase connection successful');
+    diagnostics.query = { table: 'campaigns', countChecked: true };
+    diagnostics.success = true;
+    diagnostics.durationMs = Date.now() - start;
+    lastSupabaseDiagnostics = diagnostics;
+    console.log(`✅ Supabase connection successful (${diagnostics.durationMs}ms)`);
     return true;
   } catch (error) {
-    console.error('❌ Supabase connection failed:', error.message);
+    diagnostics.error = error.message || String(error);
+    diagnostics.durationMs = Date.now() - start;
+    diagnostics.success = false;
+    lastSupabaseDiagnostics = diagnostics;
+    console.error('❌ Supabase connection failed:', diagnostics.error, `(${diagnostics.durationMs}ms)`);
     return false;
   }
 };
@@ -160,5 +202,6 @@ module.exports = {
   initializeDatabase,
   supabaseUrl,
   supabaseDbPoolerUrl,
-  supabaseAnonKey
+  supabaseAnonKey,
+  getLastSupabaseDiagnostics: () => lastSupabaseDiagnostics
 };
