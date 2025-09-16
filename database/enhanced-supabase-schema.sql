@@ -588,9 +588,9 @@ CREATE TABLE IF NOT EXISTS dashboard_exports (
 CREATE TABLE IF NOT EXISTS system_settings (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   user_id UUID NOT NULL,
-  setting_key VARCHAR(100) NOT NULL,
-  setting_value TEXT NOT NULL,
-  setting_type VARCHAR(50) DEFAULT 'string',
+  setting_key VARCHAR(255) NOT NULL,
+  setting_value JSONB NOT NULL,
+  data_type TEXT DEFAULT 'string' CHECK (data_type IN ('string', 'number', 'boolean', 'object', 'array')),
   description TEXT,
   is_active BOOLEAN DEFAULT true,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
@@ -895,6 +895,7 @@ ALTER TABLE api_cost_tracking ENABLE ROW LEVEL SECURITY;
 ALTER TABLE lead_qualification_metrics ENABLE ROW LEVEL SECURITY;
 ALTER TABLE service_health_metrics ENABLE ROW LEVEL SECURITY;
 ALTER TABLE dashboard_exports ENABLE ROW LEVEL SECURITY;
+ALTER TABLE system_settings ENABLE ROW LEVEL SECURITY;
 
 -- RLS Policies for monitoring tables
 CREATE POLICY "Users can view campaign analytics from their campaigns" ON campaign_analytics
@@ -952,6 +953,11 @@ CREATE POLICY "Users can view their own dashboard exports" ON dashboard_exports
 
 CREATE POLICY "Users can create their own dashboard exports" ON dashboard_exports
   FOR INSERT WITH CHECK (user_id = auth.uid());
+
+-- System settings for user's own settings
+CREATE POLICY "Users can manage their own system settings" ON system_settings
+  FOR ALL USING (user_id = auth.uid())
+  WITH CHECK (user_id = auth.uid());
 
 -- Grant necessary permissions (adjust as needed for your setup)
 -- GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO authenticated;
