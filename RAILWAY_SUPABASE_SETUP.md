@@ -2,10 +2,13 @@
 
 ## Recommended Supabase Connection Method
 
-For Railway deployment, use **Transaction Pooler** (port 6543) for optimal performance with stateless applications:
+IMPORTANT: `SUPABASE_URL` MUST remain the HTTPS API base: `https://<project-ref>.supabase.co`.
+Do NOT set the Postgres connection string as `SUPABASE_URL` – the Supabase JS client requires the HTTP base.
+
+For direct Postgres connectivity (raw SQL, migrations, analytics jobs) define a separate variable:
 
 ```
-postgresql://postgres.[ref]:[password]@aws-0-[region].pooler.supabase.com:6543/postgres
+SUPABASE_DB_POOLER_URL=postgresql://postgres.<ref>:<password>@aws-0-<region>.pooler.supabase.com:6543/postgres
 ```
 
 ### Why Transaction Pooler for Railway?
@@ -19,11 +22,18 @@ postgresql://postgres.[ref]:[password]@aws-0-[region].pooler.supabase.com:6543/p
 
 In your Railway project dashboard, set these environment variables:
 
-### Required Database Configuration
+### Required Database/API Configuration
 ```bash
-SUPABASE_URL=postgresql://postgres.[your-ref]:[your-password]@aws-0-us-west-1.pooler.supabase.com:6543/postgres
+# Required for supabase-js client
+SUPABASE_URL=https://<project-ref>.supabase.co
 SUPABASE_SERVICE_ROLE_KEY=sb_secret_your_actual_secret_key_here
 SUPABASE_ANON_KEY=your_anon_key_here
+
+# Optional: For raw Postgres access (DO NOT use for supabase-js)
+SUPABASE_DB_POOLER_URL=postgresql://postgres.<ref>:<password>@aws-0-<region>.pooler.supabase.com:6543/postgres
+# Optional additional fallbacks:
+# SUPABASE_DB_DIRECT_URL=postgresql://postgres:<password>@db.<ref>.supabase.co:5432/postgres
+# SUPABASE_DB_SESSION_POOLER_URL=postgresql://postgres.<ref>:<password>@aws-0-<region>.pooler.supabase.com:5432/postgres
 ```
 
 ### API Keys (Required for Real Data)
@@ -43,20 +53,14 @@ NODE_ENV=production
 
 ## Alternative Connection Methods (Fallbacks)
 
-### 1. Direct Connection (if Transaction Pooler fails)
-```
-postgresql://postgres:[password]@db.[ref].supabase.co:5432/postgres
-```
+### Connection Reference (when to use)
 
-### 2. Session Pooler (IPv4 compatible)
-```
-postgresql://postgres.[ref]:[password]@aws-0-[region].pooler.supabase.com:5432/postgres
-```
-
-### 3. HTTP REST API (legacy compatibility)
-```
-https://[your-project-id].supabase.co
-```
+| Purpose | Variable | Example | Notes |
+|---------|----------|---------|-------|
+| Supabase JS client (Auth, Storage, REST, Realtime) | SUPABASE_URL | https://<ref>.supabase.co | REQUIRED |
+| Transaction Pooler (stateless API workers) | SUPABASE_DB_POOLER_URL | postgresql://postgres.<ref>:pwd@aws-0-<region>.pooler.supabase.com:6543/postgres | Recommended |
+| Direct Connection (debug / heavy migrations) | SUPABASE_DB_DIRECT_URL | postgresql://postgres:pwd@db.<ref>.supabase.co:5432/postgres | Fallback |
+| Session Pooler (IPv4 fallback) | SUPABASE_DB_SESSION_POOLER_URL | postgresql://postgres.<ref>:pwd@aws-0-<region>.pooler.supabase.com:5432/postgres | Use only if required |
 
 ## Getting Your Supabase Connection Details
 
@@ -72,8 +76,10 @@ https://[your-project-id].supabase.co
 
 1. **Update Railway Environment Variables** (project dashboard → Variables):
    ```bash
-   # Use Transaction Pooler URL format
-   SUPABASE_URL=postgresql://postgres.[ref]:[password]@aws-0-[region].pooler.supabase.com:6543/postgres
+   SUPABASE_URL=https://<project-ref>.supabase.co
+   SUPABASE_SERVICE_ROLE_KEY=sb_secret_...
+   SUPABASE_ANON_KEY=sb_anon_...
+   SUPABASE_DB_POOLER_URL=postgresql://postgres.<ref>:<password>@aws-0-<region>.pooler.supabase.com:6543/postgres
    ```
 
 2. **Deploy to Railway**:
@@ -88,11 +94,15 @@ https://[your-project-id].supabase.co
 
 ## Troubleshooting Connection Issues
 
-### Issue: "Connection refused" or timeout errors
-**Solution**: Switch to Direct Connection method (port 5432)
+### Issue: "Invalid supabaseUrl: Must be a valid HTTP or HTTPS URL"
+**Cause**: You set a `postgresql://` value in `SUPABASE_URL`.
+**Fix**: Move that value to `SUPABASE_DB_POOLER_URL` and set `SUPABASE_URL=https://<ref>.supabase.co`.
 
-### Issue: "too many connections" error  
-**Solution**: Ensure you're using Transaction Pooler (port 6543), not Direct Connection
+### Issue: "Connection refused" or timeout errors on pooler
+**Solution**: Try `SUPABASE_DB_DIRECT_URL` temporarily to isolate network issues.
+
+### Issue: "too many connections"
+**Solution**: Ensure workers use pooler (`SUPABASE_DB_POOLER_URL`), not direct.
 
 ### Issue: IPv6 connectivity problems
 **Solution**: Use Session Pooler which is IPv4 compatible

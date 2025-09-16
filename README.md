@@ -43,9 +43,9 @@ ProspectPro is a premium lead generation platform that discovers and validates r
 - [Google Cloud](https://console.cloud.google.com) - Places API
 
 ### Recommended Connection Setup
-- **Supabase**: Use Transaction Pooler for Railway deployment
-- **Format**: `postgresql://postgres.[ref]:[password]@aws-0-[region].pooler.supabase.com:6543/postgres`
-- **Why**: Optimized for stateless applications, better connection efficiency
+- **SUPABASE_URL (REQUIRED)**: `https://<project-ref>.supabase.co` (API base for supabase-js)
+- **SUPABASE_DB_POOLER_URL (Optional)**: `postgresql://postgres.<ref>:<password>@aws-0-<region>.pooler.supabase.com:6543/postgres`
+- **Why split?** The JS client needs the HTTPS base; Postgres pooler URL is only for raw SQL/migrations.
 
 ### API Keys (Some Free Tiers Available)
 - **Google Places API** (Required) - ~$0.032 per search

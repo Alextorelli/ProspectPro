@@ -17,7 +17,22 @@ if (missingEnvVars.length > 0) {
   process.exit(1);
 }
 
-const supabaseUrl = process.env.SUPABASE_URL;
+let supabaseUrl = process.env.SUPABASE_URL;
+// Guard: Users sometimes set SUPABASE_URL to a Postgres connection string (postgresql://...) which @supabase/supabase-js rejects.
+// Provide clear remediation and allow optional SUPABASE_DB_POOLER_URL for future direct pg usage.
+if (supabaseUrl && /^postgres(ql)?:\/\//i.test(supabaseUrl)) {
+  console.error('❌ SUPABASE_URL is a Postgres connection string, but the Supabase JS client expects the HTTPS project URL.');
+  console.error('   Received:', supabaseUrl);
+  console.error('✅ FIX: Set SUPABASE_URL to https://<project-ref>.supabase.co');
+  console.error('   And (optionally) set SUPABASE_DB_POOLER_URL for raw Postgres access:');
+  console.error('   postgresql://postgres.<ref>:<password>@aws-0-<region>.pooler.supabase.com:6543/postgres');
+  if (process.env.SUPABASE_DB_POOLER_URL) {
+    console.error('ℹ️  Detected SUPABASE_DB_POOLER_URL. Using this pattern is correct for direct pg libs, NOT for supabase-js.');
+  }
+  // Fail fast to avoid silent misconfiguration
+  process.exit(1);
+}
+const supabaseDbPoolerUrl = process.env.SUPABASE_DB_POOLER_URL; // Optional: for future raw pg usage
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const supabaseAnonKey = process.env.SUPABASE_ANON_KEY;
 
@@ -144,5 +159,6 @@ module.exports = {
   testConnection,
   initializeDatabase,
   supabaseUrl,
+  supabaseDbPoolerUrl,
   supabaseAnonKey
 };
