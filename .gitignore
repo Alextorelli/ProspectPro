@@ -83,3 +83,4 @@ grafana-data/
 
 # Other
 .git/
+.env
