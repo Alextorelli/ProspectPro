@@ -51,10 +51,10 @@ BEGIN
     EXECUTE 'CREATE DOMAIN cost_amount_type AS DECIMAL(10,4) CHECK (VALUE >= 0)';
   END IF;
   IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'campaign_status_type') THEN
-    EXECUTE $$CREATE DOMAIN campaign_status_type AS TEXT CHECK (VALUE IN ('running','paused','completed','cancelled'))$$;
+    EXECUTE $cmd$CREATE DOMAIN campaign_status_type AS TEXT CHECK (VALUE IN ('running','paused','completed','cancelled'))$cmd$;
   END IF;
   IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'verification_status_type') THEN
-    EXECUTE $$CREATE DOMAIN verification_status_type AS TEXT CHECK (VALUE IN ('deliverable','undeliverable','risky','unknown','pending'))$$;
+    EXECUTE $cmd$CREATE DOMAIN verification_status_type AS TEXT CHECK (VALUE IN ('deliverable','undeliverable','risky','unknown','pending'))$cmd$;
   END IF;
 END $$;
 

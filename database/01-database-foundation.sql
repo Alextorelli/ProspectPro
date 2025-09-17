@@ -58,7 +58,7 @@ BEGIN
   IF NOT EXISTS (
     SELECT 1 FROM pg_type WHERE typname = 'campaign_status_type'
   ) THEN
-    EXECUTE $$CREATE DOMAIN campaign_status_type AS TEXT CHECK (VALUE IN ('running','paused','completed','cancelled'))$$;
+    EXECUTE $cmd$CREATE DOMAIN campaign_status_type AS TEXT CHECK (VALUE IN ('running','paused','completed','cancelled'))$cmd$;
     RAISE NOTICE 'Created domain: campaign_status_type';
   ELSE
     RAISE NOTICE 'Domain already exists: campaign_status_type';
@@ -68,7 +68,7 @@ BEGIN
   IF NOT EXISTS (
     SELECT 1 FROM pg_type WHERE typname = 'verification_status_type'
   ) THEN
-    EXECUTE $$CREATE DOMAIN verification_status_type AS TEXT CHECK (VALUE IN ('deliverable','undeliverable','risky','unknown','pending'))$$;
+    EXECUTE $cmd$CREATE DOMAIN verification_status_type AS TEXT CHECK (VALUE IN ('deliverable','undeliverable','risky','unknown','pending'))$cmd$;
     RAISE NOTICE 'Created domain: verification_status_type';
   ELSE
     RAISE NOTICE 'Domain already exists: verification_status_type';
