@@ -21,10 +21,14 @@
 -- ============================================================================
 
 -- Enable UUID generation (required for all primary keys)
+CREATE EXTENSION IF NOT EXISTS "pgcrypto"; -- for gen_random_uuid()
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 -- Enable PostGIS for geographic operations (location coordinates)
 CREATE EXTENSION IF NOT EXISTS "postgis";
+
+-- Enable trigram similarity for fuzzy text search (SIMILARITY(), % operator)
+CREATE EXTENSION IF NOT EXISTS "pg_trgm";
 
 -- Log successful extension creation
 DO $$
@@ -38,17 +42,21 @@ END $$;
 -- ============================================================================
 
 -- Create custom domains for data validation
-CREATE DOMAIN IF NOT EXISTS confidence_score_type AS INTEGER
-  CHECK (VALUE >= 0 AND VALUE <= 100);
-
-CREATE DOMAIN IF NOT EXISTS cost_amount_type AS DECIMAL(10,4)
-  CHECK (VALUE >= 0);
-
-CREATE DOMAIN IF NOT EXISTS campaign_status_type AS TEXT
-  CHECK (VALUE IN ('running', 'paused', 'completed', 'cancelled'));
-
-CREATE DOMAIN IF NOT EXISTS verification_status_type AS TEXT
-  CHECK (VALUE IN ('deliverable', 'undeliverable', 'risky', 'unknown', 'pending'));
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'confidence_score_type') THEN
+    EXECUTE 'CREATE DOMAIN confidence_score_type AS INTEGER CHECK (VALUE >= 0 AND VALUE <= 100)';
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'cost_amount_type') THEN
+    EXECUTE 'CREATE DOMAIN cost_amount_type AS DECIMAL(10,4) CHECK (VALUE >= 0)';
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'campaign_status_type') THEN
+    EXECUTE $$CREATE DOMAIN campaign_status_type AS TEXT CHECK (VALUE IN ('running','paused','completed','cancelled'))$$;
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'verification_status_type') THEN
+    EXECUTE $$CREATE DOMAIN verification_status_type AS TEXT CHECK (VALUE IN ('deliverable','undeliverable','risky','unknown','pending'))$$;
+  END IF;
+END $$;
 
 DO $$
 BEGIN
@@ -331,7 +339,7 @@ CREATE TABLE IF NOT EXISTS enhanced_leads (
   
   -- Location and search context
   search_query TEXT,
-  location_coordinates POINT,
+  location_coordinates geography(Point,4326),
   search_radius_km INTEGER CHECK (search_radius_km IS NULL OR search_radius_km > 0),
   
   -- Rich metadata
@@ -424,7 +432,7 @@ CREATE INDEX IF NOT EXISTS idx_enhanced_leads_confidence ON enhanced_leads(confi
 CREATE INDEX IF NOT EXISTS idx_enhanced_leads_export_status ON enhanced_leads(export_status);
 CREATE INDEX IF NOT EXISTS idx_enhanced_leads_created ON enhanced_leads(created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_enhanced_leads_business_name ON enhanced_leads USING GIN(to_tsvector('english', business_name));
-CREATE INDEX IF NOT EXISTS idx_enhanced_leads_location ON enhanced_leads USING GIST(location_coordinates) WHERE location_coordinates IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_enhanced_leads_location ON enhanced_leads USING GIST((location_coordinates)) WHERE location_coordinates IS NOT NULL;
 
 -- Composite indexes for common query patterns
 CREATE INDEX IF NOT EXISTS idx_enhanced_leads_campaign_confidence ON enhanced_leads(campaign_id, confidence_score DESC);
@@ -1249,7 +1257,7 @@ BEGIN
     el.business_name,
     (ST_Distance(
       ST_GeogFromText('POINT(' || center_lng || ' ' || center_lat || ')'),
-      ST_GeogFromText('POINT(' || ST_X(el.location_coordinates) || ' ' || ST_Y(el.location_coordinates) || ')')
+  el.location_coordinates
     ) / 1000)::FLOAT as distance_km,
     el.confidence_score
   FROM enhanced_leads el
@@ -1257,8 +1265,8 @@ BEGIN
     AND (campaign_id_param IS NULL OR el.campaign_id = campaign_id_param)
     AND ST_DWithin(
       ST_GeogFromText('POINT(' || center_lng || ' ' || center_lat || ')'),
-      ST_GeogFromText('POINT(' || ST_X(el.location_coordinates) || ' ' || ST_Y(el.location_coordinates) || ')'),
-      radius_km * 1000
+  el.location_coordinates,
+  radius_km * 1000
     )
   ORDER BY distance_km;
 END;
@@ -1768,27 +1776,27 @@ END $$;
 -- ============================================================================
 
 -- Create indexes to optimize RLS policy performance
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_campaigns_user_id_btree
+CREATE INDEX IF NOT EXISTS idx_campaigns_user_id_btree
   ON campaigns(user_id) WHERE user_id IS NOT NULL;
 
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_enhanced_leads_campaign_user
+CREATE INDEX IF NOT EXISTS idx_enhanced_leads_campaign_user
   ON enhanced_leads(campaign_id) 
   WHERE campaign_id IS NOT NULL;
 
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_lead_emails_lead_campaign
+CREATE INDEX IF NOT EXISTS idx_lead_emails_lead_campaign
   ON lead_emails(lead_id) 
   WHERE lead_id IS NOT NULL;
 
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_system_settings_user_active
+CREATE INDEX IF NOT EXISTS idx_system_settings_user_active
   ON system_settings(user_id) 
   WHERE is_active = true;
 
 -- Composite indexes for complex policy queries
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_campaign_analytics_user_campaign
+CREATE INDEX IF NOT EXISTS idx_campaign_analytics_user_campaign
   ON campaign_analytics(campaign_id, timestamp DESC)
   WHERE campaign_id IS NOT NULL;
 
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_api_cost_tracking_user_campaign
+CREATE INDEX IF NOT EXISTS idx_api_cost_tracking_user_campaign
   ON api_cost_tracking(campaign_id, date DESC)
   WHERE campaign_id IS NOT NULL;
 

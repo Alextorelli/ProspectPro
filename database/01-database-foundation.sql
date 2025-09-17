@@ -11,10 +11,14 @@
 -- ============================================================================
 
 -- Enable UUID generation (required for all primary keys)
+CREATE EXTENSION IF NOT EXISTS "pgcrypto"; -- required for gen_random_uuid()
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 -- Enable PostGIS for geographic operations (location coordinates)
 CREATE EXTENSION IF NOT EXISTS "postgis";
+
+-- Enable trigram similarity for fuzzy text search (SIMILARITY(), % operator)
+CREATE EXTENSION IF NOT EXISTS "pg_trgm";
 
 -- Log successful extension creation
 DO $$
@@ -28,17 +32,48 @@ END $$;
 -- ============================================================================
 
 -- Create custom domains for data validation
-CREATE DOMAIN IF NOT EXISTS confidence_score_type AS INTEGER
-  CHECK (VALUE >= 0 AND VALUE <= 100);
+DO $$
+BEGIN
+  -- confidence_score_type
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_type WHERE typname = 'confidence_score_type'
+  ) THEN
+    EXECUTE 'CREATE DOMAIN confidence_score_type AS INTEGER CHECK (VALUE >= 0 AND VALUE <= 100)';
+    RAISE NOTICE 'Created domain: confidence_score_type';
+  ELSE
+    RAISE NOTICE 'Domain already exists: confidence_score_type';
+  END IF;
 
-CREATE DOMAIN IF NOT EXISTS cost_amount_type AS DECIMAL(10,4)
-  CHECK (VALUE >= 0);
+  -- cost_amount_type
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_type WHERE typname = 'cost_amount_type'
+  ) THEN
+    EXECUTE 'CREATE DOMAIN cost_amount_type AS DECIMAL(10,4) CHECK (VALUE >= 0)';
+    RAISE NOTICE 'Created domain: cost_amount_type';
+  ELSE
+    RAISE NOTICE 'Domain already exists: cost_amount_type';
+  END IF;
 
-CREATE DOMAIN IF NOT EXISTS campaign_status_type AS TEXT
-  CHECK (VALUE IN ('running', 'paused', 'completed', 'cancelled'));
+  -- campaign_status_type
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_type WHERE typname = 'campaign_status_type'
+  ) THEN
+    EXECUTE $$CREATE DOMAIN campaign_status_type AS TEXT CHECK (VALUE IN ('running','paused','completed','cancelled'))$$;
+    RAISE NOTICE 'Created domain: campaign_status_type';
+  ELSE
+    RAISE NOTICE 'Domain already exists: campaign_status_type';
+  END IF;
 
-CREATE DOMAIN IF NOT EXISTS verification_status_type AS TEXT
-  CHECK (VALUE IN ('deliverable', 'undeliverable', 'risky', 'unknown', 'pending'));
+  -- verification_status_type
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_type WHERE typname = 'verification_status_type'
+  ) THEN
+    EXECUTE $$CREATE DOMAIN verification_status_type AS TEXT CHECK (VALUE IN ('deliverable','undeliverable','risky','unknown','pending'))$$;
+    RAISE NOTICE 'Created domain: verification_status_type';
+  ELSE
+    RAISE NOTICE 'Domain already exists: verification_status_type';
+  END IF;
+END $$;
 
 DO $$
 BEGIN

@@ -76,7 +76,8 @@ CREATE TABLE IF NOT EXISTS enhanced_leads (
   
   -- Location and search context
   search_query TEXT,
-  location_coordinates POINT,
+  -- Use PostGIS geography for accurate earth distance calculations
+  location_coordinates geography(Point,4326),
   search_radius_km INTEGER CHECK (search_radius_km IS NULL OR search_radius_km > 0),
   
   -- Rich metadata
@@ -169,7 +170,7 @@ CREATE INDEX IF NOT EXISTS idx_enhanced_leads_confidence ON enhanced_leads(confi
 CREATE INDEX IF NOT EXISTS idx_enhanced_leads_export_status ON enhanced_leads(export_status);
 CREATE INDEX IF NOT EXISTS idx_enhanced_leads_created ON enhanced_leads(created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_enhanced_leads_business_name ON enhanced_leads USING GIN(to_tsvector('english', business_name));
-CREATE INDEX IF NOT EXISTS idx_enhanced_leads_location ON enhanced_leads USING GIST(location_coordinates) WHERE location_coordinates IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_enhanced_leads_location ON enhanced_leads USING GIST((location_coordinates)) WHERE location_coordinates IS NOT NULL;
 
 -- Composite indexes for common query patterns
 CREATE INDEX IF NOT EXISTS idx_enhanced_leads_campaign_confidence ON enhanced_leads(campaign_id, confidence_score DESC);

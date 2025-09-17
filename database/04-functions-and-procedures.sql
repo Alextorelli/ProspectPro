@@ -367,16 +367,16 @@ BEGIN
     el.id as lead_id,
     el.business_name,
     (ST_Distance(
-      ST_GeogFromText('POINT(' || center_lng || ' ' || center_lat || ')'),
-      ST_GeogFromText('POINT(' || ST_X(el.location_coordinates) || ' ' || ST_Y(el.location_coordinates) || ')')
+      ST_SetSRID(ST_MakePoint(center_lng, center_lat), 4326)::geography,
+      el.location_coordinates
     ) / 1000)::FLOAT as distance_km,
     el.confidence_score
   FROM enhanced_leads el
   WHERE el.location_coordinates IS NOT NULL
     AND (campaign_id_param IS NULL OR el.campaign_id = campaign_id_param)
     AND ST_DWithin(
-      ST_GeogFromText('POINT(' || center_lng || ' ' || center_lat || ')'),
-      ST_GeogFromText('POINT(' || ST_X(el.location_coordinates) || ' ' || ST_Y(el.location_coordinates) || ')'),
+      ST_SetSRID(ST_MakePoint(center_lng, center_lat), 4326)::geography,
+      el.location_coordinates,
       radius_km * 1000
     )
   ORDER BY distance_km;
@@ -477,7 +477,7 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Archive old campaigns and leads
-CREATE OR REPLACE FUNCTION archive_old_data(cutoff_date DATE DEFAULT CURRENT_DATE - INTERVAL '90 days')
+CREATE OR REPLACE FUNCTION archive_old_data(cutoff_date DATE DEFAULT (CURRENT_DATE - INTERVAL '90 days')::DATE)
 RETURNS JSON AS $$
 DECLARE
   archived_campaigns INTEGER := 0;

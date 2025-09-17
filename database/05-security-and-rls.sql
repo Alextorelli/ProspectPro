@@ -282,27 +282,27 @@ END $$;
 -- ============================================================================
 
 -- Create indexes to optimize RLS policy performance
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_campaigns_user_id_btree
+CREATE INDEX IF NOT EXISTS idx_campaigns_user_id_btree
   ON campaigns(user_id) WHERE user_id IS NOT NULL;
 
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_enhanced_leads_campaign_user
+CREATE INDEX IF NOT EXISTS idx_enhanced_leads_campaign_user
   ON enhanced_leads(campaign_id) 
   WHERE campaign_id IS NOT NULL;
 
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_lead_emails_lead_campaign
+CREATE INDEX IF NOT EXISTS idx_lead_emails_lead_campaign
   ON lead_emails(lead_id) 
   WHERE lead_id IS NOT NULL;
 
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_system_settings_user_active
+CREATE INDEX IF NOT EXISTS idx_system_settings_user_active
   ON system_settings(user_id) 
   WHERE is_active = true;
 
 -- Composite indexes for complex policy queries
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_campaign_analytics_user_campaign
+CREATE INDEX IF NOT EXISTS idx_campaign_analytics_user_campaign
   ON campaign_analytics(campaign_id, timestamp DESC)
   WHERE campaign_id IS NOT NULL;
 
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_api_cost_tracking_user_campaign
+CREATE INDEX IF NOT EXISTS idx_api_cost_tracking_user_campaign
   ON api_cost_tracking(campaign_id, date DESC)
   WHERE campaign_id IS NOT NULL;
 
@@ -310,7 +310,7 @@ DO $$
 BEGIN
   RAISE NOTICE '✅ Phase 5.7 Complete: Security performance indexes created';
   RAISE NOTICE '   - RLS policy optimization indexes';
-  RAISE NOTICE '   - Concurrent index creation for zero-downtime';
+  RAISE NOTICE '   - Index creation compatible with SQL Editor transactions';
 END $$;
 
 -- Phase 5.8: Security Validation and Testing
