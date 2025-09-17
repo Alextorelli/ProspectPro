@@ -1,0 +1,70 @@
+{
+  "name": "prospectpro-railway-webhook-tests",
+  "version": "1.0.0",
+  "description": "Comprehensive test suite for ProspectPro Railway webhook integration",
+  "scripts": {
+    "test": "npm run test:unit && npm run test:integration && npm run test:e2e",
+    "test:unit": "node tests/unit/test-webhook-monitor.js",
+    "test:integration": "node tests/integration/test-railway-webhook-integration.js",
+    "test:e2e": "node tests/e2e/test-railway-webhook-e2e.js",
+    "test:validate": "node debug/scripts/validate-webhook-setup.js",
+    "test:monitor": "node debug/scripts/monitor-deployment-health.js",
+    "test:quick": "npm run test:unit && npm run test:validate",
+    "test:production": "NODE_ENV=production npm run test:integration",
+    "test:load": "node tests/performance/test-webhook-load.js",
+    "test:security": "node tests/security/test-webhook-security.js",
+    "test:cleanup": "node tests/utils/cleanup-test-data.js",
+    "test:report": "node tests/utils/generate-test-report.js",
+    "validate:environment": "node scripts/validate-environment.js",
+    "validate:database": "node scripts/check-rls-access.js",
+    "pretest": "npm run validate:environment",
+    "posttest": "npm run test:cleanup && npm run test:report"
+  },
+  "keywords": [
+    "railway",
+    "webhooks", 
+    "testing",
+    "prospectpro",
+    "deployment",
+    "monitoring"
+  ],
+  "author": "ProspectPro Development Team",
+  "license": "MIT",
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "dependencies": {
+    "express": "^4.18.0",
+    "@supabase/supabase-js": "^2.38.0",
+    "crypto": "^1.0.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.0",
+    "jest": "^29.0.0",
+    "supertest": "^6.3.0"
+  },
+  "testConfig": {
+    "timeout": 30000,
+    "retries": 2,
+    "parallel": false,
+    "coverage": true,
+    "verbose": true
+  },
+  "environments": {
+    "development": {
+      "baseUrl": "http://localhost:3000",
+      "requireWebhookSecret": false,
+      "logLevel": "debug"
+    },
+    "testing": {
+      "baseUrl": "http://localhost:3001", 
+      "requireWebhookSecret": true,
+      "logLevel": "info"
+    },
+    "production": {
+      "baseUrl": "https://prospectpro.railway.app",
+      "requireWebhookSecret": true,
+      "logLevel": "warn"
+    }
+  }
+}
