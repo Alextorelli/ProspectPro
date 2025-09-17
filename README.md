@@ -1,22 +1,12 @@
 # ProspectPro# ProspectPro - Real Business Data Lead Generation Platform# ProspectPro - Real Business Data Lead Generation Platform
 
-
-
 🎯 **Production-Ready Lead Generation Platform**## ✨ Overview## ✨ Overview
-
-
 
 Railway-deployed Node.js application for real business data discovery and lead generation with zero tolerance for fake information.ProspectPro is a production-ready Node.js/Express lead generation platform with **zero tolerance for fake business data**. Built for Railway deployment with Supabase PostgreSQL backend, it processes real business data through a comprehensive 5-phase validation pipeline.ProspectPro is a production-ready Node.js/Express lead generation platform with **zero tolerance for fake business data**. Built for Railway deployment with Supabase PostgreSQL backend, it processes real business data through a comprehensive 5-phase validation pipeline.
 
-
-
 ## 🚀 Quick Deploy## 🏗️ Architecture## 🏗️ Architecture
 
-
-
 [![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/new/template)### Core Infrastructure### Core Infrastructure
-
-
 
 ```bash- **Server**: Enhanced Node.js/Express with comprehensive monitoring (`server-enhanced.js`)- **Server**: Enhanced Node.js/Express with comprehensive monitoring (`server-enhanced.js`)
 
@@ -26,7 +16,7 @@ cd ProspectPro- **Database**: PostgreSQL via Supabase with 5-phase schema archit
 
 railway login && railway init && railway up
 
-```- **Deployment**: Railway platform with zero-downtime health checks- **Deployment**: Railway platform with zero-downtime health checks
+`````- **Deployment**: Railway platform with zero-downtime health checks- **Deployment**: Railway platform with zero-downtime health checks
 
 
 
@@ -112,27 +102,27 @@ NEVERBOUNCE_API_KEY=your-neverbounce-key
 
 1. Connect your GitHub repository to Railway### 💰 Cost Optimization Features
 
-```
+`````
 
-├── api/              # Business discovery routes2. Set environment variables in Railway dashboard:
+├── api/ # Business discovery routes2. Set environment variables in Railway dashboard:
 
-├── config/           # Database and API configuration  
+├── config/ # Database and API configuration
 
-├── database/         # Schema and RLS policies   - `SUPABASE_URL`- **Pre-validation filtering** reduces expensive API calls by 60%+
+├── database/ # Schema and RLS policies - `SUPABASE_URL`- **Pre-validation filtering** reduces expensive API calls by 60%+
 
-├── modules/          # Core business logic
+├── modules/ # Core business logic
 
-│   ├── api-clients/  # External API integrations   - `SUPABASE_SECRET_KEY` - **Smart budget management** with real-time cost tracking
+│ ├── api-clients/ # External API integrations - `SUPABASE_SECRET_KEY` - **Smart budget management** with real-time cost tracking
 
-│   ├── validators/   # Data quality enforcement
+│ ├── validators/ # Data quality enforcement
 
-│   └── logging/      # Campaign tracking   - `GOOGLE_PLACES_API_KEY`- **Quality thresholds** prevent low-value lead processing
+│ └── logging/ # Campaign tracking - `GOOGLE_PLACES_API_KEY`- **Quality thresholds** prevent low-value lead processing
 
-├── public/           # Web interface
+├── public/ # Web interface
 
-└── server.js         # Production server   - `PERSONAL_ACCESS_TOKEN`- **Free government APIs** maximize validation without cost
+└── server.js # Production server - `PERSONAL_ACCESS_TOKEN`- **Free government APIs** maximize validation without cost
 
-```
+````
 
 3. Deploy automatically via git push- **Bulk processing** optimization for enterprise campaigns
 
@@ -140,13 +130,13 @@ NEVERBOUNCE_API_KEY=your-neverbounce-key
 
 
 
-✅ **Real business names** from Google Places API  
+✅ **Real business names** from Google Places API
 
 ✅ **Verifiable addresses** with geocoding validation  ## 📊 Monitoring & Health Checks## 🚀 Quick Start
 
-✅ **Working phone numbers** (no fake 555 patterns)  
+✅ **Working phone numbers** (no fake 555 patterns)
 
-✅ **Accessible websites** (200-399 HTTP responses)  
+✅ **Accessible websites** (200-399 HTTP responses)
 
 ✅ **Deliverable emails** (80%+ confidence scoring)
 
@@ -188,7 +178,7 @@ git checkout debugging
 
 git checkout testing- **API Cost Tracking**: Real-time cost monitoring across all services### Free Accounts
 
-```
+````
 
 - **Service Health**: Automatic health checks for all external APIs
 
@@ -198,17 +188,13 @@ git checkout testing- **API Cost Tracking**: Real-time cost monitoring across al
 
 - 📖 **Documentation**: Switch to `instructions` branch
 
-- 🔧 **Troubleshooting**: Switch to `debugging` branch  - **Performance Metrics**: Response time, memory usage, and throughput monitoring- [Supabase](https://supabase.com) - PostgreSQL database (free tier: 500MB)
+- 🔧 **Troubleshooting**: Switch to `debugging` branch - **Performance Metrics**: Response time, memory usage, and throughput monitoring- [Supabase](https://supabase.com) - PostgreSQL database (free tier: 500MB)
 
 - 🧪 **Testing**: Switch to `testing` branch
 
 - 🐛 **Issues**: Use GitHub Issues- [Google Cloud](https://console.cloud.google.com) - Places API
 
-
-
 ## 📄 License## 🛡️ Security Features
-
-
 
 MIT License - Built for real business data discovery### Connection & Key Precedence
 
@@ -226,8 +212,6 @@ MIT License - Built for real business data discovery### Connection & Key Precede
 
 ## 💰 Cost Management4. `SUPABASE_PUBLISHABLE_KEY` (last resort; limited access)
 
-
-
 ### API Integration CostsRequired: `SUPABASE_URL` must be the HTTPS API root (`https://<ref>.supabase.co`).
 
 - **Google Places**: ~$0.032/search, $0.017/details request
@@ -237,8 +221,6 @@ MIT License - Built for real business data discovery### Connection & Key Precede
 - **NeverBounce**: ~$0.008/verification (1000 free/month)
 
 - **Scrapingdog**: $0.002/request (1000 free/month)### API Keys (Some Free Tiers Available)
-
-
 
 ### Budget Controls- **Google Places API** (Required) - ~$0.032 per search
 
@@ -250,21 +232,19 @@ MIT License - Built for real business data discovery### Connection & Key Precede
 
 - Cost-per-qualified-lead optimization## 💡 Cost Breakdown
 
-
-
-## 🎯 Data Quality Standards| Service           | Cost                           | Free Tier                |
+## 🎯 Data Quality Standards| Service | Cost | Free Tier |
 
 | ----------------- | ------------------------------ | ------------------------ |
 
-### Zero Fake Data Policy| Google Places     | $0.032/search + $0.017/details | $200 monthly credit      |
+### Zero Fake Data Policy| Google Places | $0.032/search + $0.017/details | $200 monthly credit |
 
-- No hardcoded business arrays or sample data| Railway Hosting   | $5/month                       | Free hobby plan          |
+- No hardcoded business arrays or sample data| Railway Hosting | $5/month | Free hobby plan |
 
-- All businesses verified through multiple APIs| Supabase Database | Free up to 50MB                | 500MB free               |
+- All businesses verified through multiple APIs| Supabase Database | Free up to 50MB | 500MB free |
 
-- Website accessibility validation (HTTP 200-399 required)| Hunter.io         | $0.04/search                   | 25 searches/month        |
+- Website accessibility validation (HTTP 200-399 required)| Hunter.io | $0.04/search | 25 searches/month |
 
-- Email deliverability verification (80%+ confidence)| NeverBounce       | $0.008/verification            | 1000 verifications/month |
+- Email deliverability verification (80%+ confidence)| NeverBounce | $0.008/verification | 1000 verifications/month |
 
 - Phone number format validation (no 555/000 patterns)
 
@@ -288,11 +268,9 @@ MIT License - Built for real business data discovery### Connection & Key Precede
 
 ## 🔧 Development Workflows- **Quality scoring** with confidence ratings
 
-
-
 ### Database Management### Admin Dashboard
 
-```bash
+````bash
 
 # Initialize complete database schemaProvides cost tracking, budget alerts, quality metrics, and usage analytics.
 
