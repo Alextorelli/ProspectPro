@@ -6,7 +6,9 @@
   "scripts": {
     "start": "node server.js",
     "dev": "nodemon server.js",
-    "postinstall": "echo 'ProspectPro: Zero mock data policy enforced - Ready for deployment'"
+    "health": "curl http://localhost:3000/health || echo 'Server not running'",
+    "test": "echo 'Tests moved to testing branch. Run: git checkout testing && node tests/validation/test-real-data.js'",
+    "postinstall": "echo 'ProspectPro: Production-ready deployment configured'"
   },
   "engines": {
     "node": ">=20.0.0",

@@ -1,110 +1,216 @@
-# ProspectPro - Real Business Data Lead Generation Platform# ProspectPro - Real Business Data Lead Generation Platform
+# ProspectPro# ProspectPro - Real Business Data Lead Generation Platform# ProspectPro - Real Business Data Lead Generation Platform
 
-## ✨ Overview## ✨ Overview
 
-ProspectPro is a production-ready Node.js/Express lead generation platform with **zero tolerance for fake business data**. Built for Railway deployment with Supabase PostgreSQL backend, it processes real business data through a comprehensive 5-phase validation pipeline.ProspectPro is a production-ready Node.js/Express lead generation platform with **zero tolerance for fake business data**. Built for Railway deployment with Supabase PostgreSQL backend, it processes real business data through a comprehensive 5-phase validation pipeline.
 
-## 🏗️ Architecture## 🏗️ Architecture
+🎯 **Production-Ready Lead Generation Platform**## ✨ Overview## ✨ Overview
 
-### Core Infrastructure### Core Infrastructure
 
-- **Server**: Enhanced Node.js/Express with comprehensive monitoring (`server-enhanced.js`)- **Server**: Enhanced Node.js/Express with comprehensive monitoring (`server-enhanced.js`)
 
-- **Database**: PostgreSQL via Supabase with 5-phase schema architecture- **Database**: PostgreSQL via Supabase with 5-phase schema architecture
+Railway-deployed Node.js application for real business data discovery and lead generation with zero tolerance for fake information.ProspectPro is a production-ready Node.js/Express lead generation platform with **zero tolerance for fake business data**. Built for Railway deployment with Supabase PostgreSQL backend, it processes real business data through a comprehensive 5-phase validation pipeline.ProspectPro is a production-ready Node.js/Express lead generation platform with **zero tolerance for fake business data**. Built for Railway deployment with Supabase PostgreSQL backend, it processes real business data through a comprehensive 5-phase validation pipeline.
 
-- **Deployment**: Railway platform with zero-downtime health checks- **Deployment**: Railway platform with zero-downtime health checks
 
-- **Monitoring**: Comprehensive Prometheus metrics + custom deployment monitoring- **Monitoring**: Comprehensive Prometheus metrics + custom deployment monitoring
 
-### 5-Phase Database Architecture### 5-Phase Database Architecture
+## 🚀 Quick Deploy## 🏗️ Architecture## 🏗️ Architecture
 
-1. **Foundation** (`01-database-foundation.sql`): Core infrastructure, campaigns, system settings1. **Foundation** (`01-database-foundation.sql`): Core infrastructure, campaigns, system settings
 
-2. **Leads & Enrichment** (`02-leads-and-enrichment.sql`): Business data with API cost tracking2. **Leads & Enrichment** (`02-leads-and-enrichment.sql`): Business data with API cost tracking
 
-3. **Monitoring & Analytics** (`03-monitoring-and-analytics.sql`): Performance metrics and dashboards3. **Monitoring & Analytics** (`03-monitoring-and-analytics.sql`): Performance metrics and dashboards
+[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/new/template)### Core Infrastructure### Core Infrastructure
 
-4. **Functions & Procedures** (`04-functions-and-procedures.sql`): Business logic and quality scoring4. **Functions & Procedures** (`04-functions-and-procedures.sql`): Business logic and quality scoring
 
-5. **Security & RLS** (`05-security-and-rls.sql`): Row Level Security policies5. **Security & RLS** (`05-security-and-rls.sql`): Row Level Security policies
 
-- **Stage 2**: Contact enrichment via Hunter.io + website scraping
+```bash- **Server**: Enhanced Node.js/Express with comprehensive monitoring (`server-enhanced.js`)- **Server**: Enhanced Node.js/Express with comprehensive monitoring (`server-enhanced.js`)
 
-## 🚀 Quick Start- **Stage 3**: Government registry validation (CA SOS, NY SOS, Tax Records)
+git clone https://github.com/Alextorelli/ProspectPro.git
 
-- **Stage 4**: Email verification + quality scoring (0-100%)
+cd ProspectPro- **Database**: PostgreSQL via Supabase with 5-phase schema architecture- **Database**: PostgreSQL via Supabase with 5-phase schema architecture
 
-### Development Setup
+railway login && railway init && railway up
 
-````bash### 🎯 Multi-Source Data Integration
+```- **Deployment**: Railway platform with zero-downtime health checks- **Deployment**: Railway platform with zero-downtime health checks
 
-git clone https://github.com/your-repo/ProspectPro.git
 
-cd ProspectPro- 🌐 **Google Places API** - Primary business discovery
 
-npm install- 📧 **Hunter.io** - Email discovery and verification
+## ✨ Features- **Monitoring**: Comprehensive Prometheus metrics + custom deployment monitoring- **Monitoring**: Comprehensive Prometheus metrics + custom deployment monitoring
 
-cp .env.example .env  # Configure your API keys- ✅ **NeverBounce** - Email deliverability validation
 
-npm run dev           # Starts with nodemon on port 3000- 🏛️ **Government Registries** - Business entity verification (FREE)
 
-```- 🏠 **Property Intelligence** - Address and ownership validation (FREE)
+- **Real Business Data**: Google Places API integration### 5-Phase Database Architecture### 5-Phase Database Architecture
 
-- 🌐 **Website Scraping** - Contact page extraction
+- **Email Validation**: Hunter.io + NeverBounce verification
+
+- **Quality Scoring**: Confidence-based lead qualification1. **Foundation** (`01-database-foundation.sql`): Core infrastructure, campaigns, system settings1. **Foundation** (`01-database-foundation.sql`): Core infrastructure, campaigns, system settings
+
+- **Cost Controls**: Built-in budget limits and API quotas
+
+- **Railway Ready**: One-click deployment with health monitoring2. **Leads & Enrichment** (`02-leads-and-enrichment.sql`): Business data with API cost tracking2. **Leads & Enrichment** (`02-leads-and-enrichment.sql`): Business data with API cost tracking
+
+
+
+## 🔧 Core Architecture3. **Monitoring & Analytics** (`03-monitoring-and-analytics.sql`): Performance metrics and dashboards3. **Monitoring & Analytics** (`03-monitoring-and-analytics.sql`): Performance metrics and dashboards
+
+
+
+- **Backend**: Node.js/Express server4. **Functions & Procedures** (`04-functions-and-procedures.sql`): Business logic and quality scoring4. **Functions & Procedures** (`04-functions-and-procedures.sql`): Business logic and quality scoring
+
+- **Database**: Supabase PostgreSQL with RLS security
+
+- **APIs**: Google Places, Hunter.io, NeverBounce5. **Security & RLS** (`05-security-and-rls.sql`): Row Level Security policies5. **Security & RLS** (`05-security-and-rls.sql`): Row Level Security policies
+
+- **Deployment**: Railway.app with auto-scaling
+
+- **Monitoring**: Built-in health endpoints- **Stage 2**: Contact enrichment via Hunter.io + website scraping
+
+
+
+## 📊 Health Endpoints## 🚀 Quick Start- **Stage 3**: Government registry validation (CA SOS, NY SOS, Tax Records)
+
+
+
+- `GET /health` - Railway health check- **Stage 4**: Email verification + quality scoring (0-100%)
+
+- `GET /diag` - System diagnostics
+
+- `GET /ready` - Database connectivity### Development Setup
+
+
+
+## 🌐 Environment Setup````bash### 🎯 Multi-Source Data Integration
+
+
+
+```envgit clone https://github.com/your-repo/ProspectPro.git
+
+SUPABASE_URL=https://your-project.supabase.co
+
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-keycd ProspectPro- 🌐 **Google Places API** - Primary business discovery
+
+GOOGLE_PLACES_API_KEY=your-google-places-key
+
+HUNTER_IO_API_KEY=your-hunter-io-keynpm install- 📧 **Hunter.io** - Email discovery and verification
+
+NEVERBOUNCE_API_KEY=your-neverbounce-key
+
+```cp .env.example .env  # Configure your API keys- ✅ **NeverBounce** - Email deliverability validation
+
+
+
+## 💰 Cost Structurenpm run dev           # Starts with nodemon on port 3000- 🏛️ **Government Registries** - Business entity verification (FREE)
+
+
+
+- **Google Places**: ~$10/month (moderate usage)```- 🏠 **Property Intelligence** - Address and ownership validation (FREE)
+
+- **Hunter.io**: Free tier (25 searches/month)
+
+- **NeverBounce**: Free tier (1000 verifications/month)- 🌐 **Website Scraping** - Contact page extraction
+
+- **Railway**: Usage-based hosting
 
 ### Production Deployment (Railway)
 
+## 📁 Production Structure
+
 1. Connect your GitHub repository to Railway### 💰 Cost Optimization Features
 
-2. Set environment variables in Railway dashboard:
+```
 
-   - `SUPABASE_URL`- **Pre-validation filtering** reduces expensive API calls by 60%+
+├── api/              # Business discovery routes2. Set environment variables in Railway dashboard:
 
-   - `SUPABASE_SECRET_KEY` - **Smart budget management** with real-time cost tracking
+├── config/           # Database and API configuration  
 
-   - `GOOGLE_PLACES_API_KEY`- **Quality thresholds** prevent low-value lead processing
+├── database/         # Schema and RLS policies   - `SUPABASE_URL`- **Pre-validation filtering** reduces expensive API calls by 60%+
 
-   - `PERSONAL_ACCESS_TOKEN`- **Free government APIs** maximize validation without cost
+├── modules/          # Core business logic
+
+│   ├── api-clients/  # External API integrations   - `SUPABASE_SECRET_KEY` - **Smart budget management** with real-time cost tracking
+
+│   ├── validators/   # Data quality enforcement
+
+│   └── logging/      # Campaign tracking   - `GOOGLE_PLACES_API_KEY`- **Quality thresholds** prevent low-value lead processing
+
+├── public/           # Web interface
+
+└── server.js         # Production server   - `PERSONAL_ACCESS_TOKEN`- **Free government APIs** maximize validation without cost
+
+```
 
 3. Deploy automatically via git push- **Bulk processing** optimization for enterprise campaigns
 
+## 🔍 Data Quality Standards
 
 
-## 📊 Monitoring & Health Checks## 🚀 Quick Start
 
+✅ **Real business names** from Google Places API  
 
+✅ **Verifiable addresses** with geocoding validation  ## 📊 Monitoring & Health Checks## 🚀 Quick Start
+
+✅ **Working phone numbers** (no fake 555 patterns)  
+
+✅ **Accessible websites** (200-399 HTTP responses)  
+
+✅ **Deliverable emails** (80%+ confidence scoring)
 
 ### Health Endpoints1. **Deploy to Railway** – Refer to the consolidated [Deployment Guide](DEPLOYMENT_GUIDE.md)
 
+## 📚 Documentation & Development
+
 - `/health` - Basic health check (Railway monitoring)2. **Configure Supabase** – Set `SUPABASE_URL` (HTTPS) + `SUPABASE_SECRET_KEY` (preferred new format) or `SUPABASE_SERVICE_ROLE_KEY` (legacy)
+
+This repository uses a clean branch structure:
 
 - `/diag` - Comprehensive system diagnostics  3. **Add API Keys** – Google Places required; others optional but recommended
 
-- `/boot-report` - Detailed boot sequence analysis4. **(Optional) Enable degraded mode** by setting `ALLOW_DEGRADED_START=true` to keep container alive while fixing DB config
+- **`main`** - Production code (Railway deployment)
 
-- `/system-info` - Full system information5. **Access your app** at `https://your-app.railway.app`
+- **`instructions`** - Documentation and guides  - `/boot-report` - Detailed boot sequence analysis4. **(Optional) Enable degraded mode** by setting `ALLOW_DEGRADED_START=true` to keep container alive while fixing DB config
 
-- `/metrics` - Prometheus metrics endpoint6. **Diagnostics**: Visit `/health` (quick) or `/diag` (full) for connection analysis
+- **`debugging`** - Development tools and diagnostics
+
+- **`testing`** - Test files and validation- `/system-info` - Full system information5. **Access your app** at `https://your-app.railway.app`
 
 
 
-### Monitoring Features## 📋 What You'll Need
+```bash- `/metrics` - Prometheus metrics endpoint6. **Diagnostics**: Visit `/health` (quick) or `/diag` (full) for connection analysis
+
+# Access documentation
+
+git checkout instructions
+
+
+
+# Development tools  ### Monitoring Features## 📋 What You'll Need
+
+git checkout debugging
 
 - **Boot Debugging**: 8-phase startup monitoring with timing
 
-- **API Cost Tracking**: Real-time cost monitoring across all services### Free Accounts
+# Run tests
+
+git checkout testing- **API Cost Tracking**: Real-time cost monitoring across all services### Free Accounts
+
+```
 
 - **Service Health**: Automatic health checks for all external APIs
 
+## 🆘 Support
+
 - **Error Tracking**: Structured error logging with categorization- [Railway](https://railway.app) - Web hosting ($5/month after free tier)
 
-- **Performance Metrics**: Response time, memory usage, and throughput monitoring- [Supabase](https://supabase.com) - PostgreSQL database (free tier: 500MB)
+- 📖 **Documentation**: Switch to `instructions` branch
 
-- [Google Cloud](https://console.cloud.google.com) - Places API
+- 🔧 **Troubleshooting**: Switch to `debugging` branch  - **Performance Metrics**: Response time, memory usage, and throughput monitoring- [Supabase](https://supabase.com) - PostgreSQL database (free tier: 500MB)
 
-## 🛡️ Security Features
+- 🧪 **Testing**: Switch to `testing` branch
 
-### Connection & Key Precedence
+- 🐛 **Issues**: Use GitHub Issues- [Google Cloud](https://console.cloud.google.com) - Places API
+
+
+
+## 📄 License## 🛡️ Security Features
+
+
+
+MIT License - Built for real business data discovery### Connection & Key Precedence
 
 - **Row Level Security**: Multi-tenant data isolation via Supabase RLS
 
