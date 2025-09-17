@@ -4,24 +4,24 @@
  * Creates ProspectPro tables directly using Supabase client
  */
 
-require('dotenv').config();
-const { createClient } = require('@supabase/supabase-js');
+require("dotenv").config();
+const { createClient } = require("@supabase/supabase-js");
 
 const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-console.log('🔧 Creating ProspectPro Database Tables');
-console.log('======================================');
+console.log("🔧 Creating ProspectPro Database Tables");
+console.log("======================================");
 
 const client = createClient(supabaseUrl, supabaseKey);
 
 async function createTables() {
-  console.log('📋 Creating essential tables...');
-  
+  console.log("📋 Creating essential tables...");
+
   // Create campaigns table first (referenced by other tables)
   try {
-    console.log('Creating campaigns table...');
-    const { error: campaignError } = await client.rpc('exec', {
+    console.log("Creating campaigns table...");
+    const { error: campaignError } = await client.rpc("exec", {
       sql: `
         CREATE TABLE IF NOT EXISTS campaigns (
           id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
@@ -42,47 +42,52 @@ async function createTables() {
           CONSTRAINT positive_budget CHECK (budget_limit IS NULL OR budget_limit > 0),
           CONSTRAINT positive_lead_limit CHECK (lead_limit IS NULL OR lead_limit > 0)
         );
-      `
+      `,
     });
-    
+
     if (campaignError) {
-      console.log('Note: campaigns table may already exist or need manual creation');
+      console.log(
+        "Note: campaigns table may already exist or need manual creation"
+      );
     } else {
-      console.log('✅ Campaigns table created');
+      console.log("✅ Campaigns table created");
     }
-    
   } catch (err) {
-    console.log('Note: Using alternative table creation method...');
+    console.log("Note: Using alternative table creation method...");
   }
-  
+
   // Test if we can query the tables
-  console.log('\n🧪 Testing table access...');
-  
+  console.log("\n🧪 Testing table access...");
+
   try {
     const { data, error } = await client
-      .from('campaigns')
-      .select('count', { count: 'exact', head: true });
-    
+      .from("campaigns")
+      .select("count", { count: "exact", head: true });
+
     if (!error) {
-      console.log('✅ Campaigns table accessible');
+      console.log("✅ Campaigns table accessible");
     } else {
-      console.log('⚠️  Campaigns table needs manual creation in Supabase dashboard');
-      console.log('Error:', error.message);
+      console.log(
+        "⚠️  Campaigns table needs manual creation in Supabase dashboard"
+      );
+      console.log("Error:", error.message);
     }
   } catch (err) {
-    console.log('⚠️  Table test failed:', err.message);
+    console.log("⚠️  Table test failed:", err.message);
   }
-  
-  console.log('\n📋 Manual Setup Instructions:');
-  console.log('==============================');
-  console.log('1. Go to https://supabase.com/dashboard/project/sriycekxdqnesdsgwiuc');
-  console.log('2. Navigate to SQL Editor');
-  console.log('3. Run the enhanced-supabase-schema.sql file');
-  console.log('4. Run the rls-security-hardening.sql file');
-  console.log('5. Return here to test the connection');
+
+  console.log("\n📋 Manual Setup Instructions:");
+  console.log("==============================");
+  console.log(
+    "1. Go to https://supabase.com/dashboard/project/sriycekxdqnesdsgwiuc"
+  );
+  console.log("2. Navigate to SQL Editor");
+  console.log("3. Run the enhanced-supabase-schema.sql file");
+  console.log("4. Run the rls-security-hardening.sql file");
+  console.log("5. Return here to test the connection");
 }
 
-createTables().catch(err => {
-  console.error('Setup error:', err);
+createTables().catch((err) => {
+  console.error("Setup error:", err);
   process.exit(1);
 });
