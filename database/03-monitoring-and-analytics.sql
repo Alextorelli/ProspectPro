@@ -294,9 +294,22 @@ CREATE INDEX IF NOT EXISTS idx_campaign_analytics_timestamp ON campaign_analytic
 CREATE INDEX IF NOT EXISTS idx_campaign_analytics_service ON campaign_analytics(api_service, timestamp DESC) WHERE api_service IS NOT NULL;
 
 -- Composite index for dashboard queries
--- Use immutable type cast instead of DATE() function for index expression
+-- Add a generated date column for indexing (avoids expression index parsing issues)
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns 
+    WHERE table_schema='public' AND table_name='campaign_analytics' AND column_name='timestamp_date'
+  ) THEN
+    ALTER TABLE campaign_analytics 
+      ADD COLUMN timestamp_date DATE GENERATED ALWAYS AS ("timestamp"::date) STORED;
+    RAISE NOTICE 'Added generated column campaign_analytics.timestamp_date';
+  END IF;
+END $$;
+
+-- Index uses the generated column (immutable)
 CREATE INDEX IF NOT EXISTS idx_campaign_analytics_dashboard
-  ON campaign_analytics (campaign_id, metric_type, ("timestamp")::date);
+  ON campaign_analytics (campaign_id, metric_type, timestamp_date);
 
 -- API cost tracking indexes
 CREATE INDEX IF NOT EXISTS idx_api_cost_tracking_service_date ON api_cost_tracking(api_service, date DESC, hour DESC);
