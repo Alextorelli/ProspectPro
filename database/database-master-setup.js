@@ -8,6 +8,9 @@
  * Usage: node database-master-setup.js [--test-mode] [--skip-validation]
  */
 
+// Load environment variables
+require("dotenv").config();
+
 const fs = require("fs");
 const path = require("path");
 const { createClient } = require("@supabase/supabase-js");
