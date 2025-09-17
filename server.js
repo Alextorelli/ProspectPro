@@ -28,6 +28,7 @@ const {
 // Import new monitoring and security systems
 const { ProspectProMetrics } = require("./modules/prometheus-metrics");
 const { SecurityHardening } = require("./modules/security-hardening");
+const RailwayWebhookMonitor = require("./modules/railway-webhook-monitor");
 
 const { Client } = require("@googlemaps/google-maps-services-js");
 
@@ -48,6 +49,7 @@ const PORT = process.env.PORT || 3000;
 // Initialize monitoring and security systems
 const metrics = new ProspectProMetrics();
 const security = new SecurityHardening();
+const webhookMonitor = new RailwayWebhookMonitor();
 
 bootDebugger.endPhase(true);
 
@@ -473,12 +475,28 @@ app.get("/diag", async (req, res) => {
     startupDiagnostics = await testConnection();
     degradedMode = !startupDiagnostics.success;
   }
+
+  // Get deployment status from webhook monitor
+  const deploymentStatus = webhookMonitor.getDeploymentStatus();
+
   res.json({
     service: "ProspectPro",
     timestamp: new Date().toISOString(),
     degradedMode,
     startupDiagnostics,
     lastDiagnostics: getLastSupabaseDiagnostics(),
+    deployment: {
+      status: deploymentStatus.systemHealth,
+      recentFailures: deploymentStatus.consecutiveFailures,
+      averageBuildTime: deploymentStatus.averageBuildTime,
+      lastSuccess: deploymentStatus.lastSuccessfulDeployment?.timestamp,
+      railwayWebhooks: {
+        configured: !!process.env.RAILWAY_WEBHOOK_SECRET,
+        eventsReceived: deploymentStatus.webhookStatus.totalEventsProcessed,
+        lastEventReceived: deploymentStatus.webhookStatus.lastEventReceived,
+        activeBuilds: deploymentStatus.webhookStatus.activeBuilds,
+      },
+    },
     environment: buildSanitizedEnv(),
     pid: process.pid,
     uptimeSeconds: process.uptime(),
@@ -488,6 +506,44 @@ app.get("/diag", async (req, res) => {
 // =====================================
 // API ROUTES
 // =====================================
+
+// Railway webhook endpoint (before auth middleware)
+app.post(
+  "/railway-webhook",
+  express.raw({ type: "application/json" }),
+  async (req, res) => {
+    await webhookMonitor.processWebhook(req, res);
+  }
+);
+
+// Deployment status dashboard endpoint
+app.get("/deployment-status", (req, res) => {
+  // Require admin token for sensitive deployment information
+  const token =
+    req.query.token || req.headers.authorization?.replace("Bearer ", "");
+  if (!token || token !== process.env.PERSONAL_ACCESS_TOKEN) {
+    return res
+      .status(401)
+      .json({ error: "Unauthorized - admin token required" });
+  }
+
+  const deploymentStatus = webhookMonitor.getDeploymentStatus();
+  const diag = getLastSupabaseDiagnostics();
+
+  res.json({
+    ...deploymentStatus,
+    railwayIntegration: {
+      webhookConfigured: !!process.env.RAILWAY_WEBHOOK_SECRET,
+      lastWebhookReceived: webhookMonitor.lastWebhookTimestamp,
+      monitoringActive: true,
+    },
+    systemStatus: {
+      degradedMode,
+      supabaseConnected: diag?.success || false,
+      timestamp: new Date().toISOString(),
+    },
+  });
+});
 
 // Import API routes
 let businessDiscoveryRouter;
@@ -501,12 +557,10 @@ try {
   // Provide a stub router so app still responds
   const r = require("express").Router();
   r.use((req, res) =>
-    res
-      .status(500)
-      .json({
-        error: "business-discovery module failed to load",
-        message: e.message,
-      })
+    res.status(500).json({
+      error: "business-discovery module failed to load",
+      message: e.message,
+    })
   );
   businessDiscoveryRouter = r;
 }

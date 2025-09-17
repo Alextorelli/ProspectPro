@@ -75,6 +75,32 @@
     "ALLOWED_ORIGINS": {
       "description": "Comma-separated CORS origins (auto-configured for Railway)",
       "default": "${{RAILWAY_STATIC_URL}},${{RAILWAY_PUBLIC_DOMAIN}}"
+    },
+    "RAILWAY_WEBHOOK_SECRET": {
+      "description": "Railway webhook secret for deployment monitoring - Generate in Railway dashboard webhooks section",
+      "required": false
+    },
+    "ENABLE_WEBHOOK_MONITORING": {
+      "description": "Enable Railway webhook processing for deployment debugging",
+      "default": "true"
+    },
+    "ALLOW_DEGRADED_START": {
+      "description": "Allow server to start even if some services are unavailable",
+      "default": "true"
     }
+  },
+  "webhooks": {
+    "endpoint": "/railway-webhook",
+    "events": [
+      "deployment.success",
+      "deployment.failed", 
+      "deployment.crashed",
+      "deployment.building",
+      "deployment.queued",
+      "deployment.deploying",
+      "service.connected",
+      "service.disconnected"
+    ],
+    "description": "Real-time deployment monitoring and debugging assistance"
   }
 }
