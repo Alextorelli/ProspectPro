@@ -69,7 +69,7 @@ const securityMiddleware = security.getMiddleware();
 securityMiddleware.general.forEach((middleware) => app.use(middleware));
 
 // Add metrics middleware
-app.use(metrics.getHttpMetricsMiddleware());
+app.use(metrics.createHttpMiddleware());
 
 // Body parsing middleware
 app.use(express.json({ limit: "10mb" }));
