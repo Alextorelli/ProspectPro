@@ -294,7 +294,7 @@ CREATE INDEX IF NOT EXISTS idx_campaign_analytics_timestamp ON campaign_analytic
 CREATE INDEX IF NOT EXISTS idx_campaign_analytics_service ON campaign_analytics(api_service, timestamp DESC) WHERE api_service IS NOT NULL;
 
 -- Composite index for dashboard queries
--- Add a generated date column for indexing (avoids expression index parsing issues)
+-- Use a plain column maintained by trigger (generated columns require immutable expressions)
 DO $$
 BEGIN
   IF NOT EXISTS (
@@ -302,8 +302,36 @@ BEGIN
     WHERE table_schema='public' AND table_name='campaign_analytics' AND column_name='timestamp_date'
   ) THEN
     ALTER TABLE campaign_analytics 
-      ADD COLUMN timestamp_date DATE GENERATED ALWAYS AS ("timestamp"::date) STORED;
-    RAISE NOTICE 'Added generated column campaign_analytics.timestamp_date';
+      ADD COLUMN timestamp_date DATE;
+    RAISE NOTICE 'Added column campaign_analytics.timestamp_date';
+  END IF;
+END $$;
+
+-- Backfill existing rows once
+UPDATE campaign_analytics
+SET timestamp_date = ("timestamp")::date
+WHERE timestamp_date IS NULL;
+
+-- Create or replace trigger function to maintain the column
+CREATE OR REPLACE FUNCTION set_campaign_analytics_timestamp_date()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.timestamp_date := (NEW."timestamp")::date;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Ensure trigger exists to keep column synced on insert/update
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_trigger WHERE tgname = 'trg_campaign_analytics_set_timestamp_date'
+  ) THEN
+    CREATE TRIGGER trg_campaign_analytics_set_timestamp_date
+    BEFORE INSERT OR UPDATE OF "timestamp"
+    ON campaign_analytics
+    FOR EACH ROW
+    EXECUTE FUNCTION set_campaign_analytics_timestamp_date();
   END IF;
 END $$;
 
