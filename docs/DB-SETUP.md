@@ -13,6 +13,7 @@ This guide walks you through setting up the database in Supabase using the SQL e
 2. Paste and run the first section of `database/all-phases-consolidated.sql` (Phase 01) or run the entire file (recommended).
 
 > Note: Our scripts already handle:
+>
 > - `pgcrypto`, `uuid-ossp`, `postgis`, `pg_trgm`
 > - Domains via guarded DO/EXECUTE blocks (no `CREATE DOMAIN IF NOT EXISTS`)
 
@@ -62,4 +63,3 @@ This guide walks you through setting up the database in Supabase using the SQL e
 
 - Set environment variables in Railway and deploy the app
 - Use `/diag` and `/health` endpoints to verify connectivity
-
