@@ -2000,21 +2000,37 @@ BEGIN
 END $$;
 
 -- Pin function search_path to avoid mutable search_path warnings (Supabase lints)
--- Use exact signatures from created functions
-ALTER FUNCTION public.update_updated_at_column() SET search_path = public, pg_temp;
-ALTER FUNCTION public.set_campaign_analytics_timestamp_date() SET search_path = public, pg_temp;
-ALTER FUNCTION public.calculate_lead_quality_score(json) SET search_path = public, pg_temp;
-ALTER FUNCTION public.update_lead_confidence_scores(uuid) SET search_path = public, pg_temp;
-ALTER FUNCTION public.get_campaign_analytics(uuid) SET search_path = public, pg_temp;
-ALTER FUNCTION public.get_realtime_dashboard_metrics(uuid) SET search_path = public, pg_temp;
-ALTER FUNCTION public.leads_within_radius(double precision, double precision, double precision, uuid) SET search_path = public, pg_temp;
-ALTER FUNCTION public.search_leads_by_name(text, uuid, integer) SET search_path = public, pg_temp;
-ALTER FUNCTION public.update_campaign_statistics(uuid) SET search_path = public, pg_temp;
-ALTER FUNCTION public.refresh_analytics_views() SET search_path = public, pg_temp;
-ALTER FUNCTION public.archive_old_data(date) SET search_path = public, pg_temp;
-ALTER FUNCTION public.validate_rls_security() SET search_path = public, pg_temp;
-ALTER FUNCTION public.get_deployment_health_summary() SET search_path = public, pg_temp;
-ALTER FUNCTION public.analyze_deployment_failures(integer) SET search_path = public, pg_temp;
+DO $$
+DECLARE
+  rec RECORD;
+BEGIN
+  FOR rec IN (
+    SELECT 'public.update_updated_at_column()' AS sig
+    UNION ALL SELECT 'public.set_campaign_analytics_timestamp_date()'
+    UNION ALL SELECT 'public.calculate_lead_quality_score(json)'
+    UNION ALL SELECT 'public.update_lead_confidence_scores(uuid)'
+    UNION ALL SELECT 'public.get_campaign_analytics(uuid)'
+    UNION ALL SELECT 'public.get_realtime_dashboard_metrics(uuid)'
+    UNION ALL SELECT 'public.leads_within_radius(double precision,double precision,double precision,uuid)'
+    UNION ALL SELECT 'public.search_leads_by_name(text,uuid,integer)'
+    UNION ALL SELECT 'public.update_campaign_statistics(uuid)'
+    UNION ALL SELECT 'public.refresh_analytics_views()'
+    UNION ALL SELECT 'public.archive_old_data(date)'
+    UNION ALL SELECT 'public.validate_rls_security()'
+    UNION ALL SELECT 'public.get_deployment_health_summary()'
+    UNION ALL SELECT 'public.analyze_deployment_failures(integer)'
+  ) LOOP
+    IF EXISTS (
+      SELECT 1
+      FROM pg_proc p
+      JOIN pg_namespace n ON n.oid = p.pronamespace
+      WHERE n.nspname = 'public'
+        AND p.oid::regprocedure::text = rec.sig
+    ) THEN
+      EXECUTE format('ALTER FUNCTION %s SET search_path = public, pg_temp', rec.sig);
+    END IF;
+  END LOOP;
+END $$;
 
 -- ============================================================================
 -- Phase 5 Complete - Database Setup Finished
