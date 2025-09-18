@@ -575,6 +575,8 @@ npm run dev
 - Preferred: run `database/all-phases-consolidated.sql` once in the Supabase SQL editor.
 - Then run `database/VALIDATION_QUERIES.sql` to verify extensions, domains, tables, triggers, functions, MV, and RLS.
 
+Detailed UI walkthrough with screenshots: see `docs/DB-SETUP.md`.
+
 Important Supabase SQL editor constraints used by our scripts:
 - Domains are created via guarded DO/EXECUTE blocks instead of `CREATE DOMAIN IF NOT EXISTS`.
 - No `CREATE INDEX CONCURRENTLY` (single-transaction editor).
@@ -618,9 +620,9 @@ ProspectPro/
 ## Deployment (Railway)
 
 1) Connect repo to Railway and set environment variables:
-	- `SUPABASE_URL`, `SUPABASE_SECRET_KEY`
-	- `GOOGLE_PLACES_API_KEY`, `HUNTER_IO_API_KEY`, `NEVERBOUNCE_API_KEY`
-	- Optional: `ALLOW_DEGRADED_START=true` for initial debugging
+		- `SUPABASE_URL`, `SUPABASE_SECRET_KEY`
+		- `GOOGLE_PLACES_API_KEY`, `HUNTER_IO_API_KEY`, `NEVERBOUNCE_API_KEY`
+		- Optional: `ALLOW_DEGRADED_START=true` for initial debugging
 2) Deploy; check `/health` and `/diag` for status
 
 ## Security
