@@ -64,10 +64,10 @@ WHERE n.nspname='public' AND c.relname IN (
 ORDER BY table_name;
 
 -- 9) Policies
-SELECT schemaname, tablename, polname, cmd
+SELECT schemaname, tablename, policyname, cmd
 FROM pg_policies
 WHERE schemaname='public'
-ORDER BY tablename, polname;
+ORDER BY tablename, policyname;
 
 -- 10) Materialized view
 SELECT matviewname
@@ -80,7 +80,8 @@ SELECT refresh_analytics_views();
 
 -- Geospatial search (positional args)
 SELECT *
-FROM leads_within_radius(37.7749, -122.4194, 10.0) LIMIT
+FROM leads_within_radius(37.7749, -122.4194, 10.0)
+LIMIT
 5;
 
 -- Fuzzy search (cast NULL to UUID)
