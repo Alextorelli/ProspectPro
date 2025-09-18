@@ -1289,7 +1289,7 @@ RETURNS TABLE (
   lead_id UUID,
   business_name TEXT,
   distance_km FLOAT,
-  confidence_score INTEGER
+  confidence_score confidence_score_type
 ) AS $$
 BEGIN
   RETURN QUERY
@@ -1323,7 +1323,7 @@ RETURNS TABLE (
   lead_id UUID,
   campaign_id UUID,
   business_name TEXT,
-  confidence_score INTEGER,
+  confidence_score confidence_score_type,
   similarity_score FLOAT
 ) AS $$
 BEGIN
@@ -1333,7 +1333,7 @@ BEGIN
     el.campaign_id,
     el.business_name,
     el.confidence_score,
-    SIMILARITY(el.business_name, search_term) as similarity_score
+    SIMILARITY(el.business_name, search_term)::double precision as similarity_score
   FROM enhanced_leads el
   JOIN campaigns c ON el.campaign_id = c.id
   WHERE (user_id_param IS NULL OR c.user_id = user_id_param)
