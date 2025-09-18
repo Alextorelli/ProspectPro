@@ -1,5 +1,14 @@
--- ProspectPro Essential Database Setup
--- Copy and paste this ENTIRE script into Supabase SQL Editor and click RUN
+-- DEPRECATED: Do NOT use this script.
+-- Reason: Schema has evolved for Supabase SQL editor constraints, PostGIS geography usage, RLS hardening, and performance indexes.
+-- Action: Use `database/all-phases-consolidated.sql` followed by `database/VALIDATION_QUERIES.sql` instead.
+
+DO $$
+BEGIN
+  RAISE EXCEPTION 'This script is deprecated. Run database/all-phases-consolidated.sql and then database/VALIDATION_QUERIES.sql.';
+END $$;
+
+-- The legacy content below is intentionally preserved for historical reference only.
+-- It should never be executed.
 
 -- Enable extensions
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";

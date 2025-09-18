@@ -538,41 +538,110 @@ Complete zero-trust user isolation with:
 
 
 
-## 📜 License---
+# ProspectPro – Real Business Data Lead Generation
 
+ProspectPro is a production-ready Node.js/Express platform with zero tolerance for fake business data. It uses real APIs (Google Places, website scraping, email verification) and a Supabase PostgreSQL backend with strict RLS.
 
+## Quick Start
 
-MIT License - see LICENSE file for details### Degraded Mode Workflow
+1) Clone and install
 
+```powershell
+git clone https://github.com/Alextorelli/ProspectPro.git
+cd ProspectPro
+npm install
+cp .env.example .env
+```
 
+2) Configure environment variables in `.env`
 
-## 🤝 Contributing1. Deploy with misconfigured or pending Supabase creds + `ALLOW_DEGRADED_START=true`
+```env
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_SECRET_KEY=sb_secret_...
+GOOGLE_PLACES_API_KEY=...
+HUNTER_IO_API_KEY=...
+NEVERBOUNCE_API_KEY=...
+PERSONAL_ACCESS_TOKEN=...
+```
 
-2. Hit `/diag` to view: key presence, network reachability, REST auth probe, table probe
+3) Start locally
 
-1. Fork the repository3. Correct env vars in Railway → redeploy (or just update variables and restart)
+```powershell
+npm run dev
+```
 
-2. Create feature branch (`git checkout -b feature/amazing-feature`)4. Once `/health` shows `status: ok`, remove `ALLOW_DEGRADED_START` for stricter future starts
+## Database Setup (Supabase)
 
-3. Run test suite (`npm test`)
+- Preferred: run `database/all-phases-consolidated.sql` once in the Supabase SQL editor.
+- Then run `database/VALIDATION_QUERIES.sql` to verify extensions, domains, tables, triggers, functions, MV, and RLS.
 
-4. Commit changes (`git commit -m 'Add amazing feature'`)### Crash Prevention Enhancements
+Important Supabase SQL editor constraints used by our scripts:
+- Domains are created via guarded DO/EXECUTE blocks instead of `CREATE DOMAIN IF NOT EXISTS`.
+- No `CREATE INDEX CONCURRENTLY` (single-transaction editor).
+- Geospatial uses `geography(Point,4326)` with GIST indexes.
+- The `campaign_analytics.timestamp_date` field is maintained by a trigger; use it for date filters instead of `DATE(timestamp)` expression indexes.
 
-5. Push to branch (`git push origin feature/amazing-feature`)
+If you prefer phased setup, execute `01-05` in order from `database/`.
 
-6. Open Pull RequestGlobal handlers (`unhandledRejection`, `uncaughtException`) and a heartbeat log every 2 minutes reduce silent failures and aid log-based monitoring.
+## Health Endpoints
 
+- `GET /health` – Fast Railway health check
+- `GET /diag` – Full Supabase diagnostics and environment analysis
+- `GET /ready` – Readiness probe (requires DB)
 
+## Data Quality Standards
 
-## 📞 Support**🚀 Ready to generate real leads? Start with the updated [Deployment Guide](DEPLOYMENT_GUIDE.md)**
+- Real business discovery via Google Places
+- Website must return HTTP 200–399
+- Email deliverability confidence ≥ 80%
+- Exclude fake phone patterns (555/000/111)
+- Zero hardcoded business data – all sources are real APIs
 
+## Cost Management
 
-- **Health Status**: Check `/health` endpoint
-- **System Diagnostics**: Visit `/diag` for detailed status
-- **Documentation**: See `/archive/old-documentation/` for historical docs
-- **Issues**: GitHub Issues for bug reports and feature requests
+- Budget-aware processing with per-request cost tracking
+- Optimized API usage (pre-validation scoring, quotas, backoff)
 
----
+## Project Structure
 
-**Built with ❤️ for authentic business data**
+```
+ProspectPro/
+├── api/                    # API endpoints
+├── config/                 # Supabase and API config
+├── database/               # SQL schema, RLS policies, validation
+├── modules/                # Core logic, API clients, validators
+├── public/                 # Frontend dashboard
+├── server.js               # Production server
+└── server-enhanced.js      # Extended diagnostics/metrics
+```
+
+## Deployment (Railway)
+
+1) Connect repo to Railway and set environment variables:
+	- `SUPABASE_URL`, `SUPABASE_SECRET_KEY`
+	- `GOOGLE_PLACES_API_KEY`, `HUNTER_IO_API_KEY`, `NEVERBOUNCE_API_KEY`
+	- Optional: `ALLOW_DEGRADED_START=true` for initial debugging
+2) Deploy; check `/health` and `/diag` for status
+
+## Security
+
+- Supabase Row Level Security across all tables
+- Token-protected admin dashboard (`/admin-dashboard.html?token=...`)
+- Secure headers, CORS, rate limiting
+
+## Monitoring
+
+- Prometheus metrics at `/metrics`
+- Boot report at `/boot-report`; event loop metrics at `/loop-metrics`
+
+## Testing
+
+```powershell
+node tests/validation/test-real-data.js
+node tests/validation/test-website-validation.js
+```
+
+## License
+
+MIT
 ````
