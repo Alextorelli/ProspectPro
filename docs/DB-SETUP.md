@@ -36,6 +36,7 @@ This guide walks you through setting up the database in Supabase using the SQL e
    - Functions listed; RLS enabled and policies present
    - Materialized view `lead_analytics_summary` exists
    - Smoke tests: `refresh_analytics_views()` returns true; search/geospatial queries return successfully
+   - Security hardening applied: anon/authenticated do NOT have `SELECT` on `lead_analytics_summary` and `deployment_analytics`
 
 ![Validation Results](images/validation-results.png)
 

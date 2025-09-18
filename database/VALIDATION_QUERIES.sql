@@ -95,3 +95,16 @@ FROM search_leads_by_name('pizza', NULL
 -- 12) RLS simulation helpers (replace user ids)
 -- SELECT set_config('request.jwt.claims', json_build_object('sub','<user_uuid>')::text, true);
 -- SELECT set_config('request.jwt.claim.role','authenticated', true);
+
+-- 13) Privilege hardening checks (anon/authenticated should NOT have SELECT)
+SELECT grantee, privilege_type
+FROM information_schema.role_table_grants
+WHERE table_schema='public'
+  AND table_name='lead_analytics_summary'
+  AND grantee IN ('anon','authenticated');
+
+SELECT grantee, privilege_type
+FROM information_schema.role_table_grants
+WHERE table_schema='public'
+  AND table_name='deployment_analytics'
+  AND grantee IN ('anon','authenticated');

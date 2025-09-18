@@ -76,6 +76,11 @@ ALTER TABLE api_cost_tracking ENABLE ROW LEVEL SECURITY;
 ALTER TABLE lead_qualification_metrics ENABLE ROW LEVEL SECURITY;
 ALTER TABLE dashboard_exports ENABLE ROW LEVEL SECURITY;
 
+-- Enable RLS on deployment monitoring tables (private/internal use)
+ALTER TABLE railway_webhook_logs ENABLE ROW LEVEL SECURITY;
+ALTER TABLE deployment_metrics ENABLE ROW LEVEL SECURITY;
+ALTER TABLE deployment_failures ENABLE ROW LEVEL SECURITY;
+
 DO $$
 BEGIN
   RAISE NOTICE '✅ Phase 5.2 Complete: Row Level Security enabled on all tables';
@@ -484,3 +489,45 @@ BEGIN
   RAISE NOTICE 'SELECT validate_rls_security();';
   RAISE NOTICE '';
 END $$;
+
+-- Phase 5.10: API Exposure Hardening and Function search_path pinning
+-- ============================================================================
+
+-- Guarded REVOKE: prevent PostgREST exposure for anonymous/authenticated roles
+DO $$
+BEGIN
+  RAISE NOTICE '🧰 Phase 5.10: Hardening API exposure and pinning function search_path...';
+
+  -- Revoke SELECT on materialized view if it exists
+  IF EXISTS (
+    SELECT 1 FROM pg_matviews WHERE schemaname='public' AND matviewname='lead_analytics_summary'
+  ) THEN
+    EXECUTE 'REVOKE SELECT ON MATERIALIZED VIEW public.lead_analytics_summary FROM anon, authenticated';
+    RAISE NOTICE '   - REVOKE applied on lead_analytics_summary for anon/authenticated';
+  END IF;
+
+  -- Revoke SELECT on deployment_analytics view if present (defined in Phase 3 script)
+  IF EXISTS (
+    SELECT 1 FROM pg_views WHERE schemaname='public' AND viewname='deployment_analytics'
+  ) THEN
+    EXECUTE 'REVOKE SELECT ON VIEW public.deployment_analytics FROM anon, authenticated';
+    RAISE NOTICE '   - REVOKE applied on deployment_analytics for anon/authenticated';
+  END IF;
+END $$;
+
+-- Pin function search_path to avoid mutable search_path warnings (Supabase lints)
+-- Use exact signatures from created functions
+ALTER FUNCTION public.update_updated_at_column() SET search_path = public, pg_temp;
+ALTER FUNCTION public.set_campaign_analytics_timestamp_date() SET search_path = public, pg_temp;
+ALTER FUNCTION public.calculate_lead_quality_score(json) SET search_path = public, pg_temp;
+ALTER FUNCTION public.update_lead_confidence_scores(uuid) SET search_path = public, pg_temp;
+ALTER FUNCTION public.get_campaign_analytics(uuid) SET search_path = public, pg_temp;
+ALTER FUNCTION public.get_realtime_dashboard_metrics(uuid) SET search_path = public, pg_temp;
+ALTER FUNCTION public.leads_within_radius(double precision, double precision, double precision, uuid) SET search_path = public, pg_temp;
+ALTER FUNCTION public.search_leads_by_name(text, uuid, integer) SET search_path = public, pg_temp;
+ALTER FUNCTION public.update_campaign_statistics(uuid) SET search_path = public, pg_temp;
+ALTER FUNCTION public.refresh_analytics_views() SET search_path = public, pg_temp;
+ALTER FUNCTION public.archive_old_data(date) SET search_path = public, pg_temp;
+ALTER FUNCTION public.validate_rls_security() SET search_path = public, pg_temp;
+ALTER FUNCTION public.get_deployment_health_summary() SET search_path = public, pg_temp;
+ALTER FUNCTION public.analyze_deployment_failures(integer) SET search_path = public, pg_temp;
