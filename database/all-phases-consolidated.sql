@@ -24,11 +24,28 @@
 CREATE EXTENSION IF NOT EXISTS "pgcrypto"; -- for gen_random_uuid()
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
--- Enable PostGIS for geographic operations (location coordinates)
-CREATE EXTENSION IF NOT EXISTS "postgis";
+-- Prefer installing PostGIS into a dedicated schema for security lint clearance
+DO $$
+BEGIN
+  EXECUTE 'CREATE SCHEMA IF NOT EXISTS extensions';
+  -- Fresh install path
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_extension WHERE extname = 'postgis'
+  ) THEN
+    EXECUTE 'CREATE EXTENSION IF NOT EXISTS "postgis" WITH SCHEMA extensions';
+  END IF;
+END $$;
 
--- Enable trigram similarity for fuzzy text search (SIMILARITY(), % operator)
-CREATE EXTENSION IF NOT EXISTS "pg_trgm";
+-- Prefer pg_trgm in the extensions schema as well
+DO $$
+BEGIN
+  EXECUTE 'CREATE SCHEMA IF NOT EXISTS extensions';
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_extension WHERE extname = 'pg_trgm'
+  ) THEN
+    EXECUTE 'CREATE EXTENSION IF NOT EXISTS "pg_trgm" WITH SCHEMA extensions';
+  END IF;
+END $$;
 
 -- Log successful extension creation
 DO $$
@@ -38,7 +55,7 @@ BEGIN
   RAISE NOTICE '   - postgis: Geographic operations';
 END $$;
 
--- Move security-sensitive extensions out of public schema when possible
+-- Move relocatable extensions out of public schema when possible (pg_trgm only)
 DO $$
 BEGIN
   EXECUTE 'CREATE SCHEMA IF NOT EXISTS extensions';
@@ -56,18 +73,7 @@ BEGIN
     RAISE NOTICE '   - Skipped moving pg_trgm: %', SQLERRM;
   END;
 
-  BEGIN
-    IF EXISTS (
-      SELECT 1 FROM pg_extension e
-      JOIN pg_namespace n ON n.oid = e.extnamespace
-      WHERE e.extname = 'postgis' AND n.nspname = 'public'
-    ) THEN
-      EXECUTE 'ALTER EXTENSION "postgis" SET SCHEMA extensions';
-      RAISE NOTICE '   - Moved extension postgis to schema extensions';
-    END IF;
-  EXCEPTION WHEN OTHERS THEN
-    RAISE NOTICE '   - Skipped moving postgis: %', SQLERRM;
-  END;
+  -- Note: postgis is non-relocatable; we do NOT attempt to move it post-install
 END $$;
 
 -- Phase 1.2: Core Data Types and Domains
@@ -1669,6 +1675,17 @@ ALTER TABLE deployment_failures ENABLE ROW LEVEL SECURITY;
 DO $$
 BEGIN
   RAISE NOTICE '✅ Phase 5.2 Complete: Row Level Security enabled on all tables';
+END $$;
+
+-- If PostGIS created spatial_ref_sys in public (older installs), enable RLS to silence linter
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM information_schema.tables
+    WHERE table_schema = 'public' AND table_name = 'spatial_ref_sys'
+  ) THEN
+    EXECUTE 'ALTER TABLE public.spatial_ref_sys ENABLE ROW LEVEL SECURITY';
+  END IF;
 END $$;
 
 -- Phase 5.3: Foundation Table Policies (Direct User Ownership)

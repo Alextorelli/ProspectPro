@@ -81,6 +81,17 @@ ALTER TABLE railway_webhook_logs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE deployment_metrics ENABLE ROW LEVEL SECURITY;
 ALTER TABLE deployment_failures ENABLE ROW LEVEL SECURITY;
 
+-- If PostGIS created spatial_ref_sys in public (older installs), enable RLS to silence linter
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM information_schema.tables
+    WHERE table_schema = 'public' AND table_name = 'spatial_ref_sys'
+  ) THEN
+    EXECUTE 'ALTER TABLE public.spatial_ref_sys ENABLE ROW LEVEL SECURITY';
+  END IF;
+END $$;
+
 DO $$
 BEGIN
   RAISE NOTICE '✅ Phase 5.2 Complete: Row Level Security enabled on all tables';
