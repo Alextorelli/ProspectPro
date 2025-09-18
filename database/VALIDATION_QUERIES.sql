@@ -1,10 +1,11 @@
 -- ProspectPro Post-Setup Validation Suite (Run in Supabase SQL Editor)
 
--- 1) Extensions
-SELECT extname
-FROM pg_extension
-WHERE extname IN ('pgcrypto','uuid-ossp','postgis','pg_trgm')
-ORDER BY extname;
+-- 1) Extensions (and their schemas)
+SELECT e.extname, n.nspname AS ext_schema
+FROM pg_extension e
+JOIN pg_namespace n ON n.oid = e.extnamespace
+WHERE e.extname IN ('pgcrypto','uuid-ossp','postgis','pg_trgm')
+ORDER BY e.extname;
 
 -- 2) Domains
 SELECT t.typname AS domain_name
@@ -81,13 +82,11 @@ SELECT refresh_analytics_views();
 -- Geospatial search (positional args)
 SELECT *
 FROM leads_within_radius(37.7749, -122.4194, 10.0)
-LIMIT
-5;
+LIMIT 5;
 
 -- Fuzzy search (cast NULL to UUID)
 SELECT *
-FROM search_leads_by_name('pizza', NULL
-::uuid, 5);
+FROM search_leads_by_name('pizza', NULL::uuid, 5);
 
 -- Campaign analytics (provide a real campaign id)
 -- SELECT get_campaign_analytics('<campaign_id>'::uuid);
@@ -108,3 +107,24 @@ FROM information_schema.role_table_grants
 WHERE table_schema='public'
   AND table_name='deployment_analytics'
   AND grantee IN ('anon','authenticated');
+
+-- 14) Lint clearance checks
+-- a) Extensions no longer in public (postgis/pg_trgm ideally in 'extensions' schema)
+SELECT e.extname, n.nspname AS ext_schema
+FROM pg_extension e
+JOIN pg_namespace n ON n.oid = e.extnamespace
+WHERE e.extname IN ('postgis','pg_trgm');
+
+-- b) spatial_ref_sys should not be in public (if postgis moved)
+SELECT table_schema, table_name
+FROM information_schema.tables
+WHERE table_name='spatial_ref_sys';
+
+-- c) Functions have pinned search_path (spot-check a few)
+SELECT p.oid::regprocedure AS signature,
+       pg_catalog.current_setting('search_path') AS current_session_search_path,
+       (pg_catalog.pg_get_functiondef(p.oid) LIKE '%SET search_path = public%') AS is_pinned_public
+FROM pg_proc p
+JOIN pg_namespace n ON n.oid = p.pronamespace
+WHERE n.nspname='public' AND p.proname IN ('calculate_lead_quality_score','get_campaign_analytics')
+ORDER BY signature;

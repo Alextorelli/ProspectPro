@@ -38,6 +38,38 @@ BEGIN
   RAISE NOTICE '   - postgis: Geographic operations';
 END $$;
 
+-- Move security-sensitive extensions out of public schema when possible
+DO $$
+BEGIN
+  EXECUTE 'CREATE SCHEMA IF NOT EXISTS extensions';
+
+  BEGIN
+    IF EXISTS (
+      SELECT 1 FROM pg_extension e
+      JOIN pg_namespace n ON n.oid = e.extnamespace
+      WHERE e.extname = 'pg_trgm' AND n.nspname = 'public'
+    ) THEN
+      EXECUTE 'ALTER EXTENSION "pg_trgm" SET SCHEMA extensions';
+      RAISE NOTICE '   - Moved extension pg_trgm to schema extensions';
+    END IF;
+  EXCEPTION WHEN OTHERS THEN
+    RAISE NOTICE '   - Skipped moving pg_trgm: %', SQLERRM;
+  END;
+
+  BEGIN
+    IF EXISTS (
+      SELECT 1 FROM pg_extension e
+      JOIN pg_namespace n ON n.oid = e.extnamespace
+      WHERE e.extname = 'postgis' AND n.nspname = 'public'
+    ) THEN
+      EXECUTE 'ALTER EXTENSION "postgis" SET SCHEMA extensions';
+      RAISE NOTICE '   - Moved extension postgis to schema extensions';
+    END IF;
+  EXCEPTION WHEN OTHERS THEN
+    RAISE NOTICE '   - Skipped moving postgis: %', SQLERRM;
+  END;
+END $$;
+
 -- Phase 1.2: Core Data Types and Domains
 -- ============================================================================
 
@@ -1869,7 +1901,7 @@ DO $$
 BEGIN
   RAISE NOTICE '✅ Phase 5.7 Complete: Security performance indexes created';
   RAISE NOTICE '   - RLS policy optimization indexes';
-  RAISE NOTICE '   - Concurrent index creation for zero-downtime';
+  RAISE NOTICE '   - Index creation compatible with SQL Editor transactions';
 END $$;
 
 -- Phase 5.8: Security Validation and Testing
@@ -2006,6 +2038,7 @@ DECLARE
 BEGIN
   FOR rec IN (
     SELECT 'public.update_updated_at_column()' AS sig
+    UNION ALL SELECT 'public.set_updated_at()'
     UNION ALL SELECT 'public.set_campaign_analytics_timestamp_date()'
     UNION ALL SELECT 'public.calculate_lead_quality_score(json)'
     UNION ALL SELECT 'public.update_lead_confidence_scores(uuid)'
@@ -2027,7 +2060,7 @@ BEGIN
       WHERE n.nspname = 'public'
         AND p.oid::regprocedure::text = rec.sig
     ) THEN
-      EXECUTE format('ALTER FUNCTION %s SET search_path = public, pg_temp', rec.sig);
+      EXECUTE format('ALTER FUNCTION %s SET search_path = public, extensions, pg_temp', rec.sig);
     END IF;
   END LOOP;
 END $$;

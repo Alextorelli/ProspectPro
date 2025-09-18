@@ -416,7 +416,7 @@ ProspectPro/
 
 ### Required API Keys
 
-All API integrations use real services for authentic business data:The complete schema is available in `/database/enhanced-supabase-schema.sql` with comprehensive RLS policies in `/database/rls-security-hardening.sql`.
+All API integrations use real services for authentic business data. The complete schema is provided in `/database/all-phases-consolidated.sql` with security hardening and RLS in the same file. Validate with `/database/VALIDATION_QUERIES.sql`.
 
 
 

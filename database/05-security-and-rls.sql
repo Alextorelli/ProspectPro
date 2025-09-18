@@ -494,6 +494,42 @@ END $$;
 -- Phase 5.10: API Exposure Hardening and Function search_path pinning
 -- ============================================================================
 
+-- Phase 5.10a: Extension schema hardening (move extensions out of public)
+-- This reduces exposure surface and clears Supabase lints about extensions in public
+DO $$
+BEGIN
+  -- Ensure target schema exists
+  EXECUTE 'CREATE SCHEMA IF NOT EXISTS extensions';
+
+  -- Move pg_trgm if currently in public
+  BEGIN
+    IF EXISTS (
+      SELECT 1 FROM pg_extension e
+      JOIN pg_namespace n ON n.oid = e.extnamespace
+      WHERE e.extname = 'pg_trgm' AND n.nspname = 'public'
+    ) THEN
+      EXECUTE 'ALTER EXTENSION "pg_trgm" SET SCHEMA extensions';
+      RAISE NOTICE '   - Moved extension pg_trgm to schema extensions';
+    END IF;
+  EXCEPTION WHEN OTHERS THEN
+    RAISE NOTICE '   - Skipped moving pg_trgm: %', SQLERRM;
+  END;
+
+  -- Move postgis if currently in public
+  BEGIN
+    IF EXISTS (
+      SELECT 1 FROM pg_extension e
+      JOIN pg_namespace n ON n.oid = e.extnamespace
+      WHERE e.extname = 'postgis' AND n.nspname = 'public'
+    ) THEN
+      EXECUTE 'ALTER EXTENSION "postgis" SET SCHEMA extensions';
+      RAISE NOTICE '   - Moved extension postgis to schema extensions';
+    END IF;
+  EXCEPTION WHEN OTHERS THEN
+    RAISE NOTICE '   - Skipped moving postgis: %', SQLERRM;
+  END;
+END $$;
+
 -- Guarded REVOKE: prevent PostgREST exposure for anonymous/authenticated roles
 DO $$
 BEGIN
@@ -524,6 +560,7 @@ BEGIN
   -- Iterate over known function signatures that may exist and alter them safely
   FOR rec IN (
     SELECT 'public.update_updated_at_column()' AS sig
+    UNION ALL SELECT 'public.set_updated_at()'
     UNION ALL SELECT 'public.set_campaign_analytics_timestamp_date()'
     UNION ALL SELECT 'public.calculate_lead_quality_score(json)'
     UNION ALL SELECT 'public.update_lead_confidence_scores(uuid)'
@@ -546,7 +583,7 @@ BEGIN
       WHERE n.nspname = 'public'
         AND p.oid::regprocedure::text = rec.sig
     ) THEN
-      EXECUTE format('ALTER FUNCTION %s SET search_path = public, pg_temp', rec.sig);
+      EXECUTE format('ALTER FUNCTION %s SET search_path = public, extensions, pg_temp', rec.sig);
     END IF;
   END LOOP;
 END $$;
