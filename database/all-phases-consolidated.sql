@@ -1986,7 +1986,7 @@ BEGIN
   IF EXISTS (
     SELECT 1 FROM pg_matviews WHERE schemaname='public' AND matviewname='lead_analytics_summary'
   ) THEN
-    EXECUTE 'REVOKE SELECT ON MATERIALIZED VIEW public.lead_analytics_summary FROM anon, authenticated';
+    EXECUTE 'REVOKE SELECT ON public.lead_analytics_summary FROM anon, authenticated';
     RAISE NOTICE '   - REVOKE applied on lead_analytics_summary for anon/authenticated';
   END IF;
 
@@ -1994,7 +1994,7 @@ BEGIN
   IF EXISTS (
     SELECT 1 FROM pg_views WHERE schemaname='public' AND viewname='deployment_analytics'
   ) THEN
-    EXECUTE 'REVOKE SELECT ON VIEW public.deployment_analytics FROM anon, authenticated';
+    EXECUTE 'REVOKE SELECT ON public.deployment_analytics FROM anon, authenticated';
     RAISE NOTICE '   - REVOKE applied on deployment_analytics for anon/authenticated';
   END IF;
 END $$;
