@@ -526,19 +526,7 @@ BEGIN
     RAISE NOTICE '   - Skipped moving pg_trgm: %', SQLERRM;
   END;
 
-  -- Move postgis if currently in public
-  BEGIN
-    IF EXISTS (
-      SELECT 1 FROM pg_extension e
-      JOIN pg_namespace n ON n.oid = e.extnamespace
-      WHERE e.extname = 'postgis' AND n.nspname = 'public'
-    ) THEN
-      EXECUTE 'ALTER EXTENSION "postgis" SET SCHEMA extensions';
-      RAISE NOTICE '   - Moved extension postgis to schema extensions';
-    END IF;
-  EXCEPTION WHEN OTHERS THEN
-    RAISE NOTICE '   - Skipped moving postgis: %', SQLERRM;
-  END;
+  -- Note: postgis is non-relocatable in managed environments; we do NOT attempt to move it post-install
 END $$;
 
 -- Guarded REVOKE: prevent PostgREST exposure for anonymous/authenticated roles
