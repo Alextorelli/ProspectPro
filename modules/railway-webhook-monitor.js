@@ -112,16 +112,39 @@ class RailwayWebhookMonitor {
       const signature =
         req.headers["x-railway-signature"] ||
         req.headers["x-railway-webhook-signature"];
-      const payload = req.body;
-      const payloadString =
-        typeof payload === "string" ? payload : JSON.stringify(payload);
 
-      // Verify webhook authenticity
-      if (!this.verifyWebhookSignature(payloadString, signature)) {
-        return res.status(401).json({ error: "Invalid webhook signature" });
+      // Support raw body for signature; Express route uses express.raw()
+      let payloadString;
+      if (Buffer.isBuffer(req.body)) {
+        payloadString = req.body.toString("utf8");
+      } else if (typeof req.body === "string") {
+        payloadString = req.body;
+      } else {
+        // Fallback serialization (may not match original JSON exactly)
+        payloadString = JSON.stringify(req.body || {});
       }
 
-      const event = typeof payload === "string" ? JSON.parse(payload) : payload;
+      // Verify webhook authenticity (HMAC) or fallback to token
+      const token =
+        req.query.token || req.headers["x-railway-token"] || "";
+      const hasValidSignature = this.verifyWebhookSignature(
+        payloadString,
+        signature
+      );
+      const tokenAllowed =
+        !!this.webhookSecret && token && token === this.webhookSecret;
+      if (!hasValidSignature && !tokenAllowed) {
+        return res.status(401).json({ error: "Unauthorized webhook" });
+      }
+
+      // Parse JSON payload
+      let event;
+      try {
+        event = typeof payloadString === "string" ? JSON.parse(payloadString) : {};
+      } catch (e) {
+        console.error("❌ Invalid JSON payload in webhook:", e.message);
+        return res.status(400).json({ error: "Invalid JSON payload" });
+      }
       const eventType = event.type;
 
       // Update last webhook timestamp
@@ -137,8 +160,8 @@ class RailwayWebhookMonitor {
       // Process the webhook event
       await this.handleWebhookEvent(event);
 
-      // Log event to database for analytics
-      await this.logWebhookEvent(event);
+  // Log event to database for analytics (idempotent)
+  await this.logWebhookEvent(event, payloadString);
 
       res.status(200).json({
         status: "processed",
@@ -640,20 +663,37 @@ class RailwayWebhookMonitor {
   /**
    * Log webhook events to database for analytics
    */
-  async logWebhookEvent(event) {
+  async logWebhookEvent(event, rawPayloadString = null) {
     if (!this.supabase) return;
 
     try {
+      // Compute idempotency key: prefer deployment ID; else hash of key fields
+      const idempotencyKey =
+        event?.deployment?.id ||
+        crypto
+          .createHash("sha256")
+          .update(
+            [
+              event?.type || "",
+              rawPayloadString || JSON.stringify(event || {}),
+            ].join("|"),
+            "utf8"
+          )
+          .digest("hex");
+
+      const upsertRow = {
+        event_type: event.type,
+        deployment_id: event.deployment?.id || null,
+        project_id: event.project?.id || null,
+        environment_id: event.environment?.id || null,
+        event_data: event,
+        processed_at: new Date().toISOString(),
+        idempotency_key: idempotencyKey,
+      };
+
       const { error } = await this.supabase
         .from("railway_webhook_logs")
-        .insert({
-          event_type: event.type,
-          deployment_id: event.deployment?.id,
-          project_id: event.project?.id,
-          environment_id: event.environment?.id,
-          event_data: event,
-          processed_at: new Date().toISOString(),
-        });
+        .upsert(upsertRow, { onConflict: "idempotency_key" });
 
       if (error) {
         console.warn("⚠️ Failed to log webhook to database:", error.message);
