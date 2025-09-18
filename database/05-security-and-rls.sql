@@ -115,6 +115,7 @@ CREATE POLICY "service_health_metrics_system_write" ON service_health_metrics
   FOR INSERT TO authenticated
   WITH CHECK (true);
 
+DROP POLICY IF EXISTS "service_health_metrics_system_update" ON service_health_metrics;
 CREATE POLICY "service_health_metrics_system_update" ON service_health_metrics
   FOR UPDATE TO authenticated
   USING (true);

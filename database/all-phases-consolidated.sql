@@ -209,16 +209,27 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- Apply updated_at triggers to foundation tables
-CREATE TRIGGER campaigns_update_updated_at
-  BEFORE UPDATE ON campaigns
-  FOR EACH ROW
-  EXECUTE FUNCTION update_updated_at_column();
+-- Apply updated_at triggers to foundation tables (idempotent)
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_trigger WHERE tgname = 'campaigns_update_updated_at'
+  ) THEN
+    CREATE TRIGGER campaigns_update_updated_at
+      BEFORE UPDATE ON campaigns
+      FOR EACH ROW
+      EXECUTE FUNCTION update_updated_at_column();
+  END IF;
 
-CREATE TRIGGER system_settings_update_updated_at
-  BEFORE UPDATE ON system_settings
-  FOR EACH ROW
-  EXECUTE FUNCTION update_updated_at_column();
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_trigger WHERE tgname = 'system_settings_update_updated_at'
+  ) THEN
+    CREATE TRIGGER system_settings_update_updated_at
+      BEFORE UPDATE ON system_settings
+      FOR EACH ROW
+      EXECUTE FUNCTION update_updated_at_column();
+  END IF;
+END $$;
 
 DO $$
 BEGIN
@@ -462,11 +473,18 @@ END $$;
 -- Phase 2.5: Updated Timestamp Triggers for Lead Tables
 -- ============================================================================
 
--- Apply updated_at triggers to lead tables
-CREATE TRIGGER enhanced_leads_update_updated_at
-  BEFORE UPDATE ON enhanced_leads
-  FOR EACH ROW
-  EXECUTE FUNCTION update_updated_at_column();
+-- Apply updated_at triggers to lead tables (idempotent)
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_trigger WHERE tgname = 'enhanced_leads_update_updated_at'
+  ) THEN
+    CREATE TRIGGER enhanced_leads_update_updated_at
+      BEFORE UPDATE ON enhanced_leads
+      FOR EACH ROW
+      EXECUTE FUNCTION update_updated_at_column();
+  END IF;
+END $$;
 
 DO $$
 BEGIN
@@ -1650,6 +1668,7 @@ CREATE POLICY "service_health_metrics_system_write" ON service_health_metrics
   FOR INSERT TO authenticated
   WITH CHECK (true);
 
+DROP POLICY IF EXISTS "service_health_metrics_system_update" ON service_health_metrics;
 CREATE POLICY "service_health_metrics_system_update" ON service_health_metrics
   FOR UPDATE TO authenticated
   USING (true);
