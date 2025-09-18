@@ -81,14 +81,20 @@ ALTER TABLE railway_webhook_logs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE deployment_metrics ENABLE ROW LEVEL SECURITY;
 ALTER TABLE deployment_failures ENABLE ROW LEVEL SECURITY;
 
--- If PostGIS created spatial_ref_sys in public (older installs), enable RLS to silence linter
+-- If PostGIS created spatial_ref_sys in public (older installs), attempt to enable RLS
+-- Note: This may fail in managed environments where user doesn't own PostGIS system tables
 DO $$
 BEGIN
   IF EXISTS (
     SELECT 1 FROM information_schema.tables
     WHERE table_schema = 'public' AND table_name = 'spatial_ref_sys'
   ) THEN
-    EXECUTE 'ALTER TABLE public.spatial_ref_sys ENABLE ROW LEVEL SECURITY';
+    BEGIN
+      EXECUTE 'ALTER TABLE public.spatial_ref_sys ENABLE ROW LEVEL SECURITY';
+      RAISE NOTICE '   - Enabled RLS on spatial_ref_sys';
+    EXCEPTION WHEN insufficient_privilege THEN
+      RAISE NOTICE '   - Cannot enable RLS on spatial_ref_sys (insufficient privileges - normal in managed environments)';
+    END;
   END IF;
 END $$;
 
