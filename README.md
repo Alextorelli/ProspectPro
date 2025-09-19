@@ -9,6 +9,7 @@
 ## 🎯 Core Mission
 
 Transform lead generation by eliminating fake data through:
+
 - **Real API Integration**: Google Places, government registries, email validation services
 - **Multi-Source Validation**: 7+ government APIs for business verification
 - **Cost Optimization**: Intelligent pre-validation to reduce API costs by 40-60%
@@ -17,12 +18,14 @@ Transform lead generation by eliminating fake data through:
 ## 🏗️ Architecture
 
 ### Technology Stack
+
 - **Backend**: Supabase Edge Functions (Deno/TypeScript)
 - **Database**: Supabase PostgreSQL with Row Level Security
 - **Frontend**: React/TypeScript with Tailwind CSS (Lovable.dev)
 - **Deployment**: Railway (Node.js) + Supabase (Edge Functions)
 
 ### 4-Stage Validation Pipeline
+
 1. **Discovery** - Google Places API + Yellow Pages scraping
 2. **Enrichment** - Website scraping, email discovery, contact extraction
 3. **Validation** - Government registry verification, email deliverability
@@ -31,11 +34,13 @@ Transform lead generation by eliminating fake data through:
 ## 🚀 Quick Start
 
 ### Prerequisites
+
 - Node.js 18+
 - Supabase account with project created
 - API keys: Google Places, ZeroBounce, government APIs
 
 ### Local Development
+
 ```bash
 # Clone repository
 git clone https://github.com/Alextorelli/ProspectPro.git
@@ -55,6 +60,7 @@ npm run dev
 ### Production Deployment
 
 #### Supabase Edge Functions
+
 ```bash
 # Deploy edge functions
 npx supabase login
@@ -64,6 +70,7 @@ npx supabase functions deploy lead-validation-edge
 ```
 
 #### Railway Deployment
+
 ```bash
 # Deploy to Railway
 railway login
@@ -74,6 +81,7 @@ railway deploy
 ## 📊 Enhanced Features
 
 ### Multi-Source Business Validation
+
 - **California Secretary of State**: Business entity verification
 - **New York Secretary of State**: Corporation registry search
 - **NY State Tax Parcels**: Property ownership validation
@@ -83,12 +91,14 @@ railway deploy
 - **CourtListener**: Legal risk assessment
 
 ### Cost Optimization
+
 - **Pre-validation Scoring**: Filter candidates before expensive API calls
 - **Budget Controls**: Real-time cost tracking with automatic limits
 - **Strategic API Sequencing**: Free government APIs before paid services
 - **Quality Thresholds**: Only process high-confidence leads
 
 ### Zero Fake Data Policy
+
 ```typescript
 // PROHIBITED - Never allow fake data patterns
 ❌ const fakeBusinesses = ["Artisan Bistro", "Downtown Café"];
@@ -104,11 +114,13 @@ railway deploy
 ## 🌐 API Endpoints
 
 ### Edge Functions (Production)
+
 - **Enhanced Discovery**: `https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/enhanced-business-discovery`
 - **Lead Validation**: `https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/lead-validation-edge`
 - **System Diagnostics**: `https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/diag`
 
 ### Legacy Node.js Endpoints
+
 - **Business Discovery**: `/api/business-discovery`
 - **Dashboard Export**: `/api/dashboard-export`
 - **Health Check**: `/health`
@@ -138,6 +150,7 @@ ProspectPro/
 ## 🔧 Development
 
 ### Environment Variables
+
 ```bash
 # Supabase Configuration
 SUPABASE_URL=https://your-project.supabase.co
@@ -154,6 +167,7 @@ MIN_CONFIDENCE_SCORE=75
 ```
 
 ### Testing
+
 ```bash
 # Run integration tests
 npm test
@@ -166,6 +180,7 @@ npm run test:fake-data
 ```
 
 ### Quality Assurance
+
 - **Lead Accuracy**: >95% of exported leads verified authentic
 - **Website Accessibility**: 100% of exported websites return HTTP 200-399
 - **Email Deliverability**: <5% bounce rate on validated emails
@@ -174,12 +189,14 @@ npm run test:fake-data
 ## 📈 Performance Metrics
 
 ### Expected Improvements
+
 - **Lead Quality**: 40-60% improvement over basic Google Places
 - **Cost Reduction**: 40-60% savings through pre-validation
 - **Government Validation**: 60%+ of leads verified with official registries
 - **Processing Speed**: <30 seconds per lead for complete validation
 
 ### API Cost Breakdown
+
 - **Google Places**: ~$0.032/search, $0.017/details
 - **ZeroBounce**: ~$0.007/email validation
 - **Government APIs**: $0 (7 free sources)
@@ -188,12 +205,14 @@ npm run test:fake-data
 ## 🔒 Security
 
 ### Data Protection
+
 - **Row Level Security (RLS)**: User isolation in Supabase
 - **API Rate Limiting**: Prevent abuse and cost overruns
 - **Environment Variables**: Secure credential management
 - **Input Validation**: Comprehensive data sanitization
 
 ### Compliance
+
 - **Zero Fake Data Policy**: 100% authentic business information
 - **Privacy Protection**: No storage of personal information without consent
 - **API Terms Compliance**: Adherence to all third-party API terms of service
@@ -201,6 +220,7 @@ npm run test:fake-data
 ## 🤝 Contributing
 
 ### Development Workflow
+
 1. Fork the repository
 2. Create feature branch (`git checkout -b feature/amazing-feature`)
 3. Commit changes (`git commit -m 'Add amazing feature'`)
@@ -208,6 +228,7 @@ npm run test:fake-data
 5. Open Pull Request
 
 ### Code Standards
+
 - **Zero Fake Data**: Never commit hardcoded fake business arrays
 - **TypeScript**: Use strict typing for all new code
 - **Testing**: Include tests for all new features
