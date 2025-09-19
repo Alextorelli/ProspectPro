@@ -629,13 +629,84 @@ ALTER TABLE api_health_monitoring ENABLE ROW LEVEL SECURITY;
 ALTER TABLE system_performance_metrics ENABLE ROW LEVEL SECURITY;
 -- Create secure RLS policies for service role access (admin operations)
 -- These policies allow the service role to access all monitoring data
-CREATE POLICY "Service role can access all API data sources" ON api_data_sources FOR ALL USING (auth.role() = 'service_role');
-CREATE POLICY "Service role can access all enhanced API usage" ON enhanced_api_usage FOR ALL USING (auth.role() = 'service_role');
-CREATE POLICY "Service role can access all lead validation data" ON lead_validation_pipeline FOR ALL USING (auth.role() = 'service_role');
-CREATE POLICY "Service role can access all budget management" ON budget_management FOR ALL USING (auth.role() = 'service_role');
-CREATE POLICY "Service role can access all budget alerts" ON budget_alerts FOR ALL USING (auth.role() = 'service_role');
-CREATE POLICY "Service role can access all API health monitoring" ON api_health_monitoring FOR ALL USING (auth.role() = 'service_role');
-CREATE POLICY "Service role can access all system performance metrics" ON system_performance_metrics FOR ALL USING (auth.role() = 'service_role');
+-- Guarded creation of service-role RLS policies (avoid duplicate-policy errors)
+DO $$ BEGIN IF NOT EXISTS (
+    SELECT 1
+    FROM pg_policies
+    WHERE schemaname = 'public'
+        AND tablename = 'api_data_sources'
+        AND policyname = 'Service role can access all API data sources'
+) THEN CREATE POLICY "Service role can access all API data sources" ON api_data_sources FOR ALL USING (auth.role() = 'service_role');
+RAISE NOTICE 'Created policy: Service role can access all API data sources';
+ELSE RAISE NOTICE 'Policy already exists: Service role can access all API data sources';
+END IF;
+END $$;
+DO $$ BEGIN IF NOT EXISTS (
+    SELECT 1
+    FROM pg_policies
+    WHERE schemaname = 'public'
+        AND tablename = 'enhanced_api_usage'
+        AND policyname = 'Service role can access all enhanced API usage'
+) THEN CREATE POLICY "Service role can access all enhanced API usage" ON enhanced_api_usage FOR ALL USING (auth.role() = 'service_role');
+RAISE NOTICE 'Created policy: Service role can access all enhanced API usage';
+ELSE RAISE NOTICE 'Policy already exists: Service role can access all enhanced API usage';
+END IF;
+END $$;
+DO $$ BEGIN IF NOT EXISTS (
+    SELECT 1
+    FROM pg_policies
+    WHERE schemaname = 'public'
+        AND tablename = 'lead_validation_pipeline'
+        AND policyname = 'Service role can access all lead validation data'
+) THEN CREATE POLICY "Service role can access all lead validation data" ON lead_validation_pipeline FOR ALL USING (auth.role() = 'service_role');
+RAISE NOTICE 'Created policy: Service role can access all lead validation data';
+ELSE RAISE NOTICE 'Policy already exists: Service role can access all lead validation data';
+END IF;
+END $$;
+DO $$ BEGIN IF NOT EXISTS (
+    SELECT 1
+    FROM pg_policies
+    WHERE schemaname = 'public'
+        AND tablename = 'budget_management'
+        AND policyname = 'Service role can access all budget management'
+) THEN CREATE POLICY "Service role can access all budget management" ON budget_management FOR ALL USING (auth.role() = 'service_role');
+RAISE NOTICE 'Created policy: Service role can access all budget management';
+ELSE RAISE NOTICE 'Policy already exists: Service role can access all budget management';
+END IF;
+END $$;
+DO $$ BEGIN IF NOT EXISTS (
+    SELECT 1
+    FROM pg_policies
+    WHERE schemaname = 'public'
+        AND tablename = 'budget_alerts'
+        AND policyname = 'Service role can access all budget alerts'
+) THEN CREATE POLICY "Service role can access all budget alerts" ON budget_alerts FOR ALL USING (auth.role() = 'service_role');
+RAISE NOTICE 'Created policy: Service role can access all budget alerts';
+ELSE RAISE NOTICE 'Policy already exists: Service role can access all budget alerts';
+END IF;
+END $$;
+DO $$ BEGIN IF NOT EXISTS (
+    SELECT 1
+    FROM pg_policies
+    WHERE schemaname = 'public'
+        AND tablename = 'api_health_monitoring'
+        AND policyname = 'Service role can access all API health monitoring'
+) THEN CREATE POLICY "Service role can access all API health monitoring" ON api_health_monitoring FOR ALL USING (auth.role() = 'service_role');
+RAISE NOTICE 'Created policy: Service role can access all API health monitoring';
+ELSE RAISE NOTICE 'Policy already exists: Service role can access all API health monitoring';
+END IF;
+END $$;
+DO $$ BEGIN IF NOT EXISTS (
+    SELECT 1
+    FROM pg_policies
+    WHERE schemaname = 'public'
+        AND tablename = 'system_performance_metrics'
+        AND policyname = 'Service role can access all system performance metrics'
+) THEN CREATE POLICY "Service role can access all system performance metrics" ON system_performance_metrics FOR ALL USING (auth.role() = 'service_role');
+RAISE NOTICE 'Created policy: Service role can access all system performance metrics';
+ELSE RAISE NOTICE 'Policy already exists: Service role can access all system performance metrics';
+END IF;
+END $$;
 -- Note: Additional user-specific policies can be added later if needed
 -- For example:
 -- CREATE POLICY "Users can view own API usage" ON enhanced_api_usage
