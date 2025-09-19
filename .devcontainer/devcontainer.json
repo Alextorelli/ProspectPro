@@ -2,13 +2,7 @@
   "name": "ProspectPro Development",
   "image": "mcr.microsoft.com/devcontainers/javascript-node:20",
   "features": {
-    "ghcr.io/devcontainers/features/git:1": {},
-    "ghcr.io/devcontainers/features/deno:1": {
-      "version": "v1.x"
-    },
-    "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {
-      "version": "latest"
-    }
+    "ghcr.io/devcontainers/features/git:1": {}
   },
   "customizations": {
     "vscode": {
@@ -29,7 +23,7 @@
     }
   },
   "forwardPorts": [3000, 5432],
-  "postCreateCommand": "bash -lc 'if [ -f package-lock.json ]; then npm ci; else npm install; fi && npm i -g supabase@latest'",
+  "postCreateCommand": "bash -lc 'set -e; sudo apt-get update && sudo apt-get install -y docker.io && npm config set prefix \"$HOME/.npm-global\" && mkdir -p \"$HOME/.npm-global\" && echo \"export PATH=\\\"$HOME/.npm-global/bin:$PATH\\\"\" >> ~/.bashrc && export PATH=\"$HOME/.npm-global/bin:$PATH\" && npm i -g supabase@latest && if [ -f package-lock.json ]; then npm ci; else npm install; fi'",
   "runArgs": [
     "--init",
     "-v",
