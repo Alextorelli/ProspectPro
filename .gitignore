@@ -87,3 +87,5 @@ grafana-data/
 # Other
 .git/
 .env
+supabase_bin
+supabase_cli.tar.gz

@@ -23,11 +23,7 @@
     }
   },
   "forwardPorts": [3000, 5432],
-  "postCreateCommand": "bash -lc 'set -e; sudo apt-get update && sudo apt-get install -y docker.io && npm config set prefix \"$HOME/.npm-global\" && mkdir -p \"$HOME/.npm-global\" && echo \"export PATH=\\\"$HOME/.npm-global/bin:$PATH\\\"\" >> ~/.bashrc && export PATH=\"$HOME/.npm-global/bin:$PATH\" && npm i -g supabase@latest && if [ -f package-lock.json ]; then npm ci; else npm install; fi'",
-  "runArgs": [
-    "--init",
-    "-v",
-    "/var/run/docker.sock:/var/run/docker.sock"
-  ],
+  "postCreateCommand": "bash -lc 'set -e; sudo apt-get update && sudo apt-get install -y docker.io curl && curl -sSfL https://supabase.com/install.sh | sh && echo \"export PATH=\\\"$HOME/.local/bin:$PATH\\\"\" >> ~/.bashrc && export PATH=\"$HOME/.local/bin:$PATH\" && if [ -f package-lock.json ]; then npm ci; else npm install; fi'",
+  "runArgs": ["--init", "-v", "/var/run/docker.sock:/var/run/docker.sock"],
   "remoteUser": "node"
 }
