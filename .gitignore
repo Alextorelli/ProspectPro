@@ -89,9 +89,8 @@ setup-logs/
 deployment-logs/
 *.log.*
 
-# Temporary files and weird artifacts
-witch*
-pectPro*
+# Archive and cleaned files
+archive/
 *-debug-*
 
 # Other
