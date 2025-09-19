@@ -248,7 +248,9 @@ router.get("/quality-metrics", async (req, res) => {
       .select("*")
       .gte("created_at", timeFilter.start);
 
-    if (validationError) throw validationError;
+    if (validationError && !validationError.message.includes('does not exist')) {
+      console.error('Error getting quality metrics:', validationError);
+    }
 
     // Get campaign analytics for quality trends
     const { data: campaignData, error: campaignError } = await supabase
@@ -256,7 +258,9 @@ router.get("/quality-metrics", async (req, res) => {
       .select("*")
       .gte("campaign_date", timeFilter.start.split("T")[0]);
 
-    if (campaignError) throw campaignError;
+    if (campaignError && !campaignError.message.includes('does not exist')) {
+      console.error('Error getting campaign analytics:', campaignError);
+    }
 
     const qualityMetrics = analyzeQualityMetrics(
       validationData || [],
