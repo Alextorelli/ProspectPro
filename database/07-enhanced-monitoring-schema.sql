@@ -327,6 +327,28 @@ CREATE INDEX IF NOT EXISTS idx_lead_validation_pipeline_confidence ON lead_valid
 -- Campaign analytics indexes
 CREATE INDEX IF NOT EXISTS idx_campaign_analytics_campaign_date ON campaign_analytics(campaign_date DESC);
 -- Ensure qualification_rate column exists before creating an index (safe for existing DBs)
+DO $$ BEGIN IF NOT EXISTS (
+    SELECT 1
+    FROM information_schema.columns
+    WHERE table_schema = 'public'
+        AND table_name = 'campaign_analytics'
+        AND column_name = 'qualification_rate'
+) THEN
+ALTER TABLE campaign_analytics
+ADD COLUMN IF NOT EXISTS qualification_rate DECIMAL(5, 2) DEFAULT 0.00;
+RAISE NOTICE 'Added column campaign_analytics.qualification_rate';
+END IF;
+IF NOT EXISTS (
+    SELECT 1
+    FROM pg_indexes
+    WHERE schemaname = 'public'
+        AND tablename = 'campaign_analytics'
+        AND indexname = 'idx_campaign_analytics_qualification_rate'
+) THEN EXECUTE 'CREATE INDEX idx_campaign_analytics_qualification_rate ON campaign_analytics(qualification_rate DESC)';
+RAISE NOTICE 'Created index idx_campaign_analytics_qualification_rate';
+END IF;
+END $$;
+-- Ensure cost_per_qualified_lead exists before creating an index (safe for existing DBs)
 DO $$
 BEGIN
     IF NOT EXISTS (
@@ -334,11 +356,11 @@ BEGIN
         FROM information_schema.columns
         WHERE table_schema = 'public'
             AND table_name = 'campaign_analytics'
-            AND column_name = 'qualification_rate'
+            AND column_name = 'cost_per_qualified_lead'
     ) THEN
         ALTER TABLE campaign_analytics
-        ADD COLUMN IF NOT EXISTS qualification_rate DECIMAL(5, 2) DEFAULT 0.00;
-        RAISE NOTICE 'Added column campaign_analytics.qualification_rate';
+        ADD COLUMN IF NOT EXISTS cost_per_qualified_lead DECIMAL(8,4) DEFAULT 0.0000;
+        RAISE NOTICE 'Added column campaign_analytics.cost_per_qualified_lead';
     END IF;
 
     IF NOT EXISTS (
@@ -346,13 +368,12 @@ BEGIN
         FROM pg_indexes
         WHERE schemaname = 'public'
             AND tablename = 'campaign_analytics'
-            AND indexname = 'idx_campaign_analytics_qualification_rate'
+            AND indexname = 'idx_campaign_analytics_cost_per_lead'
     ) THEN
-        EXECUTE 'CREATE INDEX idx_campaign_analytics_qualification_rate ON campaign_analytics(qualification_rate DESC)';
-        RAISE NOTICE 'Created index idx_campaign_analytics_qualification_rate';
+        EXECUTE 'CREATE INDEX idx_campaign_analytics_cost_per_lead ON campaign_analytics(cost_per_qualified_lead)';
+        RAISE NOTICE 'Created index idx_campaign_analytics_cost_per_lead';
     END IF;
 END $$;
-CREATE INDEX IF NOT EXISTS idx_campaign_analytics_cost_per_lead ON campaign_analytics(cost_per_qualified_lead);
 -- Budget management indexes
 CREATE INDEX IF NOT EXISTS idx_budget_management_period ON budget_management(period_start, period_end);
 CREATE INDEX IF NOT EXISTS idx_budget_management_active ON budget_management(is_active, budget_utilization_percentage);
