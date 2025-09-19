@@ -263,10 +263,12 @@ router.get("/quality-metrics", async (req, res) => {
       .select("*")
       .gte("campaign_date", timeFilter.start.split("T")[0]);
 
-    if (campaignError && 
-        !campaignError.message.includes("does not exist") &&
-        !campaignError.message.includes("column") &&
-        !campaignError.code?.includes("42703")) {
+    if (
+      campaignError &&
+      !campaignError.message.includes("does not exist") &&
+      !campaignError.message.includes("column") &&
+      !campaignError.code?.includes("42703")
+    ) {
       console.error("Error getting campaign analytics:", campaignError);
     }
 
