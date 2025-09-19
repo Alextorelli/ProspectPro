@@ -581,11 +581,19 @@ $$ LANGUAGE plpgsql;
 ALTER TABLE api_data_sources ENABLE ROW LEVEL SECURITY;
 ALTER TABLE enhanced_api_usage ENABLE ROW LEVEL SECURITY;
 ALTER TABLE lead_validation_pipeline ENABLE ROW LEVEL SECURITY;
+ALTER TABLE budget_management ENABLE ROW LEVEL SECURITY;
+ALTER TABLE budget_alerts ENABLE ROW LEVEL SECURITY;
+ALTER TABLE api_health_monitoring ENABLE ROW LEVEL SECURITY;
+ALTER TABLE system_performance_metrics ENABLE ROW LEVEL SECURITY;
 -- Create secure RLS policies for service role access (admin operations)
 -- These policies allow the service role to access all monitoring data
 CREATE POLICY "Service role can access all API data sources" ON api_data_sources FOR ALL USING (auth.role() = 'service_role');
 CREATE POLICY "Service role can access all enhanced API usage" ON enhanced_api_usage FOR ALL USING (auth.role() = 'service_role');
 CREATE POLICY "Service role can access all lead validation data" ON lead_validation_pipeline FOR ALL USING (auth.role() = 'service_role');
+CREATE POLICY "Service role can access all budget management" ON budget_management FOR ALL USING (auth.role() = 'service_role');
+CREATE POLICY "Service role can access all budget alerts" ON budget_alerts FOR ALL USING (auth.role() = 'service_role');
+CREATE POLICY "Service role can access all API health monitoring" ON api_health_monitoring FOR ALL USING (auth.role() = 'service_role');
+CREATE POLICY "Service role can access all system performance metrics" ON system_performance_metrics FOR ALL USING (auth.role() = 'service_role');
 -- Note: Additional user-specific policies can be added later if needed
 -- For example:
 -- CREATE POLICY "Users can view own API usage" ON enhanced_api_usage
@@ -594,6 +602,10 @@ DO $$ BEGIN RAISE NOTICE '🔒 Phase 7.6 Complete: RLS security policies configu
 RAISE NOTICE '   ✅ api_data_sources: RLS enabled with service role access';
 RAISE NOTICE '   ✅ enhanced_api_usage: RLS enabled with service role access';
 RAISE NOTICE '   ✅ lead_validation_pipeline: RLS enabled with service role access';
+RAISE NOTICE '   ✅ budget_management: RLS enabled with service role access';
+RAISE NOTICE '   ✅ budget_alerts: RLS enabled with service role access';
+RAISE NOTICE '   ✅ api_health_monitoring: RLS enabled with service role access';
+RAISE NOTICE '   ✅ system_performance_metrics: RLS enabled with service role access';
 END $$;
 -- ============================================================================
 -- Phase 7 Complete: Enhanced Monitoring Schema Ready

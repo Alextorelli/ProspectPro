@@ -92,6 +92,10 @@ BEGIN
     BEGIN
       EXECUTE 'ALTER TABLE public.spatial_ref_sys ENABLE ROW LEVEL SECURITY';
       RAISE NOTICE '   - Enabled RLS on spatial_ref_sys';
+
+      -- Create a restrictive policy for spatial_ref_sys (system access only)
+      EXECUTE 'CREATE POLICY "spatial_ref_sys_service_access" ON spatial_ref_sys FOR ALL USING (auth.role() = ''service_role'')';
+      RAISE NOTICE '   - Created restrictive policy on spatial_ref_sys';
     EXCEPTION WHEN insufficient_privilege THEN
       RAISE NOTICE '   - Cannot enable RLS on spatial_ref_sys (insufficient privileges - normal in managed environments)';
     END;
@@ -532,7 +536,19 @@ BEGIN
     RAISE NOTICE '   - Skipped moving pg_trgm: %', SQLERRM;
   END;
 
-  -- Note: postgis is non-relocatable in managed environments; we do NOT attempt to move it post-install
+  -- Try to move postgis if currently in public (may fail in managed environments)
+  BEGIN
+    IF EXISTS (
+      SELECT 1 FROM pg_extension e
+      JOIN pg_namespace n ON n.oid = e.extnamespace
+      WHERE e.extname = 'postgis' AND n.nspname = 'public'
+    ) THEN
+      EXECUTE 'ALTER EXTENSION "postgis" SET SCHEMA extensions';
+      RAISE NOTICE '   - Moved extension postgis to schema extensions';
+    END IF;
+  EXCEPTION WHEN OTHERS THEN
+    RAISE NOTICE '   - Skipped moving postgis: % (may be non-relocatable in managed environments)', SQLERRM;
+  END;
 END $$;
 
 -- Guarded REVOKE: prevent PostgREST exposure for anonymous/authenticated roles
@@ -567,7 +583,7 @@ BEGIN
     SELECT 'public.update_updated_at_column()' AS sig
     UNION ALL SELECT 'public.set_updated_at()'
     UNION ALL SELECT 'public.set_campaign_analytics_timestamp_date()'
-    UNION ALL SELECT 'public.calculate_lead_quality_score(json)'
+    UNION ALL SELECT 'public.calculate_lead_quality_score(jsonb)'
     UNION ALL SELECT 'public.update_lead_confidence_scores(uuid)'
     UNION ALL SELECT 'public.get_campaign_analytics(uuid)'
     UNION ALL SELECT 'public.get_realtime_dashboard_metrics(uuid)'
@@ -579,6 +595,18 @@ BEGIN
     UNION ALL SELECT 'public.validate_rls_security()'
     UNION ALL SELECT 'public.get_deployment_health_summary()'
     UNION ALL SELECT 'public.analyze_deployment_failures(integer)'
+    UNION ALL SELECT 'public.update_updated_at_column()'
+    UNION ALL SELECT 'public.calculate_lead_quality_score(json)'
+    UNION ALL SELECT 'public.get_campaign_analytics(uuid,text)'
+    UNION ALL SELECT 'public.get_realtime_dashboard_metrics(uuid,text)'
+    UNION ALL SELECT 'public.leads_within_radius(double precision,double precision,double precision,uuid,text)'
+    UNION ALL SELECT 'public.search_leads_by_name(text,uuid,integer,text)'
+    UNION ALL SELECT 'public.update_campaign_statistics(uuid,text)'
+    UNION ALL SELECT 'public.refresh_analytics_views(text)'
+    UNION ALL SELECT 'public.archive_old_data(date,text)'
+    UNION ALL SELECT 'public.validate_rls_security(text)'
+    UNION ALL SELECT 'public.get_deployment_health_summary(text)'
+    UNION ALL SELECT 'public.analyze_deployment_failures(integer,text)'
   ) LOOP
     -- Check if function by signature exists
     IF EXISTS (
@@ -590,5 +618,43 @@ BEGIN
     ) THEN
       EXECUTE format('ALTER FUNCTION %s SET search_path = public, extensions, pg_temp', rec.sig);
     END IF;
+  END LOOP;
+
+  -- Also try to set search_path for functions that might have been created without explicit signatures
+  FOR rec IN (
+    SELECT p.oid::regprocedure::text AS sig
+    FROM pg_proc p
+    JOIN pg_namespace n ON n.oid = p.pronamespace
+    WHERE n.nspname = 'public'
+      AND p.proname IN (
+        'validate_rls_security',
+        'calculate_lead_quality_score',
+        'get_campaign_analytics',
+        'set_updated_at',
+        'set_campaign_analytics_timestamp_date',
+        'update_updated_at_column',
+        'search_leads_by_name',
+        'leads_within_radius',
+        'update_campaign_statistics',
+        'refresh_analytics_views',
+        'archive_old_data',
+        'get_deployment_health_summary',
+        'analyze_deployment_failures',
+        'get_realtime_dashboard_metrics',
+        'update_lead_confidence_scores'
+      )
+      AND NOT EXISTS (
+        SELECT 1 FROM pg_proc p2
+        WHERE p2.oid = p.oid
+          AND p2.proconfig IS NOT NULL
+          AND array_to_string(p2.proconfig, ',') LIKE '%search_path%'
+      )
+  ) LOOP
+    BEGIN
+      EXECUTE format('ALTER FUNCTION %s SET search_path = public, extensions, pg_temp', rec.sig);
+    EXCEPTION WHEN OTHERS THEN
+      -- Ignore errors for functions that might not exist or can't be altered
+      NULL;
+    END;
   END LOOP;
 END $$;
