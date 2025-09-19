@@ -128,13 +128,18 @@ class DatabaseMasterSetup {
   async validateEnvironment() {
     const errors = [];
 
-    // Check required environment variables
-    const requiredVars = ["SUPABASE_URL", "SUPABASE_SERVICE_ROLE_KEY"];
-    requiredVars.forEach((varName) => {
-      if (!process.env[varName]) {
-        errors.push(`Missing environment variable: ${varName}`);
-      }
-    });
+    // Check required environment variables - support both modern and legacy keys
+    if (!process.env.SUPABASE_URL) {
+      errors.push("Missing environment variable: SUPABASE_URL");
+    }
+
+    const hasSupabaseKey =
+      process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
+    if (!hasSupabaseKey) {
+      errors.push(
+        "Missing Supabase API key: SUPABASE_SECRET_KEY or SUPABASE_SERVICE_ROLE_KEY required"
+      );
+    }
 
     // Check database script files exist
     this.phases.forEach((phase) => {
@@ -160,12 +165,13 @@ class DatabaseMasterSetup {
         autoRefreshToken: false,
         persistSession: false,
       },
+      global: { headers: { "X-Client-Info": "ProspectPro-Setup" } },
     });
 
-    // Test connection
+    // Test connection with campaigns table (we know it exists)
     const { data, error } = await client
-      .from("information_schema.tables")
-      .select("table_name")
+      .from("campaigns")
+      .select("count")
       .limit(1);
 
     if (
