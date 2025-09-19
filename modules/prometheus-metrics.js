@@ -112,6 +112,32 @@ class ProspectProMetrics {
       labelNames: ["version", "environment", "branch"],
     });
 
+    // Supabase connection metrics (separate from HTTP labels)
+    this.supabaseConnectionDuration = new client.Histogram({
+      name: "prospectpro_supabase_connection_duration_seconds",
+      help: "Duration of Supabase connectivity checks in seconds",
+      labelNames: ["result"], // success | failure
+      buckets: [0.05, 0.1, 0.25, 0.5, 1, 2, 5],
+    });
+
+    // Process uptime and boot metrics
+    this.uptime = new client.Gauge({
+      name: "prospectpro_process_uptime_seconds",
+      help: "Node.js process uptime in seconds",
+    });
+
+    this.bootTotalDuration = new client.Gauge({
+      name: "prospectpro_boot_total_duration_ms",
+      help: "Total boot time in milliseconds",
+    });
+
+    this.bootPhaseDuration = new client.Histogram({
+      name: "prospectpro_boot_phase_duration_ms",
+      help: "Duration of individual boot phases in milliseconds",
+      labelNames: ["phase", "result"], // success | failed
+      buckets: [10, 50, 100, 250, 500, 1000, 2000, 5000],
+    });
+
     // Register all metrics
     this.register.registerMetric(this.httpRequestDuration);
     this.register.registerMetric(this.httpRequestTotal);
@@ -126,6 +152,10 @@ class ProspectProMetrics {
     this.register.registerMetric(this.leadQualityScore);
     this.register.registerMetric(this.systemHealth);
     this.register.registerMetric(this.deploymentInfo);
+    this.register.registerMetric(this.supabaseConnectionDuration);
+    this.register.registerMetric(this.uptime);
+    this.register.registerMetric(this.bootTotalDuration);
+    this.register.registerMetric(this.bootPhaseDuration);
   }
 
   /**
@@ -323,18 +353,23 @@ class ProspectProMetrics {
     };
   }
 
-  recordSupabaseConnection(success, duration) {
-    console.log(
-      `📊 Metrics: Supabase connection ${
-        success ? "success" : "failed"
-      } (${duration}ms)`
-    );
-    // Implementation for Supabase connection tracking
-    if (this.httpRequestDuration) {
-      this.httpRequestDuration.observe(
-        { operation: "supabase_connect" },
-        duration / 1000
-      );
+  recordSupabaseConnection(a, b) {
+    // Flexible signature to match existing call sites:
+    // - recordSupabaseConnection(durationMs, success, ...)
+    // - recordSupabaseConnection(success, durationMs)
+    let durationMs, success;
+    if (typeof a === "number" && typeof b === "boolean") {
+      durationMs = a; success = b;
+    } else if (typeof a === "boolean" && typeof b === "number") {
+      success = a; durationMs = b;
+    } else {
+      // Fallback best-effort
+      durationMs = typeof a === "number" ? a : (typeof b === "number" ? b : 0);
+      success = typeof a === "boolean" ? a : (typeof b === "boolean" ? b : false);
+    }
+    console.log(`📊 Metrics: Supabase connection ${success ? "success" : "failed"} (${durationMs}ms)`);
+    if (this.supabaseConnectionDuration && typeof durationMs === "number") {
+      this.supabaseConnectionDuration.observe({ result: success ? "success" : "failure" }, durationMs / 1000);
     }
   }
 
@@ -344,12 +379,25 @@ class ProspectProMetrics {
       error?.message || error
     );
     // Implementation for error tracking
-    if (this.httpRequestsTotal) {
-      this.httpRequestsTotal.inc({
+    if (this.httpRequestTotal) {
+      this.httpRequestTotal.inc({
         method: "ERROR",
         route: errorType,
         status_code: 500,
       });
+    }
+  }
+
+  // Boot metrics helpers expected by server.js
+  recordBootComplete(totalBootTimeMs) {
+    if (this.bootTotalDuration) {
+      this.bootTotalDuration.set(totalBootTimeMs || 0);
+    }
+  }
+
+  recordBootPhase(phaseName, result, durationMs) {
+    if (this.bootPhaseDuration) {
+      this.bootPhaseDuration.observe({ phase: String(phaseName), result: result ? String(result) : "unknown" }, durationMs || 0);
     }
   }
 }
@@ -404,8 +452,8 @@ function getHttpMetricsMiddleware() {
       };
 
       // Record HTTP request metrics
-      if (metrics.httpRequestsTotal) {
-        metrics.httpRequestsTotal.inc(labels);
+      if (metrics.httpRequestTotal) {
+        metrics.httpRequestTotal.inc(labels);
       }
 
       if (metrics.httpRequestDuration) {

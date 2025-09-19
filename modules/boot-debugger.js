@@ -13,6 +13,10 @@ class BootPhaseDebugger {
     this.errors = [];
     this.warnings = [];
     this.performanceMetrics = {};
+    this.milestones = [];
+    this.bootId = `boot-${Date.now().toString(36)}-${Math.random()
+      .toString(36)
+      .slice(2, 8)}`;
   }
 
   /**
@@ -37,24 +41,37 @@ class BootPhaseDebugger {
   /**
    * End current boot phase
    */
-  endPhase(phaseId) {
-    if (!this.currentPhase || this.currentPhase.id !== phaseId) {
+  endPhase(phaseIdOrSuccess, maybeError) {
+    // Backwards compatibility: allow boolean passed from older code
+    const expectedId = this.currentPhase?.id;
+    const phaseId = typeof phaseIdOrSuccess === "string" ? phaseIdOrSuccess : expectedId;
+    const argIsBoolean = typeof phaseIdOrSuccess === "boolean";
+    const explicitSuccess = argIsBoolean ? phaseIdOrSuccess : undefined;
+
+    if (!this.currentPhase) {
+      this.logWarning("endPhase called with no active phase");
+      return;
+    }
+    if (phaseId && this.currentPhase.id !== phaseId) {
       this.logWarning(
         `Phase mismatch: expected ${phaseId}, got ${this.currentPhase?.id}`
       );
-      return;
     }
 
     const duration = Date.now() - this.currentPhase.startTime;
     this.currentPhase.endTime = Date.now();
     this.currentPhase.duration = duration;
-    this.currentPhase.status = "completed";
+    const hasErrorObject = maybeError instanceof Error;
+    const failed = explicitSuccess === false || hasErrorObject;
+    this.currentPhase.status = failed ? "failed" : "completed";
 
     this.phases.push({ ...this.currentPhase });
-    this.performanceMetrics[phaseId] = duration;
+    this.performanceMetrics[this.currentPhase.id] = duration;
 
     console.log(
-      `✅ Phase completed: ${this.currentPhase.description} (${duration}ms)`
+      `${failed ? "❌" : "✅"} Phase completed: ${
+        this.currentPhase.description
+      } (${duration}ms)`
     );
     this.currentPhase = null;
   }
@@ -181,6 +198,70 @@ class BootPhaseDebugger {
     });
 
     console.log("=".repeat(60));
+    return report;
+  }
+
+  /**
+   * Get a structured phase report compatible with server expectations
+   */
+  getPhaseReport() {
+    const totalBootTime = Date.now() - this.startTime;
+    const phaseSummaries = this.phases.map((p) => ({
+      name: p.id,
+      description: p.description,
+      duration: p.duration || 0,
+      success: p.status === "completed",
+      status: p.status,
+    }));
+    const phaseCount = phaseSummaries.length;
+    const successful = phaseSummaries.filter((p) => p.success).length;
+    const successRate = phaseCount > 0 ? Math.round((successful / phaseCount) * 1000) / 10 : 0;
+
+    return {
+      bootId: this.bootId,
+      totalBootTime,
+      phases: phaseSummaries,
+      phaseCount,
+      successRate,
+      failedPhases: phaseSummaries.filter((p) => !p.success).map((p) => p.name),
+    };
+  }
+
+  /**
+   * Lightweight health status used by endpoints
+   */
+  getHealthStatus() {
+    const status = this.errors.length > 0 ? "degraded" : this.currentPhase ? "starting" : "ok";
+    return {
+      status,
+      bootId: this.bootId,
+      activePhase: this.currentPhase?.id || null,
+      errors: this.errors.length,
+      warnings: this.warnings.length,
+    };
+  }
+
+  /**
+   * Record a startup milestone for observability
+   */
+  addMilestone(name, data = {}) {
+    const entry = { name, data, timestamp: Date.now() };
+    this.milestones.push(entry);
+    this.trackMetric(`milestone_${name}`, Date.now() - this.startTime, "ms");
+  }
+
+  /**
+   * Backwards compatible method expected by some callers
+   */
+  logFinalReport() {
+    const report = this.getPhaseReport();
+    // Print a compact summary
+    console.log(
+      `🏁 Boot complete in ${report.totalBootTime}ms | phases=${report.phaseCount} | successRate=${report.successRate}%`
+    );
+    if (report.failedPhases.length) {
+      console.log(`   Failed phases: ${report.failedPhases.join(", ")}`);
+    }
     return report;
   }
 
