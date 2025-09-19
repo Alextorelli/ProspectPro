@@ -75,9 +75,9 @@ DECLARE tables_to_check TEXT [] := ARRAY [
 table_name TEXT;
 BEGIN FOREACH table_name IN ARRAY tables_to_check LOOP IF EXISTS (
     SELECT 1
-    FROM information_schema.tables
-    WHERE table_schema = 'public'
-        AND information_schema.tables.table_name = table_name
+    FROM information_schema.tables t
+    WHERE t.table_schema = 'public'
+        AND t.table_name = table_name
 ) THEN -- Enable RLS if not already enabled
 IF NOT EXISTS (
     SELECT 1
