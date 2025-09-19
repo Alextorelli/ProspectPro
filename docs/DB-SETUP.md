@@ -1,5 +1,23 @@
 # ProspectPro Database Setup (Supabase UI)
 
+## Frontend Integration Notes (2025)
+
+All dashboard and campaign analytics features now expect the following columns to exist in the backend:
+
+- `base_url`, `cost_per_qualified_lead`, `discovery_budget`, `validation_budget`, `enrichment_budget`, and all API source cost/quality columns.
+  These columns are always present due to idempotent guards in the DB setup scripts.
+
+Row Level Security (RLS) is enabled on all analytics, monitoring, and business tables. Service role policies are automatically created; frontend API calls must use a valid service role token for privileged data.
+
+PostGIS extension objects (notably `public.spatial_ref_sys`) are intentionally exempt from RLS enforcement. See `database/README.md` for rationale and linter suppression guidance.
+
+Budget, cost, and quality metrics are now guaranteed to be non-null and up-to-date. Frontend should display fallback values only if API returns error.
+
+### Lovable Setup & Config (Preview)
+
+Lovable integration will require new config options for API keys, feature toggles, and user onboarding. Prepare to add `lovable-config.js` and update dashboard UI for Lovable-specific campaign settings.
+See upcoming docs for Lovable setup steps and config patterns. All Lovable features will be managed via the dashboard and reflected in campaign analytics.
+
 This guide walks you through setting up the database in Supabase using the SQL editor and UI. It reflects Supabase editor constraints and our final schema.
 
 ## Prerequisites

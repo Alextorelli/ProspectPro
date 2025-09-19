@@ -1,459 +1,692 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>ProspectPro - Lead Generation Platform</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css" />
     <script src="business-categories.js"></script>
-</head>
-<body>
+  </head>
+  <body>
     <div class="app">
-        <!-- Header -->
-        <header class="header">
-            <div class="container">
-                <div class="header-content">
-                    <div class="header-left">
-                        <h1 class="logo" id="logoLink" style="cursor: pointer;">🎯 ProspectPro</h1>
-                        <div class="breadcrumb">Real-Time Lead Generation</div>
-                    </div>
-                    <div class="header-right">
-                        <div class="api-status" id="apiStatus">
-                            <span class="status-dot"></span>
-                            <span class="status-text">Checking APIs...</span>
-                        </div>
-                        <button class="settings-btn" id="settingsBtn" title="Admin Settings">
-                            ⚙️
-                        </button>
-                    </div>
-                </div>
+      <!-- Header -->
+      <header class="header">
+        <div class="container">
+          <!-- === ProspectPro Frontend Integration Notes (2025) === -->
+          <section
+            style="
+              background: #fffbe6;
+              border-radius: 10px;
+              padding: 18px;
+              margin-bottom: 24px;
+              box-shadow: 0 2px 8px #f7e9b7;
+            "
+          >
+            <h2 style="color: #764ba2; margin-bottom: 10px">
+              Frontend Integration Updates (2025)
+            </h2>
+            <ul style="margin-left: 18px; color: #333; font-size: 1.05em">
+              <li>
+                All dashboard metrics and widgets now expect the following
+                columns to exist in the backend: <b>base_url</b>,
+                <b>cost_per_qualified_lead</b>, <b>discovery_budget</b>,
+                <b>validation_budget</b>, <b>enrichment_budget</b>, and all API
+                source cost/quality columns. These are always present due to
+                idempotent guards in the DB setup.
+              </li>
+              <li>
+                Row Level Security (RLS) is enabled on all analytics,
+                monitoring, and business tables. Service role policies are
+                automatically created; frontend API calls must use a valid
+                service role token for privileged data.
+              </li>
+              <li>
+                PostGIS extension objects (notably
+                <b>public.spatial_ref_sys</b>) are intentionally exempt from RLS
+                enforcement. See <code>database/README.md</code> for rationale
+                and linter suppression guidance.
+              </li>
+              <li>
+                Budget, cost, and quality metrics are now guaranteed to be
+                non-null and up-to-date. Frontend should display fallback values
+                only if API returns error.
+              </li>
+            </ul>
+            <h3 style="color: #764ba2; margin-top: 18px">
+              Lovable Setup & Config (Preview)
+            </h3>
+            <ul style="margin-left: 18px; color: #333; font-size: 1.05em">
+              <li>
+                Lovable integration will require new config options for API
+                keys, feature toggles, and user onboarding. Prepare to add
+                <code>lovable-config.js</code> and update dashboard UI for
+                Lovable-specific campaign settings.
+              </li>
+              <li>
+                See upcoming docs for Lovable setup steps and config patterns.
+                All Lovable features will be managed via the dashboard and
+                reflected in campaign analytics.
+              </li>
+            </ul>
+          </section>
+          <div class="header-content">
+            <div class="header-left">
+              <h1 class="logo" id="logoLink" style="cursor: pointer">
+                🎯 ProspectPro
+              </h1>
+              <div class="breadcrumb">Real-Time Lead Generation</div>
             </div>
-        </header>
-
-        <!-- Real Data Banner -->
-        <div class="real-data-banner">
-            <div class="container">
-                <div class="banner-content">
-                    <span class="banner-icon">⚡</span>
-                    <div class="banner-text">
-                        <strong>ZERO FAKE DATA:</strong> Only verified business contacts from real APIs - Google Places, website scraping, and email validation.
-                    </div>
-                </div>
+            <div class="header-right">
+              <div class="api-status" id="apiStatus">
+                <span class="status-dot"></span>
+                <span class="status-text">Checking APIs...</span>
+              </div>
+              <button
+                class="settings-btn"
+                id="settingsBtn"
+                title="Admin Settings"
+              >
+                ⚙️
+              </button>
             </div>
+          </div>
         </div>
+      </header>
 
-        <!-- Main Content -->
-        <main class="main">
-            <div class="container">
-                <!-- Homepage Templates -->
-                <div id="homePage" class="page-content">
-                    <div class="page-header">
-                        <h1>Lead Generation Templates</h1>
-                        <p>Choose a template to start generating high-quality leads for your business</p>
-                    </div>
-
-                    <div class="batch-templates">
-                        <div class="templates-grid">
-                            <!-- Local Business Discovery - Active -->
-                            <div class="template-card active" id="localBusinessCard">
-                                <div class="template-header">
-                                    <h3>📍 Local Business Discovery</h3>
-                                    <span class="template-badge">Active</span>
-                                </div>
-                                <div class="template-stats">
-                                    <div class="stat">
-                                        <span class="stat-value">5-100</span>
-                                        <span class="stat-label">Lead Count</span>
-                                    </div>
-                                    <div class="stat">
-                                        <span class="stat-value">87%</span>
-                                        <span class="stat-label">Success Rate</span>
-                                    </div>
-                                </div>
-                                <p class="template-description">Find local service-based businesses using Google Places with contact enrichment</p>
-                                <div class="template-details">
-                                    ✅ Geographic targeting<br>
-                                    ✅ Business type filtering<br>
-                                    ✅ Contact verification
-                                </div>
-                            </div>
-
-                            <!-- LinkedIn Lead Gen Forms Sync - Coming Soon -->
-                            <div class="template-card disabled" id="linkedinCard">
-                                <div class="template-header">
-                                    <h3>💼 LinkedIn Lead Gen Forms Sync</h3>
-                                    <span class="template-badge disabled">Coming Soon</span>
-                                </div>
-                                <div class="template-stats">
-                                    <div class="stat">
-                                        <span class="stat-value">10-500</span>
-                                        <span class="stat-label">Lead Count</span>
-                                    </div>
-                                    <div class="stat">
-                                        <span class="stat-value">96%</span>
-                                        <span class="stat-label">Success Rate</span>
-                                    </div>
-                                </div>
-                                <p class="template-description">Sync leads from your LinkedIn advertising campaigns and Lead Gen Forms</p>
-                                <div class="template-details">
-                                    ✅ Active LinkedIn ad account<br>
-                                    ✅ Lead Gen Forms setup<br>
-                                    ✅ Webhook configuration
-                                </div>
-                            </div>
-
-                            <!-- Website Contact Extraction - Coming Soon -->
-                            <div class="template-card disabled" id="websiteCard">
-                                <div class="template-header">
-                                    <h3>🌐 Website Contact Extraction</h3>
-                                    <span class="template-badge disabled">Coming Soon</span>
-                                </div>
-                                <div class="template-stats">
-                                    <div class="stat">
-                                        <span class="stat-value">5-100</span>
-                                        <span class="stat-label">Lead Count</span>
-                                    </div>
-                                    <div class="stat">
-                                        <span class="stat-value">73%</span>
-                                        <span class="stat-label">Success Rate</span>
-                                    </div>
-                                </div>
-                                <p class="template-description">Extract contact information from business websites and team pages</p>
-                                <div class="template-details">
-                                    ✅ Target website list<br>
-                                    ✅ Contact page identification<br>
-                                    ✅ Email validation
-                                </div>
-                            </div>
-
-                            <!-- Industry Directory Mining - Coming Soon -->
-                            <div class="template-card disabled" id="directoryCard">
-                                <div class="template-header">
-                                    <h3>📚 Industry Directory Mining</h3>
-                                    <span class="template-badge disabled">Coming Soon</span>
-                                </div>
-                                <div class="template-stats">
-                                    <div class="stat">
-                                        <span class="stat-value">25-1000</span>
-                                        <span class="stat-label">Lead Count</span>
-                                    </div>
-                                    <div class="stat">
-                                        <span class="stat-value">81%</span>
-                                        <span class="stat-label">Success Rate</span>
-                                    </div>
-                                </div>
-                                <p class="template-description">Mine professional directories and industry databases for leads</p>
-                                <div class="template-details">
-                                    ✅ Industry selection<br>
-                                    ✅ Professional title criteria<br>
-                                    ✅ Company size filtering
-                                </div>
-                            </div>
-
-                            <!-- Event Attendee Research - Coming Soon -->
-                            <div class="template-card disabled" id="eventCard">
-                                <div class="template-header">
-                                    <h3>🎪 Event Attendee Research</h3>
-                                    <span class="template-badge disabled">Coming Soon</span>
-                                </div>
-                                <div class="template-stats">
-                                    <div class="stat">
-                                        <span class="stat-value">10-500</span>
-                                        <span class="stat-label">Lead Count</span>
-                                    </div>
-                                    <div class="stat">
-                                        <span class="stat-value">79%</span>
-                                        <span class="stat-label">Success Rate</span>
-                                    </div>
-                                </div>
-                                <p class="template-description">Research attendees and speakers from industry events and conferences</p>
-                                <div class="template-details">
-                                    ✅ Event identification<br>
-                                    ✅ Speaker/attendee lists<br>
-                                    ✅ Contact enrichment
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Local Business Discovery Tool -->
-                <div id="localBusinessPage" class="page-content hidden">
-                    <div class="page-header">
-                        <h1>Local Business Discovery</h1>
-                        <p>Find and verify local business contacts with real data validation</p>
-                        <button class="btn btn-outline" id="newSearchBtn" onclick="prospectProApp.goHome()">← New Search</button>
-                    </div>
-
-                    <!-- Business Discovery Search Interface -->
-                    <div class="search-interface">
-                        <div class="search-card">
-                            <form class="search-form" id="searchForm">
-                                <!-- Step 1: Location and Radius -->
-                                <div class="form-step">
-                                    <h3>📍 Location & Search Area</h3>
-                                    <div class="form-row">
-                                        <div class="form-group">
-                                            <label for="locationInput">Target Location</label>
-                                            <input type="text" id="locationInput" class="form-control" 
-                                                   placeholder="e.g., San Diego, CA" required>
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="radiusSelect">Search Radius</label>
-                                            <select id="radiusSelect" class="form-select" required>
-                                                <option value="5">5 miles</option>
-                                                <option value="10" selected>10 miles</option>
-                                                <option value="25">25 miles</option>
-                                                <option value="50">50 miles</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Step 2: Business Filtering -->
-                                <div class="form-step">
-                                    <h3>🏢 Business Filtering</h3>
-                                    <div class="form-row-triple">
-                                        <div class="form-group">
-                                            <label for="categorySelect">Business Category</label>
-                                            <select id="categorySelect" class="form-select" required>
-                                                <option value="">Select a category...</option>
-                                            </select>
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="typeSelect">Business Type</label>
-                                            <select id="typeSelect" class="form-select" multiple required disabled>
-                                                <option value="">Select category first...</option>
-                                            </select>
-                                            <small class="form-help">Hold Ctrl/Cmd to select multiple types</small>
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="sizeSelect">Business Size</label>
-                                            <select id="sizeSelect" class="form-select" multiple>
-                                                <option value="1-9">1-9 Employees</option>
-                                                <option value="10-19">10-19 Employees</option>
-                                                <option value="20-49">20-49 Employees</option>
-                                                <option value="50+">50+ Employees</option>
-                                            </select>
-                                            <small class="form-help">Hold Ctrl/Cmd to select multiple sizes (optional)</small>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Step 3: Lead Quantity -->
-                                <div class="form-step">
-                                    <h3>📊 Lead Quantity</h3>
-                                    <div class="quantity-buttons" id="quantityButtons">
-                                        <button type="button" class="quantity-btn" data-value="1">1</button>
-                                        <button type="button" class="quantity-btn" data-value="3">3</button>
-                                        <button type="button" class="quantity-btn selected" data-value="5">5</button>
-                                        <button type="button" class="quantity-btn" data-value="10">10</button>
-                                        <button type="button" class="quantity-btn" data-value="25">25</button>
-                                    </div>
-                                    <div class="cost-estimate">
-                                        <span>Estimated cost: <strong id="costEstimate">$0.42</strong></span>
-                                    </div>
-                                </div>
-
-                                <div class="form-actions">
-                                    <button type="submit" class="btn btn-primary" id="searchButton">
-                                        <span class="btn-text">🔍 Start Discovery</span>
-                                        <span class="btn-spinner hidden"></span>
-                                    </button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-
-                    <!-- Results Section -->
-                    <div id="resultsSection" class="results-section hidden">
-                        <!-- Results will be populated by JavaScript -->
-                    </div>
-                </div>
-
-                <!-- Admin Settings Page -->
-                <div id="settingsPage" class="page-content hidden">
-                    <div class="page-header">
-                        <h1>⚙️ Monitoring & Configuration</h1>
-                        <p>Monitor campaign performance, configure cost limits, and access dashboard analytics</p>
-                        <button class="btn btn-outline" id="backFromSettings">← Back to Home</button>
-                    </div>
-
-                    <div class="settings-grid">
-                        <!-- Grafana Dashboard Access -->
-                        <div class="settings-card">
-                            <h3>📊 Dashboard Analytics</h3>
-                            <div class="dashboard-access">
-                                <div class="dashboard-info">
-                                    <div class="dashboard-icon">🎯</div>
-                                    <div class="dashboard-details">
-                                        <h4>Grafana Dashboard</h4>
-                                        <p>Real-time campaign monitoring, cost analysis, and ROI tracking</p>
-                                    </div>
-                                </div>
-                                <div class="dashboard-actions">
-                                    <a href="#" id="grafanaLink" class="btn btn-primary" target="_blank" rel="noopener">
-                                        📈 Open Dashboard
-                                    </a>
-                                    <p class="dashboard-note">Configure your Grafana URL in settings below</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Cost & Usage Limits -->
-                        <div class="settings-card">
-                            <h3>💰 Cost & Usage Controls</h3>
-                            <div class="config-options">
-                                <div class="config-item">
-                                    <label for="dailyCostLimit">Daily Cost Limit ($)</label>
-                                    <input type="number" id="dailyCostLimit" class="form-control" value="50.00" min="0" step="0.01" placeholder="50.00">
-                                    <small>Maximum daily spending across all APIs</small>
-                                </div>
-                                <div class="config-item">
-                                    <label for="costPerLeadLimit">Cost Per Lead Limit ($)</label>
-                                    <input type="number" id="costPerLeadLimit" class="form-control" value="2.00" min="0" step="0.01" placeholder="2.00">
-                                    <small>Maximum cost per qualified lead</small>
-                                </div>
-                                <div class="config-item">
-                                    <label for="qualificationRateAlert">Qualification Rate Alert (%)</label>
-                                    <input type="number" id="qualificationRateAlert" class="form-control" value="70" min="0" max="100" step="1" placeholder="70">
-                                    <small>Alert when qualification rate drops below this percentage</small>
-                                </div>
-                                <div class="config-item">
-                                    <label for="maxLeadsPerCampaign">Maximum Leads Per Campaign</label>
-                                    <select id="maxLeadsPerCampaign" class="form-select">
-                                        <option value="25">25 leads</option>
-                                        <option value="50" selected>50 leads</option>
-                                        <option value="100">100 leads</option>
-                                        <option value="250">250 leads</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Campaign Configuration -->
-                        <div class="settings-card">
-                            <h3>🎯 Campaign Settings</h3>
-                            <div class="config-options">
-                                <div class="config-item">
-                                    <label for="confidenceThreshold">Quality Confidence Threshold (%)</label>
-                                    <select id="confidenceThreshold" class="form-select">
-                                        <option value="50">50% - Show all leads</option>
-                                        <option value="70">70% - High quality only</option>
-                                        <option value="80" selected>80% - Premium quality only</option>
-                                        <option value="90">90% - Ultra-premium quality only</option>
-                                    </select>
-                                </div>
-                                <div class="config-item">
-                                    <label for="emailVerificationEnabled">Email Verification</label>
-                                    <input type="checkbox" id="emailVerificationEnabled" checked>
-                                    <span class="checkbox-label">Verify email deliverability (recommended)</span>
-                                </div>
-                                <div class="config-item">
-                                    <label for="websiteValidationEnabled">Website Validation</label>
-                                    <input type="checkbox" id="websiteValidationEnabled" checked>
-                                    <span class="checkbox-label">Validate website accessibility (recommended)</span>
-                                </div>
-                                <div class="config-item">
-                                    <label for="socialProfilesEnabled">Social Profile Discovery</label>
-                                    <input type="checkbox" id="socialProfilesEnabled">
-                                    <span class="checkbox-label">Find LinkedIn, Facebook profiles (additional cost)</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Dashboard & Monitoring Configuration -->
-                        <div class="settings-card">
-                            <h3>🔧 Monitoring Configuration</h3>
-                            <div class="config-options">
-                                <div class="config-item">
-                                    <label for="grafanaUrl">Grafana Dashboard URL</label>
-                                    <input type="url" id="grafanaUrl" class="form-control" placeholder="https://yourusername.grafana.net">
-                                    <small>Your Grafana Cloud dashboard URL</small>
-                                </div>
-                                <div class="config-item">
-                                    <label for="metricsCollectionInterval">Metrics Collection Interval (seconds)</label>
-                                    <select id="metricsCollectionInterval" class="form-select">
-                                        <option value="30">30 seconds</option>
-                                        <option value="60" selected>1 minute</option>
-                                        <option value="300">5 minutes</option>
-                                        <option value="900">15 minutes</option>
-                                    </select>
-                                </div>
-                                <div class="config-item">
-                                    <label for="healthCheckInterval">API Health Check Interval (seconds)</label>
-                                    <select id="healthCheckInterval" class="form-select">
-                                        <option value="60">1 minute</option>
-                                        <option value="300" selected>5 minutes</option>
-                                        <option value="600">10 minutes</option>
-                                        <option value="1800">30 minutes</option>
-                                    </select>
-                                </div>
-                                <div class="config-item">
-                                    <label for="enableRealTimeUpdates">Real-Time Dashboard Updates</label>
-                                    <input type="checkbox" id="enableRealTimeUpdates" checked>
-                                    <span class="checkbox-label">Enable WebSocket real-time monitoring</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Current Session Overview -->
-                        <div class="settings-card">
-                            <h3>📈 Current Session Stats</h3>
-                            <div class="stats-grid">
-                                <div class="stat-item">
-                                    <div class="stat-value" id="sessionLeads">0</div>
-                                    <div class="stat-label">Leads Generated</div>
-                                </div>
-                                <div class="stat-item">
-                                    <div class="stat-value" id="sessionCost">$0.00</div>
-                                    <div class="stat-label">Session Cost</div>
-                                </div>
-                                <div class="stat-item">
-                                    <div class="stat-value" id="sessionQualification">0%</div>
-                                    <div class="stat-label">Qualification Rate</div>
-                                </div>
-                                <div class="stat-item">
-                                    <div class="stat-value" id="sessionEfficiency">-</div>
-                                    <div class="stat-label">Cost Per Lead</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Quick Actions -->
-                        <div class="settings-card">
-                            <h3>⚡ Quick Actions</h3>
-                            <div class="quick-actions">
-                                <button class="btn btn-outline" id="exportCampaignData">
-                                    📊 Export Campaign Data (CSV)
-                                </button>
-                                <button class="btn btn-outline" id="exportCostAnalysis">
-                                    💰 Export Cost Analysis (CSV)
-                                </button>
-                                <button class="btn btn-outline" id="exportROIReport">
-                                    📈 Export ROI Report (CSV)
-                                </button>
-                                <button class="btn btn-outline" id="testDashboardConnection">
-                                    🔍 Test Dashboard Connection
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Save Configuration -->
-                    <div class="config-actions" style="margin-top: 2rem; text-align: center;">
-                        <button class="btn btn-primary btn-large" id="saveAllSettings">
-                            💾 Save All Configuration
-                        </button>
-                        <button class="btn btn-outline" id="resetToDefaults">
-                            🔄 Reset to Defaults
-                        </button>
-                    </div>
-                </div>
+      <!-- Real Data Banner -->
+      <div class="real-data-banner">
+        <div class="container">
+          <div class="banner-content">
+            <span class="banner-icon">⚡</span>
+            <div class="banner-text">
+              <strong>ZERO FAKE DATA:</strong> Only verified business contacts
+              from real APIs - Google Places, website scraping, and email
+              validation.
             </div>
-        </main>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Content -->
+      <main class="main">
+        <div class="container">
+          <!-- Homepage Templates -->
+          <div id="homePage" class="page-content">
+            <div class="page-header">
+              <h1>Lead Generation Templates</h1>
+              <p>
+                Choose a template to start generating high-quality leads for
+                your business
+              </p>
+            </div>
+
+            <div class="batch-templates">
+              <div class="templates-grid">
+                <!-- Local Business Discovery - Active -->
+                <div class="template-card active" id="localBusinessCard">
+                  <div class="template-header">
+                    <h3>📍 Local Business Discovery</h3>
+                    <span class="template-badge">Active</span>
+                  </div>
+                  <div class="template-stats">
+                    <div class="stat">
+                      <span class="stat-value">5-100</span>
+                      <span class="stat-label">Lead Count</span>
+                    </div>
+                    <div class="stat">
+                      <span class="stat-value">87%</span>
+                      <span class="stat-label">Success Rate</span>
+                    </div>
+                  </div>
+                  <p class="template-description">
+                    Find local service-based businesses using Google Places with
+                    contact enrichment
+                  </p>
+                  <div class="template-details">
+                    ✅ Geographic targeting<br />
+                    ✅ Business type filtering<br />
+                    ✅ Contact verification
+                  </div>
+                </div>
+
+                <!-- LinkedIn Lead Gen Forms Sync - Coming Soon -->
+                <div class="template-card disabled" id="linkedinCard">
+                  <div class="template-header">
+                    <h3>💼 LinkedIn Lead Gen Forms Sync</h3>
+                    <span class="template-badge disabled">Coming Soon</span>
+                  </div>
+                  <div class="template-stats">
+                    <div class="stat">
+                      <span class="stat-value">10-500</span>
+                      <span class="stat-label">Lead Count</span>
+                    </div>
+                    <div class="stat">
+                      <span class="stat-value">96%</span>
+                      <span class="stat-label">Success Rate</span>
+                    </div>
+                  </div>
+                  <p class="template-description">
+                    Sync leads from your LinkedIn advertising campaigns and Lead
+                    Gen Forms
+                  </p>
+                  <div class="template-details">
+                    ✅ Active LinkedIn ad account<br />
+                    ✅ Lead Gen Forms setup<br />
+                    ✅ Webhook configuration
+                  </div>
+                </div>
+
+                <!-- Website Contact Extraction - Coming Soon -->
+                <div class="template-card disabled" id="websiteCard">
+                  <div class="template-header">
+                    <h3>🌐 Website Contact Extraction</h3>
+                    <span class="template-badge disabled">Coming Soon</span>
+                  </div>
+                  <div class="template-stats">
+                    <div class="stat">
+                      <span class="stat-value">5-100</span>
+                      <span class="stat-label">Lead Count</span>
+                    </div>
+                    <div class="stat">
+                      <span class="stat-value">73%</span>
+                      <span class="stat-label">Success Rate</span>
+                    </div>
+                  </div>
+                  <p class="template-description">
+                    Extract contact information from business websites and team
+                    pages
+                  </p>
+                  <div class="template-details">
+                    ✅ Target website list<br />
+                    ✅ Contact page identification<br />
+                    ✅ Email validation
+                  </div>
+                </div>
+
+                <!-- Industry Directory Mining - Coming Soon -->
+                <div class="template-card disabled" id="directoryCard">
+                  <div class="template-header">
+                    <h3>📚 Industry Directory Mining</h3>
+                    <span class="template-badge disabled">Coming Soon</span>
+                  </div>
+                  <div class="template-stats">
+                    <div class="stat">
+                      <span class="stat-value">25-1000</span>
+                      <span class="stat-label">Lead Count</span>
+                    </div>
+                    <div class="stat">
+                      <span class="stat-value">81%</span>
+                      <span class="stat-label">Success Rate</span>
+                    </div>
+                  </div>
+                  <p class="template-description">
+                    Mine professional directories and industry databases for
+                    leads
+                  </p>
+                  <div class="template-details">
+                    ✅ Industry selection<br />
+                    ✅ Professional title criteria<br />
+                    ✅ Company size filtering
+                  </div>
+                </div>
+
+                <!-- Event Attendee Research - Coming Soon -->
+                <div class="template-card disabled" id="eventCard">
+                  <div class="template-header">
+                    <h3>🎪 Event Attendee Research</h3>
+                    <span class="template-badge disabled">Coming Soon</span>
+                  </div>
+                  <div class="template-stats">
+                    <div class="stat">
+                      <span class="stat-value">10-500</span>
+                      <span class="stat-label">Lead Count</span>
+                    </div>
+                    <div class="stat">
+                      <span class="stat-value">79%</span>
+                      <span class="stat-label">Success Rate</span>
+                    </div>
+                  </div>
+                  <p class="template-description">
+                    Research attendees and speakers from industry events and
+                    conferences
+                  </p>
+                  <div class="template-details">
+                    ✅ Event identification<br />
+                    ✅ Speaker/attendee lists<br />
+                    ✅ Contact enrichment
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Local Business Discovery Tool -->
+          <div id="localBusinessPage" class="page-content hidden">
+            <div class="page-header">
+              <h1>Local Business Discovery</h1>
+              <p>
+                Find and verify local business contacts with real data
+                validation
+              </p>
+              <button
+                class="btn btn-outline"
+                id="newSearchBtn"
+                onclick="prospectProApp.goHome()"
+              >
+                ← New Search
+              </button>
+            </div>
+
+            <!-- Business Discovery Search Interface -->
+            <div class="search-interface">
+              <div class="search-card">
+                <form class="search-form" id="searchForm">
+                  <!-- Step 1: Location and Radius -->
+                  <div class="form-step">
+                    <h3>📍 Location & Search Area</h3>
+                    <div class="form-row">
+                      <div class="form-group">
+                        <label for="locationInput">Target Location</label>
+                        <input
+                          type="text"
+                          id="locationInput"
+                          class="form-control"
+                          placeholder="e.g., San Diego, CA"
+                          required
+                        />
+                      </div>
+                      <div class="form-group">
+                        <label for="radiusSelect">Search Radius</label>
+                        <select id="radiusSelect" class="form-select" required>
+                          <option value="5">5 miles</option>
+                          <option value="10" selected>10 miles</option>
+                          <option value="25">25 miles</option>
+                          <option value="50">50 miles</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Step 2: Business Filtering -->
+                  <div class="form-step">
+                    <h3>🏢 Business Filtering</h3>
+                    <div class="form-row-triple">
+                      <div class="form-group">
+                        <label for="categorySelect">Business Category</label>
+                        <select
+                          id="categorySelect"
+                          class="form-select"
+                          required
+                        >
+                          <option value="">Select a category...</option>
+                        </select>
+                      </div>
+                      <div class="form-group">
+                        <label for="typeSelect">Business Type</label>
+                        <select
+                          id="typeSelect"
+                          class="form-select"
+                          multiple
+                          required
+                          disabled
+                        >
+                          <option value="">Select category first...</option>
+                        </select>
+                        <small class="form-help"
+                          >Hold Ctrl/Cmd to select multiple types</small
+                        >
+                      </div>
+                      <div class="form-group">
+                        <label for="sizeSelect">Business Size</label>
+                        <select id="sizeSelect" class="form-select" multiple>
+                          <option value="1-9">1-9 Employees</option>
+                          <option value="10-19">10-19 Employees</option>
+                          <option value="20-49">20-49 Employees</option>
+                          <option value="50+">50+ Employees</option>
+                        </select>
+                        <small class="form-help"
+                          >Hold Ctrl/Cmd to select multiple sizes
+                          (optional)</small
+                        >
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Step 3: Lead Quantity -->
+                  <div class="form-step">
+                    <h3>📊 Lead Quantity</h3>
+                    <div class="quantity-buttons" id="quantityButtons">
+                      <button type="button" class="quantity-btn" data-value="1">
+                        1
+                      </button>
+                      <button type="button" class="quantity-btn" data-value="3">
+                        3
+                      </button>
+                      <button
+                        type="button"
+                        class="quantity-btn selected"
+                        data-value="5"
+                      >
+                        5
+                      </button>
+                      <button
+                        type="button"
+                        class="quantity-btn"
+                        data-value="10"
+                      >
+                        10
+                      </button>
+                      <button
+                        type="button"
+                        class="quantity-btn"
+                        data-value="25"
+                      >
+                        25
+                      </button>
+                    </div>
+                    <div class="cost-estimate">
+                      <span
+                        >Estimated cost:
+                        <strong id="costEstimate">$0.42</strong></span
+                      >
+                    </div>
+                  </div>
+
+                  <div class="form-actions">
+                    <button
+                      type="submit"
+                      class="btn btn-primary"
+                      id="searchButton"
+                    >
+                      <span class="btn-text">🔍 Start Discovery</span>
+                      <span class="btn-spinner hidden"></span>
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+
+            <!-- Results Section -->
+            <div id="resultsSection" class="results-section hidden">
+              <!-- Results will be populated by JavaScript -->
+            </div>
+          </div>
+
+          <!-- Admin Settings Page -->
+          <div id="settingsPage" class="page-content hidden">
+            <div class="page-header">
+              <h1>⚙️ Monitoring & Configuration</h1>
+              <p>
+                Monitor campaign performance, configure cost limits, and access
+                dashboard analytics
+              </p>
+              <button class="btn btn-outline" id="backFromSettings">
+                ← Back to Home
+              </button>
+            </div>
+
+            <div class="settings-grid">
+              <!-- Grafana Dashboard Access -->
+              <div class="settings-card">
+                <h3>📊 Dashboard Analytics</h3>
+                <div class="dashboard-access">
+                  <div class="dashboard-info">
+                    <div class="dashboard-icon">🎯</div>
+                    <div class="dashboard-details">
+                      <h4>Grafana Dashboard</h4>
+                      <p>
+                        Real-time campaign monitoring, cost analysis, and ROI
+                        tracking
+                      </p>
+                    </div>
+                  </div>
+                  <div class="dashboard-actions">
+                    <a
+                      href="#"
+                      id="grafanaLink"
+                      class="btn btn-primary"
+                      target="_blank"
+                      rel="noopener"
+                    >
+                      📈 Open Dashboard
+                    </a>
+                    <p class="dashboard-note">
+                      Configure your Grafana URL in settings below
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Cost & Usage Limits -->
+              <div class="settings-card">
+                <h3>💰 Cost & Usage Controls</h3>
+                <div class="config-options">
+                  <div class="config-item">
+                    <label for="dailyCostLimit">Daily Cost Limit ($)</label>
+                    <input
+                      type="number"
+                      id="dailyCostLimit"
+                      class="form-control"
+                      value="50.00"
+                      min="0"
+                      step="0.01"
+                      placeholder="50.00"
+                    />
+                    <small>Maximum daily spending across all APIs</small>
+                  </div>
+                  <div class="config-item">
+                    <label for="costPerLeadLimit"
+                      >Cost Per Lead Limit ($)</label
+                    >
+                    <input
+                      type="number"
+                      id="costPerLeadLimit"
+                      class="form-control"
+                      value="2.00"
+                      min="0"
+                      step="0.01"
+                      placeholder="2.00"
+                    />
+                    <small>Maximum cost per qualified lead</small>
+                  </div>
+                  <div class="config-item">
+                    <label for="qualificationRateAlert"
+                      >Qualification Rate Alert (%)</label
+                    >
+                    <input
+                      type="number"
+                      id="qualificationRateAlert"
+                      class="form-control"
+                      value="70"
+                      min="0"
+                      max="100"
+                      step="1"
+                      placeholder="70"
+                    />
+                    <small
+                      >Alert when qualification rate drops below this
+                      percentage</small
+                    >
+                  </div>
+                  <div class="config-item">
+                    <label for="maxLeadsPerCampaign"
+                      >Maximum Leads Per Campaign</label
+                    >
+                    <select id="maxLeadsPerCampaign" class="form-select">
+                      <option value="25">25 leads</option>
+                      <option value="50" selected>50 leads</option>
+                      <option value="100">100 leads</option>
+                      <option value="250">250 leads</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Campaign Configuration -->
+              <div class="settings-card">
+                <h3>🎯 Campaign Settings</h3>
+                <div class="config-options">
+                  <div class="config-item">
+                    <label for="confidenceThreshold"
+                      >Quality Confidence Threshold (%)</label
+                    >
+                    <select id="confidenceThreshold" class="form-select">
+                      <option value="50">50% - Show all leads</option>
+                      <option value="70">70% - High quality only</option>
+                      <option value="80" selected>
+                        80% - Premium quality only
+                      </option>
+                      <option value="90">
+                        90% - Ultra-premium quality only
+                      </option>
+                    </select>
+                  </div>
+                  <div class="config-item">
+                    <label for="emailVerificationEnabled"
+                      >Email Verification</label
+                    >
+                    <input
+                      type="checkbox"
+                      id="emailVerificationEnabled"
+                      checked
+                    />
+                    <span class="checkbox-label"
+                      >Verify email deliverability (recommended)</span
+                    >
+                  </div>
+                  <div class="config-item">
+                    <label for="websiteValidationEnabled"
+                      >Website Validation</label
+                    >
+                    <input
+                      type="checkbox"
+                      id="websiteValidationEnabled"
+                      checked
+                    />
+                    <span class="checkbox-label"
+                      >Validate website accessibility (recommended)</span
+                    >
+                  </div>
+                  <div class="config-item">
+                    <label for="socialProfilesEnabled"
+                      >Social Profile Discovery</label
+                    >
+                    <input type="checkbox" id="socialProfilesEnabled" />
+                    <span class="checkbox-label"
+                      >Find LinkedIn, Facebook profiles (additional cost)</span
+                    >
+                  </div>
+                </div>
+              </div>
+
+              <!-- Dashboard & Monitoring Configuration -->
+              <div class="settings-card">
+                <h3>🔧 Monitoring Configuration</h3>
+                <div class="config-options">
+                  <div class="config-item">
+                    <label for="grafanaUrl">Grafana Dashboard URL</label>
+                    <input
+                      type="url"
+                      id="grafanaUrl"
+                      class="form-control"
+                      placeholder="https://yourusername.grafana.net"
+                    />
+                    <small>Your Grafana Cloud dashboard URL</small>
+                  </div>
+                  <div class="config-item">
+                    <label for="metricsCollectionInterval"
+                      >Metrics Collection Interval (seconds)</label
+                    >
+                    <select id="metricsCollectionInterval" class="form-select">
+                      <option value="30">30 seconds</option>
+                      <option value="60" selected>1 minute</option>
+                      <option value="300">5 minutes</option>
+                      <option value="900">15 minutes</option>
+                    </select>
+                  </div>
+                  <div class="config-item">
+                    <label for="healthCheckInterval"
+                      >API Health Check Interval (seconds)</label
+                    >
+                    <select id="healthCheckInterval" class="form-select">
+                      <option value="60">1 minute</option>
+                      <option value="300" selected>5 minutes</option>
+                      <option value="600">10 minutes</option>
+                      <option value="1800">30 minutes</option>
+                    </select>
+                  </div>
+                  <div class="config-item">
+                    <label for="enableRealTimeUpdates"
+                      >Real-Time Dashboard Updates</label
+                    >
+                    <input type="checkbox" id="enableRealTimeUpdates" checked />
+                    <span class="checkbox-label"
+                      >Enable WebSocket real-time monitoring</span
+                    >
+                  </div>
+                </div>
+              </div>
+
+              <!-- Current Session Overview -->
+              <div class="settings-card">
+                <h3>📈 Current Session Stats</h3>
+                <div class="stats-grid">
+                  <div class="stat-item">
+                    <div class="stat-value" id="sessionLeads">0</div>
+                    <div class="stat-label">Leads Generated</div>
+                  </div>
+                  <div class="stat-item">
+                    <div class="stat-value" id="sessionCost">$0.00</div>
+                    <div class="stat-label">Session Cost</div>
+                  </div>
+                  <div class="stat-item">
+                    <div class="stat-value" id="sessionQualification">0%</div>
+                    <div class="stat-label">Qualification Rate</div>
+                  </div>
+                  <div class="stat-item">
+                    <div class="stat-value" id="sessionEfficiency">-</div>
+                    <div class="stat-label">Cost Per Lead</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Quick Actions -->
+              <div class="settings-card">
+                <h3>⚡ Quick Actions</h3>
+                <div class="quick-actions">
+                  <button class="btn btn-outline" id="exportCampaignData">
+                    📊 Export Campaign Data (CSV)
+                  </button>
+                  <button class="btn btn-outline" id="exportCostAnalysis">
+                    💰 Export Cost Analysis (CSV)
+                  </button>
+                  <button class="btn btn-outline" id="exportROIReport">
+                    📈 Export ROI Report (CSV)
+                  </button>
+                  <button class="btn btn-outline" id="testDashboardConnection">
+                    🔍 Test Dashboard Connection
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Save Configuration -->
+            <div
+              class="config-actions"
+              style="margin-top: 2rem; text-align: center"
+            >
+              <button class="btn btn-primary btn-large" id="saveAllSettings">
+                💾 Save All Configuration
+              </button>
+              <button class="btn btn-outline" id="resetToDefaults">
+                🔄 Reset to Defaults
+              </button>
+            </div>
+          </div>
+        </div>
+      </main>
     </div>
 
     <script src="app.js"></script>
-</body>
+  </body>
 </html>

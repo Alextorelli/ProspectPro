@@ -364,6 +364,63 @@
   </head>
   <body>
     <div class="container">
+      <!-- === ProspectPro Frontend Integration Notes (2025) === -->
+      <section
+        style="
+          background: #fffbe6;
+          border-radius: 10px;
+          padding: 18px;
+          margin-bottom: 24px;
+          box-shadow: 0 2px 8px #f7e9b7;
+        "
+      >
+        <h2 style="color: #764ba2; margin-bottom: 10px">
+          Frontend Integration Updates (2025)
+        </h2>
+        <ul style="margin-left: 18px; color: #333; font-size: 1.05em">
+          <li>
+            All dashboard metrics and widgets now expect the following columns
+            to exist in the backend: <b>base_url</b>,
+            <b>cost_per_qualified_lead</b>, <b>discovery_budget</b>,
+            <b>validation_budget</b>, <b>enrichment_budget</b>, and all API
+            source cost/quality columns. These are always present due to
+            idempotent guards in the DB setup.
+          </li>
+          <li>
+            Row Level Security (RLS) is enabled on all analytics, monitoring,
+            and business tables. Service role policies are automatically
+            created; frontend API calls must use a valid service role token for
+            privileged data.
+          </li>
+          <li>
+            PostGIS extension objects (notably <b>public.spatial_ref_sys</b>)
+            are intentionally exempt from RLS enforcement. See
+            <code>database/README.md</code> for rationale and linter suppression
+            guidance.
+          </li>
+          <li>
+            Budget, cost, and quality metrics are now guaranteed to be non-null
+            and up-to-date. Frontend should display fallback values only if API
+            returns error.
+          </li>
+        </ul>
+        <h3 style="color: #764ba2; margin-top: 18px">
+          Lovable Setup & Config (Preview)
+        </h3>
+        <ul style="margin-left: 18px; color: #333; font-size: 1.05em">
+          <li>
+            Lovable integration will require new config options for API keys,
+            feature toggles, and user onboarding. Prepare to add
+            <code>lovable-config.js</code> and update dashboard UI for
+            Lovable-specific campaign settings.
+          </li>
+          <li>
+            See upcoming docs for Lovable setup steps and config patterns. All
+            Lovable features will be managed via the admin dashboard and
+            reflected in campaign analytics.
+          </li>
+        </ul>
+      </section>
       <header>
         <div class="header-content">
           <div class="logo">

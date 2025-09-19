@@ -1,256 +1,327 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>ProspectPro Business Dashboard</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding: 2rem;
+      }
+
+      .dashboard {
+        max-width: 1200px;
+        margin: 0 auto;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        padding: 2rem;
+      }
+
+      .header {
+        text-align: center;
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid #f0f0f0;
+      }
+
+      .header h1 {
+        color: #333;
+        font-size: 2.2rem;
+        margin-bottom: 0.5rem;
+      }
+
+      .subtitle {
+        color: #666;
+        font-size: 1.1rem;
+      }
+
+      .railway-notice {
+        background: #e3f2fd;
+        border: 1px solid #2196f3;
+        border-radius: 8px;
+        padding: 1rem;
+        margin-bottom: 2rem;
+        text-align: center;
+      }
+
+      .railway-notice h3 {
+        color: #1976d2;
+        margin-bottom: 0.5rem;
+      }
+
+      .railway-link {
+        display: inline-block;
+        background: #2196f3;
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        text-decoration: none;
+        margin-top: 0.5rem;
+      }
+
+      .metrics-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+      }
+
+      .metric-card {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 1.5rem;
+        text-align: center;
+        border-left: 4px solid #2196f3;
+      }
+
+      .metric-title {
+        color: #666;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 0.5rem;
+      }
+
+      .metric-value {
+        color: #333;
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+      }
+
+      .metric-subtitle {
+        color: #999;
+        font-size: 0.8rem;
+      }
+
+      .status {
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+        text-align: center;
+      }
+
+      .status.healthy {
+        background: #e8f5e8;
+        border: 1px solid #4caf50;
+        color: #2e7d32;
+      }
+
+      .status.loading {
+        background: #fff3e0;
+        border: 1px solid #ff9800;
+        color: #f57c00;
+      }
+
+      .infrastructure-note {
+        background: #f5f5f5;
+        border-radius: 8px;
+        padding: 1rem;
+        margin-top: 2rem;
+        text-align: center;
+        color: #666;
+      }
+
+      @media (max-width: 768px) {
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 2rem;
+          padding: 1rem;
         }
-        
+
         .dashboard {
-            max-width: 1200px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-            padding: 2rem;
+          padding: 1.5rem;
         }
-        
-        .header {
-            text-align: center;
-            margin-bottom: 2rem;
-            padding-bottom: 1rem;
-            border-bottom: 2px solid #f0f0f0;
-        }
-        
+
         .header h1 {
-            color: #333;
-            font-size: 2.2rem;
-            margin-bottom: 0.5rem;
+          font-size: 1.8rem;
         }
-        
-        .subtitle {
-            color: #666;
-            font-size: 1.1rem;
-        }
-        
-        .railway-notice {
-            background: #e3f2fd;
-            border: 1px solid #2196f3;
-            border-radius: 8px;
-            padding: 1rem;
-            margin-bottom: 2rem;
-            text-align: center;
-        }
-        
-        .railway-notice h3 {
-            color: #1976d2;
-            margin-bottom: 0.5rem;
-        }
-        
-        .railway-link {
-            display: inline-block;
-            background: #2196f3;
-            color: white;
-            padding: 0.5rem 1rem;
-            border-radius: 6px;
-            text-decoration: none;
-            margin-top: 0.5rem;
-        }
-        
-        .metrics-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
-        
-        .metric-card {
-            background: #f8f9fa;
-            border-radius: 10px;
-            padding: 1.5rem;
-            text-align: center;
-            border-left: 4px solid #2196f3;
-        }
-        
-        .metric-title {
-            color: #666;
-            font-size: 0.9rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 0.5rem;
-        }
-        
-        .metric-value {
-            color: #333;
-            font-size: 2rem;
-            font-weight: 700;
-            margin-bottom: 0.5rem;
-        }
-        
-        .metric-subtitle {
-            color: #999;
-            font-size: 0.8rem;
-        }
-        
-        .status {
-            padding: 1rem;
-            border-radius: 8px;
-            margin-bottom: 1rem;
-            text-align: center;
-        }
-        
-        .status.healthy {
-            background: #e8f5e8;
-            border: 1px solid #4caf50;
-            color: #2e7d32;
-        }
-        
-        .status.loading {
-            background: #fff3e0;
-            border: 1px solid #ff9800;
-            color: #f57c00;
-        }
-        
-        .infrastructure-note {
-            background: #f5f5f5;
-            border-radius: 8px;
-            padding: 1rem;
-            margin-top: 2rem;
-            text-align: center;
-            color: #666;
-        }
-        
-        @media (max-width: 768px) {
-            body {
-                padding: 1rem;
-            }
-            
-            .dashboard {
-                padding: 1.5rem;
-            }
-            
-            .header h1 {
-                font-size: 1.8rem;
-            }
-        }
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <div class="dashboard">
-        <header class="header">
-            <h1>ProspectPro Business Analytics</h1>
-            <p class="subtitle">Lead Generation Performance & ROI Metrics</p>
-        </header>
-        
-        <div class="railway-notice">
-            <h3>📊 Infrastructure Monitoring</h3>
-            <p>Server metrics, logs, and performance data are available in your Railway dashboard</p>
-            <a href="#" class="railway-link" onclick="openRailwayDashboard()">Open Railway Analytics</a>
+      <header class="header">
+        <h1>ProspectPro Business Analytics</h1>
+        <p class="subtitle">Lead Generation Performance & ROI Metrics</p>
+      </header>
+
+      <div class="railway-notice">
+        <h3>📊 Infrastructure Monitoring</h3>
+        <p>
+          Server metrics, logs, and performance data are available in your
+          Railway dashboard
+        </p>
+        <a href="#" class="railway-link" onclick="openRailwayDashboard()"
+          >Open Railway Analytics</a
+        >
+      </div>
+
+      <div class="status loading" id="status">
+        ⏳ Loading business metrics...
+      </div>
+
+      <div class="metrics-grid" id="metrics-grid">
+        <div class="metric-card">
+          <div class="metric-title">Total Campaigns</div>
+          <div class="metric-value" id="total-campaigns">-</div>
+          <div class="metric-subtitle">Lead generation campaigns</div>
         </div>
-        
-        <div class="status loading" id="status">
-            ⏳ Loading business metrics...
+
+        <div class="metric-card">
+          <div class="metric-title">Success Rate</div>
+          <div class="metric-value" id="success-rate">-</div>
+          <div class="metric-subtitle">Campaigns with qualified leads</div>
         </div>
-        
-        <div class="metrics-grid" id="metrics-grid">
-            <div class="metric-card">
-                <div class="metric-title">Total Campaigns</div>
-                <div class="metric-value" id="total-campaigns">-</div>
-                <div class="metric-subtitle">Lead generation campaigns</div>
-            </div>
-            
-            <div class="metric-card">
-                <div class="metric-title">Success Rate</div>
-                <div class="metric-value" id="success-rate">-</div>
-                <div class="metric-subtitle">Campaigns with qualified leads</div>
-            </div>
-            
-            <div class="metric-card">
-                <div class="metric-title">Qualified Leads</div>
-                <div class="metric-value" id="qualified-leads">-</div>
-                <div class="metric-subtitle">High-confidence prospects</div>
-            </div>
-            
-            <div class="metric-card">
-                <div class="metric-title">Daily API Costs</div>
-                <div class="metric-value" id="api-costs">-</div>
-                <div class="metric-subtitle">Google Places, Hunter.io, etc.</div>
-            </div>
+
+        <div class="metric-card">
+          <div class="metric-title">Qualified Leads</div>
+          <div class="metric-value" id="qualified-leads">-</div>
+          <div class="metric-subtitle">High-confidence prospects</div>
         </div>
-        
-        <div class="infrastructure-note">
-            <strong>Infrastructure Metrics:</strong> CPU, Memory, Network, Response Times, Uptime → 
-            <strong>Available in Railway Dashboard</strong>
+
+        <div class="metric-card">
+          <div class="metric-title">Daily API Costs</div>
+          <div class="metric-value" id="api-costs">-</div>
+          <div class="metric-subtitle">Google Places, Hunter.io, etc.</div>
         </div>
+      </div>
+      <!-- === ProspectPro Frontend Integration Notes (2025) === -->
+      <section
+        style="
+          background: #fffbe6;
+          border-radius: 10px;
+          padding: 18px;
+          margin-bottom: 24px;
+          box-shadow: 0 2px 8px #f7e9b7;
+        "
+      >
+        <h2 style="color: #764ba2; margin-bottom: 10px">
+          Frontend Integration Updates (2025)
+        </h2>
+        <ul style="margin-left: 18px; color: #333; font-size: 1.05em">
+          <li>
+            All dashboard metrics and widgets now expect the following columns
+            to exist in the backend: <b>base_url</b>,
+            <b>cost_per_qualified_lead</b>, <b>discovery_budget</b>,
+            <b>validation_budget</b>, <b>enrichment_budget</b>, and all API
+            source cost/quality columns. These are always present due to
+            idempotent guards in the DB setup.
+          </li>
+          <li>
+            Row Level Security (RLS) is enabled on all analytics, monitoring,
+            and business tables. Service role policies are automatically
+            created; frontend API calls must use a valid service role token for
+            privileged data.
+          </li>
+          <li>
+            PostGIS extension objects (notably <b>public.spatial_ref_sys</b>)
+            are intentionally exempt from RLS enforcement. See
+            <code>database/README.md</code> for rationale and linter suppression
+            guidance.
+          </li>
+          <li>
+            Budget, cost, and quality metrics are now guaranteed to be non-null
+            and up-to-date. Frontend should display fallback values only if API
+            returns error.
+          </li>
+        </ul>
+        <h3 style="color: #764ba2; margin-top: 18px">
+          Lovable Setup & Config (Preview)
+        </h3>
+        <ul style="margin-left: 18px; color: #333; font-size: 1.05em">
+          <li>
+            Lovable integration will require new config options for API keys,
+            feature toggles, and user onboarding. Prepare to add
+            <code>lovable-config.js</code> and update dashboard UI for
+            Lovable-specific campaign settings.
+          </li>
+          <li>
+            See upcoming docs for Lovable setup steps and config patterns. All
+            Lovable features will be managed via the dashboard and reflected in
+            campaign analytics.
+          </li>
+        </ul>
+      </section>
+
+      <div class="infrastructure-note">
+        <strong>Infrastructure Metrics:</strong> CPU, Memory, Network, Response
+        Times, Uptime →
+        <strong>Available in Railway Dashboard</strong>
+      </div>
     </div>
-    
+
     <script>
-        async function loadBusinessMetrics() {
-            try {
-                const response = await fetch('/api/business-metrics');
-                const result = await response.json();
-                
-                if (result.success) {
-                    const data = result.data;
-                    
-                    // Update metrics
-                    document.getElementById('total-campaigns').textContent = data.campaigns.total;
-                    document.getElementById('success-rate').textContent = data.campaigns.success_rate + '%';
-                    document.getElementById('qualified-leads').textContent = data.leads.qualified;
-                    document.getElementById('api-costs').textContent = '$' + data.costs.total.toFixed(2);
-                    
-                    // Update status
-                    const status = document.getElementById('status');
-                    status.className = 'status healthy';
-                    status.innerHTML = '✅ Business metrics loaded successfully';
-                } else {
-                    throw new Error(result.error || 'Failed to load metrics');
-                }
-            } catch (error) {
-                console.error('Error loading metrics:', error);
-                
-                const status = document.getElementById('status');
-                status.className = 'status';
-                status.style.background = '#ffebee';
-                status.style.border = '1px solid #f44336';
-                status.style.color = '#c62828';
-                status.innerHTML = '⚠️ Using mock data - check Railway logs for details';
-                
-                // Show mock data
-                document.getElementById('total-campaigns').textContent = '0';
-                document.getElementById('success-rate').textContent = '100%';
-                document.getElementById('qualified-leads').textContent = '0';
-                document.getElementById('api-costs').textContent = '$0.00';
-            }
+      async function loadBusinessMetrics() {
+        try {
+          const response = await fetch("/api/business-metrics");
+          const result = await response.json();
+
+          if (result.success) {
+            const data = result.data;
+
+            // Update metrics
+            document.getElementById("total-campaigns").textContent =
+              data.campaigns.total;
+            document.getElementById("success-rate").textContent =
+              data.campaigns.success_rate + "%";
+            document.getElementById("qualified-leads").textContent =
+              data.leads.qualified;
+            document.getElementById("api-costs").textContent =
+              "$" + data.costs.total.toFixed(2);
+
+            // Update status
+            const status = document.getElementById("status");
+            status.className = "status healthy";
+            status.innerHTML = "✅ Business metrics loaded successfully";
+          } else {
+            throw new Error(result.error || "Failed to load metrics");
+          }
+        } catch (error) {
+          console.error("Error loading metrics:", error);
+
+          const status = document.getElementById("status");
+          status.className = "status";
+          status.style.background = "#ffebee";
+          status.style.border = "1px solid #f44336";
+          status.style.color = "#c62828";
+          status.innerHTML =
+            "⚠️ Using mock data - check Railway logs for details";
+
+          // Show mock data
+          document.getElementById("total-campaigns").textContent = "0";
+          document.getElementById("success-rate").textContent = "100%";
+          document.getElementById("qualified-leads").textContent = "0";
+          document.getElementById("api-costs").textContent = "$0.00";
         }
-        
-        function openRailwayDashboard() {
-            // This would open the actual Railway dashboard
-            alert('Navigate to your Railway project dashboard for infrastructure metrics:\n\n' +
-                  '• CPU & Memory Usage\n' +
-                  '• Request Response Times\n' +
-                  '• Error Rates & Logs\n' +
-                  '• Network & Database Metrics\n' +
-                  '• Uptime & Health Checks');
-        }
-        
-        // Load metrics on page load
-        document.addEventListener('DOMContentLoaded', loadBusinessMetrics);
-        
-        // Refresh every 5 minutes
-        setInterval(loadBusinessMetrics, 300000);
+      }
+
+      function openRailwayDashboard() {
+        // This would open the actual Railway dashboard
+        alert(
+          "Navigate to your Railway project dashboard for infrastructure metrics:\n\n" +
+            "• CPU & Memory Usage\n" +
+            "• Request Response Times\n" +
+            "• Error Rates & Logs\n" +
+            "• Network & Database Metrics\n" +
+            "• Uptime & Health Checks"
+        );
+      }
+
+      // Load metrics on page load
+      document.addEventListener("DOMContentLoaded", loadBusinessMetrics);
+
+      // Refresh every 5 minutes
+      setInterval(loadBusinessMetrics, 300000);
     </script>
-</body>
+  </body>
 </html>
