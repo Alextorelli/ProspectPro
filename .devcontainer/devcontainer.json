@@ -19,11 +19,13 @@
         "rangav.vscode-thunder-client"
       ],
       "settings": {
-        "terminal.integrated.defaultProfile.linux": "bash"
+        "terminal.integrated.defaultProfile.linux": "bash",
+        "deno.enable": true,
+        "deno.enablePaths": ["supabase/functions"]
       }
     }
   },
   "forwardPorts": [3000, 5432],
-  "postCreateCommand": "npm ci",
+  "postCreateCommand": "npm ci && npm i -g supabase",
   "remoteUser": "node"
 }
