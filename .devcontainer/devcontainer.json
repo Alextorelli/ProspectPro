@@ -5,6 +5,9 @@
     "ghcr.io/devcontainers/features/git:1": {},
     "ghcr.io/devcontainers/features/deno:1": {
       "version": "v1.x"
+    },
+    "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {
+      "version": "latest"
     }
   },
   "customizations": {
@@ -26,6 +29,11 @@
     }
   },
   "forwardPorts": [3000, 5432],
-  "postCreateCommand": "npm ci && npm i -g supabase",
+  "postCreateCommand": "bash -lc 'if [ -f package-lock.json ]; then npm ci; else npm install; fi && npm i -g supabase@latest'",
+  "runArgs": [
+    "--init",
+    "-v",
+    "/var/run/docker.sock:/var/run/docker.sock"
+  ],
   "remoteUser": "node"
 }
