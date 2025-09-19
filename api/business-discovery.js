@@ -214,7 +214,7 @@ router.post("/discover", async (req, res) => {
     enhancedResults.totalCost += enhancedValidationResults.totalEnhancedCost;
 
     // Log campaign results
-    await campaignLogger.logCampaign({
+    await campaignLogger.logCampaignResults({
       query,
       location,
       totalBusinesses: googleResults.length,
