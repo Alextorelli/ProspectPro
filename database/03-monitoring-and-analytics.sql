@@ -767,3 +767,20 @@ RAISE NOTICE 'Next Steps:';
 RAISE NOTICE '1. Execute 04-functions-and-procedures.sql';
 RAISE NOTICE '2. Execute 05-security-and-rls.sql';
 END $$;
+-- ============================================================================
+-- Phase 3.8: Security - Row Level Security (RLS) Configuration
+-- ============================================================================
+-- Enable RLS on monitoring tables for security (service role access for internal operations)
+ALTER TABLE railway_webhook_logs ENABLE ROW LEVEL SECURITY;
+ALTER TABLE deployment_metrics ENABLE ROW LEVEL SECURITY;
+ALTER TABLE deployment_failures ENABLE ROW LEVEL SECURITY;
+-- Create secure RLS policies for service role access (internal monitoring operations)
+-- These policies allow the service role to access all monitoring data for system operations
+CREATE POLICY "Service role can access all railway webhook logs" ON railway_webhook_logs FOR ALL USING (auth.role() = 'service_role');
+CREATE POLICY "Service role can access all deployment metrics" ON deployment_metrics FOR ALL USING (auth.role() = 'service_role');
+CREATE POLICY "Service role can access all deployment failures" ON deployment_failures FOR ALL USING (auth.role() = 'service_role');
+DO $$ BEGIN RAISE NOTICE '🔒 Phase 3.8 Complete: RLS security policies configured for monitoring tables';
+RAISE NOTICE '   ✅ railway_webhook_logs: RLS enabled with service role access';
+RAISE NOTICE '   ✅ deployment_metrics: RLS enabled with service role access';
+RAISE NOTICE '   ✅ deployment_failures: RLS enabled with service role access';
+END $$;

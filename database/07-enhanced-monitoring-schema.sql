@@ -575,6 +575,27 @@ RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
 -- ============================================================================
+-- Phase 7.6: Security - Row Level Security (RLS) Configuration
+-- ============================================================================
+-- Enable RLS on all monitoring tables for security
+ALTER TABLE api_data_sources ENABLE ROW LEVEL SECURITY;
+ALTER TABLE enhanced_api_usage ENABLE ROW LEVEL SECURITY;
+ALTER TABLE lead_validation_pipeline ENABLE ROW LEVEL SECURITY;
+-- Create secure RLS policies for service role access (admin operations)
+-- These policies allow the service role to access all monitoring data
+CREATE POLICY "Service role can access all API data sources" ON api_data_sources FOR ALL USING (auth.role() = 'service_role');
+CREATE POLICY "Service role can access all enhanced API usage" ON enhanced_api_usage FOR ALL USING (auth.role() = 'service_role');
+CREATE POLICY "Service role can access all lead validation data" ON lead_validation_pipeline FOR ALL USING (auth.role() = 'service_role');
+-- Note: Additional user-specific policies can be added later if needed
+-- For example:
+-- CREATE POLICY "Users can view own API usage" ON enhanced_api_usage
+-- FOR SELECT USING (auth.uid() = user_id);
+DO $$ BEGIN RAISE NOTICE '🔒 Phase 7.6 Complete: RLS security policies configured';
+RAISE NOTICE '   ✅ api_data_sources: RLS enabled with service role access';
+RAISE NOTICE '   ✅ enhanced_api_usage: RLS enabled with service role access';
+RAISE NOTICE '   ✅ lead_validation_pipeline: RLS enabled with service role access';
+END $$;
+-- ============================================================================
 -- Phase 7 Complete: Enhanced Monitoring Schema Ready
 -- ============================================================================
 DO $$ BEGIN RAISE NOTICE '🎉 Phase 7 Complete: Enhanced Monitoring & Business Intelligence Schema';
