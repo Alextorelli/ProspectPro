@@ -92,21 +92,71 @@ END $$;
 -- ============================================================================
 -- Campaigns: Direct user ownership
 DROP POLICY IF EXISTS "campaigns_user_access" ON campaigns;
-CREATE POLICY "campaigns_user_access" ON campaigns FOR ALL TO authenticated USING (user_id = auth.uid()) WITH CHECK (user_id = auth.uid());
+DO $$ BEGIN IF NOT EXISTS (
+  SELECT 1
+  FROM pg_policies
+  WHERE schemaname = 'public'
+    AND tablename = 'campaigns'
+    AND policyname = 'campaigns_user_access'
+) THEN CREATE POLICY "campaigns_user_access" ON campaigns FOR ALL TO authenticated USING (user_id = auth.uid()) WITH CHECK (user_id = auth.uid());
+RAISE NOTICE 'Created policy: campaigns_user_access';
+ELSE RAISE NOTICE 'Policy already exists: campaigns_user_access';
+END IF;
+END $$;
 -- System settings: Direct user ownership
 DROP POLICY IF EXISTS "system_settings_user_access" ON system_settings;
-CREATE POLICY "system_settings_user_access" ON system_settings FOR ALL TO authenticated USING (user_id = auth.uid()) WITH CHECK (user_id = auth.uid());
+DO $$ BEGIN IF NOT EXISTS (
+  SELECT 1
+  FROM pg_policies
+  WHERE schemaname = 'public'
+    AND tablename = 'system_settings'
+    AND policyname = 'system_settings_user_access'
+) THEN CREATE POLICY "system_settings_user_access" ON system_settings FOR ALL TO authenticated USING (user_id = auth.uid()) WITH CHECK (user_id = auth.uid());
+RAISE NOTICE 'Created policy: system_settings_user_access';
+ELSE RAISE NOTICE 'Policy already exists: system_settings_user_access';
+END IF;
+END $$;
 -- Service health metrics: Read-only for all authenticated users
 DROP POLICY IF EXISTS "service_health_metrics_read_all" ON service_health_metrics;
-CREATE POLICY "service_health_metrics_read_all" ON service_health_metrics FOR
+DO $$ BEGIN IF NOT EXISTS (
+  SELECT 1
+  FROM pg_policies
+  WHERE schemaname = 'public'
+    AND tablename = 'service_health_metrics'
+    AND policyname = 'service_health_metrics_read_all'
+) THEN CREATE POLICY "service_health_metrics_read_all" ON service_health_metrics FOR
 SELECT TO authenticated USING (true);
+RAISE NOTICE 'Created policy: service_health_metrics_read_all';
+ELSE RAISE NOTICE 'Policy already exists: service_health_metrics_read_all';
+END IF;
+END $$;
 -- Service health metrics: System can insert/update
 DROP POLICY IF EXISTS "service_health_metrics_system_write" ON service_health_metrics;
-CREATE POLICY "service_health_metrics_system_write" ON service_health_metrics FOR
+DO $$ BEGIN IF NOT EXISTS (
+  SELECT 1
+  FROM pg_policies
+  WHERE schemaname = 'public'
+    AND tablename = 'service_health_metrics'
+    AND policyname = 'service_health_metrics_system_write'
+) THEN CREATE POLICY "service_health_metrics_system_write" ON service_health_metrics FOR
 INSERT TO authenticated WITH CHECK (true);
+RAISE NOTICE 'Created policy: service_health_metrics_system_write';
+ELSE RAISE NOTICE 'Policy already exists: service_health_metrics_system_write';
+END IF;
+END $$;
 DROP POLICY IF EXISTS "service_health_metrics_system_update" ON service_health_metrics;
-CREATE POLICY "service_health_metrics_system_update" ON service_health_metrics FOR
+DO $$ BEGIN IF NOT EXISTS (
+  SELECT 1
+  FROM pg_policies
+  WHERE schemaname = 'public'
+    AND tablename = 'service_health_metrics'
+    AND policyname = 'service_health_metrics_system_update'
+) THEN CREATE POLICY "service_health_metrics_system_update" ON service_health_metrics FOR
 UPDATE TO authenticated USING (true);
+RAISE NOTICE 'Created policy: service_health_metrics_system_update';
+ELSE RAISE NOTICE 'Policy already exists: service_health_metrics_system_update';
+END IF;
+END $$;
 DO $$ BEGIN RAISE NOTICE '✅ Phase 5.3 Complete: Foundation table security policies created';
 RAISE NOTICE '   - campaigns: User-isolated access';
 RAISE NOTICE '   - system_settings: User-isolated access';
@@ -116,7 +166,13 @@ END $$;
 -- ============================================================================
 -- Enhanced leads: Access via campaign ownership
 DROP POLICY IF EXISTS "enhanced_leads_campaign_access" ON enhanced_leads;
-CREATE POLICY "enhanced_leads_campaign_access" ON enhanced_leads FOR ALL TO authenticated USING (
+DO $$ BEGIN IF NOT EXISTS (
+  SELECT 1
+  FROM pg_policies
+  WHERE schemaname = 'public'
+    AND tablename = 'enhanced_leads'
+    AND policyname = 'enhanced_leads_campaign_access'
+) THEN CREATE POLICY "enhanced_leads_campaign_access" ON enhanced_leads FOR ALL TO authenticated USING (
   campaign_id IN (
     SELECT id
     FROM campaigns
@@ -129,9 +185,19 @@ CREATE POLICY "enhanced_leads_campaign_access" ON enhanced_leads FOR ALL TO auth
     WHERE user_id = auth.uid()
   )
 );
+RAISE NOTICE 'Created policy: enhanced_leads_campaign_access';
+ELSE RAISE NOTICE 'Policy already exists: enhanced_leads_campaign_access';
+END IF;
+END $$;
 -- Lead emails: Access via lead->campaign chain
 DROP POLICY IF EXISTS "lead_emails_campaign_access" ON lead_emails;
-CREATE POLICY "lead_emails_campaign_access" ON lead_emails FOR ALL TO authenticated USING (
+DO $$ BEGIN IF NOT EXISTS (
+  SELECT 1
+  FROM pg_policies
+  WHERE schemaname = 'public'
+    AND tablename = 'lead_emails'
+    AND policyname = 'lead_emails_campaign_access'
+) THEN CREATE POLICY "lead_emails_campaign_access" ON lead_emails FOR ALL TO authenticated USING (
   lead_id IN (
     SELECT el.id
     FROM enhanced_leads el
@@ -146,9 +212,19 @@ CREATE POLICY "lead_emails_campaign_access" ON lead_emails FOR ALL TO authentica
     WHERE c.user_id = auth.uid()
   )
 );
+RAISE NOTICE 'Created policy: lead_emails_campaign_access';
+ELSE RAISE NOTICE 'Policy already exists: lead_emails_campaign_access';
+END IF;
+END $$;
 -- Lead social profiles: Access via lead->campaign chain
 DROP POLICY IF EXISTS "lead_social_profiles_campaign_access" ON lead_social_profiles;
-CREATE POLICY "lead_social_profiles_campaign_access" ON lead_social_profiles FOR ALL TO authenticated USING (
+DO $$ BEGIN IF NOT EXISTS (
+  SELECT 1
+  FROM pg_policies
+  WHERE schemaname = 'public'
+    AND tablename = 'lead_social_profiles'
+    AND policyname = 'lead_social_profiles_campaign_access'
+) THEN CREATE POLICY "lead_social_profiles_campaign_access" ON lead_social_profiles FOR ALL TO authenticated USING (
   lead_id IN (
     SELECT el.id
     FROM enhanced_leads el
@@ -163,6 +239,10 @@ CREATE POLICY "lead_social_profiles_campaign_access" ON lead_social_profiles FOR
     WHERE c.user_id = auth.uid()
   )
 );
+RAISE NOTICE 'Created policy: lead_social_profiles_campaign_access';
+ELSE RAISE NOTICE 'Policy already exists: lead_social_profiles_campaign_access';
+END IF;
+END $$;
 DO $$ BEGIN RAISE NOTICE '✅ Phase 5.4 Complete: Lead management security policies created';
 RAISE NOTICE '   - enhanced_leads: Campaign-based access control';
 RAISE NOTICE '   - lead_emails: Lead->campaign ownership chain';
@@ -172,7 +252,13 @@ END $$;
 -- ============================================================================
 -- API usage log: Campaign-based access (with NULL campaign support)
 DROP POLICY IF EXISTS "api_usage_log_campaign_access" ON api_usage_log;
-CREATE POLICY "api_usage_log_campaign_access" ON api_usage_log FOR ALL TO authenticated USING (
+DO $$ BEGIN IF NOT EXISTS (
+  SELECT 1
+  FROM pg_policies
+  WHERE schemaname = 'public'
+    AND tablename = 'api_usage_log'
+    AND policyname = 'api_usage_log_campaign_access'
+) THEN CREATE POLICY "api_usage_log_campaign_access" ON api_usage_log FOR ALL TO authenticated USING (
   campaign_id IS NULL
   OR campaign_id IN (
     SELECT id
@@ -187,6 +273,10 @@ CREATE POLICY "api_usage_log_campaign_access" ON api_usage_log FOR ALL TO authen
     WHERE user_id = auth.uid()
   )
 );
+RAISE NOTICE 'Created policy: api_usage_log_campaign_access';
+ELSE RAISE NOTICE 'Policy already exists: api_usage_log_campaign_access';
+END IF;
+END $$;
 DO $$ BEGIN RAISE NOTICE '✅ Phase 5.5 Complete: API usage tracking security policies created';
 RAISE NOTICE '   - api_usage_log: Campaign-based with system-wide support';
 END $$;
@@ -194,7 +284,13 @@ END $$;
 -- ============================================================================
 -- Campaign analytics: Campaign-based access
 DROP POLICY IF EXISTS "campaign_analytics_campaign_access" ON campaign_analytics;
-CREATE POLICY "campaign_analytics_campaign_access" ON campaign_analytics FOR ALL TO authenticated USING (
+DO $$ BEGIN IF NOT EXISTS (
+  SELECT 1
+  FROM pg_policies
+  WHERE schemaname = 'public'
+    AND tablename = 'campaign_analytics'
+    AND policyname = 'campaign_analytics_campaign_access'
+) THEN CREATE POLICY "campaign_analytics_campaign_access" ON campaign_analytics FOR ALL TO authenticated USING (
   campaign_id IN (
     SELECT id
     FROM campaigns
@@ -207,9 +303,19 @@ CREATE POLICY "campaign_analytics_campaign_access" ON campaign_analytics FOR ALL
     WHERE user_id = auth.uid()
   )
 );
+RAISE NOTICE 'Created policy: campaign_analytics_campaign_access';
+ELSE RAISE NOTICE 'Policy already exists: campaign_analytics_campaign_access';
+END IF;
+END $$;
 -- API cost tracking: Campaign-based access (with NULL campaign support)
 DROP POLICY IF EXISTS "api_cost_tracking_campaign_access" ON api_cost_tracking;
-CREATE POLICY "api_cost_tracking_campaign_access" ON api_cost_tracking FOR ALL TO authenticated USING (
+DO $$ BEGIN IF NOT EXISTS (
+  SELECT 1
+  FROM pg_policies
+  WHERE schemaname = 'public'
+    AND tablename = 'api_cost_tracking'
+    AND policyname = 'api_cost_tracking_campaign_access'
+) THEN CREATE POLICY "api_cost_tracking_campaign_access" ON api_cost_tracking FOR ALL TO authenticated USING (
   campaign_id IS NULL
   OR campaign_id IN (
     SELECT id
@@ -224,9 +330,19 @@ CREATE POLICY "api_cost_tracking_campaign_access" ON api_cost_tracking FOR ALL T
     WHERE user_id = auth.uid()
   )
 );
+RAISE NOTICE 'Created policy: api_cost_tracking_campaign_access';
+ELSE RAISE NOTICE 'Policy already exists: api_cost_tracking_campaign_access';
+END IF;
+END $$;
 -- Lead qualification metrics: Campaign-based access
 DROP POLICY IF EXISTS "lead_qualification_metrics_campaign_access" ON lead_qualification_metrics;
-CREATE POLICY "lead_qualification_metrics_campaign_access" ON lead_qualification_metrics FOR ALL TO authenticated USING (
+DO $$ BEGIN IF NOT EXISTS (
+  SELECT 1
+  FROM pg_policies
+  WHERE schemaname = 'public'
+    AND tablename = 'lead_qualification_metrics'
+    AND policyname = 'lead_qualification_metrics_campaign_access'
+) THEN CREATE POLICY "lead_qualification_metrics_campaign_access" ON lead_qualification_metrics FOR ALL TO authenticated USING (
   campaign_id IN (
     SELECT id
     FROM campaigns
@@ -239,9 +355,23 @@ CREATE POLICY "lead_qualification_metrics_campaign_access" ON lead_qualification
     WHERE user_id = auth.uid()
   )
 );
+RAISE NOTICE 'Created policy: lead_qualification_metrics_campaign_access';
+ELSE RAISE NOTICE 'Policy already exists: lead_qualification_metrics_campaign_access';
+END IF;
+END $$;
 -- Dashboard exports: User-based access with campaign filtering
 DROP POLICY IF EXISTS "dashboard_exports_user_access" ON dashboard_exports;
-CREATE POLICY "dashboard_exports_user_access" ON dashboard_exports FOR ALL TO authenticated USING (user_id = auth.uid()) WITH CHECK (user_id = auth.uid());
+DO $$ BEGIN IF NOT EXISTS (
+  SELECT 1
+  FROM pg_policies
+  WHERE schemaname = 'public'
+    AND tablename = 'dashboard_exports'
+    AND policyname = 'dashboard_exports_user_access'
+) THEN CREATE POLICY "dashboard_exports_user_access" ON dashboard_exports FOR ALL TO authenticated USING (user_id = auth.uid()) WITH CHECK (user_id = auth.uid());
+RAISE NOTICE 'Created policy: dashboard_exports_user_access';
+ELSE RAISE NOTICE 'Policy already exists: dashboard_exports_user_access';
+END IF;
+END $$;
 DO $$ BEGIN RAISE NOTICE '✅ Phase 5.6 Complete: Analytics and monitoring security policies created';
 RAISE NOTICE '   - campaign_analytics: Campaign-based access';
 RAISE NOTICE '   - api_cost_tracking: Campaign-based with system support';

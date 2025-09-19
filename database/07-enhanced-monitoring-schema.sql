@@ -379,6 +379,162 @@ CREATE INDEX IF NOT EXISTS idx_api_health_monitoring_source_created ON api_healt
 -- Phase 7.7: Initial Data Population
 -- ============================================================================
 -- Insert known API data sources
+-- Ensure the `api_data_sources` table has the expected columns (safe for older DBs)
+DO $$ BEGIN IF NOT EXISTS (
+    SELECT 1
+    FROM information_schema.columns
+    WHERE table_schema = 'public'
+        AND table_name = 'api_data_sources'
+        AND column_name = 'base_url'
+) THEN
+ALTER TABLE api_data_sources
+ADD COLUMN IF NOT EXISTS base_url TEXT;
+RAISE NOTICE 'Added column api_data_sources.base_url';
+END IF;
+IF NOT EXISTS (
+    SELECT 1
+    FROM information_schema.columns
+    WHERE table_schema = 'public'
+        AND table_name = 'api_data_sources'
+        AND column_name = 'cost_per_request'
+) THEN
+ALTER TABLE api_data_sources
+ADD COLUMN IF NOT EXISTS cost_per_request DECIMAL(10, 4) DEFAULT 0.0000;
+RAISE NOTICE 'Added column api_data_sources.cost_per_request';
+END IF;
+IF NOT EXISTS (
+    SELECT 1
+    FROM information_schema.columns
+    WHERE table_schema = 'public'
+        AND table_name = 'api_data_sources'
+        AND column_name = 'quality_score'
+) THEN
+ALTER TABLE api_data_sources
+ADD COLUMN IF NOT EXISTS quality_score INTEGER DEFAULT 50;
+RAISE NOTICE 'Added column api_data_sources.quality_score';
+END IF;
+IF NOT EXISTS (
+    SELECT 1
+    FROM information_schema.columns
+    WHERE table_schema = 'public'
+        AND table_name = 'api_data_sources'
+        AND column_name = 'reliability_score'
+) THEN
+ALTER TABLE api_data_sources
+ADD COLUMN IF NOT EXISTS reliability_score INTEGER DEFAULT 50;
+RAISE NOTICE 'Added column api_data_sources.reliability_score';
+END IF;
+IF NOT EXISTS (
+    SELECT 1
+    FROM information_schema.columns
+    WHERE table_schema = 'public'
+        AND table_name = 'api_data_sources'
+        AND column_name = 'priority_level'
+) THEN
+ALTER TABLE api_data_sources
+ADD COLUMN IF NOT EXISTS priority_level INTEGER DEFAULT 5;
+RAISE NOTICE 'Added column api_data_sources.priority_level';
+END IF;
+IF NOT EXISTS (
+    SELECT 1
+    FROM information_schema.columns
+    WHERE table_schema = 'public'
+        AND table_name = 'api_data_sources'
+        AND column_name = 'business_value'
+) THEN
+ALTER TABLE api_data_sources
+ADD COLUMN IF NOT EXISTS business_value TEXT;
+RAISE NOTICE 'Added column api_data_sources.business_value';
+END IF;
+IF NOT EXISTS (
+    SELECT 1
+    FROM information_schema.columns
+    WHERE table_schema = 'public'
+        AND table_name = 'api_data_sources'
+        AND column_name = 'is_active'
+) THEN
+ALTER TABLE api_data_sources
+ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT true;
+RAISE NOTICE 'Added column api_data_sources.is_active';
+END IF;
+IF NOT EXISTS (
+    SELECT 1
+    FROM information_schema.columns
+    WHERE table_schema = 'public'
+        AND table_name = 'api_data_sources'
+        AND column_name = 'updated_at'
+) THEN
+ALTER TABLE api_data_sources
+ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP WITH TIME ZONE DEFAULT now();
+RAISE NOTICE 'Added column api_data_sources.updated_at';
+END IF;
+IF NOT EXISTS (
+    SELECT 1
+    FROM information_schema.columns
+    WHERE table_schema = 'public'
+        AND table_name = 'api_data_sources'
+        AND column_name = 'created_at'
+) THEN
+ALTER TABLE api_data_sources
+ADD COLUMN IF NOT EXISTS created_at TIMESTAMP WITH TIME ZONE DEFAULT now();
+RAISE NOTICE 'Added column api_data_sources.created_at';
+END IF;
+IF NOT EXISTS (
+    SELECT 1
+    FROM information_schema.columns
+    WHERE table_schema = 'public'
+        AND table_name = 'api_data_sources'
+        AND column_name = 'source_name'
+) THEN
+ALTER TABLE api_data_sources
+ADD COLUMN IF NOT EXISTS source_name TEXT NOT NULL;
+RAISE NOTICE 'Added column api_data_sources.source_name';
+END IF;
+IF NOT EXISTS (
+    SELECT 1
+    FROM information_schema.columns
+    WHERE table_schema = 'public'
+        AND table_name = 'api_data_sources'
+        AND column_name = 'source_type'
+) THEN
+ALTER TABLE api_data_sources
+ADD COLUMN IF NOT EXISTS source_type TEXT;
+RAISE NOTICE 'Added column api_data_sources.source_type';
+END IF;
+IF NOT EXISTS (
+    SELECT 1
+    FROM information_schema.columns
+    WHERE table_schema = 'public'
+        AND table_name = 'api_data_sources'
+        AND column_name = 'provider_name'
+) THEN
+ALTER TABLE api_data_sources
+ADD COLUMN IF NOT EXISTS provider_name TEXT;
+RAISE NOTICE 'Added column api_data_sources.provider_name';
+END IF;
+IF NOT EXISTS (
+    SELECT 1
+    FROM information_schema.columns
+    WHERE table_schema = 'public'
+        AND table_name = 'api_data_sources'
+        AND column_name = 'cost_currency'
+) THEN
+ALTER TABLE api_data_sources
+ADD COLUMN IF NOT EXISTS cost_currency TEXT DEFAULT 'USD';
+RAISE NOTICE 'Added column api_data_sources.cost_currency';
+END IF;
+IF NOT EXISTS (
+    SELECT 1
+    FROM information_schema.columns
+    WHERE table_schema = 'public'
+        AND table_name = 'api_data_sources'
+        AND column_name = 'auth_type'
+) THEN
+ALTER TABLE api_data_sources
+ADD COLUMN IF NOT EXISTS auth_type TEXT;
+RAISE NOTICE 'Added column api_data_sources.auth_type';
+END IF;
+END $$;
 INSERT INTO api_data_sources (
         source_name,
         source_type,
