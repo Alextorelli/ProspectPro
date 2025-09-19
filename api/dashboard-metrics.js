@@ -248,8 +248,13 @@ router.get("/quality-metrics", async (req, res) => {
       .select("*")
       .gte("created_at", timeFilter.start);
 
-    if (validationError && !validationError.message.includes('does not exist')) {
-      console.error('Error getting quality metrics:', validationError);
+    if (
+      validationError &&
+      !validationError.message.includes("does not exist") &&
+      !validationError.message.includes("column") &&
+      !validationError.code?.includes("42703")
+    ) {
+      console.error("Error getting quality metrics:", validationError);
     }
 
     // Get campaign analytics for quality trends
@@ -258,8 +263,11 @@ router.get("/quality-metrics", async (req, res) => {
       .select("*")
       .gte("campaign_date", timeFilter.start.split("T")[0]);
 
-    if (campaignError && !campaignError.message.includes('does not exist')) {
-      console.error('Error getting campaign analytics:', campaignError);
+    if (campaignError && 
+        !campaignError.message.includes("does not exist") &&
+        !campaignError.message.includes("column") &&
+        !campaignError.code?.includes("42703")) {
+      console.error("Error getting campaign analytics:", campaignError);
     }
 
     const qualityMetrics = analyzeQualityMetrics(

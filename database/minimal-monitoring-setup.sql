@@ -1,6 +1,5 @@
 -- Essential Monitoring Tables - Minimal Setup
 -- Run this in Supabase SQL Editor to fix column errors
-
 -- 1. API Data Sources Table
 CREATE TABLE IF NOT EXISTS api_data_sources (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
@@ -16,7 +15,6 @@ CREATE TABLE IF NOT EXISTS api_data_sources (
     business_value TEXT,
     is_active BOOLEAN DEFAULT true
 );
-
 -- 2. Enhanced API Usage Tracking
 CREATE TABLE IF NOT EXISTS enhanced_api_usage (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
@@ -30,7 +28,6 @@ CREATE TABLE IF NOT EXISTS enhanced_api_usage (
     estimated_cost DECIMAL(10, 4) DEFAULT 0.0000,
     actual_cost DECIMAL(10, 4)
 );
-
 -- 3. Campaign Analytics (fixes the campaign_date error)
 CREATE TABLE IF NOT EXISTS campaign_analytics (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
@@ -44,7 +41,6 @@ CREATE TABLE IF NOT EXISTS campaign_analytics (
     total_cost DECIMAL(10, 4) DEFAULT 0.0000,
     cost_per_lead DECIMAL(8, 4) DEFAULT 0.0000
 );
-
 -- 4. Budget Management
 CREATE TABLE IF NOT EXISTS budget_management (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
@@ -57,7 +53,6 @@ CREATE TABLE IF NOT EXISTS budget_management (
     budget_utilization_percentage DECIMAL(5, 2) DEFAULT 0.00,
     is_active BOOLEAN DEFAULT true
 );
-
 -- 5. Lead Validation Pipeline
 CREATE TABLE IF NOT EXISTS lead_validation_pipeline (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
@@ -69,23 +64,61 @@ CREATE TABLE IF NOT EXISTS lead_validation_pipeline (
     stage_4_qualified BOOLEAN DEFAULT false,
     total_cost DECIMAL(10, 4) DEFAULT 0.0000
 );
-
 -- Insert essential API sources
-INSERT INTO api_data_sources (source_name, source_type, provider_name, cost_per_request, quality_score, is_active)
-VALUES 
-    ('google_places', 'discovery', 'Google', 0.0320, 85, true),
-    ('hunter_io', 'enrichment', 'Hunter.io', 0.0400, 85, true),
-    ('neverbounce', 'verification', 'NeverBounce', 0.0080, 95, true),
-    ('zerobounce', 'verification', 'ZeroBounce', 0.0080, 95, true)
-ON CONFLICT (source_name) DO NOTHING;
-
+INSERT INTO api_data_sources (
+        source_name,
+        source_type,
+        provider_name,
+        cost_per_request,
+        quality_score,
+        is_active
+    )
+VALUES (
+        'google_places',
+        'discovery',
+        'Google',
+        0.0320,
+        85,
+        true
+    ),
+    (
+        'hunter_io',
+        'enrichment',
+        'Hunter.io',
+        0.0400,
+        85,
+        true
+    ),
+    (
+        'neverbounce',
+        'verification',
+        'NeverBounce',
+        0.0080,
+        95,
+        true
+    ),
+    (
+        'zerobounce',
+        'verification',
+        'ZeroBounce',
+        0.0080,
+        95,
+        true
+    ) ON CONFLICT (source_name) DO NOTHING;
 -- Create initial budget
 INSERT INTO budget_management (
-    budget_period, period_start, period_end, total_budget, is_active
-) VALUES (
-    'monthly', 
-    DATE_TRUNC('month', CURRENT_DATE)::DATE,
-    (DATE_TRUNC('month', CURRENT_DATE) + INTERVAL '1 month' - INTERVAL '1 day')::DATE,
-    150.00,
-    true
-) ON CONFLICT DO NOTHING;
+        budget_period,
+        period_start,
+        period_end,
+        total_budget,
+        is_active
+    )
+VALUES (
+        'monthly',
+        DATE_TRUNC('month', CURRENT_DATE)::DATE,
+        (
+            DATE_TRUNC('month', CURRENT_DATE) + INTERVAL '1 month' - INTERVAL '1 day'
+        )::DATE,
+        150.00,
+        true
+    ) ON CONFLICT DO NOTHING;
