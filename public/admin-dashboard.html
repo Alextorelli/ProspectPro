@@ -364,6 +364,48 @@
   </head>
   <body>
     <div class="container">
+      <!-- Lovable Feature Controls -->
+      <section
+        style="
+          background: #f3eaff;
+          border-radius: 10px;
+          padding: 18px;
+          margin-bottom: 24px;
+          box-shadow: 0 2px 8px #d1c4e9;
+        "
+      >
+        <h2 style="color: #764ba2; margin-bottom: 10px">
+          Lovable Feature Controls
+        </h2>
+        <div id="lovable-controls" style="margin-bottom: 12px">
+          <label style="font-weight: 600; color: #333; margin-right: 12px">
+            <input type="checkbox" id="lovableEnabledToggle" /> Enable Lovable
+            Features
+          </label>
+          <label style="font-weight: 600; color: #333; margin-right: 12px">
+            <input type="checkbox" id="lovableOnboardingToggle" /> Enable
+            Onboarding
+          </label>
+        </div>
+        <div style="margin-top: 10px">
+          <label style="font-weight: 600; color: #333; margin-right: 12px">
+            <input type="checkbox" id="lovableAnalyticsToggle" /> Show Lovable
+            Analytics
+          </label>
+        </div>
+        <div style="margin-top: 18px">
+          <label
+            for="lovableCampaignStatus"
+            style="font-weight: 600; color: #333; margin-right: 12px"
+            >Default Campaign Lovable Status:</label
+          >
+          <select id="lovableCampaignStatus">
+            <option value="enabled">Enabled</option>
+            <option value="disabled">Disabled</option>
+            <option value="pending">Pending</option>
+          </select>
+        </div>
+      </section>
       <!-- === ProspectPro Frontend Integration Notes (2025) === -->
       <section
         style="
@@ -940,6 +982,47 @@
     </div>
 
     <script>
+      // Import LovableConfig
+      import LovableConfig from "./lovable-config.js";
+
+      // Initialize Lovable UI controls
+      function initLovableControls() {
+        document.getElementById("lovableEnabledToggle").checked =
+          LovableConfig.enabled;
+        document.getElementById("lovableOnboardingToggle").checked =
+          LovableConfig.onboardingEnabled;
+        document.getElementById("lovableAnalyticsToggle").checked =
+          LovableConfig.showLovableAnalytics;
+        document.getElementById("lovableCampaignStatus").value =
+          LovableConfig.campaignSettings.defaultLovableStatus;
+
+        document
+          .getElementById("lovableEnabledToggle")
+          .addEventListener("change", (e) => {
+            LovableConfig.enabled = e.target.checked;
+          });
+        document
+          .getElementById("lovableOnboardingToggle")
+          .addEventListener("change", (e) => {
+            LovableConfig.onboardingEnabled = e.target.checked;
+          });
+        document
+          .getElementById("lovableAnalyticsToggle")
+          .addEventListener("change", (e) => {
+            LovableConfig.showLovableAnalytics = e.target.checked;
+          });
+        document
+          .getElementById("lovableCampaignStatus")
+          .addEventListener("change", (e) => {
+            LovableConfig.campaignSettings.defaultLovableStatus =
+              e.target.value;
+          });
+      }
+
+      // Call on page load
+      window.addEventListener("DOMContentLoaded", () => {
+        initLovableControls();
+      });
       // Configuration
       const CONFIG = {
         apiBaseUrl: window.location.origin,
