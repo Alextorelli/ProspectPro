@@ -1,0 +1,26 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Debug Server",
+      "type": "pwa-node",
+      "request": "launch",
+      "program": "${workspaceFolder}/server.js",
+      "env": {
+        "NODE_ENV": "development"
+      },
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "Debug Enhanced Server",
+      "type": "pwa-node",
+      "request": "launch",
+      "program": "${workspaceFolder}/server-enhanced.js",
+      "env": {
+        "NODE_ENV": "development",
+        "ALLOW_DEGRADED_START": "true"
+      },
+      "console": "integratedTerminal"
+    }
+  ]
+}

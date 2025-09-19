@@ -646,4 +646,54 @@ node tests/validation/test-website-validation.js
 ## License
 
 MIT
+
+## Dev Drive Setup and Branch Workflow (Windows)
+
+Recommended layout for coding on your Dev Drive, with clean deployments from `main` to Lovable/Supabase.
+
+```powershell
+# 1) Clone to your Dev Drive
+cd D:\APPS
+git clone https://github.com/Alextorelli/ProspectPro.git
+cd ProspectPro
+
+# 2) Install dependencies
+npm ci
+
+# 3) Create a local dev env file
+Copy-Item .env.example .env
+
+# 4) Work on a feature branch (avoid committing directly to main)
+git checkout -b feat/edge-functions
+
+# 5) Run the Node server locally
+npm run dev
+
+# 6) Merge to main only after tests pass
+git checkout main
+git merge --no-ff feat/edge-functions
+git push origin main
+```
+
+Branch purpose:
+
+- `main`: Production-ready code that deploys to Lovable frontend + Supabase backend
+- Feature branches (e.g., `feat/*`, `fix/*`): Active development isolated from production
+- Optional: `testing`, `debugging`, `instructions` for specialized workflows
+
+## Supabase Edge Functions – Local Dev (Windows PowerShell)
+
+If you use Supabase Edge Functions (recommended for Lovable + Supabase architecture), you can run them locally:
+
+```powershell
+# From the repo root, serve functions without JWT during local dev
+supabase functions serve diag --no-verify-jwt
+supabase functions serve business-discovery --no-verify-jwt
+supabase functions serve lead-enrichment --no-verify-jwt
+
+# Invoke from Supabase CLI (example)
+supabase functions invoke diag --no-verify-jwt --body '{"ping": true}'
+```
+
+Environment variables for functions should be configured in Supabase Project Settings → Functions, not in `.env`.
 ````

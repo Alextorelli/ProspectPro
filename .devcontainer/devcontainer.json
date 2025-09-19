@@ -1,5 +1,5 @@
 {
-  "name": "ProspectPro Dev",
+  "name": "ProspectPro Development",
   "image": "mcr.microsoft.com/devcontainers/javascript-node:20",
   "features": {
     "ghcr.io/devcontainers/features/git:1": {},
@@ -7,23 +7,23 @@
       "version": "v1.x"
     }
   },
-  "postCreateCommand": "npm ci",
   "customizations": {
     "vscode": {
       "extensions": [
         "denoland.vscode-deno",
         "supabase.supabase-vscode",
-        "ms-vscode.vscode-typescript-next",
+        "eamodio.gitlens",
         "dbaeumer.vscode-eslint",
         "esbenp.prettier-vscode",
         "humao.rest-client",
         "rangav.vscode-thunder-client"
-      ]
+      ],
+      "settings": {
+        "terminal.integrated.defaultProfile.linux": "bash"
+      }
     }
   },
-  "remoteUser": "node",
-  "forwardPorts": [3000],
-  "mounts": [
-    "source=${localWorkspaceFolder},target=/workspace,type=bind"
-  ]
+  "forwardPorts": [3000, 5432],
+  "postCreateCommand": "npm ci",
+  "remoteUser": "node"
 }
