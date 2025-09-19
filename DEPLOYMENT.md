@@ -1,64 +1,88 @@
-ProspectPro Deployment Runbook
+# ProspectPro Deployment Runbook (Lovable + Supabase Edge Functions)
 
-Overview
-This runbook documents the steps to deploy ProspectPro to Railway (or similar PaaS) and validate the deployment. It assumes the database hardening and SQL scripts in `database/` have been applied already.
+## Overview
 
-Prerequisites
+This runbook documents the steps to run ProspectPro with a Lovable-hosted frontend and Supabase Edge Functions backend. The legacy Railway Express server is considered optional/legacy and may be removed once Edge Functions cover all endpoints. It assumes the database hardening and SQL scripts in `database/` have been applied already.
+
+## Prerequisites
+
 - Git repo with code on `main` branch
-- Railway project created and linked to this repo
 - Supabase project provisioned with database and schemas
+- Supabase CLI installed and logged in (PowerShell: `iwr -useb https://supabase.com/cli/install/windows.ps1 | iex`)
 - Required API keys (Google Places, Scrapingdog, Hunter.io, NeverBounce)
 
-1) Environment variables (Railway project settings)
-- SUPABASE_URL: https://<ref>.supabase.co
-- SUPABASE_SECRET_KEY: Service role key from Supabase
-- GOOGLE_PLACES_API_KEY: Google Cloud API key with Places + Geocoding enabled
-- PERSONAL_ACCESS_TOKEN: Random secure token for the admin dashboard
-- RAILWAY_WEBHOOK_SECRET: (Optional) for verifying incoming webhooks
-- SCRAPINGDOG_API_KEY, HUNTER_IO_API_KEY, NEVERBOUNCE_API_KEY: Optional but recommended
+## 1) Environment variables (Supabase project → Settings → Configuration)
 
-2) Local smoke-check (optional - skip if you prefer)
-- Copy `.env.example` to `.env` and fill keys
-- Run `npm install` then `node server.js`
-- Confirm `http://localhost:3000/health` responds 200
+- `SUPABASE_URL`: `https://<ref>.supabase.co`
+- `SUPABASE_SERVICE_ROLE_KEY` or `SUPABASE_SECRET_KEY`: Service role key from Supabase
+- `GOOGLE_PLACES_API_KEY`: Google Cloud API key with Places + Geocoding enabled
+- `PERSONAL_ACCESS_TOKEN`: Random secure token for the admin dashboard
+- `SCRAPINGDOG_API_KEY`, `HUNTER_IO_API_KEY`, `NEVERBOUNCE_API_KEY`: Optional but recommended
 
-3) Deploy to Railway
-- Commit changes to `main` and push: `git add . && git commit -m "Deploy" && git push origin main`
-- On Railway dashboard, ensure the env vars are present
-- Monitor deployment logs. The app should print: `ProspectPro server listening on port <port>` and later `Supabase connection success: true`
+## 2) Local development (Edge Functions)
 
-4) Post-deploy verification
-- Open `https://<railway-app>.railway.app/health` → expect 200
-- `https://<railway-app>.railway.app/diag` → check Supabase diagnostics (should show service role key detected)
-- Run `database/VALIDATION_QUERIES.sql` in Supabase SQL editor to verify:
+- Recommended: VS Code + DevContainer (open folder and re-open in container)
+- Run locally with the Supabase CLI:
+  - PowerShell
+    - `cd C:\Users\Alext\ProspectPro`
+    - `supabase functions serve diag`
+    - `supabase functions serve business-discovery`
+  - Or use VS Code tasks: `Supabase: Serve Function (diag)` and `Supabase: Serve Function (business-discovery)`
+
+## 3) Deploy Edge Functions
+
+- Ensure you’re logged in: `supabase login`
+- Link project (run once): `supabase link --project-ref <your-project-ref>`
+- Deploy: `supabase functions deploy diag`; `supabase functions deploy business-discovery`
+
+## 4) Wire in Lovable frontend
+
+- In Lovable, connect GitHub repo and configure environment variables matching your Supabase project
+- Use Supabase JS client in the frontend and call Edge Functions with `supabase.functions.invoke('business-discovery', { body: { query, location } })`
+
+## 5) Post-deploy verification
+
+- Invoke `diag` function via Supabase dashboard or CLI:
+  - `supabase functions invoke diag --no-verify-jwt --body '{"ping":true}'`
+- Verify DB constraints by running `database/VALIDATION_QUERIES.sql` in Supabase SQL editor
   - `function_search_path_mutable` cleared
   - `extension_in_public` only shows `postgis` in public for existing installs
-  - `rls_disabled_in_public` should be cleared except for system tables if permissions prevented changes
+  - `rls_disabled_in_public` cleared except for system tables when permissions prevent change
 
-5) Optional: Configure monitoring & alerts
-- Configure Railway alerts for failures and restarts
-- Set up Sentry (if SENTRY_DSN set) and Prometheus scraping
+## 6) Windows Dev Drive and Junction Setup
 
-6) Rollback plan
-- If deployment fails, roll back by selecting previous successful deployment in Railway
-- Ensure DB migrations are idempotent; use `database/all-phases-consolidated.sql` only for new installs
+- Preferred working path: `D:\APPS\ProspectPro` (fast dev drive)
+- Create a junction from your user folder to the dev drive (run PowerShell as Administrator):
+  - `New-Item -ItemType Junction -Path 'C:\Users\Alext\ProspectPro' -Target 'D:\APPS\ProspectPro'`
+- After this, open the project via `C:\Users\Alext\ProspectPro` in VS Code; the underlying files live on D:
 
-Troubleshooting tips
-- If Supabase connection fails: verify `SUPABASE_URL` and `SUPABASE_SECRET_KEY` env vars
-- If PostGIS errors occur: PostGIS may be non-relocatable; accept `postgis` in `public` for existing installs
+## 7) Legacy server (optional)
+
+- The Node/Express server remains for now for reference and `/health`; you can run it locally with:
+  - `npm ci; node server.js`
+- Plan to deprecate once Edge Functions replace all endpoints
+
+## Troubleshooting tips
+
+- If Edge Function import errors appear in VS Code, ensure the Deno extension is enabled for the workspace and `deno.json` + `import_map.json` are present
+- Supabase function serve binds on a local port; check the CLI output for the URL
+- PostGIS may be non-relocatable in managed Supabase; accept `postgis` in `public` for existing installs
 - If `spatial_ref_sys` RLS change fails: managed DBs may disallow ownership changes; this is acceptable
 
-Quick Commands (PowerShell)
+## Quick Commands (PowerShell)
+
+```powershell
+# Supabase CLI login and link
+supabase login; supabase link --project-ref <your-project-ref>
+
+# Serve and deploy functions
+supabase functions serve diag; supabase functions deploy diag
+supabase functions serve business-discovery; supabase functions deploy business-discovery
+
+# Create Windows junction for dev drive (Admin PowerShell)
+New-Item -ItemType Junction -Path 'C:\\Users\\Alext\\ProspectPro' -Target 'D:\\APPS\\ProspectPro'
 ```
-# Install deps and start locally
-cd C:\Users\Alext\ProspectPro; npm ci; node server.js
 
-# Test Supabase connectivity via helper
-node -e "require('dotenv').config(); require('./config/supabase').testConnection().then(r => console.log(r)).catch(e => console.error(e))"
+## Contact
 
-# Deploy
-git add .; git commit -m "Deploy"; git push origin main
-```
-
-Contact
-- For deployment help: reach out to the development team or open an issue in the repo.
+- For deployment help: open an issue in the repo.

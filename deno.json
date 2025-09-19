@@ -1,0 +1,19 @@
+{
+  "lock": false,
+  "tasks": {
+    "run:diag": "deno run -A supabase/functions/diag/index.ts",
+    "run:discovery": "deno run -A supabase/functions/business-discovery/index.ts"
+  },
+  "importMap": "./import_map.json",
+  "fmt": {
+    "useTabs": false,
+    "indentWidth": 2,
+    "singleQuote": false
+  },
+  "lint": {
+    "rules": {
+      "tags": ["recommended"],
+      "include": ["ban-untagged-todo"]
+    }
+  }
+}
