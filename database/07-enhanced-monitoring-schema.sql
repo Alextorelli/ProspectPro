@@ -1117,3 +1117,29 @@ RAISE NOTICE '   ✅ System health monitoring configured';
 RAISE NOTICE '   ✅ Performance indexes created for optimal queries';
 RAISE NOTICE '   📊 Ready for comprehensive business intelligence and monitoring!';
 END $$;
+-- Pin function search_path to avoid mutable search_path linter warnings
+DO $$ BEGIN IF EXISTS (
+    SELECT 1
+    FROM pg_proc p
+        JOIN pg_namespace n ON p.pronamespace = n.oid
+    WHERE n.nspname = 'public'
+        AND p.proname = 'update_campaign_analytics'
+) THEN BEGIN EXECUTE 'ALTER FUNCTION public.update_campaign_analytics() SET search_path = public, pg_temp';
+EXCEPTION
+WHEN undefined_function THEN -- function might have different argument signature; ignore if not exact
+RAISE NOTICE 'update_campaign_analytics() not found with exact signature; skipping ALTER';
+END;
+END IF;
+IF EXISTS (
+    SELECT 1
+    FROM pg_proc p
+        JOIN pg_namespace n ON p.pronamespace = n.oid
+    WHERE n.nspname = 'public'
+        AND p.proname = 'check_budget_alerts'
+) THEN BEGIN EXECUTE 'ALTER FUNCTION public.check_budget_alerts() SET search_path = public, pg_temp';
+EXCEPTION
+WHEN undefined_function THEN RAISE NOTICE 'check_budget_alerts() not found with exact signature; skipping ALTER';
+END;
+END IF;
+RAISE NOTICE 'Pinned search_path for Phase 7 functions (if present)';
+END $$;

@@ -757,6 +757,69 @@ END;
 $$ LANGUAGE plpgsql;
 DO $$ BEGIN RAISE NOTICE '✅ Phase 3.7 Complete: Railway deployment analytics views and functions';
 END $$;
+-- Pin function search_path to avoid mutable search_path linter warnings
+DO $$ BEGIN -- idempotent: only alter if current setting is different or unset
+IF EXISTS (
+  SELECT 1
+  FROM pg_proc p
+    JOIN pg_namespace n ON p.pronamespace = n.oid
+  WHERE n.nspname = 'public'
+    AND p.proname = 'get_deployment_health_summary'
+) THEN PERFORM (
+  CASE
+    WHEN (
+      SELECT COALESCE(
+          pg_get_functiondef(p.oid) LIKE '%SET search_path%',
+          false
+        )
+      FROM pg_proc p
+      WHERE p.proname = 'get_deployment_health_summary'
+      LIMIT 1
+    ) THEN NULL
+    ELSE (
+      EXECUTE 'ALTER FUNCTION public.get_deployment_health_summary() SET search_path = public, pg_temp'
+    )
+  END
+);
+END IF;
+IF EXISTS (
+  SELECT 1
+  FROM pg_proc p
+    JOIN pg_namespace n ON p.pronamespace = n.oid
+  WHERE n.nspname = 'public'
+    AND p.proname = 'analyze_deployment_failures'
+) THEN -- analyze_deployment_failures may have an argument; handle default-arg signature
+BEGIN EXECUTE 'ALTER FUNCTION public.analyze_deployment_failures(integer) SET search_path = public, pg_temp';
+EXCEPTION
+WHEN undefined_function THEN -- try no-arg variant
+EXECUTE 'ALTER FUNCTION public.analyze_deployment_failures() SET search_path = public, pg_temp';
+END;
+END IF;
+IF EXISTS (
+  SELECT 1
+  FROM pg_proc p
+    JOIN pg_namespace n ON p.pronamespace = n.oid
+  WHERE n.nspname = 'public'
+    AND p.proname = 'set_campaign_analytics_timestamp_date'
+) THEN PERFORM (
+  CASE
+    WHEN (
+      SELECT COALESCE(
+          pg_get_functiondef(p.oid) LIKE '%SET search_path%',
+          false
+        )
+      FROM pg_proc p
+      WHERE p.proname = 'set_campaign_analytics_timestamp_date'
+      LIMIT 1
+    ) THEN NULL
+    ELSE (
+      EXECUTE 'ALTER FUNCTION public.set_campaign_analytics_timestamp_date() SET search_path = public, pg_temp'
+    )
+  END
+);
+END IF;
+RAISE NOTICE 'Pinned search_path for Phase 3 functions (if present)';
+END $$;
 -- ============================================================================
 -- Phase 3 Complete Summary
 -- ============================================================================
