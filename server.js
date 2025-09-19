@@ -586,6 +586,15 @@ bootDebugger.endPhase(true);
 app.use("/api/business", businessDiscoveryRouter);
 app.use("/api/export", dashboardExportRouter);
 
+// Add dashboard metrics API
+try {
+  const dashboardMetricsRouter = require("./api/dashboard-metrics");
+  app.use("/api/dashboard-metrics", dashboardMetricsRouter);
+  console.log("📊 Dashboard metrics API mounted at /api/dashboard-metrics");
+} catch (error) {
+  console.error("⚠️ Failed to load dashboard metrics API:", error.message);
+}
+
 // =====================================
 // STATIC FILE SERVING
 // =====================================
