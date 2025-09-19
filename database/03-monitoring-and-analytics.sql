@@ -174,7 +174,6 @@ CREATE TABLE IF NOT EXISTS campaign_analytics (
   CONSTRAINT campaign_analytics_positive_value CHECK (metric_value >= 0)
 );
 
--- API cost tracking for budget management (depends on campaigns)
 CREATE TABLE IF NOT EXISTS api_cost_tracking (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   campaign_id UUID REFERENCES campaigns(id) ON DELETE CASCADE, -- Optional for system-wide tracking
@@ -198,6 +197,13 @@ CREATE TABLE IF NOT EXISTS api_cost_tracking (
   CONSTRAINT api_cost_tracking_request_counts CHECK (success_count + error_count <= request_count),
   CONSTRAINT api_cost_tracking_cost_calculation CHECK (total_cost = cost_per_request * request_count)
 );
+-- Ensure campaign_analytics table has all required columns for dashboard and API compatibility
+ALTER TABLE campaign_analytics ADD COLUMN IF NOT EXISTS user_id UUID;
+ALTER TABLE campaign_analytics ADD COLUMN IF NOT EXISTS campaign_date DATE NOT NULL DEFAULT CURRENT_DATE;
+ALTER TABLE campaign_analytics ADD COLUMN IF NOT EXISTS validation_success_rate NUMERIC(5, 2);
+ALTER TABLE campaign_analytics ADD COLUMN IF NOT EXISTS api_calls_count INTEGER DEFAULT 0;
+ALTER TABLE campaign_analytics ADD COLUMN IF NOT EXISTS processing_time_seconds INTEGER;
+ALTER TABLE campaign_analytics ADD COLUMN IF NOT EXISTS quality_score NUMERIC(5, 2);
 
 -- Lead qualification metrics for quality analysis (depends on campaigns)
 CREATE TABLE IF NOT EXISTS lead_qualification_metrics (
