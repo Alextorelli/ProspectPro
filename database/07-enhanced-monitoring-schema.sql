@@ -662,6 +662,75 @@ SET updated_at = now(),
     reliability_score = EXCLUDED.reliability_score,
     is_active = EXCLUDED.is_active;
 -- Create initial budget for current month
+-- Ensure budget_management has expected budget allocation columns (safe for older DBs)
+DO $$ BEGIN IF NOT EXISTS (
+    SELECT 1
+    FROM information_schema.columns
+    WHERE table_schema = 'public'
+        AND table_name = 'budget_management'
+        AND column_name = 'discovery_budget'
+) THEN
+ALTER TABLE budget_management
+ADD COLUMN IF NOT EXISTS discovery_budget DECIMAL(10, 2) DEFAULT 0.00;
+RAISE NOTICE 'Added column budget_management.discovery_budget';
+END IF;
+IF NOT EXISTS (
+    SELECT 1
+    FROM information_schema.columns
+    WHERE table_schema = 'public'
+        AND table_name = 'budget_management'
+        AND column_name = 'validation_budget'
+) THEN
+ALTER TABLE budget_management
+ADD COLUMN IF NOT EXISTS validation_budget DECIMAL(10, 2) DEFAULT 0.00;
+RAISE NOTICE 'Added column budget_management.validation_budget';
+END IF;
+IF NOT EXISTS (
+    SELECT 1
+    FROM information_schema.columns
+    WHERE table_schema = 'public'
+        AND table_name = 'budget_management'
+        AND column_name = 'enrichment_budget'
+) THEN
+ALTER TABLE budget_management
+ADD COLUMN IF NOT EXISTS enrichment_budget DECIMAL(10, 2) DEFAULT 0.00;
+RAISE NOTICE 'Added column budget_management.enrichment_budget';
+END IF;
+IF NOT EXISTS (
+    SELECT 1
+    FROM information_schema.columns
+    WHERE table_schema = 'public'
+        AND table_name = 'budget_management'
+        AND column_name = 'google_places_budget'
+) THEN
+ALTER TABLE budget_management
+ADD COLUMN IF NOT EXISTS google_places_budget DECIMAL(8, 2) DEFAULT 0.00;
+RAISE NOTICE 'Added column budget_management.google_places_budget';
+END IF;
+IF NOT EXISTS (
+    SELECT 1
+    FROM information_schema.columns
+    WHERE table_schema = 'public'
+        AND table_name = 'budget_management'
+        AND column_name = 'yelp_fusion_budget'
+) THEN
+ALTER TABLE budget_management
+ADD COLUMN IF NOT EXISTS yelp_fusion_budget DECIMAL(8, 2) DEFAULT 0.00;
+RAISE NOTICE 'Added column budget_management.yelp_fusion_budget';
+END IF;
+IF NOT EXISTS (
+    SELECT 1
+    FROM information_schema.columns
+    WHERE table_schema = 'public'
+        AND table_name = 'budget_management'
+        AND column_name = 'email_validation_budget'
+) THEN
+ALTER TABLE budget_management
+ADD COLUMN IF NOT EXISTS email_validation_budget DECIMAL(8, 2) DEFAULT 0.00;
+RAISE NOTICE 'Added column budget_management.email_validation_budget';
+END IF;
+END $$;
+-- Create initial budget for current month
 INSERT INTO budget_management (
         budget_period,
         period_start,
@@ -697,9 +766,165 @@ VALUES (
         -- Email validation
         true
     ) ON CONFLICT DO NOTHING;
+-- Ensure budget_management has expected budget allocation columns (safe for older DBs)
+DO $$ BEGIN IF NOT EXISTS (
+    SELECT 1
+    FROM information_schema.columns
+    WHERE table_schema = 'public'
+        AND table_name = 'budget_management'
+        AND column_name = 'discovery_budget'
+) THEN
+ALTER TABLE budget_management
+ADD COLUMN IF NOT EXISTS discovery_budget DECIMAL(10, 2) DEFAULT 0.00;
+RAISE NOTICE 'Added column budget_management.discovery_budget';
+END IF;
+IF NOT EXISTS (
+    SELECT 1
+    FROM information_schema.columns
+    WHERE table_schema = 'public'
+        AND table_name = 'budget_management'
+        AND column_name = 'validation_budget'
+) THEN
+ALTER TABLE budget_management
+ADD COLUMN IF NOT EXISTS validation_budget DECIMAL(10, 2) DEFAULT 0.00;
+RAISE NOTICE 'Added column budget_management.validation_budget';
+END IF;
+IF NOT EXISTS (
+    SELECT 1
+    FROM information_schema.columns
+    WHERE table_schema = 'public'
+        AND table_name = 'budget_management'
+        AND column_name = 'enrichment_budget'
+) THEN
+ALTER TABLE budget_management
+ADD COLUMN IF NOT EXISTS enrichment_budget DECIMAL(10, 2) DEFAULT 0.00;
+RAISE NOTICE 'Added column budget_management.enrichment_budget';
+END IF;
+IF NOT EXISTS (
+    SELECT 1
+    FROM information_schema.columns
+    WHERE table_schema = 'public'
+        AND table_name = 'budget_management'
+        AND column_name = 'google_places_budget'
+) THEN
+ALTER TABLE budget_management
+ADD COLUMN IF NOT EXISTS google_places_budget DECIMAL(8, 2) DEFAULT 0.00;
+RAISE NOTICE 'Added column budget_management.google_places_budget';
+END IF;
+IF NOT EXISTS (
+    SELECT 1
+    FROM information_schema.columns
+    WHERE table_schema = 'public'
+        AND table_name = 'budget_management'
+        AND column_name = 'yelp_fusion_budget'
+) THEN
+ALTER TABLE budget_management
+ADD COLUMN IF NOT EXISTS yelp_fusion_budget DECIMAL(8, 2) DEFAULT 0.00;
+RAISE NOTICE 'Added column budget_management.yelp_fusion_budget';
+END IF;
+IF NOT EXISTS (
+    SELECT 1
+    FROM information_schema.columns
+    WHERE table_schema = 'public'
+        AND table_name = 'budget_management'
+        AND column_name = 'email_validation_budget'
+) THEN
+ALTER TABLE budget_management
+ADD COLUMN IF NOT EXISTS email_validation_budget DECIMAL(8, 2) DEFAULT 0.00;
+RAISE NOTICE 'Added column budget_management.email_validation_budget';
+END IF;
+END $$;
 -- Phase 7.8: Functions and Triggers for Automated Updates
 -- ============================================================================
 -- Function to update API usage costs in campaign analytics
+-- Ensure `campaign_analytics` has columns used by trigger functions (safe for older DBs)
+DO $$
+DECLARE dup_campaign RECORD;
+BEGIN IF NOT EXISTS (
+    SELECT 1
+    FROM information_schema.columns
+    WHERE table_schema = 'public'
+        AND table_name = 'campaign_analytics'
+        AND column_name = 'campaign_name'
+) THEN
+ALTER TABLE campaign_analytics
+ADD COLUMN IF NOT EXISTS campaign_name TEXT;
+RAISE NOTICE 'Added column campaign_analytics.campaign_name';
+END IF;
+IF NOT EXISTS (
+    SELECT 1
+    FROM information_schema.columns
+    WHERE table_schema = 'public'
+        AND table_name = 'campaign_analytics'
+        AND column_name = 'updated_at'
+) THEN
+ALTER TABLE campaign_analytics
+ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP WITH TIME ZONE DEFAULT now();
+RAISE NOTICE 'Added column campaign_analytics.updated_at';
+END IF;
+IF NOT EXISTS (
+    SELECT 1
+    FROM information_schema.columns
+    WHERE table_schema = 'public'
+        AND table_name = 'campaign_analytics'
+        AND column_name = 'total_cost'
+) THEN
+ALTER TABLE campaign_analytics
+ADD COLUMN IF NOT EXISTS total_cost DECIMAL(10, 4) DEFAULT 0.0000;
+RAISE NOTICE 'Added column campaign_analytics.total_cost';
+END IF;
+IF NOT EXISTS (
+    SELECT 1
+    FROM information_schema.columns
+    WHERE table_schema = 'public'
+        AND table_name = 'campaign_analytics'
+        AND column_name = 'businesses_discovered'
+) THEN
+ALTER TABLE campaign_analytics
+ADD COLUMN IF NOT EXISTS businesses_discovered INTEGER DEFAULT 0;
+RAISE NOTICE 'Added column campaign_analytics.businesses_discovered';
+END IF;
+IF NOT EXISTS (
+    SELECT 1
+    FROM information_schema.columns
+    WHERE table_schema = 'public'
+        AND table_name = 'campaign_analytics'
+        AND column_name = 'discovery_cost'
+) THEN
+ALTER TABLE campaign_analytics
+ADD COLUMN IF NOT EXISTS discovery_cost DECIMAL(10, 4) DEFAULT 0.0000;
+RAISE NOTICE 'Added column campaign_analytics.discovery_cost';
+END IF;
+IF NOT EXISTS (
+    SELECT 1
+    FROM information_schema.columns
+    WHERE table_schema = 'public'
+        AND table_name = 'campaign_analytics'
+        AND column_name = 'validation_cost'
+) THEN
+ALTER TABLE campaign_analytics
+ADD COLUMN IF NOT EXISTS validation_cost DECIMAL(10, 4) DEFAULT 0.0000;
+RAISE NOTICE 'Added column campaign_analytics.validation_cost';
+END IF;
+-- Create a unique index on campaign_id to support ON CONFLICT (campaign_id) UPSERTs if safe
+IF NOT EXISTS (
+    SELECT 1
+    FROM pg_indexes
+    WHERE schemaname = 'public'
+        AND tablename = 'campaign_analytics'
+        AND indexname = 'ux_campaign_analytics_campaign_id'
+) THEN
+SELECT campaign_id INTO dup_campaign
+FROM campaign_analytics
+GROUP BY campaign_id
+HAVING COUNT(*) > 1
+LIMIT 1;
+IF FOUND THEN RAISE NOTICE 'Skipping creation of unique index ux_campaign_analytics_campaign_id because duplicate campaign_id values exist';
+ELSE EXECUTE 'CREATE UNIQUE INDEX ux_campaign_analytics_campaign_id ON campaign_analytics(campaign_id)';
+RAISE NOTICE 'Created unique index ux_campaign_analytics_campaign_id';
+END IF;
+END IF;
+END $$;
 CREATE OR REPLACE FUNCTION update_campaign_analytics() RETURNS TRIGGER AS $$ BEGIN -- Update campaign analytics when new API usage is recorded
 INSERT INTO campaign_analytics (campaign_id, campaign_name)
 SELECT NEW.campaign_id,
