@@ -839,7 +839,35 @@ CREATE INDEX IF NOT EXISTS idx_api_cost_tracking_total_cost ON api_cost_tracking
 -- Lead qualification metrics indexes
 CREATE INDEX IF NOT EXISTS idx_lead_qualification_campaign_id ON lead_qualification_metrics(campaign_id);
 CREATE INDEX IF NOT EXISTS idx_lead_qualification_date ON lead_qualification_metrics(date DESC, hour DESC);
-CREATE INDEX IF NOT EXISTS idx_lead_qualification_rate ON lead_qualification_metrics(qualification_rate DESC) WHERE qualification_rate > 0;
+-- Guard creation of idx_lead_qualification_rate in case the generated column is absent in older DBs
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1
+    FROM information_schema.columns
+    WHERE table_schema = 'public'
+      AND table_name = 'lead_qualification_metrics'
+      AND column_name = 'qualification_rate'
+  ) THEN
+    -- If the column is missing, create it as a stored generated column matching the schema used elsewhere
+    ALTER TABLE lead_qualification_metrics
+    ADD COLUMN IF NOT EXISTS qualification_rate DECIMAL(5,4) GENERATED ALWAYS AS (
+      CASE
+        WHEN total_leads_discovered > 0 THEN leads_qualified::DECIMAL / total_leads_discovered
+        ELSE 0
+      END
+    ) STORED;
+    RAISE NOTICE 'Added column lead_qualification_metrics.qualification_rate';
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_indexes
+    WHERE schemaname = 'public' AND tablename = 'lead_qualification_metrics' AND indexname = 'idx_lead_qualification_rate'
+  ) THEN
+    EXECUTE 'CREATE INDEX idx_lead_qualification_rate ON lead_qualification_metrics(qualification_rate DESC) WHERE qualification_rate > 0';
+    RAISE NOTICE 'Created index idx_lead_qualification_rate';
+  END IF;
+END $$;
 
 -- Dashboard exports indexes
 CREATE INDEX IF NOT EXISTS idx_dashboard_exports_user_id ON dashboard_exports(user_id);
