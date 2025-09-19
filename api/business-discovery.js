@@ -2,6 +2,8 @@ const express = require("express");
 const GooglePlacesClient = require("../modules/api-clients/google-places");
 const EnhancedLeadDiscovery = require("../modules/enhanced-lead-discovery");
 const CampaignLogger = require("../modules/logging/campaign-logger");
+const EnhancedStateRegistryClient = require("../modules/api-clients/enhanced-state-registry-client");
+const ZeroBounceClient = require("../modules/api-clients/zerobounce-client");
 const router = express.Router();
 
 // Initialize enhanced discovery algorithm with all API keys
@@ -9,11 +11,35 @@ const apiKeys = {
   hunterIO: process.env.HUNTER_IO_API_KEY,
   neverBounce: process.env.NEVERBOUNCE_API_KEY,
   googlePlaces: process.env.GOOGLE_PLACES_API_KEY,
+  // Enhanced State Registry APIs
+  zeroBounce: process.env.ZEROBOUNCE_API_KEY,
+  courtListener: process.env.COURTLISTENER_API_KEY,
+  socrata: process.env.SOCRATA_API_KEY,
+  socrataToken: process.env.SOCRATA_APP_TOKEN,
+  uspto: process.env.USPTO_TSDR_API_KEY,
 };
 
 const googlePlacesClient = new GooglePlacesClient(apiKeys.googlePlaces);
 const enhancedDiscovery = new EnhancedLeadDiscovery(apiKeys);
 const campaignLogger = new CampaignLogger();
+
+// Lazy initialization of enhanced API clients to avoid startup delays
+let enhancedStateRegistry = null;
+let zeroBounceClient = null;
+
+function getEnhancedStateRegistry() {
+  if (!enhancedStateRegistry) {
+    enhancedStateRegistry = new EnhancedStateRegistryClient();
+  }
+  return enhancedStateRegistry;
+}
+
+function getZeroBounceClient() {
+  if (!zeroBounceClient) {
+    zeroBounceClient = new ZeroBounceClient(apiKeys.zeroBounce);
+  }
+  return zeroBounceClient;
+}
 
 // POST /api/business/discover
 router.post("/discover", async (req, res) => {
@@ -91,6 +117,102 @@ router.post("/discover", async (req, res) => {
       discoveryOptions
     );
 
+    // Stage 5: Enhanced State Registry & Email Validation
+    console.log(
+      `🏛️ Starting enhanced validation for ${enhancedResults.leads.length} leads`
+    );
+
+    const enhancedValidationResults = {
+      stateRegistryChecks: 0,
+      stateRegistryMatches: 0,
+      emailValidations: 0,
+      emailDeliverable: 0,
+      totalEnhancedCost: 0,
+      confidenceImprovements: 0,
+    };
+
+    // Process leads with enhanced validation
+    for (let i = 0; i < enhancedResults.leads.length; i++) {
+      const lead = enhancedResults.leads[i];
+
+      try {
+        // Enhanced State Registry Validation
+        if (lead.name && lead.address) {
+          const stateValidation =
+            await getEnhancedStateRegistry().searchBusinessAcrossStates(
+              lead.name,
+              lead.address,
+              lead.state || location
+            );
+
+          enhancedValidationResults.stateRegistryChecks++;
+          if (stateValidation.confidenceScore > 50) {
+            enhancedValidationResults.stateRegistryMatches++;
+            // Boost confidence for registry-validated businesses
+            if (lead.confidenceScore) {
+              lead.confidenceScore = Math.min(100, lead.confidenceScore + 15);
+              enhancedValidationResults.confidenceImprovements++;
+            }
+            // Add state registry validation details
+            lead.stateRegistryValidation = {
+              isValidated: true,
+              confidenceScore: stateValidation.confidenceScore,
+              sourcesChecked:
+                stateValidation.qualityMetrics?.totalAPIsQueried || 7,
+              registrationDetails: stateValidation.registrationDetails,
+            };
+          }
+        }
+
+        // ZeroBounce Email Validation (if budget allows)
+        if (
+          lead.email &&
+          enhancedValidationResults.totalEnhancedCost < budgetLimit * 0.1
+        ) {
+          try {
+            const emailValidation = await getZeroBounceClient().validateEmail(
+              lead.email
+            );
+            enhancedValidationResults.emailValidations++;
+            enhancedValidationResults.totalEnhancedCost +=
+              emailValidation.cost || 0.007;
+
+            if (emailValidation.isValid && emailValidation.confidence > 80) {
+              enhancedValidationResults.emailDeliverable++;
+              // Boost confidence for validated emails
+              if (lead.confidenceScore) {
+                lead.confidenceScore = Math.min(100, lead.confidenceScore + 10);
+                enhancedValidationResults.confidenceImprovements++;
+              }
+            }
+
+            // Add email validation details
+            lead.emailValidation = {
+              status: emailValidation.status,
+              isValid: emailValidation.isValid,
+              confidence: emailValidation.confidence,
+              deliverable: emailValidation.status === "valid",
+            };
+          } catch (emailError) {
+            console.log(
+              `⚠️ Email validation failed for ${lead.email}: ${emailError.message}`
+            );
+          }
+        }
+      } catch (validationError) {
+        console.log(
+          `⚠️ Enhanced validation failed for ${lead.name}: ${validationError.message}`
+        );
+      }
+    }
+
+    console.log(
+      `✅ Enhanced validation complete: ${enhancedValidationResults.stateRegistryMatches}/${enhancedValidationResults.stateRegistryChecks} registry matches, ${enhancedValidationResults.emailDeliverable}/${enhancedValidationResults.emailValidations} emails validated`
+    );
+
+    // Update total cost to include enhanced validations
+    enhancedResults.totalCost += enhancedValidationResults.totalEnhancedCost;
+
     // Log campaign results
     await campaignLogger.logCampaign({
       query,
@@ -137,6 +259,38 @@ router.post("/discover", async (req, res) => {
         emailVerifications: enhancedResults.qualityMetrics.emailsVerified || 0,
         propertyIntelligence:
           enhancedResults.qualityMetrics.propertiesFound || 0,
+        // New Enhanced State Registry & ZeroBounce Validations
+        stateRegistryValidations: {
+          totalChecked: enhancedValidationResults.stateRegistryChecks,
+          validatedBusinesses: enhancedValidationResults.stateRegistryMatches,
+          validationRate:
+            enhancedValidationResults.stateRegistryChecks > 0
+              ? Math.round(
+                  (enhancedValidationResults.stateRegistryMatches /
+                    enhancedValidationResults.stateRegistryChecks) *
+                    100
+                )
+              : 0,
+        },
+        advancedEmailValidations: {
+          totalValidated: enhancedValidationResults.emailValidations,
+          deliverableEmails: enhancedValidationResults.emailDeliverable,
+          deliverabilityRate:
+            enhancedValidationResults.emailValidations > 0
+              ? Math.round(
+                  (enhancedValidationResults.emailDeliverable /
+                    enhancedValidationResults.emailValidations) *
+                    100
+                )
+              : 0,
+        },
+        qualityImprovements: {
+          leadsEnhanced: enhancedValidationResults.confidenceImprovements,
+          enhancedValidationCost:
+            enhancedValidationResults.totalEnhancedCost.toFixed(3),
+          governmentAPIsSources: 7,
+          totalFreeAPIsUsed: enhancedValidationResults.stateRegistryChecks,
+        },
       },
     });
   } catch (error) {
