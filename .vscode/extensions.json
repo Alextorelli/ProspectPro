@@ -1,13 +1,5 @@
 {
   "recommendations": [
-    "denoland.vscode-deno",
-    "ms-vscode.js-debug-nightly",
-    "supabase.supabase-vscode",
-    "ms-azuretools.vscode-docker",
-    "github.vscode-github-actions",
-    "streetsidesoftware.code-spell-checker",
-    "eamodio.gitlens",
-    "rangav.vscode-thunder-client",
-    "humao.rest-client"
+    "denoland.vscode-deno"
   ]
 }
