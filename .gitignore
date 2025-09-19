@@ -84,6 +84,16 @@ debug-*.js
 prometheus-data/
 grafana-data/
 
+# Setup and deployment logs
+setup-logs/
+deployment-logs/
+*.log.*
+
+# Temporary files and weird artifacts
+witch*
+pectPro*
+*-debug-*
+
 # Other
 .git/
 .env
