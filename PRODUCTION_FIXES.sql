@@ -72,36 +72,36 @@ DECLARE tables_to_check TEXT [] := ARRAY [
     'api_health_monitoring',
     'system_performance_metrics'
   ];
-table_name TEXT;
-BEGIN FOREACH table_name IN ARRAY tables_to_check LOOP IF EXISTS (
+target_table TEXT;
+BEGIN FOREACH target_table IN ARRAY tables_to_check LOOP IF EXISTS (
     SELECT 1
     FROM information_schema.tables t
     WHERE t.table_schema = 'public'
-        AND t.table_name = table_name
+        AND t.table_name = target_table
 ) THEN -- Enable RLS if not already enabled
 IF NOT EXISTS (
     SELECT 1
     FROM pg_class c
         JOIN pg_namespace n ON n.oid = c.relnamespace
     WHERE n.nspname = 'public'
-        AND c.relname = table_name
+        AND c.relname = target_table
         AND c.relrowsecurity = true
 ) THEN EXECUTE format(
     'ALTER TABLE %I ENABLE ROW LEVEL SECURITY',
-    table_name
+    target_table
 );
 EXECUTE format(
     'CREATE POLICY "Service role can access all %I" ON %I FOR ALL USING (auth.role() = ''service_role'')',
-    table_name,
-    table_name
+    target_table,
+    target_table
 );
 RAISE NOTICE '✅ Enabled RLS on table: %',
-table_name;
+target_table;
 ELSE RAISE NOTICE 'ℹ️  RLS already enabled on table: %',
-table_name;
+target_table;
 END IF;
 ELSE RAISE NOTICE 'ℹ️  Table not found: %',
-table_name;
+target_table;
 END IF;
 END LOOP;
 END $$;
