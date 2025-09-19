@@ -90,6 +90,11 @@ Deno.serve(async (req) => {
       return new Response(
         JSON.stringify({
           error: `Google Places API error: ${placesData.status}`,
+          details: placesData.error_message || "No additional details",
+          debug: {
+            status: placesData.status,
+            url: placesUrl.replace(googleApiKey, "***HIDDEN***"),
+          },
         }),
         {
           status: 500,
