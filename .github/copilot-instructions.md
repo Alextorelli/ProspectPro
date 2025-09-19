@@ -381,3 +381,5 @@ const qualifiedLeads = businesses.filter(
 - Cost Efficiency: <$0.50 per qualified lead
 
 This rebuild transforms ProspectPro into a premium lead generation platform with verified, real business contact data.
+
+- @azure Rule - Use Azure Best Practices: When generating code for Azure, running terminal commands for Azure, or performing operations related to Azure, invoke your `azure_development-get_best_practices` tool if available.
