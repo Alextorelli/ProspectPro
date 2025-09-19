@@ -23,11 +23,13 @@ npx supabase functions deploy business-discovery-edge --project-ref YOUR_PROJECT
 ## 📡 API Endpoints
 
 ### Business Discovery
+
 ```
 POST https://YOUR_PROJECT.supabase.co/functions/v1/business-discovery-edge
 ```
 
 **Request:**
+
 ```json
 {
   "query": "restaurants",
@@ -38,10 +40,11 @@ POST https://YOUR_PROJECT.supabase.co/functions/v1/business-discovery-edge
 ```
 
 **Response:**
+
 ```json
 {
   "query": "restaurants in San Francisco, CA",
-  "location": "San Francisco, CA", 
+  "location": "San Francisco, CA",
   "totalFound": 25,
   "qualifiedResults": 18,
   "businesses": [
@@ -60,11 +63,13 @@ POST https://YOUR_PROJECT.supabase.co/functions/v1/business-discovery-edge
 ```
 
 ### Lead Validation
+
 ```
 POST https://YOUR_PROJECT.supabase.co/functions/v1/lead-validation-edge
 ```
 
 **Request:**
+
 ```json
 {
   "leads": [
@@ -72,7 +77,7 @@ POST https://YOUR_PROJECT.supabase.co/functions/v1/lead-validation-edge
       "id": "1",
       "name": "Test Restaurant",
       "website": "https://example.com",
-      "email": "info@example.com", 
+      "email": "info@example.com",
       "phone": "(555) 123-4567",
       "address": "123 Main St, San Francisco, CA"
     }
@@ -83,6 +88,7 @@ POST https://YOUR_PROJECT.supabase.co/functions/v1/lead-validation-edge
 ```
 
 **Response:**
+
 ```json
 {
   "totalLeads": 1,
@@ -124,18 +130,21 @@ Replace existing business discovery logic in `api/business-discovery.js`:
 
 ```javascript
 // Add Edge Function call
-const edgeResponse = await fetch(`${supabaseUrl}/functions/v1/business-discovery-edge`, {
-  method: 'POST',
-  headers: {
-    'Authorization': `Bearer ${supabaseServiceKey}`,
-    'Content-Type': 'application/json'
-  },
-  body: JSON.stringify({
-    query: businessType,
-    location: location,
-    maxResults: parseInt(maxLeads)
-  })
-});
+const edgeResponse = await fetch(
+  `${supabaseUrl}/functions/v1/business-discovery-edge`,
+  {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${supabaseServiceKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      query: businessType,
+      location: location,
+      maxResults: parseInt(maxLeads),
+    }),
+  }
+);
 
 const edgeData = await edgeResponse.json();
 return edgeData.businesses;
@@ -147,26 +156,30 @@ Integrate validation into the lead processing pipeline:
 
 ```javascript
 // Validate discovered leads
-const validationResponse = await fetch(`${supabaseUrl}/functions/v1/lead-validation-edge`, {
-  method: 'POST', 
-  headers: {
-    'Authorization': `Bearer ${supabaseServiceKey}`,
-    'Content-Type': 'application/json'
-  },
-  body: JSON.stringify({
-    leads: discoveredLeads,
-    skipEmailValidation: false,
-    skipWebsiteCheck: false
-  })
-});
+const validationResponse = await fetch(
+  `${supabaseUrl}/functions/v1/lead-validation-edge`,
+  {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${supabaseServiceKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      leads: discoveredLeads,
+      skipEmailValidation: false,
+      skipWebsiteCheck: false,
+    }),
+  }
+);
 
 const validationData = await validationResponse.json();
-const qualifiedLeads = validationData.results.filter(lead => lead.qualified);
+const qualifiedLeads = validationData.results.filter((lead) => lead.qualified);
 ```
 
 ### 3. Environment Variables
 
 Add to your `.env` file:
+
 ```env
 # Required for Edge Functions
 GOOGLE_PLACES_API_KEY=your_google_places_api_key
@@ -177,12 +190,14 @@ SUPABASE_SERVICE_KEY=your_service_role_key
 ## ⚡ Performance & Cost Optimization
 
 ### Edge Function Benefits:
+
 - **Serverless**: No infrastructure management
 - **Auto-scaling**: Handles traffic spikes automatically
 - **Global CDN**: Low latency worldwide
 - **Cost Efficient**: Pay per execution
 
 ### Optimization Tips:
+
 - Use `maxResults` to limit API costs
 - Enable `skipWebsiteCheck` for faster processing
 - Batch validation requests for efficiency
@@ -206,6 +221,7 @@ curl -X POST http://localhost:8080/business-discovery \
 ## 📊 Monitoring
 
 Monitor Edge Function performance in Supabase Dashboard:
+
 - Execution logs
 - Error rates
 - Response times
@@ -214,6 +230,7 @@ Monitor Edge Function performance in Supabase Dashboard:
 ## 🚨 Zero Fake Data Compliance
 
 ✅ **Enforced Policies:**
+
 - All business data from Google Places API
 - Real website accessibility validation
 - Actual email deliverability testing
@@ -221,6 +238,7 @@ Monitor Edge Function performance in Supabase Dashboard:
 - Confidence scoring based on real data quality
 
 ❌ **Prohibited Patterns:**
+
 - Mock business names like "Sample Restaurant"
 - Sequential fake addresses
 - 555-xxxx phone numbers
