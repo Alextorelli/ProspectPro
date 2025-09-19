@@ -22,12 +22,14 @@ Open http://localhost:5173 to access the application.
 ## 🏗️ Architecture
 
 ### Core Components
+
 - **Dashboard** - Campaign overview and statistics
 - **Business Discovery** - Real-time search and validation interface
 - **Results Viewer** - Lead display with confidence scoring and export
 - **Admin Panel** - System monitoring and API usage analytics
 
 ### Technology Stack
+
 - **Frontend**: React 18 + TypeScript + Vite
 - **Styling**: Tailwind CSS with custom design system
 - **State Management**: Zustand with persistence
@@ -37,6 +39,7 @@ Open http://localhost:5173 to access the application.
 ## 🔗 Supabase Integration
 
 ### Edge Functions (Already Deployed)
+
 ```
 https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/
 ├── enhanced-business-discovery - Main 4-stage pipeline
@@ -46,6 +49,7 @@ https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/
 ```
 
 ### Required Environment Variables
+
 ```env
 # Supabase Configuration
 VITE_SUPABASE_URL=https://sriycekxdqnesdsgwiuc.supabase.co
@@ -63,18 +67,21 @@ VITE_ZEROBOUNCE_API_KEY=your_key_here
 ## 🎨 Key Features
 
 ### Zero Fake Data Enforcement
+
 - Real-time validation indicators with confidence scoring
 - Source attribution for all data points
 - Quality gates before export (70%+ confidence required)
 - Visual feedback for data authenticity
 
 ### Cost Optimization Dashboard
+
 - Budget tracking with real-time alerts
 - API usage visualization and quotas
 - Cost per lead calculations
 - Pre-validation filtering to reduce API waste
 
 ### User Experience
+
 - Progressive disclosure of complexity
 - Real-time progress tracking during discovery
 - Responsive design for all devices
@@ -143,14 +150,17 @@ frontend/
 ### Common Issues
 
 1. **"Cannot find module 'react'" errors**
+
    - Run `npm install` to ensure all dependencies are installed
    - Check that you're in the `frontend/` directory
 
 2. **Supabase connection errors**
+
    - Verify your `.env` file has the correct SUPABASE_URL and SUPABASE_ANON_KEY
    - Check that your Supabase project is active
 
 3. **Edge Function 404 errors**
+
    - Ensure Edge Functions are deployed via `npx supabase functions deploy`
    - Verify function URLs match your project reference
 
@@ -177,14 +187,17 @@ The frontend is designed to deploy to any static hosting provider:
 ## 📝 Next Steps
 
 1. **Configure Environment Variables**
+
    - Get your Supabase anon key from the [Supabase Dashboard](https://supabase.com/dashboard/project/sriycekxdqnesdsgwiuc/settings/api)
    - Add API keys for enhanced functionality
 
 2. **Test Edge Function Integration**
+
    - Run a test discovery campaign
    - Verify real-time updates and cost tracking
 
 3. **Customize UI/UX**
+
    - Modify Tailwind theme in `tailwind.config.js`
    - Add your branding and color scheme
 
