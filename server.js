@@ -5,6 +5,37 @@ try {
   console.warn("⚠️  dotenv not loaded (likely fine in production):", e.message);
 }
 
+// Dynamically load secrets from Supabase app_secrets table
+const { createClient } = require("@supabase/supabase-js");
+
+async function loadSecretsFromSupabase() {
+  const supabaseUrl = process.env.SUPABASE_URL;
+  const supabaseKey =
+    process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!supabaseUrl || !supabaseKey) {
+    console.warn("Supabase config missing, skipping dynamic secret loading");
+    return;
+  }
+  try {
+    const supabase = createClient(supabaseUrl, supabaseKey);
+    const { data, error } = await supabase
+      .from("app_secrets")
+      .select("key,value");
+    if (error) throw error;
+    data.forEach(({ key, value }) => {
+      if (!process.env[key]) process.env[key] = value;
+    });
+    console.log("✅ Loaded secrets from Supabase");
+  } catch (err) {
+    console.error("Failed to load secrets from Supabase:", err.message);
+  }
+}
+
+// Synchronously load secrets before booting core systems
+(async () => {
+  await loadSecretsFromSupabase();
+})();
+
 // Initialize Boot Phase Debugger first
 const { BootPhaseDebugger } = require("./modules/boot-debugger");
 const bootDebugger = new BootPhaseDebugger();
