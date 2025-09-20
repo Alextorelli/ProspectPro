@@ -19,8 +19,7 @@ class EnhancedLeadDiscovery {
     this.newYorkSOSClient = new NewYorkSOS();
     this.nyTaxParcelsClient = new NYTaxParcels();
 
-    // New government API clients for enhanced validation
-    this.secEdgarClient = new SECEdgarClient();
+    // Government API clients for small business validation
     this.proPublicaClient = new ProPublicaClient();
     this.foursquareClient = new FoursquareClient(apiKeys.foursquare);
 
@@ -51,7 +50,7 @@ class EnhancedLeadDiscovery {
   async discoverAndValidateLeads(businesses, options = {}) {
     const {
       budgetLimit = 50.0,
-      qualityThreshold = 75,
+      qualityThreshold = 50,
       maxResults = 100,
     } = options;
 
@@ -119,11 +118,21 @@ class EnhancedLeadDiscovery {
    * Process single business through enhanced 4-stage pipeline
    */
   async processBusinessThroughPipeline(business, options) {
-    // Stage 1: Discovery + Pre-validation Scoring
+    // Prioritize Foursquare and other free APIs first
+    let discoveryResult = await this.foursquareClient.searchPlaces(
+      business.name,
+      {
+        near: business.address,
+        limit: 10,
+      }
+    );
+    if (discoveryResult.found && discoveryResult.places.length > 0) {
+      business.foursquareData = discoveryResult;
+    }
+    // Now run standard pre-validation
     const stage1Result = await this.stage1_DiscoveryAndPreValidation(business);
-
     // Early filtering - only proceed if pre-validation score is promising
-    if (stage1Result.preValidationScore < 60) {
+    if (stage1Result.preValidationScore < 50) {
       console.log(
         `⏭️ Skipping ${business.name} - low pre-validation score: ${stage1Result.preValidationScore}`
       );
@@ -133,20 +142,35 @@ class EnhancedLeadDiscovery {
         stage: "pre-validation-filtered",
       };
     }
-
+    // Google Places discovery with pagination
+    let googleResults = [];
+    if (this.googlePlacesClient) {
+      let pageToken = null;
+      let pagesFetched = 0;
+      do {
+        const response = await this.googlePlacesClient.textSearch({
+          query: `${business.name} in ${business.address}`,
+          type: "establishment",
+          pagetoken: pageToken,
+        });
+        if (response && response.results) {
+          googleResults = googleResults.concat(response.results);
+        }
+        pageToken = response.next_page_token || null;
+        pagesFetched++;
+      } while (pageToken && pagesFetched < 3); // Fetch up to 3 pages
+      business.googlePlacesResults = googleResults;
+    }
     // Stage 2: Enrichment + Property Intelligence
     const stage2Result = await this.stage2_EnrichmentAndPropertyIntel(
       stage1Result
     );
-
     // Stage 3: Validation + Risk Assessment
     const stage3Result = await this.stage3_ValidationAndRiskAssessment(
       stage2Result
     );
-
     // Stage 4: Quality Scoring + Export Preparation
     const finalResult = await this.stage4_QualityScoringAndExport(stage3Result);
-
     return finalResult;
   }
 
@@ -359,7 +383,6 @@ class EnhancedLeadDiscovery {
     const results = await Promise.allSettled([
       this.californiaSOSClient.searchBusiness(business.name),
       this.newYorkSOSClient.searchBusiness(business.name),
-      this.secEdgarClient.searchCompanies(business.name),
       this.proPublicaClient.searchNonprofits(business.name),
     ]);
 
@@ -367,23 +390,18 @@ class EnhancedLeadDiscovery {
       results[0].status === "fulfilled" ? results[0].value : { found: false };
     const nyResult =
       results[1].status === "fulfilled" ? results[1].value : { found: false };
-    const secResult =
-      results[2].status === "fulfilled" ? results[2].value : { found: false };
     const proPublicaResult =
-      results[3].status === "fulfilled" ? results[3].value : { found: false };
+      results[2].status === "fulfilled" ? results[2].value : { found: false };
 
     return {
       california: caResult,
       newYork: nyResult,
-      secEdgar: secResult,
       proPublica: proPublicaResult,
       registeredInAnyState: caResult.found || nyResult.found,
-      registeredFederally: secResult.found,
       isNonprofit: proPublicaResult.found,
       confidence: Math.max(
         caResult.confidence || 0,
         nyResult.confidence || 0,
-        secResult.confidence || 0,
         proPublicaResult.confidence || 0
       ),
     };
