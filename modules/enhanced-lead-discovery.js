@@ -35,23 +35,77 @@ class EnhancedLeadDiscovery {
     this.totalCost = 0;
     this.apiUsageStats = {};
 
+    // High Priority: API Prioritization & Caching
+    this.cache = new Map(); // Simple in-memory cache
+    this.cacheTTL = 3600000; // 1 hour in milliseconds
+
     console.log(
-      "🔧 Enhanced Lead Discovery Algorithm initialized with government APIs"
+      "🔧 Enhanced Lead Discovery Algorithm initialized with government APIs and caching"
     );
   }
 
   /**
-   * Main lead discovery pipeline with 4 enhanced stages
-   * Stage 1: Discovery + Pre-validation
-   * Stage 2: Enrichment + Property Intelligence
-   * Stage 3: Validation + Risk Assessment
-   * Stage 4: Quality Scoring + Export Preparation
+   * High Priority: API Prioritization & Caching - Cache getter/setter
    */
+  getCache(key) {
+    const cached = this.cache.get(key);
+    if (cached && Date.now() - cached.timestamp < this.cacheTTL) {
+      return cached.data;
+    }
+    this.cache.delete(key);
+    return null;
+  }
+
+  setCache(key, data) {
+    this.cache.set(key, { data, timestamp: Date.now() });
+  }
+
+  /**
+   * High Priority: Dynamic - Real-Time Campaign Feedback
+   */
+  generateRealTimeFeedback(scoredBusinesses, options) {
+    const totalProcessed = scoredBusinesses.length;
+    const qualified = scoredBusinesses.filter(
+      (b) => b.finalConfidenceScore >= options.qualityThreshold
+    ).length;
+    const qualificationRate =
+      totalProcessed > 0 ? (qualified / totalProcessed) * 100 : 0;
+
+    const avgConfidence =
+      totalProcessed > 0
+        ? scoredBusinesses.reduce((sum, b) => sum + b.finalConfidenceScore, 0) /
+          totalProcessed
+        : 0;
+
+    const recommendations = [];
+    if (qualificationRate < 30) {
+      recommendations.push(
+        "Consider lowering quality threshold or expanding search radius"
+      );
+    }
+    if (this.totalCost > options.budgetLimit * 0.8) {
+      recommendations.push(
+        "Approaching budget limit - consider pausing expensive validations"
+      );
+    }
+
+    return {
+      processed: totalProcessed,
+      qualified,
+      qualificationRate: Math.round(qualificationRate),
+      averageConfidence: Math.round(avgConfidence),
+      totalCost: this.totalCost,
+      recommendations,
+      timestamp: new Date().toISOString(),
+    };
+  }
   async discoverAndValidateLeads(businesses, options = {}) {
     const {
       budgetLimit = 50.0,
       qualityThreshold = 50,
       maxResults = 100,
+      enableRealTimeFeedback = true, // High Priority: Dynamic - Real-Time Campaign Feedback
+      interactiveTuning = true, // High Priority: Dynamic - Interactive Parameter Tuning
     } = options;
 
     console.log(
@@ -61,56 +115,45 @@ class EnhancedLeadDiscovery {
       `💰 Budget limit: $${budgetLimit}, Quality threshold: ${qualityThreshold}%`
     );
 
-    const results = [];
-    let processedCount = 0;
+    // High Priority: Module Disaggregation - Run stages separately
+    const preValidated = await this.runDiscoveryStage(
+      businesses.slice(0, maxResults),
+      options
+    );
+    const filteredForEnrichment = preValidated.filter(
+      (b) => b.preValidationScore >= 40
+    ); // Adaptive threshold
 
-    for (const business of businesses.slice(0, maxResults)) {
-      try {
-        // Check budget before processing each business
-        if (this.totalCost >= budgetLimit) {
-          console.warn(
-            `⚠️ Budget limit reached: $${this.totalCost.toFixed(2)}`
-          );
-          break;
-        }
+    const enriched = await this.runEnrichmentStage(
+      filteredForEnrichment,
+      options
+    );
+    const validated = await this.runValidationStage(enriched, options);
+    const scored = await this.runScoringStage(validated, options);
 
-        // Enhanced 4-stage pipeline
-        const enhancedBusiness = await this.processBusinessThroughPipeline(
-          business,
-          options
-        );
-
-        // Only include businesses that meet quality threshold
-        if (enhancedBusiness.finalConfidenceScore >= qualityThreshold) {
-          results.push(enhancedBusiness);
-        }
-
-        processedCount++;
-
-        if (processedCount % 10 === 0) {
-          console.log(
-            `✅ Processed ${processedCount} businesses, found ${results.length} qualified leads`
-          );
-        }
-      } catch (error) {
-        console.error(
-          `❌ Error processing business ${business.name}:`,
-          error.message
-        );
-      }
+    // High Priority: Dynamic - Real-Time Campaign Feedback
+    const feedback = this.generateRealTimeFeedback(scored, options);
+    if (enableRealTimeFeedback) {
+      console.log("📊 Real-Time Feedback:", feedback);
     }
 
+    // Filter final results
+    const results = scored.filter(
+      (b) => b.finalConfidenceScore >= qualityThreshold
+    );
+
     console.log(
-      `🎯 Enhanced discovery complete: ${results.length} qualified leads from ${processedCount} businesses`
+      `🎯 Enhanced discovery complete: ${results.length} qualified leads from ${businesses.length} businesses`
     );
     console.log(`💰 Total cost: $${this.totalCost.toFixed(2)}`);
 
     return {
       leads: results,
-      totalProcessed: processedCount,
+      totalProcessed: businesses.length,
       totalCost: this.totalCost,
       usageStats: this.getUsageStats(),
       qualityMetrics: this.calculateQualityMetrics(results),
+      realTimeFeedback: feedback,
     };
   }
 
@@ -199,6 +242,7 @@ class EnhancedLeadDiscovery {
 
   /**
    * Stage 2: Enrichment + Property Intelligence + Location Data
+   * High Priority: API Prioritization & Caching
    */
   async stage2_EnrichmentAndPropertyIntel(businessData) {
     console.log(`🏢 Stage 2: Property intel for ${businessData.name}`);
@@ -208,41 +252,57 @@ class EnhancedLeadDiscovery {
     let foursquareData = {};
     let stageCost = 0;
 
+    // High Priority: API Prioritization - Free APIs first
     // Property intelligence (free)
     if (businessData.address) {
-      propertyData = await this.nyTaxParcelsClient.getPropertyData(
-        businessData.address
-      );
-    }
-
-    // Foursquare location intelligence (free)
-    if (businessData.name && businessData.address) {
-      try {
-        foursquareData = await this.foursquareClient.searchPlaces(
-          businessData.name,
-          {
-            near: businessData.address,
-            limit: 5,
-          }
+      const cacheKey = `property_${businessData.address}`;
+      propertyData = this.getCache(cacheKey);
+      if (!propertyData) {
+        propertyData = await this.nyTaxParcelsClient.getPropertyData(
+          businessData.address
         );
-      } catch (error) {
-        console.warn(
-          `⚠️ Foursquare search failed for ${businessData.name}:`,
-          error.message
-        );
-        foursquareData = { found: false, error: error.message };
+        this.setCache(cacheKey, propertyData);
       }
     }
 
-    // Email discovery (paid - selective usage)
+    // Foursquare location intelligence (free) - Prioritized
+    if (businessData.name && businessData.address) {
+      const cacheKey = `foursquare_${businessData.name}_${businessData.address}`;
+      foursquareData = this.getCache(cacheKey);
+      if (!foursquareData) {
+        try {
+          foursquareData = await this.foursquareClient.searchPlaces(
+            businessData.name,
+            {
+              near: businessData.address,
+              limit: 5,
+            }
+          );
+          this.setCache(cacheKey, foursquareData);
+        } catch (error) {
+          console.warn(
+            `⚠️ Foursquare search failed for ${businessData.name}:`,
+            error.message
+          );
+          foursquareData = { found: false, error: error.message };
+        }
+      }
+    }
+
+    // Email discovery (paid - selective usage, cached)
     if (
       this.hunterClient &&
       businessData.website &&
       businessData.preValidationScore >= 80
     ) {
       const domain = this.extractDomainFromWebsite(businessData.website);
-      emailDiscovery = await this.hunterClient.domainSearch(domain);
-      stageCost += emailDiscovery.cost || 0;
+      const cacheKey = `email_${domain}`;
+      emailDiscovery = this.getCache(cacheKey);
+      if (!emailDiscovery) {
+        emailDiscovery = await this.hunterClient.domainSearch(domain);
+        this.setCache(cacheKey, emailDiscovery);
+        stageCost += emailDiscovery.cost || 0;
+      }
     }
 
     return {
@@ -257,6 +317,7 @@ class EnhancedLeadDiscovery {
 
   /**
    * Stage 3: Validation + Risk Assessment
+   * High Priority: API Prioritization & Caching
    */
   async stage3_ValidationAndRiskAssessment(businessData) {
     console.log(`✅ Stage 3: Validation for ${businessData.name}`);
@@ -265,32 +326,43 @@ class EnhancedLeadDiscovery {
     let websiteValidation = {};
     let stageCost = 0;
 
-    // Website validation (free)
+    // Website validation (free, cached)
     if (businessData.website) {
-      websiteValidation = await this.validateWebsiteAccessibility(
-        businessData.website
-      );
+      const cacheKey = `website_${businessData.website}`;
+      websiteValidation = this.getCache(cacheKey);
+      if (!websiteValidation) {
+        websiteValidation = await this.validateWebsiteAccessibility(
+          businessData.website
+        );
+        this.setCache(cacheKey, websiteValidation);
+      }
     }
 
-    // Email validation (paid - selective usage)
+    // Email validation (paid - selective usage, cached)
     if (
       this.neverBounceClient &&
       businessData.emailDiscovery?.emails?.length > 0
     ) {
-      const priorityEmails = businessData.emailDiscovery.emails.slice(0, 2); // Limit to 2 best emails
-      const verificationResults = await this.neverBounceClient.verifyEmailBatch(
-        priorityEmails.map((e) => e.value || e)
-      );
-      emailValidation = {
-        results: verificationResults,
-        bestEmail: verificationResults.find((r) => r.isDeliverable),
-        deliverableCount: verificationResults.filter((r) => r.isDeliverable)
-          .length,
-      };
-      stageCost += verificationResults.reduce(
-        (sum, r) => sum + (r.cost || 0),
-        0
-      );
+      const priorityEmails = businessData.emailDiscovery.emails.slice(0, 2);
+      const cacheKey = `email_validation_${priorityEmails.join("_")}`;
+      emailValidation = this.getCache(cacheKey);
+      if (!emailValidation) {
+        const verificationResults =
+          await this.neverBounceClient.verifyEmailBatch(
+            priorityEmails.map((e) => e.value || e)
+          );
+        emailValidation = {
+          results: verificationResults,
+          bestEmail: verificationResults.find((r) => r.isDeliverable),
+          deliverableCount: verificationResults.filter((r) => r.isDeliverable)
+            .length,
+        };
+        this.setCache(cacheKey, emailValidation);
+        stageCost += verificationResults.reduce(
+          (sum, r) => sum + (r.cost || 0),
+          0
+        );
+      }
     }
 
     this.totalCost += stageCost;
