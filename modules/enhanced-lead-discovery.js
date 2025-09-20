@@ -182,10 +182,9 @@ class EnhancedLeadDiscovery {
 
     const preValidationScore = this.calculatePreValidationScore(business);
 
-    // Free registry validation for high-scoring businesses
+    // Soften registry validation: allow for scores >= 50
     let registryValidation = {};
-
-    if (preValidationScore >= 70) {
+    if (preValidationScore >= 50) {
       registryValidation = await this.validateBusinessRegistration(business);
     }
 
@@ -319,7 +318,7 @@ class EnhancedLeadDiscovery {
       ...businessData,
       qualityScores,
       finalConfidenceScore,
-      exportReady: finalConfidenceScore >= 75,
+      exportReady: finalConfidenceScore >= 50,
       stage: "completed",
       completedAt: new Date().toISOString(),
     };
@@ -333,42 +332,35 @@ class EnhancedLeadDiscovery {
 
     // Business name quality (25 points max)
     if (business.name) {
-      if (!this.isGenericBusinessName(business.name)) {
-        score += 25;
-      } else {
-        score += 10; // Some points for having a name
-      }
+      score += !this.isGenericBusinessName(business.name) ? 25 : 15;
     }
 
     // Address completeness (20 points max)
     if (business.address) {
-      if (this.isCompleteAddress(business.address)) {
-        score += 20;
-      } else {
-        score += 10;
-      }
+      score += this.isCompleteAddress(business.address) ? 20 : 15;
     }
 
     // Phone number format (20 points max)
     if (business.phone) {
-      if (
+      score +=
         this.isValidPhoneFormat(business.phone) &&
         !this.isFakePhone(business.phone)
-      ) {
-        score += 20;
-      }
+          ? 20
+          : 10;
     }
 
     // Google rating and review indicators (15 points max)
     if (business.rating >= 4.0 && business.user_ratings_total >= 10) {
       score += 15;
     } else if (business.rating >= 3.5) {
-      score += 8;
+      score += 10;
     }
 
     // Website presence (20 points max)
     if (business.website && business.website !== "http://example.com") {
       score += 20;
+    } else if (business.website) {
+      score += 10;
     }
 
     return Math.min(score, 100);
