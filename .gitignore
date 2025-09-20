@@ -93,6 +93,10 @@ deployment-logs/
 archive/
 *-debug-*
 
+# Corporate leadgen APIs (exclude from main branch)
+modules/api-clients/enhanced-sec-edgar-client.js
+modules/api-clients/companies-house-uk-client.js
+
 # Other
 .git/
 .env
