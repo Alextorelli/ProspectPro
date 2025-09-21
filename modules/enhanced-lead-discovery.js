@@ -7,7 +7,9 @@ const CaliforniaSOS = require("./api-clients/california-sos-client");
 const NewYorkSOS = require("./api-clients/newyork-sos-client");
 const NYTaxParcels = require("./api-clients/ny-tax-parcels-client");
 const GooglePlacesClient = require("./api-clients/google-places");
+// Import API clients
 const MultiSourceEmailDiscovery = require("./api-clients/multi-source-email-discovery");
+const ComprehensiveHunterClient = require("./api-clients/comprehensive-hunter-client");
 const NeverBounceClient = require("./api-clients/neverbounce");
 const SECEdgarClient = require("./api-clients/enhanced-sec-edgar-client");
 const ProPublicaClient = require("./api-clients/propublica-nonprofit-client");

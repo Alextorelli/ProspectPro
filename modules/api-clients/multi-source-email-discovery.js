@@ -17,7 +17,8 @@
 
 const axios = require("axios");
 const HunterIOClient = require("./hunter-io");
-const EnhancedHunterClient = require("./enhanced-hunter-client");
+const EnhancedHunterClient = require("./enhanced-hunter-io-client");
+const ComprehensiveHunterClient = require("./comprehensive-hunter-client");
 
 class MultiSourceEmailDiscovery {
   constructor(config = {}) {
@@ -80,13 +81,17 @@ class MultiSourceEmailDiscovery {
   }
 
   initializeClients() {
-    // Enhanced Hunter.io client with circuit breaker
+    // Comprehensive Hunter.io client with all API endpoints
     if (this.config.hunterApiKey) {
-      this.hunterClient = new EnhancedHunterClient(
+      this.hunterClient = new ComprehensiveHunterClient(
         this.config.hunterApiKey,
-        this.config.maxDailyCost * 0.6 // Allocate 60% budget to Hunter.io
+        {
+          maxDailyCost: this.config.maxDailyCost * 0.6, // 60% budget allocation
+          maxPerLeadCost: this.config.maxPerLeadCost * 0.7,
+          minEmailConfidence: this.config.minEmailConfidence,
+        }
       );
-      console.log("✅ Hunter.io client initialized");
+      console.log("✅ Comprehensive Hunter.io client initialized");
     }
 
     // Apollo.io client (professional email discovery)
@@ -449,8 +454,30 @@ class MultiSourceEmailDiscovery {
 
       switch (api.id) {
         case "hunter":
-          result = await this.hunterClient.discoverBusinessEmails(businessData);
-          break;
+          // Use comprehensive Hunter.io discovery with all endpoints
+          result = await this.hunterClient.comprehensiveEmailDiscovery(
+            businessData
+          );
+
+          // Transform result to match expected format
+          if (result && result.success) {
+            return {
+              emails: result.emails || [],
+              cost: result.total_cost || 0,
+              source: "hunter_comprehensive",
+              enrichment_data: {
+                company: result.companyData,
+                persons: result.personData,
+                combined: result.combinedData,
+                similar_companies: result.similarCompanies,
+              },
+              confidence_score: result.confidence_score,
+              endpoints_used: result.endpoints_used,
+            };
+          }
+
+          return { emails: [], cost: 0, source: "hunter_comprehensive" };
+
         case "apollo":
           result = await this.apolloClient.discoverEmails(domain, businessData);
           break;
