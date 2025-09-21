@@ -19,6 +19,7 @@ const axios = require("axios");
 const HunterIOClient = require("./hunter-io");
 const EnhancedHunterClient = require("./enhanced-hunter-io-client");
 const ComprehensiveHunterClient = require("./comprehensive-hunter-client");
+const CostOptimizedApolloClient = require("./cost-optimized-apollo-client");
 
 class MultiSourceEmailDiscovery {
   constructor(config = {}) {
@@ -94,10 +95,14 @@ class MultiSourceEmailDiscovery {
       console.log("✅ Comprehensive Hunter.io client initialized");
     }
 
-    // Apollo.io client (professional email discovery)
+    // Apollo.io client (organization enrichment - FREE)
     if (this.config.apolloApiKey) {
-      this.apolloClient = new ApolloEmailClient(this.config.apolloApiKey);
-      console.log("✅ Apollo.io client initialized");
+      this.apolloClient = new CostOptimizedApolloClient(
+        this.config.apolloApiKey
+      );
+      console.log(
+        "✅ Cost-Optimized Apollo.io client initialized (FREE Organization Enrichment)"
+      );
     }
 
     // ZoomInfo client (enterprise email discovery)
@@ -302,6 +307,222 @@ class MultiSourceEmailDiscovery {
   }
 
   /**
+   * Apollo.io Organization Enrichment (FREE)
+   * Enrich organization data and generate intelligent email patterns
+   */
+  async apolloOrganizationEnrichment(domain, businessData) {
+    console.log(`🏢 Apollo Organization Enrichment for domain: ${domain}`);
+
+    const startTime = Date.now();
+    const result = {
+      emails: [],
+      cost: 0,
+      source: "apollo_organization_enrichment",
+      organization_data: null,
+      enhanced_patterns: [],
+    };
+
+    try {
+      // Use Apollo's FREE organization enrichment
+      const enrichmentResult = await this.apolloClient.enrichOrganization({
+        domain,
+      });
+
+      if (enrichmentResult.success && enrichmentResult.matched) {
+        result.organization_data = enrichmentResult.organization;
+        result.cost = enrichmentResult.estimatedCost;
+
+        console.log(
+          `✅ Organization enriched: ${result.organization_data.name}`
+        );
+        console.log(
+          `👥 Employees: ${result.organization_data.employees || "Unknown"}`
+        );
+        console.log(
+          `🏭 Industry: ${result.organization_data.industry || "Unknown"}`
+        );
+
+        // Generate enhanced email patterns based on enriched data
+        const enhancedPatterns = this.generateEnhancedEmailPatterns(
+          result.organization_data,
+          domain,
+          businessData
+        );
+
+        // Validate enhanced patterns
+        for (const pattern of enhancedPatterns) {
+          try {
+            if (await this.quickEmailValidation(pattern.email)) {
+              result.emails.push({
+                value: pattern.email,
+                type: pattern.type,
+                confidence: pattern.confidence,
+                source: "apollo_enhanced_pattern",
+                validation_method: "mx_record_check",
+                reasoning: pattern.reasoning,
+              });
+            }
+          } catch (error) {
+            // Skip invalid patterns
+          }
+        }
+
+        console.log(
+          `📧 Generated ${result.emails.length} validated Apollo-enhanced email patterns`
+        );
+      } else {
+        console.log(`⚠️ Apollo organization not found for domain: ${domain}`);
+      }
+
+      const responseTime = Date.now() - startTime;
+      console.log(`⏱️ Apollo enrichment completed in ${responseTime}ms`);
+
+      return result;
+    } catch (error) {
+      console.error(`❌ Apollo organization enrichment failed:`, error.message);
+      throw new Error(`Apollo organization enrichment error: ${error.message}`);
+    }
+  }
+
+  /**
+   * Generate enhanced email patterns using Apollo organization data
+   */
+  generateEnhancedEmailPatterns(organizationData, domain, businessData) {
+    const patterns = [];
+
+    // Industry-specific email patterns
+    const industryPatterns = this.getIndustrySpecificEmailPatterns(
+      organizationData.industry
+    );
+    industryPatterns.forEach((pattern) => {
+      patterns.push({
+        email: `${pattern}@${domain}`,
+        type: "industry_specific",
+        confidence: 75,
+        reasoning: `Industry-specific pattern for ${organizationData.industry}`,
+      });
+    });
+
+    // Company size-based patterns
+    if (organizationData.employees) {
+      const sizePatterns = this.getCompanySizeEmailPatterns(
+        organizationData.employees
+      );
+      sizePatterns.forEach((pattern) => {
+        patterns.push({
+          email: `${pattern}@${domain}`,
+          type: "company_size_specific",
+          confidence: 70,
+          reasoning: `Company size pattern for ${organizationData.employees} employees`,
+        });
+      });
+    }
+
+    // Enhanced business name patterns using Apollo data
+    if (organizationData.name) {
+      const namePatterns = this.generateAdvancedNamePatterns(
+        organizationData.name,
+        domain
+      );
+      patterns.push(...namePatterns);
+    }
+
+    // Remove duplicates and return top patterns
+    const uniquePatterns = patterns
+      .filter(
+        (pattern, index, self) =>
+          index === self.findIndex((p) => p.email === pattern.email)
+      )
+      .sort((a, b) => b.confidence - a.confidence)
+      .slice(0, 8); // Limit to top 8 patterns
+
+    return uniquePatterns;
+  }
+
+  /**
+   * Get industry-specific email patterns
+   */
+  getIndustrySpecificEmailPatterns(industry) {
+    const industryMap = {
+      technology: ["tech", "dev", "it", "engineering"],
+      healthcare: ["medical", "health", "patient", "clinic"],
+      finance: ["accounting", "finance", "billing", "payments"],
+      retail: ["orders", "customers", "returns", "shopping"],
+      "real estate": ["properties", "listings", "realty", "homes"],
+      legal: ["legal", "attorney", "law", "counsel"],
+      consulting: ["consulting", "advisor", "strategy", "solutions"],
+      marketing: ["marketing", "campaigns", "advertising", "media"],
+      default: ["business", "team", "office", "company"],
+    };
+
+    const normalizedIndustry = industry?.toLowerCase() || "";
+    for (const [key, patterns] of Object.entries(industryMap)) {
+      if (normalizedIndustry.includes(key)) {
+        return patterns;
+      }
+    }
+    return industryMap.default;
+  }
+
+  /**
+   * Get company size-based email patterns
+   */
+  getCompanySizeEmailPatterns(employeeCount) {
+    if (employeeCount <= 10) {
+      return ["founder", "owner", "ceo", "director"]; // Small company patterns
+    } else if (employeeCount <= 50) {
+      return ["manager", "lead", "head", "coordinator"]; // Medium company patterns
+    } else {
+      return ["department", "division", "regional", "corporate"]; // Large company patterns
+    }
+  }
+
+  /**
+   * Generate advanced name-based email patterns
+   */
+  generateAdvancedNamePatterns(companyName, domain) {
+    const patterns = [];
+    const cleanName = companyName
+      .toLowerCase()
+      .replace(/[^\w\s]/g, "")
+      .replace(/\b(inc|llc|corp|ltd|company|co)\b/g, "")
+      .trim();
+
+    const words = cleanName.split(/\s+/).filter((word) => word.length > 2);
+
+    if (words.length >= 1) {
+      const primaryWord = words[0];
+      patterns.push({
+        email: `${primaryWord}@${domain}`,
+        type: "company_name_primary",
+        confidence: 80,
+        reasoning: `Primary company name: ${primaryWord}`,
+      });
+
+      if (primaryWord.length > 5) {
+        patterns.push({
+          email: `${primaryWord.substring(0, 5)}@${domain}`,
+          type: "company_name_abbreviated",
+          confidence: 75,
+          reasoning: `Abbreviated company name: ${primaryWord.substring(0, 5)}`,
+        });
+      }
+    }
+
+    if (words.length >= 2) {
+      const acronym = words.map((word) => word.charAt(0)).join("");
+      patterns.push({
+        email: `${acronym}@${domain}`,
+        type: "company_acronym",
+        confidence: 70,
+        reasoning: `Company acronym: ${acronym}`,
+      });
+    }
+
+    return patterns;
+  }
+
+  /**
    * STAGE 2: API-based email discovery with circuit breaker
    * Intelligently use multiple APIs based on availability and cost
    */
@@ -479,7 +700,10 @@ class MultiSourceEmailDiscovery {
           return { emails: [], cost: 0, source: "hunter_comprehensive" };
 
         case "apollo":
-          result = await this.apolloClient.discoverEmails(domain, businessData);
+          result = await this.apolloOrganizationEnrichment(
+            domain,
+            businessData
+          );
           break;
         case "zoominfo":
           result = await this.zoomInfoClient.discoverEmails(
@@ -673,7 +897,9 @@ class MultiSourceEmailDiscovery {
     // Source reliability bonus
     const sourceBonus = {
       hunter_io: 20,
-      apollo: 15,
+      apollo: 18, // Increased for organization enrichment data quality
+      apollo_enhanced_pattern: 22, // Higher bonus for Apollo-enhanced patterns
+      apollo_organization_enrichment: 20,
       zoominfo: 25,
       pattern_generation: 5,
     };
@@ -908,31 +1134,18 @@ class MultiSourceEmailDiscovery {
 }
 
 /**
- * Apollo.io Email Client (Professional Grade)
+ * Apollo.io integration is now handled by CostOptimizedApolloClient
+ * Focus: FREE Organization Enrichment + Enhanced Email Pattern Generation
+ *
+ * Key Features:
+ * - Organization data enrichment (industry, employee count, revenue)
+ * - Industry-specific email pattern generation
+ * - Company size-based email patterns
+ * - Advanced name-based patterns using Apollo data
+ * - Cost optimization (uses only free Apollo endpoint)
+ *
+ * Upgrade Path: Apollo Pro ($39/month) for People Search & Mobile Phone Data
  */
-class ApolloEmailClient {
-  constructor(apiKey) {
-    this.apiKey = apiKey;
-    this.baseUrl = "https://api.apollo.io/v1";
-    this.costPerRequest = 0.15;
-  }
-
-  async discoverEmails(domain, businessData) {
-    // Implement Apollo.io API integration
-    console.log(`🔍 Apollo.io discovery for domain: ${domain}`);
-
-    try {
-      // Placeholder for Apollo.io API call
-      return {
-        emails: [],
-        cost: this.costPerRequest,
-        source: "apollo",
-      };
-    } catch (error) {
-      throw new Error(`Apollo.io API error: ${error.message}`);
-    }
-  }
-}
 
 /**
  * ZoomInfo Email Client (Enterprise Grade)
