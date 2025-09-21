@@ -7,7 +7,7 @@ const CaliforniaSOS = require("./api-clients/california-sos-client");
 const NewYorkSOS = require("./api-clients/newyork-sos-client");
 const NYTaxParcels = require("./api-clients/ny-tax-parcels-client");
 const GooglePlacesClient = require("./api-clients/google-places");
-const HunterIOClient = require("./api-clients/hunter-io");
+const MultiSourceEmailDiscovery = require("./api-clients/multi-source-email-discovery");
 const NeverBounceClient = require("./api-clients/neverbounce");
 const SECEdgarClient = require("./api-clients/enhanced-sec-edgar-client");
 const ProPublicaClient = require("./api-clients/propublica-nonprofit-client");
@@ -29,10 +29,16 @@ class EnhancedLeadDiscovery {
     this.proPublicaClient = new ProPublicaClient();
     this.foursquareClient = new FoursquareClient(apiKeys.foursquare);
 
-    // Paid API clients with cost optimization
-    this.hunterClient = apiKeys.hunterIO
-      ? new HunterIOClient(apiKeys.hunterIO)
-      : null;
+    // Multi-source email discovery system with circuit breaker
+    this.emailDiscovery = new MultiSourceEmailDiscovery({
+      hunterApiKey: apiKeys.hunterIO,
+      apolloApiKey: apiKeys.apollo,
+      zoomInfoApiKey: apiKeys.zoomInfo,
+      neverBounceApiKey: apiKeys.neverBounce,
+      maxDailyCost: 50.0,
+      maxPerLeadCost: 2.0,
+      minEmailConfidence: 70,
+    });
     this.neverBounceClient = apiKeys.neverBounce
       ? new NeverBounceClient(apiKeys.neverBounce)
       : null;
@@ -409,26 +415,74 @@ class EnhancedLeadDiscovery {
       }
     }
 
-    // Email discovery (paid - lowered threshold for full pipeline testing)
+    // Enhanced Email discovery using multi-source system
     if (
-      this.hunterClient &&
+      this.emailDiscovery &&
       businessData.website &&
-      businessData.preValidationScore >= 50 // Lowered from 80 to 50 for full testing
+      businessData.preValidationScore >= 50 // Quality threshold for email discovery
     ) {
-      const domain = this.extractDomainFromWebsite(businessData.website);
-      const cacheKey = `email_${domain}`;
-      emailDiscovery = this.getCache(cacheKey);
-      if (!emailDiscovery) {
-        console.log(
-          `📧 Searching for emails at ${domain} for ${businessData.name}`
-        );
-        emailDiscovery = await this.hunterClient.domainSearch(domain);
-        this.setCache(cacheKey, emailDiscovery);
-        stageCost += emailDiscovery.cost || 0;
+      console.log(
+        `📧 Starting multi-source email discovery for ${businessData.name}`
+      );
 
-        // Enhanced contact differentiation: Company vs Owner
-        if (emailDiscovery.emails && emailDiscovery.emails.length > 0) {
-          const emails = emailDiscovery.emails;
+      const emailResult = await this.emailDiscovery.discoverBusinessEmails({
+        business_name: businessData.name,
+        website: businessData.website,
+        owner_name: businessData.ownerName || null,
+        location: businessData.formattedAddress || businessData.address,
+      });
+
+      stageCost += emailResult.total_cost || 0;
+
+      if (
+        emailResult.success &&
+        emailResult.emails &&
+        emailResult.emails.length > 0
+      ) {
+        console.log(
+          `✅ Found ${emailResult.emails.length} verified emails for ${businessData.name}`
+        );
+
+        // Process discovered emails and contacts
+        emailDiscovery = {
+          emails: emailResult.emails,
+          domain: emailResult.domain,
+          sources_used: emailResult.sources_used,
+          confidence_score: emailResult.confidence_score,
+          cost: emailResult.total_cost,
+        };
+
+        // Enhanced contact differentiation using business contacts
+        if (emailResult.business_contacts) {
+          const { owner, manager, primary } = emailResult.business_contacts;
+
+          // Set owner contact if found with high confidence
+          if (owner && owner.confidence >= 70) {
+            businessData.ownerEmail = owner.value;
+            businessData.ownerEmailSource = `${owner.source} (${owner.confidence}% confidence)`;
+            businessData.ownerEmailConfidence = owner.confidence;
+
+            // Extract owner name if available
+            if (owner.first_name && owner.last_name) {
+              businessData.ownerName = `${owner.first_name} ${owner.last_name}`;
+            }
+
+            // Extract title/position if available
+            if (owner.position || owner.type === "personal") {
+              businessData.ownerTitle = owner.position || "Owner";
+            }
+          }
+
+          // Set company email using primary or manager
+          const companyEmail = primary || manager;
+          if (companyEmail && companyEmail.confidence >= 60) {
+            businessData.email = companyEmail.value;
+            businessData.emailSource = `${companyEmail.source} (${companyEmail.confidence}% confidence)`;
+            businessData.emailConfidence = companyEmail.confidence;
+          }
+        } else {
+          // Fallback to legacy email processing
+          const emails = emailResult.emails;
 
           // Find high-confidence owner email (80%+ confidence with owner-like titles)
           const ownerEmail = emails.find(
@@ -452,7 +506,9 @@ class EnhancedLeadDiscovery {
           // Set owner contact if found with high confidence
           if (ownerEmail) {
             businessData.ownerEmail = ownerEmail.value;
-            businessData.ownerEmailSource = "Hunter.io domain search";
+            businessData.ownerEmailSource = `${emailResult.sources_used.join(
+              ", "
+            )} (${ownerEmail.confidence}% confidence)`;
             businessData.ownerEmailConfidence = ownerEmail.confidence;
             businessData.ownerName = `${ownerEmail.first_name || ""} ${
               ownerEmail.last_name || ""
@@ -463,51 +519,28 @@ class EnhancedLeadDiscovery {
 
           // Set company contact (primary or management)
           const companyEmail = mgmtEmail || emails[0];
-          businessData.companyEmail = companyEmail.value;
-          businessData.companyEmailSource = "Hunter.io domain search";
-          businessData.companyEmailConfidence = companyEmail.confidence;
+          if (companyEmail) {
+            businessData.companyEmail = companyEmail.value;
+            businessData.companyEmailSource = `${emailResult.sources_used.join(
+              ", "
+            )} (${companyEmail.confidence}% confidence)`;
+            businessData.companyEmailConfidence = companyEmail.confidence;
 
-          // Legacy field for backwards compatibility
-          businessData.email = companyEmail.value;
-          businessData.emailSource = "Hunter.io domain search";
+            // Legacy field for backwards compatibility
+            businessData.email = companyEmail.value;
+            businessData.emailSource = `${emailResult.sources_used.join(", ")}`;
+            businessData.emailConfidence = companyEmail.confidence;
+          }
         }
-      } else if (emailDiscovery.emails && emailDiscovery.emails.length > 0) {
-        // Handle cached results with same logic
-        const emails = emailDiscovery.emails;
-        const ownerEmail = emails.find(
-          (email) =>
-            email.confidence >= 80 &&
-            this.isOwnerPosition(
-              email.position || email.position_raw,
-              email.first_name,
-              email.last_name,
-              businessData.name
-            )
+      } else {
+        console.log(
+          `⚠️ No emails found for ${
+            businessData.name
+          } (Sources: ${emailResult.sources_used.join(", ")})`
         );
-        const mgmtEmail = emails.find(
-          (email) =>
-            email.confidence >= 80 &&
-            this.isManagementPosition(email.position || email.position_raw)
-        );
-
-        if (ownerEmail) {
-          businessData.ownerEmail = ownerEmail.value;
-          businessData.ownerEmailSource = "Hunter.io (cached)";
-          businessData.ownerEmailConfidence = ownerEmail.confidence;
-          businessData.ownerName = `${ownerEmail.first_name || ""} ${
-            ownerEmail.last_name || ""
-          }`.trim();
-          businessData.ownerTitle =
-            ownerEmail.position || ownerEmail.position_raw;
+        if (emailResult.error) {
+          console.error(`   Email discovery error: ${emailResult.error}`);
         }
-
-        const companyEmail = mgmtEmail || emails[0];
-        businessData.companyEmail = companyEmail.value;
-        businessData.companyEmailSource = "Hunter.io (cached)";
-        businessData.companyEmailConfidence = companyEmail.confidence;
-
-        businessData.email = companyEmail.value;
-        businessData.emailSource = "Hunter.io (cached)";
       }
     }
 
