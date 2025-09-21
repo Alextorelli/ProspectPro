@@ -11,7 +11,7 @@ const MultiSourceEmailDiscovery = require("./modules/api-clients/multi-source-em
 // Configuration that encourages API usage
 const APOLLO_TEST_CONFIG = {
   hunterApiKey: process.env.HUNTER_IO_API_KEY,
-  apolloApiKey: process.env.APOLLO_API_KEY || "sRlHxW_zYKpcToD-tWtRVQ",
+  apolloApiKey: process.env.APOLLO_API_KEY || "GQOnv7RMsT8uV6yy_IMhyQ",
   maxDailyCost: 10.0, // Higher budget to allow API calls
   maxPerLeadCost: 2.0, // Higher per-lead budget
   minEmailConfidence: 50, // Lower threshold to see more results

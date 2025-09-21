@@ -1,13 +1,13 @@
 /**
  * Apollo.io Cost-Optimized Integration Client
  *
- * Optimized for Paid Basic Account with intelligent credit management
+ * Optimized for Basic Paid Account with intelligent credit management
  * Maximizes quality while minimizing costs based on actual Apollo pricing
  *
- * ACCOUNT STATUS: Paid Basic Account (Free Trial)
+ * ACCOUNT STATUS: Basic Paid Account (Upgraded)
  * CURRENT STATUS: All endpoints available, credits consumed per use
  *
- * PRICING (Based on provided table):
+ * PRICING (Based on provided table for Paid Basic Account):
  * ✅ Organization Enrichment: 1 credit per result (FREE during trial)
  * ✅ People Search: 1 credit per page returned (max 100 results/page)
  * ✅ Organization Search: 1 credit per page returned (max 100 results/page)
@@ -31,14 +31,14 @@ class CostOptimizedApolloClient {
     this.baseURL = "https://api.apollo.io/api/v1";
     this.defaultTimeout = options.timeout || 30000;
 
-    // Start with conservative FREE account assumptions
-    // Will be updated by detectAccountStatus() if paid features are available
+    // Account status - Basic Paid Account (upgraded from free)
+    // Will be updated by detectAccountStatus() if different
     this.accountStatus = {
-      plan: "Free", // Start conservative
-      trialStatus: "none", // No trial for free accounts
+      plan: "Basic", // Upgraded to Basic Paid
+      trialStatus: "active", // Paid account active
       creditsConsumed: 0,
-      monthlyLimit: 0, // Free accounts have no credits
-      remainingCredits: 0, // Free accounts have no credits
+      monthlyLimit: 1000, // Basic plan limit
+      remainingCredits: 1000, // Basic plan credits available
     };
 
     // Cost tracking with actual Apollo pricing

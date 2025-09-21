@@ -20,7 +20,7 @@ require("dotenv").config();
 const CostOptimizedApolloClient = require("./modules/api-clients/cost-optimized-apollo-client");
 
 // Test configuration
-const APOLLO_API_KEY = process.env.APOLLO_API_KEY || "sRlHxW_zYKpcToD-tWtRVQ"; // Master API Key provided
+const APOLLO_API_KEY = process.env.APOLLO_API_KEY || "GQOnv7RMsT8uV6yy_IMhyQ"; // Master API Key provided
 const TEST_TIMEOUT = 30000; // 30 seconds per test
 
 class ApolloIntegrationTester {
