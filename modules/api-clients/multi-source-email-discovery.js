@@ -307,8 +307,8 @@ class MultiSourceEmailDiscovery {
   }
 
   /**
-   * Apollo.io Organization Enrichment (FREE)
-   * Enrich organization data and generate intelligent email patterns
+   * Apollo.io Organization Enrichment (FREE during trial, 1 credit post-trial)
+   * Enhanced with new pricing-aware client and intelligent pattern generation
    */
   async apolloOrganizationEnrichment(domain, businessData) {
     console.log(`🏢 Apollo Organization Enrichment for domain: ${domain}`);
@@ -320,10 +320,11 @@ class MultiSourceEmailDiscovery {
       source: "apollo_organization_enrichment",
       organization_data: null,
       enhanced_patterns: [],
+      credits_used: 0,
     };
 
     try {
-      // Use Apollo's FREE organization enrichment
+      // Use the new cost-optimized Apollo client
       const enrichmentResult = await this.apolloClient.enrichOrganization({
         domain,
       });
@@ -331,6 +332,7 @@ class MultiSourceEmailDiscovery {
       if (enrichmentResult.success && enrichmentResult.matched) {
         result.organization_data = enrichmentResult.organization;
         result.cost = enrichmentResult.estimatedCost;
+        result.credits_used = enrichmentResult.creditsUsed;
 
         console.log(
           `✅ Organization enriched: ${result.organization_data.name}`
@@ -341,6 +343,7 @@ class MultiSourceEmailDiscovery {
         console.log(
           `🏭 Industry: ${result.organization_data.industry || "Unknown"}`
         );
+        console.log(`💰 Credits used: ${result.credits_used}`);
 
         // Generate enhanced email patterns based on enriched data
         const enhancedPatterns = this.generateEnhancedEmailPatterns(
@@ -360,6 +363,7 @@ class MultiSourceEmailDiscovery {
                 source: "apollo_enhanced_pattern",
                 validation_method: "mx_record_check",
                 reasoning: pattern.reasoning,
+                apollo_enhanced: true,
               });
             }
           } catch (error) {
@@ -1135,16 +1139,33 @@ class MultiSourceEmailDiscovery {
 
 /**
  * Apollo.io integration is now handled by CostOptimizedApolloClient
- * Focus: FREE Organization Enrichment + Enhanced Email Pattern Generation
+ * Focus: FREE Organization Enrichment during trial + Enhanced Email Pattern Generation
+ *
+ * ACCOUNT STATUS: Paid Basic Account (Free Trial)
+ * AVAILABLE ENDPOINTS: All Apollo endpoints available with credit costs
+ *
+ * PRICING (Based on provided table):
+ * ✅ Organization Enrichment: 1 credit per result (FREE during trial)
+ * ✅ People Search: 1 credit per page returned
+ * ✅ Organization Search: 1 credit per page returned
+ * ✅ People Enrichment: 1 credit/email + 8 credits/phone (avoid phones)
+ * ✅ Bulk Operations: Same pricing as single operations
+ *
+ * OPTIMIZATION STRATEGY:
+ * 1. Use Organization Enrichment (FREE during trial) for company intelligence
+ * 2. Generate enhanced email patterns from Apollo organization data
+ * 3. Avoid expensive phone number revelation (8 credits each)
+ * 4. Use People Enrichment only for emails, not phones
+ * 5. Implement credit budgeting and cost tracking
  *
  * Key Features:
  * - Organization data enrichment (industry, employee count, revenue)
  * - Industry-specific email pattern generation
  * - Company size-based email patterns
  * - Advanced name-based patterns using Apollo data
- * - Cost optimization (uses only free Apollo endpoint)
+ * - Cost optimization with credit awareness
  *
- * Upgrade Path: Apollo Pro ($39/month) for People Search & Mobile Phone Data
+ * Upgrade Path: Apollo Pro ($39/month) for advanced people search & mobile phone data
  */
 
 /**

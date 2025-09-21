@@ -1,23 +1,26 @@
 /**
  * Apollo.io Cost-Optimized Integration Client
  *
- * Based on test results, this client focuses on FREE Apollo.io endpoints
- * and provides intelligent fallback strategies for paid features
+ * Optimized for Paid Basic Account with intelligent credit management
+ * Maximizes quality while minimizing costs based on actual Apollo pricing
  *
- * WORKING ENDPOINTS (Free Plan):
- * ✅ Organization Enrichment (/api/v1/organizations/enrich)
+ * ACCOUNT STATUS: Paid Basic Account (Free Trial)
+ * CURRENT STATUS: All endpoints available, credits consumed per use
  *
- * PAID ENDPOINTS (Require Plan Upgrade):
- * ❌ People Search (/api/v1/mixed_people/search)
- * ❌ People Enrichment (/api/v1/people/match)
- * ❌ Organization Search (/api/v1/mixed_companies/search)
- * ❌ Bulk Operations
+ * PRICING (Based on provided table):
+ * ✅ Organization Enrichment: 1 credit per result (FREE during trial)
+ * ✅ People Search: 1 credit per page returned (max 100 results/page)
+ * ✅ Organization Search: 1 credit per page returned (max 100 results/page)
+ * ✅ People Enrichment: 1 credit per net-new email, 8 credits per phone number
+ * ✅ Bulk People Enrichment: Same as single enrichment
+ * ✅ Bulk Organization Enrichment: 1 credit per company returned
  *
- * INTEGRATION STRATEGY:
- * 1. Use free Organization Enrichment for company data
- * 2. Combine with existing Hunter.io for people data
- * 3. Provide upgrade path messaging for premium features
- * 4. Maximize value from free tier capabilities
+ * OPTIMIZATION STRATEGY:
+ * 1. Use Organization Enrichment (currently FREE) for company intelligence
+ * 2. Selective People Enrichment (avoid phone numbers unless critical)
+ * 3. Bulk operations for efficiency when processing multiple items
+ * 4. Intelligent fallback to Hunter.io for cost optimization
+ * 5. Credit budgeting and usage tracking
  */
 
 const axios = require("axios");
@@ -28,19 +31,59 @@ class CostOptimizedApolloClient {
     this.baseURL = "https://api.apollo.io/api/v1";
     this.defaultTimeout = options.timeout || 30000;
 
-    // Cost tracking
+    // Start with conservative FREE account assumptions
+    // Will be updated by detectAccountStatus() if paid features are available
+    this.accountStatus = {
+      plan: "Free", // Start conservative
+      trialStatus: "none", // No trial for free accounts
+      creditsConsumed: 0,
+      monthlyLimit: 0, // Free accounts have no credits
+      remainingCredits: 0, // Free accounts have no credits
+    };
+
+    // Cost tracking with actual Apollo pricing
     this.totalCreditsUsed = 0;
     this.requestCount = 0;
     this.costTracking = {
+      peopleSearch: { requests: 0, credits: 0, cost: 0 },
+      peopleEnrichment: { requests: 0, credits: 0, cost: 0 },
+      organizationSearch: { requests: 0, credits: 0, cost: 0 },
       organizationEnrichment: { requests: 0, credits: 0, cost: 0 },
+      bulkOperations: { requests: 0, credits: 0, cost: 0 },
     };
 
-    // Circuit breaker for organization enrichment
-    this.circuitBreaker = {
-      failures: 0,
-      lastFailure: null,
-      threshold: 5,
-      cooldownMs: 5 * 60 * 1000, // 5 minutes
+    // Circuit breaker for each endpoint
+    this.circuitBreakers = {
+      peopleSearch: {
+        failures: 0,
+        lastFailure: null,
+        threshold: 5,
+        cooldownMs: 5 * 60 * 1000,
+      },
+      peopleEnrichment: {
+        failures: 0,
+        lastFailure: null,
+        threshold: 5,
+        cooldownMs: 5 * 60 * 1000,
+      },
+      organizationSearch: {
+        failures: 0,
+        lastFailure: null,
+        threshold: 5,
+        cooldownMs: 5 * 60 * 1000,
+      },
+      organizationEnrichment: {
+        failures: 0,
+        lastFailure: null,
+        threshold: 3,
+        cooldownMs: 3 * 60 * 1000,
+      },
+      bulk: {
+        failures: 0,
+        lastFailure: null,
+        threshold: 3,
+        cooldownMs: 5 * 60 * 1000,
+      },
     };
 
     // Rate limiting
@@ -50,11 +93,54 @@ class CostOptimizedApolloClient {
       requestsThisMinute: 0,
     };
 
-    console.log("🎯 Cost-Optimized Apollo.io Client initialized");
-    console.log(`📊 API Key: ${this.apiKey.substring(0, 8)}...`);
-    console.log(
-      "💰 Focus: FREE Organization Enrichment + Premium Integration Strategy"
-    );
+    // Quality vs Cost optimization settings
+    this.optimizationSettings = {
+      preferPhoneNumbers: false, // Avoid expensive phone numbers (8 credits each)
+      maxCreditsPerRequest: 10, // Maximum credits for a single operation
+      bulkThreshold: 3, // Use bulk operations for 3+ items
+      creditBudgetPerDay: options.dailyBudget || 100, // Daily credit budget
+    };
+  }
+
+  /**
+   * Detect actual account status from API responses
+   */
+  async detectAccountStatus() {
+    try {
+      console.log("🔍 Detecting actual Apollo.io account status...");
+
+      // Try a paid endpoint to see if it works
+      const client = this.createAxiosInstance();
+      await client.post("/mixed_people/search", {
+        q_keywords: "test",
+        per_page: 1,
+      });
+
+      console.log("✅ Paid endpoints accessible - Account is PAID");
+      this.accountStatus.plan = "Basic";
+      this.accountStatus.trialStatus = "active";
+      return true;
+    } catch (error) {
+      if (error.response?.data?.error_code === "API_INACCESSIBLE") {
+        console.log(
+          "⚠️ Paid endpoints not accessible - Account appears to be FREE"
+        );
+        this.accountStatus.plan = "Free";
+        this.accountStatus.trialStatus = "none";
+        this.accountStatus.monthlyLimit = 0;
+        this.accountStatus.remainingCredits = 0;
+        return false;
+      }
+      // Other errors might be temporary
+      console.log(
+        "⚠️ Could not determine account status, assuming FREE for safety"
+      );
+      this.accountStatus.plan = "Free";
+      this.accountStatus.trialStatus = "none";
+      this.accountStatus.monthlyLimit = 0;
+      this.accountStatus.remainingCredits = 0;
+      return false;
+    }
   }
 
   /**
@@ -73,17 +159,20 @@ class CostOptimizedApolloClient {
   }
 
   /**
-   * Check circuit breaker status
+   * Check circuit breaker status for specific endpoint
    */
-  isCircuitOpen() {
-    if (this.circuitBreaker.failures >= this.circuitBreaker.threshold) {
-      const timeSinceLastFailure = Date.now() - this.circuitBreaker.lastFailure;
-      if (timeSinceLastFailure < this.circuitBreaker.cooldownMs) {
+  isCircuitOpen(endpoint) {
+    const breaker = this.circuitBreakers[endpoint];
+    if (!breaker) return false;
+
+    if (breaker.failures >= breaker.threshold) {
+      const timeSinceLastFailure = Date.now() - breaker.lastFailure;
+      if (timeSinceLastFailure < breaker.cooldownMs) {
         return true;
       } else {
         // Reset circuit breaker after cooldown
-        this.circuitBreaker.failures = 0;
-        this.circuitBreaker.lastFailure = null;
+        breaker.failures = 0;
+        breaker.lastFailure = null;
         return false;
       }
     }
@@ -93,13 +182,56 @@ class CostOptimizedApolloClient {
   /**
    * Record success/failure for circuit breaker
    */
-  recordResult(success) {
+  recordResult(endpoint, success) {
+    const breaker = this.circuitBreakers[endpoint];
+    if (!breaker) return;
+
     if (success) {
-      this.circuitBreaker.failures = 0;
-      this.circuitBreaker.lastFailure = null;
+      breaker.failures = 0;
+      breaker.lastFailure = null;
     } else {
-      this.circuitBreaker.failures++;
-      this.circuitBreaker.lastFailure = Date.now();
+      breaker.failures++;
+      breaker.lastFailure = Date.now();
+    }
+  }
+
+  /**
+   * Check if we can afford an operation
+   */
+  canAffordCredits(creditsNeeded) {
+    const remainingCredits = this.accountStatus.remainingCredits;
+    const dailyBudget = this.optimizationSettings.creditBudgetPerDay;
+
+    if (remainingCredits < creditsNeeded) {
+      console.warn(
+        `💰 Insufficient credits: ${remainingCredits} remaining, ${creditsNeeded} needed`
+      );
+      return false;
+    }
+
+    if (this.totalCreditsUsed + creditsNeeded > dailyBudget) {
+      console.warn(
+        `💰 Daily budget exceeded: ${this.totalCreditsUsed}/${dailyBudget} credits used`
+      );
+      return false;
+    }
+
+    return true;
+  }
+
+  /**
+   * Track credit usage
+   */
+  trackCredits(endpoint, creditsUsed) {
+    this.totalCreditsUsed += creditsUsed;
+    this.accountStatus.remainingCredits -= creditsUsed;
+    this.accountStatus.creditsConsumed += creditsUsed;
+
+    if (this.costTracking[endpoint]) {
+      this.costTracking[endpoint].requests++;
+      this.costTracking[endpoint].credits += creditsUsed;
+      // Estimate cost at $0.005 per credit (industry average)
+      this.costTracking[endpoint].cost += creditsUsed * 0.005;
     }
   }
 
@@ -125,12 +257,19 @@ class CostOptimizedApolloClient {
   }
 
   /**
-   * FREE: Organization Enrichment
-   * The only working endpoint on free plan - maximize its value
+   * Organization Enrichment (1 credit per result)
+   * FREE during trial, 1 credit post-trial
    */
   async enrichOrganization(orgData, options = {}) {
-    if (this.isCircuitOpen()) {
+    const endpoint = "organizationEnrichment";
+
+    if (this.isCircuitOpen(endpoint)) {
       throw new Error("Apollo Organization Enrichment circuit breaker is open");
+    }
+
+    // Check if we can afford this operation (1 credit)
+    if (!this.canAffordCredits(1)) {
+      throw new Error("Insufficient credits for organization enrichment");
     }
 
     await this.enforceRateLimit();
@@ -150,18 +289,14 @@ class CostOptimizedApolloClient {
       });
 
       this.requestCount++;
-      this.recordResult(true);
+      this.recordResult(endpoint, true);
 
       const organization = response.data?.organization;
       const matched = organization !== null;
 
       if (matched) {
-        // Track successful enrichment
-        this.totalCreditsUsed += 1;
-        this.costTracking.organizationEnrichment.requests++;
-        this.costTracking.organizationEnrichment.credits++;
-        // Estimate cost at $0.05 per enrichment (industry average)
-        this.costTracking.organizationEnrichment.cost += 0.05;
+        // Track successful enrichment (1 credit)
+        this.trackCredits(endpoint, 1);
 
         console.log(`✅ Organization enriched successfully`);
         console.log(
@@ -209,7 +344,8 @@ class CostOptimizedApolloClient {
           },
           responseTime: Date.now() - startTime,
           creditsUsed: 1,
-          estimatedCost: 0.05,
+          estimatedCost:
+            this.accountStatus.trialStatus === "active" ? 0 : 0.005, // FREE during trial
         };
       } else {
         console.log(`⚠️ Organization not found in Apollo database`);
@@ -223,7 +359,7 @@ class CostOptimizedApolloClient {
         };
       }
     } catch (error) {
-      this.recordResult(false);
+      this.recordResult(endpoint, false);
       console.error(
         "❌ Apollo Organization Enrichment failed:",
         error.response?.data || error.message
@@ -241,54 +377,416 @@ class CostOptimizedApolloClient {
   }
 
   /**
-   * PREMIUM: People Search (Requires Paid Plan)
-   * Returns upgrade message and integration strategy
+   * People Search (1 credit per page returned)
+   * Returns up to 100 results per page
    */
-  async searchPeople(filters = {}) {
-    console.log("💰 Apollo People Search requires Premium Plan");
-    console.log(
-      "🔄 Recommendation: Use Hunter.io Domain Search as alternative"
-    );
-    console.log(
-      "📈 Upgrade to Apollo Premium for advanced people search filters"
-    );
+  async searchPeople(filters = {}, options = {}) {
+    const endpoint = "peopleSearch";
 
-    return {
-      success: false,
-      requiresUpgrade: true,
-      feature: "People Search",
-      alternativeService: "Hunter.io Domain Search",
-      upgradeMessage:
-        "Apollo People Search requires a paid plan. Consider Hunter.io as an alternative.",
-      estimatedMonthlyCost: "$39+ per month for Apollo Pro Plan",
-    };
+    if (this.isCircuitOpen(endpoint)) {
+      throw new Error("Apollo People Search circuit breaker is open");
+    }
+
+    // People search costs 1 credit per page returned
+    // We'll estimate 1 credit for now, but track actual usage
+    if (!this.canAffordCredits(1)) {
+      throw new Error("Insufficient credits for people search");
+    }
+
+    await this.enforceRateLimit();
+
+    const client = this.createAxiosInstance();
+    const startTime = Date.now();
+
+    try {
+      console.log(`👥 Apollo People Search - ${JSON.stringify(filters)}`);
+
+      const response = await client.post("/mixed_people/search", {
+        ...filters,
+        page: options.page || 1,
+        per_page: options.perPage || 25, // Max 100
+      });
+
+      this.requestCount++;
+      this.recordResult(endpoint, true);
+
+      const people = response.data?.people || [];
+      const pagination = response.data?.pagination || {};
+
+      // Track credits used (1 credit per page returned)
+      const pagesReturned = pagination.page || 1;
+      this.trackCredits(endpoint, pagesReturned);
+
+      console.log(`✅ People search successful: ${people.length} results`);
+      console.log(
+        `📄 Page ${pagination.page}/${pagination.total_pages || 1} (${
+          pagination.total_entries || 0
+        } total)`
+      );
+
+      return {
+        success: true,
+        people: people.map((person) => ({
+          id: person.id,
+          name: `${person.first_name} ${person.last_name}`,
+          title: person.title,
+          email: person.email,
+          organization: {
+            name: person.organization?.name,
+            domain: person.organization?.primary_domain,
+            id: person.organization?.id,
+          },
+          location: {
+            city: person.city,
+            state: person.state,
+            country: person.country,
+          },
+          linkedin: person.linkedin_url,
+          apolloId: person.id,
+        })),
+        pagination,
+        responseTime: Date.now() - startTime,
+        creditsUsed: pagesReturned,
+        estimatedCost: pagesReturned * 0.005,
+      };
+    } catch (error) {
+      this.recordResult(endpoint, false);
+      console.error(
+        "❌ Apollo People Search failed:",
+        error.response?.data || error.message
+      );
+
+      return {
+        success: false,
+        people: [],
+        error: error.response?.data || error.message,
+        responseTime: Date.now() - startTime,
+        creditsUsed: 0,
+        estimatedCost: 0,
+      };
+    }
   }
 
   /**
-   * PREMIUM: People Enrichment (Requires Paid Plan)
-   * Returns upgrade message with mobile phone revelation info
+   * People Enrichment (1 credit per net-new email, 8 credits per phone number)
+   * Intelligent credit management - avoid phone numbers unless critical
    */
   async enrichPerson(personData, options = {}) {
-    console.log("💰 Apollo People Enrichment requires Premium Plan");
-    console.log("📱 Premium Feature: Mobile phone number revelation");
-    console.log(
-      "🔄 Recommendation: Use Hunter.io Email Finder + NeverBounce verification"
-    );
+    const endpoint = "peopleEnrichment";
 
-    return {
-      success: false,
-      requiresUpgrade: true,
-      feature: "People Enrichment with Mobile Phone Revelation",
-      alternativeService: "Hunter.io + NeverBounce",
-      upgradeMessage:
-        "Apollo People Enrichment with mobile phone revelation requires a paid plan.",
-      estimatedMonthlyCost: "$39+ per month for Apollo Pro Plan",
-    };
+    if (this.isCircuitOpen(endpoint)) {
+      throw new Error("Apollo People Enrichment circuit breaker is open");
+    }
+
+    // Calculate potential credits needed
+    let estimatedCredits = 0;
+    if (options.revealPhone) {
+      estimatedCredits += 8; // Phone numbers cost 8 credits each
+    }
+    if (options.revealEmail) {
+      estimatedCredits += 1; // Net-new emails cost 1 credit
+    }
+
+    if (estimatedCredits === 0) {
+      throw new Error("Must specify what to enrich (email or phone)");
+    }
+
+    if (!this.canAffordCredits(estimatedCredits)) {
+      throw new Error(
+        `Insufficient credits for people enrichment (${estimatedCredits} needed)`
+      );
+    }
+
+    await this.enforceRateLimit();
+
+    const client = this.createAxiosInstance();
+    const startTime = Date.now();
+
+    try {
+      console.log(
+        `� Apollo People Enrichment - ${
+          personData.id || personData.email || "Unknown"
+        }`
+      );
+
+      const requestData = {
+        id: personData.id,
+        email: personData.email,
+        reveal_personal_emails: options.revealEmail || false,
+        reveal_phone_number: options.revealPhone || false, // Avoid unless critical
+      };
+
+      const response = await client.post("/people/match", requestData);
+
+      this.requestCount++;
+      this.recordResult(endpoint, true);
+
+      const person = response.data?.person;
+      if (!person) {
+        console.log(`⚠️ Person not found or no new data revealed`);
+        return {
+          success: true,
+          enriched: false,
+          person: null,
+          responseTime: Date.now() - startTime,
+          creditsUsed: 0,
+          estimatedCost: 0,
+        };
+      }
+
+      // Calculate actual credits used
+      let actualCredits = 0;
+      if (person.email && person.email !== personData.email) {
+        actualCredits += 1; // Net-new email
+      }
+      if (person.phone_numbers && person.phone_numbers.length > 0) {
+        actualCredits += 8; // Phone number revelation
+      }
+
+      this.trackCredits(endpoint, actualCredits);
+
+      console.log(`✅ Person enriched successfully`);
+      console.log(`📧 Email: ${person.email || "Not revealed"}`);
+      console.log(
+        `📱 Phone: ${person.phone_numbers?.[0]?.number || "Not revealed"}`
+      );
+      console.log(`💰 Credits used: ${actualCredits}`);
+
+      return {
+        success: true,
+        enriched: true,
+        person: {
+          id: person.id,
+          name: `${person.first_name} ${person.last_name}`,
+          title: person.title,
+          email: person.email,
+          phone: person.phone_numbers?.[0]?.number,
+          organization: {
+            name: person.organization?.name,
+            domain: person.organization?.primary_domain,
+          },
+          location: {
+            city: person.city,
+            state: person.state,
+            country: person.country,
+          },
+          linkedin: person.linkedin_url,
+          apolloId: person.id,
+        },
+        responseTime: Date.now() - startTime,
+        creditsUsed: actualCredits,
+        estimatedCost: actualCredits * 0.005,
+      };
+    } catch (error) {
+      this.recordResult(endpoint, false);
+      console.error(
+        "❌ Apollo People Enrichment failed:",
+        error.response?.data || error.message
+      );
+
+      return {
+        success: false,
+        enriched: false,
+        error: error.response?.data || error.message,
+        responseTime: Date.now() - startTime,
+        creditsUsed: 0,
+        estimatedCost: 0,
+      };
+    }
+  }
+
+  /**
+   * Organization Search (1 credit per page returned)
+   * Returns up to 100 results per page
+   */
+  async searchOrganizations(filters = {}, options = {}) {
+    const endpoint = "organizationSearch";
+
+    if (this.isCircuitOpen(endpoint)) {
+      throw new Error("Apollo Organization Search circuit breaker is open");
+    }
+
+    // Organization search costs 1 credit per page returned
+    if (!this.canAffordCredits(1)) {
+      throw new Error("Insufficient credits for organization search");
+    }
+
+    await this.enforceRateLimit();
+
+    const client = this.createAxiosInstance();
+    const startTime = Date.now();
+
+    try {
+      console.log(`🏢 Apollo Organization Search - ${JSON.stringify(filters)}`);
+
+      const response = await client.post("/mixed_companies/search", {
+        ...filters,
+        page: options.page || 1,
+        per_page: options.perPage || 25, // Max 100
+      });
+
+      this.requestCount++;
+      this.recordResult(endpoint, true);
+
+      const organizations = response.data?.organizations || [];
+      const pagination = response.data?.pagination || {};
+
+      // Track credits used (1 credit per page returned)
+      const pagesReturned = pagination.page || 1;
+      this.trackCredits(endpoint, pagesReturned);
+
+      console.log(
+        `✅ Organization search successful: ${organizations.length} results`
+      );
+      console.log(
+        `📄 Page ${pagination.page}/${pagination.total_pages || 1} (${
+          pagination.total_entries || 0
+        } total)`
+      );
+
+      return {
+        success: true,
+        organizations: organizations.map((org) => ({
+          id: org.id,
+          name: org.name,
+          domain: org.primary_domain,
+          website: org.website_url,
+          industry: org.industry,
+          employees: org.estimated_num_employees,
+          revenue: org.estimated_annual_revenue,
+          location: {
+            city: org.primary_city,
+            state: org.primary_state,
+            country: org.primary_country,
+          },
+          apolloId: org.id,
+        })),
+        pagination,
+        responseTime: Date.now() - startTime,
+        creditsUsed: pagesReturned,
+        estimatedCost: pagesReturned * 0.005,
+      };
+    } catch (error) {
+      this.recordResult(endpoint, false);
+      console.error(
+        "❌ Apollo Organization Search failed:",
+        error.response?.data || error.message
+      );
+
+      return {
+        success: false,
+        organizations: [],
+        error: error.response?.data || error.message,
+        responseTime: Date.now() - startTime,
+        creditsUsed: 0,
+        estimatedCost: 0,
+      };
+    }
+  }
+
+  /**
+   * Bulk People Enrichment (Same pricing as single enrichment)
+   * Cost-effective for processing multiple people at once
+   */
+  async bulkEnrichPeople(peopleData, options = {}) {
+    const endpoint = "bulkOperations";
+
+    if (this.isCircuitOpen(endpoint)) {
+      throw new Error("Apollo Bulk Operations circuit breaker is open");
+    }
+
+    // Calculate potential credits needed
+    let estimatedCredits = 0;
+    peopleData.forEach((person) => {
+      if (options.revealPhone) estimatedCredits += 8;
+      if (options.revealEmail) estimatedCredits += 1;
+    });
+
+    if (!this.canAffordCredits(estimatedCredits)) {
+      throw new Error(
+        `Insufficient credits for bulk people enrichment (${estimatedCredits} needed)`
+      );
+    }
+
+    await this.enforceRateLimit();
+
+    const client = this.createAxiosInstance();
+    const startTime = Date.now();
+
+    try {
+      console.log(
+        `📦 Apollo Bulk People Enrichment - ${peopleData.length} people`
+      );
+
+      const requestData = {
+        people: peopleData.map((person) => ({
+          id: person.id,
+          email: person.email,
+          reveal_personal_emails: options.revealEmail || false,
+          reveal_phone_number: options.revealPhone || false,
+        })),
+      };
+
+      const response = await client.post("/people/bulk_match", requestData);
+
+      this.requestCount++;
+      this.recordResult(endpoint, true);
+
+      const results = response.data?.results || [];
+      let totalCredits = 0;
+
+      // Calculate actual credits used
+      results.forEach((result) => {
+        if (result.person?.email) totalCredits += 1; // Net-new email
+        if (result.person?.phone_numbers?.length > 0) totalCredits += 8; // Phone number
+      });
+
+      this.trackCredits(endpoint, totalCredits);
+
+      console.log(`✅ Bulk enrichment successful: ${results.length} results`);
+      console.log(`💰 Total credits used: ${totalCredits}`);
+
+      return {
+        success: true,
+        results: results.map((result) => ({
+          success: result.success,
+          person: result.person
+            ? {
+                id: result.person.id,
+                name: `${result.person.first_name} ${result.person.last_name}`,
+                email: result.person.email,
+                phone: result.person.phone_numbers?.[0]?.number,
+                organization: result.person.organization?.name,
+              }
+            : null,
+          error: result.error,
+        })),
+        responseTime: Date.now() - startTime,
+        creditsUsed: totalCredits,
+        estimatedCost: totalCredits * 0.005,
+      };
+    } catch (error) {
+      this.recordResult(endpoint, false);
+      console.error(
+        "❌ Apollo Bulk People Enrichment failed:",
+        error.response?.data || error.message
+      );
+
+      return {
+        success: false,
+        results: [],
+        error: error.response?.data || error.message,
+        responseTime: Date.now() - startTime,
+        creditsUsed: 0,
+        estimatedCost: 0,
+      };
+    }
   }
 
   /**
    * Multi-Source Organization Intelligence
    * Combine Apollo Organization Enrichment with domain analysis
+   * Cost-optimized: Uses FREE organization enrichment during trial
    */
   async getOrganizationIntelligence(domain, options = {}) {
     console.log(`🧠 Multi-Source Organization Intelligence - ${domain}`);
@@ -302,12 +800,12 @@ class CostOptimizedApolloClient {
       confidence: 0,
     };
 
-    // 1. Apollo Organization Enrichment (Free)
+    // 1. Apollo Organization Enrichment (FREE during trial, 1 credit post-trial)
     try {
       const apolloResult = await this.enrichOrganization({ domain });
       if (apolloResult.success && apolloResult.matched) {
         intelligence.apolloData = apolloResult.organization;
-        intelligence.confidence += 40; // Apollo contributes 40 points
+        intelligence.confidence += 70; // Apollo contributes 70 points (higher quality)
         console.log("✅ Apollo data retrieved successfully");
       }
     } catch (error) {
@@ -365,86 +863,48 @@ class CostOptimizedApolloClient {
       confidence: intelligence.confidence,
       responseTime,
       creditsUsed: intelligence.apolloData ? 1 : 0,
+      estimatedCost: intelligence.apolloData
+        ? this.accountStatus.trialStatus === "active"
+          ? 0
+          : 0.005
+        : 0,
       recommendNextSteps: this.generateRecommendations(intelligence),
     };
-  }
-
-  /**
-   * Generate actionable recommendations based on intelligence
-   */
-  generateRecommendations(intelligence) {
-    const recommendations = [];
-
-    if (intelligence.apolloData) {
-      recommendations.push({
-        action: "Email Discovery",
-        service: "Hunter.io Domain Search",
-        reason: `Use Hunter.io to find verified emails for ${intelligence.apolloData.name}`,
-        priority: "High",
-      });
-
-      if (intelligence.apolloData.employees > 50) {
-        recommendations.push({
-          action: "People Discovery",
-          service: "Hunter.io + Apollo Premium",
-          reason:
-            "Large organization - consider Apollo Pro for advanced people search",
-          priority: "Medium",
-        });
-      }
-    }
-
-    if (intelligence.emails.length > 0) {
-      recommendations.push({
-        action: "Email Verification",
-        service: "NeverBounce",
-        reason: "Verify generated email patterns for deliverability",
-        priority: "High",
-      });
-    }
-
-    if (intelligence.confidence < 50) {
-      recommendations.push({
-        action: "Manual Research",
-        service: "Website Scraping + LinkedIn",
-        reason: "Low confidence - supplement with manual research",
-        priority: "Medium",
-      });
-    }
-
-    return recommendations;
   }
 
   /**
    * Get Apollo integration statistics
    */
   getStats() {
+    const totalCost = Object.values(this.costTracking).reduce(
+      (sum, endpoint) => sum + endpoint.cost,
+      0
+    );
+
     return {
+      accountStatus: this.accountStatus,
       totalRequests: this.requestCount,
       totalCreditsUsed: this.totalCreditsUsed,
-      estimatedCost: this.costTracking.organizationEnrichment.cost,
-      organizationEnrichments:
-        this.costTracking.organizationEnrichment.requests,
-      circuitBreakerStatus:
-        this.circuitBreaker.failures >= this.circuitBreaker.threshold
-          ? "OPEN"
-          : "CLOSED",
-      averageResponseTime:
-        this.requestCount > 0
-          ? this.costTracking.organizationEnrichment.responseTime /
-            this.requestCount
-          : 0,
-      freeFeatures: [
-        "Organization Enrichment",
-        "Domain Intelligence",
-        "Email Pattern Generation",
+      estimatedCost: totalCost,
+      creditsRemaining: this.accountStatus.remainingCredits,
+      dailyBudgetUsed: `${this.totalCreditsUsed}/${this.optimizationSettings.creditBudgetPerDay}`,
+      costBreakdown: this.costTracking,
+      circuitBreakers: Object.entries(this.circuitBreakers).map(
+        ([endpoint, breaker]) => ({
+          endpoint,
+          status: breaker.failures >= breaker.threshold ? "OPEN" : "CLOSED",
+          failures: breaker.failures,
+          lastFailure: breaker.lastFailure,
+        })
+      ),
+      availableEndpoints: [
+        "Organization Enrichment (FREE during trial)",
+        "People Search (1 credit/page)",
+        "People Enrichment (1 credit/email, 8 credits/phone)",
+        "Organization Search (1 credit/page)",
+        "Bulk People Enrichment (same as single)",
       ],
-      premiumFeatures: [
-        "People Search ($39+/month)",
-        "People Enrichment with Mobile Phone ($39+/month)",
-        "Bulk Operations ($39+/month)",
-        "Organization Search ($39+/month)",
-      ],
+      optimizationSettings: this.optimizationSettings,
     };
   }
 
@@ -509,18 +969,26 @@ class CostOptimizedApolloClient {
   }
 
   /**
-   * Reset statistics
+   * Reset statistics and circuit breakers
    */
   reset() {
     this.totalCreditsUsed = 0;
     this.requestCount = 0;
-    this.costTracking = {
-      organizationEnrichment: { requests: 0, credits: 0, cost: 0 },
-    };
-    this.circuitBreaker.failures = 0;
-    this.circuitBreaker.lastFailure = null;
+    this.accountStatus.creditsConsumed = 0;
+    this.accountStatus.remainingCredits = this.accountStatus.monthlyLimit;
 
-    console.log("📊 Apollo client statistics reset");
+    // Reset cost tracking
+    Object.keys(this.costTracking).forEach((endpoint) => {
+      this.costTracking[endpoint] = { requests: 0, credits: 0, cost: 0 };
+    });
+
+    // Reset circuit breakers
+    Object.values(this.circuitBreakers).forEach((breaker) => {
+      breaker.failures = 0;
+      breaker.lastFailure = null;
+    });
+
+    console.log("📊 Apollo client statistics and circuit breakers reset");
   }
 }
 
