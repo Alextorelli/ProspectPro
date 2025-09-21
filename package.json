@@ -8,6 +8,11 @@
     "dev": "nodemon server.js",
     "health": "curl http://localhost:3000/health || echo 'Server not running'",
     "test": "echo 'Tests moved to testing branch. Run: git checkout testing && node tests/validation/test-real-data.js'",
+    "test:foursquare": "node test/test-foursquare-integration.js",
+    "mcp:server": "node tools/mcp/mcp-server.js",
+    "docker:build": "docker build -t prospectpro:latest .",
+    "docker:run": "docker run --rm -p 3000:3000 --env-file .env -v \"$PWD/uploads:/app/uploads\" --name prospectpro prospectpro:latest",
+    "docker:stop": "docker stop prospectpro 2>/dev/null || true",
     "postinstall": "echo 'ProspectPro: Production-ready deployment configured'"
   },
   "engines": {
@@ -33,6 +38,7 @@
     "rate-limiter-flexible": "^2.4.2"
   },
   "devDependencies": {
+    "@modelcontextprotocol/sdk": "^1.18.1",
     "jest": "^30.1.3",
     "nodemon": "^3.1.10",
     "supabase": "^2.40.7",
