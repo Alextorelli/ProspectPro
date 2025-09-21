@@ -104,3 +104,5 @@ supabase_bin
 supabase_cli.tar.gz
 # Ignore large consolidated DB installer during iterative debugging
 database/all-phases-consolidated.sql
+exports/
+nohup.out
