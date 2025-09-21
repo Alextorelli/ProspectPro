@@ -50,39 +50,17 @@ async function runClientBriefTrace() {
     console.log("🌐 API DISCOVERY SIMULATION:");
     console.log("--------------------------------");
 
-    // Simulate Google Places API call
-    const simulatedGoogleResults = [
-      {
-        place_id: "ChIJK1234567890abcdef",
-        name: "Priority Plumbing & Drain",
-        formatted_address: "1234 Miramar Rd, San Diego, CA 92126",
-        geometry: { location: { lat: 32.9083, lng: -117.139 } },
-        business_status: "OPERATIONAL",
-        rating: 4.8,
-        user_ratings_total: 127,
-        website: "https://priorityplumbingsd.com",
-        formatted_phone_number: "(619) 555-0123",
-        types: ["plumber", "home_services", "contractor"],
-      },
-    ];
-
-    // Simulate Foursquare API call
-    const simulatedFoursquareResults = [
-      {
-        fsq_id: "abc123def456ghi789",
-        name: "Priority Plumbing & Drain",
-        location: {
-          formatted_address: "1234 Miramar Rd, San Diego, CA 92126",
-          locality: "San Diego",
-          region: "CA",
-          postcode: "92126",
-        },
-        geocodes: { main: { latitude: 32.9083, longitude: -117.139 } },
-        categories: [{ id: 17036, name: "Plumber", short_name: "Plumber" }],
-        website: "https://priorityplumbingsd.com",
-        tel: "+16195550123",
-      },
-    ];
+    // REAL API INTEGRATION REQUIRED
+    // This trace is now removed to prevent confusion with production data
+    console.log("❌ FAKE DATA TRACE REMOVED");
+    console.log(
+      "This simulation has been disabled to prevent fake data generation."
+    );
+    console.log("Use the production API endpoint: /api/business-discovery");
+    console.log(
+      "This ensures only real business data from Google Places, Foursquare, etc."
+    );
+    return;
 
     console.log("✅ Google Places API response: 1 result");
     console.log("   Cost: ~$0.032 (text search)");
