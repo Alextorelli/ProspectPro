@@ -1,200 +1,11 @@
-# Supabase CLI
+# ProspectPro - Enhanced Lead Discovery Platform v2.0
 
-[![Coverage Status](https://coveralls.io/repos/github/supabase/cli/badge.svg?branch=main)](https://coveralls.io/github/supabase/cli?branch=main) [![Bitbucket Pipelines](https://img.shields.io/bitbucket/pipelines/supabase-cli/setup-cli/master?style=flat-square&label=Bitbucket%20Canary)](https://bitbucket.org/supabase-cli/setup-cli/pipelines) [![Gitlab Pipeline Status](https://img.shields.io/gitlab/pipeline-status/sweatybridge%2Fsetup-cli?label=Gitlab%20Canary)
-](https://gitlab.com/sweatybridge/setup-cli/-/pipelines)
-
-[Supabase](https://supabase.io) is an open source Firebase alternative. We're building the features of Firebase using enterprise-grade open source tools.
-
-This repository contains all the functionality for Supabase CLI.
-
-- [x] Running Supabase locally
-- [x] Managing database migrations
-- [x] Creating and deploying Supabase Functions
-- [x] Generating types directly from your database schema
-- [x] Making authenticated HTTP requests to [Management API](https://supabase.com/docs/reference/api/introduction)
-
-## Getting started
-
-### Install the CLI
-
-Available via [NPM](https://www.npmjs.com) as dev dependency. To install:
-
-```bash
-npm i supabase --save-dev
-```
-
-To install the beta release channel:
-
-```bash
-npm i supabase@beta --save-dev
-```
-
-When installing with yarn 4, you need to disable experimental fetch with the following nodejs config.
-
-```
-NODE_OPTIONS=--no-experimental-fetch yarn add supabase
-```
-
-> **Note**
-> For Bun versions below v1.0.17, you must add `supabase` as a [trusted dependency](https://bun.sh/guides/install/trusted) before running `bun add -D supabase`.
-
-<details>
-  <summary><b>macOS</b></summary>
-
-Available via [Homebrew](https://brew.sh). To install:
-
-```sh
-brew install supabase/tap/supabase
-```
-
-To install the beta release channel:
-
-```sh
-brew install supabase/tap/supabase-beta
-brew link --overwrite supabase-beta
-```
-
-To upgrade:
-
-```sh
-brew upgrade supabase
-```
-
-</details>
-
-<details>
-  <summary><b>Windows</b></summary>
-
-Available via [Scoop](https://scoop.sh). To install:
-
-```powershell
-scoop bucket add supabase https://github.com/supabase/scoop-bucket.git
-scoop install supabase
-```
-
-To upgrade:
-
-```powershell
-scoop update supabase
-```
-
-</details>
-
-<details>
-  <summary><b>Linux</b></summary>
-
-Available via [Homebrew](https://brew.sh) and Linux packages.
-
-#### via Homebrew
-
-To install:
-
-```sh
-brew install supabase/tap/supabase
-```
-
-To upgrade:
-
-```sh
-brew upgrade supabase
-```
-
-#### via Linux packages
-
-Linux packages are provided in [Releases](https://github.com/supabase/cli/releases). To install, download the `.apk`/`.deb`/`.rpm`/`.pkg.tar.zst` file depending on your package manager and run the respective commands.
-
-```sh
-sudo apk add --allow-untrusted <...>.apk
-```
-
-```sh
-sudo dpkg -i <...>.deb
-```
-
-```sh
-sudo rpm -i <...>.rpm
-```
-
-```sh
-sudo pacman -U <...>.pkg.tar.zst
-```
-
-</details>
-
-<details>
-  <summary><b>Other Platforms</b></summary>
-
-You can also install the CLI via [go modules](https://go.dev/ref/mod#go-install) without the help of package managers.
-
-```sh
-go install github.com/supabase/cli@latest
-```
-
-Add a symlink to the binary in `$PATH` for easier access:
-
-```sh
-ln -s "$(go env GOPATH)/bin/cli" /usr/bin/supabase
-```
-
-This works on other non-standard Linux distros.
-
-</details>
-
-<details>
-  <summary><b>Community Maintained Packages</b></summary>
-
-Available via [pkgx](https://pkgx.sh/). Package script [here](https://github.com/pkgxdev/pantry/blob/main/projects/supabase.com/cli/package.yml).
-To install in your working directory:
-
-```bash
-pkgx install supabase
-```
-
-Available via [Nixpkgs](https://nixos.org/). Package script [here](https://github.com/NixOS/nixpkgs/blob/master/pkgs/development/tools/supabase-cli/default.nix).
-
-</details>
-
-### Run the CLI
-
-```bash
-supabase bootstrap
-```
-
-Or using npx:
-
-```bash
-npx supabase bootstrap
-```
-
-The bootstrap command will guide you through the process of setting up a Supabase project using one of the [starter](https://github.com/supabase-community/supabase-samples/blob/main/samples.json) templates.
-
-## Docs
-
-Command & config reference can be found [here](https://supabase.com/docs/reference/cli/about).
-
-## Breaking changes
-
-We follow semantic versioning for changes that directly impact CLI commands, flags, and configurations.
-
-However, due to dependencies on other service images, we cannot guarantee that schema migrations, seed.sql, and generated types will always work for the same CLI major version. If you need such guarantees, we encourage you to pin a specific version of CLI in package.json.
-
-## Developing
-
-To run from source:
-
-```sh
-# Go >= 1.22
-go run . help
-```
-
-# ProspectPro - Enhanced Lead Discovery Platform
-
-## 🚀 Latest Updates (v2.0)
+## 🚀 Latest Features (September 2025)
 
 ### Enhanced CSV Export System
 
 - **Multi-Query Campaigns**: Build comprehensive datasets across multiple searches
-- **45+ Column CSV Export**: Complete business intelligence data with owner/company contact differentiation
+- **45+ Column CSV Export**: Complete business intelligence with owner/company contact differentiation
 - **Campaign Analytics**: Query-level analysis with cost efficiency and quality metrics
 - **Testing Support**: Rich metadata for algorithm optimization and A/B testing
 
@@ -204,42 +15,64 @@ ProspectPro maintains **zero tolerance for fake business data** through:
 
 - Real-time Google Places API integration
 - Multi-source validation (Hunter.io, NeverBounce, State Registries)
-- Sophisticated owner detection algorithms
+- Sophisticated owner detection algorithms with name matching
 - 80%+ email deliverability requirements
+- Website accessibility verification
 
-## Quick Start
+## Installation & Setup
 
-### Installation
+### Prerequisites
+
+- Node.js 16+
+- PostgreSQL database (Supabase recommended)
+- API keys for Google Places, Hunter.io, NeverBounce
+
+### Quick Start
 
 ```bash
 git clone https://github.com/yourusername/ProspectPro.git
 cd ProspectPro
 npm install
+cp .env.example .env
 ```
 
-### Environment Setup
+### Environment Configuration
+
+```env
+# Required APIs
+GOOGLE_PLACES_API_KEY=your_google_places_key
+HUNTER_IO_API_KEY=your_hunter_io_key
+NEVERBOUNCE_API_KEY=your_neverbounce_key
+
+# Database
+SUPABASE_URL=your_supabase_url
+SUPABASE_SECRET_KEY=your_supabase_secret_key
+
+# Optional APIs for enhanced validation
+FOURSQUARE_API_KEY=your_foursquare_key
+ZEROBOUNCE_API_KEY=your_zerobounce_key
+```
+
+### Database Setup
 
 ```bash
-cp .env.example .env
-# Add your API keys:
-# GOOGLE_PLACES_API_KEY=your_key
-# HUNTER_IO_API_KEY=your_key
-# NEVERBOUNCE_API_KEY=your_key
-# SUPABASE_URL=your_url
-# SUPABASE_SECRET_KEY=your_key
+# Run database migrations
+node database/database-master-setup.js
+
+# Validate setup
+node database/validate-setup.js
 ```
 
-### Start Server
+### Start Development Server
 
 ```bash
 npm run dev  # Development with auto-reload
-# or
-npm start   # Production mode
+# Server starts on http://localhost:3000
 ```
 
 ## API Usage Examples
 
-### Single Query Discovery
+### Single Query with CSV Export
 
 ```javascript
 const response = await fetch("http://localhost:3000/api/business/discover", {
@@ -257,49 +90,56 @@ const response = await fetch("http://localhost:3000/api/business/discover", {
 
 const result = await response.json();
 console.log(`Found ${result.results.length} qualified leads`);
-console.log(`CSV exported: ${result.csvExport.filename}`);
+console.log(`CSV: ${result.csvExport.filename}`);
+console.log(`Campaign ID: ${result.campaignTracking.campaignId}`);
 ```
 
-### Multi-Query Campaign
+### Multi-Query Campaign Workflow
 
 ```javascript
-// Start campaign
+// 1. Start new campaign
 const campaign = await fetch(
   "http://localhost:3000/api/business/campaign/start",
   {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      campaignName: "Austin Food Scene Analysis",
-      description: "Comprehensive restaurant market research",
+      campaignName: "Austin Restaurant Market Analysis",
+      description: "Comprehensive food scene research",
     }),
   }
 );
 
 const { campaignId } = await campaign.json();
 
-// Add multiple queries
+// 2. Add multiple queries to campaign
 const queries = [
-  "pizza restaurants",
-  "taco shops",
-  "bbq restaurants",
-  "food trucks",
+  { query: "pizza restaurants", location: "Austin, TX" },
+  { query: "taco shops", location: "Austin, TX" },
+  { query: "barbecue restaurants", location: "Austin, TX" },
+  { query: "food trucks", location: "Austin, TX" },
 ];
 
-for (const query of queries) {
-  await fetch("http://localhost:3000/api/business/campaign/add-query", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      campaignId,
-      query,
-      location: "Austin, TX",
-      count: 25,
-    }),
-  });
+for (const queryData of queries) {
+  const queryResult = await fetch(
+    "http://localhost:3000/api/business/campaign/add-query",
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        campaignId,
+        ...queryData,
+        count: 25,
+        qualityThreshold: 70,
+      }),
+    }
+  );
+
+  const query = await queryResult.json();
+  console.log(`Added query: ${query.queryMetadata.leadCount} leads found`);
 }
 
-// Export comprehensive dataset
+// 3. Export comprehensive campaign dataset
 const exportResult = await fetch(
   "http://localhost:3000/api/business/campaign/export",
   {
@@ -310,8 +150,189 @@ const exportResult = await fetch(
 );
 
 const exportData = await exportResult.json();
-console.log(`Campaign CSV: ${exportData.export.filename}`);
+console.log(`Campaign exported: ${exportData.export.filename}`);
 console.log(
-  `Total leads: ${exportData.export.leadCount} across ${exportData.export.queryCount} queries`
+  `Total: ${exportData.export.leadCount} leads across ${exportData.export.queryCount} queries`
 );
+console.log(`Analysis: ${exportData.export.analysisUrl}`);
+console.log(`Summary: ${exportData.export.summaryUrl}`);
 ```
+
+## Enhanced CSV Export Features
+
+### Comprehensive Data Structure (45+ Columns)
+
+#### Campaign Tracking
+
+- Campaign ID, Query ID, Search Query, Location, Timestamps
+
+#### Business Information
+
+- Name, Address, Category, Rating, Reviews, Price Level
+
+#### Contact Differentiation
+
+- **Company Contacts**: Main business phone/email
+- **Owner Contacts**: Owner-specific phone/email with confidence scores
+- **Owner Details**: Name, title, source attribution
+
+#### Validation & Quality
+
+- Confidence scores (0-100), Quality grades (A-F)
+- Registry validation, Email deliverability, Website accessibility
+- Property intelligence, API cost breakdown
+
+#### Testing & Analysis
+
+- Individual scoring metrics (name, address, phone, website, email)
+- Pre-validation scores, Processing times, Source attribution
+- Technical identifiers (Google Place ID, Foursquare ID)
+
+### Generated Files
+
+Each campaign export creates:
+
+1. **Main CSV** - Complete lead dataset with all 45+ columns
+2. **Campaign Summary JSON** - Query-level analysis and totals
+3. **Analysis Data JSON** - Testing metrics and optimization insights
+
+## Key Features
+
+### Owner vs Company Contact Detection
+
+The system intelligently differentiates between business contacts and owner contacts:
+
+```csv
+Business Name,Company Email,Owner Email,Owner Name,Owner Title,Owner Email Confidence
+Trevor Caudle Law Practice,haley@trevorcaudlelaw.com,trevor@trevorcaudlelaw.com,Trevor Caudle,Accountant,98
+```
+
+**Detection Algorithm**:
+
+- Position-based analysis (CEO, Owner, Founder, etc.)
+- Name matching with business name for edge cases
+- 80%+ confidence threshold for owner classification
+- Separate confidence scoring for each contact type
+
+### Quality Assurance Pipeline
+
+1. **Pre-validation Screening** (0-100 score)
+2. **Google Places Discovery** (Primary source)
+3. **Multi-source Enrichment** (Hunter.io, Foursquare, etc.)
+4. **Validation & Verification** (NeverBounce, website checks)
+5. **Quality Scoring & Grading** (A-F grades)
+6. **Export Readiness Assessment**
+
+### Cost Optimization
+
+- **Budget-aware processing** with configurable limits
+- **Pre-screening** to avoid expensive APIs on low-quality leads
+- **API rate limiting** and intelligent queuing
+- **Cost per lead tracking** typically $0.05-0.15 per qualified lead
+
+## API Endpoints
+
+### Core Discovery
+
+- `POST /api/business/discover` - Single query discovery with optional campaign
+- `GET /api/business/stats` - Campaign statistics and metrics
+
+### Campaign Management
+
+- `POST /api/business/campaign/start` - Initialize new campaign
+- `POST /api/business/campaign/add-query` - Add query to existing campaign
+- `GET /api/business/campaign/status/:campaignId` - Get campaign status
+- `POST /api/business/campaign/export` - Export complete campaign
+
+### File Downloads
+
+- `GET /api/business/download-csv/:filename` - Download CSV/JSON files
+
+## Project Structure
+
+```
+ProspectPro/
+├── api/                    # API endpoints
+│   ├── business-discovery.js
+│   └── campaign-export.js
+├── modules/                # Core logic
+│   ├── enhanced-lead-discovery.js
+│   ├── campaign-csv-exporter.js
+│   └── api-clients/        # External API integrations
+├── database/               # Database schemas and setup
+├── frontend/               # Web interface
+├── exports/                # Generated CSV files
+├── docs/                   # Documentation
+└── test/                   # Testing utilities
+```
+
+## Testing & Validation
+
+### Real Data Validation
+
+```bash
+node test/test-real-data.js         # Verify zero fake data patterns
+node test/test-website-validation.js # Test website accessibility
+node debug/inspect-business-data.js  # Debug specific business data
+```
+
+### Performance Testing
+
+```bash
+node run-production-test.js         # End-to-end production test
+node iterative-testing-framework.js # Algorithm optimization testing
+```
+
+## Deployment
+
+### Railway (Recommended)
+
+```bash
+# Configure environment variables in Railway dashboard
+railway up
+```
+
+### Docker
+
+```bash
+docker build -t prospectpro .
+docker run -p 3000:3000 --env-file .env prospectpro
+```
+
+### Manual Deployment
+
+```bash
+npm install --production
+npm start
+```
+
+## Documentation
+
+- [Enhanced CSV Export System](docs/ENHANCED_CSV_EXPORT_SYSTEM.md) - Complete v2.0 export guide
+- [API Keys Integration Guide](docs/API_KEYS_INTEGRATION_GUIDE.md) - Setup instructions
+- [Database Setup Guide](docs/DATABASE_CONNECTION_SETUP.md) - Supabase configuration
+- [Technical Overview](docs/TECHNICAL_OVERVIEW.md) - Architecture details
+
+## Contributing
+
+1. Fork the repository
+2. Create feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit changes (`git commit -m 'Add amazing feature'`)
+4. Push to branch (`git push origin feature/amazing-feature`)
+5. Open Pull Request
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Support
+
+For questions, issues, or feature requests:
+
+- Create an issue on GitHub
+- Check existing documentation in `/docs`
+- Review the API examples above
+
+---
+
+**ProspectPro v2.0** - Enterprise-grade lead generation with comprehensive campaign analytics and zero fake data guarantee.
