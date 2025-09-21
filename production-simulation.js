@@ -1,17 +1,20 @@
 /**
- * Production Simulation: West Coast SMB Lead Generation
- * Demonstrates high-quality lead discovery across multiple metros and industries
- * Target: Quality over quantity with $5 budget
+ * ALGORITHM SIMULATION: West Coast SMB Lead Generation
+ * Simulates high-quality lead discovery pipeline for testing and validation
+ * NOTE: This is a SIMULATION using synthetic data - not live API calls
+ * For PRODUCTION testing, use iterative-testing-framework.js
  */
 
 const EnhancedLeadDiscovery = require("./modules/enhanced-lead-discovery");
 
-async function runProductionSimulation() {
-  console.log("🎯 WEST COAST SMB PRODUCTION SIMULATION");
-  console.log("=======================================");
+async function runAlgorithmSimulation() {
+  console.log("🎯 ALGORITHM SIMULATION: WEST COAST SMB PIPELINE");
+  console.log("===============================================");
+  console.log("⚠️  SIMULATION MODE: Using synthetic data for algorithm testing");
   console.log("Target: High-quality trades & wellness businesses");
   console.log("Budget: $5.00 | Geography: West Coast metros");
   console.log("Strategy: Quality over Quantity (80%+ confidence threshold)");
+  console.log("📋 For PRODUCTION testing, use: node iterative-testing-framework.js");
   console.log("");
 
   const discovery = new EnhancedLeadDiscovery({
@@ -346,7 +349,7 @@ async function runProductionSimulation() {
   console.log("• Data provenance (sources, discovery methods)");
   console.log("• Geographic coverage (West Coast metro areas)");
 
-  console.log("\n✅ PRODUCTION SIMULATION COMPLETED");
+  console.log("\n✅ ALGORITHM SIMULATION COMPLETED");
   console.log(
     `🎯 Quality over Quantity: ${qualifiedLeads.length} premium leads at 80%+ confidence`
   );
@@ -357,6 +360,7 @@ async function runProductionSimulation() {
   );
   console.log(`📊 Industry mix: Trades (60%) + Wellness/Beauty (40%)`);
   console.log(`🗺️  Geographic coverage: 5 West Coast metro areas`);
+  console.log(`\n🚀 Ready for PRODUCTION testing with iterative-testing-framework.js`);
 }
 
 // Scoring simulation functions
@@ -423,7 +427,7 @@ function calculateFinalConfidence(candidate) {
 
 // Run simulation
 if (require.main === module) {
-  runProductionSimulation().catch(console.error);
+  runAlgorithmSimulation().catch(console.error);
 }
 
-module.exports = { runProductionSimulation };
+module.exports = { runAlgorithmSimulation };

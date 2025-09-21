@@ -1,4 +1,6 @@
-# West Coast SMB Lead Generation - Production Results
+# West Coast SMB Lead Generation - Algorithm Simulation Results
+
+**⚠️ SIMULATION DATA:** These results demonstrate the ProspectPro algorithm using synthetic business data for testing and validation purposes. For live production testing, see iterative-testing-framework.js
 
 ## Campaign Summary
 
@@ -6,7 +8,8 @@
 **Budget:** $5.00  
 **Strategy:** Quality over Quantity (80%+ confidence threshold)  
 **Geography:** West Coast metropolitan areas  
-**Target:** Small service businesses (<10 employees), owner-operated
+**Target:** Small service businesses (<10 employees), owner-operated  
+**Data Source:** Algorithm simulation with synthetic business profiles
 
 ## Results Overview
 
@@ -142,4 +145,6 @@
 
 ## Export Ready
 
-All data is formatted for immediate CRM import or outreach campaigns with comprehensive validation and provenance tracking. Each lead includes owner contact details, professional credentials, and full business verification status.
+All simulated data is formatted to demonstrate immediate CRM import capabilities and outreach campaign preparation. The algorithm successfully extracts owner contact details, professional credentials, and comprehensive business verification status. 
+
+**🚀 For Production Testing:** Use `node iterative-testing-framework.js` to execute live API calls and generate real business leads.
