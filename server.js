@@ -617,6 +617,15 @@ bootDebugger.endPhase(true);
 app.use("/api/business", businessDiscoveryRouter);
 app.use("/api/export", dashboardExportRouter);
 
+// Add campaign-specific export API
+try {
+  const campaignExportRouter = require("./api/campaign-export");
+  app.use("/api/campaigns", campaignExportRouter);
+  console.log("📤 Campaign export API mounted at /api/campaigns");
+} catch (error) {
+  console.error("⚠️ Failed to load campaign export API:", error.message);
+}
+
 // Add dashboard metrics API
 try {
   const dashboardMetricsRouter = require("./api/dashboard-metrics");
