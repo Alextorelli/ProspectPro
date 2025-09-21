@@ -15,12 +15,19 @@ const apiKeys = {
   hunterIO: process.env.HUNTER_IO_API_KEY,
   neverBounce: process.env.NEVERBOUNCE_API_KEY,
   googlePlaces: process.env.GOOGLE_PLACES_API_KEY,
+  // Foursquare Places API for location intelligence
+  foursquare:
+    process.env.FOURSQUARE_SERVICE_API_KEY ||
+    process.env.FOURSQUARE_PLACES_API_KEY,
   // Enhanced State Registry APIs
   zeroBounce: process.env.ZEROBOUNCE_API_KEY,
   courtListener: process.env.COURTLISTENER_API_KEY,
   socrata: process.env.SOCRATA_API_KEY,
   socrataToken: process.env.SOCRATA_APP_TOKEN,
   uspto: process.env.USPTO_TSDR_API_KEY,
+  // Additional API keys for comprehensive validation
+  californiaSOSApiKey: process.env.CALIFORNIA_SOS_API_KEY,
+  scrapingdog: process.env.SCRAPINGDOG_API_KEY,
 };
 
 const googlePlacesClient = new GooglePlacesClient(apiKeys.googlePlaces);

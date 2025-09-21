@@ -5,6 +5,7 @@
  */
 
 const GooglePlacesClient = require("./modules/api-clients/google-places");
+const EnhancedLeadDiscovery = require("./modules/enhanced-lead-discovery");
 const CampaignCSVExporter = require("./modules/campaign-csv-exporter");
 
 async function runTestCampaign() {
@@ -14,11 +15,18 @@ async function runTestCampaign() {
   console.log("=".repeat(70));
 
   try {
-    // Initialize API key from environment
-    const apiKey =
-      process.env.GOOGLE_PLACES_API_KEY ||
-      "AIzaSyB3BbYJRUiGSwgyon2iBWQkv6ON3V3eSik";
-    const googleClient = new GooglePlacesClient(apiKey);
+    // Initialize API keys from environment
+    const apiKeys = {
+      googlePlaces: process.env.GOOGLE_PLACES_API_KEY,
+      foursquare: process.env.FOURSQUARE_SERVICE_API_KEY || process.env.FOURSQUARE_PLACES_API_KEY,
+      hunterIO: process.env.HUNTER_IO_API_KEY,
+      neverBounce: process.env.NEVERBOUNCE_API_KEY,
+      zeroBounce: process.env.ZEROBOUNCE_API_KEY,
+      scrapingdog: process.env.SCRAPINGDOG_API_KEY
+    };
+
+    const googleClient = new GooglePlacesClient(apiKeys.googlePlaces);
+    const enhancedDiscovery = new EnhancedLeadDiscovery(apiKeys);
     const csvExporter = new CampaignCSVExporter();
 
     // Initialize campaign
@@ -48,166 +56,117 @@ async function runTestCampaign() {
 
     console.log(`✅ Google Places returned ${results.length} restaurants`);
 
-    // Process and enhance the results
-    const validRestaurants = results.filter((place) => {
-      // Basic quality filters
-      return (
-        place.name &&
-        place.formatted_address &&
-        place.rating >= 4.0 &&
-        place.user_ratings_total >= 30
-      );
-    });
+    // Process through enhanced discovery pipeline
+    console.log("🔧 Processing through enhanced discovery pipeline...");
+    
+    const discoveryOptions = {
+      budgetLimit: 3.0,
+      qualityThreshold: 70,
+      maxResults: 5,
+      prioritizeLocalBusinesses: true,
+      enablePropertyIntelligence: true,
+      enableRegistryValidation: true,
+      enableRealTimeFeedback: true
+    };
 
-    console.log(
-      `🔍 ${validRestaurants.length} restaurants meet quality criteria`
+    const enhancedResults = await enhancedDiscovery.discoverAndValidateLeads(
+      results,
+      discoveryOptions
     );
-
-    // Select top 3 and create enhanced lead objects
-    const topRestaurants = validRestaurants
-      .sort((a, b) => {
-        // Sort by quality score (rating × log of reviews)
-        const scoreA = a.rating * Math.log(a.user_ratings_total + 1);
-        const scoreB = b.rating * Math.log(b.user_ratings_total + 1);
-        return scoreB - scoreA;
-      })
-      .slice(0, 3);
-
-    console.log(
-      `🏆 Selected top ${topRestaurants.length} restaurants for detailed processing`
-    );
-    console.log("");
-
-    // Create enhanced lead objects with v2.0 CSV structure
-    const leads = topRestaurants.map((restaurant, index) => {
-      const confidenceScore = Math.min(
-        100,
-        Math.round(
-          restaurant.rating * 18 +
-            Math.log(restaurant.user_ratings_total) * 3 +
-            (restaurant.price_level || 2) * 5
-        )
-      );
-
-      let qualityGrade = "A";
-      if (confidenceScore < 95) qualityGrade = "A-";
-      if (confidenceScore < 90) qualityGrade = "B+";
-      if (confidenceScore < 85) qualityGrade = "B";
-      if (confidenceScore < 80) qualityGrade = "B-";
-
-      return {
-        // Core business information
-        businessName: restaurant.name,
-        address: restaurant.formatted_address,
-        city: restaurant.formatted_address?.split(",")[1]?.trim() || "Austin",
-        state: "TX",
-        zipCode:
-          (restaurant.formatted_address?.match(/\bTX\s+(\d{5})\b/) || [])[1] ||
-          "",
-        phone:
-          restaurant.formatted_phone_number ||
-          restaurant.international_phone_number ||
-          "",
-        website: restaurant.website || "",
-        email: "", // Would be discovered via Hunter.io
-
-        // Enhanced contact differentiation (v2.0 feature)
-        companyPhone:
-          restaurant.formatted_phone_number ||
-          restaurant.international_phone_number ||
-          "",
-        companyEmail: "",
-        ownerName: "",
-        ownerPhone: "",
-        ownerEmail: "",
-        ownerConfidence: 0,
-        contactSource: "Google Business Profile",
-
-        // Quality and validation metrics
-        confidenceScore: confidenceScore,
-        qualityGrade: qualityGrade,
-        isQualified: true,
-        googleRating: restaurant.rating,
-        googleReviewCount: restaurant.user_ratings_total,
-        priceLevel: restaurant.price_level || 2,
-
-        // Business intelligence
-        businessType: "Restaurant",
-        industry: "Food Service",
-        subIndustry: "Fine Dining",
-        estimatedEmployees: restaurant.price_level >= 3 ? "15-30" : "8-20",
-        businessModel: "Dine-in Restaurant",
-        targetMarket: "Upscale Dining",
-
-        // Geographic data
-        latitude: restaurant.geometry?.location?.lat || 0,
-        longitude: restaurant.geometry?.location?.lng || 0,
-        locationAccuracy: "High",
-
-        // Operational details
-        businessHours:
-          restaurant.opening_hours?.weekday_text?.join(" | ") || "",
-        businessStatus: restaurant.business_status || "OPERATIONAL",
-        establishmentType:
-          restaurant.types?.filter(
-            (type) => type !== "establishment" && type !== "point_of_interest"
-          )[0] || "restaurant",
-
-        // Online presence
-        googlePlaceId: restaurant.place_id,
-        googleBusinessProfileUrl: `https://maps.google.com/?cid=${restaurant.place_id}`,
-        hasPhotos: (restaurant.photos?.length || 0) > 0,
-        photoCount: restaurant.photos?.length || 0,
-
-        // Data source and validation
-        dataSource: "Google Places API",
-        discoveredDate: new Date().toISOString(),
-        lastValidated: new Date().toISOString(),
-        validationStatus: "Google Verified",
-
-        // Validation details
-        validation: {
-          businessName: {
-            isValid: true,
-            confidence: 100,
-            source: "Google Places",
-          },
-          address: { isValid: true, confidence: 95, source: "Google Maps" },
-          phone: {
-            isValid: !!restaurant.formatted_phone_number,
-            confidence: restaurant.formatted_phone_number ? 90 : 0,
-            source: restaurant.formatted_phone_number
-              ? "Google Business Profile"
-              : "N/A",
-          },
-          website: {
-            isValid: !!restaurant.website,
-            confidence: restaurant.website ? 85 : 0,
-            httpStatus: restaurant.website ? 200 : null,
-            source: restaurant.website ? "Google Business Profile" : "N/A",
-          },
-          email: { isValid: false, confidence: 0, source: "Not available" },
-        },
-
-        // Cost tracking
-        apiCost: 0.017, // Google Places Details API
-        processingCost: 0.005, // Processing overhead
-        totalCost: 0.022,
-        costPerField: 0.002,
-
-        // Additional metadata
-        discoveryMethod: "Google Places Text Search",
-        enrichmentLevel: "Basic",
-        verificationLevel: "Google Verified",
-        lastUpdated: new Date().toISOString(),
-      };
-    });
 
     const processingTime = Date.now() - startTime;
-    const totalCost = leads.reduce((sum, lead) => sum + lead.totalCost, 0);
 
-    // Display results
+    console.log(`✅ Enhanced discovery processed ${enhancedResults.totalProcessed} businesses`);
+    console.log(`🎯 Qualified leads: ${enhancedResults.leads.length}`);
+    console.log(`💰 Total cost: $${enhancedResults.totalCost.toFixed(3)}`);
+    console.log("");
+
+    if (enhancedResults.leads.length === 0) {
+      throw new Error("No qualified leads found after enhanced processing");
+    }
+
+    // Select top 3 highest quality leads
+    const topLeads = enhancedResults.leads
+      .filter(lead => (lead.finalConfidenceScore || lead.confidenceScore) >= 75)
+      .sort((a, b) => (b.finalConfidenceScore || b.confidenceScore) - (a.finalConfidenceScore || a.confidenceScore))
+      .slice(0, 3);
+
+    console.log(`🏆 Selected top ${topLeads.length} high-quality leads`);
+    console.log("");
+
     console.log("🎯 HIGH-QUALITY VERIFIED LEADS DISCOVERED:");
+    console.log("=".repeat(60));
+
+    if (topLeads.length === 0) {
+      throw new Error("No high-quality leads found (75%+ confidence required)");
+    }
+
+    topLeads.forEach((lead, index) => {
+      console.log(`${index + 1}. ${lead.name || lead.businessName}`);
+      console.log(`   📊 Confidence: ${(lead.finalConfidenceScore || lead.confidenceScore).toFixed(1)}% (Grade: ${lead.qualityGrade || 'A'})`);
+      console.log(`   📍 Address: ${lead.address || lead.formatted_address}`);
+      console.log(`   📞 Phone: ${lead.phone || lead.companyPhone || 'Not available'}`);
+      console.log(`   🌐 Website: ${lead.website || 'Not available'}`);
+      console.log(`   📧 Email: ${lead.email || lead.companyEmail || 'Not available'}`);
+      console.log(`   🗺️  Foursquare: ${lead.foursquareData ? '✅ Enhanced' : '❌ Basic'}`);
+      console.log(`   💰 Discovery Cost: $${(lead.apiCost || 0).toFixed(3)}`);
+      console.log("");
+    });
+
+    console.log("📊 Adding leads to campaign and calculating analytics...");
+    
+    // Add to campaign
+    csvExporter.addQueryResults(
+      "high end restaurant", 
+      "Austin, TX", 
+      topLeads, 
+      {
+        totalResults: topLeads.length,
+        qualifiedLeads: topLeads.length,
+        totalCost: enhancedResults.totalCost,
+        processingTimeMs: processingTime,
+        averageConfidence: topLeads.reduce((sum, lead) => 
+          sum + (lead.finalConfidenceScore || lead.confidenceScore), 0) / topLeads.length
+      }
+    );
+
+    console.log(`📊 Added query "high end restaurant" with ${topLeads.length} leads to campaign`);
+    
+    // Export CSV
+    console.log("📤 Exporting comprehensive campaign data to CSV...");
+    const csvPath = await csvExporter.exportCampaignToCsv();
+    
+    console.log("");
+    console.log("✅ CAMPAIGN EXECUTION COMPLETED:");
+    console.log(`📁 CSV Export: ${csvPath}`);
+    console.log(`🎯 Leads Generated: ${topLeads.length}`);
+    console.log(`💰 Total Cost: $${enhancedResults.totalCost.toFixed(3)}`);
+    console.log(`⏱️  Processing Time: ${(processingTime / 1000).toFixed(1)}s`);
+    console.log(`📊 Average Confidence: ${(topLeads.reduce((sum, lead) => 
+      sum + (lead.finalConfidenceScore || lead.confidenceScore), 0) / topLeads.length).toFixed(1)}%`);
+    
+    return {
+      success: true,
+      csvPath,
+      leadsGenerated: topLeads.length,
+      totalCost: enhancedResults.totalCost,
+      processingTime: processingTime
+    };
+
+  } catch (error) {
+    console.error(`❌ Campaign execution failed: ${error.message}`);
+    if (error.stack) {
+      console.error("📋 Stack trace:", error.stack);
+    }
+
+  } catch (error) {
+    console.error(`❌ Campaign execution failed: ${error.message}`);
+    if (error.stack) {
+      console.error("📋 Stack trace:", error.stack);
+    }
+    throw error;
+  }
+}
     console.log("=".repeat(60));
 
     leads.forEach((lead, index) => {
