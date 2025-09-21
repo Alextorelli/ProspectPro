@@ -493,32 +493,41 @@ async function exportResultsToCsv(leads, metadata) {
   const filename = `ProspectPro-${sanitizedQuery}-${timestamp}.csv`;
   const filepath = path.join(exportsDir, filename);
 
-  // Define CSV structure
+  // Define CSV structure for full pipeline testing
   const csvWriter = createCsvWriter({
     path: filepath,
     header: [
       { id: "name", title: "Business Name" },
       { id: "address", title: "Address" },
       { id: "phone", title: "Phone" },
+      { id: "phoneSource", title: "Phone Source" },
       { id: "website", title: "Website" },
+      { id: "websiteSource", title: "Website Source" },
       { id: "email", title: "Email" },
+      { id: "emailSource", title: "Email Source" },
+      { id: "emailVerified", title: "Email Verified" },
       { id: "confidenceScore", title: "Confidence Score" },
       { id: "category", title: "Category" },
       { id: "rating", title: "Rating" },
       { id: "reviewCount", title: "Review Count" },
       { id: "priceLevel", title: "Price Level" },
       { id: "hours", title: "Hours" },
+      { id: "dataSource", title: "Data Sources" },
       { id: "placeId", title: "Google Place ID" },
     ],
   });
 
-  // Map leads to CSV format
+  // Map leads to CSV format with full pipeline data
   const csvData = leads.map((lead) => ({
     name: lead.name || "",
     address: lead.address || "",
     phone: lead.phone || "",
+    phoneSource: lead.phoneSource || "Google Places",
     website: lead.website || "",
+    websiteSource: lead.websiteSource || "Google Places",
     email: lead.email || "",
+    emailSource: lead.emailSource || "",
+    emailVerified: lead.emailValidation?.bestEmail ? "Yes" : "No",
     confidenceScore: lead.finalConfidenceScore || lead.confidenceScore || "",
     category: lead.category || "",
     rating: lead.rating || "",
@@ -529,6 +538,14 @@ async function exportResultsToCsv(leads, metadata) {
         ? JSON.stringify(lead.hours)
         : lead.hours
       : "",
+    dataSource: [
+      "Google Places",
+      lead.foursquareData?.found ? "Foursquare" : "",
+      lead.emailDiscovery?.emails?.length > 0 ? "Hunter.io" : "",
+      lead.emailValidation?.results?.length > 0 ? "NeverBounce" : "",
+    ]
+      .filter(Boolean)
+      .join(", "),
     placeId: lead.placeId || "",
   }));
 

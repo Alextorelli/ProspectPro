@@ -404,19 +404,56 @@ class EnhancedLeadDiscovery {
       }
     }
 
-    // Email discovery (paid - selective usage, cached)
+    // Email discovery (paid - lowered threshold for full pipeline testing)
     if (
       this.hunterClient &&
       businessData.website &&
-      businessData.preValidationScore >= 80
+      businessData.preValidationScore >= 50 // Lowered from 80 to 50 for full testing
     ) {
       const domain = this.extractDomainFromWebsite(businessData.website);
       const cacheKey = `email_${domain}`;
       emailDiscovery = this.getCache(cacheKey);
       if (!emailDiscovery) {
+        console.log(
+          `📧 Searching for emails at ${domain} for ${businessData.name}`
+        );
         emailDiscovery = await this.hunterClient.domainSearch(domain);
         this.setCache(cacheKey, emailDiscovery);
         stageCost += emailDiscovery.cost || 0;
+
+        // Apply discovered emails to business data
+        if (emailDiscovery.emails && emailDiscovery.emails.length > 0) {
+          businessData.email = emailDiscovery.emails[0].value; // Primary email
+          businessData.emailSource = "Hunter.io domain search";
+        }
+      } else if (emailDiscovery.emails && emailDiscovery.emails.length > 0) {
+        businessData.email = emailDiscovery.emails[0].value;
+        businessData.emailSource = "Hunter.io (cached)";
+      }
+    }
+
+    // Enhanced Foursquare + Google Places cross-validation for contact enrichment
+    if (
+      foursquareData.found &&
+      foursquareData.places &&
+      foursquareData.places.length > 0
+    ) {
+      const fsPlace = foursquareData.places[0];
+      console.log(
+        `🔗 Cross-referencing ${businessData.name} data: Google + Foursquare`
+      );
+
+      // Use Foursquare data to supplement missing Google Places info
+      if (!businessData.phone && fsPlace.contact && fsPlace.contact.phone) {
+        businessData.phone = fsPlace.contact.phone;
+        businessData.phoneSource = "Foursquare";
+      }
+      if (!businessData.website && fsPlace.url) {
+        businessData.website = fsPlace.url;
+        businessData.websiteSource = "Foursquare";
+      }
+      if (fsPlace.categories && fsPlace.categories.length > 0) {
+        businessData.category = fsPlace.categories[0].name;
       }
     }
 
