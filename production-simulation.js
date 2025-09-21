@@ -10,11 +10,15 @@ const EnhancedLeadDiscovery = require("./modules/enhanced-lead-discovery");
 async function runAlgorithmSimulation() {
   console.log("🎯 ALGORITHM SIMULATION: WEST COAST SMB PIPELINE");
   console.log("===============================================");
-  console.log("⚠️  SIMULATION MODE: Using synthetic data for algorithm testing");
+  console.log(
+    "⚠️  SIMULATION MODE: Using synthetic data for algorithm testing"
+  );
   console.log("Target: High-quality trades & wellness businesses");
   console.log("Budget: $5.00 | Geography: West Coast metros");
   console.log("Strategy: Quality over Quantity (80%+ confidence threshold)");
-  console.log("📋 For PRODUCTION testing, use: node iterative-testing-framework.js");
+  console.log(
+    "📋 For PRODUCTION testing, use: node iterative-testing-framework.js"
+  );
   console.log("");
 
   const discovery = new EnhancedLeadDiscovery({
@@ -360,7 +364,9 @@ async function runAlgorithmSimulation() {
   );
   console.log(`📊 Industry mix: Trades (60%) + Wellness/Beauty (40%)`);
   console.log(`🗺️  Geographic coverage: 5 West Coast metro areas`);
-  console.log(`\n🚀 Ready for PRODUCTION testing with iterative-testing-framework.js`);
+  console.log(
+    `\n🚀 Ready for PRODUCTION testing with iterative-testing-framework.js`
+  );
 }
 
 // Scoring simulation functions
