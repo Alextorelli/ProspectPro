@@ -6,6 +6,7 @@
 const CaliforniaSOS = require("./api-clients/california-sos-client");
 const NewYorkSOS = require("./api-clients/newyork-sos-client");
 const NYTaxParcels = require("./api-clients/ny-tax-parcels-client");
+const GooglePlacesClient = require("./api-clients/google-places");
 const HunterIOClient = require("./api-clients/hunter-io");
 const NeverBounceClient = require("./api-clients/neverbounce");
 const SECEdgarClient = require("./api-clients/enhanced-sec-edgar-client");
@@ -18,6 +19,11 @@ class EnhancedLeadDiscovery {
     this.californiaSOSClient = new CaliforniaSOS();
     this.newYorkSOSClient = new NewYorkSOS();
     this.nyTaxParcelsClient = new NYTaxParcels();
+
+    // Google Places client for contact enrichment
+    this.googlePlacesClient = apiKeys.googlePlaces
+      ? new GooglePlacesClient(apiKeys.googlePlaces)
+      : null;
 
     // Government API clients for small business validation
     this.proPublicaClient = new ProPublicaClient();
@@ -317,7 +323,49 @@ class EnhancedLeadDiscovery {
     let propertyData = {};
     let emailDiscovery = {};
     let foursquareData = {};
+    let googlePlacesDetails = {};
     let stageCost = 0;
+
+    // Google Places Details Enrichment (paid but essential for contact info)
+    if (this.googlePlacesClient && businessData.placeId) {
+      const cacheKey = `google_details_${businessData.placeId}`;
+      googlePlacesDetails = this.getCache(cacheKey);
+      if (!googlePlacesDetails) {
+        try {
+          console.log(`📞 Fetching contact details for ${businessData.name}`);
+          googlePlacesDetails = await this.googlePlacesClient.getPlaceDetails(
+            businessData.placeId
+          );
+          this.setCache(cacheKey, googlePlacesDetails);
+          stageCost += 0.017; // Google Places Details API cost
+
+          // Enrich business data with contact information
+          if (googlePlacesDetails.phone) {
+            businessData.phone = googlePlacesDetails.phone;
+          }
+          if (googlePlacesDetails.website) {
+            businessData.website = googlePlacesDetails.website;
+          }
+          if (googlePlacesDetails.hours) {
+            businessData.hours = googlePlacesDetails.hours;
+          }
+        } catch (error) {
+          console.warn(
+            `⚠️ Google Places details failed for ${businessData.name}:`,
+            error.message
+          );
+          googlePlacesDetails = { found: false, error: error.message };
+        }
+      } else {
+        // Apply cached contact details
+        if (googlePlacesDetails.phone)
+          businessData.phone = googlePlacesDetails.phone;
+        if (googlePlacesDetails.website)
+          businessData.website = googlePlacesDetails.website;
+        if (googlePlacesDetails.hours)
+          businessData.hours = googlePlacesDetails.hours;
+      }
+    }
 
     // High Priority: API Prioritization - Free APIs first
     // Property intelligence (free)
@@ -377,6 +425,7 @@ class EnhancedLeadDiscovery {
       propertyIntelligence: propertyData,
       foursquareData,
       emailDiscovery,
+      googlePlacesDetails,
       stage: "enrichment",
       processingCost: stageCost,
     };
