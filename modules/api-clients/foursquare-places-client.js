@@ -20,7 +20,12 @@ class FoursquarePlacesClient {
   constructor(clientId = null, clientSecret = null) {
     this.clientId = clientId || process.env.FOURSQUARE_CLIENT_ID;
     this.clientSecret = clientSecret || process.env.FOURSQUARE_CLIENT_SECRET;
-    this.baseUrl = "https://api.foursquare.com/v3";
+    this.baseUrl = "https://places-api.foursquare.com"; // migrated base URL
+    this.serviceKey =
+      process.env.FOURSQUARE_SERVICE_API_KEY ||
+      process.env.FOURSQUARE_PLACES_API_KEY ||
+      null;
+    this.apiVersion = process.env.FOURSQUARE_PLACES_API_VERSION || "2025-06-17";
 
     // Rate limiting configuration
     this.rateLimitPerDay = 950; // Free tier limit
@@ -89,9 +94,9 @@ class FoursquarePlacesClient {
       "4bf58dd8d48988d11b941735": "Pub",
     };
 
-    if (!this.clientId || !this.clientSecret) {
+    if (!this.serviceKey) {
       console.warn(
-        "⚠️ Foursquare API credentials not found. Set FOURSQUARE_CLIENT_ID and FOURSQUARE_CLIENT_SECRET environment variables."
+        "⚠️ Foursquare Service Key not found. Set FOURSQUARE_SERVICE_API_KEY (preferred) or FOURSQUARE_PLACES_API_KEY."
       );
     }
   }
@@ -140,6 +145,7 @@ class FoursquarePlacesClient {
     }
 
     try {
+      // Build base search params
       const searchParams = new URLSearchParams({
         query: query.trim(),
         limit: Math.min(options.limit || 20, 50), // Max 50 results
@@ -337,9 +343,10 @@ class FoursquarePlacesClient {
    */
   async makeRequest(endpoint, retries = 3) {
     const headers = {
-      Authorization: process.env.FOURSQUARE_SERVICE_API_KEY,
+      Authorization: `Bearer ${this.serviceKey}`,
       Accept: "application/json",
       "User-Agent": "ProspectPro/2.0 Business Discovery System",
+      "X-Places-Api-Version": this.apiVersion,
     };
 
     const url = `${this.baseUrl}${endpoint}`;
@@ -479,7 +486,7 @@ class FoursquarePlacesClient {
       totalResults: places.length,
       exactMatches,
       places: places.map((place) => ({
-        fsqId: place.fsq_id || null,
+        fsqId: place.fsq_place_id || place.fsq_id || null,
         name: place.name || null,
 
         // Location information
@@ -491,8 +498,8 @@ class FoursquarePlacesClient {
         formattedAddress: place.location?.formatted_address || null,
 
         // Geographic coordinates
-        latitude: place.geocodes?.main?.latitude || null,
-        longitude: place.geocodes?.main?.longitude || null,
+        latitude: place.latitude || place.geocodes?.main?.latitude || null,
+        longitude: place.longitude || place.geocodes?.main?.longitude || null,
 
         // Categories and classification
         categories:
@@ -514,7 +521,7 @@ class FoursquarePlacesClient {
 
         // Validation metadata
         source: "Foursquare Places API",
-        sourceId: place.fsq_id,
+        sourceId: place.fsq_place_id || place.fsq_id,
         lastVerified: new Date().toISOString(),
         dataQuality: "crowdsourced_location_data",
       })),

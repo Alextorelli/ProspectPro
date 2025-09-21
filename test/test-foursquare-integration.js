@@ -12,8 +12,9 @@ const client = new FoursquarePlacesClient();
 async function testSearch() {
   try {
     const result = await client.searchPlaces("Starbucks", {
-      near: "San Francisco, CA",
+      ll: "37.7749,-122.4194", // San Francisco coordinates
       limit: 3,
+      radius: 5000,
     });
     console.log("Foursquare search result:", JSON.stringify(result, null, 2));
     if (result.found && result.places.length > 0) {
