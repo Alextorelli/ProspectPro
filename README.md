@@ -192,13 +192,16 @@ go run . help
 ## 🚀 Latest Updates (v2.0)
 
 ### Enhanced CSV Export System
+
 - **Multi-Query Campaigns**: Build comprehensive datasets across multiple searches
 - **45+ Column CSV Export**: Complete business intelligence data with owner/company contact differentiation
 - **Campaign Analytics**: Query-level analysis with cost efficiency and quality metrics
 - **Testing Support**: Rich metadata for algorithm optimization and A/B testing
 
 ### Zero Fake Data Architecture
+
 ProspectPro maintains **zero tolerance for fake business data** through:
+
 - Real-time Google Places API integration
 - Multi-source validation (Hunter.io, NeverBounce, State Registries)
 - Sophisticated owner detection algorithms
@@ -207,6 +210,7 @@ ProspectPro maintains **zero tolerance for fake business data** through:
 ## Quick Start
 
 ### Installation
+
 ```bash
 git clone https://github.com/yourusername/ProspectPro.git
 cd ProspectPro
@@ -214,17 +218,19 @@ npm install
 ```
 
 ### Environment Setup
+
 ```bash
 cp .env.example .env
 # Add your API keys:
 # GOOGLE_PLACES_API_KEY=your_key
-# HUNTER_IO_API_KEY=your_key  
+# HUNTER_IO_API_KEY=your_key
 # NEVERBOUNCE_API_KEY=your_key
 # SUPABASE_URL=your_url
 # SUPABASE_SECRET_KEY=your_key
 ```
 
 ### Start Server
+
 ```bash
 npm run dev  # Development with auto-reload
 # or
@@ -234,18 +240,19 @@ npm start   # Production mode
 ## API Usage Examples
 
 ### Single Query Discovery
+
 ```javascript
-const response = await fetch('http://localhost:3000/api/business/discover', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
+const response = await fetch("http://localhost:3000/api/business/discover", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
   body: JSON.stringify({
-    query: 'pizza restaurants',
-    location: 'Austin, TX',
+    query: "pizza restaurants",
+    location: "Austin, TX",
     count: 20,
     budgetLimit: 5.0,
     qualityThreshold: 75,
-    exportToCsv: true
-  })
+    exportToCsv: true,
+  }),
 });
 
 const result = await response.json();
@@ -254,48 +261,57 @@ console.log(`CSV exported: ${result.csvExport.filename}`);
 ```
 
 ### Multi-Query Campaign
+
 ```javascript
 // Start campaign
-const campaign = await fetch('http://localhost:3000/api/business/campaign/start', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({
-    campaignName: 'Austin Food Scene Analysis',
-    description: 'Comprehensive restaurant market research'
-  })
-});
+const campaign = await fetch(
+  "http://localhost:3000/api/business/campaign/start",
+  {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      campaignName: "Austin Food Scene Analysis",
+      description: "Comprehensive restaurant market research",
+    }),
+  }
+);
 
 const { campaignId } = await campaign.json();
 
 // Add multiple queries
 const queries = [
-  'pizza restaurants',
-  'taco shops', 
-  'bbq restaurants',
-  'food trucks'
+  "pizza restaurants",
+  "taco shops",
+  "bbq restaurants",
+  "food trucks",
 ];
 
 for (const query of queries) {
-  await fetch('http://localhost:3000/api/business/campaign/add-query', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+  await fetch("http://localhost:3000/api/business/campaign/add-query", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       campaignId,
       query,
-      location: 'Austin, TX',
-      count: 25
-    })
+      location: "Austin, TX",
+      count: 25,
+    }),
   });
 }
 
 // Export comprehensive dataset
-const exportResult = await fetch('http://localhost:3000/api/business/campaign/export', {
-  method: 'POST', 
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ campaignId })
-});
+const exportResult = await fetch(
+  "http://localhost:3000/api/business/campaign/export",
+  {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ campaignId }),
+  }
+);
 
 const exportData = await exportResult.json();
 console.log(`Campaign CSV: ${exportData.export.filename}`);
-console.log(`Total leads: ${exportData.export.leadCount} across ${exportData.export.queryCount} queries`);
+console.log(
+  `Total leads: ${exportData.export.leadCount} across ${exportData.export.queryCount} queries`
+);
 ```

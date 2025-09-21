@@ -97,7 +97,7 @@ router.post("/discover", async (req, res) => {
         initialLocation: location,
         budgetLimit,
         qualityThreshold,
-        requestedCount: count
+        requestedCount: count,
       });
     }
 
@@ -258,7 +258,8 @@ router.post("/discover", async (req, res) => {
           {
             totalProcessed: enhancedResults.totalProcessed,
             qualificationRate: Math.round(
-              (enhancedResults.leads.length / enhancedResults.totalProcessed) * 100
+              (enhancedResults.leads.length / enhancedResults.totalProcessed) *
+                100
             ),
             averageConfidence: enhancedResults.qualityMetrics.averageConfidence,
             processingTime: Date.now() - startTime,
@@ -267,13 +268,13 @@ router.post("/discover", async (req, res) => {
             apiUsage: enhancedResults.usageStats,
             budgetLimit,
             qualityThreshold,
-            requestedCount: count
+            requestedCount: count,
           }
         );
 
         // Export campaign to comprehensive CSV
         csvExportResult = await campaignCSVExporter.exportCampaignToCsv();
-        
+
         console.log(
           `📊 Enhanced CSV Export: ${csvExportResult.filename} created with ${enhancedResults.leads.length} leads from query "${query}"`
         );
@@ -282,7 +283,7 @@ router.post("/discover", async (req, res) => {
         );
       } catch (csvError) {
         console.error("❌ Enhanced CSV Export failed:", csvError.message);
-        
+
         // Fallback to legacy CSV export
         try {
           csvExportResult = await exportResultsToCsv(enhancedResults.leads, {
@@ -301,7 +302,10 @@ router.post("/discover", async (req, res) => {
             `📊 Fallback CSV Export: ${csvExportResult.filename} created`
           );
         } catch (fallbackError) {
-          console.error("❌ Fallback CSV Export also failed:", fallbackError.message);
+          console.error(
+            "❌ Fallback CSV Export also failed:",
+            fallbackError.message
+          );
         }
       }
     }
@@ -383,22 +387,26 @@ router.post("/discover", async (req, res) => {
             downloadUrl: `/api/business/download-csv/${encodeURIComponent(
               csvExportResult.filename
             )}`,
-            analysisUrl: csvExportResult.summaryFiles ? 
-              `/api/business/download-csv/${encodeURIComponent(
-                csvExportResult.summaryFiles.analysis
-              )}` : null,
-            summaryUrl: csvExportResult.summaryFiles ? 
-              `/api/business/download-csv/${encodeURIComponent(
-                csvExportResult.summaryFiles.summary
-              )}` : null,
+            analysisUrl: csvExportResult.summaryFiles
+              ? `/api/business/download-csv/${encodeURIComponent(
+                  csvExportResult.summaryFiles.analysis
+                )}`
+              : null,
+            summaryUrl: csvExportResult.summaryFiles
+              ? `/api/business/download-csv/${encodeURIComponent(
+                  csvExportResult.summaryFiles.summary
+                )}`
+              : null,
           }
         : null,
-      campaignTracking: currentCampaignId ? {
-        campaignId: currentCampaignId,
-        canAddMoreQueries: true,
-        addQueryEndpoint: "/api/business/campaign/add-query",
-        exportCampaignEndpoint: "/api/business/campaign/export"
-      } : null,
+      campaignTracking: currentCampaignId
+        ? {
+            campaignId: currentCampaignId,
+            canAddMoreQueries: true,
+            addQueryEndpoint: "/api/business/campaign/add-query",
+            exportCampaignEndpoint: "/api/business/campaign/export",
+          }
+        : null,
     });
   } catch (error) {
     console.error("❌ Enhanced business discovery failed:", error);
@@ -421,13 +429,13 @@ router.post("/discover", async (req, res) => {
 router.post("/campaign/start", async (req, res) => {
   try {
     const { campaignName, description, targetQueries = [] } = req.body;
-    
+
     const campaignId = campaignCSVExporter.initializeCampaign(null, {
       campaignName: campaignName || "Unnamed Campaign",
       description: description || "",
       targetQueries,
       startedBy: "API",
-      startTime: new Date().toISOString()
+      startTime: new Date().toISOString(),
     });
 
     console.log(`🆔 New campaign started: ${campaignId}`);
@@ -439,15 +447,14 @@ router.post("/campaign/start", async (req, res) => {
       nextSteps: {
         addQuery: "/api/business/campaign/add-query",
         exportCampaign: "/api/business/campaign/export",
-        campaignStatus: "/api/business/campaign/status"
-      }
+        campaignStatus: "/api/business/campaign/status",
+      },
     });
-
   } catch (error) {
     console.error("❌ Failed to start campaign:", error);
     res.status(500).json({
       success: false,
-      error: error.message
+      error: error.message,
     });
   }
 });
@@ -475,11 +482,13 @@ router.post("/campaign/add-query", async (req, res) => {
     if (campaignCSVExporter.campaignData.campaignId !== campaignId) {
       return res.status(400).json({
         error: "Campaign ID not found or expired",
-        message: "Please start a new campaign or use the correct campaign ID"
+        message: "Please start a new campaign or use the correct campaign ID",
       });
     }
 
-    console.log(`📊 Adding query to campaign ${campaignId}: "${query}" in "${location}"`);
+    console.log(
+      `📊 Adding query to campaign ${campaignId}: "${query}" in "${location}"`
+    );
 
     const startTime = Date.now();
 
@@ -531,11 +540,13 @@ router.post("/campaign/add-query", async (req, res) => {
         apiUsage: enhancedResults.usageStats,
         budgetLimit,
         qualityThreshold,
-        requestedCount: count
+        requestedCount: count,
       }
     );
 
-    console.log(`✅ Query added to campaign: ${queryId} with ${enhancedResults.leads.length} leads`);
+    console.log(
+      `✅ Query added to campaign: ${queryId} with ${enhancedResults.leads.length} leads`
+    );
 
     res.json({
       success: true,
@@ -557,16 +568,16 @@ router.post("/campaign/add-query", async (req, res) => {
         totalQueries: campaignCSVExporter.campaignData.queries.length,
         totalLeads: campaignCSVExporter.campaignData.totalLeads.length,
         totalCost: campaignCSVExporter.campaignData.analysisData.totalCost,
-        averageConfidence: campaignCSVExporter.campaignData.analysisData.averageConfidence
-      }
+        averageConfidence:
+          campaignCSVExporter.campaignData.analysisData.averageConfidence,
+      },
     });
-
   } catch (error) {
     console.error("❌ Failed to add query to campaign:", error);
     res.status(500).json({
       success: false,
       error: error.message,
-      campaignId: req.body.campaignId
+      campaignId: req.body.campaignId,
     });
   }
 });
@@ -579,7 +590,7 @@ router.get("/campaign/status/:campaignId", async (req, res) => {
     if (campaignCSVExporter.campaignData.campaignId !== campaignId) {
       return res.status(404).json({
         success: false,
-        error: "Campaign not found or expired"
+        error: "Campaign not found or expired",
       });
     }
 
@@ -593,24 +604,23 @@ router.get("/campaign/status/:campaignId", async (req, res) => {
         totalQueries: campaignData.queries.length,
         totalLeads: campaignData.totalLeads.length,
         metadata: campaignData.metadata,
-        analysisData: campaignData.analysisData
+        analysisData: campaignData.analysisData,
       },
-      queries: campaignData.queries.map(q => ({
+      queries: campaignData.queries.map((q) => ({
         queryId: q.queryId,
         query: q.query,
         location: q.location,
         leadCount: q.leadCount,
         timestamp: q.timestamp,
         cost: q.cost,
-        processingTime: q.processingTime
-      }))
+        processingTime: q.processingTime,
+      })),
     });
-
   } catch (error) {
     console.error("❌ Failed to get campaign status:", error);
     res.status(500).json({
       success: false,
-      error: error.message
+      error: error.message,
     });
   }
 });
@@ -622,21 +632,21 @@ router.post("/campaign/export", async (req, res) => {
 
     if (!campaignId) {
       return res.status(400).json({
-        error: "campaignId is required"
+        error: "campaignId is required",
       });
     }
 
     if (campaignCSVExporter.campaignData.campaignId !== campaignId) {
       return res.status(404).json({
         success: false,
-        error: "Campaign not found or expired"
+        error: "Campaign not found or expired",
       });
     }
 
     if (campaignCSVExporter.campaignData.totalLeads.length === 0) {
       return res.status(400).json({
         success: false,
-        error: "No leads to export - add queries to the campaign first"
+        error: "No leads to export - add queries to the campaign first",
       });
     }
 
@@ -655,23 +665,24 @@ router.post("/campaign/export", async (req, res) => {
         downloadUrl: `/api/business/download-csv/${encodeURIComponent(
           exportResult.filename
         )}`,
-        analysisUrl: exportResult.summaryFiles ? 
-          `/api/business/download-csv/${encodeURIComponent(
-            exportResult.summaryFiles.analysis
-          )}` : null,
-        summaryUrl: exportResult.summaryFiles ? 
-          `/api/business/download-csv/${encodeURIComponent(
-            exportResult.summaryFiles.summary
-          )}` : null,
-      }
+        analysisUrl: exportResult.summaryFiles
+          ? `/api/business/download-csv/${encodeURIComponent(
+              exportResult.summaryFiles.analysis
+            )}`
+          : null,
+        summaryUrl: exportResult.summaryFiles
+          ? `/api/business/download-csv/${encodeURIComponent(
+              exportResult.summaryFiles.summary
+            )}`
+          : null,
+      },
     });
-
   } catch (error) {
     console.error("❌ Campaign export failed:", error);
     res.status(500).json({
       success: false,
       error: error.message,
-      campaignId: req.body.campaignId
+      campaignId: req.body.campaignId,
     });
   }
 });

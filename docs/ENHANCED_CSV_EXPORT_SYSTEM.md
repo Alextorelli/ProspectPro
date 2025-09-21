@@ -7,6 +7,7 @@ The Enhanced CSV Export System provides comprehensive campaign tracking and anal
 ## Key Features
 
 ### 🆔 Campaign Tracking
+
 - **Unique Campaign IDs**: Each campaign session gets a unique identifier
 - **Query-level Tracking**: Individual queries within campaigns are tracked
 - **Multi-Query Support**: Build comprehensive datasets across multiple searches
@@ -17,6 +18,7 @@ The Enhanced CSV Export System provides comprehensive campaign tracking and anal
 The new CSV export includes **45+ columns** of comprehensive data:
 
 #### Campaign & Query Metadata
+
 - `Campaign ID` - Unique campaign identifier
 - `Query ID` - Individual query identifier within campaign
 - `Search Query` - Original search terms used
@@ -24,6 +26,7 @@ The new CSV export includes **45+ columns** of comprehensive data:
 - `Query Timestamp` - When the query was executed
 
 #### Business Information
+
 - `Business Name` - Verified business name
 - `Address` - Complete business address
 - `Category` - Business category/type
@@ -32,6 +35,7 @@ The new CSV export includes **45+ columns** of comprehensive data:
 - `Price Level` - Cost indicator ($-$$$$)
 
 #### Company vs Owner Contact Differentiation
+
 - `Company Phone` / `Company Email` - Main business contacts
 - `Owner Phone` / `Owner Email` - Owner-specific contacts
 - `Owner Name` / `Owner Title` - Owner identification
@@ -39,6 +43,7 @@ The new CSV export includes **45+ columns** of comprehensive data:
 - **Source Attribution** - Which API provided each contact
 
 #### Digital Presence & Validation
+
 - `Website` - Business website URL
 - `Website Accessible` - Accessibility verification (true/false)
 - `Website Response Time` - Performance metrics
@@ -47,6 +52,7 @@ The new CSV export includes **45+ columns** of comprehensive data:
 - **Property Intelligence** - Commercial property verification
 
 #### Quality & Analysis Metrics
+
 - `Confidence Score` - Overall lead quality score (0-100)
 - `Quality Grade` - A-F quality assessment
 - `Is Qualified` / `Export Ready` - Quality thresholds
@@ -54,6 +60,7 @@ The new CSV export includes **45+ columns** of comprehensive data:
 - `Pre-validation Score` - Initial screening score
 
 #### Technical & Testing Data
+
 - `API Cost` - Cost breakdown per lead
 - `Processing Time` - Performance metrics
 - `Data Sources` - All APIs used for the lead
@@ -71,6 +78,7 @@ Each campaign export generates **3 files**:
 ## API Endpoints
 
 ### Single Query with Campaign Support
+
 ```bash
 POST /api/business/discover
 {
@@ -85,6 +93,7 @@ POST /api/business/discover
 ### Multi-Query Campaign Management
 
 #### Start New Campaign
+
 ```bash
 POST /api/business/campaign/start
 {
@@ -95,6 +104,7 @@ POST /api/business/campaign/start
 ```
 
 #### Add Query to Campaign
+
 ```bash
 POST /api/business/campaign/add-query
 {
@@ -107,6 +117,7 @@ POST /api/business/campaign/add-query
 ```
 
 #### Export Campaign
+
 ```bash
 POST /api/business/campaign/export
 {
@@ -115,6 +126,7 @@ POST /api/business/campaign/export
 ```
 
 #### Check Campaign Status
+
 ```bash
 GET /api/business/campaign/status/campaign_1234567890_abc123
 ```
@@ -122,6 +134,7 @@ GET /api/business/campaign/status/campaign_1234567890_abc123
 ## Campaign Analysis Features
 
 ### Quality Distribution Analysis
+
 ```json
 {
   "confidenceDistribution": {
@@ -143,6 +156,7 @@ GET /api/business/campaign/status/campaign_1234567890_abc123
 ```
 
 ### Source Effectiveness Analysis
+
 ```json
 {
   "sourceEffectiveness": {
@@ -161,6 +175,7 @@ GET /api/business/campaign/status/campaign_1234567890_abc123
 ```
 
 ### Cost Efficiency Metrics
+
 ```json
 {
   "costEfficiency": {
@@ -175,22 +190,26 @@ GET /api/business/campaign/status/campaign_1234567890_abc123
 ## Testing & Analysis Support
 
 ### Pre-validation Accuracy
+
 - Compare pre-validation scores with final quality scores
 - Identify patterns in screening effectiveness
 - Optimize cost by improving initial filtering
 
 ### API Cost Efficiency
+
 - Track cost per API per lead
 - Identify expensive APIs with low value
 - Optimize API usage patterns
 
 ### Data Quality Metrics
+
 - **Completeness Scores** - Field population rates
-- **Accuracy Metrics** - Validation success rates  
+- **Accuracy Metrics** - Validation success rates
 - **Consistency Analysis** - Cross-source validation
 - **Source Reliability** - API accuracy tracking
 
 ### Processing Optimization
+
 - Query processing times
 - API response time analysis
 - Bottleneck identification
@@ -199,72 +218,75 @@ GET /api/business/campaign/status/campaign_1234567890_abc123
 ## Usage Examples
 
 ### Basic Single Query
+
 ```javascript
-const response = await fetch('/api/business/discover', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
+const response = await fetch("/api/business/discover", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
   body: JSON.stringify({
-    query: 'law firms',
-    location: 'San Francisco, CA',
+    query: "law firms",
+    location: "San Francisco, CA",
     count: 20,
-    exportToCsv: true
-  })
+    exportToCsv: true,
+  }),
 });
 
 const result = await response.json();
-console.log('CSV exported:', result.csvExport.filename);
-console.log('Campaign ID:', result.campaignTracking.campaignId);
+console.log("CSV exported:", result.csvExport.filename);
+console.log("Campaign ID:", result.campaignTracking.campaignId);
 ```
 
 ### Multi-Query Campaign
+
 ```javascript
 // Start campaign
-const campaign = await fetch('/api/business/campaign/start', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
+const campaign = await fetch("/api/business/campaign/start", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
   body: JSON.stringify({
-    campaignName: 'Legal Services Analysis',
-    description: 'Comprehensive legal market research'
-  })
+    campaignName: "Legal Services Analysis",
+    description: "Comprehensive legal market research",
+  }),
 });
 
 const { campaignId } = await campaign.json();
 
 // Add multiple queries
 const queries = [
-  { query: 'personal injury lawyers', location: 'San Francisco, CA' },
-  { query: 'family law attorneys', location: 'San Francisco, CA' },
-  { query: 'corporate lawyers', location: 'San Francisco, CA' }
+  { query: "personal injury lawyers", location: "San Francisco, CA" },
+  { query: "family law attorneys", location: "San Francisco, CA" },
+  { query: "corporate lawyers", location: "San Francisco, CA" },
 ];
 
 for (const queryData of queries) {
-  await fetch('/api/business/campaign/add-query', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+  await fetch("/api/business/campaign/add-query", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       campaignId,
       ...queryData,
-      count: 25
-    })
+      count: 25,
+    }),
   });
 }
 
 // Export comprehensive campaign
-const exportResult = await fetch('/api/business/campaign/export', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ campaignId })
+const exportResult = await fetch("/api/business/campaign/export", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ campaignId }),
 });
 
 const exportData = await exportResult.json();
-console.log('Campaign exported:', exportData.export.filename);
-console.log('Total leads:', exportData.export.leadCount);
-console.log('Analysis file:', exportData.export.analysisUrl);
+console.log("Campaign exported:", exportData.export.filename);
+console.log("Total leads:", exportData.export.leadCount);
+console.log("Analysis file:", exportData.export.analysisUrl);
 ```
 
 ## File Structure
 
 ### Exported Files
+
 ```
 exports/
 ├── ProspectPro-Campaign-campaign_1234567890_abc123-2025-09-21T20-30-45-123Z.csv
@@ -273,8 +295,9 @@ exports/
 ```
 
 ### CSV Columns (45+ fields)
+
 1. Campaign ID
-2. Query ID  
+2. Query ID
 3. Search Query
 4. Search Location
 5. Query Timestamp
@@ -326,18 +349,21 @@ exports/
 ## Benefits
 
 ### For Testing & Analysis
+
 - **Complete Audit Trail** - Every query and result tracked
 - **A/B Testing Support** - Compare different parameters across queries
 - **Performance Analysis** - Identify bottlenecks and optimization opportunities
 - **Cost Analysis** - Track spending efficiency across campaigns
 
 ### For Business Intelligence
+
 - **Market Analysis** - Comprehensive view across multiple searches
 - **Competitive Analysis** - Track business landscapes over time
 - **Quality Assurance** - Verify data quality and accuracy
 - **ROI Tracking** - Measure campaign effectiveness
 
 ### For Data Science
+
 - **Feature Engineering** - Rich dataset for ML model training
 - **Quality Prediction** - Train models to predict lead quality
 - **Cost Optimization** - Optimize API usage patterns
@@ -348,6 +374,7 @@ exports/
 The system maintains **backward compatibility** with the original single-query CSV export. Existing integrations continue to work, while new campaigns can take advantage of enhanced features.
 
 ### Legacy Support
+
 - Single query exports still work with original 16-column format
 - New enhanced exports include all legacy columns plus 30+ new fields
 - Existing API endpoints unchanged
