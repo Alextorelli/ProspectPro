@@ -2,9 +2,9 @@
 require("dotenv").config();
 const FoursquarePlacesClient = require("../ProspectPro/modules/api-clients/foursquare-places-client");
 
-const serviceApiKey = process.env.FOURSQUARE_SERVICE_API_KEY;
-if (!serviceApiKey) {
-  console.error("Foursquare SERVICE_API_KEY missing. Check .env file.");
+const placesApiKey = process.env.FOURSQUARE_PLACES_API_KEY;
+if (!placesApiKey) {
+  console.error("Foursquare PLACES_API_KEY missing. Check .env file.");
   process.exit(1);
 }
 const client = new FoursquarePlacesClient();

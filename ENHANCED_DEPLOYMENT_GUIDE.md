@@ -340,6 +340,7 @@ Your ProspectPro platform now provides enterprise-grade lead generation with ver
 ProspectPro uses the Foursquare Places API for business discovery and location intelligence. Add these to your environment:
 
 ```bash
+export FOURSQUARE_PLACES_API_KEY='your_places_api_key'
 export FOURSQUARE_SERVICE_API_KEY='your_service_api_key'
 export FOURSQUARE_CLIENT_ID='your_client_id'
 export FOURSQUARE_CLIENT_SECRET='your_client_secret'

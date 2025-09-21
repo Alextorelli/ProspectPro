@@ -196,6 +196,7 @@ ProspectPro integrates the Foursquare Places API for business discovery and loca
 Add these to your `.env` file:
 
 ```
+FOURSQUARE_PLACES_API_KEY=your_places_api_key
 FOURSQUARE_SERVICE_API_KEY=your_service_api_key
 FOURSQUARE_CLIENT_ID=your_client_id
 FOURSQUARE_CLIENT_SECRET=your_client_secret
@@ -204,7 +205,7 @@ FOURSQUARE_BEARER_TOKEN=your_bearer_token
 
 ### Usage
 
-The Foursquare client uses the SERVICE_API_KEY for authentication in API requests. See `modules/api-clients/foursquare-places-client.js` for implementation details.
+The Foursquare client uses the PLACES_API_KEY for authentication in API v3 requests. See `modules/api-clients/foursquare-places-client.js` for implementation details.
 
 ### Testing Integration
 
