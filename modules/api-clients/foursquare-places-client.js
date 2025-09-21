@@ -337,7 +337,7 @@ class FoursquarePlacesClient {
    */
   async makeRequest(endpoint, retries = 3) {
     const headers = {
-      Authorization: `Bearer ${await this.getAccessToken()}`,
+      Authorization: process.env.FOURSQUARE_SERVICE_API_KEY,
       Accept: "application/json",
       "User-Agent": "ProspectPro/2.0 Business Discovery System",
     };
