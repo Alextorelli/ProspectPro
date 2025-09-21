@@ -157,6 +157,73 @@ class EnhancedLeadDiscovery {
     };
   }
 
+  // Stage wrapper methods to match expected interface
+  async runDiscoveryStage(businesses, options) {
+    console.log(
+      `🔍 Running discovery stage for ${businesses.length} businesses`
+    );
+    const results = [];
+    for (const business of businesses) {
+      try {
+        const result = await this.stage1_DiscoveryAndPreValidation(business);
+        results.push(result);
+      } catch (error) {
+        console.error(`Error in discovery stage for ${business.name}:`, error);
+        results.push({ ...business, preValidationScore: 0, isValid: false });
+      }
+    }
+    return results;
+  }
+
+  async runEnrichmentStage(businesses, options) {
+    console.log(
+      `🔧 Running enrichment stage for ${businesses.length} businesses`
+    );
+    const results = [];
+    for (const business of businesses) {
+      try {
+        const result = await this.stage2_EnrichmentAndPropertyIntel(business);
+        results.push(result);
+      } catch (error) {
+        console.error(`Error in enrichment stage for ${business.name}:`, error);
+        results.push(business);
+      }
+    }
+    return results;
+  }
+
+  async runValidationStage(businesses, options) {
+    console.log(
+      `✅ Running validation stage for ${businesses.length} businesses`
+    );
+    const results = [];
+    for (const business of businesses) {
+      try {
+        const result = await this.stage3_ValidationAndRiskAssessment(business);
+        results.push(result);
+      } catch (error) {
+        console.error(`Error in validation stage for ${business.name}:`, error);
+        results.push(business);
+      }
+    }
+    return results;
+  }
+
+  async runScoringStage(businesses, options) {
+    console.log(`📊 Running scoring stage for ${businesses.length} businesses`);
+    const results = [];
+    for (const business of businesses) {
+      try {
+        const result = await this.stage4_QualityScoringAndExport(business);
+        results.push(result);
+      } catch (error) {
+        console.error(`Error in scoring stage for ${business.name}:`, error);
+        results.push(business);
+      }
+    }
+    return results;
+  }
+
   /**
    * Process single business through enhanced 4-stage pipeline
    */
@@ -686,21 +753,35 @@ class EnhancedLeadDiscovery {
   }
 
   getUsageStats() {
-    const stats = {
-      californiaSOSRequests: this.californiaSOSClient.getUsageStats(),
-      newYorkSOSRequests: this.newYorkSOSClient.getUsageStats(),
-      nyTaxParcelsRequests: this.nyTaxParcelsClient.getUsageStats(),
-      secEdgarRequests: this.secEdgarClient.getUsageStats(),
-      proPublicaRequests: this.proPublicaClient.getUsageStats(),
-      foursquareRequests: this.foursquareClient.getUsageStats(),
-    };
+    const stats = {};
 
-    if (this.hunterClient) {
+    // Only include stats for initialized clients
+    if (this.californiaSOSClient && this.californiaSOSClient.getUsageStats) {
+      stats.californiaSOSRequests = this.californiaSOSClient.getUsageStats();
+    }
+    if (this.newYorkSOSClient && this.newYorkSOSClient.getUsageStats) {
+      stats.newYorkSOSRequests = this.newYorkSOSClient.getUsageStats();
+    }
+    if (this.nyTaxParcelsClient && this.nyTaxParcelsClient.getUsageStats) {
+      stats.nyTaxParcelsRequests = this.nyTaxParcelsClient.getUsageStats();
+    }
+    if (this.secEdgarClient && this.secEdgarClient.getUsageStats) {
+      stats.secEdgarRequests = this.secEdgarClient.getUsageStats();
+    }
+    if (this.proPublicaClient && this.proPublicaClient.getUsageStats) {
+      stats.proPublicaRequests = this.proPublicaClient.getUsageStats();
+    }
+    if (this.foursquareClient && this.foursquareClient.getUsageStats) {
+      stats.foursquareRequests = this.foursquareClient.getUsageStats();
+    }
+    if (this.hunterClient && this.hunterClient.getUsageStats) {
       stats.hunterIOUsage = this.hunterClient.getUsageStats();
     }
-
-    if (this.neverBounceClient) {
+    if (this.neverBounceClient && this.neverBounceClient.getUsageStats) {
       stats.neverBounceUsage = this.neverBounceClient.getUsageStats();
+    }
+    if (this.googlePlacesClient && this.googlePlacesClient.getUsageStats) {
+      stats.googlePlacesUsage = this.googlePlacesClient.getUsageStats();
     }
 
     return stats;

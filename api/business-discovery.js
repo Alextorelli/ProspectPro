@@ -4,6 +4,9 @@ const EnhancedLeadDiscovery = require("../modules/enhanced-lead-discovery");
 const CampaignLogger = require("../modules/logging/campaign-logger");
 const EnhancedStateRegistryClient = require("../modules/api-clients/enhanced-state-registry-client");
 const ZeroBounceClient = require("../modules/api-clients/zerobounce-client");
+const createCsvWriter = require("csv-writer").createObjectCsvWriter;
+const path = require("path");
+const fs = require("fs").promises;
 const router = express.Router();
 
 // Initialize enhanced discovery algorithm with all API keys
@@ -51,6 +54,7 @@ router.post("/discover", async (req, res) => {
       budgetLimit = 25.0,
       qualityThreshold = 75,
       batchType = "cost-optimized",
+      exportToCsv = false,
     } = req.body;
 
     // Validate required parameters
@@ -226,6 +230,30 @@ router.post("/discover", async (req, res) => {
       timestamp: new Date().toISOString(),
     });
 
+    // CSV Export functionality
+    let csvExportResult = null;
+    if (exportToCsv && enhancedResults.leads.length > 0) {
+      try {
+        csvExportResult = await exportResultsToCsv(enhancedResults.leads, {
+          query,
+          location,
+          totalProcessed: enhancedResults.totalProcessed,
+          qualificationRate: Math.round(
+            (enhancedResults.leads.length / enhancedResults.totalProcessed) *
+              100
+          ),
+          averageConfidence: enhancedResults.qualityMetrics.averageConfidence,
+          processingTime: Date.now() - startTime,
+          totalCost: enhancedResults.totalCost,
+        });
+        console.log(
+          `📊 CSV Export: ${csvExportResult.filename} created with ${enhancedResults.leads.length} leads`
+        );
+      } catch (csvError) {
+        console.error("❌ CSV Export failed:", csvError.message);
+      }
+    }
+
     // Return enhanced results with full transparency
     res.json({
       success: true,
@@ -292,6 +320,16 @@ router.post("/discover", async (req, res) => {
           totalFreeAPIsUsed: enhancedValidationResults.stateRegistryChecks,
         },
       },
+      csvExport: csvExportResult
+        ? {
+            filename: csvExportResult.filename,
+            filepath: csvExportResult.filepath,
+            leadCount: csvExportResult.leadCount,
+            downloadUrl: `/api/business/download-csv/${encodeURIComponent(
+              csvExportResult.filename
+            )}`,
+          }
+        : null,
     });
   } catch (error) {
     console.error("❌ Enhanced business discovery failed:", error);
@@ -438,5 +476,122 @@ function deduplicateBusinesses(businesses) {
 
   return deduplicated;
 }
+
+// CSV Export Function
+async function exportResultsToCsv(leads, metadata) {
+  // Ensure exports directory exists
+  const exportsDir = path.join(__dirname, "../exports");
+  try {
+    await fs.mkdir(exportsDir, { recursive: true });
+  } catch (error) {
+    console.error("Error creating exports directory:", error);
+  }
+
+  // Create timestamp for unique filename
+  const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
+  const sanitizedQuery = metadata.query.replace(/[^a-zA-Z0-9]/g, "-");
+  const filename = `ProspectPro-${sanitizedQuery}-${timestamp}.csv`;
+  const filepath = path.join(exportsDir, filename);
+
+  // Define CSV structure
+  const csvWriter = createCsvWriter({
+    path: filepath,
+    header: [
+      { id: "name", title: "Business Name" },
+      { id: "address", title: "Address" },
+      { id: "phone", title: "Phone" },
+      { id: "website", title: "Website" },
+      { id: "email", title: "Email" },
+      { id: "confidenceScore", title: "Confidence Score" },
+      { id: "category", title: "Category" },
+      { id: "rating", title: "Rating" },
+      { id: "reviewCount", title: "Review Count" },
+      { id: "priceLevel", title: "Price Level" },
+      { id: "hours", title: "Hours" },
+      { id: "placeId", title: "Google Place ID" },
+    ],
+  });
+
+  // Map leads to CSV format
+  const csvData = leads.map((lead) => ({
+    name: lead.name || "",
+    address: lead.address || "",
+    phone: lead.phone || "",
+    website: lead.website || "",
+    email: lead.email || "",
+    confidenceScore: lead.finalConfidenceScore || lead.confidenceScore || "",
+    category: lead.category || "",
+    rating: lead.rating || "",
+    reviewCount: lead.reviewCount || "",
+    priceLevel: lead.priceLevel || "",
+    hours: lead.hours
+      ? typeof lead.hours === "object"
+        ? JSON.stringify(lead.hours)
+        : lead.hours
+      : "",
+    placeId: lead.placeId || "",
+  }));
+
+  // Write CSV file
+  await csvWriter.writeRecords(csvData);
+
+  // Write metadata file
+  const metadataFilename = `ProspectPro-${sanitizedQuery}-${timestamp}-metadata.json`;
+  const metadataPath = path.join(exportsDir, metadataFilename);
+  await fs.writeFile(
+    metadataPath,
+    JSON.stringify(
+      {
+        ...metadata,
+        exportDate: new Date().toISOString(),
+        leadCount: leads.length,
+      },
+      null,
+      2
+    )
+  );
+
+  console.log(
+    `✅ CSV Export complete: ${leads.length} leads exported to ${filename}`
+  );
+
+  return {
+    filename: filename,
+    filepath: filepath,
+    leadCount: leads.length,
+    metadataFile: metadataFilename,
+  };
+}
+
+// Download CSV endpoint
+router.get("/download-csv/:filename", async (req, res) => {
+  try {
+    const { filename } = req.params;
+    const filepath = path.join(__dirname, "../exports", filename);
+
+    // Check if file exists
+    try {
+      await fs.access(filepath);
+    } catch (error) {
+      return res.status(404).json({
+        error: "File not found",
+        message: "The requested CSV file does not exist or has expired.",
+      });
+    }
+
+    // Send file with proper headers
+    res.setHeader("Content-Type", "text/csv");
+    res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
+
+    const fileStream = require("fs").createReadStream(filepath);
+    fileStream.pipe(res);
+  } catch (error) {
+    console.error("Error downloading CSV:", error);
+    res.status(500).json({
+      error: "Download failed",
+      message: error.message,
+    });
+  }
+});
 
 module.exports = router;
