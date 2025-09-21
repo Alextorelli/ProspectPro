@@ -7,6 +7,7 @@ The ProspectPro Enhanced Business Discovery system has been successfully integra
 - **Enhanced State Registry Client** (7 government APIs)
 - **ZeroBounce Email Validation** (cost-optimized)
 - **Google Places API** (business discovery)
+- **Foursquare Places API** (business discovery and location intelligence)
 - **4-Stage Validation Pipeline** (pre-validation → state registry → email validation → final scoring)
 
 ## ✅ Integration Status
@@ -16,20 +17,22 @@ The ProspectPro Enhanced Business Discovery system has been successfully integra
 - ✅ **Enhanced State Registry Client**: Integrated with 7 free government APIs
 - ✅ **ZeroBounce Email Validation**: Cost-optimized validation with confidence scoring
 - ✅ **Google Places Integration**: Real business data discovery with zero fake data policy
+- ✅ **Foursquare Places Integration**: Business discovery and location intelligence
 - ✅ **Edge Functions**: TypeScript/Deno implementation ready for Supabase deployment
 - ✅ **Cost Optimization**: Pre-validation filtering and budget controls implemented
 
 ### API Integrations
 
 1. **Google Places API** - Business discovery (Required)
-2. **California Secretary of State** - Business entity validation (Free)
-3. **New York Secretary of State** - Business registry search (Free)
-4. **NY State Tax Parcels** - Property intelligence (Free)
-5. **Connecticut UCC Filings** - Financial risk assessment (Free)
-6. **SEC EDGAR** - Public company verification (Free)
-7. **USPTO Trademarks** - Intellectual property verification (Free with API key)
-8. **CourtListener** - Legal risk assessment (Free with API key)
-9. **ZeroBounce** - Email validation (Paid - cost controlled)
+2. **Foursquare Places API** - Business discovery and location intelligence (Required)
+3. **California Secretary of State** - Business entity validation (Free)
+4. **New York Secretary of State** - Business registry search (Free)
+5. **NY State Tax Parcels** - Property intelligence (Free)
+6. **Connecticut UCC Filings** - Financial risk assessment (Free)
+7. **SEC EDGAR** - Public company verification (Free)
+8. **USPTO Trademarks** - Intellectual property verification (Free with API key)
+9. **CourtListener** - Legal risk assessment (Free with API key)
+10. **ZeroBounce** - Email validation (Paid - cost controlled)
 
 ## 🔧 Environment Configuration
 
@@ -38,6 +41,8 @@ The ProspectPro Enhanced Business Discovery system has been successfully integra
 ```bash
 # Essential for business discovery
 export GOOGLE_PLACES_API_KEY='your_google_places_api_key'
+export FOURSQUARE_CLIENT_ID='your_client_id'
+export FOURSQUARE_CLIENT_SECRET='your_client_secret'
 
 # Supabase deployment
 export SUPABASE_URL='https://your-project.supabase.co'
@@ -68,6 +73,8 @@ export SOCRATA_APP_TOKEN='your_socrata_app_token'
 
 # Core required variables:
 GOOGLE_PLACES_API_KEY=your_key_here
+FOURSQUARE_CLIENT_ID=your_key_here
+FOURSQUARE_CLIENT_SECRET=your_key_here
 SUPABASE_SERVICE_ROLE_KEY=your_key_here
 
 # Optional enhanced features:
@@ -130,6 +137,9 @@ curl -X POST 'https://your-project.supabase.co/functions/v1/enhanced-business-di
   "totalCost": 2.45,
   "businesses": [...]
 }
+
+# Test Foursquare integration
+node test/test-foursquare-integration.js
 ```
 
 ## 💰 Cost Optimization Features
@@ -155,9 +165,10 @@ curl -X POST 'https://your-project.supabase.co/functions/v1/enhanced-business-di
 ### Cost Breakdown (per 100 businesses processed)
 
 - Google Places discovery: ~$3.20 (required)
+- Foursquare Places discovery: ~$2.50 (required)
 - State registry validation: $0.00 (7 free government APIs)
 - Email validation: ~$0.35 (5-10 high-confidence leads)
-- **Total estimated cost: $3.55 per 100 businesses**
+- **Total estimated cost: $6.05 per 100 businesses**
 
 ## 📈 Quality Improvements
 
@@ -323,3 +334,22 @@ The Enhanced Business Discovery system is now ready for production deployment wi
 - **4-Stage Quality Pipeline** operational
 
 Your ProspectPro platform now provides enterprise-grade lead generation with verified, authentic business data!
+
+### Foursquare Places API (NEW)
+
+ProspectPro uses the Foursquare Places API for business discovery and location intelligence. Add these to your environment:
+
+```bash
+export FOURSQUARE_SERVICE_API_KEY='your_service_api_key'
+export FOURSQUARE_CLIENT_ID='your_client_id'
+export FOURSQUARE_CLIENT_SECRET='your_client_secret'
+export FOURSQUARE_BEARER_TOKEN='your_bearer_token'
+```
+
+To test the integration, run:
+
+```bash
+node test/test-foursquare-integration.js
+```
+
+See `modules/api-clients/foursquare-places-client.js` for implementation details.
