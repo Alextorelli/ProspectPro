@@ -8,8 +8,8 @@
  * - Geographic search capabilities with radius and bounding box support
  *
  * API Documentation: https://docs.foursquare.com/data-products/docs/places-api/
- * Authentication: OAuth 2.0 with Client ID and Client Secret
- * Rate Limits: 950 requests per day for free tier
+ * Authentication: Service Key via Authorization: Bearer <FOURSQUARE_SERVICE_API_KEY>
+ * Versioning: X-Places-Api-Version header (e.g., 2025-06-17)
  *
  * ProspectPro - Zero Fake Data Policy
  */
@@ -18,6 +18,8 @@ require("dotenv").config();
 
 class FoursquarePlacesClient {
   constructor(clientId = null, clientSecret = null) {
+    // Note: Client ID/Secret are no longer required for the new Places API.
+    // They're retained for backward compatibility but are not used for auth.
     this.clientId = clientId || process.env.FOURSQUARE_CLIENT_ID;
     this.clientSecret = clientSecret || process.env.FOURSQUARE_CLIENT_SECRET;
     this.baseUrl = "https://places-api.foursquare.com"; // migrated base URL
@@ -117,9 +119,9 @@ class FoursquarePlacesClient {
       throw new Error("Search query is required and must be a string");
     }
 
-    if (!this.clientId || !this.clientSecret) {
+    if (!this.serviceKey) {
       console.warn(
-        "⚠️ Foursquare API credentials not configured, returning mock response"
+        "⚠️ Foursquare Service Key not configured, returning mock response"
       );
       return this.getMockResponse(query);
     }
@@ -213,9 +215,9 @@ class FoursquarePlacesClient {
       throw new Error("Place ID is required");
     }
 
-    if (!this.clientId || !this.clientSecret) {
-      console.warn("⚠️ Foursquare API credentials not configured");
-      return { found: false, error: "API credentials not configured" };
+    if (!this.serviceKey) {
+      console.warn("⚠️ Foursquare Service Key not configured");
+      return { found: false, error: "Service Key not configured" };
     }
 
     // Check cache
@@ -237,21 +239,7 @@ class FoursquarePlacesClient {
     }
 
     try {
-      let endpoint = `/places/${placeId}`;
-
-      // Add fields parameter for additional data
-      const fields = ["name", "location", "categories", "geocodes", "tel"];
-
-      if (options.includePhotos) {
-        fields.push("photos");
-      }
-      if (options.includeTips) {
-        fields.push("tips");
-      }
-
-      endpoint += `?fields=${fields.join(",")}`;
-
-      const response = await this.makeRequest(endpoint);
+      const response = await this.makeRequest(`/places/${placeId}`);
       const normalizedResponse = this.normalizePlaceResponse(
         response,
         placeId,
@@ -558,7 +546,7 @@ class FoursquarePlacesClient {
       found: true,
       placeId,
       placeDetails: {
-        fsqId: data.fsq_id || placeId,
+        fsqId: data.fsq_place_id || data.fsq_id || placeId,
         name: data.name || null,
 
         // Location details
@@ -572,15 +560,9 @@ class FoursquarePlacesClient {
         },
 
         // Geographic information
-        geocodes: {
-          main: {
-            latitude: data.geocodes?.main?.latitude || null,
-            longitude: data.geocodes?.main?.longitude || null,
-          },
-          roof: {
-            latitude: data.geocodes?.roof?.latitude || null,
-            longitude: data.geocodes?.roof?.longitude || null,
-          },
+        coordinates: {
+          latitude: data.latitude || data.geocodes?.main?.latitude || null,
+          longitude: data.longitude || data.geocodes?.main?.longitude || null,
         },
 
         // Categories

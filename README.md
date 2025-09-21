@@ -187,25 +187,31 @@ To run from source:
 go run . help
 ```
 
-## Foursquare Places API Integration
+## Foursquare Places API Integration (Updated)
 
-ProspectPro integrates the Foursquare Places API for business discovery and location intelligence.
+ProspectPro integrates the new Foursquare Places API for business discovery and location intelligence.
+
+Key changes from legacy v3:
+
+- Base URL: `https://places-api.foursquare.com`
+- Auth: `Authorization: Bearer <FOURSQUARE_SERVICE_API_KEY>` (Service Key preferred)
+- Versioning: `X-Places-Api-Version` header (e.g., `2025-06-17`)
 
 ### Environment Variables
 
 Add these to your `.env` file:
 
 ```
-FOURSQUARE_PLACES_API_KEY=your_places_api_key
 FOURSQUARE_SERVICE_API_KEY=your_service_api_key
-FOURSQUARE_CLIENT_ID=your_client_id
-FOURSQUARE_CLIENT_SECRET=your_client_secret
-FOURSQUARE_BEARER_TOKEN=your_bearer_token
+FOURSQUARE_PLACES_API_KEY=optional_legacy_fallback
+FOURSQUARE_PLACES_API_VERSION=2025-06-17
 ```
+
+Client ID/Secret and OAuth tokens are not required for the new Places API.
 
 ### Usage
 
-The Foursquare client uses the PLACES_API_KEY for authentication in API v3 requests. See `modules/api-clients/foursquare-places-client.js` for implementation details.
+The client at `modules/api-clients/foursquare-places-client.js` uses the Service Key with Bearer auth and sends the version header.
 
 ### Testing Integration
 

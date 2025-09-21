@@ -335,16 +335,22 @@ The Enhanced Business Discovery system is now ready for production deployment wi
 
 Your ProspectPro platform now provides enterprise-grade lead generation with verified, authentic business data!
 
-### Foursquare Places API (NEW)
+### Foursquare Places API (Updated)
 
-ProspectPro uses the Foursquare Places API for business discovery and location intelligence. Add these to your environment:
+ProspectPro uses the new Foursquare Places API for business discovery and location intelligence.
+
+Key points:
+
+- Base URL: `https://places-api.foursquare.com`
+- Auth: `Authorization: Bearer $FOURSQUARE_SERVICE_API_KEY` (Service Key)
+- Versioning header: `X-Places-Api-Version` (e.g., `2025-06-17`)
+
+Add these to your environment:
 
 ```bash
-export FOURSQUARE_PLACES_API_KEY='your_places_api_key'
 export FOURSQUARE_SERVICE_API_KEY='your_service_api_key'
-export FOURSQUARE_CLIENT_ID='your_client_id'
-export FOURSQUARE_CLIENT_SECRET='your_client_secret'
-export FOURSQUARE_BEARER_TOKEN='your_bearer_token'
+export FOURSQUARE_PLACES_API_KEY='optional_legacy_fallback'
+export FOURSQUARE_PLACES_API_VERSION='2025-06-17'
 ```
 
 To test the integration, run:
