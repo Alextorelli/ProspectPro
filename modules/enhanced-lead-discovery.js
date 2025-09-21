@@ -339,9 +339,11 @@ class EnhancedLeadDiscovery {
           this.setCache(cacheKey, googlePlacesDetails);
           stageCost += 0.017; // Google Places Details API cost
 
-          // Enrich business data with contact information
+          // Enhanced contact differentiation: Company vs Owner information
           if (googlePlacesDetails.phone) {
             businessData.phone = googlePlacesDetails.phone;
+            businessData.companyPhone = googlePlacesDetails.phone; // Google Places typically provides main business line
+            businessData.companyPhoneSource = "Google Places";
           }
           if (googlePlacesDetails.website) {
             businessData.website = googlePlacesDetails.website;
@@ -357,9 +359,12 @@ class EnhancedLeadDiscovery {
           googlePlacesDetails = { found: false, error: error.message };
         }
       } else {
-        // Apply cached contact details
-        if (googlePlacesDetails.phone)
+        // Apply cached contact details with enhanced differentiation
+        if (googlePlacesDetails.phone) {
           businessData.phone = googlePlacesDetails.phone;
+          businessData.companyPhone = googlePlacesDetails.phone;
+          businessData.companyPhoneSource = "Google Places";
+        }
         if (googlePlacesDetails.website)
           businessData.website = googlePlacesDetails.website;
         if (googlePlacesDetails.hours)
@@ -421,13 +426,87 @@ class EnhancedLeadDiscovery {
         this.setCache(cacheKey, emailDiscovery);
         stageCost += emailDiscovery.cost || 0;
 
-        // Apply discovered emails to business data
+        // Enhanced contact differentiation: Company vs Owner
         if (emailDiscovery.emails && emailDiscovery.emails.length > 0) {
-          businessData.email = emailDiscovery.emails[0].value; // Primary email
+          const emails = emailDiscovery.emails;
+
+          // Find high-confidence owner email (80%+ confidence with owner-like titles)
+          const ownerEmail = emails.find(
+            (email) =>
+              email.confidence >= 80 &&
+              this.isOwnerPosition(
+                email.position || email.position_raw,
+                email.first_name,
+                email.last_name,
+                businessData.name
+              )
+          );
+
+          // Find high-confidence management email
+          const mgmtEmail = emails.find(
+            (email) =>
+              email.confidence >= 80 &&
+              this.isManagementPosition(email.position || email.position_raw)
+          );
+
+          // Set owner contact if found with high confidence
+          if (ownerEmail) {
+            businessData.ownerEmail = ownerEmail.value;
+            businessData.ownerEmailSource = "Hunter.io domain search";
+            businessData.ownerEmailConfidence = ownerEmail.confidence;
+            businessData.ownerName = `${ownerEmail.first_name || ""} ${
+              ownerEmail.last_name || ""
+            }`.trim();
+            businessData.ownerTitle =
+              ownerEmail.position || ownerEmail.position_raw;
+          }
+
+          // Set company contact (primary or management)
+          const companyEmail = mgmtEmail || emails[0];
+          businessData.companyEmail = companyEmail.value;
+          businessData.companyEmailSource = "Hunter.io domain search";
+          businessData.companyEmailConfidence = companyEmail.confidence;
+
+          // Legacy field for backwards compatibility
+          businessData.email = companyEmail.value;
           businessData.emailSource = "Hunter.io domain search";
         }
       } else if (emailDiscovery.emails && emailDiscovery.emails.length > 0) {
-        businessData.email = emailDiscovery.emails[0].value;
+        // Handle cached results with same logic
+        const emails = emailDiscovery.emails;
+        const ownerEmail = emails.find(
+          (email) =>
+            email.confidence >= 80 &&
+            this.isOwnerPosition(
+              email.position || email.position_raw,
+              email.first_name,
+              email.last_name,
+              businessData.name
+            )
+        );
+        const mgmtEmail = emails.find(
+          (email) =>
+            email.confidence >= 80 &&
+            this.isManagementPosition(email.position || email.position_raw)
+        );
+
+        if (ownerEmail) {
+          businessData.ownerEmail = ownerEmail.value;
+          businessData.ownerEmailSource = "Hunter.io (cached)";
+          businessData.ownerEmailConfidence = ownerEmail.confidence;
+          businessData.ownerName = `${ownerEmail.first_name || ""} ${
+            ownerEmail.last_name || ""
+          }`.trim();
+          businessData.ownerTitle =
+            ownerEmail.position || ownerEmail.position_raw;
+        }
+
+        const companyEmail = mgmtEmail || emails[0];
+        businessData.companyEmail = companyEmail.value;
+        businessData.companyEmailSource = "Hunter.io (cached)";
+        businessData.companyEmailConfidence = companyEmail.confidence;
+
+        businessData.email = companyEmail.value;
         businessData.emailSource = "Hunter.io (cached)";
       }
     }
@@ -443,10 +522,13 @@ class EnhancedLeadDiscovery {
         `🔗 Cross-referencing ${businessData.name} data: Google + Foursquare`
       );
 
-      // Use Foursquare data to supplement missing Google Places info
+      // Enhanced contact differentiation for phone numbers
       if (!businessData.phone && fsPlace.contact && fsPlace.contact.phone) {
+        // Foursquare phones are typically company main numbers
         businessData.phone = fsPlace.contact.phone;
+        businessData.companyPhone = fsPlace.contact.phone;
         businessData.phoneSource = "Foursquare";
+        businessData.companyPhoneSource = "Foursquare";
       }
       if (!businessData.website && fsPlace.url) {
         businessData.website = fsPlace.url;
@@ -871,6 +953,79 @@ class EnhancedLeadDiscovery {
     }
 
     return stats;
+  }
+
+  /**
+   * Helper methods for contact role identification
+   */
+  isOwnerPosition(position, firstName, lastName, businessName) {
+    if (!position) return false;
+
+    // Primary owner titles
+    const ownerTitles = [
+      "owner",
+      "founder",
+      "ceo",
+      "president",
+      "principal",
+      "proprietor",
+      "managing director",
+      "managing partner",
+      "executive director",
+    ];
+
+    // Additional titles that often indicate ownership in small businesses
+    const likelyOwnerTitles = [
+      "accountant", // Often owner-operated businesses
+      "attorney",
+      "lawyer", // Solo practitioners
+      "consultant",
+      "advisor", // Independent consultants
+      "practitioner", // Medical/legal practices
+    ];
+
+    const positionLower = position.toLowerCase();
+
+    // Direct owner title match
+    if (ownerTitles.some((title) => positionLower.includes(title))) {
+      return true;
+    }
+
+    // Name matching with business for likely owner titles
+    if (likelyOwnerTitles.some((title) => positionLower.includes(title))) {
+      if (firstName && lastName && businessName) {
+        const fullName = `${firstName} ${lastName}`.toLowerCase();
+        const businessLower = businessName.toLowerCase();
+
+        // Check if person's name appears in business name
+        if (
+          businessLower.includes(firstName.toLowerCase()) ||
+          businessLower.includes(lastName.toLowerCase()) ||
+          businessLower.includes(fullName)
+        ) {
+          return true;
+        }
+      }
+    }
+
+    return false;
+  }
+
+  isManagementPosition(position) {
+    if (!position) return false;
+    const mgmtTitles = [
+      "manager",
+      "director",
+      "vp",
+      "vice president",
+      "supervisor",
+      "coordinator",
+      "lead",
+      "head",
+      "chief",
+      "general manager",
+    ];
+    return mgmtTitles.some((title) => position.toLowerCase().includes(title));
   }
 }
 

@@ -493,19 +493,26 @@ async function exportResultsToCsv(leads, metadata) {
   const filename = `ProspectPro-${sanitizedQuery}-${timestamp}.csv`;
   const filepath = path.join(exportsDir, filename);
 
-  // Define CSV structure for full pipeline testing
+  // Define CSV structure for enhanced company vs owner contact differentiation
   const csvWriter = createCsvWriter({
     path: filepath,
     header: [
       { id: "name", title: "Business Name" },
       { id: "address", title: "Address" },
-      { id: "phone", title: "Phone" },
-      { id: "phoneSource", title: "Phone Source" },
+      { id: "companyPhone", title: "Company Phone" },
+      { id: "companyPhoneSource", title: "Company Phone Source" },
+      { id: "ownerPhone", title: "Owner Phone" },
+      { id: "ownerPhoneSource", title: "Owner Phone Source" },
       { id: "website", title: "Website" },
       { id: "websiteSource", title: "Website Source" },
-      { id: "email", title: "Email" },
-      { id: "emailSource", title: "Email Source" },
-      { id: "emailVerified", title: "Email Verified" },
+      { id: "companyEmail", title: "Company Email" },
+      { id: "companyEmailSource", title: "Company Email Source" },
+      { id: "companyEmailConfidence", title: "Company Email Confidence" },
+      { id: "ownerEmail", title: "Owner Email" },
+      { id: "ownerEmailSource", title: "Owner Email Source" },
+      { id: "ownerEmailConfidence", title: "Owner Email Confidence" },
+      { id: "ownerName", title: "Owner Name" },
+      { id: "ownerTitle", title: "Owner Title" },
       { id: "confidenceScore", title: "Confidence Score" },
       { id: "category", title: "Category" },
       { id: "rating", title: "Rating" },
@@ -517,17 +524,25 @@ async function exportResultsToCsv(leads, metadata) {
     ],
   });
 
-  // Map leads to CSV format with full pipeline data
+  // Map leads to CSV format with enhanced company vs owner contact differentiation
   const csvData = leads.map((lead) => ({
     name: lead.name || "",
     address: lead.address || "",
-    phone: lead.phone || "",
-    phoneSource: lead.phoneSource || "Google Places",
+    companyPhone: lead.companyPhone || lead.phone || "",
+    companyPhoneSource:
+      lead.companyPhoneSource || lead.phoneSource || "Google Places",
+    ownerPhone: lead.ownerPhone || "",
+    ownerPhoneSource: lead.ownerPhoneSource || "",
     website: lead.website || "",
     websiteSource: lead.websiteSource || "Google Places",
-    email: lead.email || "",
-    emailSource: lead.emailSource || "",
-    emailVerified: lead.emailValidation?.bestEmail ? "Yes" : "No",
+    companyEmail: lead.companyEmail || lead.email || "",
+    companyEmailSource: lead.companyEmailSource || lead.emailSource || "",
+    companyEmailConfidence: lead.companyEmailConfidence || "",
+    ownerEmail: lead.ownerEmail || "",
+    ownerEmailSource: lead.ownerEmailSource || "",
+    ownerEmailConfidence: lead.ownerEmailConfidence || "",
+    ownerName: lead.ownerName || "",
+    ownerTitle: lead.ownerTitle || "",
     confidenceScore: lead.finalConfidenceScore || lead.confidenceScore || "",
     category: lead.category || "",
     rating: lead.rating || "",
