@@ -14,10 +14,9 @@ yarn-error.log*
 .env.test.local
 .env.production.local
 
-# Railway production files (CRITICAL - prevent secret exposure)
-railway-production-variables.json
-railway-secrets.json
-railway-config-production.json
+# Lovable frontend deployment files
+.lovable/
+lovable-config.json
 
 # Production builds
 /build
