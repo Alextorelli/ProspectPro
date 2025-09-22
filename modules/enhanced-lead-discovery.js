@@ -7,7 +7,8 @@ const CaliforniaSOS = require("./api-clients/california-sos-client");
 const NewYorkSOS = require("./api-clients/newyork-sos-client");
 const NYTaxParcels = require("./api-clients/ny-tax-parcels-client");
 const GooglePlacesClient = require("./api-clients/google-places");
-const ValidationRouter = require("./routing/validation-router");
+const RegistryValidationEngine = require("./registry-engines/registry-validation-engine");
+const { batchProcessor } = require("./utils/batch-processor");
 const logger = require("./utils/logger");
 // Import API clients
 const MultiSourceEmailDiscovery = require("./api-clients/multi-source-email-discovery");
@@ -21,6 +22,21 @@ class EnhancedLeadDiscovery {
   constructor(apiKeys = {}) {
     // Initialize validation router
     this.validationRouter = new ValidationRouter();
+
+    // Initialize Registry Validation Engine with all providers
+    this.registryEngine = new RegistryValidationEngine({
+      concurrency: 3,
+      cacheEnabled: true,
+      cacheTTL: 3600000, // 1 hour
+      providerConfig: {
+        "california-sos": { apiKey: apiKeys.californiaSOS },
+        "newyork-sos": { apiKey: apiKeys.newYorkSOS },
+        propublica: { apiKey: apiKeys.proPublica },
+        "sec-edgar": { userAgent: "ProspectPro Lead Discovery Tool" },
+        uspto: { apiKey: apiKeys.uspto },
+        "companies-house-uk": { apiKey: apiKeys.companiesHouseUK },
+      },
+    });
 
     // Initialize all API clients
     this.californiaSOSClient = new CaliforniaSOS();
@@ -683,41 +699,73 @@ class EnhancedLeadDiscovery {
     let stageCost = 0;
 
     // Website validation (free, cached)
+    // Website validation - now uses batch processor with domain-level caching
     if (businessData.website) {
-      const cacheKey = `website_${businessData.website}`;
-      websiteValidation = this.getCache(cacheKey);
-      if (!websiteValidation) {
-        websiteValidation = await this.validateWebsiteAccessibility(
-          businessData.website
+      logger.debug(
+        `🌐 Batch validating website for ${businessData.name}: ${businessData.website}`
+      );
+
+      try {
+        // Use batch processor for website scraping (with domain-level caching)
+        const websiteResults = await batchProcessor.batchWebsiteScraping([
+          businessData.website,
+        ]);
+        websiteValidation = websiteResults[0] || {
+          isAccessible: false,
+          error: "No result returned from batch processor",
+        };
+      } catch (error) {
+        logger.warn(
+          `⚠️ Batch website validation failed for ${businessData.name}: ${error.message}`
         );
-        this.setCache(cacheKey, websiteValidation);
+        websiteValidation = {
+          isAccessible: false,
+          error: error.message,
+          batchProcessed: false,
+        };
       }
     }
 
-    // Email validation (paid - selective usage, cached)
+    // Email validation (paid - selective usage, cached) - Now uses batch processor
     if (
       this.neverBounceClient &&
       businessData.emailDiscovery?.emails?.length > 0
     ) {
       const priorityEmails = businessData.emailDiscovery.emails.slice(0, 2);
-      const cacheKey = `email_validation_${priorityEmails.join("_")}`;
-      emailValidation = this.getCache(cacheKey);
-      if (!emailValidation) {
-        const verificationResults =
-          await this.neverBounceClient.verifyEmailBatch(
-            priorityEmails.map((e) => e.value || e)
-          );
+      const emailsToVerify = priorityEmails.map((e) => e.value || e);
+
+      logger.debug(
+        `🔍 Batch verifying ${emailsToVerify.length} emails for ${businessData.name}`
+      );
+
+      try {
+        // Use batch processor for email verification
+        const verificationResults = await batchProcessor.batchEmailVerification(
+          emailsToVerify,
+          this.neverBounceClient
+        );
+
         emailValidation = {
           results: verificationResults,
           bestEmail: verificationResults.find((r) => r.isDeliverable),
           deliverableCount: verificationResults.filter((r) => r.isDeliverable)
             .length,
+          batchProcessed: true,
         };
-        this.setCache(cacheKey, emailValidation);
+
         stageCost += verificationResults.reduce(
           (sum, r) => sum + (r.cost || 0),
           0
         );
+      } catch (error) {
+        logger.warn(
+          `⚠️ Batch email verification failed for ${businessData.name}: ${error.message}`
+        );
+        emailValidation = {
+          results: [],
+          error: error.message,
+          batchProcessed: false,
+        };
       }
     }
 
@@ -799,136 +847,165 @@ class EnhancedLeadDiscovery {
    * Uses dynamic routing to only call relevant APIs based on business location/type
    */
   async validateBusinessRegistration(business, searchParams = {}) {
-    logger.debug(`Validating business registration for ${business.name}`);
-
-    // Use router to determine which validators to use
-    const selectedValidators = this.validationRouter.getValidatorsForBusiness(
-      business,
-      searchParams
-    );
-
-    if (selectedValidators.length === 0) {
-      logger.debug(
-        `No validators selected for ${business.name} - likely small wellness business`
-      );
-      return {
-        california: {
-          found: false,
-          skipped: true,
-          reason: "Small wellness business",
-        },
-        newYork: {
-          found: false,
-          skipped: true,
-          reason: "Small wellness business",
-        },
-        proPublica: {
-          found: false,
-          skipped: true,
-          reason: "Small wellness business",
-        },
-        registeredInAnyState: false,
-        isNonprofit: false,
-        confidence: 0,
-        routingDecision: this.validationRouter.getRoutingSummary(
-          business,
-          searchParams
-        ),
-      };
-    }
-
     logger.debug(
-      `Selected validators for ${business.name}: ${selectedValidators.join(
-        ", "
-      )}`
+      `🔍 Running registry validation for ${business.name} using modular engine`
     );
 
-    // Build validation promises based on router selection
-    const validationPromises = [];
-    const validatorMap = {};
-
-    if (selectedValidators.includes("californiaSOS")) {
-      validationPromises.push(
-        this.californiaSOSClient.searchBusiness(business.name)
-      );
-      validatorMap["californiaSOS"] = validationPromises.length - 1;
-    }
-
-    if (selectedValidators.includes("newYorkSOS")) {
-      validationPromises.push(
-        this.newYorkSOSClient.searchBusiness(business.name)
-      );
-      validatorMap["newYorkSOS"] = validationPromises.length - 1;
-    }
-
-    if (selectedValidators.includes("proPublica")) {
-      validationPromises.push(
-        this.proPublicaClient.searchNonprofits(business.name)
-      );
-      validatorMap["proPublica"] = validationPromises.length - 1;
-    }
-
-    // Execute only selected validations
-    const results = await Promise.allSettled(validationPromises);
-
-    // Map results back to expected structure
-    const caResult =
-      validatorMap["californiaSOS"] !== undefined
-        ? results[validatorMap["californiaSOS"]].status === "fulfilled"
-          ? results[validatorMap["californiaSOS"]].value
-          : {
-              found: false,
-              error: results[validatorMap["californiaSOS"]].reason?.message,
-            }
-        : { found: false, skipped: true, reason: "Not in California" };
-
-    const nyResult =
-      validatorMap["newYorkSOS"] !== undefined
-        ? results[validatorMap["newYorkSOS"]].status === "fulfilled"
-          ? results[validatorMap["newYorkSOS"]].value
-          : {
-              found: false,
-              error: results[validatorMap["newYorkSOS"]].reason?.message,
-            }
-        : { found: false, skipped: true, reason: "Not in New York" };
-
-    const proPublicaResult =
-      validatorMap["proPublica"] !== undefined
-        ? results[validatorMap["proPublica"]].status === "fulfilled"
-          ? results[validatorMap["proPublica"]].value
-          : {
-              found: false,
-              error: results[validatorMap["proPublica"]].reason?.message,
-            }
-        : { found: false, skipped: true, reason: "Not a nonprofit" };
-
-    // Log any validation errors (not mock responses)
-    [caResult, nyResult, proPublicaResult].forEach((result, index) => {
-      if (result.error && !result.skipped) {
-        const sources = ["California SOS", "New York SOS", "ProPublica"];
-        logger.warn(
-          `${sources[index]} validation failed for ${business.name}: ${result.error}`
-        );
-      }
-    });
-
-    return {
-      california: caResult,
-      newYork: nyResult,
-      proPublica: proPublicaResult,
-      registeredInAnyState: caResult.found || nyResult.found,
-      isNonprofit: proPublicaResult.found,
-      confidence: Math.max(
-        caResult.confidence || 0,
-        nyResult.confidence || 0,
-        proPublicaResult.confidence || 0
-      ),
-      routingDecision: this.validationRouter.getRoutingSummary(
+    try {
+      // Use the modular registry validation engine
+      const validationResult = await this.registryEngine.validateBusiness(
         business,
         searchParams
-      ),
-      validatorsUsed: selectedValidators,
-    };
+      );
+
+      if (validationResult.skipped) {
+        logger.debug(
+          `⏭️ Registry validation skipped for ${business.name} - no relevant providers`
+        );
+        return {
+          california: {
+            found: false,
+            skipped: true,
+            reason: "No relevant providers",
+          },
+          newYork: {
+            found: false,
+            skipped: true,
+            reason: "No relevant providers",
+          },
+          proPublica: {
+            found: false,
+            skipped: true,
+            reason: "No relevant providers",
+          },
+          secEdgar: {
+            found: false,
+            skipped: true,
+            reason: "No relevant providers",
+          },
+          uspto: {
+            found: false,
+            skipped: true,
+            reason: "No relevant providers",
+          },
+          companiesHouseUK: {
+            found: false,
+            skipped: true,
+            reason: "No relevant providers",
+          },
+          registeredInAnyState: false,
+          isNonprofit: false,
+          isPublicCompany: false,
+          hasIntellectualProperty: false,
+          isInternational: false,
+          confidence: 0,
+          providersUsed: [],
+          engineStats: this.registryEngine.getStats(),
+        };
+      }
+
+      const { validationResults, providersUsed, errors } = validationResult;
+
+      // Map results to legacy format for backward compatibility
+      const california = validationResults["california-sos"] || {
+        found: false,
+        skipped: true,
+      };
+      const newYork = validationResults["newyork-sos"] || {
+        found: false,
+        skipped: true,
+      };
+      const proPublica = validationResults["propublica"] || {
+        found: false,
+        skipped: true,
+      };
+      const secEdgar = validationResults["sec-edgar"] || {
+        found: false,
+        skipped: true,
+      };
+      const uspto = validationResults["uspto"] || {
+        found: false,
+        skipped: true,
+      };
+      const companiesHouseUK = validationResults["companies-house-uk"] || {
+        found: false,
+        skipped: true,
+      };
+
+      // Log validation errors
+      if (errors && errors.length > 0) {
+        errors.forEach((error) => {
+          logger.warn(
+            `⚠️ ${error.provider} validation failed for ${error.business}: ${error.error}`
+          );
+        });
+      }
+
+      // Calculate overall confidence and registration status
+      const allConfidences = [
+        california.confidence || 0,
+        newYork.confidence || 0,
+        proPublica.confidence || 0,
+        secEdgar.confidence || 0,
+        uspto.confidence || 0,
+        companiesHouseUK.confidence || 0,
+      ];
+      const maxConfidence = Math.max(...allConfidences);
+
+      const registeredInAnyState =
+        california.found || newYork.found || companiesHouseUK.found;
+      const isNonprofit = proPublica.found;
+      const isPublicCompany = secEdgar.found;
+      const hasIntellectualProperty = uspto.found;
+      const isInternational = companiesHouseUK.found;
+
+      logger.debug(
+        `✅ Registry validation complete for ${business.name}: ${providersUsed.length} providers used, confidence ${maxConfidence}%`
+      );
+
+      return {
+        california,
+        newYork,
+        proPublica,
+        secEdgar,
+        uspto,
+        companiesHouseUK,
+        registeredInAnyState,
+        isNonprofit,
+        isPublicCompany,
+        hasIntellectualProperty,
+        isInternational,
+        confidence: maxConfidence,
+        providersUsed,
+        validationResults: validationResults,
+        engineStats: this.registryEngine.getStats(),
+        errors: errors || [],
+      };
+    } catch (error) {
+      logger.error(
+        `❌ Registry validation engine failed for ${business.name}:`,
+        error.message
+      );
+
+      // Fallback to no validation rather than fake data
+      return {
+        california: { found: false, error: error.message },
+        newYork: { found: false, error: error.message },
+        proPublica: { found: false, error: error.message },
+        secEdgar: { found: false, error: error.message },
+        uspto: { found: false, error: error.message },
+        companiesHouseUK: { found: false, error: error.message },
+        registeredInAnyState: false,
+        isNonprofit: false,
+        isPublicCompany: false,
+        hasIntellectualProperty: false,
+        isInternational: false,
+        confidence: 0,
+        providersUsed: [],
+        error: error.message,
+        engineStats: this.registryEngine.getStats(),
+      };
+    }
   }
 
   /**
@@ -1147,6 +1224,22 @@ class EnhancedLeadDiscovery {
 
   getUsageStats() {
     const stats = {};
+
+    // Registry validation engine statistics
+    if (this.registryEngine) {
+      stats.registryEngine = this.registryEngine.getStats();
+    }
+
+    // Batch processor statistics
+    if (batchProcessor && batchProcessor.getStats) {
+      stats.batchProcessor = batchProcessor.getStats();
+    }
+
+    // Global cache statistics
+    const { globalCache } = require("./utils/cache");
+    if (globalCache && globalCache.getStats) {
+      stats.globalCache = globalCache.getStats();
+    }
 
     // Only include stats for initialized clients
     if (this.californiaSOSClient && this.californiaSOSClient.getUsageStats) {

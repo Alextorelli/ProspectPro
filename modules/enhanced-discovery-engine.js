@@ -269,23 +269,16 @@ class EnhancedDiscoveryEngine {
         (hasOwnerName &&
           (lead.companyEmail || lead.email) &&
           (companyEmailVerified || emailVerifiedEvidence)) ||
+                  (lead.companyEmail || lead.email) &&
+          (companyEmailVerified || emailVerifiedEvidence)) ||
         // Fallback: if owner email exists and is not pattern-generated with decent confidence
         (hasOwnerEmail &&
           !isPatternSource(ownerEmailSource) &&
           ownerEmailConfidence >= 60);
 
-      // Enhanced email verification requirements for qualification
-      const hasVerifiedEmail =
-        hasEmail &&
-        // NeverBounce verification indicates deliverable
-        (hasDeliverableEmail ||
-          // From verified API sources (Hunter, Apollo, etc.)
-          emailVerifiedEvidence ||
-          // Company email from verified source with high confidence
-          (companyEmailVerified && companyEmailConfidence >= 70) ||
-          // Website scraped email (not pattern-generated)
-          (looksVerifiedSource(companyEmailSource) &&
-            !isPatternSource(companyEmailSource)));
+      const hasConfidence =
+        (lead.finalConfidenceScore || lead.confidenceScore) >=
+        minimumConfidence;
 
       // Log email qualification details for debugging
       if (requireEmail && this.logger) {
@@ -339,7 +332,7 @@ class EnhancedDiscoveryEngine {
         hasAddress &&
         (!requirePhone || hasPhone) &&
         (!requireWebsite || (hasWebsite && websiteAccessible)) &&
-        (!requireEmail || hasVerifiedEmail) &&
+        (!requireEmail || hasEmail) &&
         (!requireOwnerQualified || ownerQualified) &&
         hasConfidence &&
         passesIndustry;
