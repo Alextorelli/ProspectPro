@@ -269,8 +269,6 @@ class EnhancedDiscoveryEngine {
         (hasOwnerName &&
           (lead.companyEmail || lead.email) &&
           (companyEmailVerified || emailVerifiedEvidence)) ||
-                  (lead.companyEmail || lead.email) &&
-          (companyEmailVerified || emailVerifiedEvidence)) ||
         // Fallback: if owner email exists and is not pattern-generated with decent confidence
         (hasOwnerEmail &&
           !isPatternSource(ownerEmailSource) &&
@@ -290,10 +288,6 @@ class EnhancedDiscoveryEngine {
           Math.max(companyEmailConfidence, ownerEmailConfidence)
         );
       }
-
-      const hasConfidence =
-        (lead.finalConfidenceScore || lead.confidenceScore) >=
-        minimumConfidence;
 
       // Industry/category enforcement (e.g., wellness)
       let passesIndustry = true;

@@ -8,6 +8,7 @@ const NewYorkSOS = require("./api-clients/newyork-sos-client");
 const NYTaxParcels = require("./api-clients/ny-tax-parcels-client");
 const GooglePlacesClient = require("./api-clients/google-places");
 const RegistryValidationEngine = require("./registry-engines/registry-validation-engine");
+const ValidationRouter = require("./routing/validation-router");
 const { batchProcessor } = require("./utils/batch-processor");
 const logger = require("./utils/logger");
 // Import API clients

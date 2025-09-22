@@ -695,6 +695,35 @@ try {
   console.error("⚠️ Failed to load dashboard metrics API:", error.message);
 }
 
+// Add webhook endpoints (without auth middleware for external calls)
+try {
+  const leadEnrichmentWebhook = require("./api/webhooks/lead-enrichment");
+  app.use("/api/webhooks/lead-enrichment", leadEnrichmentWebhook);
+  console.log(
+    "🔔 Lead enrichment webhook mounted at /api/webhooks/lead-enrichment"
+  );
+} catch (error) {
+  console.error("⚠️ Failed to load lead enrichment webhook:", error.message);
+}
+
+try {
+  const costAlertWebhook = require("./api/webhooks/cost-alert");
+  app.use("/api/webhooks/cost-alert", costAlertWebhook);
+  console.log("💰 Cost alert webhook mounted at /api/webhooks/cost-alert");
+} catch (error) {
+  console.error("⚠️ Failed to load cost alert webhook:", error.message);
+}
+
+try {
+  const campaignLifecycleWebhook = require("./api/webhooks/campaign-lifecycle");
+  app.use("/api/webhooks/campaign-lifecycle", campaignLifecycleWebhook);
+  console.log(
+    "📋 Campaign lifecycle webhook mounted at /api/webhooks/campaign-lifecycle"
+  );
+} catch (error) {
+  console.error("⚠️ Failed to load campaign lifecycle webhook:", error.message);
+}
+
 // =====================================
 // STATIC FILE SERVING
 // =====================================
