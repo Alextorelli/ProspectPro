@@ -1,14 +1,27 @@
-# 🏗️ ProspectPro Frontend Architecture
+# 🏗️ ProspectPro Frontend Architecture v2.1
 
 ## 🎯 **System Overview**
 
-### **Architecture Pattern: Event-Driven React Application**
+### **Architecture Pattern: Modern React Migration from Legacy HTML**
 
-- **Frontend**: Lovable (React 18 + TypeScript + Vite)
-- **Backend**: Node.js/Express + Supabase Edge Functions
-- **Real-Time**: Supabase Realtime subscriptions + Webhooks
+- **Current Production**: HTML/Vanilla JS frontend (`public/` directory)
+- **Target Frontend**: React 18 + TypeScript + Vite (Lovable deployment)
+- **Backend**: Node.js/Express + Supabase (Production Ready - v2.0)
+- **Migration Strategy**: Gradual component replacement with feature parity
+- **Real-Time**: Supabase Realtime subscriptions (already implemented)
 - **State**: Zustand with persistence + React Query for server state
-- **Deployment**: Static frontend + Serverless edge functions
+- **Deployment**: Lovable (React) → Node.js backend (Railway/Supabase)
+
+### **Production Backend Integration**
+
+The current production backend (main branch) provides these endpoints:
+- `GET /health` - System health check
+- `POST /api/business-discovery` - Enhanced business discovery with 4-stage pipeline
+- `GET /api/campaigns/:id/export` - CSV/JSON export functionality  
+- `GET /api/dashboard/metrics` - Campaign analytics and cost tracking
+- Real-time WebSocket connections via Supabase channels
+
+**Database Schema**: Complete with enhanced_leads, campaigns, api_costs tables and RLS policies.
 
 ---
 

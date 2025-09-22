@@ -1,30 +1,45 @@
-# 🔌 ProspectPro API Integration Reference
+# 🔌 ProspectPro API Integration Reference v2.1
 
-## 📋 **Quick Reference**
+## 📋 **Production Backend Integration**
 
-### **Base Configuration**
+### **Base Configuration (Production Ready)**
+
+The current production backend is already deployed and running. The React frontend will connect to these existing, tested endpoints:
 
 ```typescript
+// Production backend configuration
+const BACKEND_BASE_URL = process.env.NODE_ENV === 'production' 
+  ? 'https://your-production-url.railway.app'  // Update with actual Railway URL
+  : 'http://localhost:3000';
+
+// Supabase configuration (already configured in backend)
 const supabaseUrl = "https://sriycekxdqnesdsgwiuc.supabase.co";
-const supabaseAnonKey = "your_anon_key_here";
+const supabaseAnonKey = "your_supabase_anon_key_here";
 
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 ```
 
+**Important**: The backend server.js already handles:
+- Dynamic secret loading from Supabase vault
+- API key management for Google Places, Hunter.io, Apollo
+- Database connections with RLS policies
+- CORS configuration for frontend domains
+
 ---
 
-## 🚀 **Edge Functions API**
+## 🚀 **Production API Endpoints**
 
-### **1. Business Discovery**
+### **1. Business Discovery (Production Ready)**
 
-**Endpoint:** `enhanced-business-discovery`
+**Endpoint**: `POST /api/business-discovery`
 
 ```typescript
 interface DiscoveryRequest {
   businessType: string;
   location: string;
-  businessCount?: number;
-  budgetLimit?: number;
+  radius?: number;        // Default: 10 miles
+  businessCount?: number; // Default: 5
+  budgetLimit?: number;   // Default: $25
 }
 
 interface DiscoveryResponse {
@@ -32,84 +47,78 @@ interface DiscoveryResponse {
   message: string;
   estimatedCost: number;
   processingTime: string;
+  status: 'started' | 'processing' | 'completed';
 }
 
-// Usage
+// Usage with production backend
 const startDiscovery = async (params: DiscoveryRequest) => {
-  const { data, error } = await supabase.functions.invoke(
-    "enhanced-business-discovery",
-    { body: params }
-  );
+  const response = await fetch(`${BACKEND_BASE_URL}/api/business-discovery`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(params)
+  });
 
-  if (error) throw new Error(error.message);
-  return data;
+  if (!response.ok) throw new Error(`Discovery failed: ${response.statusText}`);
+  return response.json() as DiscoveryResponse;
 };
 ```
 
-### **2. Campaign Export (with Verify-on-Export)**
+### **2. Campaign Export (Production Ready)**
 
-**Endpoint:** `export-campaign`
+**Endpoint**: `GET /api/campaigns/:id/export`
 
 ```typescript
-interface ExportRequest {
-  campaignId: string;
-  format: "csv" | "json" | "excel";
-  includeAnalysis?: boolean;
-  verifyOnExport?: boolean; // Only verify selected leads at export time
-  selectedLeadIds?: string[]; // Specific leads to export
+interface ExportOptions {
+  format: 'csv' | 'json';
+  includeAnalytics?: boolean;
 }
 
-interface ExportResponse {
-  downloadUrl: string;
-  filename: string;
-  recordCount: number;
-  verificationCost?: number; // Cost for verify-on-export if applicable
-  estimatedTime?: string; // Processing time for verification
-}
-
-// Standard export
-const exportCampaign = async (request: ExportRequest) => {
-  const { data, error } = await supabase.functions.invoke("export-campaign", {
-    body: request,
-  });
-
-  if (error) throw new Error(error.message);
-  return data;
-};
-
-// Verify-on-Export with cost projection
-const exportWithVerification = async (
-  campaignId: string,
-  selectedLeads: string[]
-) => {
-  // First get cost estimate
-  const { data: estimate } = await supabase.functions.invoke(
-    "estimate-verification",
-    {
-      body: { campaignId, leadIds: selectedLeads },
-    }
-  );
-
-  if (estimate.projectedCost > 5) {
-    // Show warning for >$5 verification
-    const confirmed = confirm(
-      `Verification will cost ~$${estimate.projectedCost.toFixed(2)}. Continue?`
-    );
-    if (!confirmed) return null;
-  }
-
-  return exportCampaign({
-    campaignId,
-    format: "csv",
-    verifyOnExport: true,
-    selectedLeadIds: selectedLeads,
-  });
+// Export campaign data
+const exportCampaign = async (campaignId: string, options: ExportOptions = { format: 'csv' }) => {
+  const params = new URLSearchParams(options as any);
+  const response = await fetch(`${BACKEND_BASE_URL}/api/campaigns/${campaignId}/export?${params}`);
+  
+  if (!response.ok) throw new Error(`Export failed: ${response.statusText}`);
+  
+  const blob = await response.blob();
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `campaign-${campaignId}-${new Date().getTime()}.${options.format}`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  window.URL.revokeObjectURL(url);
 };
 ```
 
-### **3. System Health Check**
+### **3. Dashboard Metrics (Production Ready)**
 
-**Endpoint:** `system-health`
+**Endpoint**: `GET /api/dashboard/metrics`
+
+```typescript
+interface DashboardMetrics {
+  totalCampaigns: number;
+  totalLeads: number;
+  totalCost: number;
+  avgConfidence: number;
+  apiHealthStatus: Record<string, boolean>;
+  recentCampaigns: Campaign[];
+}
+
+// Fetch dashboard metrics
+const getDashboardMetrics = async (): Promise<DashboardMetrics> => {
+  const response = await fetch(`${BACKEND_BASE_URL}/api/dashboard/metrics`);
+  if (!response.ok) throw new Error(`Metrics fetch failed: ${response.statusText}`);
+  return response.json();
+};
+```
+
+### **4. System Health Check (Production Ready)**
+
+**Endpoint**: `GET /health`
 
 ```typescript
 interface HealthResponse {
@@ -118,15 +127,17 @@ interface HealthResponse {
   apis: {
     googlePlaces: boolean;
     hunterIo: boolean;
+    apollo: boolean;
     neverBounce: boolean;
   };
   lastUpdated: string;
+  version: string;
 }
 
-// Usage
-const checkSystemHealth = async () => {
-  const { data, error } = await supabase.functions.invoke("system-health");
-  return error ? { status: "error", message: error.message } : data;
+// Check system health
+const checkSystemHealth = async (): Promise<HealthResponse> => {
+  const response = await fetch(`${BACKEND_BASE_URL}/health`);
+  return response.json();
 };
 ```
 
