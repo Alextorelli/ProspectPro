@@ -1,0 +1,1 @@
+# Legacy Files Archive\n\nThis branch contains historical legacy files from the main archive/ folder.\nThese files are preserved for reference but not needed in production.\n\n## Contents:\n- Legacy test results\n- Outdated API client implementations\n- Historical development files\n\n## Usage:\nTo access these files: `git checkout archive/legacy-files`
