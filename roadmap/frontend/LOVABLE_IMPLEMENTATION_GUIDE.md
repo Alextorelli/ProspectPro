@@ -23,8 +23,10 @@ Create `.env.local`:
 
 ```bash
 VITE_SUPABASE_URL=https://sriycekxdqnesdsgwiuc.supabase.co
-VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNyaXljZWt4ZHFuZXNkc2d3aXVjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzM1MjU1NDYsImV4cCI6MjA0OTEwMTU0Nn0.NrBxTSfJPvwJHwgMgKIeXvHJfEFZLZ2t7LPv2FqA9O4
+VITE_SUPABASE_ANON_KEY=your_supabase_anon_key_here
 ```
+
+> **Security Note**: Never commit `.env*` files. Rotate API keys periodically. Get your actual anon key from [Supabase Dashboard](https://supabase.com/dashboard/project/sriycekxdqnesdsgwiuc/settings/api)
 
 ---
 
@@ -1063,22 +1065,73 @@ VITE_ENVIRONMENT=production
 
 ---
 
-## 🎯 **Success Metrics**
+## 🎯 **7-Day Fast Track Implementation**
 
-### **Week 1 Goals**
+### **Daily Sprint Goals**
 
-- [ ] Core discovery form functional
-- [ ] Real-time lead updates working
-- [ ] Basic dashboard displaying results
-- [ ] Export functionality operational
-- [ ] Cost tracking visible to users
+**Day 1: Foundation**
+- [ ] Project scaffold with TypeScript + Supabase client
+- [ ] Environment setup + providers (React Query, Toast)
+- [ ] Health check smoke test + error boundaries
 
-### **Week 2 Goals**
+**Day 2: Discovery Core**
+- [ ] Business discovery form with validation
+- [ ] startDiscovery mutation with toast feedback
+- [ ] Basic routing structure (Dashboard → Discovery → Results)
 
-- [ ] Advanced filtering and sorting
-- [ ] Campaign management interface
-- [ ] Detailed lead validation display
-- [ ] Performance optimizations
-- [ ] Error handling improvements
+**Day 3: Real-Time Pipeline**
+- [ ] Single multiplexed realtime channel setup
+- [ ] Batched UI updates for lead insertions
+- [ ] Campaign status tracking with progress indicators
 
-**The implementation guide is ready for immediate Lovable development!** 🚀
+**Day 4: Dashboard & Analytics**
+- [ ] Campaign overview with hero cards (Total, Qualified, Cost, Confidence)
+- [ ] Cost tracker with budget gauge and API breakdown
+- [ ] Lead funnel visualization
+
+**Day 5: Lead Management**
+- [ ] Lead table with sticky headers and confidence chips
+- [ ] Optimistic selection with bulk operations
+- [ ] Export preview modal with format selection
+
+**Day 6: Cost Optimization**
+- [ ] Verify-on-Export flow with cost projection
+- [ ] Budget guardrails and projected cost warnings
+- [ ] Column projection + pagination for efficiency
+
+**Day 7: Polish & Deploy**
+- [ ] Loading skeletons and empty states
+- [ ] Dark mode support and accessibility improvements
+- [ ] Production build and Lovable deployment
+
+### **UI Enhancement Checklist**
+
+- [ ] **Visual Hierarchy**: Consistent hero cards, colored confidence chips
+- [ ] **Real-Time Feedback**: Toast notifications, progress animations
+- [ ] **Cost Transparency**: Budget gauge with "X of Y used" labels
+- [ ] **User Experience**: Sticky headers, density toggle, keyboard navigation
+- [ ] **Performance**: Query pagination, realtime batching, idle mode
+- [ ] **Accessibility**: WCAG AA contrast, focus rings, dark mode
+
+### **Performance Defaults**
+
+```typescript
+// React Query configuration for efficiency
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      refetchOnWindowFocus: false,
+      refetchInterval: false, // Disable background refetch on completion
+    },
+  },
+})
+
+// Confidence chip color helper
+const clsForConfidence = (score: number) =>
+  score >= 80 ? 'bg-green-50 text-green-700 ring-green-200' :
+  score >= 60 ? 'bg-amber-50 text-amber-700 ring-amber-200' :
+                'bg-rose-50 text-rose-700 ring-rose-200';
+```
+
+**7-day delivery with production-ready quality and cost optimization!** 🚀

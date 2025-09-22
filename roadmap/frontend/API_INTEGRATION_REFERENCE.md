@@ -46,7 +46,7 @@ const startDiscovery = async (params: DiscoveryRequest) => {
 };
 ```
 
-### **2. Campaign Export**
+### **2. Campaign Export (with Verify-on-Export)**
 
 **Endpoint:** `export-campaign`
 
@@ -55,15 +55,19 @@ interface ExportRequest {
   campaignId: string;
   format: "csv" | "json" | "excel";
   includeAnalysis?: boolean;
+  verifyOnExport?: boolean; // Only verify selected leads at export time
+  selectedLeadIds?: string[]; // Specific leads to export
 }
 
 interface ExportResponse {
   downloadUrl: string;
   filename: string;
   recordCount: number;
+  verificationCost?: number; // Cost for verify-on-export if applicable
+  estimatedTime?: string; // Processing time for verification
 }
 
-// Usage
+// Standard export
 const exportCampaign = async (request: ExportRequest) => {
   const { data, error } = await supabase.functions.invoke("export-campaign", {
     body: request,
@@ -71,6 +75,26 @@ const exportCampaign = async (request: ExportRequest) => {
 
   if (error) throw new Error(error.message);
   return data;
+};
+
+// Verify-on-Export with cost projection
+const exportWithVerification = async (campaignId: string, selectedLeads: string[]) => {
+  // First get cost estimate
+  const { data: estimate } = await supabase.functions.invoke("estimate-verification", {
+    body: { campaignId, leadIds: selectedLeads }
+  });
+
+  if (estimate.projectedCost > 5) { // Show warning for >$5 verification
+    const confirmed = confirm(`Verification will cost ~$${estimate.projectedCost.toFixed(2)}. Continue?`);
+    if (!confirmed) return null;
+  }
+
+  return exportCampaign({
+    campaignId,
+    format: "csv",
+    verifyOnExport: true,
+    selectedLeadIds: selectedLeads
+  });
 };
 ```
 
@@ -121,13 +145,26 @@ interface Lead {
   updated_at: string;
 }
 
-// Fetch leads for campaign
-const getCampaignLeads = async (campaignId: string) => {
+// Fetch leads for campaign (optimized with column projection)
+const getCampaignLeads = async (campaignId: string, page = 0, pageSize = 50) => {
+  const { data, error } = await supabase
+    .from("enhanced_leads")
+    .select("id,business_name,confidence_score,website,is_qualified,phone,email")
+    .eq("campaign_id", campaignId)
+    .order("confidence_score", { ascending: false })
+    .range(page * pageSize, page * pageSize + pageSize - 1);
+
+  if (error) throw new Error(error.message);
+  return data;
+};
+
+// Get full lead details (when needed)
+const getLeadDetails = async (leadId: string) => {
   const { data, error } = await supabase
     .from("enhanced_leads")
     .select("*")
-    .eq("campaign_id", campaignId)
-    .order("confidence_score", { ascending: false });
+    .eq("id", leadId)
+    .single();
 
   if (error) throw new Error(error.message);
   return data;
@@ -233,45 +270,73 @@ const getCostSummary = async (campaignId: string) => {
 
 ---
 
-## 🔄 **Real-Time Subscriptions**
+## 🔄 **Real-Time Subscriptions (Optimized)**
 
-### **Lead Updates Subscription**
+### **Single Multiplexed Channel Pattern**
 
 ```typescript
-const useLeadUpdates = (campaignId: string) => {
+const useRealTimeUpdates = (campaignId: string) => {
   const [leads, setLeads] = useState<Lead[]>([]);
+  const [campaign, setCampaign] = useState<Campaign | null>(null);
+  const [totalCost, setTotalCost] = useState(0);
+
+  // Batched update queue for performance
+  const queue = useRef<any[]>([]);
+  const rafRef = useRef<number>(0);
+
+  const flushUpdates = useCallback(() => {
+    if (queue.current.length > 0) {
+      setLeads(prev => [...prev, ...queue.current]);
+      queue.current = [];
+    }
+    rafRef.current = 0;
+  }, []);
+
+  const enqueueUpdate = useCallback((item: any) => {
+    queue.current.push(item);
+    if (!rafRef.current) {
+      rafRef.current = requestAnimationFrame(flushUpdates);
+    }
+  }, [flushUpdates]);
 
   useEffect(() => {
-    const subscription = supabase
+    const channel = supabase
       .channel(`campaign-${campaignId}`)
-      .on(
-        "postgres_changes",
-        {
-          event: "INSERT",
-          schema: "public",
-          table: "enhanced_leads",
-          filter: `campaign_id=eq.${campaignId}`,
-        },
-        (payload) => {
-          setLeads((prev) => [...prev, payload.new as Lead]);
+      .on('postgres_changes', {
+        event: '*', schema: 'public', table: 'enhanced_leads',
+        filter: `campaign_id=eq.${campaignId}`
+      }, (payload) => {
+        if (payload.eventType === 'INSERT') {
+          enqueueUpdate(payload.new as Lead);
+        } else if (payload.eventType === 'UPDATE') {
+          setLeads(prev => prev.map(lead => 
+            lead.id === payload.new.id ? payload.new as Lead : lead
+          ));
         }
-      )
-      .on(
-        "postgres_changes",
-        {
-          event: "UPDATE",
-          schema: "public",
-          table: "enhanced_leads",
-          filter: `campaign_id=eq.${campaignId}`,
-        },
-        (payload) => {
-          setLeads((prev) =>
-            prev.map((lead) =>
-              lead.id === payload.new.id ? (payload.new as Lead) : lead
-            )
-          );
-        }
-      )
+      })
+      .on('postgres_changes', {
+        event: 'UPDATE', schema: 'public', table: 'campaigns',
+        filter: `id=eq.${campaignId}`
+      }, (payload) => {
+        setCampaign(payload.new as Campaign);
+      })
+      .on('postgres_changes', {
+        event: 'INSERT', schema: 'public', table: 'api_costs',
+        filter: `campaign_id=eq.${campaignId}`
+      }, (payload) => {
+        const cost = payload.new as any;
+        setTotalCost(prev => prev + cost.cost_amount);
+      })
+      .subscribe();
+
+    return () => {
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      supabase.removeChannel(channel);
+    };
+  }, [campaignId, enqueueUpdate]);
+
+  return { leads, campaign, totalCost };
+};
       .subscribe();
 
     return () => supabase.removeChannel(subscription);

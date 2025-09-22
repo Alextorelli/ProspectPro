@@ -103,18 +103,24 @@ src/
 
 ## 🔄 **State Management Strategy**
 
-### **State Architecture: Hybrid Approach**
+### **State Architecture: Hybrid Cost-Aware Approach**
 
-#### **Client State (Zustand)**
+#### **Client State (Zustand) - Enhanced for Cost Management**
 
 ```typescript
-// Campaign state - transient, session-based
+// Campaign state - transient, session-based with cost awareness
 interface CampaignStore {
   activeCampaign: Campaign | null;
   discoveryProgress: DiscoveryProgress;
   selectedLeads: string[];
   filters: LeadFilters;
   exportConfig: ExportConfig;
+  
+  // Cost-aware state
+  isActiveCampaign: boolean;
+  budgetRemaining: number;
+  projectedCost: number;
+  isIdle: boolean; // For disabling realtime when complete
 }
 
 // User preferences - persistent
@@ -122,54 +128,76 @@ interface UserStore {
   budgetPreferences: BudgetPreferences;
   exportSettings: ExportSettings;
   dashboardLayout: DashboardConfig;
+  costOptimizationMode: 'standard' | 'economy' | 'premium';
 }
 ```
 
-#### **Server State (React Query)**
+#### **Server State (React Query) - Optimized for Performance**
 
 ```typescript
-// API data - cached with invalidation
+// API data - cached with cost-aware invalidation
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       staleTime: 5 * 60 * 1000, // 5 minutes
       cacheTime: 10 * 60 * 1000, // 10 minutes
       refetchOnWindowFocus: false,
+      refetchInterval: false, // Disabled by default, enabled only during active campaigns
     },
   },
 });
 
-// Key queries:
-// - ['campaigns'] - Campaign list
-// - ['leads', campaignId] - Campaign leads
-// - ['costs', campaignId] - Cost tracking
+// Key queries with projection:
+// - ['campaigns'] - Campaign list (summary fields only)
+// - ['leads', campaignId, page] - Paginated campaign leads
+// - ['lead-details', leadId] - Full lead details (on demand)
+// - ['costs', campaignId] - Real-time cost tracking
 // - ['system-health'] - System status
 ```
 
-#### **Real-Time State (Supabase Subscriptions)**
+#### **Real-Time State (Batched Realtime Reducer)**
 
 ```typescript
-// Real-time updates bypass cache
-const useRealTimeLeads = (campaignId: string) => {
+// Cost-aware realtime with batched updates and idle mode
+const useRealTimeUpdates = (campaignId: string, isIdle = false) => {
+  const queue = useRef<any[]>([]);
+  const rafRef = useRef<number>(0);
+
+  const flushBatch = useCallback(() => {
+    if (queue.current.length > 0) {
+      queryClient.setQueryData(['leads', campaignId, 0], (old: any[] = []) => 
+        [...old, ...queue.current]
+      );
+      queue.current = [];
+    }
+    rafRef.current = 0;
+  }, [campaignId]);
+
   useEffect(() => {
+    // Skip subscription if campaign is idle/completed
+    if (isIdle) return;
+
     const subscription = supabase
       .channel(`campaign-${campaignId}`)
-      .on(
-        "postgres_changes",
-        {
-          event: "INSERT",
-          schema: "public",
-          table: "enhanced_leads",
-        },
-        (payload) => {
-          // Direct state update for real-time data
-          queryClient.setQueryData(["leads", campaignId], (old) => [
-            ...(old || []),
-            payload.new,
-          ]);
+      .on('postgres_changes', {
+        event: '*', schema: 'public',
+        table: 'enhanced_leads',
+        filter: `campaign_id=eq.${campaignId}`
+      }, (payload) => {
+        // Batch updates for performance
+        queue.current.push(payload.new);
+        if (!rafRef.current) {
+          rafRef.current = requestAnimationFrame(flushBatch);
         }
-      )
+      })
       .subscribe();
+
+    return () => {
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      supabase.removeChannel(subscription);
+    };
+  }, [campaignId, isIdle, flushBatch]);
+};
 
     return () => supabase.removeChannel(subscription);
   }, [campaignId]);
@@ -180,12 +208,64 @@ const useRealTimeLeads = (campaignId: string) => {
 
 ## 🎨 **UI/UX Design System**
 
-### **Design Principles**
+### **Design Principles (Enhanced)**
 
 1. **Progressive Disclosure** - Show complexity only when needed
 2. **Real-Time Feedback** - Immediate visual response to actions
-3. **Confidence Visualization** - Clear quality indicators
-4. **Cost Transparency** - Always visible budget tracking
+3. **Confidence Visualization** - Clear quality indicators with color coding
+4. **Cost Transparency** - Always visible budget tracking with projections
+5. **Accessibility First** - WCAG AA compliance, keyboard navigation, dark mode
+6. **Performance Feedback** - Loading skeletons, optimistic updates, error recovery
+
+### **Enhanced UI Patterns**
+
+#### **Confidence Visualization System**
+
+```typescript
+// Color-coded confidence chips with consistent design
+const getConfidenceStyles = (score: number) => ({
+  className: score >= 80 ? 'bg-green-50 text-green-700 ring-green-200' :
+             score >= 60 ? 'bg-amber-50 text-amber-700 ring-amber-200' :
+                          'bg-rose-50 text-rose-700 ring-rose-200',
+  label: score >= 80 ? 'High Quality' :
+         score >= 60 ? 'Good Quality' : 'Needs Review',
+  icon: score >= 80 ? '✅' : score >= 60 ? '⚠️' : '❌'
+});
+```
+
+#### **Budget Gauge Component**
+
+```typescript
+interface BudgetGaugeProps {
+  used: number;
+  limit: number;
+  projected?: number;
+}
+
+// Example: "$12.40 of $25 used • 50% under budget • est. $0.42/qualified lead"
+const BudgetGauge = ({ used, limit, projected }: BudgetGaugeProps) => {
+  const percentage = (used / limit) * 100;
+  const remaining = limit - used;
+  const isNearLimit = percentage > 80;
+  
+  return (
+    <div className="space-y-2">
+      <div className="flex justify-between text-sm">
+        <span>${used.toFixed(2)} of ${limit} used</span>
+        <span className={isNearLimit ? 'text-red-600' : 'text-green-600'}>
+          {percentage.toFixed(0)}% {isNearLimit ? 'near limit' : 'under budget'}
+        </span>
+      </div>
+      <ProgressBar value={percentage} className={isNearLimit ? 'bg-red-500' : 'bg-blue-500'} />
+      {projected && (
+        <p className="text-xs text-gray-600">
+          Projected total: ${(used + projected).toFixed(2)}
+        </p>
+      )}
+    </div>
+  );
+};
+```
 
 ### **Component Design Patterns**
 
@@ -319,7 +399,91 @@ const useAPIError = () => {
 
 ---
 
-## 📈 **Performance Optimization**
+## � **Cost Optimization Patterns**
+
+### **Verify-on-Export Strategy**
+```typescript
+// Only verify leads when user exports (30-45% cost savings)
+const useExportWithVerification = () => {
+  const [isVerifying, setIsVerifying] = useState(false);
+
+  const exportWithVerification = async (selectedLeads: string[], campaignId: string) => {
+    // Get cost estimate first
+    const estimate = await api.estimateVerificationCost(selectedLeads);
+    
+    if (estimate.projectedCost > 0) {
+      const confirmed = confirm(
+        `Email verification will cost ~$${estimate.projectedCost.toFixed(2)}. Continue?`
+      );
+      if (!confirmed) return;
+    }
+
+    setIsVerifying(true);
+    try {
+      return await api.exportCampaign({
+        campaignId,
+        format: 'csv',
+        verifyOnExport: true,
+        selectedLeadIds: selectedLeads
+      });
+    } finally {
+      setIsVerifying(false);
+    }
+  };
+
+  return { exportWithVerification, isVerifying };
+};
+```
+
+### **Budget Guardrails**
+```typescript
+// Project cost and abort before budget exceeded
+const useBudgetGuard = (budgetLimit: number) => {
+  const [projectedCost, setProjectedCost] = useState(0);
+
+  const checkBudgetBeforeAction = (estimatedCost: number) => {
+    const total = projectedCost + estimatedCost;
+    
+    if (total > budgetLimit * 0.9) {
+      throw new APIError(
+        `Projected cost ($${total.toFixed(2)}) exceeds 90% of budget`,
+        'BUDGET_EXCEEDED'
+      );
+    }
+    
+    return true;
+  };
+
+  return { projectedCost, setProjectedCost, checkBudgetBeforeAction };
+};
+```
+
+### **Column Projection & Pagination**
+```typescript
+// Fetch only needed columns and paginate for efficiency
+const useEfficientLeadList = (campaignId: string) => {
+  const [page, setPage] = useState(0);
+  const pageSize = 50;
+
+  return useQuery(
+    ['leads', campaignId, page],
+    () => supabase
+      .from('enhanced_leads')
+      .select('id,business_name,confidence_score,is_qualified,phone,email')
+      .eq('campaign_id', campaignId)
+      .order('confidence_score', { ascending: false })
+      .range(page * pageSize, (page + 1) * pageSize - 1),
+    {
+      keepPreviousData: true,
+      staleTime: 2 * 60 * 1000, // 2 minutes for list data
+    }
+  );
+};
+```
+
+---
+
+## �📈 **Performance Optimization**
 
 ### **Frontend Performance Strategy**
 
