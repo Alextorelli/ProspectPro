@@ -219,6 +219,12 @@ class CampaignCSVExporter {
         { id: "apiCost", title: "API Cost ($)" },
         { id: "processingTime", title: "Processing Time (ms)" },
 
+        // Enhanced API Integration Tracking
+        { id: "apolloData", title: "Apollo.io Data" },
+        { id: "hunterData", title: "Hunter.io Data" },
+        { id: "optimizedEngineCost", title: "Optimized Engine Cost ($)" },
+        { id: "employeeCount", title: "Employee Count Est." },
+
         // Testing & Analysis Metadata
         { id: "businessNameScore", title: "Business Name Score" },
         { id: "addressScore", title: "Address Score" },
@@ -299,6 +305,12 @@ class CampaignCSVExporter {
       dataSources: this.formatDataSources(lead),
       apiCost: lead.processingCost || "",
       processingTime: lead.processingTime || "",
+
+      // Enhanced API Integration Tracking
+      apolloData: this.getApolloDataStatus(lead),
+      hunterData: this.getHunterDataStatus(lead),
+      optimizedEngineCost: this.getOptimizedEngineCost(lead),
+      employeeCount: lead.employeeCount || lead.employee_count_estimate || "",
 
       // Testing & Analysis Metadata
       businessNameScore: lead.qualityScores?.businessNameScore || "",
@@ -559,6 +571,101 @@ class CampaignCSVExporter {
     }
 
     return recommendations;
+  }
+
+  /**
+   * Enhanced optimized engine tracking functions
+   */
+  getApolloDataStatus(lead) {
+    // Check if lead has data enriched by Apollo
+    const hasOwnerData =
+      lead.ownerName || lead.ownerTitle || lead.owner_name || lead.owner_title;
+    const hasOrganizationData =
+      lead.employeeCount ||
+      lead.employee_count_estimate ||
+      lead.companyDescription;
+    const apolloCost = this.getApiCostByService(lead, "apollo");
+
+    if (apolloCost > 0) {
+      const dataPoints = [];
+      if (hasOwnerData) dataPoints.push("Owner Info");
+      if (hasOrganizationData) dataPoints.push("Company Data");
+      if (dataPoints.length > 0) {
+        return `Yes (${dataPoints.join(", ")}) - $${apolloCost.toFixed(4)}`;
+      }
+      return `Yes - $${apolloCost.toFixed(4)}`;
+    }
+
+    // Check for Apollo-sourced data without explicit cost tracking
+    if (
+      hasOwnerData &&
+      (lead.source?.includes("apollo") || lead.dataSources?.includes("apollo"))
+    ) {
+      return "Yes (Owner Info)";
+    }
+
+    return "No";
+  }
+
+  getHunterDataStatus(lead) {
+    // Check if lead has Hunter.io email data
+    const hunterEmails =
+      lead.emails?.filter(
+        (email) =>
+          email.source?.toLowerCase().includes("hunter") ||
+          email.discovery_method?.toLowerCase().includes("hunter")
+      ) || [];
+
+    const hunterCost = this.getApiCostByService(lead, "hunter");
+
+    if (hunterCost > 0) {
+      const emailCount =
+        hunterEmails.length || (lead.companyEmail || lead.ownerEmail ? 1 : 0);
+      return `Yes (${emailCount} emails) - $${hunterCost.toFixed(4)}`;
+    }
+
+    // Check for Hunter-sourced emails without explicit cost tracking
+    if (hunterEmails.length > 0) {
+      return `Yes (${hunterEmails.length} emails)`;
+    }
+
+    // Check if email discovery source mentions hunter/comprehensive
+    if (
+      lead.companyEmailSource?.toLowerCase().includes("hunter") ||
+      lead.ownerEmailSource?.toLowerCase().includes("hunter") ||
+      lead.emailSource?.toLowerCase().includes("comprehensive")
+    ) {
+      return "Yes (Email Discovery)";
+    }
+
+    return "No";
+  }
+
+  getOptimizedEngineCost(lead) {
+    const apolloCost = this.getApiCostByService(lead, "apollo");
+    const hunterCost = this.getApiCostByService(lead, "hunter");
+    return (apolloCost + hunterCost).toFixed(4);
+  }
+
+  getApiCostByService(lead, serviceName) {
+    if (!lead.apiCosts || !Array.isArray(lead.apiCosts)) {
+      return 0;
+    }
+
+    return lead.apiCosts
+      .filter((cost) =>
+        cost.api_service?.toLowerCase().includes(serviceName.toLowerCase())
+      )
+      .reduce((sum, cost) => sum + parseFloat(cost.cost_usd || 0), 0);
+  }
+
+  formatDataSources(lead) {
+    const sources = [];
+    if (lead.source) sources.push(lead.source);
+    if (lead.foursquareData?.found) sources.push("Foursquare");
+    if (lead.apolloData) sources.push("Apollo.io");
+    if (lead.hunterData) sources.push("Hunter.io");
+    return sources.length > 0 ? sources.join(", ") : "google_places";
   }
 
   // Placeholder methods for detailed analysis (to be implemented based on specific needs)
