@@ -13,7 +13,7 @@
 ### **Migration Benefits**
 
 - **Feature Parity**: Maintain all current functionality
-- **Enhanced UX**: Dashboard-centric design with real-time updates  
+- **Enhanced UX**: Dashboard-centric design with real-time updates
 - **Cost Optimization**: Verify-on-export and batched API calls
 - **Developer Experience**: TypeScript, hot reloading, component reuse
 - **Production Safety**: Gradual rollout with fallback capability
@@ -58,14 +58,14 @@ VITE_BACKEND_URL_DEV=http://localhost:3000
 
 Current HTML/JS features that need React equivalents:
 
-| Legacy Feature | React Component | Priority |
-|-------|---------|---------|
-| Business Discovery Form | `BusinessDiscoveryForm.tsx` | High |
-| Results Display | `LeadTable.tsx` | High |  
-| Campaign Monitoring | `CampaignDashboard.tsx` | High |
-| Settings/Config | `SettingsPanel.tsx` | Medium |
-| Real-time Updates | `useRealTimeUpdates.ts` | High |
-| CSV Export | `ExportTray.tsx` | Medium |
+| Legacy Feature          | React Component             | Priority |
+| ----------------------- | --------------------------- | -------- |
+| Business Discovery Form | `BusinessDiscoveryForm.tsx` | High     |
+| Results Display         | `LeadTable.tsx`             | High     |
+| Campaign Monitoring     | `CampaignDashboard.tsx`     | High     |
+| Settings/Config         | `SettingsPanel.tsx`         | Medium   |
+| Real-time Updates       | `useRealTimeUpdates.ts`     | High     |
+| CSV Export              | `ExportTray.tsx`            | Medium   |
 
 ---
 

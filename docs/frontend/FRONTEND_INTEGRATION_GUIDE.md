@@ -16,7 +16,7 @@
 lovable create prospect-pro-frontend
 cd prospect-pro-frontend
 
-# Step 2: Install backend integration dependencies  
+# Step 2: Install backend integration dependencies
 npm install @supabase/supabase-js zustand @tanstack/react-query axios
 
 # Step 3: Configure backend connection
@@ -42,7 +42,7 @@ echo "VITE_SUPABASE_URL=https://sriycekxdqnesdsgwiuc.supabase.co" >> .env.local
 
 - `POST /api/business-discovery` - Enhanced business discovery with 4-stage pipeline
 - `GET /api/campaigns/:id/export` - CSV/JSON export functionality
-- `GET /api/dashboard/metrics` - Campaign analytics and cost tracking  
+- `GET /api/dashboard/metrics` - Campaign analytics and cost tracking
 - `GET /health` - System health diagnostics
 - WebSocket: Supabase Realtime for live lead updates
 
@@ -56,18 +56,21 @@ echo "VITE_SUPABASE_URL=https://sriycekxdqnesdsgwiuc.supabase.co" >> .env.local
 ## 🎨 **Migration Benefits**
 
 ### **Developer Experience**
+
 - TypeScript for type safety and better IDE support
 - Hot reloading for faster development cycles
 - Component-based architecture for reusability
 - Modern state management with Zustand + React Query
 
-### **User Experience**  
+### **User Experience**
+
 - Dashboard-centric navigation starting from campaign overview
 - Real-time updates feel more responsive with optimistic UI
 - Mobile-first responsive design
 - Loading skeletons and better error states
 
 ### **Performance & Scalability**
+
 - Verify-on-export pattern reduces API costs by 30-45%
 - Batched real-time updates prevent UI stuttering
 - Code splitting and lazy loading for faster page loads
@@ -91,7 +94,7 @@ echo "VITE_SUPABASE_URL=https://sriycekxdqnesdsgwiuc.supabase.co" >> .env.local
 Every current feature will be recreated in React:
 
 - [x] Business discovery form with validation
-- [x] Real-time lead display with confidence scoring  
+- [x] Real-time lead display with confidence scoring
 - [x] Campaign monitoring and cost tracking
 - [x] CSV/JSON export functionality
 - [x] Settings panel for configuration

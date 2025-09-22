@@ -13,13 +13,15 @@
 ## 🎯 **Current vs Target State**
 
 ### **Current Production State (main branch)**
+
 - ✅ **Backend**: Node.js/Express with Supabase integration
-- ✅ **Frontend**: HTML/Vanilla JS (`public/` directory)  
+- ✅ **Frontend**: HTML/Vanilla JS (`public/` directory)
 - ✅ **APIs**: Google Places, Hunter.io, Apollo, NeverBounce
 - ✅ **Database**: Enhanced schema with RLS policies
 - ✅ **Deployment**: Railway backend + static frontend
 
 ### **Target State (React Migration)**
+
 - ✅ **Backend**: Same Node.js/Express (unchanged)
 - 🎯 **Frontend**: React 18 + TypeScript + Vite (Lovable)
 - ✅ **APIs**: Same APIs (via backend proxy)
@@ -30,14 +32,14 @@
 
 ## 📊 **Feature Compatibility Matrix**
 
-| Current HTML Feature | React Equivalent | Backend Endpoint | Status |
-|----------------------|------------------|-----------------|--------|
-| Business Discovery Form | `BusinessDiscoveryForm.tsx` | `POST /api/business-discovery` | ✅ Ready |
-| Live Results Display | `LeadTable.tsx` | WebSocket + DB queries | ✅ Ready |
-| Campaign Monitoring | `CampaignDashboard.tsx` | `GET /api/dashboard/metrics` | ✅ Ready |
-| CSV Export | `ExportTray.tsx` | `GET /api/campaigns/:id/export` | ✅ Ready |
-| Settings Panel | `SettingsPanel.tsx` | Multiple config endpoints | ✅ Ready |
-| API Health Check | `SystemHealth.tsx` | `GET /health` | ✅ Ready |
+| Current HTML Feature    | React Equivalent            | Backend Endpoint                | Status   |
+| ----------------------- | --------------------------- | ------------------------------- | -------- |
+| Business Discovery Form | `BusinessDiscoveryForm.tsx` | `POST /api/business-discovery`  | ✅ Ready |
+| Live Results Display    | `LeadTable.tsx`             | WebSocket + DB queries          | ✅ Ready |
+| Campaign Monitoring     | `CampaignDashboard.tsx`     | `GET /api/dashboard/metrics`    | ✅ Ready |
+| CSV Export              | `ExportTray.tsx`            | `GET /api/campaigns/:id/export` | ✅ Ready |
+| Settings Panel          | `SettingsPanel.tsx`         | Multiple config endpoints       | ✅ Ready |
+| API Health Check        | `SystemHealth.tsx`          | `GET /health`                   | ✅ Ready |
 
 ---
 
@@ -46,8 +48,9 @@
 ### **Phase 1: Core Infrastructure (Days 1-2)**
 
 **Deliverables**:
+
 - React app scaffolding with Lovable
-- Backend integration layer (REST + WebSocket)  
+- Backend integration layer (REST + WebSocket)
 - State management setup (Zustand + React Query)
 - Basic routing and layout components
 
@@ -56,6 +59,7 @@
 ### **Phase 2: Feature Recreation (Days 3-5)**
 
 **Deliverables**:
+
 - Business discovery form with validation
 - Real-time results display with WebSocket
 - Campaign dashboard with metrics
@@ -66,8 +70,9 @@
 ### **Phase 3: Enhanced UX (Days 6-7)**
 
 **Deliverables**:
+
 - Dashboard-centric navigation
-- Visual confidence indicators  
+- Visual confidence indicators
 - Export tray with verify-on-export
 - Loading states and error handling
 
@@ -76,6 +81,7 @@
 ### **Phase 4: Production Deployment (Days 8-10)**
 
 **Deliverables**:
+
 - Lovable production deployment
 - A/B testing setup (optional)
 - Performance monitoring
@@ -96,20 +102,24 @@ class ProspectProAPI {
 
   async startDiscovery(params: DiscoveryRequest) {
     const response = await fetch(`${this.baseURL}/api/business-discovery`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(params)
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(params),
     });
     return response.json();
   }
 
   async getCampaignMetrics(campaignId: string) {
-    const response = await fetch(`${this.baseURL}/api/campaigns/${campaignId}/metrics`);
+    const response = await fetch(
+      `${this.baseURL}/api/campaigns/${campaignId}/metrics`
+    );
     return response.json();
   }
 
-  async exportCampaign(campaignId: string, format = 'csv') {
-    const response = await fetch(`${this.baseURL}/api/campaigns/${campaignId}/export?format=${format}`);
+  async exportCampaign(campaignId: string, format = "csv") {
+    const response = await fetch(
+      `${this.baseURL}/api/campaigns/${campaignId}/export?format=${format}`
+    );
     const blob = await response.blob();
     // Trigger download...
   }
@@ -127,15 +137,19 @@ const useRealTimeUpdates = (campaignId: string) => {
     // Connect to existing Supabase realtime (backend handles auth)
     const channel = supabase
       .channel(`campaign-${campaignId}`)
-      .on('postgres_changes', {
-        event: '*',
-        schema: 'public',
-        table: 'enhanced_leads',
-        filter: `campaign_id=eq.${campaignId}`
-      }, (payload) => {
-        // Update React state with new leads
-        updateLeads(payload.new);
-      })
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "enhanced_leads",
+          filter: `campaign_id=eq.${campaignId}`,
+        },
+        (payload) => {
+          // Update React state with new leads
+          updateLeads(payload.new);
+        }
+      )
       .subscribe();
 
     return () => supabase.removeChannel(channel);
@@ -148,26 +162,29 @@ const useRealTimeUpdates = (campaignId: string) => {
 ## 🚦 **Deployment Strategy**
 
 ### **Development Environment**
+
 - React dev server: `http://localhost:5173` (Vite)
 - Backend proxy: `http://localhost:3000` (existing)
 - Database: Same production Supabase instance
 
 ### **Production Deployment**
+
 - Frontend: Lovable hosting (React build)
 - Backend: Railway (existing, no changes)
 - Database: Supabase (existing, no changes)
 
 ### **CORS Configuration**
+
 Backend will need to allow the new Lovable domain:
 
 ```javascript
 // In server.js (one-line change)
 const corsOptions = {
   origin: [
-    'http://localhost:5173',           // React dev
-    'https://your-lovable-app.com',    // Production React
-    'http://localhost:3000'            // Existing frontend
-  ]
+    "http://localhost:5173", // React dev
+    "https://your-lovable-app.com", // Production React
+    "http://localhost:3000", // Existing frontend
+  ],
 };
 ```
 
@@ -176,18 +193,21 @@ const corsOptions = {
 ## 📈 **Success Metrics**
 
 ### **Technical Metrics**
+
 - [ ] 100% feature parity with current frontend
-- [ ] < 2s page load time on 3G connection  
+- [ ] < 2s page load time on 3G connection
 - [ ] < 500ms API response times maintained
 - [ ] Zero backend downtime during migration
 
 ### **User Experience Metrics**
+
 - [ ] Improved navigation with dashboard-centric design
 - [ ] Real-time updates feel more responsive
 - [ ] Mobile-first responsive design
 - [ ] Accessibility compliance (WCAG AA)
 
 ### **Business Metrics**
+
 - [ ] Same or improved lead generation rates
 - [ ] Same or lower API costs
 - [ ] Faster development velocity for new features
@@ -198,7 +218,7 @@ const corsOptions = {
 ## 🎯 **Next Steps**
 
 1. **Review and Approve**: Stakeholder sign-off on migration plan
-2. **Environment Setup**: Create Lovable project and configure environments  
+2. **Environment Setup**: Create Lovable project and configure environments
 3. **Backend Integration**: Implement API client and test connectivity
 4. **Component Development**: Build React components with feature parity
 5. **Testing**: Comprehensive testing against production backend

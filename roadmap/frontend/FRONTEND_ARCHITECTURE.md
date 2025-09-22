@@ -15,9 +15,10 @@
 ### **Production Backend Integration**
 
 The current production backend (main branch) provides these endpoints:
+
 - `GET /health` - System health check
 - `POST /api/business-discovery` - Enhanced business discovery with 4-stage pipeline
-- `GET /api/campaigns/:id/export` - CSV/JSON export functionality  
+- `GET /api/campaigns/:id/export` - CSV/JSON export functionality
 - `GET /api/dashboard/metrics` - Campaign analytics and cost tracking
 - Real-time WebSocket connections via Supabase channels
 

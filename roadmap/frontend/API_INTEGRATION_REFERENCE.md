@@ -8,9 +8,10 @@ The current production backend is already deployed and running. The React fronte
 
 ```typescript
 // Production backend configuration
-const BACKEND_BASE_URL = process.env.NODE_ENV === 'production' 
-  ? 'https://your-production-url.railway.app'  // Update with actual Railway URL
-  : 'http://localhost:3000';
+const BACKEND_BASE_URL =
+  process.env.NODE_ENV === "production"
+    ? "https://your-production-url.railway.app" // Update with actual Railway URL
+    : "http://localhost:3000";
 
 // Supabase configuration (already configured in backend)
 const supabaseUrl = "https://sriycekxdqnesdsgwiuc.supabase.co";
@@ -20,6 +21,7 @@ const supabase = createClient(supabaseUrl, supabaseAnonKey);
 ```
 
 **Important**: The backend server.js already handles:
+
 - Dynamic secret loading from Supabase vault
 - API key management for Google Places, Hunter.io, Apollo
 - Database connections with RLS policies
@@ -37,9 +39,9 @@ const supabase = createClient(supabaseUrl, supabaseAnonKey);
 interface DiscoveryRequest {
   businessType: string;
   location: string;
-  radius?: number;        // Default: 10 miles
+  radius?: number; // Default: 10 miles
   businessCount?: number; // Default: 5
-  budgetLimit?: number;   // Default: $25
+  budgetLimit?: number; // Default: $25
 }
 
 interface DiscoveryResponse {
@@ -47,17 +49,17 @@ interface DiscoveryResponse {
   message: string;
   estimatedCost: number;
   processingTime: string;
-  status: 'started' | 'processing' | 'completed';
+  status: "started" | "processing" | "completed";
 }
 
 // Usage with production backend
 const startDiscovery = async (params: DiscoveryRequest) => {
   const response = await fetch(`${BACKEND_BASE_URL}/api/business-discovery`, {
-    method: 'POST',
+    method: "POST",
     headers: {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
     },
-    body: JSON.stringify(params)
+    body: JSON.stringify(params),
   });
 
   if (!response.ok) throw new Error(`Discovery failed: ${response.statusText}`);
@@ -71,22 +73,29 @@ const startDiscovery = async (params: DiscoveryRequest) => {
 
 ```typescript
 interface ExportOptions {
-  format: 'csv' | 'json';
+  format: "csv" | "json";
   includeAnalytics?: boolean;
 }
 
 // Export campaign data
-const exportCampaign = async (campaignId: string, options: ExportOptions = { format: 'csv' }) => {
+const exportCampaign = async (
+  campaignId: string,
+  options: ExportOptions = { format: "csv" }
+) => {
   const params = new URLSearchParams(options as any);
-  const response = await fetch(`${BACKEND_BASE_URL}/api/campaigns/${campaignId}/export?${params}`);
-  
+  const response = await fetch(
+    `${BACKEND_BASE_URL}/api/campaigns/${campaignId}/export?${params}`
+  );
+
   if (!response.ok) throw new Error(`Export failed: ${response.statusText}`);
-  
+
   const blob = await response.blob();
   const url = window.URL.createObjectURL(blob);
-  const a = document.createElement('a');
+  const a = document.createElement("a");
   a.href = url;
-  a.download = `campaign-${campaignId}-${new Date().getTime()}.${options.format}`;
+  a.download = `campaign-${campaignId}-${new Date().getTime()}.${
+    options.format
+  }`;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
@@ -111,7 +120,8 @@ interface DashboardMetrics {
 // Fetch dashboard metrics
 const getDashboardMetrics = async (): Promise<DashboardMetrics> => {
   const response = await fetch(`${BACKEND_BASE_URL}/api/dashboard/metrics`);
-  if (!response.ok) throw new Error(`Metrics fetch failed: ${response.statusText}`);
+  if (!response.ok)
+    throw new Error(`Metrics fetch failed: ${response.statusText}`);
   return response.json();
 };
 ```
