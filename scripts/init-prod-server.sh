@@ -17,52 +17,43 @@ trigger_env_workflow() {
     if [ -z "$github_token" ]; then
         echo "⚠️  No GitHub token found (GHP_SECRET or GITHUB_TOKEN)"
         echo "   Set repository secret 'GHP_SECRET' or environment variable 'GHP_SECRET'"
-        echo "   Skipping workflow trigger - ensure .env is manually configured"
+        echo "   Using local environment generation instead..."
         return 1
     fi
     
-    echo "🔔 Triggering environment generation workflow..."
-    echo "📋 Using repository: $repo_owner/$repo_name"
+    echo "🔔 Using new production environment puller script..."
+    echo "📋 Repository: $repo_owner/$repo_name"
     
-    # Trigger the workflow via GitHub API
-    curl -X POST \
-        -H "Accept: application/vnd.github+json" \
-        -H "Authorization: Bearer $github_token" \
-        -H "X-GitHub-Api-Version: 2022-11-28" \
-        "https://api.github.com/repos/$repo_owner/$repo_name/dispatches" \
-        -d '{"event_type":"server-init","client_payload":{"source":"production-server-init","timestamp":"'$(date -u +%Y-%m-%dT%H:%M:%SZ)'"}}' \
-        && echo "✅ Workflow triggered successfully" \
-        || echo "❌ Failed to trigger workflow"
+    # Use the new environment puller script
+    if ./scripts/pull-env-from-secrets.js; then
+        echo "✅ Production environment generated successfully"
+        return 0
+    else
+        echo "❌ Environment generation script failed"
+        return 1
+    fi
 }
 
 # Function to wait for environment file
 wait_for_env() {
-    local max_wait=300  # 5 minutes
-    local wait_time=0
+    echo "🔍 Checking for production .env file..."
     
-    echo "⏳ Waiting for .env file to be generated..."
-    
-    while [ $wait_time -lt $max_wait ]; do
-        if [ -f ".env" ]; then
-            # Check if .env has critical template values (not just optional ones)
-            if ! grep -q "your_supabase.*_here\|your_service_role_key_here\|your-project-ref\.supabase\.co" .env; then
-                echo "✅ Production .env file ready (core credentials configured)"
-                return 0
-            else
-                echo "⏳ .env file exists but contains critical template values..."
-            fi
+    if [ -f ".env" ]; then
+        # Check if .env has critical template values (not just optional ones)
+        if ! grep -q "your_supabase.*_here\|your_service_role_key_here\|your-project-ref\.supabase\.co" .env; then
+            echo "✅ Production .env file ready (core credentials configured)"
+            return 0
+        else
+            echo "⚠️  .env file exists but requires manual credential configuration"
+            echo "   Edit .env file and replace template values with real Supabase credentials"
+            echo "   Then run: npm run prod:check"
+            return 1
         fi
-        
-        sleep 10
-        wait_time=$((wait_time + 10))
-        
-        if [ $((wait_time % 60)) -eq 0 ]; then
-            echo "⏳ Still waiting for environment generation (${wait_time}s elapsed)..."
-        fi
-    done
-    
-    echo "⚠️  Timeout waiting for .env file generation"
-    return 1
+    else
+        echo "❌ No .env file found"
+        echo "   Run: npm run prod:setup-env  # Generate production environment template"
+        return 1
+    fi
 }
 
 # Function to validate environment
@@ -142,7 +133,7 @@ main() {
     done
     
     # Check if .env already exists and is valid
-    if [ -f ".env" ] && ! grep -q "your_.*_here" .env; then
+    if [ -f ".env" ] && ! grep -q "your_supabase.*_here\|your_service_role_key_here\|your-project-ref\.supabase\.co" .env; then
         echo "✅ Valid .env file already exists, skipping workflow trigger"
         skip_workflow_trigger=true
     fi
@@ -150,21 +141,29 @@ main() {
     # Step 1: Trigger environment generation workflow (unless skipped)
     if [ "$skip_workflow_trigger" = false ]; then
         if ! trigger_env_workflow; then
-            echo "⚠️  Workflow trigger failed, checking for existing .env..."
-            if [ ! -f ".env" ]; then
-                echo "❌ No .env file available and workflow trigger failed"
-                echo "   Please manually create .env file or set GitHub token"
-                exit 1
-            fi
-        else
-            # Step 2: Wait for environment file generation
-            if ! wait_for_env; then
-                echo "❌ Environment generation failed or timed out"
-                exit 1
-            fi
+            echo "⚠️  Workflow trigger failed or unavailable"
+            echo "   Run manually: npm run prod:setup-env"
+            echo "   Then edit .env file with your Supabase credentials"
+            exit 1
+        fi
+        
+        # Step 2: Check for environment file readiness
+        if ! wait_for_env; then
+            echo "❌ Environment configuration incomplete"
+            echo "   Complete the setup: npm run prod:setup-env"
+            echo "   Edit .env with real credentials, then: npm run prod:check"
+            exit 1
         fi
     else
         echo "⏭️  Skipping workflow trigger"
+        # If skipping workflow, we MUST have a valid .env file
+        if ! wait_for_env; then
+            echo "❌ Cannot start production server"
+            echo "   Missing or incomplete .env file"
+            echo "   Run: npm run prod:setup-env"
+            echo "   Then edit .env with your Supabase credentials"
+            exit 1
+        fi
     fi
     
     # Step 3: Validate environment
