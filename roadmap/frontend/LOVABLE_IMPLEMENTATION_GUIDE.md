@@ -1070,36 +1070,43 @@ VITE_ENVIRONMENT=production
 ### **Daily Sprint Goals**
 
 **Day 1: Foundation**
+
 - [ ] Project scaffold with TypeScript + Supabase client
 - [ ] Environment setup + providers (React Query, Toast)
 - [ ] Health check smoke test + error boundaries
 
 **Day 2: Discovery Core**
+
 - [ ] Business discovery form with validation
 - [ ] startDiscovery mutation with toast feedback
 - [ ] Basic routing structure (Dashboard → Discovery → Results)
 
 **Day 3: Real-Time Pipeline**
+
 - [ ] Single multiplexed realtime channel setup
 - [ ] Batched UI updates for lead insertions
 - [ ] Campaign status tracking with progress indicators
 
 **Day 4: Dashboard & Analytics**
+
 - [ ] Campaign overview with hero cards (Total, Qualified, Cost, Confidence)
 - [ ] Cost tracker with budget gauge and API breakdown
 - [ ] Lead funnel visualization
 
 **Day 5: Lead Management**
+
 - [ ] Lead table with sticky headers and confidence chips
 - [ ] Optimistic selection with bulk operations
 - [ ] Export preview modal with format selection
 
 **Day 6: Cost Optimization**
+
 - [ ] Verify-on-Export flow with cost projection
 - [ ] Budget guardrails and projected cost warnings
 - [ ] Column projection + pagination for efficiency
 
 **Day 7: Polish & Deploy**
+
 - [ ] Loading skeletons and empty states
 - [ ] Dark mode support and accessibility improvements
 - [ ] Production build and Lovable deployment
@@ -1125,13 +1132,15 @@ const queryClient = new QueryClient({
       refetchInterval: false, // Disable background refetch on completion
     },
   },
-})
+});
 
 // Confidence chip color helper
 const clsForConfidence = (score: number) =>
-  score >= 80 ? 'bg-green-50 text-green-700 ring-green-200' :
-  score >= 60 ? 'bg-amber-50 text-amber-700 ring-amber-200' :
-                'bg-rose-50 text-rose-700 ring-rose-200';
+  score >= 80
+    ? "bg-green-50 text-green-700 ring-green-200"
+    : score >= 60
+    ? "bg-amber-50 text-amber-700 ring-amber-200"
+    : "bg-rose-50 text-rose-700 ring-rose-200";
 ```
 
 **7-day delivery with production-ready quality and cost optimization!** 🚀

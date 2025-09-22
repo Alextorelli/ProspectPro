@@ -115,7 +115,7 @@ interface CampaignStore {
   selectedLeads: string[];
   filters: LeadFilters;
   exportConfig: ExportConfig;
-  
+
   // Cost-aware state
   isActiveCampaign: boolean;
   budgetRemaining: number;
@@ -128,7 +128,7 @@ interface UserStore {
   budgetPreferences: BudgetPreferences;
   exportSettings: ExportSettings;
   dashboardLayout: DashboardConfig;
-  costOptimizationMode: 'standard' | 'economy' | 'premium';
+  costOptimizationMode: "standard" | "economy" | "premium";
 }
 ```
 
@@ -165,7 +165,7 @@ const useRealTimeUpdates = (campaignId: string, isIdle = false) => {
 
   const flushBatch = useCallback(() => {
     if (queue.current.length > 0) {
-      queryClient.setQueryData(['leads', campaignId, 0], (old: any[] = []) => 
+      queryClient.setQueryData(['leads', campaignId, 0], (old: any[] = []) =>
         [...old, ...queue.current]
       );
       queue.current = [];
@@ -224,12 +224,19 @@ const useRealTimeUpdates = (campaignId: string, isIdle = false) => {
 ```typescript
 // Color-coded confidence chips with consistent design
 const getConfidenceStyles = (score: number) => ({
-  className: score >= 80 ? 'bg-green-50 text-green-700 ring-green-200' :
-             score >= 60 ? 'bg-amber-50 text-amber-700 ring-amber-200' :
-                          'bg-rose-50 text-rose-700 ring-rose-200',
-  label: score >= 80 ? 'High Quality' :
-         score >= 60 ? 'Good Quality' : 'Needs Review',
-  icon: score >= 80 ? '✅' : score >= 60 ? '⚠️' : '❌'
+  className:
+    score >= 80
+      ? "bg-green-50 text-green-700 ring-green-200"
+      : score >= 60
+      ? "bg-amber-50 text-amber-700 ring-amber-200"
+      : "bg-rose-50 text-rose-700 ring-rose-200",
+  label:
+    score >= 80
+      ? "High Quality"
+      : score >= 60
+      ? "Good Quality"
+      : "Needs Review",
+  icon: score >= 80 ? "✅" : score >= 60 ? "⚠️" : "❌",
 });
 ```
 
@@ -247,16 +254,21 @@ const BudgetGauge = ({ used, limit, projected }: BudgetGaugeProps) => {
   const percentage = (used / limit) * 100;
   const remaining = limit - used;
   const isNearLimit = percentage > 80;
-  
+
   return (
     <div className="space-y-2">
       <div className="flex justify-between text-sm">
-        <span>${used.toFixed(2)} of ${limit} used</span>
-        <span className={isNearLimit ? 'text-red-600' : 'text-green-600'}>
-          {percentage.toFixed(0)}% {isNearLimit ? 'near limit' : 'under budget'}
+        <span>
+          ${used.toFixed(2)} of ${limit} used
+        </span>
+        <span className={isNearLimit ? "text-red-600" : "text-green-600"}>
+          {percentage.toFixed(0)}% {isNearLimit ? "near limit" : "under budget"}
         </span>
       </div>
-      <ProgressBar value={percentage} className={isNearLimit ? 'bg-red-500' : 'bg-blue-500'} />
+      <ProgressBar
+        value={percentage}
+        className={isNearLimit ? "bg-red-500" : "bg-blue-500"}
+      />
       {projected && (
         <p className="text-xs text-gray-600">
           Projected total: ${(used + projected).toFixed(2)}
@@ -402,18 +414,24 @@ const useAPIError = () => {
 ## � **Cost Optimization Patterns**
 
 ### **Verify-on-Export Strategy**
+
 ```typescript
 // Only verify leads when user exports (30-45% cost savings)
 const useExportWithVerification = () => {
   const [isVerifying, setIsVerifying] = useState(false);
 
-  const exportWithVerification = async (selectedLeads: string[], campaignId: string) => {
+  const exportWithVerification = async (
+    selectedLeads: string[],
+    campaignId: string
+  ) => {
     // Get cost estimate first
     const estimate = await api.estimateVerificationCost(selectedLeads);
-    
+
     if (estimate.projectedCost > 0) {
       const confirmed = confirm(
-        `Email verification will cost ~$${estimate.projectedCost.toFixed(2)}. Continue?`
+        `Email verification will cost ~$${estimate.projectedCost.toFixed(
+          2
+        )}. Continue?`
       );
       if (!confirmed) return;
     }
@@ -422,9 +440,9 @@ const useExportWithVerification = () => {
     try {
       return await api.exportCampaign({
         campaignId,
-        format: 'csv',
+        format: "csv",
         verifyOnExport: true,
-        selectedLeadIds: selectedLeads
+        selectedLeadIds: selectedLeads,
       });
     } finally {
       setIsVerifying(false);
@@ -436,6 +454,7 @@ const useExportWithVerification = () => {
 ```
 
 ### **Budget Guardrails**
+
 ```typescript
 // Project cost and abort before budget exceeded
 const useBudgetGuard = (budgetLimit: number) => {
@@ -443,14 +462,14 @@ const useBudgetGuard = (budgetLimit: number) => {
 
   const checkBudgetBeforeAction = (estimatedCost: number) => {
     const total = projectedCost + estimatedCost;
-    
+
     if (total > budgetLimit * 0.9) {
       throw new APIError(
         `Projected cost ($${total.toFixed(2)}) exceeds 90% of budget`,
-        'BUDGET_EXCEEDED'
+        "BUDGET_EXCEEDED"
       );
     }
-    
+
     return true;
   };
 
@@ -459,6 +478,7 @@ const useBudgetGuard = (budgetLimit: number) => {
 ```
 
 ### **Column Projection & Pagination**
+
 ```typescript
 // Fetch only needed columns and paginate for efficiency
 const useEfficientLeadList = (campaignId: string) => {
@@ -466,13 +486,14 @@ const useEfficientLeadList = (campaignId: string) => {
   const pageSize = 50;
 
   return useQuery(
-    ['leads', campaignId, page],
-    () => supabase
-      .from('enhanced_leads')
-      .select('id,business_name,confidence_score,is_qualified,phone,email')
-      .eq('campaign_id', campaignId)
-      .order('confidence_score', { ascending: false })
-      .range(page * pageSize, (page + 1) * pageSize - 1),
+    ["leads", campaignId, page],
+    () =>
+      supabase
+        .from("enhanced_leads")
+        .select("id,business_name,confidence_score,is_qualified,phone,email")
+        .eq("campaign_id", campaignId)
+        .order("confidence_score", { ascending: false })
+        .range(page * pageSize, (page + 1) * pageSize - 1),
     {
       keepPreviousData: true,
       staleTime: 2 * 60 * 1000, // 2 minutes for list data

@@ -78,14 +78,23 @@ const exportCampaign = async (request: ExportRequest) => {
 };
 
 // Verify-on-Export with cost projection
-const exportWithVerification = async (campaignId: string, selectedLeads: string[]) => {
+const exportWithVerification = async (
+  campaignId: string,
+  selectedLeads: string[]
+) => {
   // First get cost estimate
-  const { data: estimate } = await supabase.functions.invoke("estimate-verification", {
-    body: { campaignId, leadIds: selectedLeads }
-  });
+  const { data: estimate } = await supabase.functions.invoke(
+    "estimate-verification",
+    {
+      body: { campaignId, leadIds: selectedLeads },
+    }
+  );
 
-  if (estimate.projectedCost > 5) { // Show warning for >$5 verification
-    const confirmed = confirm(`Verification will cost ~$${estimate.projectedCost.toFixed(2)}. Continue?`);
+  if (estimate.projectedCost > 5) {
+    // Show warning for >$5 verification
+    const confirmed = confirm(
+      `Verification will cost ~$${estimate.projectedCost.toFixed(2)}. Continue?`
+    );
     if (!confirmed) return null;
   }
 
@@ -93,7 +102,7 @@ const exportWithVerification = async (campaignId: string, selectedLeads: string[
     campaignId,
     format: "csv",
     verifyOnExport: true,
-    selectedLeadIds: selectedLeads
+    selectedLeadIds: selectedLeads,
   });
 };
 ```
@@ -146,10 +155,16 @@ interface Lead {
 }
 
 // Fetch leads for campaign (optimized with column projection)
-const getCampaignLeads = async (campaignId: string, page = 0, pageSize = 50) => {
+const getCampaignLeads = async (
+  campaignId: string,
+  page = 0,
+  pageSize = 50
+) => {
   const { data, error } = await supabase
     .from("enhanced_leads")
-    .select("id,business_name,confidence_score,website,is_qualified,phone,email")
+    .select(
+      "id,business_name,confidence_score,website,is_qualified,phone,email"
+    )
     .eq("campaign_id", campaignId)
     .order("confidence_score", { ascending: false })
     .range(page * pageSize, page * pageSize + pageSize - 1);
@@ -309,7 +324,7 @@ const useRealTimeUpdates = (campaignId: string) => {
         if (payload.eventType === 'INSERT') {
           enqueueUpdate(payload.new as Lead);
         } else if (payload.eventType === 'UPDATE') {
-          setLeads(prev => prev.map(lead => 
+          setLeads(prev => prev.map(lead =>
             lead.id === payload.new.id ? payload.new as Lead : lead
           ));
         }

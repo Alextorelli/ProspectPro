@@ -17,6 +17,7 @@ npm install @supabase/supabase-js zustand @tanstack/react-query recharts
 ```
 
 **Environment Setup:**
+
 ```bash
 # .env.local
 VITE_SUPABASE_URL=https://sriycekxdqnesdsgwiuc.supabase.co
@@ -26,21 +27,25 @@ VITE_SUPABASE_ANON_KEY=your_key_from_supabase_dashboard
 ## 📚 **Documentation Links**
 
 ### **📖 Essential Reading**
+
 - **[Frontend Architecture](../roadmap/frontend/FRONTEND_ARCHITECTURE.md)** - Complete system design, data flow, state management patterns
 - **[API Integration Reference](../roadmap/frontend/API_INTEGRATION_REFERENCE.md)** - All endpoints, hooks, real-time subscriptions, ready-to-use code
 
 ### **🛠️ Implementation Guide**
+
 - **[7-Day Fast Track Plan](../roadmap/frontend/LOVABLE_IMPLEMENTATION_GUIDE.md)** - Daily sprint goals, UI patterns, deployment checklist
 
 ## ⚡ **Production-Ready Backend**
 
 ### **Available APIs (Already Deployed)**
+
 - `enhanced-business-discovery` - 4-stage lead pipeline with cost tracking
-- `export-campaign` - CSV/JSON export with verify-on-export option  
+- `export-campaign` - CSV/JSON export with verify-on-export option
 - `system-health` - Real-time system diagnostics
 - All database tables with Row Level Security enabled
 
 ### **Real-Time Features Ready**
+
 - Live lead updates during discovery
 - Cost tracking with budget alerts
 - Campaign progress with completion notifications
@@ -49,16 +54,19 @@ VITE_SUPABASE_ANON_KEY=your_key_from_supabase_dashboard
 ## 🎨 **Key Features to Implement**
 
 ### **Day 1-2: Core Discovery**
+
 - Business search form with budget selection
 - startDiscovery mutation with toast feedback
 - Campaign dashboard with progress tracking
 
 ### **Day 3-4: Real-Time Results**
+
 - Live lead table with confidence scoring
 - Cost gauge with budget remaining display
 - Batched UI updates for smooth performance
 
 ### **Day 5-7: Export & Polish**
+
 - Verify-on-Export with cost confirmation
 - Advanced filtering and bulk selection
 - Loading states, error handling, accessibility
