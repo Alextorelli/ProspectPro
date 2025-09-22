@@ -1,7 +1,7 @@
 /**
  * Production-Ready Environment Configuration Loader
  * Loads configuration from GitHub Actions, Supabase Vault, and environment variables
- * 
+ *
  * Configuration Sources (in priority order):
  * 1. Process environment variables (GitHub Actions, CI/CD)
  * 2. Supabase Vault (for API keys)
@@ -52,16 +52,16 @@ class EnvironmentLoader {
   loadProcessEnvironment() {
     // Check for GitHub Actions / CI/CD injected variables
     const cicdVars = [
-      "SUPABASE_URL", 
+      "SUPABASE_URL",
       "SUPABASE_SECRET_KEY",
       "BUILD_TIMESTAMP",
       "BUILD_COMMIT",
-      "BUILD_BRANCH"
+      "BUILD_BRANCH",
     ];
 
     let cicdCount = 0;
     cicdVars.forEach((varName) => {
-      if (process.env[varName] && !process.env[varName].includes('your_')) {
+      if (process.env[varName] && !process.env[varName].includes("your_")) {
         cicdCount++;
       }
     });
@@ -69,7 +69,7 @@ class EnvironmentLoader {
     if (cicdCount >= 2) {
       this.configSources.push("🏭 GitHub Actions / CI/CD");
       console.log(`✅ ${cicdCount} variables loaded from CI/CD environment`);
-      
+
       if (process.env.BUILD_TIMESTAMP) {
         console.log(`📅 Build: ${process.env.BUILD_TIMESTAMP}`);
       }
@@ -82,7 +82,7 @@ class EnvironmentLoader {
     const envVars = ["SUPABASE_URL", "SUPABASE_SECRET_KEY"];
     let envCount = 0;
     envVars.forEach((varName) => {
-      if (process.env[varName] && !process.env[varName].includes('your_')) {
+      if (process.env[varName] && !process.env[varName].includes("your_")) {
         envCount++;
       }
     });
@@ -105,7 +105,7 @@ class EnvironmentLoader {
       MAX_CONCURRENT_REQUESTS: "10",
       MIN_CONFIDENCE_SCORE: "85",
       ENABLE_COST_TRACKING: "true",
-      ENABLE_CIRCUIT_BREAKER: "true"
+      ENABLE_CIRCUIT_BREAKER: "true",
     };
 
     let defaultsSet = 0;
@@ -124,22 +124,30 @@ class EnvironmentLoader {
 
   validateConfiguration() {
     const required = ["SUPABASE_URL", "SUPABASE_SECRET_KEY", "NODE_ENV"];
-    const missing = required.filter((key) => !process.env[key] || process.env[key].includes('your_'));
+    const missing = required.filter(
+      (key) => !process.env[key] || process.env[key].includes("your_")
+    );
 
     console.log("\n🔍 Configuration Validation:");
 
     if (missing.length > 0) {
       console.error("❌ Missing required environment variables:", missing);
       console.error("\n💡 Solutions:");
-      console.error("   🔧 Production: Ensure GitHub repository secrets are configured");
+      console.error(
+        "   🔧 Production: Ensure GitHub repository secrets are configured"
+      );
       console.error("   🛠️  Development: Add real values to .env file");
       console.error("   📋 Secrets needed: SUPABASE_URL, SUPABASE_SECRET_KEY");
 
       if (process.env.ALLOW_DEGRADED_START !== "true") {
-        console.error("\n❌ Set ALLOW_DEGRADED_START=true to continue without full configuration");
+        console.error(
+          "\n❌ Set ALLOW_DEGRADED_START=true to continue without full configuration"
+        );
         process.exit(1);
       } else {
-        console.warn("⚠️  Continuing in degraded mode without complete configuration");
+        console.warn(
+          "⚠️  Continuing in degraded mode without complete configuration"
+        );
       }
     } else {
       console.log("✅ All required environment variables configured");
@@ -147,8 +155,8 @@ class EnvironmentLoader {
 
     // Validate Supabase configuration
     const supabaseUrl = process.env.SUPABASE_URL;
-    if (supabaseUrl && !supabaseUrl.includes('your_')) {
-      if (supabaseUrl.includes('supabase.co')) {
+    if (supabaseUrl && !supabaseUrl.includes("your_")) {
+      if (supabaseUrl.includes("supabase.co")) {
         console.log("✅ Supabase URL format validated");
       } else {
         console.warn("⚠️  Supabase URL format may be incorrect");
@@ -165,9 +173,16 @@ class EnvironmentLoader {
     console.log("\n🎯 Runtime Configuration:");
     console.log(`   Environment: ${process.env.NODE_ENV}`);
     console.log(`   Port: ${process.env.PORT || 3000}`);
-    console.log(`   Degraded Mode Allowed: ${process.env.ALLOW_DEGRADED_START === 'true' ? 'Yes' : 'No'}`);
-    
-    if (process.env.SUPABASE_URL && !process.env.SUPABASE_URL.includes('your_')) {
+    console.log(
+      `   Degraded Mode Allowed: ${
+        process.env.ALLOW_DEGRADED_START === "true" ? "Yes" : "No"
+      }`
+    );
+
+    if (
+      process.env.SUPABASE_URL &&
+      !process.env.SUPABASE_URL.includes("your_")
+    ) {
       const url = process.env.SUPABASE_URL;
       console.log(`   Supabase: ${url.substring(0, 30)}...`);
     }
@@ -176,16 +191,16 @@ class EnvironmentLoader {
     console.log("\n🔑 API Keys Expected from Supabase Vault:");
     const expectedVaultKeys = [
       "GOOGLE_PLACES_API_KEY",
-      "HUNTER_IO_API_KEY", 
+      "HUNTER_IO_API_KEY",
       "NEVERBOUNCE_API_KEY",
       "APOLLO_API_KEY",
       "FOURSQUARE_SERVICE_API_KEY",
-      "PERSONAL_ACCESS_TOKEN"
+      "PERSONAL_ACCESS_TOKEN",
     ];
-    expectedVaultKeys.forEach(key => {
+    expectedVaultKeys.forEach((key) => {
       console.log(`   📝 ${key}`);
     });
-    
+
     console.log("\n" + "=".repeat(50) + "\n");
   }
 
@@ -245,8 +260,8 @@ class EnvironmentLoader {
         timestamp: process.env.BUILD_TIMESTAMP,
         commit: process.env.BUILD_COMMIT,
         branch: process.env.BUILD_BRANCH,
-        actor: process.env.BUILD_ACTOR
-      }
+        actor: process.env.BUILD_ACTOR,
+      },
     };
   }
 }
