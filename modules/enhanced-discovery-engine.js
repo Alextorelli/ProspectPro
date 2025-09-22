@@ -16,25 +16,27 @@
 const GooglePlacesClient = require("./api-clients/google-places");
 const EnhancedLeadDiscovery = require("./enhanced-lead-discovery");
 const CampaignCSVExporter = require("./campaign-csv-exporter");
+const logger = require("./utils/logger");
 
 class EnhancedDiscoveryEngine {
   constructor(apiKeys = {}) {
-    this.apiKeys = apiKeys;
+    this.leadDiscovery = new EnhancedLeadDiscovery(apiKeys);
     this.googleClient = new GooglePlacesClient(apiKeys.googlePlaces);
-    this.enhancedDiscovery = new EnhancedLeadDiscovery(apiKeys);
     this.csvExporter = new CampaignCSVExporter();
+    this.logger = logger;
+    this.sessionStats = {
+      totalQueries: 0,
+      businessesProcessed: 0,
+      qualifiedLeads: 0,
+      totalCost: 0,
+      averageConfidence: 0,
+      successRate: 0,
+    };
 
-    // Discovery metrics
+    // Discovery stats
     this.totalProcessed = 0;
     this.totalCost = 0;
     this.startTime = null;
-    this.sessionStats = {
-      queriesExecuted: 0,
-      businessesProcessed: 0,
-      qualifiedLeadsFound: 0,
-      averageConfidence: 0,
-      costPerLead: 0,
-    };
   }
 
   /**
@@ -66,46 +68,34 @@ class EnhancedDiscoveryEngine {
     let allQualifiedLeads = [];
     let currentQueryIndex = 0;
     let attemptCount = 0;
+    const maxAttempts = 20; // Prevent infinite loops
 
-    const searchQueries = this.generateSearchQueries(
-      businessType,
-      location
-    ).concat(additionalQueries);
-    const maxAttempts = 8;
-    const maxResultsPerQuery = 15;
+    // Generate comprehensive search queries
+    const searchQueries = this.generateSearchQueries(businessType, location);
+    if (additionalQueries.length > 0) {
+      searchQueries.push(...additionalQueries);
+    }
+
+    const maxResultsPerQuery = Math.ceil(
+      (targetCount * 3) / searchQueries.length
+    );
 
     console.log(
-      `🔍 Search Strategy: ${searchQueries.length} query variations prepared`
+      `📋 Generated ${searchQueries.length} search queries, ${maxResultsPerQuery} results each`
     );
-    console.log(
-      `💰 Budget: $${budgetLimit} | Quality Threshold: ${minConfidenceScore}%`
-    );
-    console.log(`📊 Max Results per Query: ${maxResultsPerQuery}`);
     console.log("");
 
-    // Initialize campaign
-    const campaignId = this.csvExporter.generateCampaignId();
-    this.csvExporter.initializeCampaign(campaignId, {
-      name: `Enhanced Discovery: ${businessType} in ${location}`,
-      description: `Quality-focused discovery ensuring complete contact information`,
-      targetLeads: targetCount,
-      qualityRequirements: { requireCompleteContacts, minConfidenceScore },
-      searchStrategy: searchQueries,
-    });
-
+    // Iterative discovery loop
     while (
       allQualifiedLeads.length < targetCount &&
-      attemptCount < maxAttempts &&
       currentQueryIndex < searchQueries.length &&
+      attemptCount < maxAttempts &&
       this.totalCost < budgetLimit
     ) {
       attemptCount++;
       const currentQuery = searchQueries[currentQueryIndex];
 
-      console.log(`🔍 Search Attempt ${attemptCount}: "${currentQuery}"`);
-      console.log(
-        `   📊 Current Qualified: ${allQualifiedLeads.length}/${targetCount}`
-      );
+      console.log(`🔍 Query ${attemptCount}: "${currentQuery}"`);
       console.log(
         `   💰 Budget Used: $${this.totalCost.toFixed(3)}/$${budgetLimit}`
       );
@@ -139,7 +129,7 @@ class EnhancedDiscoveryEngine {
         };
 
         const enhancedResults =
-          await this.enhancedDiscovery.discoverAndValidateLeads(
+          await this.leadDiscovery.discoverAndValidateLeads(
             searchResults,
             discoveryOptions
           );
@@ -214,7 +204,7 @@ class EnhancedDiscoveryEngine {
     return this.generateDiscoveryResults(
       allQualifiedLeads,
       targetCount,
-      campaignId,
+      null, // campaignId
       businessType,
       location
     );
@@ -284,6 +274,30 @@ class EnhancedDiscoveryEngine {
           !isPatternSource(ownerEmailSource) &&
           ownerEmailConfidence >= 60);
 
+      // Enhanced email verification requirements for qualification
+      const hasVerifiedEmail =
+        hasEmail &&
+        // NeverBounce verification indicates deliverable
+        (hasDeliverableEmail ||
+          // From verified API sources (Hunter, Apollo, etc.)
+          emailVerifiedEvidence ||
+          // Company email from verified source with high confidence
+          (companyEmailVerified && companyEmailConfidence >= 70) ||
+          // Website scraped email (not pattern-generated)
+          (looksVerifiedSource(companyEmailSource) &&
+            !isPatternSource(companyEmailSource)));
+
+      // Log email qualification details for debugging
+      if (requireEmail && this.logger) {
+        this.logger.emailFilterLog(
+          lead,
+          hasEmail,
+          hasVerifiedEmail,
+          [companyEmailSource, ownerEmailSource].filter((s) => s),
+          Math.max(companyEmailConfidence, ownerEmailConfidence)
+        );
+      }
+
       const hasConfidence =
         (lead.finalConfidenceScore || lead.confidenceScore) >=
         minimumConfidence;
@@ -325,7 +339,7 @@ class EnhancedDiscoveryEngine {
         hasAddress &&
         (!requirePhone || hasPhone) &&
         (!requireWebsite || (hasWebsite && websiteAccessible)) &&
-        (!requireEmail || (hasEmail && !isPatternSource(companyEmailSource))) &&
+        (!requireEmail || hasVerifiedEmail) &&
         (!requireOwnerQualified || ownerQualified) &&
         hasConfidence &&
         passesIndustry;
@@ -368,64 +382,88 @@ class EnhancedDiscoveryEngine {
       });
     });
   }
+
   /**
    * Generate comprehensive search queries for industry and location
    */
   generateSearchQueries(industry, location) {
-    const industryQueries = {
+    const baseQueries = [
+      `${industry} in ${location}`,
+      `${industry} ${location}`,
+      `${industry} businesses ${location}`,
+      `${industry} services ${location}`,
+      `${industry} companies ${location}`,
+    ];
+
+    // Add industry-specific variations
+    const industryVariations = this.getIndustryVariations(industry);
+    const locationVariations = this.getLocationVariations(location);
+
+    const expandedQueries = [];
+    baseQueries.forEach((base) => expandedQueries.push(base));
+
+    // Add industry variations
+    industryVariations.forEach((variation) => {
+      expandedQueries.push(`${variation} in ${location}`);
+      expandedQueries.push(`${variation} ${location}`);
+    });
+
+    // Add location variations
+    locationVariations.forEach((locVariation) => {
+      expandedQueries.push(`${industry} in ${locVariation}`);
+    });
+
+    return expandedQueries.slice(0, 15); // Limit to top 15 queries
+  }
+
+  /**
+   * Get industry-specific variations
+   */
+  getIndustryVariations(industry) {
+    const variationMap = {
       wellness: [
-        `wellness center spa ${location}`,
-        `massage therapy clinic ${location}`,
-        `day spa wellness ${location}`,
-        `holistic wellness center ${location}`,
-        `medical spa ${location}`,
-        `health spa wellness ${location}`,
-        `therapeutic massage ${location}`,
-        `wellness studio ${location}`,
+        "wellness center",
+        "health center",
+        "holistic health",
+        "wellness clinic",
       ],
-      restaurant: [
-        `restaurant ${location}`,
-        `fine dining restaurant ${location}`,
-        `local restaurant ${location}`,
-        `family restaurant ${location}`,
-        `cuisine restaurant ${location}`,
-        `bistro restaurant ${location}`,
-        `cafe restaurant ${location}`,
-        `grill restaurant ${location}`,
-      ],
-      legal: [
-        `law firm attorney ${location}`,
-        `legal services ${location}`,
-        `lawyer attorney ${location}`,
-        `law office ${location}`,
-        `legal counsel ${location}`,
-        `litigation attorney ${location}`,
-        `business lawyer ${location}`,
-        `legal practice ${location}`,
-      ],
-      healthcare: [
-        `medical practice ${location}`,
-        `healthcare clinic ${location}`,
-        `medical office ${location}`,
-        `physician practice ${location}`,
-        `medical center ${location}`,
-        `health clinic ${location}`,
-        `medical facility ${location}`,
-        `healthcare provider ${location}`,
-      ],
-      default: [
-        `business ${location}`,
-        `professional services ${location}`,
-        `local business ${location}`,
-        `commercial services ${location}`,
-        `professional office ${location}`,
-      ],
+      restaurant: ["dining", "food", "cuisine", "eatery"],
+      legal: ["law firm", "attorney", "legal services", "lawyer"],
+      retail: ["store", "shop", "boutique", "retailer"],
     };
 
-    return (
-      industryQueries[industry.toLowerCase()] ||
-      industryQueries.default.map((q) => q.replace("business", industry))
-    );
+    return variationMap[industry.toLowerCase()] || [];
+  }
+
+  /**
+   * Get location-specific variations
+   */
+  getLocationVariations(location) {
+    if (location.includes(",")) {
+      const parts = location.split(",");
+      const city = parts[0].trim();
+      const state = parts[1]?.trim();
+
+      const variations = [city];
+      if (state) {
+        variations.push(`${city}, ${state}`);
+      }
+
+      // Add metro area variations for major cities
+      const metroAreas = {
+        "San Diego": ["San Diego County", "North County San Diego"],
+        "Los Angeles": ["LA", "Greater Los Angeles"],
+        "San Francisco": ["Bay Area", "SF"],
+      };
+
+      if (metroAreas[city]) {
+        variations.push(...metroAreas[city]);
+      }
+
+      return variations;
+    }
+
+    return [location];
   }
 
   /**
@@ -483,6 +521,10 @@ class EnhancedDiscoveryEngine {
         : 0;
     this.sessionStats.costPerLead =
       cappedLeads.length > 0 ? this.totalCost / cappedLeads.length : 0;
+    this.sessionStats.successRate =
+      this.totalProcessed > 0
+        ? (cappedLeads.length / this.totalProcessed) * 100
+        : 0;
 
     // Quality metrics
     const qualityMetrics = {
@@ -503,21 +545,22 @@ class EnhancedDiscoveryEngine {
     console.log("=".repeat(70));
     console.log(`🎯 Target: ${targetLeads} | Achieved: ${cappedLeads.length}`);
     console.log(
-      `📈 Businesses Processed: ${this.sessionStats.businessesProcessed}`
+      `⏱️  Processing Time: ${(processingTime / 1000).toFixed(1)} seconds`
     );
-    console.log(`💰 Total Cost: $${this.totalCost.toFixed(3)}`);
-    console.log(`⏱️ Processing Time: ${(processingTime / 1000).toFixed(1)}s`);
-    console.log(`🔍 Queries Executed: ${this.sessionStats.queriesExecuted}`);
     console.log(
-      `📊 Success Rate: ${(
-        (qualifiedLeads.length / this.sessionStats.businessesProcessed) *
-        100
-      ).toFixed(1)}%`
+      `💰 Total Cost: $${this.totalCost.toFixed(
+        3
+      )} (${this.sessionStats.costPerLead.toFixed(3)}/lead)`
+    );
+    console.log(
+      `📈 Success Rate: ${this.sessionStats.successRate.toFixed(1)}% (${
+        cappedLeads.length
+      }/${this.totalProcessed})`
     );
     console.log("");
 
-    // Quality validation
-    console.log("🔍 QUALITY VALIDATION:");
+    // Quality assessment
+    console.log("🎯 QUALITY METRICS:");
     console.log(
       `   📧 All have email: ${qualityMetrics.allHaveEmail ? "✅" : "❌"}`
     );
@@ -535,102 +578,39 @@ class EnhancedDiscoveryEngine {
     // Display qualified leads
     if (qualifiedLeads.length > 0) {
       console.log("🎯 QUALIFIED LEADS (Complete Contact Info):");
-      console.log("=".repeat(60));
+      console.log("-".repeat(70));
 
       cappedLeads.forEach((lead, index) => {
+        const email = lead.email || lead.companyEmail || "N/A";
+        const phone = lead.phone || lead.companyPhone || "N/A";
+        const confidence = (
+          lead.finalConfidenceScore ||
+          lead.confidenceScore ||
+          0
+        ).toFixed(1);
+
         console.log(`${index + 1}. ${lead.name || lead.businessName}`);
-        console.log(
-          `   📊 Confidence: ${(
-            lead.finalConfidenceScore || lead.confidenceScore
-          ).toFixed(1)}%`
-        );
-        console.log(`   📍 Address: ${lead.address || lead.formatted_address}`);
-        console.log(`   📞 Phone: ${lead.phone || lead.companyPhone}`);
-        console.log(`   🌐 Website: ${lead.website || "Not available"}`);
-        console.log(
-          `   📧 Email: ${lead.email || lead.companyEmail || "Not available"}`
-        );
-        console.log(
-          `   🗺️ Enhanced: ${lead.foursquareData ? "✅ Yes" : "❌ No"}`
-        );
-        console.log(
-          `   ⭐ Rating: ${lead.rating || lead.googleRating || "N/A"}/5`
-        );
-        console.log(`   💰 Cost: $${(lead.apiCost || 0).toFixed(3)}`);
+        console.log(`   📧 ${email}`);
+        console.log(`   📞 ${phone}`);
+        console.log(`   🌐 ${lead.website || "N/A"}`);
+        console.log(`   📊 ${confidence}% confidence`);
         console.log("");
       });
-
-      if (qualifiedLeads.length > cappedLeads.length) {
-        console.log(
-          `ℹ️ ${qualifiedLeads.length} qualified leads found; capped to ${cappedLeads.length} to meet target.`
-        );
-      }
-
-      // Add to campaign and export
-      console.log("📊 Adding qualified leads to campaign...");
-      this.csvExporter.addQueryResults(
-        `enhanced ${industry} discovery`,
-        location,
-        cappedLeads,
-        {
-          totalResults: cappedLeads.length,
-          qualifiedLeads: cappedLeads.length,
-          totalCost: this.totalCost,
-          processingTimeMs: processingTime,
-          averageConfidence: qualityMetrics.avgConfidence,
-          qualityMetrics: qualityMetrics,
-          searchQueriesUsed: this.sessionStats.queriesExecuted,
-          successRate:
-            (qualifiedLeads.length / this.sessionStats.businessesProcessed) *
-            100,
-          sessionStats: this.sessionStats,
-        }
-      );
-
-      console.log("📤 Exporting campaign to CSV...");
-      const csvPath = await this.csvExporter.exportCampaignToCsv();
-
-      console.log("");
-      console.log("✅ DISCOVERY COMPLETED:");
-      console.log("=".repeat(60));
-      console.log(`📁 CSV Export: ${csvPath.filepath}`);
-      console.log(
-        `🎯 Success: ${
-          qualifiedLeads.length >= targetLeads ? "TARGET MET" : "PARTIAL"
-        }`
-      );
-      console.log(
-        `💰 Cost per Lead: $${this.sessionStats.costPerLead.toFixed(3)}`
-      );
-      console.log(
-        `⏱️ Time per Lead: ${(
-          processingTime / 1000 / cappedLeads.length || 1
-        ).toFixed(1)}s`
-      );
-      console.log(
-        `📊 Quality Score: ${qualityMetrics.avgConfidence.toFixed(1)}%`
-      );
-
-      return {
-        success: qualifiedLeads.length >= targetLeads,
-        leads: cappedLeads,
-        qualifiedCount: cappedLeads.length,
-        targetMet: qualifiedLeads.length >= targetLeads,
-        totalCost: this.totalCost,
-        processingTime: processingTime,
-        qualityMetrics,
-        sessionStats: this.sessionStats,
-        csvPath: csvPath,
-        campaignId,
-      };
-    } else {
-      console.log("❌ No qualified leads found meeting requirements");
-      return {
-        success: false,
-        leads: [],
-        error: "No qualified leads found meeting complete contact requirements",
-      };
     }
+
+    return {
+      success: cappedLeads.length > 0,
+      totalFound: qualifiedLeads.length,
+      exported: cappedLeads.length,
+      target: targetLeads,
+      targetMet: qualifiedLeads.length >= targetLeads,
+      leads: cappedLeads,
+      processingTime,
+      totalCost: this.totalCost,
+      sessionStats: this.sessionStats,
+      qualityMetrics,
+      costPerLead: this.sessionStats.costPerLead,
+    };
   }
 
   /**
@@ -638,24 +618,15 @@ class EnhancedDiscoveryEngine {
    */
   async quickDiscovery(industry, location, targetLeads = 3) {
     const searchConfig = {
-      industry,
-      location,
+      businessType: industry,
+      location: location,
+      targetCount: targetLeads,
       budgetLimit: 5.0,
-      maxAttempts: 3,
+      requireCompleteContacts: true,
+      minConfidenceScore: 70,
     };
 
-    const qualityRequirements = {
-      requireEmail: true,
-      requirePhone: true,
-      requireWebsite: true,
-      minimumConfidence: 70,
-    };
-
-    return await this.discoverQualifiedLeads(
-      searchConfig,
-      targetLeads,
-      qualityRequirements
-    );
+    return await this.discoverQualifiedLeads(searchConfig);
   }
 }
 

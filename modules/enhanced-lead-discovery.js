@@ -7,6 +7,8 @@ const CaliforniaSOS = require("./api-clients/california-sos-client");
 const NewYorkSOS = require("./api-clients/newyork-sos-client");
 const NYTaxParcels = require("./api-clients/ny-tax-parcels-client");
 const GooglePlacesClient = require("./api-clients/google-places");
+const ValidationRouter = require("./routing/validation-router");
+const logger = require("./utils/logger");
 // Import API clients
 const MultiSourceEmailDiscovery = require("./api-clients/multi-source-email-discovery");
 const ComprehensiveHunterClient = require("./api-clients/comprehensive-hunter-client");
@@ -17,6 +19,9 @@ const FoursquareClient = require("./api-clients/foursquare-places-client");
 
 class EnhancedLeadDiscovery {
   constructor(apiKeys = {}) {
+    // Initialize validation router
+    this.validationRouter = new ValidationRouter();
+
     // Initialize all API clients
     this.californiaSOSClient = new CaliforniaSOS();
     this.newYorkSOSClient = new NewYorkSOS();
@@ -791,22 +796,121 @@ class EnhancedLeadDiscovery {
 
   /**
    * Validate business registration with state registries and federal sources
+   * Uses dynamic routing to only call relevant APIs based on business location/type
    */
-  async validateBusinessRegistration(business) {
-    console.log(`📋 Validating business registration for ${business.name}`);
+  async validateBusinessRegistration(business, searchParams = {}) {
+    logger.debug(`Validating business registration for ${business.name}`);
 
-    const results = await Promise.allSettled([
-      this.californiaSOSClient.searchBusiness(business.name),
-      this.newYorkSOSClient.searchBusiness(business.name),
-      this.proPublicaClient.searchNonprofits(business.name),
-    ]);
+    // Use router to determine which validators to use
+    const selectedValidators = this.validationRouter.getValidatorsForBusiness(
+      business,
+      searchParams
+    );
 
+    if (selectedValidators.length === 0) {
+      logger.debug(
+        `No validators selected for ${business.name} - likely small wellness business`
+      );
+      return {
+        california: {
+          found: false,
+          skipped: true,
+          reason: "Small wellness business",
+        },
+        newYork: {
+          found: false,
+          skipped: true,
+          reason: "Small wellness business",
+        },
+        proPublica: {
+          found: false,
+          skipped: true,
+          reason: "Small wellness business",
+        },
+        registeredInAnyState: false,
+        isNonprofit: false,
+        confidence: 0,
+        routingDecision: this.validationRouter.getRoutingSummary(
+          business,
+          searchParams
+        ),
+      };
+    }
+
+    logger.debug(
+      `Selected validators for ${business.name}: ${selectedValidators.join(
+        ", "
+      )}`
+    );
+
+    // Build validation promises based on router selection
+    const validationPromises = [];
+    const validatorMap = {};
+
+    if (selectedValidators.includes("californiaSOS")) {
+      validationPromises.push(
+        this.californiaSOSClient.searchBusiness(business.name)
+      );
+      validatorMap["californiaSOS"] = validationPromises.length - 1;
+    }
+
+    if (selectedValidators.includes("newYorkSOS")) {
+      validationPromises.push(
+        this.newYorkSOSClient.searchBusiness(business.name)
+      );
+      validatorMap["newYorkSOS"] = validationPromises.length - 1;
+    }
+
+    if (selectedValidators.includes("proPublica")) {
+      validationPromises.push(
+        this.proPublicaClient.searchNonprofits(business.name)
+      );
+      validatorMap["proPublica"] = validationPromises.length - 1;
+    }
+
+    // Execute only selected validations
+    const results = await Promise.allSettled(validationPromises);
+
+    // Map results back to expected structure
     const caResult =
-      results[0].status === "fulfilled" ? results[0].value : { found: false };
+      validatorMap["californiaSOS"] !== undefined
+        ? results[validatorMap["californiaSOS"]].status === "fulfilled"
+          ? results[validatorMap["californiaSOS"]].value
+          : {
+              found: false,
+              error: results[validatorMap["californiaSOS"]].reason?.message,
+            }
+        : { found: false, skipped: true, reason: "Not in California" };
+
     const nyResult =
-      results[1].status === "fulfilled" ? results[1].value : { found: false };
+      validatorMap["newYorkSOS"] !== undefined
+        ? results[validatorMap["newYorkSOS"]].status === "fulfilled"
+          ? results[validatorMap["newYorkSOS"]].value
+          : {
+              found: false,
+              error: results[validatorMap["newYorkSOS"]].reason?.message,
+            }
+        : { found: false, skipped: true, reason: "Not in New York" };
+
     const proPublicaResult =
-      results[2].status === "fulfilled" ? results[2].value : { found: false };
+      validatorMap["proPublica"] !== undefined
+        ? results[validatorMap["proPublica"]].status === "fulfilled"
+          ? results[validatorMap["proPublica"]].value
+          : {
+              found: false,
+              error: results[validatorMap["proPublica"]].reason?.message,
+            }
+        : { found: false, skipped: true, reason: "Not a nonprofit" };
+
+    // Log any validation errors (not mock responses)
+    [caResult, nyResult, proPublicaResult].forEach((result, index) => {
+      if (result.error && !result.skipped) {
+        const sources = ["California SOS", "New York SOS", "ProPublica"];
+        logger.warn(
+          `${sources[index]} validation failed for ${business.name}: ${result.error}`
+        );
+      }
+    });
 
     return {
       california: caResult,
@@ -819,6 +923,11 @@ class EnhancedLeadDiscovery {
         nyResult.confidence || 0,
         proPublicaResult.confidence || 0
       ),
+      routingDecision: this.validationRouter.getRoutingSummary(
+        business,
+        searchParams
+      ),
+      validatorsUsed: selectedValidators,
     };
   }
 

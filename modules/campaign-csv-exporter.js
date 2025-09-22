@@ -167,7 +167,6 @@ class CampaignCSVExporter {
         // Campaign & Query Tracking
         { id: "campaignId", title: "Campaign ID" },
         { id: "queryId", title: "Query ID" },
-        // Removed: Search Query
         { id: "location", title: "Search Location" },
         { id: "queryTimestamp", title: "Query Timestamp" },
 
@@ -175,7 +174,6 @@ class CampaignCSVExporter {
         { id: "name", title: "Business Name" },
         { id: "address", title: "Address" },
         { id: "category", title: "Category" },
-        // Removed: Rating, Review Count, Price Level
 
         // Company Contact Information
         { id: "companyPhone", title: "Company Phone" },
