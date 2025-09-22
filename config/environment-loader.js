@@ -78,8 +78,24 @@ class EnvironmentLoader {
 
     if (missing.length > 0) {
       console.error("❌ Missing required environment variables:", missing);
+      console.error("💡 Solutions:");
+      console.error(
+        "   1. Set GitHub Codespaces secrets: SUPABASE_URL, SUPABASE_SECRET_KEY"
+      );
+      console.error(
+        "   2. Add them directly to .env file (uncomment lines 21-22)"
+      );
+      console.error("   3. Export them in your terminal session");
+
       if (process.env.ALLOW_DEGRADED_START !== "true") {
+        console.error(
+          "❌ Set ALLOW_DEGRADED_START=true to continue without database"
+        );
         process.exit(1);
+      } else {
+        console.warn(
+          "⚠️  Continuing in degraded mode without database connection"
+        );
       }
     } else {
       console.log("✅ All required environment variables configured");

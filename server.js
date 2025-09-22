@@ -13,12 +13,16 @@ const { createClient } = require("@supabase/supabase-js");
 
 async function loadSecretsFromSupabase() {
   const startTime = Date.now();
-  const supabaseUrl = process.env.SUPABASE_URL;
-  const supabaseKey =
-    process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const supabaseUrl = config.supabase.url;
+  const supabaseKey = config.supabase.secretKey;
 
   if (!supabaseUrl || !supabaseKey) {
-    console.warn("Supabase config missing, skipping dynamic secret loading");
+    console.warn(
+      "Supabase config missing from environment-loader, skipping dynamic secret loading"
+    );
+    console.warn(
+      "💡 Tip: Set SUPABASE_URL and SUPABASE_SECRET_KEY in your environment or GitHub secrets"
+    );
     return;
   }
 
