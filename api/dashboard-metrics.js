@@ -228,6 +228,99 @@ router.get("/api-usage", async (req, res) => {
 });
 
 /**
+ * Get optimized API client usage metrics (Apollo + Hunter.io)
+ * GET /api/dashboard/optimized-api-usage?timeRange=7d
+ */
+router.get("/optimized-api-usage", async (req, res) => {
+  try {
+    if (!supabase) {
+      return res
+        .status(500)
+        .json({ error: "Database connection not available" });
+    }
+
+    const { timeRange = "7d" } = req.query;
+    const timeFilter = getTimeFilter(timeRange);
+
+    // Query for Apollo and Hunter.io specific usage
+    const { data: apolloUsage, error: apolloError } = await supabase
+      .from("api_cost_tracking")
+      .select("*")
+      .ilike("api_service", "%apollo%")
+      .gte("created_at", timeFilter.start);
+
+    const { data: hunterUsage, error: hunterError } = await supabase
+      .from("api_cost_tracking")
+      .select("*")
+      .or("api_service.ilike.%hunter%,api_service.ilike.%comprehensive%")
+      .gte("created_at", timeFilter.start);
+
+    if (apolloError || hunterError) {
+      throw apolloError || hunterError;
+    }
+
+    // Calculate Apollo.io metrics
+    const apolloMetrics = calculateOptimizedApiMetrics(
+      apolloUsage || [],
+      "Apollo.io"
+    );
+
+    // Calculate Hunter.io metrics
+    const hunterMetrics = calculateOptimizedApiMetrics(
+      hunterUsage || [],
+      "Hunter.io"
+    );
+
+    // Calculate combined efficiency
+    const combinedCost = apolloMetrics.totalCost + hunterMetrics.totalCost;
+    const combinedRequests =
+      apolloMetrics.totalRequests + hunterMetrics.totalRequests;
+    const combinedLeads =
+      apolloMetrics.leadsGenerated + hunterMetrics.leadsGenerated;
+
+    res.json({
+      success: true,
+      timeRange,
+      optimizedApis: {
+        apollo: apolloMetrics,
+        hunter: hunterMetrics,
+      },
+      performance: {
+        totalCost: combinedCost.toFixed(4),
+        totalRequests: combinedRequests,
+        totalLeads: combinedLeads,
+        costPerLead:
+          combinedLeads > 0
+            ? (combinedCost / combinedLeads).toFixed(4)
+            : "0.0000",
+        avgResponseTime: (
+          (apolloMetrics.avgResponseTime + hunterMetrics.avgResponseTime) /
+          2
+        ).toFixed(0),
+        successRate:
+          combinedRequests > 0
+            ? (
+                ((apolloMetrics.successfulRequests +
+                  hunterMetrics.successfulRequests) /
+                  combinedRequests) *
+                100
+              ).toFixed(1)
+            : "0.0",
+      },
+      recommendations: generateApiOptimizationRecommendations(
+        apolloMetrics,
+        hunterMetrics
+      ),
+    });
+  } catch (error) {
+    console.error("Optimized API usage metrics error:", error);
+    res
+      .status(500)
+      .json({ error: "Failed to fetch optimized API usage metrics" });
+  }
+});
+
+/**
  * Get lead quality analytics
  * GET /api/dashboard/quality-metrics?timeRange=30d
  */
@@ -880,3 +973,121 @@ function generateBudgetRecommendations(budget, alerts) {
 }
 
 module.exports = router;
+
+/**
+ * Calculate metrics for optimized API clients (Apollo + Hunter)
+ */
+function calculateOptimizedApiMetrics(usageData, serviceName) {
+  const totalRequests = usageData.length;
+  const totalCost = usageData.reduce(
+    (sum, item) => sum + parseFloat(item.cost_usd || 0),
+    0
+  );
+  const successfulRequests = usageData.filter(
+    (item) => item.success === true
+  ).length;
+
+  // Calculate response times
+  const responseTimes = usageData
+    .filter((item) => item.response_time_ms)
+    .map((item) => parseInt(item.response_time_ms));
+  const avgResponseTime =
+    responseTimes.length > 0
+      ? responseTimes.reduce((sum, time) => sum + time, 0) /
+        responseTimes.length
+      : 0;
+
+  // Estimate leads generated (based on successful enrichment calls)
+  const leadsGenerated = usageData.filter(
+    (item) =>
+      item.success === true &&
+      (item.endpoint_type === "search" || item.endpoint_type === "organization")
+  ).length;
+
+  return {
+    serviceName,
+    totalRequests,
+    successfulRequests,
+    totalCost: parseFloat(totalCost.toFixed(4)),
+    costPerRequest:
+      totalRequests > 0
+        ? parseFloat((totalCost / totalRequests).toFixed(4))
+        : 0,
+    successRate:
+      totalRequests > 0
+        ? parseFloat(((successfulRequests / totalRequests) * 100).toFixed(1))
+        : 0,
+    avgResponseTime: Math.round(avgResponseTime),
+    leadsGenerated,
+    costPerLead:
+      leadsGenerated > 0
+        ? parseFloat((totalCost / leadsGenerated).toFixed(4))
+        : 0,
+  };
+}
+
+/**
+ * Generate API optimization recommendations
+ */
+function generateApiOptimizationRecommendations(apolloMetrics, hunterMetrics) {
+  const recommendations = [];
+
+  // Cost efficiency recommendations
+  if (apolloMetrics.costPerLead > 0.5) {
+    recommendations.push({
+      type: "cost",
+      priority: "high",
+      message: `Apollo cost per lead ($${apolloMetrics.costPerLead}) exceeds $0.50 target. Consider pre-filtering leads.`,
+    });
+  }
+
+  if (hunterMetrics.costPerLead > 0.3) {
+    recommendations.push({
+      type: "cost",
+      priority: "medium",
+      message: `Hunter.io cost per lead ($${hunterMetrics.costPerLead}) exceeds $0.30 target. Review email discovery efficiency.`,
+    });
+  }
+
+  // Success rate recommendations
+  if (apolloMetrics.successRate < 95) {
+    recommendations.push({
+      type: "reliability",
+      priority: "medium",
+      message: `Apollo success rate (${apolloMetrics.successRate}%) below 95%. Check API key limits and error handling.`,
+    });
+  }
+
+  if (hunterMetrics.successRate < 90) {
+    recommendations.push({
+      type: "reliability",
+      priority: "high",
+      message: `Hunter.io success rate (${hunterMetrics.successRate}%) below 90%. Review domain validation logic.`,
+    });
+  }
+
+  // Performance recommendations
+  if (apolloMetrics.avgResponseTime > 3000) {
+    recommendations.push({
+      type: "performance",
+      priority: "low",
+      message:
+        "Apollo response time exceeds 3 seconds. Consider implementing caching for repeated queries.",
+    });
+  }
+
+  // Efficiency recommendations
+  const combinedEfficiency =
+    (apolloMetrics.costPerLead + hunterMetrics.costPerLead) / 2;
+  if (combinedEfficiency < 0.25) {
+    recommendations.push({
+      type: "success",
+      priority: "info",
+      message: `Excellent cost efficiency: $${combinedEfficiency.toFixed(
+        4
+      )} per lead. System is well-optimized.`,
+    });
+  }
+
+  return recommendations;
+}

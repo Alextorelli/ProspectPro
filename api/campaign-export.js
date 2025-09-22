@@ -173,6 +173,9 @@ async function generateCampaignCSV(campaign, leads, options = {}) {
     "Created Date",
     "Discovery Source",
     "Email Source",
+    "Apollo.io Data",
+    "Hunter.io Data",
+    "Optimized Engine Cost",
     "Website Status",
     "Email Deliverability",
     "Phone Validation",
@@ -215,6 +218,9 @@ async function generateCampaignCSV(campaign, leads, options = {}) {
       formatDate(lead.created_at),
       cleanCsvField(lead.discovery_source || "unknown"),
       cleanCsvField(lead.email_discovery_source || "website"),
+      getApolloDataStatus(lead),
+      getHunterDataStatus(lead),
+      formatCurrency(getOptimizedEngineCost(lead)),
       getWebsiteStatus(lead),
       getEmailDeliverability(lead),
       getPhoneValidation(lead),
@@ -348,7 +354,84 @@ function getSocialMediaLinks(lead) {
   if (lead.linkedin_url) socialLinks.push("LinkedIn");
   if (lead.twitter_url) socialLinks.push("Twitter");
   if (lead.instagram_url) socialLinks.push("Instagram");
-  return socialLinks.join("; ") || "None Found";
+  return socialLinks.length > 0 ? socialLinks.join(", ") : "None";
+}
+
+/**
+ * Enhanced optimized engine tracking functions
+ */
+function getApolloDataStatus(lead) {
+  // Check if lead has data enriched by Apollo
+  const hasOwnerData = lead.owner_name || lead.owner_title;
+  const hasOrganizationData =
+    lead.employee_count_estimate || lead.company_description;
+  const apolloCost = getApiCostByService(lead, "apollo");
+
+  if (apolloCost > 0) {
+    const dataPoints = [];
+    if (hasOwnerData) dataPoints.push("Owner Info");
+    if (hasOrganizationData) dataPoints.push("Company Data");
+    if (dataPoints.length > 0) {
+      return `Yes (${dataPoints.join(", ")}) - $${apolloCost.toFixed(4)}`;
+    }
+    return `Yes - $${apolloCost.toFixed(4)}`;
+  }
+
+  // Check for Apollo-sourced data without explicit cost tracking
+  if (hasOwnerData && lead.discovery_source?.includes("apollo")) {
+    return "Yes (Owner Info)";
+  }
+
+  return "No";
+}
+
+function getHunterDataStatus(lead) {
+  // Check if lead has Hunter.io email data
+  const hunterEmails =
+    lead.lead_emails?.filter(
+      (email) =>
+        email.source?.toLowerCase().includes("hunter") ||
+        email.discovery_method?.toLowerCase().includes("hunter")
+    ) || [];
+
+  const hunterCost = getApiCostByService(lead, "hunter");
+
+  if (hunterCost > 0) {
+    return `Yes (${hunterEmails.length} emails) - $${hunterCost.toFixed(4)}`;
+  }
+
+  // Check for Hunter-sourced emails without explicit cost tracking
+  if (hunterEmails.length > 0) {
+    return `Yes (${hunterEmails.length} emails)`;
+  }
+
+  // Check if email discovery source mentions hunter/comprehensive
+  if (
+    lead.email_discovery_source?.toLowerCase().includes("hunter") ||
+    lead.email_discovery_source?.toLowerCase().includes("comprehensive")
+  ) {
+    return "Yes (Email Discovery)";
+  }
+
+  return "No";
+}
+
+function getOptimizedEngineCost(lead) {
+  const apolloCost = getApiCostByService(lead, "apollo");
+  const hunterCost = getApiCostByService(lead, "hunter");
+  return apolloCost + hunterCost;
+}
+
+function getApiCostByService(lead, serviceName) {
+  if (!lead.api_costs || !Array.isArray(lead.api_costs)) {
+    return 0;
+  }
+
+  return lead.api_costs
+    .filter((cost) =>
+      cost.api_service?.toLowerCase().includes(serviceName.toLowerCase())
+    )
+    .reduce((sum, cost) => sum + parseFloat(cost.cost_usd || 0), 0);
 }
 
 function calculateDataQualityScore(lead) {
