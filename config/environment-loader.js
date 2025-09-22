@@ -1,6 +1,12 @@
 /**
  * Production-Ready Environment Configuration Loader
- * Loads configuration from GitHub secrets, environment variables, and defaults
+ * Loads configuration from GitHub Actions, Supabase Vault, and environment variables
+ * 
+ * Configuration Sources (in priority order):
+ * 1. Process environment variables (GitHub Actions, CI/CD)
+ * 2. Supabase Vault (for API keys)
+ * 3. Local .env file (development only)
+ * 4. Production defaults
  */
 
 const path = require("path");
@@ -8,45 +14,82 @@ const fs = require("fs");
 
 class EnvironmentLoader {
   constructor() {
+    this.configSources = [];
     this.loadEnvironment();
   }
 
   loadEnvironment() {
-    // 1. Load from .env file (template/defaults)
+    console.log("🔧 ProspectPro Environment Configuration Loader");
+    console.log("📍 Loading configuration from multiple sources...\n");
+
+    // 1. Load from .env file (development/local only)
     this.loadDotEnv();
 
-    // 2. Override with GitHub Codespaces secrets (highest priority)
-    this.loadGitHubSecrets();
+    // 2. Process environment variables (CI/CD, GitHub Actions)
+    this.loadProcessEnvironment();
 
     // 3. Set production defaults if not specified
     this.setProductionDefaults();
 
     // 4. Validate required configuration
     this.validateConfiguration();
+
+    // 5. Display configuration summary
+    this.displayConfigurationSummary();
   }
 
   loadDotEnv() {
     const envPath = path.join(process.cwd(), ".env");
     if (fs.existsSync(envPath)) {
       require("dotenv").config({ path: envPath });
-      console.log("✅ Environment template loaded");
+      this.configSources.push("📄 .env file");
+      console.log("✅ Environment template loaded from .env file");
+    } else {
+      console.log("ℹ️  No .env file found (expected in CI/CD environments)");
     }
   }
 
-  loadGitHubSecrets() {
-    // GitHub Codespaces automatically injects these
-    const githubSecrets = ["SUPABASE_URL", "SUPABASE_SECRET_KEY"];
+  loadProcessEnvironment() {
+    // Check for GitHub Actions / CI/CD injected variables
+    const cicdVars = [
+      "SUPABASE_URL", 
+      "SUPABASE_SECRET_KEY",
+      "BUILD_TIMESTAMP",
+      "BUILD_COMMIT",
+      "BUILD_BRANCH"
+    ];
 
-    let secretsLoaded = 0;
-    githubSecrets.forEach((secret) => {
-      if (process.env[secret]) {
-        console.log(`✅ GitHub secret loaded: ${secret}`);
-        secretsLoaded++;
+    let cicdCount = 0;
+    cicdVars.forEach((varName) => {
+      if (process.env[varName] && !process.env[varName].includes('your_')) {
+        cicdCount++;
       }
     });
 
-    if (secretsLoaded > 0) {
-      console.log(`✅ ${secretsLoaded} GitHub secrets loaded successfully`);
+    if (cicdCount >= 2) {
+      this.configSources.push("🏭 GitHub Actions / CI/CD");
+      console.log(`✅ ${cicdCount} variables loaded from CI/CD environment`);
+      
+      if (process.env.BUILD_TIMESTAMP) {
+        console.log(`📅 Build: ${process.env.BUILD_TIMESTAMP}`);
+      }
+      if (process.env.BUILD_COMMIT) {
+        console.log(`📋 Commit: ${process.env.BUILD_COMMIT?.substring(0, 8)}`);
+      }
+    }
+
+    // Check for direct environment variables
+    const envVars = ["SUPABASE_URL", "SUPABASE_SECRET_KEY"];
+    let envCount = 0;
+    envVars.forEach((varName) => {
+      if (process.env[varName] && !process.env[varName].includes('your_')) {
+        envCount++;
+      }
+    });
+
+    if (envCount > 0 && cicdCount < 2) {
+      this.configSources.push("🌍 Process Environment");
+      console.log(`✅ ${envCount} variables loaded from process environment`);
     }
   }
 
@@ -61,45 +104,89 @@ class EnvironmentLoader {
       CACHE_TTL_SECONDS: "3600",
       MAX_CONCURRENT_REQUESTS: "10",
       MIN_CONFIDENCE_SCORE: "85",
+      ENABLE_COST_TRACKING: "true",
+      ENABLE_CIRCUIT_BREAKER: "true"
     };
 
+    let defaultsSet = 0;
     Object.entries(defaults).forEach(([key, value]) => {
       if (!process.env[key]) {
         process.env[key] = value;
-        console.log(`✅ Production default set: ${key}=${value}`);
+        defaultsSet++;
       }
     });
+
+    if (defaultsSet > 0) {
+      this.configSources.push("⚙️  Production Defaults");
+      console.log(`✅ ${defaultsSet} production defaults applied`);
+    }
   }
 
   validateConfiguration() {
     const required = ["SUPABASE_URL", "SUPABASE_SECRET_KEY", "NODE_ENV"];
+    const missing = required.filter((key) => !process.env[key] || process.env[key].includes('your_'));
 
-    const missing = required.filter((key) => !process.env[key]);
+    console.log("\n🔍 Configuration Validation:");
 
     if (missing.length > 0) {
       console.error("❌ Missing required environment variables:", missing);
-      console.error("💡 Solutions:");
-      console.error(
-        "   1. Set GitHub Codespaces secrets: SUPABASE_URL, SUPABASE_SECRET_KEY"
-      );
-      console.error(
-        "   2. Add them directly to .env file (uncomment lines 21-22)"
-      );
-      console.error("   3. Export them in your terminal session");
+      console.error("\n💡 Solutions:");
+      console.error("   🔧 Production: Ensure GitHub repository secrets are configured");
+      console.error("   🛠️  Development: Add real values to .env file");
+      console.error("   📋 Secrets needed: SUPABASE_URL, SUPABASE_SECRET_KEY");
 
       if (process.env.ALLOW_DEGRADED_START !== "true") {
-        console.error(
-          "❌ Set ALLOW_DEGRADED_START=true to continue without database"
-        );
+        console.error("\n❌ Set ALLOW_DEGRADED_START=true to continue without full configuration");
         process.exit(1);
       } else {
-        console.warn(
-          "⚠️  Continuing in degraded mode without database connection"
-        );
+        console.warn("⚠️  Continuing in degraded mode without complete configuration");
       }
     } else {
       console.log("✅ All required environment variables configured");
     }
+
+    // Validate Supabase configuration
+    const supabaseUrl = process.env.SUPABASE_URL;
+    if (supabaseUrl && !supabaseUrl.includes('your_')) {
+      if (supabaseUrl.includes('supabase.co')) {
+        console.log("✅ Supabase URL format validated");
+      } else {
+        console.warn("⚠️  Supabase URL format may be incorrect");
+      }
+    }
+  }
+
+  displayConfigurationSummary() {
+    console.log("\n📊 Configuration Sources Summary:");
+    this.configSources.forEach((source) => {
+      console.log(`   ${source}`);
+    });
+
+    console.log("\n🎯 Runtime Configuration:");
+    console.log(`   Environment: ${process.env.NODE_ENV}`);
+    console.log(`   Port: ${process.env.PORT || 3000}`);
+    console.log(`   Degraded Mode Allowed: ${process.env.ALLOW_DEGRADED_START === 'true' ? 'Yes' : 'No'}`);
+    
+    if (process.env.SUPABASE_URL && !process.env.SUPABASE_URL.includes('your_')) {
+      const url = process.env.SUPABASE_URL;
+      console.log(`   Supabase: ${url.substring(0, 30)}...`);
+    }
+
+    // Show vault configuration expectation
+    console.log("\n🔑 API Keys Expected from Supabase Vault:");
+    const expectedVaultKeys = [
+      "GOOGLE_PLACES_API_KEY",
+      "HUNTER_IO_API_KEY", 
+      "NEVERBOUNCE_API_KEY",
+      "APOLLO_API_KEY",
+      "FOURSQUARE_SERVICE_API_KEY",
+      "PERSONAL_ACCESS_TOKEN"
+    ];
+    expectedVaultKeys.forEach(key => {
+      console.log(`   📝 ${key}`);
+    });
+    
+    console.log("\n" + "=".repeat(50) + "\n");
   }
 
   // Get environment-specific configuration
@@ -152,6 +239,14 @@ class EnvironmentLoader {
         enableCircuitBreaker: process.env.ENABLE_CIRCUIT_BREAKER === "true",
         enableCostTracking: process.env.ENABLE_COST_TRACKING === "true",
       },
+
+      // Build information (from CI/CD)
+      build: {
+        timestamp: process.env.BUILD_TIMESTAMP,
+        commit: process.env.BUILD_COMMIT,
+        branch: process.env.BUILD_BRANCH,
+        actor: process.env.BUILD_ACTOR
+      }
     };
   }
 }
