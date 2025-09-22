@@ -15,14 +15,11 @@ class EnhancedLeadDiscoveryOrchestrator {
       config.scrapingDogBudget || process.env.SCRAPINGDOG_MONTHLY_BUDGET || 200
     );
 
-    this.hunter = new ComprehensiveHunterClient(
-      process.env.HUNTER_IO_API_KEY,
-      {
-        maxDailyCost: config.hunterBudget || 15.0,
-        maxPerLeadCost: 1.0,
-        minEmailConfidence: 75,
-      }
-    );
+    this.hunter = new ComprehensiveHunterClient(process.env.HUNTER_IO_API_KEY, {
+      maxDailyCost: config.hunterBudget || 15.0,
+      maxPerLeadCost: 1.0,
+      minEmailConfidence: 75,
+    });
 
     this.supabase = createSupabaseClient();
 

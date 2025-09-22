@@ -24,7 +24,9 @@ async function testRealHunterAPI() {
     }
   );
 
-  console.log("✅ Comprehensive Hunter.io Client initialized for real API testing");
+  console.log(
+    "✅ Comprehensive Hunter.io Client initialized for real API testing"
+  );
   console.log("");
 
   // Test with real businesses that should have discoverable emails

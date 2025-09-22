@@ -879,21 +879,31 @@ class CostOptimizedApolloClient {
     const recommendations = [];
 
     if (intelligence.apolloData) {
-      recommendations.push("Use Apollo organization data for enhanced email patterns");
-      
+      recommendations.push(
+        "Use Apollo organization data for enhanced email patterns"
+      );
+
       if (intelligence.apolloData.employees > 100) {
-        recommendations.push("Large company - consider department-specific email patterns");
+        recommendations.push(
+          "Large company - consider department-specific email patterns"
+        );
       }
-      
+
       if (intelligence.apolloData.industry) {
-        recommendations.push(`Industry-specific patterns available for ${intelligence.apolloData.industry}`);
+        recommendations.push(
+          `Industry-specific patterns available for ${intelligence.apolloData.industry}`
+        );
       }
     } else {
-      recommendations.push("Apollo organization enrichment not successful - rely on domain patterns");
+      recommendations.push(
+        "Apollo organization enrichment not successful - rely on domain patterns"
+      );
     }
 
     if (intelligence.emails.length > 5) {
-      recommendations.push("Multiple email patterns available - prioritize by confidence");
+      recommendations.push(
+        "Multiple email patterns available - prioritize by confidence"
+      );
     }
 
     return recommendations;
