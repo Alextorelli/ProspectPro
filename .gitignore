@@ -1,3 +1,5 @@
+# === CORE APPLICATION EXCLUSIONS ===
+
 # Dependencies
 node_modules/
 npm-debug.log*
@@ -21,21 +23,55 @@ railway-config-production.json
 /build
 /dist
 
-# Logs
+# === RUNTIME DATA (NEVER COMMIT) ===
+
+# Application logs and runtime data
 *.log
 logs/
 boot-*.log
 diagnostic-*.json
+exports/
+campaign-exports/
 
-# Runtime data
+# Process management
 pids/
 *.pid
 *.seed
 *.pid.lock
+nohup.out
 
-# Coverage directory used by tools like istanbul
+# Temporary runtime files
+*.tmp
+*.temp
+
+# === DEVELOPMENT & DEBUG TOOLS ===
+
+# Debug and development scripts
+debug/
+tests/archived/
+*-debug-*
+debug-*.js
+
+# Archive folders (preserved in archive/* branches)
+archive/
+docs/archive/
+*-old.*
+*-backup.*
+*.backup
+*.bak
+
+# Development artifacts
+.cache/
+.parcel-cache/
+.temp/
+supabase/.temp/
+*.cache
+
+# Test coverage
 coverage/
 .nyc_output
+
+# === SYSTEM & IDE FILES ===
 
 # IDE and editor files
 .vscode/
@@ -43,9 +79,6 @@ coverage/
 *.swp
 *.swo
 *~
-
-# Devcontainer local env files (do not commit secrets)
-.devcontainer/devcontainer.env
 
 # OS generated files
 .DS_Store
@@ -56,15 +89,31 @@ coverage/
 ehthumbs.db
 Thumbs.db
 
-# Temporary files
-*.tmp
-*.temp
-debug-*.js
+# === DATABASE & INFRASTRUCTURE ===
 
-# Backup files
-*.backup
-*.bak
-*-backup.*
+# Database files
+*.sqlite
+*.db
+
+# Supabase local development
+supabase/.temp/
+.supabase/
+supabase_bin
+supabase_cli.tar.gz
+
+# Large database files (use migrations instead)
+database/all-phases-consolidated.sql
+
+# Monitoring and metrics
+prometheus-data/
+grafana-data/
+
+# Deployment logs
+setup-logs/
+deployment-logs/
+*.log.*
+
+# === SECURITY & SECRETS ===
 
 # Personal secrets and keys
 *secrets*.txt
@@ -72,37 +121,11 @@ debug-*.js
 *.key
 *.pem
 
-# Database files
-*.sqlite
-*.db
+# Devcontainer local env files
+.devcontainer/devcontainer.env
 
-# Cache directories
-.cache/
-.parcel-cache/
-
-# Monitoring and metrics
-prometheus-data/
-grafana-data/
-
-# Setup and deployment logs
-setup-logs/
-deployment-logs/
-*.log.*
-
-# Archive and cleaned files
-archive/
-*-debug-*
+# === SPECIFIC API EXCLUSIONS ===
 
 # Corporate leadgen APIs (exclude from main branch)
 modules/api-clients/enhanced-sec-edgar-client.js
 modules/api-clients/companies-house-uk-client.js
-
-# Other
-.git/
-.env
-supabase_bin
-supabase_cli.tar.gz
-# Ignore large consolidated DB installer during iterative debugging
-database/all-phases-consolidated.sql
-exports/
-nohup.out
