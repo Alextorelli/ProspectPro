@@ -1,0 +1,1 @@
+# Archived Tests Branch\n\nThis branch preserves historical test files from tests/archived/.\nIncludes legacy integration tests and optimization test suites.\n\n## Contents:\n- Legacy API integration tests\n- Historical optimization test suites\n- Archived validation scripts\n- Development test campaigns\n\n## Usage:\nFor reference: `git checkout archive/old-tests`
