@@ -6,7 +6,14 @@
 const CaliforniaSOS = require("./api-clients/california-sos-client");
 const NewYorkSOS = require("./api-clients/newyork-sos-client");
 const NYTaxParcels = require("./api-clients/ny-tax-parcels-client");
-const HunterIOClient = require("./api-clients/hunter-io");
+const GooglePlacesClient = require("./api-clients/google-places");
+const RegistryValidationEngine = require("./registry-engines/registry-validation-engine");
+const ValidationRouter = require("./routing/validation-router");
+const { batchProcessor } = require("./utils/batch-processor");
+const logger = require("./utils/logger");
+// Import API clients
+const MultiSourceEmailDiscovery = require("./api-clients/multi-source-email-discovery");
+const ComprehensiveHunterClient = require("./api-clients/comprehensive-hunter-client");
 const NeverBounceClient = require("./api-clients/neverbounce");
 const SECEdgarClient = require("./api-clients/enhanced-sec-edgar-client");
 const ProPublicaClient = require("./api-clients/propublica-nonprofit-client");
@@ -14,19 +21,48 @@ const FoursquareClient = require("./api-clients/foursquare-places-client");
 
 class EnhancedLeadDiscovery {
   constructor(apiKeys = {}) {
+    // Initialize validation router
+    this.validationRouter = new ValidationRouter();
+
+    // Initialize Registry Validation Engine with all providers
+    this.registryEngine = new RegistryValidationEngine({
+      concurrency: 3,
+      cacheEnabled: true,
+      cacheTTL: 3600000, // 1 hour
+      providerConfig: {
+        "california-sos": { apiKey: apiKeys.californiaSOS },
+        "newyork-sos": { apiKey: apiKeys.newYorkSOS },
+        propublica: { apiKey: apiKeys.proPublica },
+        "sec-edgar": { userAgent: "ProspectPro Lead Discovery Tool" },
+        uspto: { apiKey: apiKeys.uspto },
+        "companies-house-uk": { apiKey: apiKeys.companiesHouseUK },
+      },
+    });
+
     // Initialize all API clients
     this.californiaSOSClient = new CaliforniaSOS();
     this.newYorkSOSClient = new NewYorkSOS();
     this.nyTaxParcelsClient = new NYTaxParcels();
 
+    // Google Places client for contact enrichment
+    this.googlePlacesClient = apiKeys.googlePlaces
+      ? new GooglePlacesClient(apiKeys.googlePlaces)
+      : null;
+
     // Government API clients for small business validation
     this.proPublicaClient = new ProPublicaClient();
     this.foursquareClient = new FoursquareClient(apiKeys.foursquare);
 
-    // Paid API clients with cost optimization
-    this.hunterClient = apiKeys.hunterIO
-      ? new HunterIOClient(apiKeys.hunterIO)
-      : null;
+    // Multi-source email discovery system with circuit breaker
+    this.emailDiscovery = new MultiSourceEmailDiscovery({
+      hunterApiKey: apiKeys.hunterIO,
+      apolloApiKey: apiKeys.apollo,
+      zoomInfoApiKey: apiKeys.zoomInfo,
+      neverBounceApiKey: apiKeys.neverBounce,
+      maxDailyCost: 50.0,
+      maxPerLeadCost: 2.0,
+      minEmailConfidence: 70,
+    });
     this.neverBounceClient = apiKeys.neverBounce
       ? new NeverBounceClient(apiKeys.neverBounce)
       : null;
@@ -54,6 +90,57 @@ class EnhancedLeadDiscovery {
     }
     this.cache.delete(key);
     return null;
+  }
+
+  /**
+   * Lightweight website email scraper
+   * - Fetches the homepage and tries a few common contact paths
+   * - Extracts emails via regex
+   */
+  async scrapeEmailsFromWebsite(websiteUrl) {
+    const urlsToTry = [websiteUrl];
+    // Add common contact paths
+    try {
+      const base = new URL(websiteUrl);
+      const make = (p) => new URL(p, base.origin).toString();
+      urlsToTry.push(make("/contact"), make("/contact-us"), make("/about"));
+    } catch (_) {
+      // If URL parsing fails, just use the original
+    }
+
+    const emails = new Set();
+    let lastStatus = null;
+
+    for (const url of urlsToTry) {
+      try {
+        const res = await fetch(url, {
+          method: "GET",
+          headers: { "User-Agent": "ProspectPro-EmailScraper/1.0" },
+          redirect: "follow",
+        });
+        lastStatus = res.status;
+        if (!res.ok) continue;
+        const html = await res.text();
+        // Basic email regex; avoids overly permissive patterns
+        const regex = /[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi;
+        const matches = html.match(regex) || [];
+        for (const m of matches) {
+          // Filter out image names or obvious false positives
+          if (
+            !m.toLowerCase().endsWith(".png") &&
+            !m.toLowerCase().endsWith(".jpg")
+          ) {
+            emails.add(m);
+          }
+        }
+        // If we found any emails, no need to fetch more pages
+        if (emails.size > 0) break;
+      } catch (_) {
+        // Ignore fetch errors and try next path
+      }
+    }
+
+    return { emails: Array.from(emails).slice(0, 5), status: lastStatus };
   }
 
   setCache(key, data) {
@@ -157,6 +244,73 @@ class EnhancedLeadDiscovery {
     };
   }
 
+  // Stage wrapper methods to match expected interface
+  async runDiscoveryStage(businesses, options) {
+    console.log(
+      `🔍 Running discovery stage for ${businesses.length} businesses`
+    );
+    const results = [];
+    for (const business of businesses) {
+      try {
+        const result = await this.stage1_DiscoveryAndPreValidation(business);
+        results.push(result);
+      } catch (error) {
+        console.error(`Error in discovery stage for ${business.name}:`, error);
+        results.push({ ...business, preValidationScore: 0, isValid: false });
+      }
+    }
+    return results;
+  }
+
+  async runEnrichmentStage(businesses, options) {
+    console.log(
+      `🔧 Running enrichment stage for ${businesses.length} businesses`
+    );
+    const results = [];
+    for (const business of businesses) {
+      try {
+        const result = await this.stage2_EnrichmentAndPropertyIntel(business);
+        results.push(result);
+      } catch (error) {
+        console.error(`Error in enrichment stage for ${business.name}:`, error);
+        results.push(business);
+      }
+    }
+    return results;
+  }
+
+  async runValidationStage(businesses, options) {
+    console.log(
+      `✅ Running validation stage for ${businesses.length} businesses`
+    );
+    const results = [];
+    for (const business of businesses) {
+      try {
+        const result = await this.stage3_ValidationAndRiskAssessment(business);
+        results.push(result);
+      } catch (error) {
+        console.error(`Error in validation stage for ${business.name}:`, error);
+        results.push(business);
+      }
+    }
+    return results;
+  }
+
+  async runScoringStage(businesses, options) {
+    console.log(`📊 Running scoring stage for ${businesses.length} businesses`);
+    const results = [];
+    for (const business of businesses) {
+      try {
+        const result = await this.stage4_QualityScoringAndExport(business);
+        results.push(result);
+      } catch (error) {
+        console.error(`Error in scoring stage for ${business.name}:`, error);
+        results.push(business);
+      }
+    }
+    return results;
+  }
+
   /**
    * Process single business through enhanced 4-stage pipeline
    */
@@ -250,7 +404,84 @@ class EnhancedLeadDiscovery {
     let propertyData = {};
     let emailDiscovery = {};
     let foursquareData = {};
+    let googlePlacesDetails = {};
     let stageCost = 0;
+
+    // Google Places Details Enrichment (paid but essential for contact info)
+    if (this.googlePlacesClient && businessData.placeId) {
+      const cacheKey = `google_details_${businessData.placeId}`;
+      googlePlacesDetails = this.getCache(cacheKey);
+      if (!googlePlacesDetails) {
+        try {
+          console.log(`📞 Fetching contact details for ${businessData.name}`);
+          googlePlacesDetails = await this.googlePlacesClient.getPlaceDetails(
+            businessData.placeId
+          );
+          this.setCache(cacheKey, googlePlacesDetails);
+          stageCost += 0.017; // Google Places Details API cost
+
+          // Enhanced contact differentiation: Company vs Owner information
+          if (googlePlacesDetails.phone) {
+            businessData.phone = googlePlacesDetails.phone;
+            businessData.companyPhone = googlePlacesDetails.phone; // Google Places typically provides main business line
+            businessData.companyPhoneSource = "Google Places";
+          }
+          if (googlePlacesDetails.website) {
+            businessData.website = googlePlacesDetails.website;
+          }
+          if (googlePlacesDetails.hours) {
+            businessData.hours = googlePlacesDetails.hours;
+          }
+        } catch (error) {
+          console.warn(
+            `⚠️ Google Places details failed for ${businessData.name}:`,
+            error.message
+          );
+          googlePlacesDetails = { found: false, error: error.message };
+        }
+      } else {
+        // Apply cached contact details with enhanced differentiation
+        if (googlePlacesDetails.phone) {
+          businessData.phone = googlePlacesDetails.phone;
+          businessData.companyPhone = googlePlacesDetails.phone;
+          businessData.companyPhoneSource = "Google Places";
+        }
+        if (googlePlacesDetails.website)
+          businessData.website = googlePlacesDetails.website;
+        if (googlePlacesDetails.hours)
+          businessData.hours = googlePlacesDetails.hours;
+      }
+    }
+
+    // Attempt to scrape emails directly from the website (real data, free)
+    if (businessData.website) {
+      try {
+        const scraped = await this.scrapeEmailsFromWebsite(
+          businessData.website
+        );
+        if (scraped && scraped.emails && scraped.emails.length > 0) {
+          // Prefer non-generic emails if available
+          const nonGeneric = scraped.emails.find(
+            (e) => !/^(info|contact|support|admin|hello|sales|team)@/i.test(e)
+          );
+          const selected = nonGeneric || scraped.emails[0];
+          if (selected) {
+            businessData.companyEmail = selected;
+            businessData.companyEmailSource = `website_scrape (${
+              scraped.status || "HTTP"
+            })`;
+            businessData.companyEmailConfidence = 75; // Real source but not deliverability-verified
+
+            // Legacy fields for compatibility
+            businessData.email = selected;
+            businessData.emailSource = businessData.companyEmailSource;
+            businessData.emailConfidence = businessData.companyEmailConfidence;
+          }
+        }
+      } catch (e) {
+        // Non-fatal: continue without website scrape
+      }
+    }
 
     // High Priority: API Prioritization - Free APIs first
     // Property intelligence (free)
@@ -289,19 +520,160 @@ class EnhancedLeadDiscovery {
       }
     }
 
-    // Email discovery (paid - selective usage, cached)
+    // Enhanced Email discovery using multi-source system
     if (
-      this.hunterClient &&
+      this.emailDiscovery &&
       businessData.website &&
-      businessData.preValidationScore >= 80
+      businessData.preValidationScore >= 50 // Quality threshold for email discovery
     ) {
-      const domain = this.extractDomainFromWebsite(businessData.website);
-      const cacheKey = `email_${domain}`;
-      emailDiscovery = this.getCache(cacheKey);
-      if (!emailDiscovery) {
-        emailDiscovery = await this.hunterClient.domainSearch(domain);
-        this.setCache(cacheKey, emailDiscovery);
-        stageCost += emailDiscovery.cost || 0;
+      console.log(
+        `📧 Starting multi-source email discovery for ${businessData.name}`
+      );
+
+      const emailResult = await this.emailDiscovery.discoverBusinessEmails({
+        business_name: businessData.name,
+        website: businessData.website,
+        owner_name: businessData.ownerName || null,
+        location: businessData.formattedAddress || businessData.address,
+      });
+
+      stageCost += emailResult.total_cost || 0;
+
+      if (
+        emailResult.success &&
+        emailResult.emails &&
+        emailResult.emails.length > 0
+      ) {
+        console.log(
+          `✅ Found ${emailResult.emails.length} verified emails for ${businessData.name}`
+        );
+
+        // Process discovered emails and contacts
+        emailDiscovery = {
+          emails: emailResult.emails,
+          domain: emailResult.domain,
+          sources_used: emailResult.sources_used,
+          confidence_score: emailResult.confidence_score,
+          cost: emailResult.total_cost,
+        };
+
+        // Enhanced contact differentiation using business contacts
+        if (emailResult.business_contacts) {
+          const { owner, manager, primary } = emailResult.business_contacts;
+
+          // Set owner contact if found with high confidence
+          if (owner && owner.confidence >= 70) {
+            businessData.ownerEmail = owner.value;
+            businessData.ownerEmailSource = `${owner.source} (${owner.confidence}% confidence)`;
+            businessData.ownerEmailConfidence = owner.confidence;
+
+            // Extract owner name if available
+            if (owner.first_name && owner.last_name) {
+              businessData.ownerName = `${owner.first_name} ${owner.last_name}`;
+            }
+
+            // Extract title/position if available
+            if (owner.position || owner.type === "personal") {
+              businessData.ownerTitle = owner.position || "Owner";
+            }
+          }
+
+          // Set company email using primary or manager
+          const companyEmail = primary || manager;
+          if (companyEmail && companyEmail.confidence >= 60) {
+            businessData.email = companyEmail.value;
+            businessData.emailSource = `${companyEmail.source} (${companyEmail.confidence}% confidence)`;
+            businessData.emailConfidence = companyEmail.confidence;
+          }
+        } else {
+          // Fallback to legacy email processing
+          const emails = emailResult.emails;
+
+          // Find high-confidence owner email (80%+ confidence with owner-like titles)
+          const ownerEmail = emails.find(
+            (email) =>
+              email.confidence >= 80 &&
+              this.isOwnerPosition(
+                email.position || email.position_raw,
+                email.first_name,
+                email.last_name,
+                businessData.name
+              )
+          );
+
+          // Find high-confidence management email
+          const mgmtEmail = emails.find(
+            (email) =>
+              email.confidence >= 80 &&
+              this.isManagementPosition(email.position || email.position_raw)
+          );
+
+          // Set owner contact if found with high confidence
+          if (ownerEmail) {
+            businessData.ownerEmail = ownerEmail.value;
+            businessData.ownerEmailSource = `${emailResult.sources_used.join(
+              ", "
+            )} (${ownerEmail.confidence}% confidence)`;
+            businessData.ownerEmailConfidence = ownerEmail.confidence;
+            businessData.ownerName = `${ownerEmail.first_name || ""} ${
+              ownerEmail.last_name || ""
+            }`.trim();
+            businessData.ownerTitle =
+              ownerEmail.position || ownerEmail.position_raw;
+          }
+
+          // Set company contact (primary or management)
+          const companyEmail = mgmtEmail || emails[0];
+          if (companyEmail) {
+            businessData.companyEmail = companyEmail.value;
+            businessData.companyEmailSource = `${emailResult.sources_used.join(
+              ", "
+            )} (${companyEmail.confidence}% confidence)`;
+            businessData.companyEmailConfidence = companyEmail.confidence;
+
+            // Legacy field for backwards compatibility
+            businessData.email = companyEmail.value;
+            businessData.emailSource = `${emailResult.sources_used.join(", ")}`;
+            businessData.emailConfidence = companyEmail.confidence;
+          }
+        }
+      } else {
+        console.log(
+          `⚠️ No emails found for ${
+            businessData.name
+          } (Sources: ${emailResult.sources_used.join(", ")})`
+        );
+        if (emailResult.error) {
+          console.error(`   Email discovery error: ${emailResult.error}`);
+        }
+      }
+    }
+
+    // Enhanced Foursquare + Google Places cross-validation for contact enrichment
+    if (
+      foursquareData.found &&
+      foursquareData.places &&
+      foursquareData.places.length > 0
+    ) {
+      const fsPlace = foursquareData.places[0];
+      console.log(
+        `🔗 Cross-referencing ${businessData.name} data: Google + Foursquare`
+      );
+
+      // Enhanced contact differentiation for phone numbers
+      if (!businessData.phone && fsPlace.contact && fsPlace.contact.phone) {
+        // Foursquare phones are typically company main numbers
+        businessData.phone = fsPlace.contact.phone;
+        businessData.companyPhone = fsPlace.contact.phone;
+        businessData.phoneSource = "Foursquare";
+        businessData.companyPhoneSource = "Foursquare";
+      }
+      if (!businessData.website && fsPlace.url) {
+        businessData.website = fsPlace.url;
+        businessData.websiteSource = "Foursquare";
+      }
+      if (fsPlace.categories && fsPlace.categories.length > 0) {
+        businessData.category = fsPlace.categories[0].name;
       }
     }
 
@@ -310,6 +682,7 @@ class EnhancedLeadDiscovery {
       propertyIntelligence: propertyData,
       foursquareData,
       emailDiscovery,
+      googlePlacesDetails,
       stage: "enrichment",
       processingCost: stageCost,
     };
@@ -327,41 +700,73 @@ class EnhancedLeadDiscovery {
     let stageCost = 0;
 
     // Website validation (free, cached)
+    // Website validation - now uses batch processor with domain-level caching
     if (businessData.website) {
-      const cacheKey = `website_${businessData.website}`;
-      websiteValidation = this.getCache(cacheKey);
-      if (!websiteValidation) {
-        websiteValidation = await this.validateWebsiteAccessibility(
-          businessData.website
+      logger.debug(
+        `🌐 Batch validating website for ${businessData.name}: ${businessData.website}`
+      );
+
+      try {
+        // Use batch processor for website scraping (with domain-level caching)
+        const websiteResults = await batchProcessor.batchWebsiteScraping([
+          businessData.website,
+        ]);
+        websiteValidation = websiteResults[0] || {
+          isAccessible: false,
+          error: "No result returned from batch processor",
+        };
+      } catch (error) {
+        logger.warn(
+          `⚠️ Batch website validation failed for ${businessData.name}: ${error.message}`
         );
-        this.setCache(cacheKey, websiteValidation);
+        websiteValidation = {
+          isAccessible: false,
+          error: error.message,
+          batchProcessed: false,
+        };
       }
     }
 
-    // Email validation (paid - selective usage, cached)
+    // Email validation (paid - selective usage, cached) - Now uses batch processor
     if (
       this.neverBounceClient &&
       businessData.emailDiscovery?.emails?.length > 0
     ) {
       const priorityEmails = businessData.emailDiscovery.emails.slice(0, 2);
-      const cacheKey = `email_validation_${priorityEmails.join("_")}`;
-      emailValidation = this.getCache(cacheKey);
-      if (!emailValidation) {
-        const verificationResults =
-          await this.neverBounceClient.verifyEmailBatch(
-            priorityEmails.map((e) => e.value || e)
-          );
+      const emailsToVerify = priorityEmails.map((e) => e.value || e);
+
+      logger.debug(
+        `🔍 Batch verifying ${emailsToVerify.length} emails for ${businessData.name}`
+      );
+
+      try {
+        // Use batch processor for email verification
+        const verificationResults = await batchProcessor.batchEmailVerification(
+          emailsToVerify,
+          this.neverBounceClient
+        );
+
         emailValidation = {
           results: verificationResults,
           bestEmail: verificationResults.find((r) => r.isDeliverable),
           deliverableCount: verificationResults.filter((r) => r.isDeliverable)
             .length,
+          batchProcessed: true,
         };
-        this.setCache(cacheKey, emailValidation);
+
         stageCost += verificationResults.reduce(
           (sum, r) => sum + (r.cost || 0),
           0
         );
+      } catch (error) {
+        logger.warn(
+          `⚠️ Batch email verification failed for ${businessData.name}: ${error.message}`
+        );
+        emailValidation = {
+          results: [],
+          error: error.message,
+          batchProcessed: false,
+        };
       }
     }
 
@@ -440,35 +845,168 @@ class EnhancedLeadDiscovery {
 
   /**
    * Validate business registration with state registries and federal sources
+   * Uses dynamic routing to only call relevant APIs based on business location/type
    */
-  async validateBusinessRegistration(business) {
-    console.log(`📋 Validating business registration for ${business.name}`);
+  async validateBusinessRegistration(business, searchParams = {}) {
+    logger.debug(
+      `🔍 Running registry validation for ${business.name} using modular engine`
+    );
 
-    const results = await Promise.allSettled([
-      this.californiaSOSClient.searchBusiness(business.name),
-      this.newYorkSOSClient.searchBusiness(business.name),
-      this.proPublicaClient.searchNonprofits(business.name),
-    ]);
+    try {
+      // Use the modular registry validation engine
+      const validationResult = await this.registryEngine.validateBusiness(
+        business,
+        searchParams
+      );
 
-    const caResult =
-      results[0].status === "fulfilled" ? results[0].value : { found: false };
-    const nyResult =
-      results[1].status === "fulfilled" ? results[1].value : { found: false };
-    const proPublicaResult =
-      results[2].status === "fulfilled" ? results[2].value : { found: false };
+      if (validationResult.skipped) {
+        logger.debug(
+          `⏭️ Registry validation skipped for ${business.name} - no relevant providers`
+        );
+        return {
+          california: {
+            found: false,
+            skipped: true,
+            reason: "No relevant providers",
+          },
+          newYork: {
+            found: false,
+            skipped: true,
+            reason: "No relevant providers",
+          },
+          proPublica: {
+            found: false,
+            skipped: true,
+            reason: "No relevant providers",
+          },
+          secEdgar: {
+            found: false,
+            skipped: true,
+            reason: "No relevant providers",
+          },
+          uspto: {
+            found: false,
+            skipped: true,
+            reason: "No relevant providers",
+          },
+          companiesHouseUK: {
+            found: false,
+            skipped: true,
+            reason: "No relevant providers",
+          },
+          registeredInAnyState: false,
+          isNonprofit: false,
+          isPublicCompany: false,
+          hasIntellectualProperty: false,
+          isInternational: false,
+          confidence: 0,
+          providersUsed: [],
+          engineStats: this.registryEngine.getStats(),
+        };
+      }
 
-    return {
-      california: caResult,
-      newYork: nyResult,
-      proPublica: proPublicaResult,
-      registeredInAnyState: caResult.found || nyResult.found,
-      isNonprofit: proPublicaResult.found,
-      confidence: Math.max(
-        caResult.confidence || 0,
-        nyResult.confidence || 0,
-        proPublicaResult.confidence || 0
-      ),
-    };
+      const { validationResults, providersUsed, errors } = validationResult;
+
+      // Map results to legacy format for backward compatibility
+      const california = validationResults["california-sos"] || {
+        found: false,
+        skipped: true,
+      };
+      const newYork = validationResults["newyork-sos"] || {
+        found: false,
+        skipped: true,
+      };
+      const proPublica = validationResults["propublica"] || {
+        found: false,
+        skipped: true,
+      };
+      const secEdgar = validationResults["sec-edgar"] || {
+        found: false,
+        skipped: true,
+      };
+      const uspto = validationResults["uspto"] || {
+        found: false,
+        skipped: true,
+      };
+      const companiesHouseUK = validationResults["companies-house-uk"] || {
+        found: false,
+        skipped: true,
+      };
+
+      // Log validation errors
+      if (errors && errors.length > 0) {
+        errors.forEach((error) => {
+          logger.warn(
+            `⚠️ ${error.provider} validation failed for ${error.business}: ${error.error}`
+          );
+        });
+      }
+
+      // Calculate overall confidence and registration status
+      const allConfidences = [
+        california.confidence || 0,
+        newYork.confidence || 0,
+        proPublica.confidence || 0,
+        secEdgar.confidence || 0,
+        uspto.confidence || 0,
+        companiesHouseUK.confidence || 0,
+      ];
+      const maxConfidence = Math.max(...allConfidences);
+
+      const registeredInAnyState =
+        california.found || newYork.found || companiesHouseUK.found;
+      const isNonprofit = proPublica.found;
+      const isPublicCompany = secEdgar.found;
+      const hasIntellectualProperty = uspto.found;
+      const isInternational = companiesHouseUK.found;
+
+      logger.debug(
+        `✅ Registry validation complete for ${business.name}: ${providersUsed.length} providers used, confidence ${maxConfidence}%`
+      );
+
+      return {
+        california,
+        newYork,
+        proPublica,
+        secEdgar,
+        uspto,
+        companiesHouseUK,
+        registeredInAnyState,
+        isNonprofit,
+        isPublicCompany,
+        hasIntellectualProperty,
+        isInternational,
+        confidence: maxConfidence,
+        providersUsed,
+        validationResults: validationResults,
+        engineStats: this.registryEngine.getStats(),
+        errors: errors || [],
+      };
+    } catch (error) {
+      logger.error(
+        `❌ Registry validation engine failed for ${business.name}:`,
+        error.message
+      );
+
+      // Fallback to no validation rather than fake data
+      return {
+        california: { found: false, error: error.message },
+        newYork: { found: false, error: error.message },
+        proPublica: { found: false, error: error.message },
+        secEdgar: { found: false, error: error.message },
+        uspto: { found: false, error: error.message },
+        companiesHouseUK: { found: false, error: error.message },
+        registeredInAnyState: false,
+        isNonprofit: false,
+        isPublicCompany: false,
+        hasIntellectualProperty: false,
+        isInternational: false,
+        confidence: 0,
+        providersUsed: [],
+        error: error.message,
+        engineStats: this.registryEngine.getStats(),
+      };
+    }
   }
 
   /**
@@ -686,24 +1224,127 @@ class EnhancedLeadDiscovery {
   }
 
   getUsageStats() {
-    const stats = {
-      californiaSOSRequests: this.californiaSOSClient.getUsageStats(),
-      newYorkSOSRequests: this.newYorkSOSClient.getUsageStats(),
-      nyTaxParcelsRequests: this.nyTaxParcelsClient.getUsageStats(),
-      secEdgarRequests: this.secEdgarClient.getUsageStats(),
-      proPublicaRequests: this.proPublicaClient.getUsageStats(),
-      foursquareRequests: this.foursquareClient.getUsageStats(),
-    };
+    const stats = {};
 
-    if (this.hunterClient) {
-      stats.hunterIOUsage = this.hunterClient.getUsageStats();
+    // Registry validation engine statistics
+    if (this.registryEngine) {
+      stats.registryEngine = this.registryEngine.getStats();
     }
 
-    if (this.neverBounceClient) {
+    // Batch processor statistics
+    if (batchProcessor && batchProcessor.getStats) {
+      stats.batchProcessor = batchProcessor.getStats();
+    }
+
+    // Global cache statistics
+    const { globalCache } = require("./utils/cache");
+    if (globalCache && globalCache.getStats) {
+      stats.globalCache = globalCache.getStats();
+    }
+
+    // Only include stats for initialized clients
+    if (this.californiaSOSClient && this.californiaSOSClient.getUsageStats) {
+      stats.californiaSOSRequests = this.californiaSOSClient.getUsageStats();
+    }
+    if (this.newYorkSOSClient && this.newYorkSOSClient.getUsageStats) {
+      stats.newYorkSOSRequests = this.newYorkSOSClient.getUsageStats();
+    }
+    if (this.nyTaxParcelsClient && this.nyTaxParcelsClient.getUsageStats) {
+      stats.nyTaxParcelsRequests = this.nyTaxParcelsClient.getUsageStats();
+    }
+    if (this.secEdgarClient && this.secEdgarClient.getUsageStats) {
+      stats.secEdgarRequests = this.secEdgarClient.getUsageStats();
+    }
+    if (this.proPublicaClient && this.proPublicaClient.getUsageStats) {
+      stats.proPublicaRequests = this.proPublicaClient.getUsageStats();
+    }
+    if (this.foursquareClient && this.foursquareClient.getUsageStats) {
+      stats.foursquareRequests = this.foursquareClient.getUsageStats();
+    }
+    if (this.hunterClient && this.hunterClient.getUsageStats) {
+      stats.hunterIOUsage = this.hunterClient.getUsageStats();
+    }
+    if (this.neverBounceClient && this.neverBounceClient.getUsageStats) {
       stats.neverBounceUsage = this.neverBounceClient.getUsageStats();
+    }
+    if (this.googlePlacesClient && this.googlePlacesClient.getUsageStats) {
+      stats.googlePlacesUsage = this.googlePlacesClient.getUsageStats();
     }
 
     return stats;
+  }
+
+  /**
+   * Helper methods for contact role identification
+   */
+  isOwnerPosition(position, firstName, lastName, businessName) {
+    if (!position) return false;
+
+    // Primary owner titles
+    const ownerTitles = [
+      "owner",
+      "founder",
+      "ceo",
+      "president",
+      "principal",
+      "proprietor",
+      "managing director",
+      "managing partner",
+      "executive director",
+    ];
+
+    // Additional titles that often indicate ownership in small businesses
+    const likelyOwnerTitles = [
+      "accountant", // Often owner-operated businesses
+      "attorney",
+      "lawyer", // Solo practitioners
+      "consultant",
+      "advisor", // Independent consultants
+      "practitioner", // Medical/legal practices
+    ];
+
+    const positionLower = position.toLowerCase();
+
+    // Direct owner title match
+    if (ownerTitles.some((title) => positionLower.includes(title))) {
+      return true;
+    }
+
+    // Name matching with business for likely owner titles
+    if (likelyOwnerTitles.some((title) => positionLower.includes(title))) {
+      if (firstName && lastName && businessName) {
+        const fullName = `${firstName} ${lastName}`.toLowerCase();
+        const businessLower = businessName.toLowerCase();
+
+        // Check if person's name appears in business name
+        if (
+          businessLower.includes(firstName.toLowerCase()) ||
+          businessLower.includes(lastName.toLowerCase()) ||
+          businessLower.includes(fullName)
+        ) {
+          return true;
+        }
+      }
+    }
+
+    return false;
+  }
+
+  isManagementPosition(position) {
+    if (!position) return false;
+    const mgmtTitles = [
+      "manager",
+      "director",
+      "vp",
+      "vice president",
+      "supervisor",
+      "coordinator",
+      "lead",
+      "head",
+      "chief",
+      "general manager",
+    ];
+    return mgmtTitles.some((title) => position.toLowerCase().includes(title));
   }
 }
 

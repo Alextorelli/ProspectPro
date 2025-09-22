@@ -9,25 +9,85 @@ try {
 const { createClient } = require("@supabase/supabase-js");
 
 async function loadSecretsFromSupabase() {
+  const startTime = Date.now();
   const supabaseUrl = process.env.SUPABASE_URL;
   const supabaseKey =
     process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
+
   if (!supabaseUrl || !supabaseKey) {
     console.warn("Supabase config missing, skipping dynamic secret loading");
     return;
   }
+
   try {
     const supabase = createClient(supabaseUrl, supabaseKey);
+
+    // Try Vault first (new method)
+    try {
+      const { data: vaultSecrets, error: vaultError } = await supabase
+        .from("vault.decrypted_secrets")
+        .select("name, decrypted_secret")
+        .in("name", [
+          "GOOGLE_PLACES_API_KEY",
+          "FOURSQUARE_API_KEY",
+          "HUNTER_IO_API_KEY",
+          "ZEROBOUNCE_API_KEY",
+          "NEVERBOUNCE_API_KEY",
+          "SCRAPINGDOG_API_KEY",
+          "APOLLO_API_KEY",
+          "PERSONAL_ACCESS_TOKEN",
+        ]);
+
+      if (!vaultError && vaultSecrets?.length > 0) {
+        let vaultSecretsLoaded = 0;
+        vaultSecrets.forEach(({ name, decrypted_secret }) => {
+          if (
+            !process.env[name] &&
+            decrypted_secret &&
+            decrypted_secret !== "CONFIGURE_IN_SUPABASE_DASHBOARD"
+          ) {
+            process.env[name] = decrypted_secret;
+            vaultSecretsLoaded++;
+          }
+        });
+        const duration = Date.now() - startTime;
+        console.log(
+          `✅ Loaded ${vaultSecretsLoaded} secrets from Supabase Vault (${duration}ms)`
+        );
+        return;
+      }
+    } catch (vaultErr) {
+      console.warn(
+        "Vault unavailable, falling back to app_secrets:",
+        vaultErr.message
+      );
+    }
+
+    // Fallback to app_secrets table (legacy method)
     const { data, error } = await supabase
       .from("app_secrets")
       .select("key,value");
     if (error) throw error;
+
+    let legacySecretsLoaded = 0;
     data.forEach(({ key, value }) => {
-      if (!process.env[key]) process.env[key] = value;
+      if (!process.env[key]) {
+        process.env[key] = value;
+        legacySecretsLoaded++;
+      }
     });
-    console.log("✅ Loaded secrets from Supabase");
+
+    const duration = Date.now() - startTime;
+    console.log(
+      `✅ Loaded ${legacySecretsLoaded} secrets from legacy app_secrets (${duration}ms)`
+    );
   } catch (err) {
-    console.error("Failed to load secrets from Supabase:", err.message);
+    const duration = Date.now() - startTime;
+    console.error(
+      `Failed to load secrets from Supabase (${duration}ms):`,
+      err.message
+    );
+    console.log("🔄 Continuing with environment variables only");
   }
 }
 
@@ -617,6 +677,15 @@ bootDebugger.endPhase(true);
 app.use("/api/business", businessDiscoveryRouter);
 app.use("/api/export", dashboardExportRouter);
 
+// Add campaign-specific export API
+try {
+  const campaignExportRouter = require("./api/campaign-export");
+  app.use("/api/campaigns", campaignExportRouter);
+  console.log("📤 Campaign export API mounted at /api/campaigns");
+} catch (error) {
+  console.error("⚠️ Failed to load campaign export API:", error.message);
+}
+
 // Add dashboard metrics API
 try {
   const dashboardMetricsRouter = require("./api/dashboard-metrics");
@@ -624,6 +693,35 @@ try {
   console.log("📊 Dashboard metrics API mounted at /api/dashboard-metrics");
 } catch (error) {
   console.error("⚠️ Failed to load dashboard metrics API:", error.message);
+}
+
+// Add webhook endpoints (without auth middleware for external calls)
+try {
+  const leadEnrichmentWebhook = require("./api/webhooks/lead-enrichment");
+  app.use("/api/webhooks/lead-enrichment", leadEnrichmentWebhook);
+  console.log(
+    "🔔 Lead enrichment webhook mounted at /api/webhooks/lead-enrichment"
+  );
+} catch (error) {
+  console.error("⚠️ Failed to load lead enrichment webhook:", error.message);
+}
+
+try {
+  const costAlertWebhook = require("./api/webhooks/cost-alert");
+  app.use("/api/webhooks/cost-alert", costAlertWebhook);
+  console.log("💰 Cost alert webhook mounted at /api/webhooks/cost-alert");
+} catch (error) {
+  console.error("⚠️ Failed to load cost alert webhook:", error.message);
+}
+
+try {
+  const campaignLifecycleWebhook = require("./api/webhooks/campaign-lifecycle");
+  app.use("/api/webhooks/campaign-lifecycle", campaignLifecycleWebhook);
+  console.log(
+    "📋 Campaign lifecycle webhook mounted at /api/webhooks/campaign-lifecycle"
+  );
+} catch (error) {
+  console.error("⚠️ Failed to load campaign lifecycle webhook:", error.message);
 }
 
 // =====================================

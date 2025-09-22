@@ -1,314 +1,332 @@
 const express = require("express");
-const GooglePlacesClient = require("../modules/api-clients/google-places");
-const EnhancedLeadDiscovery = require("../modules/enhanced-lead-discovery");
+const EnhancedDiscoveryEngine = require("../modules/enhanced-discovery-engine");
 const CampaignLogger = require("../modules/logging/campaign-logger");
-const EnhancedStateRegistryClient = require("../modules/api-clients/enhanced-state-registry-client");
-const ZeroBounceClient = require("../modules/api-clients/zerobounce-client");
+const path = require("path");
+const fs = require("fs").promises;
 const router = express.Router();
 
-// Initialize enhanced discovery algorithm with all API keys
+// Initialize Enhanced Discovery Engine v2.0 with all API keys
 const apiKeys = {
   hunterIO: process.env.HUNTER_IO_API_KEY,
+  apollo: process.env.APOLLO_API_KEY,
   neverBounce: process.env.NEVERBOUNCE_API_KEY,
   googlePlaces: process.env.GOOGLE_PLACES_API_KEY,
-  // Enhanced State Registry APIs
+  foursquare:
+    process.env.FOURSQUARE_SERVICE_API_KEY ||
+    process.env.FOURSQUARE_PLACES_API_KEY,
   zeroBounce: process.env.ZEROBOUNCE_API_KEY,
   courtListener: process.env.COURTLISTENER_API_KEY,
   socrata: process.env.SOCRATA_API_KEY,
   socrataToken: process.env.SOCRATA_APP_TOKEN,
   uspto: process.env.USPTO_TSDR_API_KEY,
+  californiaSOSApiKey: process.env.CALIFORNIA_SOS_API_KEY,
+  scrapingdog: process.env.SCRAPINGDOG_API_KEY,
 };
 
-const googlePlacesClient = new GooglePlacesClient(apiKeys.googlePlaces);
-const enhancedDiscovery = new EnhancedLeadDiscovery(apiKeys);
+// Initialize Enhanced Discovery Engine v2.0
+const discoveryEngine = new EnhancedDiscoveryEngine(apiKeys);
 const campaignLogger = new CampaignLogger();
 
-// Lazy initialization of enhanced API clients to avoid startup delays
-let enhancedStateRegistry = null;
-let zeroBounceClient = null;
+// Enhanced business discovery endpoint with v2.0 quality-focused engine
+router.post("/discover-businesses", async (req, res) => {
+  const startTime = Date.now();
+  let campaignId = null;
 
-function getEnhancedStateRegistry() {
-  if (!enhancedStateRegistry) {
-    enhancedStateRegistry = new EnhancedStateRegistryClient();
-  }
-  return enhancedStateRegistry;
-}
-
-function getZeroBounceClient() {
-  if (!zeroBounceClient) {
-    zeroBounceClient = new ZeroBounceClient(apiKeys.zeroBounce);
-  }
-  return zeroBounceClient;
-}
-
-// POST /api/business/discover
-router.post("/discover", async (req, res) => {
   try {
     const {
-      query,
+      businessType,
       location,
-      count = 20,
-      budgetLimit = 25.0,
-      qualityThreshold = 75,
-      batchType = "cost-optimized",
+      maxResults = 10,
+      budgetLimit = 50,
+      requireCompleteContacts = true,
+      minConfidenceScore = 70,
+      additionalQueries = [],
     } = req.body;
 
     // Validate required parameters
-    if (!query || !location) {
+    if (!businessType || !location) {
       return res.status(400).json({
-        error: "Query and location are required",
-        provided: { query, location },
-      });
-    }
-
-    // Validate API keys for enhanced features
-    const missingKeys = [];
-    if (!apiKeys.googlePlaces) missingKeys.push("GOOGLE_PLACES_API_KEY");
-    if (!apiKeys.hunterIO) missingKeys.push("HUNTER_IO_API_KEY (recommended)");
-    if (!apiKeys.neverBounce)
-      missingKeys.push("NEVERBOUNCE_API_KEY (recommended)");
-
-    if (!apiKeys.googlePlaces) {
-      return res.status(500).json({
-        error: "Google Places API key is required",
-        missingKeys,
-      });
-    }
-
-    console.log(`🚀 Enhanced business discovery: "${query}" in "${location}"`);
-    console.log(
-      `💰 Budget: $${budgetLimit}, Quality threshold: ${qualityThreshold}%, Count: ${count}`
-    );
-
-    const startTime = Date.now();
-
-    // Stage 1: Google Places Discovery (Primary Source)
-    const googleResults = await googlePlacesClient.textSearch({
-      query: `${query} in ${location}`,
-      type: "establishment",
-    });
-
-    if (!googleResults || googleResults.length === 0) {
-      return res.json({
         success: false,
-        message: "No businesses found for the specified query and location",
-        results: [],
-        totalCost: 0,
-        processingTime: Date.now() - startTime,
+        error: "Business type and location are required",
       });
     }
 
-    console.log(
-      `🔍 Found ${googleResults.length} businesses from Google Places`
-    );
-
-    // Stage 2-4: Enhanced Multi-Source Validation Pipeline
-    const discoveryOptions = {
-      budgetLimit,
-      qualityThreshold,
-      maxResults: count,
-      prioritizeLocalBusinesses: true,
-      enablePropertyIntelligence: true,
-      enableRegistryValidation: true,
-    };
-
-    const enhancedResults = await enhancedDiscovery.discoverAndValidateLeads(
-      googleResults,
-      discoveryOptions
-    );
-
-    // Stage 5: Enhanced State Registry & Email Validation
-    console.log(
-      `🏛️ Starting enhanced validation for ${enhancedResults.leads.length} leads`
-    );
-
-    const enhancedValidationResults = {
-      stateRegistryChecks: 0,
-      stateRegistryMatches: 0,
-      emailValidations: 0,
-      emailDeliverable: 0,
-      totalEnhancedCost: 0,
-      confidenceImprovements: 0,
-    };
-
-    // Process leads with enhanced validation
-    for (let i = 0; i < enhancedResults.leads.length; i++) {
-      const lead = enhancedResults.leads[i];
-
-      try {
-        // Enhanced State Registry Validation
-        if (lead.name && lead.address) {
-          const stateValidation =
-            await getEnhancedStateRegistry().searchBusinessAcrossStates(
-              lead.name,
-              lead.address,
-              lead.state || location
-            );
-
-          enhancedValidationResults.stateRegistryChecks++;
-          if (stateValidation.confidenceScore > 50) {
-            enhancedValidationResults.stateRegistryMatches++;
-            // Boost confidence for registry-validated businesses
-            if (lead.confidenceScore) {
-              lead.confidenceScore = Math.min(100, lead.confidenceScore + 15);
-              enhancedValidationResults.confidenceImprovements++;
-            }
-            // Add state registry validation details
-            lead.stateRegistryValidation = {
-              isValidated: true,
-              confidenceScore: stateValidation.confidenceScore,
-              sourcesChecked:
-                stateValidation.qualityMetrics?.totalAPIsQueried || 7,
-              registrationDetails: stateValidation.registrationDetails,
-            };
-          }
-        }
-
-        // ZeroBounce Email Validation (if budget allows)
-        if (
-          lead.email &&
-          enhancedValidationResults.totalEnhancedCost < budgetLimit * 0.1
-        ) {
-          try {
-            const emailValidation = await getZeroBounceClient().validateEmail(
-              lead.email
-            );
-            enhancedValidationResults.emailValidations++;
-            enhancedValidationResults.totalEnhancedCost +=
-              emailValidation.cost || 0.007;
-
-            if (emailValidation.isValid && emailValidation.confidence > 80) {
-              enhancedValidationResults.emailDeliverable++;
-              // Boost confidence for validated emails
-              if (lead.confidenceScore) {
-                lead.confidenceScore = Math.min(100, lead.confidenceScore + 10);
-                enhancedValidationResults.confidenceImprovements++;
-              }
-            }
-
-            // Add email validation details
-            lead.emailValidation = {
-              status: emailValidation.status,
-              isValid: emailValidation.isValid,
-              confidence: emailValidation.confidence,
-              deliverable: emailValidation.status === "valid",
-            };
-          } catch (emailError) {
-            console.log(
-              `⚠️ Email validation failed for ${lead.email}: ${emailError.message}`
-            );
-          }
-        }
-      } catch (validationError) {
-        console.log(
-          `⚠️ Enhanced validation failed for ${lead.name}: ${validationError.message}`
-        );
-      }
-    }
+    // Generate campaign ID for tracking
+    campaignId = `campaign_${Date.now()}_${Math.random()
+      .toString(36)
+      .substr(2, 9)}`;
 
     console.log(
-      `✅ Enhanced validation complete: ${enhancedValidationResults.stateRegistryMatches}/${enhancedValidationResults.stateRegistryChecks} registry matches, ${enhancedValidationResults.emailDeliverable}/${enhancedValidationResults.emailValidations} emails validated`
+      `🚀 Starting Enhanced Discovery v2.0 - Campaign: ${campaignId}`
     );
+    console.log(`📊 Requirements: ${maxResults} qualified leads`);
+    console.log(`💰 Budget limit: $${budgetLimit}`);
+    console.log(`✅ Complete contacts required: ${requireCompleteContacts}`);
+    console.log(`🎯 Minimum confidence: ${minConfidenceScore}%`);
 
-    // Update total cost to include enhanced validations
-    enhancedResults.totalCost += enhancedValidationResults.totalEnhancedCost;
-
-    // Log campaign results
-    await campaignLogger.logCampaignResults({
-      query,
+    // Use Enhanced Discovery Engine v2.0 for iterative quality-focused discovery
+    const discoveryResult = await discoveryEngine.discoverQualifiedLeads({
+      businessType,
       location,
-      totalBusinesses: googleResults.length,
-      qualifiedLeads: enhancedResults.leads.length,
-      totalCost: enhancedResults.totalCost,
-      qualityMetrics: enhancedResults.qualityMetrics,
-      usageStats: enhancedResults.usageStats,
-      processingTime: Date.now() - startTime,
-      timestamp: new Date().toISOString(),
+      targetCount: maxResults,
+      budgetLimit,
+      requireCompleteContacts,
+      minConfidenceScore,
+      additionalQueries,
     });
 
-    // Return enhanced results with full transparency
-    res.json({
+    const processingTime = Date.now() - startTime;
+
+    // Enhanced response with comprehensive metrics
+    const response = {
       success: true,
-      results: enhancedResults.leads,
+      campaignId,
+      discoveryEngine: "Enhanced Discovery Engine v2.0",
+      requirements: {
+        targetLeads: maxResults,
+        budgetLimit,
+        requireCompleteContacts,
+        minConfidenceScore,
+      },
+      results: {
+        totalFound: discoveryResult.totalFound,
+        qualified: discoveryResult.qualified.length,
+        qualificationRate: `${(
+          (discoveryResult.qualified.length / discoveryResult.totalFound) *
+          100
+        ).toFixed(1)}%`,
+        averageConfidence: discoveryResult.averageConfidence,
+        completeness: discoveryResult.completeness,
+      },
+      costs: {
+        totalCost: discoveryResult.totalCost,
+        costPerLead: discoveryResult.costPerLead,
+        costBreakdown: discoveryResult.costBreakdown,
+      },
+      performance: {
+        processingTime: `${(processingTime / 1000).toFixed(1)}s`,
+        avgTimePerLead: `${(
+          processingTime /
+          1000 /
+          discoveryResult.qualified.length
+        ).toFixed(1)}s`,
+        iterationsCompleted: discoveryResult.iterationsCompleted,
+      },
+      leads: discoveryResult.qualified.map((lead) => ({
+        businessName: lead.businessName,
+        address: lead.address,
+        phone: lead.phone,
+        website: lead.website,
+        email: lead.email,
+        confidenceScore: lead.confidenceScore,
+        preValidationScore: lead.preValidationScore,
+        dataCompleteness: lead.dataCompleteness,
+        sources: lead.sources,
+        enrichmentData: lead.enrichmentData,
+        validationResults: lead.validationResults,
+      })),
       metadata: {
-        totalProcessed: enhancedResults.totalProcessed,
-        totalQualified: enhancedResults.leads.length,
-        qualificationRate: Math.round(
-          (enhancedResults.leads.length / enhancedResults.totalProcessed) * 100
-        ),
-        averageConfidence: enhancedResults.qualityMetrics.averageConfidence,
-        totalCost: enhancedResults.totalCost,
-        costPerLead:
-          enhancedResults.leads.length > 0
-            ? (
-                enhancedResults.totalCost / enhancedResults.leads.length
-              ).toFixed(3)
-            : 0,
-        processingTime: Date.now() - startTime,
-        budgetUtilization: Math.round(
-          (enhancedResults.totalCost / budgetLimit) * 100
-        ),
+        timestamp: new Date().toISOString(),
+        version: "Enhanced Discovery Engine v2.0",
+        searchQueries: discoveryResult.searchQueries,
+        duplicatesRemoved: discoveryResult.duplicatesRemoved,
+        qualityFiltering: discoveryResult.qualityFiltering,
       },
-      qualityBreakdown: enhancedResults.qualityMetrics,
-      apiUsage: enhancedResults.usageStats,
-      dataEnhancements: {
-        businessRegistrationChecks:
-          enhancedResults.qualityMetrics.registrationVerified || 0,
-        websiteValidations:
-          enhancedResults.qualityMetrics.websitesAccessible || 0,
-        emailVerifications: enhancedResults.qualityMetrics.emailsVerified || 0,
-        propertyIntelligence:
-          enhancedResults.qualityMetrics.propertiesFound || 0,
-        // New Enhanced State Registry & ZeroBounce Validations
-        stateRegistryValidations: {
-          totalChecked: enhancedValidationResults.stateRegistryChecks,
-          validatedBusinesses: enhancedValidationResults.stateRegistryMatches,
-          validationRate:
-            enhancedValidationResults.stateRegistryChecks > 0
-              ? Math.round(
-                  (enhancedValidationResults.stateRegistryMatches /
-                    enhancedValidationResults.stateRegistryChecks) *
-                    100
-                )
-              : 0,
-        },
-        advancedEmailValidations: {
-          totalValidated: enhancedValidationResults.emailValidations,
-          deliverableEmails: enhancedValidationResults.emailDeliverable,
-          deliverabilityRate:
-            enhancedValidationResults.emailValidations > 0
-              ? Math.round(
-                  (enhancedValidationResults.emailDeliverable /
-                    enhancedValidationResults.emailValidations) *
-                    100
-                )
-              : 0,
-        },
-        qualityImprovements: {
-          leadsEnhanced: enhancedValidationResults.confidenceImprovements,
-          enhancedValidationCost:
-            enhancedValidationResults.totalEnhancedCost.toFixed(3),
-          governmentAPIsSources: 7,
-          totalFreeAPIsUsed: enhancedValidationResults.stateRegistryChecks,
-        },
-      },
+    };
+
+    // Log successful campaign completion using available method
+    const finalCampaignData = {
+      campaignId,
+      businessType,
+      location,
+      targetCount: maxResults,
+      businesses: discoveryResult.qualified.map((lead) => ({
+        name: lead.businessName,
+        address: lead.address,
+        phone: lead.phone,
+        website: lead.website,
+        email: lead.email,
+        confidenceScore: lead.confidenceScore,
+        qualityGrade:
+          lead.confidenceScore >= 80
+            ? "A"
+            : lead.confidenceScore >= 70
+            ? "B"
+            : lead.confidenceScore >= 60
+            ? "C"
+            : "D",
+      })),
+      estimatedCost: discoveryResult.totalCost,
+      duration: processingTime,
+    };
+
+    // Log campaign results asynchronously (don't block response)
+    campaignLogger.logCampaignResults(finalCampaignData).catch((err) => {
+      console.warn("Campaign logging failed:", err.message);
     });
+
+    console.log(
+      `✅ Campaign ${campaignId} completed: ${discoveryResult.qualified.length}/${maxResults} qualified leads`
+    );
+    console.log(`💰 Total cost: $${discoveryResult.totalCost.toFixed(4)}`);
+    console.log(`⏱️ Processing time: ${(processingTime / 1000).toFixed(1)}s`);
+
+    res.json(response);
   } catch (error) {
-    console.error("❌ Enhanced business discovery failed:", error);
+    const processingTime = Date.now() - startTime;
+
+    console.error("❌ Enhanced Discovery Error:", error.message);
+    console.error("Stack trace:", error.stack);
+
+    // Log failed campaign if ID exists
+    if (campaignId) {
+      const failedCampaignData = {
+        campaignId,
+        businessType: req.body.businessType,
+        location: req.body.location,
+        targetCount: req.body.maxResults || 10,
+        businesses: [],
+        estimatedCost: 0,
+        duration: processingTime,
+        error: error.message,
+      };
+
+      campaignLogger.logCampaignResults(failedCampaignData).catch((err) => {
+        console.warn("Failed campaign logging failed:", err.message);
+      });
+    }
 
     res.status(500).json({
       success: false,
-      error: error.message,
-      recommendations: [
-        "Check API key configuration",
-        "Verify budget limits and thresholds",
-        "Ensure network connectivity to external APIs",
-        "Review query format and location specificity",
-      ],
+      error: "Enhanced discovery system failed",
+      details: error.message,
+      campaignId,
+      processingTime: `${(processingTime / 1000).toFixed(1)}s`,
+      timestamp: new Date().toISOString(),
     });
   }
 });
-// Removed stray unreachable block with top-level await and undefined symbols (preValidationScorer, ownerDiscovery, etc.)
+
+// Legacy API endpoint for backward compatibility - redirects to new engine
+router.post("/discover", async (req, res) => {
+  console.log(
+    "🔄 Legacy /discover endpoint called - redirecting to Enhanced Discovery Engine v2.0"
+  );
+
+  try {
+    // Map legacy parameters to new format
+    const {
+      query: businessType,
+      location,
+      count: maxResults = 10,
+      budgetLimit = 50,
+      qualityThreshold: minConfidenceScore = 70,
+    } = req.body;
+
+    // Validate required parameters
+    if (!businessType || !location) {
+      return res.status(400).json({
+        success: false,
+        error: "Business type (query) and location are required",
+      });
+    }
+
+    // Call Enhanced Discovery Engine v2.0 with mapped parameters
+    const startTime = Date.now();
+    let campaignId = null;
+
+    // Generate campaign ID for tracking
+    campaignId = `campaign_${Date.now()}_${Math.random()
+      .toString(36)
+      .substr(2, 9)}`;
+
+    console.log(
+      `🔄 Legacy endpoint using Enhanced Discovery v2.0 - Campaign: ${campaignId}`
+    );
+
+    // Use Enhanced Discovery Engine v2.0
+    const discoveryResult = await discoveryEngine.discoverQualifiedLeads({
+      businessType,
+      location,
+      targetCount: maxResults,
+      budgetLimit,
+      requireCompleteContacts: true,
+      minConfidenceScore,
+    });
+
+    const processingTime = Date.now() - startTime;
+
+    // Log campaign completion using available method
+    const legacyCampaignData = {
+      campaignId,
+      businessType,
+      location,
+      targetCount: maxResults,
+      businesses: discoveryResult.qualified.map((lead) => ({
+        name: lead.businessName,
+        address: lead.address,
+        phone: lead.phone,
+        website: lead.website,
+        email: lead.email,
+        confidenceScore: lead.confidenceScore,
+        qualityGrade:
+          lead.confidenceScore >= 80
+            ? "A"
+            : lead.confidenceScore >= 70
+            ? "B"
+            : lead.confidenceScore >= 60
+            ? "C"
+            : "D",
+      })),
+      estimatedCost: discoveryResult.totalCost,
+      duration: processingTime,
+    };
+
+    campaignLogger.logCampaignResults(legacyCampaignData).catch((err) => {
+      console.warn("Legacy campaign logging failed:", err.message);
+    });
+
+    // Return response in legacy format for backward compatibility
+    res.json({
+      success: true,
+      results: discoveryResult.qualified.map((lead) => ({
+        name: lead.businessName,
+        address: lead.address,
+        phone: lead.phone,
+        website: lead.website,
+        email: lead.email,
+        confidenceScore: lead.confidenceScore,
+        category: lead.category,
+        rating: lead.rating,
+        reviewCount: lead.reviewCount,
+        sources: lead.sources,
+        enrichmentData: lead.enrichmentData,
+        validationResults: lead.validationResults,
+      })),
+      metadata: {
+        totalProcessed: discoveryResult.totalFound,
+        totalQualified: discoveryResult.qualified.length,
+        qualificationRate: Math.round(
+          (discoveryResult.qualified.length / discoveryResult.totalFound) * 100
+        ),
+        averageConfidence: discoveryResult.averageConfidence,
+        totalCost: discoveryResult.totalCost,
+        costPerLead: discoveryResult.costPerLead,
+        processingTime: Date.now() - startTime,
+        discoveryEngine: "Enhanced Discovery Engine v2.0 (Legacy Compatible)",
+        campaignId,
+      },
+    });
+  } catch (error) {
+    console.error("❌ Legacy endpoint error:", error.message);
+    res.status(500).json({
+      success: false,
+      error: "Enhanced discovery system failed",
+      details: error.message,
+      timestamp: new Date().toISOString(),
+    });
+  }
+});
 
 // GET /api/business/stats - Get campaign statistics for admin dashboard
 router.get("/stats", async (req, res) => {
@@ -316,19 +334,11 @@ router.get("/stats", async (req, res) => {
     const stats = await campaignLogger.getCampaignStats();
     const recentCampaigns = await campaignLogger.getRecentCampaigns(5);
 
-    // Get basic enrichment stats from the discovery module
-    const enrichmentStats = {
-      totalProcessed: 0,
-      totalEnriched: 0,
-      enrichmentRate: 0,
-      averageConfidence: 0,
-    };
-
     res.json({
       success: true,
       aggregateStats: stats,
       recentCampaigns: recentCampaigns,
-      currentSessionStats: enrichmentStats,
+      discoveryEngine: "Enhanced Discovery Engine v2.0",
     });
   } catch (error) {
     console.error("Failed to get campaign stats:", error);
@@ -339,104 +349,73 @@ router.get("/stats", async (req, res) => {
   }
 });
 
-// POST /api/business/usage-report - Generate usage report for date range
-router.post("/usage-report", async (req, res) => {
+// CSV Export endpoint for Enhanced Discovery Engine v2.0
+router.post("/export-csv", async (req, res) => {
   try {
-    const { startDate, endDate } = req.body;
+    const { campaignId } = req.body;
 
-    if (!startDate || !endDate) {
+    if (!campaignId) {
       return res.status(400).json({
-        error: "startDate and endDate are required",
+        error: "campaignId is required",
       });
     }
 
-    const report = await campaignLogger.getUsageReport(startDate, endDate);
+    console.log(`📊 Exporting campaign: ${campaignId}`);
+
+    // Get campaign data and export to CSV using Enhanced Discovery Engine v2.0
+    const exportResult = await discoveryEngine.exportCampaignToCsv(campaignId);
+
+    console.log(
+      `✅ Campaign export complete: ${exportResult.filename} with ${exportResult.leadCount} leads`
+    );
 
     res.json({
       success: true,
-      report: report,
+      export: {
+        ...exportResult,
+        downloadUrl: `/api/business/download-csv/${encodeURIComponent(
+          exportResult.filename
+        )}`,
+      },
     });
   } catch (error) {
-    console.error("Failed to generate usage report:", error);
+    console.error("❌ Campaign export failed:", error);
     res.status(500).json({
-      error: "Failed to generate usage report",
-      message: error.message,
+      success: false,
+      error: error.message,
     });
   }
 });
 
-// Helper function to calculate quality distribution
-function calculateQualityDistribution(businesses) {
-  if (!businesses) return { A: 0, B: 0, C: 0, D: 0, F: 0 };
+// Download CSV endpoint
+router.get("/download-csv/:filename", async (req, res) => {
+  try {
+    const { filename } = req.params;
+    const filepath = path.join(__dirname, "../exports", filename);
 
-  const distribution = { A: 0, B: 0, C: 0, D: 0, F: 0 };
-  businesses.forEach((b) => {
-    const grade = b.qualityGrade || "F";
-    if (distribution[grade] !== undefined) {
-      distribution[grade]++;
-    }
-  });
-
-  return distribution;
-}
-
-function mergeBusinessSources(googleResults, yellowPagesResults) {
-  const merged = [...googleResults];
-
-  // Create a more sophisticated deduplication key using name + address
-  const getBusinessKey = (business) => {
-    const name = business.name?.toLowerCase().trim() || "";
-    const address = business.address?.toLowerCase().trim() || "";
-    // Use first part of address to handle slight variations
-    const addressKey = address.split(",")[0] || address;
-    return `${name}|${addressKey}`;
-  };
-
-  const googleKeys = new Set(googleResults.map((b) => getBusinessKey(b)));
-
-  // Add Yellow Pages results that aren't already in Google results
-  yellowPagesResults.forEach((business) => {
-    const businessKey = getBusinessKey(business);
-    if (!googleKeys.has(businessKey)) {
-      merged.push(business);
-    }
-  });
-
-  return merged;
-}
-
-function deduplicateBusinesses(businesses) {
-  const seen = new Map();
-  const deduplicated = [];
-
-  businesses.forEach((business) => {
-    const name = business.name?.toLowerCase().trim() || "";
-    const address = business.address?.toLowerCase().trim() || "";
-    const phone = business.phone?.replace(/\D/g, "") || ""; // Remove non-digits
-
-    // Create multiple possible keys for deduplication
-    const keys = [
-      `${name}|${address.split(",")[0]}`, // name + street address
-      phone ? `${name}|${phone}` : null, // name + phone
-      business.placeId ? `place_${business.placeId}` : null, // Google Places ID
-    ].filter(Boolean);
-
-    let isDuplicate = false;
-    for (const key of keys) {
-      if (seen.has(key)) {
-        isDuplicate = true;
-        break;
-      }
+    // Check if file exists
+    try {
+      await fs.access(filepath);
+    } catch (error) {
+      return res.status(404).json({
+        error: "File not found",
+        message: "The requested CSV file does not exist or has expired.",
+      });
     }
 
-    if (!isDuplicate) {
-      // Mark all keys as seen
-      keys.forEach((key) => seen.set(key, true));
-      deduplicated.push(business);
-    }
-  });
+    // Send file with proper headers
+    res.setHeader("Content-Type", "text/csv");
+    res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
 
-  return deduplicated;
-}
+    const fileStream = require("fs").createReadStream(filepath);
+    fileStream.pipe(res);
+  } catch (error) {
+    console.error("Error downloading CSV:", error);
+    res.status(500).json({
+      error: "Download failed",
+      message: error.message,
+    });
+  }
+});
 
 module.exports = router;

@@ -120,7 +120,7 @@ HUNTER_IO_API_KEY=your_hunter_io_api_key
 
 # Test the key
 node -e "
-const Hunter = require('./modules/api-clients/enhanced-hunter-client.js');
+const ComprehensiveHunterClient = require('./modules/api-clients/comprehensive-hunter-client.js');
 const hunter = new Hunter(process.env.HUNTER_IO_API_KEY, 500);
 hunter.searchDomain('stripe.com').then(r => console.log('✅ Hunter.io OK:', r.emails?.length, 'emails'));
 "

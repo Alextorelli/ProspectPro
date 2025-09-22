@@ -11,7 +11,7 @@ class RealTimeCampaignDashboard {
     this.subscription = null;
     this.charts = {};
     this.refreshInterval = null;
-    
+
     this.initializeDashboard();
   }
 
@@ -152,11 +152,11 @@ class RealTimeCampaignDashboard {
    * Attach event listeners
    */
   attachEventListeners() {
-    const campaignSelect = document.getElementById('campaignSelect');
-    const refreshBtn = document.getElementById('refreshBtn');
-    const exportBtn = document.getElementById('exportBtn');
+    const campaignSelect = document.getElementById("campaignSelect");
+    const refreshBtn = document.getElementById("refreshBtn");
+    const exportBtn = document.getElementById("exportBtn");
 
-    campaignSelect.addEventListener('change', (e) => {
+    campaignSelect.addEventListener("change", (e) => {
       if (e.target.value) {
         this.selectCampaign(e.target.value);
       } else {
@@ -164,13 +164,13 @@ class RealTimeCampaignDashboard {
       }
     });
 
-    refreshBtn.addEventListener('click', () => {
+    refreshBtn.addEventListener("click", () => {
       if (this.currentCampaign) {
         this.refreshCampaignData();
       }
     });
 
-    exportBtn.addEventListener('click', () => {
+    exportBtn.addEventListener("click", () => {
       if (this.currentCampaign) {
         this.exportCampaignLeads();
       }
@@ -183,25 +183,24 @@ class RealTimeCampaignDashboard {
   async loadCampaigns() {
     try {
       const { data: campaigns, error } = await this.supabase.enhanced
-        .from('campaigns')
-        .select('id, name, status, created_at')
-        .order('created_at', { ascending: false });
+        .from("campaigns")
+        .select("id, name, status, created_at")
+        .order("created_at", { ascending: false });
 
       if (error) throw error;
 
-      const select = document.getElementById('campaignSelect');
+      const select = document.getElementById("campaignSelect");
       select.innerHTML = '<option value="">Select Campaign</option>';
 
-      campaigns.forEach(campaign => {
-        const option = document.createElement('option');
+      campaigns.forEach((campaign) => {
+        const option = document.createElement("option");
         option.value = campaign.id;
         option.textContent = `${campaign.name} (${campaign.status})`;
         select.appendChild(option);
       });
-
     } catch (error) {
-      console.error('❌ Failed to load campaigns:', error);
-      this.showError('Failed to load campaigns');
+      console.error("❌ Failed to load campaigns:", error);
+      this.showError("Failed to load campaigns");
     }
   }
 
@@ -211,27 +210,26 @@ class RealTimeCampaignDashboard {
   async selectCampaign(campaignId) {
     try {
       console.log(`📡 Selecting campaign: ${campaignId}`);
-      
+
       // Disconnect from previous campaign
       this.disconnectFromCampaign();
-      
+
       this.currentCampaign = campaignId;
-      
+
       // Show dashboard content
-      document.querySelector('.dashboard-content').style.display = 'block';
-      
+      document.querySelector(".dashboard-content").style.display = "block";
+
       // Load initial campaign data
       await this.loadCampaignData();
-      
+
       // Set up real-time monitoring
       this.setupRealTimeMonitoring();
-      
+
       // Start periodic refresh
       this.startPeriodicRefresh();
-      
     } catch (error) {
-      console.error('❌ Failed to select campaign:', error);
-      this.showError('Failed to load campaign data');
+      console.error("❌ Failed to select campaign:", error);
+      this.showError("Failed to load campaign data");
     }
   }
 
@@ -242,23 +240,24 @@ class RealTimeCampaignDashboard {
     if (!this.currentCampaign) return;
 
     try {
-      console.log('📊 Loading campaign analytics...');
-      
+      console.log("📊 Loading campaign analytics...");
+
       // Load comprehensive analytics
-      const analytics = await this.supabase.enhanced.getCampaignAnalytics(this.currentCampaign);
-      
+      const analytics = await this.supabase.enhanced.getCampaignAnalytics(
+        this.currentCampaign
+      );
+
       // Update dashboard
       this.updateStatsCards(analytics);
       this.updateQualityChart(analytics.quality_distribution);
       this.updateApiUsage(analytics.api_usage_breakdown);
       this.checkBudgetAlerts(analytics);
-      
+
       // Load recent high-quality leads
       await this.loadRecentLeads();
-      
     } catch (error) {
-      console.error('❌ Failed to load campaign data:', error);
-      this.showError('Failed to load campaign analytics');
+      console.error("❌ Failed to load campaign data:", error);
+      this.showError("Failed to load campaign analytics");
     }
   }
 
@@ -268,8 +267,8 @@ class RealTimeCampaignDashboard {
   setupRealTimeMonitoring() {
     if (!this.currentCampaign) return;
 
-    console.log('📡 Setting up real-time monitoring...');
-    
+    console.log("📡 Setting up real-time monitoring...");
+
     const callbacks = {
       onNewLead: (lead) => {
         this.handleNewLead(lead);
@@ -279,11 +278,11 @@ class RealTimeCampaignDashboard {
       },
       onStatusChange: (status) => {
         this.updateConnectionStatus(status);
-      }
+      },
     };
 
     this.subscription = this.supabase.enhanced.setupCampaignMonitoring(
-      this.currentCampaign, 
+      this.currentCampaign,
       callbacks
     );
   }
@@ -292,23 +291,26 @@ class RealTimeCampaignDashboard {
    * Handle new lead discovered
    */
   handleNewLead(lead) {
-    console.log('🎉 New lead discovered:', lead.business_name);
-    
+    console.log("🎉 New lead discovered:", lead.business_name);
+
     // Add to activity feed
     this.addToActivityFeed({
-      type: 'new_lead',
+      type: "new_lead",
       message: `New lead discovered: ${lead.business_name}`,
       confidence: lead.confidence_score,
       cost: lead.total_cost,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
-    
+
     // Update stats (will be refreshed automatically)
     this.scheduleStatsRefresh();
-    
+
     // Show notification if high-quality lead
     if (lead.confidence_score >= 80) {
-      this.showNotification(`🎯 High-quality lead found: ${lead.business_name} (${lead.confidence_score}% confidence)`, 'success');
+      this.showNotification(
+        `🎯 High-quality lead found: ${lead.business_name} (${lead.confidence_score}% confidence)`,
+        "success"
+      );
     }
   }
 
@@ -316,14 +318,14 @@ class RealTimeCampaignDashboard {
    * Handle campaign updates
    */
   handleCampaignUpdate(campaign) {
-    console.log('📊 Campaign updated:', campaign);
-    
+    console.log("📊 Campaign updated:", campaign);
+
     this.addToActivityFeed({
-      type: 'campaign_update',
+      type: "campaign_update",
       message: `Campaign updated: ${campaign.name}`,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
-    
+
     this.scheduleStatsRefresh();
   }
 
@@ -331,13 +333,15 @@ class RealTimeCampaignDashboard {
    * Update connection status indicator
    */
   updateConnectionStatus(status) {
-    const statusElement = document.getElementById('connectionStatus');
-    const dot = statusElement.querySelector('.status-dot');
-    const text = statusElement.querySelector('span');
-    
-    dot.className = `status-dot ${status === 'SUBSCRIBED' ? 'connected' : 'offline'}`;
-    text.textContent = status === 'SUBSCRIBED' ? 'Connected' : 'Disconnected';
-    
+    const statusElement = document.getElementById("connectionStatus");
+    const dot = statusElement.querySelector(".status-dot");
+    const text = statusElement.querySelector("span");
+
+    dot.className = `status-dot ${
+      status === "SUBSCRIBED" ? "connected" : "offline"
+    }`;
+    text.textContent = status === "SUBSCRIBED" ? "Connected" : "Disconnected";
+
     console.log(`📡 Connection status: ${status}`);
   }
 
@@ -345,40 +349,66 @@ class RealTimeCampaignDashboard {
    * Update stats cards
    */
   updateStatsCards(analytics) {
-    document.getElementById('totalLeads').textContent = analytics.total_leads || 0;
-    document.getElementById('qualifiedLeads').textContent = analytics.qualified_leads || 0;
-    document.getElementById('totalCost').textContent = `$${(analytics.total_cost || 0).toFixed(2)}`;
-    document.getElementById('avgConfidence').textContent = `${analytics.average_confidence || 0}%`;
-    
+    document.getElementById("totalLeads").textContent =
+      analytics.total_leads || 0;
+    document.getElementById("qualifiedLeads").textContent =
+      analytics.qualified_leads || 0;
+    document.getElementById("totalCost").textContent = `$${(
+      analytics.total_cost || 0
+    ).toFixed(2)}`;
+    document.getElementById("avgConfidence").textContent = `${
+      analytics.average_confidence || 0
+    }%`;
+
     // Calculate rates and changes
-    const qualificationRate = analytics.total_leads > 0 ? 
-      Math.round((analytics.qualified_leads / analytics.total_leads) * 100) : 0;
-    document.getElementById('qualifiedRate').textContent = `${qualificationRate}%`;
-    
+    const qualificationRate =
+      analytics.total_leads > 0
+        ? Math.round((analytics.qualified_leads / analytics.total_leads) * 100)
+        : 0;
+    document.getElementById(
+      "qualifiedRate"
+    ).textContent = `${qualificationRate}%`;
+
     const costPerLead = analytics.cost_per_lead || 0;
-    document.getElementById('costPerLead').textContent = `$${costPerLead}/lead`;
+    document.getElementById("costPerLead").textContent = `$${costPerLead}/lead`;
   }
 
   /**
    * Update quality distribution chart
    */
   updateQualityChart(qualityData) {
-    const canvas = document.getElementById('qualityChart');
-    const ctx = canvas.getContext('2d');
-    
+    const canvas = document.getElementById("qualityChart");
+    const ctx = canvas.getContext("2d");
+
     // Clear canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    
+
     if (!qualityData) return;
-    
+
     const data = [
-      { label: 'Excellent (90-100%)', value: qualityData.excellent || 0, color: '#10B981' },
-      { label: 'Very Good (80-89%)', value: qualityData.very_good || 0, color: '#3B82F6' },
-      { label: 'Good (70-79%)', value: qualityData.good || 0, color: '#F59E0B' },
-      { label: 'Average (50-69%)', value: qualityData.average || 0, color: '#EF4444' },
-      { label: 'Poor (<50%)', value: qualityData.poor || 0, color: '#6B7280' }
+      {
+        label: "Excellent (90-100%)",
+        value: qualityData.excellent || 0,
+        color: "#10B981",
+      },
+      {
+        label: "Very Good (80-89%)",
+        value: qualityData.very_good || 0,
+        color: "#3B82F6",
+      },
+      {
+        label: "Good (70-79%)",
+        value: qualityData.good || 0,
+        color: "#F59E0B",
+      },
+      {
+        label: "Average (50-69%)",
+        value: qualityData.average || 0,
+        color: "#EF4444",
+      },
+      { label: "Poor (<50%)", value: qualityData.poor || 0, color: "#6B7280" },
     ];
-    
+
     this.drawBarChart(ctx, data, canvas.width, canvas.height);
   }
 
@@ -389,33 +419,33 @@ class RealTimeCampaignDashboard {
     const padding = 40;
     const chartWidth = width - padding * 2;
     const chartHeight = height - padding * 2;
-    
+
     const total = data.reduce((sum, item) => sum + item.value, 0);
     if (total === 0) {
-      ctx.fillStyle = '#6B7280';
-      ctx.font = '14px Arial';
-      ctx.textAlign = 'center';
-      ctx.fillText('No data available', width / 2, height / 2);
+      ctx.fillStyle = "#6B7280";
+      ctx.font = "14px Arial";
+      ctx.textAlign = "center";
+      ctx.fillText("No data available", width / 2, height / 2);
       return;
     }
-    
+
     const barWidth = chartWidth / data.length - 10;
-    
+
     data.forEach((item, index) => {
       const barHeight = (item.value / total) * chartHeight;
       const x = padding + index * (barWidth + 10);
       const y = height - padding - barHeight;
-      
+
       // Draw bar
       ctx.fillStyle = item.color;
       ctx.fillRect(x, y, barWidth, barHeight);
-      
+
       // Draw value
-      ctx.fillStyle = '#000';
-      ctx.font = '12px Arial';
-      ctx.textAlign = 'center';
+      ctx.fillStyle = "#000";
+      ctx.font = "12px Arial";
+      ctx.textAlign = "center";
       ctx.fillText(item.value.toString(), x + barWidth / 2, y - 5);
-      
+
       // Draw label (rotated)
       ctx.save();
       ctx.translate(x + barWidth / 2, height - padding + 20);
@@ -429,17 +459,17 @@ class RealTimeCampaignDashboard {
    * Update API usage section
    */
   updateApiUsage(apiUsageData) {
-    const container = document.getElementById('apiUsageGrid');
-    container.innerHTML = '';
-    
+    const container = document.getElementById("apiUsageGrid");
+    container.innerHTML = "";
+
     if (!apiUsageData) {
-      container.innerHTML = '<p>No API usage data available</p>';
+      container.innerHTML = "<p>No API usage data available</p>";
       return;
     }
-    
+
     Object.entries(apiUsageData).forEach(([service, usage]) => {
-      const card = document.createElement('div');
-      card.className = 'api-usage-card';
+      const card = document.createElement("div");
+      card.className = "api-usage-card";
       card.innerHTML = `
         <div class="api-service-name">${service}</div>
         <div class="api-stats">
@@ -466,22 +496,21 @@ class RealTimeCampaignDashboard {
    */
   async loadRecentLeads() {
     if (!this.currentCampaign) return;
-    
+
     try {
       const filters = {
         campaignIds: [this.currentCampaign],
         minConfidence: 70,
-        sortBy: 'created_at',
-        sortOrder: 'desc',
-        limit: 20
+        sortBy: "created_at",
+        sortOrder: "desc",
+        limit: 20,
       };
-      
+
       const leads = await this.supabase.enhanced.getQualifiedLeads(filters);
-      
+
       this.updateRecentLeadsTable(leads);
-      
     } catch (error) {
-      console.error('❌ Failed to load recent leads:', error);
+      console.error("❌ Failed to load recent leads:", error);
     }
   }
 
@@ -489,61 +518,80 @@ class RealTimeCampaignDashboard {
    * Update recent leads table
    */
   updateRecentLeadsTable(leads) {
-    const tbody = document.getElementById('recentLeadsBody');
-    
+    const tbody = document.getElementById("recentLeadsBody");
+
     if (!leads || leads.length === 0) {
-      tbody.innerHTML = '<tr class="placeholder-row"><td colspan="5">No high-quality leads found</td></tr>';
+      tbody.innerHTML =
+        '<tr class="placeholder-row"><td colspan="5">No high-quality leads found</td></tr>';
       return;
     }
-    
-    tbody.innerHTML = leads.map(lead => `
+
+    tbody.innerHTML = leads
+      .map(
+        (lead) => `
       <tr class="lead-row" data-confidence="${lead.confidence_score}">
         <td>
           <div class="business-name">${lead.business_name}</div>
-          <div class="business-address">${lead.address || 'No address'}</div>
+          <div class="business-address">${lead.address || "No address"}</div>
         </td>
         <td>
-          <div class="confidence-badge confidence-${this.getConfidenceClass(lead.confidence_score)}">
+          <div class="confidence-badge confidence-${this.getConfidenceClass(
+            lead.confidence_score
+          )}">
             ${lead.confidence_score}%
           </div>
         </td>
         <td>
           <div class="contact-info">
-            ${lead.phone ? `📞 ${lead.phone}<br>` : ''}
-            ${lead.lead_emails?.length ? `📧 ${lead.lead_emails.length} emails<br>` : ''}
-            ${lead.website ? `🌐 Website` : ''}
+            ${lead.phone ? `📞 ${lead.phone}<br>` : ""}
+            ${
+              lead.lead_emails?.length
+                ? `📧 ${lead.lead_emails.length} emails<br>`
+                : ""
+            }
+            ${lead.website ? `🌐 Website` : ""}
           </div>
         </td>
         <td class="cost-cell">$${(lead.total_cost || 0).toFixed(3)}</td>
         <td class="time-cell">${this.formatTimeAgo(lead.created_at)}</td>
       </tr>
-    `).join('');
+    `
+      )
+      .join("");
   }
 
   /**
    * Add item to activity feed
    */
   addToActivityFeed(activity) {
-    const feed = document.getElementById('activityFeed');
-    
+    const feed = document.getElementById("activityFeed");
+
     // Remove placeholder
-    const placeholder = feed.querySelector('.placeholder');
+    const placeholder = feed.querySelector(".placeholder");
     if (placeholder) placeholder.remove();
-    
-    const item = document.createElement('div');
+
+    const item = document.createElement("div");
     item.className = `activity-item ${activity.type}`;
     item.innerHTML = `
       <div class="activity-time">${activity.timestamp.toLocaleTimeString()}</div>
       <div class="activity-content">
         ${activity.message}
-        ${activity.confidence ? `<span class="confidence-badge">${activity.confidence}%</span>` : ''}
-        ${activity.cost ? `<span class="cost-badge">$${activity.cost.toFixed(3)}</span>` : ''}
+        ${
+          activity.confidence
+            ? `<span class="confidence-badge">${activity.confidence}%</span>`
+            : ""
+        }
+        ${
+          activity.cost
+            ? `<span class="cost-badge">$${activity.cost.toFixed(3)}</span>`
+            : ""
+        }
       </div>
     `;
-    
+
     // Add to top of feed
     feed.insertBefore(item, feed.firstChild);
-    
+
     // Keep only last 20 items
     while (feed.children.length > 20) {
       feed.removeChild(feed.lastChild);
@@ -554,19 +602,19 @@ class RealTimeCampaignDashboard {
    * Check and display budget alerts
    */
   checkBudgetAlerts(analytics) {
-    const alertElement = document.getElementById('budgetAlert');
-    const messageElement = document.getElementById('budgetMessage');
-    
+    const alertElement = document.getElementById("budgetAlert");
+    const messageElement = document.getElementById("budgetMessage");
+
     if (analytics.budget_utilization && analytics.budget_utilization > 80) {
       messageElement.textContent = `Campaign has used ${analytics.budget_utilization}% of budget`;
-      alertElement.style.display = 'block';
-      
+      alertElement.style.display = "block";
+
       if (analytics.budget_utilization > 95) {
-        alertElement.className = 'alert alert-error';
+        alertElement.className = "alert alert-error";
         messageElement.textContent = `⚠️ CRITICAL: Campaign has used ${analytics.budget_utilization}% of budget!`;
       }
     } else {
-      alertElement.style.display = 'none';
+      alertElement.style.display = "none";
     }
   }
 
@@ -575,24 +623,56 @@ class RealTimeCampaignDashboard {
    */
   async exportCampaignLeads() {
     if (!this.currentCampaign) return;
-    
+
     try {
-      console.log('📤 Exporting campaign leads...');
-      
-      const exportResult = await this.supabase.enhanced.exportCampaignLeads(
-        this.currentCampaign,
-        { minConfidence: 70, requireEmail: true }
+      console.log("📤 Exporting campaign leads...");
+
+      // Use the new campaign export API endpoint
+      const params = new URLSearchParams({
+        format: "csv",
+        minConfidence: "70",
+        includeUnqualified: "false",
+        includeProvenance: "true",
+      });
+
+      const response = await fetch(
+        `/api/campaigns/${this.currentCampaign}/export?${params}`
       );
-      
-      // Create and download CSV
-      const csvContent = this.generateCSV(exportResult.leads);
-      this.downloadCSV(csvContent, `campaign-leads-${new Date().toISOString().split('T')[0]}.csv`);
-      
-      this.showNotification(`✅ Exported ${exportResult.exported_leads} leads`, 'success');
-      
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Export failed");
+      }
+
+      // Get export metadata from headers
+      const exportCount = response.headers.get("X-Export-Count");
+      const totalCount = response.headers.get("X-Total-Count");
+      const campaignName = response.headers.get("X-Campaign-Name");
+
+      // Download the CSV file
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+
+      const timestamp = new Date().toISOString().slice(0, 10);
+      const filename = `${campaignName}_${this.currentCampaign.slice(
+        0,
+        8
+      )}_${timestamp}.csv`;
+
+      link.href = url;
+      link.download = filename;
+      link.click();
+
+      window.URL.revokeObjectURL(url);
+
+      this.showNotification(
+        `✅ Exported ${exportCount}/${totalCount} leads from "${campaignName}"`,
+        "success"
+      );
     } catch (error) {
-      console.error('❌ Export failed:', error);
-      this.showError('Failed to export leads');
+      console.error("❌ Export failed:", error);
+      this.showError(`Failed to export leads: ${error.message}`);
     }
   }
 
@@ -600,21 +680,29 @@ class RealTimeCampaignDashboard {
    * Generate CSV content
    */
   generateCSV(leads) {
-    const headers = ['Business Name', 'Phone', 'Address', 'Website', 'Emails', 'Confidence Score', 'Total Cost'];
-    const rows = leads.map(lead => [
-      lead.business_name || '',
-      lead.phone || '',
-      lead.address || '',
-      lead.website || '',
-      lead.lead_emails?.map(e => e.email).join(';') || '',
+    const headers = [
+      "Business Name",
+      "Phone",
+      "Address",
+      "Website",
+      "Emails",
+      "Confidence Score",
+      "Total Cost",
+    ];
+    const rows = leads.map((lead) => [
+      lead.business_name || "",
+      lead.phone || "",
+      lead.address || "",
+      lead.website || "",
+      lead.lead_emails?.map((e) => e.email).join(";") || "",
       lead.confidence_score || 0,
-      lead.total_cost || 0
+      lead.total_cost || 0,
     ]);
-    
+
     const csvContent = [headers, ...rows]
-      .map(row => row.map(field => `"${field}"`).join(','))
-      .join('\n');
-    
+      .map((row) => row.map((field) => `"${field}"`).join(","))
+      .join("\n");
+
     return csvContent;
   }
 
@@ -622,9 +710,9 @@ class RealTimeCampaignDashboard {
    * Download CSV file
    */
   downloadCSV(content, filename) {
-    const blob = new Blob([content], { type: 'text/csv' });
+    const blob = new Blob([content], { type: "text/csv" });
     const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
+    const a = document.createElement("a");
     a.href = url;
     a.download = filename;
     a.click();
@@ -634,22 +722,22 @@ class RealTimeCampaignDashboard {
   /**
    * Utility functions
    */
-  
+
   getConfidenceClass(score) {
-    if (score >= 90) return 'excellent';
-    if (score >= 80) return 'very-good';
-    if (score >= 70) return 'good';
-    if (score >= 50) return 'average';
-    return 'poor';
+    if (score >= 90) return "excellent";
+    if (score >= 80) return "very-good";
+    if (score >= 70) return "good";
+    if (score >= 50) return "average";
+    return "poor";
   }
-  
+
   formatTimeAgo(timestamp) {
     const now = new Date();
     const time = new Date(timestamp);
     const diffMs = now - time;
     const diffMins = Math.floor(diffMs / 60000);
-    
-    if (diffMins < 1) return 'Just now';
+
+    if (diffMins < 1) return "Just now";
     if (diffMins < 60) return `${diffMins}m ago`;
     if (diffMins < 1440) return `${Math.floor(diffMins / 60)}h ago`;
     return `${Math.floor(diffMins / 1440)}d ago`;
@@ -688,30 +776,30 @@ class RealTimeCampaignDashboard {
       this.supabase.enhanced.stopCampaignMonitoring(this.currentCampaign);
       this.subscription = null;
     }
-    
+
     this.stopPeriodicRefresh();
     this.currentCampaign = null;
-    
+
     // Hide dashboard content
-    document.querySelector('.dashboard-content').style.display = 'none';
-    
-    console.log('📡 Disconnected from campaign monitoring');
+    document.querySelector(".dashboard-content").style.display = "none";
+
+    console.log("📡 Disconnected from campaign monitoring");
   }
 
-  showNotification(message, type = 'info') {
+  showNotification(message, type = "info") {
     // Simple notification - in a real app, use a proper notification library
-    const notification = document.createElement('div');
+    const notification = document.createElement("div");
     notification.className = `notification ${type}`;
     notification.textContent = message;
     document.body.appendChild(notification);
-    
+
     setTimeout(() => {
       notification.remove();
     }, 5000);
   }
 
   showError(message) {
-    this.showNotification(`❌ ${message}`, 'error');
+    this.showNotification(`❌ ${message}`, "error");
   }
 
   /**
@@ -720,7 +808,7 @@ class RealTimeCampaignDashboard {
   destroy() {
     this.disconnectFromCampaign();
     if (this.container) {
-      this.container.innerHTML = '';
+      this.container.innerHTML = "";
     }
   }
 }

@@ -90,17 +90,9 @@ class OptimizedLeadDiscovery {
       this.costTracker.breakdown.googlePlaces =
         (this.costTracker.breakdown.googlePlaces || 0) + 0.032;
 
-      // Mock discovery results (replace with real API call)
-      const businesses = Array.from({ length: Math.min(limit, 5) }, (_, i) => ({
-        name: `${query} ${location} ${i + 1}`,
-        address: `${100 + i * 10} Main St, ${location}`,
-        phone: `(${Math.floor(Math.random() * 900) + 100}) ${
-          Math.floor(Math.random() * 900) + 100
-        }-${Math.floor(Math.random() * 9000) + 1000}`,
-        website: `https://business${i + 1}.example.com`,
-        rating: 4.0 + Math.random(),
-        user_ratings_total: Math.floor(Math.random() * 500) + 50,
-      }));
+      // REMOVED: All fake data generation eliminated
+      // This function should never be called without real API integration
+      throw new Error("FAKE DATA GENERATION REMOVED - Real API integration required. This edge function is deprecated and must use production business discovery API.");
 
       return {
         businesses,
