@@ -34,7 +34,7 @@ const authenticateWebhook = (req, res, next) => {
 // Campaign CSV Exporter integration
 let CampaignCsvExporter;
 try {
-  CampaignCsvExporter = require("../../modules/exporters/campaign-csv-exporter");
+  CampaignCsvExporter = require("../../modules/core/export-campaign-csv-system");
 } catch (error) {
   console.warn("⚠️ CampaignCsvExporter not available:", error.message);
   CampaignCsvExporter = null;
@@ -43,7 +43,7 @@ try {
 // ProspectPro Metrics integration
 let ProspectProMetrics;
 try {
-  const metricsModule = require("../../modules/prometheus-metrics");
+  const metricsModule = require("../../modules/monitoring/prometheus-metrics");
   ProspectProMetrics = metricsModule.ProspectProMetrics;
 } catch (error) {
   console.warn("⚠️ ProspectProMetrics not available:", error.message);

@@ -3,21 +3,21 @@
  * Integrates multiple data sources with cost optimization and intelligent pre-validation
  */
 
-const CaliforniaSOS = require("./api-clients/california-sos-client");
-const NewYorkSOS = require("./api-clients/newyork-sos-client");
-const NYTaxParcels = require("./api-clients/ny-tax-parcels-client");
-const GooglePlacesClient = require("./api-clients/google-places");
-const RegistryValidationEngine = require("./registry-engines/registry-validation-engine");
-const ValidationRouter = require("./routing/validation-router");
-const { batchProcessor } = require("./utils/batch-processor");
-const logger = require("./utils/logger");
+const CaliforniaSOS = require("../api-clients/california-sos-client");
+const NewYorkSOS = require("../api-clients/newyork-sos-client");
+const NYTaxParcels = require("../api-clients/ny-tax-parcels-client");
+const GooglePlacesClient = require("../api-clients/api-google-places-client");
+const RegistryValidationEngine = require("../registry-engines/registry-validation-core-engine");
+const ValidationRouter = require("../routing/validation-smart-router");
+const { batchProcessor } = require("../utils/batch-processing-manager");
+const logger = require("../utils/logger");
 // Import API clients
-const MultiSourceEmailDiscovery = require("./api-clients/multi-source-email-discovery");
-const ComprehensiveHunterClient = require("./api-clients/comprehensive-hunter-client");
-const NeverBounceClient = require("./api-clients/neverbounce");
-const SECEdgarClient = require("./api-clients/enhanced-sec-edgar-client");
-const ProPublicaClient = require("./api-clients/propublica-nonprofit-client");
-const FoursquareClient = require("./api-clients/foursquare-places-client");
+const MultiSourceEmailDiscovery = require("../api-clients/multi-api-email-discovery-client");
+const ComprehensiveHunterClient = require("../api-clients/api-hunter-comprehensive-client");
+const NeverBounceClient = require("../api-clients/neverbounce-client");
+const SECEdgarClient = require("../api-clients/api-sec-edgar-enhanced-client");
+const ProPublicaClient = require("../api-clients/propublica-nonprofit-client");
+const FoursquareClient = require("../api-clients/api-foursquare-places-client");
 
 class EnhancedLeadDiscovery {
   constructor(apiKeys = {}) {
@@ -1237,7 +1237,7 @@ class EnhancedLeadDiscovery {
     }
 
     // Global cache statistics
-    const { globalCache } = require("./utils/cache");
+    const { globalCache } = require("../utils/cache-ttl-manager");
     if (globalCache && globalCache.getStats) {
       stats.globalCache = globalCache.getStats();
     }

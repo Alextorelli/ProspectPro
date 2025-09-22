@@ -5,7 +5,9 @@
  */
 
 const express = require("express");
-const { ProspectProMetrics } = require("../../modules/prometheus-metrics");
+const {
+  ProspectProMetrics,
+} = require("../../modules/monitoring/prometheus-metrics");
 const supabase = require("../../config/supabase");
 const logger = require("../../modules/utils/logger");
 

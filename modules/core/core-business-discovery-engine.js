@@ -13,10 +13,10 @@
  * ProspectPro v2.0 - Zero Fake Data Policy
  */
 
-const GooglePlacesClient = require("./api-clients/google-places");
-const EnhancedLeadDiscovery = require("./enhanced-lead-discovery");
-const CampaignCSVExporter = require("./campaign-csv-exporter");
-const logger = require("./utils/logger");
+const GooglePlacesClient = require("../api-clients/api-google-places-client");
+const EnhancedLeadDiscovery = require("./core-lead-discovery-engine");
+const CampaignCSVExporter = require("./export-campaign-csv-system");
+const logger = require("../utils/logger");
 
 class EnhancedDiscoveryEngine {
   constructor(apiKeys = {}) {

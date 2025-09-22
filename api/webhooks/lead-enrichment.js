@@ -6,7 +6,7 @@
 
 const express = require("express");
 const crypto = require("crypto");
-const EnhancedLeadDiscovery = require("../../modules/enhanced-lead-discovery");
+const EnhancedLeadDiscovery = require("../../modules/core/core-lead-discovery-engine");
 const supabase = require("../../config/supabase");
 const logger = require("../../modules/utils/logger");
 

@@ -22,48 +22,119 @@ async function loadSecretsFromSupabase() {
   try {
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Try Vault first (new method)
+    // Access vault secrets using RPC function (secure approach)
     try {
-      const { data: vaultSecrets, error: vaultError } = await supabase
-        .from("vault.decrypted_secrets")
-        .select("name, decrypted_secret")
-        .in("name", [
-          "GOOGLE_PLACES_API_KEY",
-          "FOURSQUARE_API_KEY",
-          "HUNTER_IO_API_KEY",
-          "ZEROBOUNCE_API_KEY",
-          "NEVERBOUNCE_API_KEY",
-          "SCRAPINGDOG_API_KEY",
-          "APOLLO_API_KEY",
-          "PERSONAL_ACCESS_TOKEN",
-        ]);
+      console.log("🔑 Accessing Supabase Vault secrets via RPC function...");
 
-      if (!vaultError && vaultSecrets?.length > 0) {
-        let vaultSecretsLoaded = 0;
-        vaultSecrets.forEach(({ name, decrypted_secret }) => {
+      const vaultKeyNames = [
+        "GOOGLE_PLACES_API_KEY",
+        "FOURSQUARE_API_KEY",
+        "HUNTER_IO_API_KEY",
+        "ZEROBOUNCE_API_KEY",
+        "NEVERBOUNCE_API_KEY",
+        "SCRAPINGDOG_API_KEY",
+        "APOLLO_API_KEY",
+        "PERSONAL_ACCESS_TOKEN",
+      ];
+
+      // First try the RPC function approach (preferred)
+      const { data: vaultSecrets, error: vaultError } = await supabase.rpc(
+        "get_vault_secrets",
+        {
+          secret_names: vaultKeyNames,
+        }
+      );
+
+      if (!vaultError && vaultSecrets && Array.isArray(vaultSecrets)) {
+        console.log(
+          `📋 Found ${vaultSecrets.length} vault secrets via RPC function`
+        );
+        await loadVaultSecretsIntoEnv(vaultSecrets, startTime);
+        return;
+      }
+
+      // If RPC function doesn't exist, create it and retry
+      if (
+        vaultError &&
+        (vaultError.code === "42883" ||
+          vaultError.message?.includes("does not exist"))
+      ) {
+        console.log(
+          "� RPC function not found, attempting to create vault access functions..."
+        );
+
+        try {
+          // Try to create the vault access functions
+          await createVaultAccessFunctions(supabase);
+
+          // Retry the RPC call
+          const { data: retryVaultSecrets, error: retryError } =
+            await supabase.rpc("get_vault_secrets", {
+              secret_names: vaultKeyNames,
+            });
+
           if (
-            !process.env[name] &&
-            decrypted_secret &&
-            decrypted_secret !== "CONFIGURE_IN_SUPABASE_DASHBOARD"
+            !retryError &&
+            retryVaultSecrets &&
+            Array.isArray(retryVaultSecrets)
           ) {
-            process.env[name] = decrypted_secret;
-            vaultSecretsLoaded++;
+            console.log(
+              "✅ Successfully created vault functions and retrieved secrets"
+            );
+            await loadVaultSecretsIntoEnv(retryVaultSecrets, startTime);
+            return;
+          } else if (retryError) {
+            throw retryError;
           }
-        });
+        } catch (createError) {
+          console.warn(
+            "⚠️ Could not create vault access functions:",
+            createError.message
+          );
+        }
+      }
+
+      // Final fallback: check if secrets are already in environment (manual injection)
+      console.log(
+        "🔍 Checking for manually injected vault secrets in environment..."
+      );
+      let foundEnvSecrets = 0;
+      vaultKeyNames.forEach((keyName) => {
+        const envValue = process.env[keyName];
+        if (
+          envValue &&
+          envValue !== "PLACEHOLDER_VALUE_SET_VIA_DASHBOARD" &&
+          !envValue.startsWith("your_")
+        ) {
+          foundEnvSecrets++;
+          console.log(`✅ Found ${keyName} in environment`);
+        }
+      });
+
+      if (foundEnvSecrets > 0) {
         const duration = Date.now() - startTime;
         console.log(
-          `✅ Loaded ${vaultSecretsLoaded} secrets from Supabase Vault (${duration}ms)`
+          `✅ Using ${foundEnvSecrets} secrets from environment injection (${duration}ms)`
         );
         return;
       }
+
+      // If we get here, vault access completely failed
+      if (vaultError) {
+        throw vaultError;
+      } else {
+        throw new Error("No vault secrets found via any method");
+      }
     } catch (vaultErr) {
       console.warn(
-        "Vault unavailable, falling back to app_secrets:",
-        vaultErr.message
+        "❌ Vault access failed:",
+        vaultErr.message,
+        "\n🔄 Falling back to legacy app_secrets table"
       );
     }
 
     // Fallback to app_secrets table (legacy method)
+    console.log("📂 Attempting legacy app_secrets table access...");
     const { data, error } = await supabase
       .from("app_secrets")
       .select("key,value");
@@ -71,7 +142,11 @@ async function loadSecretsFromSupabase() {
 
     let legacySecretsLoaded = 0;
     data.forEach(({ key, value }) => {
-      if (!process.env[key]) {
+      if (
+        !process.env[key] &&
+        value &&
+        value !== "CONFIGURE_IN_SUPABASE_DASHBOARD"
+      ) {
         process.env[key] = value;
         legacySecretsLoaded++;
       }
@@ -84,10 +159,82 @@ async function loadSecretsFromSupabase() {
   } catch (err) {
     const duration = Date.now() - startTime;
     console.error(
-      `Failed to load secrets from Supabase (${duration}ms):`,
+      `❌ Failed to load secrets from Supabase (${duration}ms):`,
       err.message
     );
     console.log("🔄 Continuing with environment variables only");
+  }
+}
+
+// Helper function to load vault secrets into environment
+async function loadVaultSecretsIntoEnv(vaultSecrets, startTime) {
+  let vaultSecretsLoaded = 0;
+
+  if (Array.isArray(vaultSecrets)) {
+    vaultSecrets.forEach(({ name, decrypted_secret }) => {
+      if (name && decrypted_secret && !process.env[name]) {
+        // Validate secret isn't placeholder
+        if (
+          decrypted_secret !== "PLACEHOLDER_VALUE_SET_VIA_DASHBOARD" &&
+          decrypted_secret !== "CONFIGURE_IN_SUPABASE_DASHBOARD" &&
+          !decrypted_secret.startsWith("your_")
+        ) {
+          process.env[name] = decrypted_secret;
+          vaultSecretsLoaded++;
+          console.log(
+            `🔑 Loaded vault secret: ${name} = ${decrypted_secret.substring(
+              0,
+              8
+            )}...`
+          );
+        }
+      }
+    });
+  }
+
+  const duration = Date.now() - startTime;
+  console.log(
+    `✅ Successfully loaded ${vaultSecretsLoaded} secrets from Supabase Vault (${duration}ms)`
+  );
+}
+
+// Helper function to create vault access functions if they don't exist
+async function createVaultAccessFunctions(supabase) {
+  const fs = require("fs");
+  const path = require("path");
+
+  // Check if the vault functions file exists
+  const vaultFunctionsPath = path.join(
+    __dirname,
+    "database",
+    "12-vault-access-functions.sql"
+  );
+
+  if (fs.existsSync(vaultFunctionsPath)) {
+    console.log("📋 Found vault access functions SQL file, executing...");
+    const vaultSQL = fs.readFileSync(vaultFunctionsPath, "utf8");
+
+    // Split into individual statements and execute them
+    const statements = vaultSQL
+      .split(";")
+      .map((stmt) => stmt.trim())
+      .filter((stmt) => stmt.length > 0 && !stmt.startsWith("--"));
+
+    for (const statement of statements) {
+      if (statement.length > 0) {
+        try {
+          await supabase.rpc("exec_sql", { sql: statement });
+        } catch (error) {
+          // Log but continue - some statements might fail if already exist
+          console.warn(`⚠️ SQL statement warning:`, error.message);
+        }
+      }
+    }
+
+    console.log("✅ Vault access functions setup completed");
+  } else {
+    console.warn("⚠️ Vault access functions SQL file not found");
+    throw new Error("Cannot create vault access functions - SQL file missing");
   }
 }
 
@@ -97,7 +244,7 @@ async function loadSecretsFromSupabase() {
 })();
 
 // Initialize Boot Phase Debugger first
-const { BootPhaseDebugger } = require("./modules/boot-debugger");
+const { BootPhaseDebugger } = require("./modules/utils/boot-debugger");
 const bootDebugger = new BootPhaseDebugger();
 
 bootDebugger.startPhase(
@@ -117,9 +264,11 @@ const {
 } = require("./config/supabase");
 
 // Import new monitoring and security systems
-const { ProspectProMetrics } = require("./modules/prometheus-metrics");
-const { SecurityHardening } = require("./modules/security-hardening");
-const RailwayWebhookMonitor = require("./modules/railway-webhook-monitor");
+const {
+  ProspectProMetrics,
+} = require("./modules/monitoring/prometheus-metrics");
+const { SecurityHardening } = require("./modules/utils/security-hardening");
+const RailwayWebhookMonitor = require("./modules/monitoring/railway-webhook-monitor");
 
 const { Client } = require("@googlemaps/google-maps-services-js");
 

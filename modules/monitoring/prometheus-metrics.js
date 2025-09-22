@@ -359,32 +359,53 @@ class ProspectProMetrics {
     // - recordSupabaseConnection(success, durationMs)
     let durationMs, success;
     if (typeof a === "number" && typeof b === "boolean") {
-      durationMs = a; success = b;
+      durationMs = a;
+      success = b;
     } else if (typeof a === "boolean" && typeof b === "number") {
-      success = a; durationMs = b;
+      success = a;
+      durationMs = b;
     } else {
       // Fallback best-effort
-      durationMs = typeof a === "number" ? a : (typeof b === "number" ? b : 0);
-      success = typeof a === "boolean" ? a : (typeof b === "boolean" ? b : false);
+      durationMs = typeof a === "number" ? a : typeof b === "number" ? b : 0;
+      success = typeof a === "boolean" ? a : typeof b === "boolean" ? b : false;
     }
-    console.log(`📊 Metrics: Supabase connection ${success ? "success" : "failed"} (${durationMs}ms)`);
+    console.log(
+      `📊 Metrics: Supabase connection ${
+        success ? "success" : "failed"
+      } (${durationMs}ms)`
+    );
     if (this.supabaseConnectionDuration && typeof durationMs === "number") {
-      this.supabaseConnectionDuration.observe({ result: success ? "success" : "failure" }, durationMs / 1000);
+      this.supabaseConnectionDuration.observe(
+        { result: success ? "success" : "failure" },
+        durationMs / 1000
+      );
     }
   }
 
   recordError(errorType, component, severity, error) {
-    console.log(
-      `📊 Metrics: Error recorded - ${errorType} in ${component} (${severity}):`,
-      error?.message || error
-    );
+    // Skip logging to prevent EPIPE infinite loops during server startup tests
+    try {
+      if (process.stdout.writable && !process.stdout.destroyed) {
+        console.log(
+          `📊 Metrics: Error recorded - ${errorType} in ${component} (${severity}):`,
+          error?.message || error
+        );
+      }
+    } catch (e) {
+      // Silently ignore console errors to prevent infinite loops
+    }
+
     // Implementation for error tracking
     if (this.httpRequestTotal) {
-      this.httpRequestTotal.inc({
-        method: "ERROR",
-        route: errorType,
-        status_code: 500,
-      });
+      try {
+        this.httpRequestTotal.inc({
+          method: "ERROR",
+          route: errorType,
+          status_code: 500,
+        });
+      } catch (e) {
+        // Silently ignore metrics errors during startup
+      }
     }
   }
 
@@ -397,7 +418,13 @@ class ProspectProMetrics {
 
   recordBootPhase(phaseName, result, durationMs) {
     if (this.bootPhaseDuration) {
-      this.bootPhaseDuration.observe({ phase: String(phaseName), result: result ? String(result) : "unknown" }, durationMs || 0);
+      this.bootPhaseDuration.observe(
+        {
+          phase: String(phaseName),
+          result: result ? String(result) : "unknown",
+        },
+        durationMs || 0
+      );
     }
   }
 }

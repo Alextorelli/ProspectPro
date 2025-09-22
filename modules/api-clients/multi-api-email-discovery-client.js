@@ -16,8 +16,8 @@
  */
 
 const axios = require("axios");
-const ComprehensiveHunterClient = require("./comprehensive-hunter-client");
-const CostOptimizedApolloClient = require("./cost-optimized-apollo-client");
+const ComprehensiveHunterClient = require("./api-hunter-comprehensive-client");
+const CostOptimizedApolloClient = require("./api-apollo-cost-optimized-client");
 
 class MultiSourceEmailDiscovery {
   constructor(config = {}) {

@@ -4,7 +4,7 @@
  */
 
 const pLimit = require("p-limit");
-const { globalCache, TTLCache } = require("../utils/cache");
+const { globalCache, TTLCache } = require("../utils/cache-ttl-manager");
 const { createAllProviders, createProvider } = require("./providers");
 const logger = require("../utils/logger");
 

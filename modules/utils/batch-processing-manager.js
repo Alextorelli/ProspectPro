@@ -4,7 +4,7 @@
  */
 
 const pLimit = require("p-limit");
-const { globalCache, TTLCache } = require("./cache");
+const { globalCache, TTLCache } = require("./cache-ttl-manager");
 const logger = require("./logger");
 
 class BatchProcessor {

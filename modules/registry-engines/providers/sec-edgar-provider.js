@@ -2,7 +2,7 @@
  * SEC Edgar Provider for Public Company Validation
  */
 
-const SECEdgarClient = require("../../api-clients/enhanced-sec-edgar-client");
+const SECEdgarClient = require("../../api-clients/api-sec-edgar-enhanced-client");
 
 class SECEdgarProvider {
   constructor(userAgent = "ProspectPro Lead Discovery Tool") {
