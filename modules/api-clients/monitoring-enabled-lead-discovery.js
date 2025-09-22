@@ -4,7 +4,7 @@
  */
 
 const EnhancedScrapingDogClient = require('./enhanced-scrapingdog-client');
-const EnhancedHunterClient = require('./enhanced-hunter-client');
+const ComprehensiveHunterClient = require('./comprehensive-hunter-client');
 const EnhancedSupabaseClient = require('./enhanced-supabase-client');
 const ProspectProMetricsClient = require('./prospectpro-metrics-client');
 const LeadDiscoveryOrchestrator = require('../enhanced-lead-discovery-orchestrator');

@@ -13,7 +13,7 @@
  */
 
 const MultiSourceEmailDiscovery = require("./modules/api-clients/multi-source-email-discovery");
-const EnhancedHunterIOClient = require("./modules/api-clients/enhanced-hunter-io-client");
+const ComprehensiveHunterClient = require("./modules/api-clients/comprehensive-hunter-client");
 
 // Test configuration
 const TEST_CONFIG = {

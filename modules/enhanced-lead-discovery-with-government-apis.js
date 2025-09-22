@@ -15,7 +15,7 @@
 const CaliforniaSOS = require("./api-clients/california-sos-client");
 const NewYorkSOS = require("./api-clients/newyork-sos-client");
 const NYTaxParcels = require("./api-clients/ny-tax-parcels-client");
-const HunterIOClient = require("./api-clients/hunter-io");
+const ComprehensiveHunterClient = require("./api-clients/comprehensive-hunter-client");
 const NeverBounceClient = require("./api-clients/neverbounce");
 
 // Phase 1 Government API clients

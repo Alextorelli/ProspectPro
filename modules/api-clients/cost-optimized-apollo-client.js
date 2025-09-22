@@ -868,8 +868,35 @@ class CostOptimizedApolloClient {
           ? 0
           : 0.005
         : 0,
-      recommendNextSteps: this.generateRecommendations(intelligence),
+      recommendations: this.generateRecommendations(intelligence),
     };
+  }
+
+  /**
+   * Generate recommendations based on organization intelligence
+   */
+  generateRecommendations(intelligence) {
+    const recommendations = [];
+
+    if (intelligence.apolloData) {
+      recommendations.push("Use Apollo organization data for enhanced email patterns");
+      
+      if (intelligence.apolloData.employees > 100) {
+        recommendations.push("Large company - consider department-specific email patterns");
+      }
+      
+      if (intelligence.apolloData.industry) {
+        recommendations.push(`Industry-specific patterns available for ${intelligence.apolloData.industry}`);
+      }
+    } else {
+      recommendations.push("Apollo organization enrichment not successful - rely on domain patterns");
+    }
+
+    if (intelligence.emails.length > 5) {
+      recommendations.push("Multiple email patterns available - prioritize by confidence");
+    }
+
+    return recommendations;
   }
 
   /**

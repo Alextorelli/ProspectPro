@@ -7,7 +7,7 @@
 
 const StateRegistryClient = require('../api-clients/enhanced-state-registry-client');
 const OpenCorporatesClient = require('../api-clients/opencorporates-client');
-const HunterClient = require('../api-clients/hunter-client');
+const ComprehensiveHunterClient = require('../api-clients/comprehensive-hunter-client');
 const NeverBounceClient = require('../api-clients/neverbounce-client');
 
 class CostEfficientEnrichment {

@@ -4,7 +4,7 @@
  */
 
 const EnhancedScrapingDogClient = require("./api-clients/enhanced-scrapingdog-client");
-const EnhancedHunterClient = require("./api-clients/enhanced-hunter-client");
+const ComprehensiveHunterClient = require("./api-clients/comprehensive-hunter-client");
 const { createSupabaseClient } = require("../config/supabase");
 
 class EnhancedLeadDiscoveryOrchestrator {
@@ -15,9 +15,13 @@ class EnhancedLeadDiscoveryOrchestrator {
       config.scrapingDogBudget || process.env.SCRAPINGDOG_MONTHLY_BUDGET || 200
     );
 
-    this.hunter = new EnhancedHunterClient(
+    this.hunter = new ComprehensiveHunterClient(
       process.env.HUNTER_IO_API_KEY,
-      config.hunterBudget || process.env.HUNTER_MONTHLY_BUDGET || 500
+      {
+        maxDailyCost: config.hunterBudget || 15.0,
+        maxPerLeadCost: 1.0,
+        minEmailConfidence: 75,
+      }
     );
 
     this.supabase = createSupabaseClient();

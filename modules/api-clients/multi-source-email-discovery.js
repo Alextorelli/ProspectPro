@@ -16,8 +16,6 @@
  */
 
 const axios = require("axios");
-const HunterIOClient = require("./hunter-io");
-const EnhancedHunterClient = require("./enhanced-hunter-io-client");
 const ComprehensiveHunterClient = require("./comprehensive-hunter-client");
 const CostOptimizedApolloClient = require("./cost-optimized-apollo-client");
 

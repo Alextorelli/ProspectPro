@@ -6,24 +6,25 @@
  * our circuit breaker and rate limiting improvements
  */
 
-const EnhancedHunterIOClient = require("./modules/api-clients/enhanced-hunter-io-client");
+const ComprehensiveHunterClient = require("./modules/api-clients/comprehensive-hunter-client");
 
 async function testRealHunterAPI() {
   console.log("🔥 TESTING REAL HUNTER.IO API INTEGRATION");
   console.log("=".repeat(60));
 
   // Initialize with production settings
-  const hunterClient = new EnhancedHunterIOClient(
+  const hunterClient = new ComprehensiveHunterClient(
     process.env.HUNTER_IO_API_KEY || "7bb2d1f9b5f8af7c1e8bf1736cf51f60eff49bbf",
     {
-      dailyBudget: 2.0, // Limit spending for testing
+      maxDailyCost: 2.0, // Limit spending for testing
+      maxPerLeadCost: 0.5,
+      minEmailConfidence: 75,
       maxConcurrentRequests: 1,
-      baseDelayMs: 1500, // Respectful rate limiting
-      maxRetries: 2,
+      baseDelay: 1500, // Respectful rate limiting
     }
   );
 
-  console.log("✅ Enhanced Hunter.io Client initialized for real API testing");
+  console.log("✅ Comprehensive Hunter.io Client initialized for real API testing");
   console.log("");
 
   // Test with real businesses that should have discoverable emails
@@ -53,7 +54,7 @@ async function testRealHunterAPI() {
     totalTests++;
 
     try {
-      const result = await hunterClient.discoverBusinessEmails(business);
+      const result = await hunterClient.comprehensiveEmailDiscovery(business);
 
       if (result.success && result.emails && result.emails.length > 0) {
         successfulTests++;

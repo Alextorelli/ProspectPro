@@ -5,7 +5,6 @@
  * to demonstrate the optimization improvements and additional features.
  */
 
-const EnhancedHunterClient = require("./modules/api-clients/enhanced-hunter-io-client");
 const ComprehensiveHunterClient = require("./modules/api-clients/comprehensive-hunter-client");
 
 async function compareHunterIntegrations() {

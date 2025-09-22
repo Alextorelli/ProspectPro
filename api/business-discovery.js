@@ -8,6 +8,7 @@ const router = express.Router();
 // Initialize Enhanced Discovery Engine v2.0 with all API keys
 const apiKeys = {
   hunterIO: process.env.HUNTER_IO_API_KEY,
+  apollo: process.env.APOLLO_API_KEY,
   neverBounce: process.env.NEVERBOUNCE_API_KEY,
   googlePlaces: process.env.GOOGLE_PLACES_API_KEY,
   foursquare:
