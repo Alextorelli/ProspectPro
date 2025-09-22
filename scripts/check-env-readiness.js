@@ -66,14 +66,22 @@ function checkRequiredVars() {
 
 // Check if GitHub Actions workflow can be triggered
 function checkWorkflowTriggerability() {
-  const hasGitHubToken = process.env.GITHUB_TOKEN || process.env.GITHUB_PAT;
+  const hasGitHubToken =
+    process.env.GHP_SECRET ||
+    process.env.GITHUB_TOKEN ||
+    process.env.GITHUB_PAT;
   const hasRepoInfo =
     process.env.GITHUB_REPOSITORY_OWNER && process.env.GITHUB_REPOSITORY_NAME;
 
   if (!hasGitHubToken) {
-    console.log("⚠️  No GitHub token found (GITHUB_TOKEN or GITHUB_PAT)");
+    console.log(
+      "⚠️  No GitHub token found (GHP_SECRET, GITHUB_TOKEN, or GITHUB_PAT)"
+    );
     console.log(
       "   Workflow triggering not available - manual .env setup required"
+    );
+    console.log(
+      "   💡 Set GHP_SECRET repository secret or GHP_SECRET environment variable"
     );
     return false;
   }
@@ -85,6 +93,12 @@ function checkWorkflowTriggerability() {
   }
 
   console.log("✅ GitHub Actions workflow can be triggered");
+  const tokenSource = process.env.GHP_SECRET
+    ? "GHP_SECRET"
+    : process.env.GITHUB_TOKEN
+    ? "GITHUB_TOKEN"
+    : "GITHUB_PAT";
+  console.log(`   🔑 Token source: ${tokenSource}`);
   return true;
 }
 
@@ -157,7 +171,10 @@ async function performReadinessCheck() {
       );
     }
     if (!results.find((r) => r.name === "Workflow Trigger")?.passed) {
-      console.log("   # Set GITHUB_TOKEN or GITHUB_PAT environment variable");
+      console.log(
+        "   # Set GHP_SECRET environment variable or ensure repository secret is configured"
+      );
+      console.log("   export GHP_SECRET='your_github_personal_access_token'");
     }
   }
 

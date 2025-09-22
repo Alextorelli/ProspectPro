@@ -10,17 +10,19 @@ echo "=============================================="
 
 # Function to trigger GitHub Actions workflow
 trigger_env_workflow() {
-    local github_token="${GITHUB_TOKEN:-$GITHUB_PAT}"
+    local github_token="${GHP_SECRET:-$GITHUB_TOKEN}"
     local repo_owner="${GITHUB_REPOSITORY_OWNER:-Alextorelli}"
     local repo_name="${GITHUB_REPOSITORY_NAME:-ProspectPro}"
     
     if [ -z "$github_token" ]; then
-        echo "⚠️  No GitHub token found (GITHUB_TOKEN or GITHUB_PAT)"
+        echo "⚠️  No GitHub token found (GHP_SECRET or GITHUB_TOKEN)"
+        echo "   Set repository secret 'GHP_SECRET' or environment variable 'GHP_SECRET'"
         echo "   Skipping workflow trigger - ensure .env is manually configured"
         return 1
     fi
     
     echo "🔔 Triggering environment generation workflow..."
+    echo "📋 Using repository: $repo_owner/$repo_name"
     
     # Trigger the workflow via GitHub API
     curl -X POST \

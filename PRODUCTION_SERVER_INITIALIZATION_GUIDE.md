@@ -95,9 +95,9 @@ Configure in `Repository Settings → Secrets and variables → Actions`:
 ### Required Environment Variables (for workflow triggering)
 
 ```bash
+export GHP_SECRET="your_github_personal_access_token"
+# OR (fallback)
 export GITHUB_TOKEN="your_github_personal_access_token"
-# OR
-export GITHUB_PAT="your_github_personal_access_token"
 ```
 
 ### Optional Environment Variables
@@ -127,10 +127,10 @@ graph TD
 
 ### Issue: "No GitHub token found"
 
-**Solution:** Set `GITHUB_TOKEN` or `GITHUB_PAT` environment variable
+**Solution:** Set `GHP_SECRET` environment variable or ensure repository secret is configured
 
 ```bash
-export GITHUB_TOKEN="ghp_your_token_here"
+export GHP_SECRET="ghp_your_token_here"
 npm run prod:init
 ```
 
@@ -181,7 +181,7 @@ After successful initialization, your server will show:
 1. **Set GitHub token:**
 
    ```bash
-   export GITHUB_TOKEN="your_token"
+   export GHP_SECRET="your_token"
    ```
 
 2. **Initialize production server:**
