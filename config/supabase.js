@@ -208,12 +208,70 @@ function resolveSupabaseKey() {
   return selectSupabaseKey();
 }
 
+// Vault-specific helper functions
+async function getVaultSecrets(secretNames = []) {
+  const client = getSupabaseClient();
+  if (!client) return null;
+  
+  try {
+    const { data, error } = await client
+      .from("vault.decrypted_secrets")
+      .select("name, decrypted_secret")
+      .in("name", secretNames);
+      
+    if (error) throw error;
+    return data || [];
+  } catch (err) {
+    console.warn("Vault secrets query failed:", err.message);
+    return null;
+  }
+}
+
+async function getVaultSecretByName(secretName) {
+  const client = getSupabaseClient();
+  if (!client) return null;
+  
+  try {
+    const { data, error } = await client
+      .from("vault.decrypted_secrets")
+      .select("decrypted_secret")
+      .eq("name", secretName)
+      .single();
+      
+    if (error) throw error;
+    return data?.decrypted_secret || null;
+  } catch (err) {
+    console.warn(`Vault secret '${secretName}' query failed:`, err.message);
+    return null;
+  }
+}
+
+async function checkVaultHealth() {
+  const client = getSupabaseClient();
+  if (!client) return { available: false, error: "No client" };
+  
+  try {
+    const { data, error } = await client
+      .from("vault.secrets")
+      .select("name")
+      .limit(1);
+      
+    if (error) throw error;
+    return { available: true, secretsFound: data?.length || 0 };
+  } catch (err) {
+    return { available: false, error: err.message };
+  }
+}
+
 module.exports = {
   testConnection,
   getLastSupabaseDiagnostics,
   setLastSupabaseDiagnostics,
   getSupabaseClient,
   resolveSupabaseKey,
+  getVaultSecrets,
+  getVaultSecretByName,
+  checkVaultHealth,
   supabaseUrl,
   supabaseDbPoolerUrl
 };
