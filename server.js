@@ -1,9 +1,12 @@
-// Load environment early; ignore if missing (Railway injects vars directly)
-try {
-  require("dotenv").config();
-} catch (e) {
-  console.warn("⚠️  dotenv not loaded (likely fine in production):", e.message);
-}
+// Load environment configuration first
+const EnvironmentLoader = require("./config/environment-loader");
+const envLoader = new EnvironmentLoader();
+const config = envLoader.getConfig();
+
+console.log(`🚀 Starting ProspectPro in ${config.environment} mode`);
+console.log(
+  `📊 Performance features: ${JSON.stringify(config.features, null, 2)}`
+);
 
 // Dynamically load secrets from Supabase app_secrets table
 const { createClient } = require("@supabase/supabase-js");
@@ -349,16 +352,13 @@ bootDebugger.startPhase("auth-setup", "Setting up authentication middleware");
 // Enhanced auth middleware for API routes
 const authMiddleware = (req, res, next) => {
   // Skip auth in development if configured
-  if (
-    process.env.NODE_ENV !== "production" &&
-    process.env.SKIP_AUTH_IN_DEV === "true"
-  ) {
+  if (config.isDevelopment && process.env.SKIP_AUTH_IN_DEV === "true") {
     req.user = { id: "dev-user-id", email: "dev@example.com" };
     return next();
   }
 
   // Check for personal access token in production
-  if (process.env.NODE_ENV === "production") {
+  if (config.isProduction) {
     const authHeader = req.headers.authorization;
     const token = authHeader && authHeader.split(" ")[1]; // Bearer TOKEN
 
@@ -435,7 +435,7 @@ app.get("/health", (req, res) => {
     status: diag.success ? "ok" : degradedMode ? "degraded" : "error",
     degradedMode,
     timestamp: new Date().toISOString(),
-    environment: process.env.NODE_ENV,
+    environment: config.environment,
     version: "2.0.0",
     bootHealth,
     supabase: {
@@ -919,7 +919,7 @@ app.use((error, req, res, next) => {
   console.error("Global error handler:", error);
 
   // Don't leak error details in production
-  const isDevelopment = process.env.NODE_ENV !== "production";
+  const isDevelopment = config.isDevelopment;
 
   res.status(error.status || 500).json({
     error: "Internal server error",
