@@ -167,9 +167,7 @@ async function generateCampaignCSV(campaign, leads, options = {}) {
     "Confidence Score",
     "Validation Status",
     "Industry/Category",
-    "Employee Count Est.",
-    "Google Rating",
-    "Google Reviews",
+    // Removed: Employee Count Est., Google Rating, Google Reviews
     "Created Date",
     "Discovery Source",
     "Email Source",
@@ -187,8 +185,7 @@ async function generateCampaignCSV(campaign, leads, options = {}) {
   // Add provenance columns if requested
   if (includeProvenance) {
     headers.push(
-      "Google Place ID",
-      "Foursquare ID",
+      // Removed: Google Place ID, Foursquare ID
       "Business Registration",
       "Professional License",
       "Chamber Membership",
@@ -212,9 +209,7 @@ async function generateCampaignCSV(campaign, leads, options = {}) {
       lead.confidence_score || 0,
       cleanCsvField(lead.validation_status || "pending"),
       cleanCsvField(lead.business_category || ""),
-      lead.employee_count_estimate || "",
-      lead.google_rating || "",
-      lead.google_reviews_count || "",
+      // Removed: employee count, google rating, reviews
       formatDate(lead.created_at),
       cleanCsvField(lead.discovery_source || "unknown"),
       cleanCsvField(lead.email_discovery_source || "website"),
@@ -232,8 +227,7 @@ async function generateCampaignCSV(campaign, leads, options = {}) {
     // Add provenance data if requested
     if (includeProvenance) {
       baseRow.push(
-        cleanCsvField(lead.google_place_id || ""),
-        cleanCsvField(lead.foursquare_fsq_id || ""),
+        // Removed: google_place_id, foursquare_fsq_id
         getRegistrationStatus(lead),
         getProfessionalLicense(lead),
         getChamberMembership(lead),

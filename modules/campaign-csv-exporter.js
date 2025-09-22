@@ -167,7 +167,7 @@ class CampaignCSVExporter {
         // Campaign & Query Tracking
         { id: "campaignId", title: "Campaign ID" },
         { id: "queryId", title: "Query ID" },
-        { id: "query", title: "Search Query" },
+        // Removed: Search Query
         { id: "location", title: "Search Location" },
         { id: "queryTimestamp", title: "Query Timestamp" },
 
@@ -175,9 +175,7 @@ class CampaignCSVExporter {
         { id: "name", title: "Business Name" },
         { id: "address", title: "Address" },
         { id: "category", title: "Category" },
-        { id: "rating", title: "Rating" },
-        { id: "reviewCount", title: "Review Count" },
-        { id: "priceLevel", title: "Price Level" },
+        // Removed: Rating, Review Count, Price Level
 
         // Company Contact Information
         { id: "companyPhone", title: "Company Phone" },
@@ -199,13 +197,13 @@ class CampaignCSVExporter {
         { id: "website", title: "Website" },
         { id: "websiteSource", title: "Website Source" },
         { id: "websiteAccessible", title: "Website Accessible" },
-        { id: "websiteResponseTime", title: "Website Response Time (ms)" },
+        // Removed: Website Response Time (ms)
 
         // Validation & Quality
         { id: "confidenceScore", title: "Confidence Score" },
         { id: "qualityGrade", title: "Quality Grade" },
         { id: "isQualified", title: "Is Qualified" },
-        { id: "exportReady", title: "Export Ready" },
+        // Removed: Export Ready
 
         // Registry & Verification
         { id: "registryValidated", title: "Registry Validated" },
@@ -217,13 +215,13 @@ class CampaignCSVExporter {
         { id: "primarySource", title: "Primary Source" },
         { id: "dataSources", title: "All Data Sources" },
         { id: "apiCost", title: "API Cost ($)" },
-        { id: "processingTime", title: "Processing Time (ms)" },
+        // Removed: Processing Time (ms)
 
         // Enhanced API Integration Tracking
         { id: "apolloData", title: "Apollo.io Data" },
         { id: "hunterData", title: "Hunter.io Data" },
         { id: "optimizedEngineCost", title: "Optimized Engine Cost ($)" },
-        { id: "employeeCount", title: "Employee Count Est." },
+        // Removed: Employee Count Est.
 
         // Testing & Analysis Metadata
         { id: "businessNameScore", title: "Business Name Score" },
@@ -233,11 +231,7 @@ class CampaignCSVExporter {
         { id: "emailScore", title: "Email Score" },
         { id: "registrationScore", title: "Registration Score" },
         { id: "preValidationScore", title: "Pre-validation Score" },
-
-        // Technical Identifiers
-        { id: "placeId", title: "Google Place ID" },
-        { id: "foursquareId", title: "Foursquare ID" },
-        { id: "hours", title: "Business Hours" },
+        // Removed: Google Place ID, Foursquare ID, Business Hours
       ],
     });
 
@@ -246,7 +240,7 @@ class CampaignCSVExporter {
       // Campaign & Query Tracking
       campaignId: lead.campaignId,
       queryId: lead.queryId,
-      query: lead.query,
+      // Removed: query (Search Query)
       location: lead.location,
       queryTimestamp: lead.queryTimestamp,
 
@@ -254,9 +248,7 @@ class CampaignCSVExporter {
       name: lead.name || "",
       address: lead.address || "",
       category: lead.category || "",
-      rating: lead.rating || "",
-      reviewCount: lead.reviewCount || "",
-      priceLevel: lead.priceLevel || "",
+      // Removed: rating, reviewCount, priceLevel
 
       // Company Contact Information
       companyPhone: lead.companyPhone || lead.phone || "",
@@ -286,13 +278,13 @@ class CampaignCSVExporter {
       website: lead.website || "",
       websiteSource: lead.websiteSource || "Google Places",
       websiteAccessible: lead.websiteValidation?.accessible || false,
-      websiteResponseTime: lead.websiteValidation?.responseTime || "",
+      // Removed: websiteResponseTime
 
       // Validation & Quality
       confidenceScore: lead.finalConfidenceScore || lead.confidenceScore || "",
       qualityGrade: lead.qualityGrade || "",
       isQualified: lead.isQualified || false,
-      exportReady: lead.exportReady || false,
+      // Removed: exportReady
 
       // Registry & Verification
       registryValidated: lead.registryValidation?.registeredInAnyState || false,
@@ -304,13 +296,13 @@ class CampaignCSVExporter {
       primarySource: lead.source || "Google Places",
       dataSources: this.formatDataSources(lead),
       apiCost: lead.processingCost || "",
-      processingTime: lead.processingTime || "",
+      // Removed: processingTime
 
       // Enhanced API Integration Tracking
       apolloData: this.getApolloDataStatus(lead),
       hunterData: this.getHunterDataStatus(lead),
       optimizedEngineCost: this.getOptimizedEngineCost(lead),
-      employeeCount: lead.employeeCount || lead.employee_count_estimate || "",
+      // Removed: employeeCount
 
       // Testing & Analysis Metadata
       businessNameScore: lead.qualityScores?.businessNameScore || "",
@@ -321,14 +313,7 @@ class CampaignCSVExporter {
       registrationScore: lead.qualityScores?.registrationScore || "",
       preValidationScore: lead.preValidationScore || "",
 
-      // Technical Identifiers
-      placeId: lead.placeId || "",
-      foursquareId: lead.foursquareData?.places?.[0]?.fsqId || "",
-      hours: lead.hours
-        ? typeof lead.hours === "object"
-          ? JSON.stringify(lead.hours)
-          : lead.hours
-        : "",
+      // Removed: Technical Identifiers (placeId, foursquareId, hours)
     }));
 
     // Write comprehensive CSV

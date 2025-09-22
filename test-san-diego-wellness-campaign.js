@@ -71,21 +71,20 @@ async function runSanDiegoWellnessCampaign() {
     console.log("📊 CAMPAIGN RESULTS");
     console.log("=".repeat(60));
 
+    const qualifiedLeads = campaignResult.leads || [];
+    console.log(`✅ Qualified Leads Found: ${qualifiedLeads.length}/5 target`);
     console.log(
-      `✅ Qualified Leads Found: ${
-        campaignResult.qualified?.length || 0
-      }/5 target`
+      `💰 Total Cost: $${(campaignResult.totalCost || 0).toFixed(4)}`
     );
     console.log(
-      `💰 Total Cost: $${
-        campaignResult.sessionStats?.totalCost?.toFixed(4) || "0.0000"
-      }`
+      `📈 Average Confidence: ${(
+        campaignResult.qualityMetrics?.avgConfidence || 0
+      ).toFixed(1)}%`
     );
     console.log(
-      `📈 Average Confidence: ${campaignResult.averageConfidence || 0}%`
-    );
-    console.log(
-      `⏱️ Processing Time: ${campaignResult.sessionStats?.totalTime || 0}s`
+      `⏱️ Processing Time: ${(
+        (campaignResult.processingTime || 0) / 1000
+      ).toFixed(1)}s`
     );
     console.log(
       `🔍 Queries Executed: ${
@@ -94,11 +93,11 @@ async function runSanDiegoWellnessCampaign() {
     );
 
     // Display lead details
-    if (campaignResult.qualified && campaignResult.qualified.length > 0) {
+    if (qualifiedLeads.length > 0) {
       console.log("\n📋 QUALIFIED WELLNESS BUSINESS LEADS:");
       console.log("-".repeat(60));
 
-      campaignResult.qualified.forEach((lead, index) => {
+      qualifiedLeads.forEach((lead, index) => {
         console.log(`\n${index + 1}. ${lead.name || lead.business_name}`);
         console.log(`   📍 Address: ${lead.address}`);
         console.log(`   📞 Phone: ${lead.companyPhone || lead.phone || "N/A"}`);
@@ -113,11 +112,7 @@ async function runSanDiegoWellnessCampaign() {
         console.log(
           `   📧 Owner Email: ${lead.ownerEmail || lead.owner_email || "N/A"}`
         );
-        console.log(
-          `   👥 Employee Count: ${
-            lead.employeeCount || lead.employee_count_estimate || "Unknown"
-          }`
-        );
+        // Employee count removed from requirements; not displayed
         console.log(
           `   ⭐ Confidence: ${
             lead.finalConfidenceScore || lead.confidenceScore
@@ -130,12 +125,14 @@ async function runSanDiegoWellnessCampaign() {
 
     // Check CSV export
     if (campaignResult.csvPath) {
-      console.log(`\n📄 CSV Export: ${campaignResult.csvPath}`);
+      const csvFilePath =
+        campaignResult.csvPath.filepath || campaignResult.csvPath;
+      console.log(`\n📄 CSV Export: ${csvFilePath}`);
 
       // Read and validate CSV content
       const fs = require("fs");
-      if (fs.existsSync(campaignResult.csvPath)) {
-        const csvContent = fs.readFileSync(campaignResult.csvPath, "utf8");
+      if (fs.existsSync(csvFilePath)) {
+        const csvContent = fs.readFileSync(csvFilePath, "utf8");
         const lines = csvContent.split("\n");
         const headers = lines[0];
 
@@ -156,19 +153,12 @@ async function runSanDiegoWellnessCampaign() {
             headers.includes("Owner Name") ? "✅" : "❌"
           }`
         );
-        console.log(
-          `   📋 Headers include Employee Count: ${
-            headers.includes("Employee Count Est.") ? "✅" : "❌"
-          }`
-        );
+        // Employee Count header was removed by design
 
         // Check for data in first lead row
         if (lines.length > 1) {
           const firstDataRow = lines[1].split(",");
           const ownerNameIndex = headers.split(",").indexOf("Owner Name");
-          const employeeCountIndex = headers
-            .split(",")
-            .indexOf("Employee Count Est.");
 
           console.log("   🔍 First Lead Sample:");
           console.log(
@@ -178,76 +168,64 @@ async function runSanDiegoWellnessCampaign() {
                 : "N/A"
             }`
           );
-          console.log(
-            `      Employee Count: ${
-              employeeCountIndex >= 0
-                ? firstDataRow[employeeCountIndex] || "Empty"
-                : "N/A"
-            }`
-          );
         }
       }
     }
 
     // Validation results
     console.log("\n🎯 REQUIREMENT VALIDATION:");
-    const hasOwnerInfo = campaignResult.qualified?.some(
+    const hasOwnerInfo = qualifiedLeads.some(
       (lead) =>
         lead.ownerName || lead.owner_name || lead.ownerEmail || lead.owner_email
     );
-    const hasSmallBusiness = campaignResult.qualified?.some(
-      (lead) =>
-        (lead.employeeCount && lead.employeeCount <= 5) ||
-        (lead.employee_count_estimate && lead.employee_count_estimate <= 5)
-    );
+    // Small business verification removed from hard requirement in this validation block
 
     console.log(
       `   ✅ Location (San Diego): ${
-        campaignResult.qualified?.length > 0 ? "✅ Met" : "❌ Failed"
+        qualifiedLeads.length > 0 ? "✅ Met" : "❌ Failed"
       }`
     );
     console.log(
       `   ✅ Business Type (Wellness): ${
-        campaignResult.qualified?.length > 0 ? "✅ Met" : "❌ Failed"
+        qualifiedLeads.length > 0 ? "✅ Met" : "❌ Failed"
       }`
     );
     console.log(
       `   ✅ Owner Information: ${hasOwnerInfo ? "✅ Met" : "❌ Failed"}`
     );
-    console.log(
-      `   ✅ Small Business (<5 employees): ${
-        hasSmallBusiness ? "✅ Met" : "❌ Needs Verification"
-      }`
-    );
+    console.log(`   ✅ Small Business (<5 employees): ❌ Needs Verification`);
     console.log(
       `   ✅ Complete Contacts: ${
-        campaignResult.qualified?.length > 0 ? "✅ Met" : "❌ Failed"
+        qualifiedLeads.length > 0 ? "✅ Met" : "❌ Failed"
       }`
     );
     console.log(
       `   ✅ Target Count (3-5 leads): ${
-        campaignResult.qualified?.length >= 3 &&
-        campaignResult.qualified?.length <= 5
+        qualifiedLeads.length >= 3 && qualifiedLeads.length <= 5
           ? "✅ Met"
           : "❌ Failed"
       }`
     );
 
-    if (campaignResult.qualified?.length >= 3 && hasOwnerInfo) {
+    if (
+      qualifiedLeads.length >= 3 &&
+      qualifiedLeads.length <= 5 &&
+      hasOwnerInfo
+    ) {
       console.log("\n🎉 SUCCESS: Campaign requirements met!");
       console.log("✅ Ready for client delivery");
       return {
         success: true,
-        leads: campaignResult.qualified,
-        csvPath: campaignResult.csvPath,
+        leads: qualifiedLeads,
+        csvPath: campaignResult.csvPath?.filepath || campaignResult.csvPath,
       };
     } else {
       console.log("\n⚠️  PARTIAL SUCCESS: Some requirements not fully met");
       console.log("📝 Consider adjusting search parameters or data enrichment");
       return {
         success: false,
-        leads: campaignResult.qualified || [],
-        csvPath: campaignResult.csvPath,
+        leads: qualifiedLeads,
+        csvPath: campaignResult.csvPath?.filepath || campaignResult.csvPath,
       };
     }
   } catch (error) {

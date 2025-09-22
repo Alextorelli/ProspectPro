@@ -70,6 +70,57 @@ class EnhancedLeadDiscovery {
     return null;
   }
 
+  /**
+   * Lightweight website email scraper
+   * - Fetches the homepage and tries a few common contact paths
+   * - Extracts emails via regex
+   */
+  async scrapeEmailsFromWebsite(websiteUrl) {
+    const urlsToTry = [websiteUrl];
+    // Add common contact paths
+    try {
+      const base = new URL(websiteUrl);
+      const make = (p) => new URL(p, base.origin).toString();
+      urlsToTry.push(make("/contact"), make("/contact-us"), make("/about"));
+    } catch (_) {
+      // If URL parsing fails, just use the original
+    }
+
+    const emails = new Set();
+    let lastStatus = null;
+
+    for (const url of urlsToTry) {
+      try {
+        const res = await fetch(url, {
+          method: "GET",
+          headers: { "User-Agent": "ProspectPro-EmailScraper/1.0" },
+          redirect: "follow",
+        });
+        lastStatus = res.status;
+        if (!res.ok) continue;
+        const html = await res.text();
+        // Basic email regex; avoids overly permissive patterns
+        const regex = /[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi;
+        const matches = html.match(regex) || [];
+        for (const m of matches) {
+          // Filter out image names or obvious false positives
+          if (
+            !m.toLowerCase().endsWith(".png") &&
+            !m.toLowerCase().endsWith(".jpg")
+          ) {
+            emails.add(m);
+          }
+        }
+        // If we found any emails, no need to fetch more pages
+        if (emails.size > 0) break;
+      } catch (_) {
+        // Ignore fetch errors and try next path
+      }
+    }
+
+    return { emails: Array.from(emails).slice(0, 5), status: lastStatus };
+  }
+
   setCache(key, data) {
     this.cache.set(key, { data, timestamp: Date.now() });
   }
@@ -377,6 +428,36 @@ class EnhancedLeadDiscovery {
           businessData.website = googlePlacesDetails.website;
         if (googlePlacesDetails.hours)
           businessData.hours = googlePlacesDetails.hours;
+      }
+    }
+
+    // Attempt to scrape emails directly from the website (real data, free)
+    if (businessData.website) {
+      try {
+        const scraped = await this.scrapeEmailsFromWebsite(
+          businessData.website
+        );
+        if (scraped && scraped.emails && scraped.emails.length > 0) {
+          // Prefer non-generic emails if available
+          const nonGeneric = scraped.emails.find(
+            (e) => !/^(info|contact|support|admin|hello|sales|team)@/i.test(e)
+          );
+          const selected = nonGeneric || scraped.emails[0];
+          if (selected) {
+            businessData.companyEmail = selected;
+            businessData.companyEmailSource = `website_scrape (${
+              scraped.status || "HTTP"
+            })`;
+            businessData.companyEmailConfidence = 75; // Real source but not deliverability-verified
+
+            // Legacy fields for compatibility
+            businessData.email = selected;
+            businessData.emailSource = businessData.companyEmailSource;
+            businessData.emailConfidence = businessData.companyEmailConfidence;
+          }
+        }
+      } catch (e) {
+        // Non-fatal: continue without website scrape
       }
     }
 
