@@ -16,14 +16,33 @@
 
 ```mermaid
 graph TD
-    A[Lovable Frontend] -->|API Calls| B[Supabase Edge Functions]
-    B -->|Process| C[Enhanced Lead Discovery]
-    C -->|Store| D[Supabase Database]
-    D -->|Real-time| A
-    B -->|Webhooks| E[Cost Tracking]
-    E -->|Update| D
-    D -->|Notifications| F[Real-time Subscriptions]
-    F -->|Live Updates| A
+    subgraph "Client (React)"
+        A[User Lands on /] --> B{Dashboard Page};
+        B --> C{{useCampaigns Hook}};
+        C -- Fetches --> D[Campaign List];
+        D -- Renders --> E[CampaignCard Grid];
+        E -- Click --> F{Campaign Detail Page};
+        F --> G{{useBusinessDiscovery Hook}};
+        G -- Fetches --> H[Lead Data];
+        F --> I{{useRealTimeUpdates Hook}};
+        I -- Subscribes --> J[Supabase Realtime];
+        H -- Renders --> K[LeadTable];
+        K -- Selects Leads --> L{ExportTray};
+        L -- Initiates Export --> M{{useExport Hook}};
+    end
+
+    subgraph "Backend (Supabase)"
+        C -- "SELECT * FROM campaigns" --> S1[Postgres DB];
+        G -- "SELECT * FROM leads WHERE campaign_id=X" --> S1;
+        J -- "channel('campaigns')" --> I;
+        M -- "invoke('verify-and-export')" --> S2[Edge Function];
+        S2 -- "SELECT & Validate" --> S1;
+        S2 -- "External APIs (NeverBounce)" --> S3[3rd Party APIs];
+    end
+
+    style F fill:#f9f,stroke:#333,stroke-width:2px
+    style L fill:#ccf,stroke:#333,stroke-width:2px
+    style S2 fill:#f96,stroke:#333,stroke-width:2px
 ```
 
 ### **Real-Time Data Pipeline**
@@ -48,56 +67,28 @@ API Call → Cost Calculation → Database Update → Real-time Cost Display →
 
 ---
 
-## 🧩 **Component Architecture**
+## 🧩 **Component Architecture (Tiered Implementation)**
 
-### **Application Structure**
+This architecture is designed for progressive enhancement, aligning with the Tier 1, 2, and 3 recommendations.
 
-```
-src/
-├── components/              # Reusable UI components
-│   ├── layout/             # Layout components
-│   │   ├── AppLayout.tsx       # Main app shell
-│   │   ├── Sidebar.tsx         # Navigation sidebar
-│   │   └── Header.tsx          # Top navigation bar
-│   ├── forms/              # Form components
-│   │   ├── BusinessDiscoveryForm.tsx
-│   │   └── ExportConfigForm.tsx
-│   ├── dashboard/          # Dashboard components
-│   │   ├── CampaignDashboard.tsx
-│   │   ├── CostTracker.tsx
-│   │   └── ProgressIndicator.tsx
-│   ├── results/            # Results display
-│   │   ├── LeadCard.tsx
-│   │   ├── LeadTable.tsx
-│   │   └── ConfidenceIndicator.tsx
-│   └── ui/                 # Base UI components
-│       ├── Button.tsx
-│       ├── Card.tsx
-│       ├── Modal.tsx
-│       └── ProgressBar.tsx
-├── pages/                  # Route components
-│   ├── Dashboard.tsx           # Campaign overview
-│   ├── BusinessDiscovery.tsx   # Search interface
-│   ├── Results.tsx            # Lead results
-│   └── AdminPanel.tsx         # System monitoring
-├── hooks/                  # Custom React hooks
-│   ├── useBusinessDiscovery.ts # Main discovery logic
-│   ├── useRealTimeUpdates.ts   # Real-time subscriptions
-│   ├── useCostTracking.ts     # Budget and cost monitoring
-│   └── useExport.ts           # Data export functionality
-├── stores/                 # State management
-│   ├── campaignStore.ts       # Campaign state
-│   ├── userStore.ts           # User preferences
-│   └── systemStore.ts         # System status
-├── lib/                    # Utilities and configs
-│   ├── supabase.ts           # Supabase client
-│   ├── api.ts               # API helpers
-│   └── utils.ts             # Helper functions
-└── types/                  # TypeScript definitions
-    ├── campaign.ts           # Campaign types
-    ├── lead.ts              # Lead types
-    └── api.ts               # API response types
-```
+#### **Tier 1: Core UX & Layout**
+
+- **`AppLayout.tsx`**: The persistent shell for the entire application. It contains the main navigation (`Sidebar.tsx`) and a dynamic header. This ensures a consistent user experience and immediate access to core functions.
+- **`pages/index.tsx` (Central Dashboard)**: The new application entry point. It displays a grid of `CampaignCard` components, providing an immediate, high-level overview of all user activities. Replaces the previous, more fragmented landing page.
+- **`CampaignCard.tsx`**: A modular, at-a-glance summary of a single campaign. Displays key stats (e.g., leads found, cost, status) and serves as a navigation point to the detailed campaign view.
+- **`LoadingSkeleton.tsx` & `EmptyState.tsx`**: Critical for a polished user experience. Skeletons provide a perceived performance boost during data fetching, while empty states guide the user when no data is available, preventing blank screens.
+
+#### **Tier 2: Enhanced Functionality & Feedback**
+
+- **`BusinessDiscoveryForm.tsx` (Enhanced)**: Upgraded to include a real-time cost and time estimator. This component provides immediate feedback to the user about the potential impact of their search query _before_ they commit to it, aligning with our cost-control principles.
+- **`ConfidenceBar.tsx`**: A visual component used within the `LeadTable` to represent the quality score of a lead. It translates a numerical score (0-100) into an intuitive, color-coded bar, allowing for rapid visual scanning of lead quality.
+- **`ExportTray.tsx`**: A non-modal, slide-out panel for managing the export process. It replaces the previous disruptive modal, allowing users to configure and monitor exports while still interacting with the main application. This is a significant UX improvement for asynchronous tasks.
+
+#### **Tier 3: Advanced & "Lovable" Features**
+
+- **`BudgetTracker.tsx`**: A visual gauge that provides a persistent, real-time view of the campaign's budget consumption against its limit. This component makes budget awareness a constant, ambient part of the user interface.
+- **`CampaignList.tsx`**: A small, scrollable list of recent campaigns, typically placed in the `AppLayout`'s sidebar. It provides quick navigation between active or recent campaigns, improving workflow for power users.
+- **Interactive Onboarding/Help System**: A guided tour or context-sensitive help system (e.g., using a library like Shepherd.js) to introduce users to the cost-saving features and advanced functionality, improving feature discovery and user confidence.
 
 ---
 

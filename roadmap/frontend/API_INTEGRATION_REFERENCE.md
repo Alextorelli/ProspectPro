@@ -223,19 +223,21 @@ interface Campaign {
   metadata: CampaignMetadata;
 }
 
-// Get user campaigns
-const getUserCampaigns = async () => {
+// Get all user campaigns for the main dashboard
+const getAllCampaigns = async () => {
   const { data, error } = await supabase
     .from("campaigns")
-    .select("*")
+    .select(
+      "id, business_type, location, status, leads_found, total_cost, started_at"
+    )
     .order("started_at", { ascending: false });
 
   if (error) throw new Error(error.message);
   return data;
 };
 
-// Get campaign details
-const getCampaign = async (campaignId: string) => {
+// Get full campaign details for the campaign view
+const getCampaignDetails = async (campaignId: string) => {
   const { data, error } = await supabase
     .from("campaigns")
     .select("*")
@@ -437,66 +439,94 @@ const useCostTracking = (campaignId: string) => {
 
 ---
 
-## 🎯 **Custom Hooks**
+## 🎯 **Custom Hooks (React Query)**
 
-### **Business Discovery Hook**
+### **`useCampaigns` (for Dashboard)**
 
 ```typescript
-const useBusinessDiscovery = () => {
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [currentCampaign, setCurrentCampaign] = useState<Campaign | null>(null);
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/lib/supabase";
 
-  const startDiscovery = async (params: DiscoveryRequest) => {
-    setIsProcessing(true);
+const getAllCampaigns = async () => {
+  const { data, error } = await supabase
+    .from("campaigns")
+    .select(
+      "id, business_type, location, status, leads_found, total_cost, started_at"
+    )
+    .order("started_at", { ascending: false });
 
-    try {
-      const result = await supabase.functions.invoke(
-        "enhanced-business-discovery",
-        { body: params }
-      );
+  if (error) throw new Error(error.message);
+  return data;
+};
 
-      if (result.error) throw new Error(result.error.message);
-
-      const campaign = result.data;
-      setCurrentCampaign(campaign);
-
-      return campaign;
-    } catch (error) {
-      console.error("Discovery failed:", error);
-      throw error;
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
-  return {
-    startDiscovery,
-    isProcessing,
-    currentCampaign,
-  };
+export const useCampaigns = () => {
+  return useQuery({
+    queryKey: ["campaigns"],
+    queryFn: getAllCampaigns,
+  });
 };
 ```
 
-### **Export Hook**
+### **`useBusinessDiscovery` (Mutation)**
 
 ```typescript
-const useExport = () => {
-  const [isExporting, setIsExporting] = useState(false);
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/lib/supabase";
+import toast from "react-hot-toast";
 
-  const exportCampaign = async (
-    campaignId: string,
-    format: "csv" | "json" | "excel" = "csv"
-  ) => {
-    setIsExporting(true);
+// ... (DiscoveryRequest interface)
 
-    try {
-      const { data, error } = await supabase.functions.invoke(
-        "export-campaign",
-        { body: { campaignId, format } }
-      );
+const startDiscovery = async (params: DiscoveryRequest) => {
+  const { data, error } = await supabase.functions.invoke(
+    "enhanced-business-discovery",
+    { body: params }
+  );
+  if (error) throw new Error(error.message);
+  return data;
+};
 
-      if (error) throw new Error(error.message);
+export const useBusinessDiscovery = () => {
+  const queryClient = useQueryClient();
 
+  return useMutation({
+    mutationFn: startDiscovery,
+    onSuccess: () => {
+      // When a new campaign starts, invalidate the list of all campaigns
+      // so the dashboard refetches and shows the new one.
+      queryClient.invalidateQueries({ queryKey: ["campaigns"] });
+      toast.success("Discovery campaign started!");
+    },
+    onError: (error) => {
+      toast.error(`Failed to start discovery: ${error.message}`);
+    },
+  });
+};
+```
+
+### **`useExport` (Mutation with Verify-on-Export)**
+
+```typescript
+import { useMutation } from "@tanstack/react-query";
+import { supabase } from "@/lib/supabase";
+import toast from "react-hot-toast";
+
+// ... (ExportRequest interface)
+
+const exportCampaign = async (request: ExportRequest) => {
+  const { data, error } = await supabase.functions.invoke("export-campaign", {
+    body: request,
+  });
+  if (error) throw new Error(error.message);
+  return data;
+};
+
+export const useExport = () => {
+  return useMutation({
+    mutationFn: exportCampaign,
+    onMutate: () => {
+      toast.loading("Preparing your export...", { id: "export" });
+    },
+    onSuccess: (data) => {
       // Trigger download
       const link = document.createElement("a");
       link.href = data.downloadUrl;
@@ -504,20 +534,12 @@ const useExport = () => {
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-
-      return data;
-    } catch (error) {
-      console.error("Export failed:", error);
-      throw error;
-    } finally {
-      setIsExporting(false);
-    }
-  };
-
-  return {
-    exportCampaign,
-    isExporting,
-  };
+      toast.success("Export complete!", { id: "export" });
+    },
+    onError: (error) => {
+      toast.error(`Export failed: ${error.message}`, { id: "export" });
+    },
+  });
 };
 ```
 

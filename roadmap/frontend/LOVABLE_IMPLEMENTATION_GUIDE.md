@@ -32,47 +32,49 @@ VITE_SUPABASE_ANON_KEY=your_supabase_anon_key_here
 
 ## 🔧 **Lovable-Optimized Project Structure**
 
-### **File Organization (Lovable Best Practices)**
+### **File Organization (Enhanced for UX)**
 
 ```
 src/
-├── app/                    # Core app configuration
-│   ├── layout.tsx             # Root layout component
-│   ├── globals.css            # Global styles with Tailwind
-│   └── providers.tsx          # React Query & Toast providers
-├── components/            # Feature-based components
-│   ├── discovery/            # Business discovery feature
-│   │   ├── DiscoveryForm.tsx
-│   │   ├── DiscoveryResults.tsx
-│   │   └── BudgetTracker.tsx
-│   ├── dashboard/           # Campaign dashboard
-│   │   ├── CampaignOverview.tsx
-│   │   ├── LeadMetrics.tsx
-│   │   └── CostAnalytics.tsx
-│   ├── leads/              # Lead management
-│   │   ├── LeadCard.tsx
-│   │   ├── LeadTable.tsx
-│   │   └── LeadExport.tsx
-│   └── ui/                 # Reusable UI components
+├── app/                     # Root layout and providers
+│   ├── AppLayout.tsx          # Main app shell with persistent sidebar/header
+│   └── providers.tsx          # React Query, Toaster, etc.
+├── components/              # Feature-based components
+│   ├── campaign/            # Components for managing campaigns
+│   │   ├── CampaignCard.tsx     # Overview card for the main dashboard
+│   │   └── CampaignList.tsx     # List of recent campaigns for the sidebar
+│   ├── discovery/           # Business discovery feature
+│   │   ├── BusinessDiscoveryForm.tsx # Enhanced with cost/time estimator
+│   │   └── BudgetTracker.tsx    # Visual budget gauge
+│   ├── leads/               # Lead display and management
+│   │   ├── LeadTable.tsx        # Upgraded with ConfidenceBar and filters
+│   │   ├── ConfidenceBar.tsx    # Visual indicator for lead quality
+│   │   └── ExportTray.tsx       # Non-modal export component
+│   └── ui/                  # Shared, reusable UI elements
 │       ├── Button.tsx
 │       ├── Card.tsx
-│       ├── Modal.tsx
-│       └── ProgressBar.tsx
-├── lib/                   # Utilities and configs
-│   ├── supabase.ts           # Supabase client config
-│   ├── api.ts               # API helper functions
-│   ├── stores.ts            # Zustand stores
-│   └── utils.ts             # Helper utilities
-├── pages/                 # Route pages
-│   ├── index.tsx             # Landing/Dashboard
-│   ├── discovery.tsx         # Business discovery page
-│   ├── campaign/            # Campaign details
-│   │   └── [id].tsx
-│   └── results.tsx          # Search results page
-└── types/                 # TypeScript definitions
-    ├── api.ts               # API response types
-    ├── campaign.ts          # Campaign types
-    └── lead.ts              # Lead types
+│       ├── EmptyState.tsx       # For pages with no data
+│       └── LoadingSkeleton.tsx  # For loading states
+├── pages/                   # Route components
+│   ├── index.tsx              # Main dashboard with all campaigns
+│   ├── campaign/[id].tsx      # Detailed view for a single campaign
+│   └── discovery.tsx          # Page for starting a new campaign
+├── hooks/                   # Custom React hooks
+│   ├── useCampaigns.ts        # Fetches list of all campaigns
+│   ├── useBusinessDiscovery.ts
+│   ├── useRealTimeUpdates.ts
+│   └── useExport.ts
+├── stores/                  # State management (Zustand)
+│   ├── campaignStore.ts
+│   └── userStore.ts
+├── lib/                     # Utilities and configs
+│   ├── supabase.ts
+│   ├── api.ts
+│   └── utils.ts
+└── types/                   # TypeScript definitions
+    ├── campaign.ts
+    ├── lead.ts
+    └── api.ts
 ```
 
 ---
@@ -1065,60 +1067,74 @@ VITE_ENVIRONMENT=production
 
 ---
 
-## 🎯 **7-Day Fast Track Implementation**
+## 🎯 **7-Day Fast Track Implementation (UX Enhanced)**
+
+## 🎯 **7-Day Fast Track Implementation (UX Enhanced)**
 
 ### **Daily Sprint Goals**
 
-**Day 1: Foundation**
+#### **Day 1: Foundation & Core Layout**
 
-- [ ] Project scaffold with TypeScript + Supabase client
-- [ ] Environment setup + providers (React Query, Toast)
-- [ ] Health check smoke test + error boundaries
+- [ ] **Tier 1:** Scaffold project with Vite, TypeScript, Tailwind.
+- [ ] **Tier 1:** Implement `AppLayout.tsx` as the persistent app shell with a placeholder sidebar and header.
+- [ ] **Tier 1:** Set up `providers.tsx` (React Query, Toaster) and Supabase client.
+- [ ] **Tier 1:** Create the main dashboard page (`pages/index.tsx`) and a basic `CampaignCard.tsx` component.
 
-**Day 2: Discovery Core**
+#### **Day 2: Campaign Dashboard & Data**
 
-- [ ] Business discovery form with validation
-- [ ] startDiscovery mutation with toast feedback
-- [ ] Basic routing structure (Dashboard → Discovery → Results)
+- [ ] **Tier 1:** Develop the `useCampaigns.ts` hook to fetch all campaigns for the dashboard.
+- [ ] **Tier 1:** Populate the dashboard with a grid of `CampaignCard` components.
+- [ ] **Tier 1:** Implement `LoadingSkeleton.tsx` for the dashboard loading state and `EmptyState.tsx` for when no campaigns exist.
+- [ ] Create routing for `campaign/[id].tsx`.
 
-**Day 3: Real-Time Pipeline**
+#### **Day 3: Discovery & Real-Time**
 
-- [ ] Single multiplexed realtime channel setup
-- [ ] Batched UI updates for lead insertions
-- [ ] Campaign status tracking with progress indicators
+- [ ] **Tier 2:** Build the `BusinessDiscoveryForm.tsx` on its own page (`/discovery`), including the cost/time estimator.
+- [ ] Implement the `useBusinessDiscovery.ts` hook to start a new campaign.
+- [ ] Set up the `useRealTimeUpdates.ts` hook for the campaign detail page.
+- [ ] Display incoming leads in a basic table on the campaign detail page.
 
-**Day 4: Dashboard & Analytics**
+#### **Day 4: Lead Visualization & Interaction**
 
-- [ ] Campaign overview with hero cards (Total, Qualified, Cost, Confidence)
-- [ ] Cost tracker with budget gauge and API breakdown
-- [ ] Lead funnel visualization
+- [ ] **Tier 2:** Enhance the `LeadTable.tsx` with sorting, filtering, and the `ConfidenceBar.tsx` component.
+- [ ] Implement lead selection (single and bulk) within the `campaignStore`.
+- [ ] **Tier 3:** Add the `CampaignList.tsx` to the `AppLayout` sidebar for quick navigation.
 
-**Day 5: Lead Management**
+#### **Day 5: Export & Budgeting**
 
-- [ ] Lead table with sticky headers and confidence chips
-- [ ] Optimistic selection with bulk operations
-- [ ] Export preview modal with format selection
+- [ ] **Tier 2:** Implement the `ExportTray.tsx` as a non-modal slide-out panel.
+- [ ] Create the `useExport.ts` hook with the "Verify-on-Export" logic.
+- [ ] **Tier 3:** Develop the `BudgetTracker.tsx` visual gauge and integrate it into the campaign detail page.
 
-**Day 6: Cost Optimization**
+#### **Day 6: Polish & Onboarding**
 
-- [ ] Verify-on-Export flow with cost projection
-- [ ] Budget guardrails and projected cost warnings
-- [ ] Column projection + pagination for efficiency
+- [ ] Refine all loading states and empty states across the application.
+- [ ] **Tier 3:** Implement an interactive onboarding tour (e.g., using Shepherd.js) to highlight key features.
+- [ ] Conduct accessibility (WCAG) and responsive design checks.
 
-**Day 7: Polish & Deploy**
+#### **Day 7: Final Testing & Deployment**
 
-- [ ] Loading skeletons and empty states
-- [ ] Dark mode support and accessibility improvements
-- [ ] Production build and Lovable deployment
+- [ ] End-to-end testing of the full user flow: create campaign -> see leads -> export.
+- [ ] Final review of API costs and performance.
+- [ ] Build and deploy to production.
 
 ### **UI Enhancement Checklist**
 
-- [ ] **Visual Hierarchy**: Consistent hero cards, colored confidence chips
-- [ ] **Real-Time Feedback**: Toast notifications, progress animations
-- [ ] **Cost Transparency**: Budget gauge with "X of Y used" labels
-- [ ] **User Experience**: Sticky headers, density toggle, keyboard navigation
-- [ ] **Performance**: Query pagination, realtime batching, idle mode
-- [ ] **Accessibility**: WCAG AA contrast, focus rings, dark mode
+- [ ] **Persistent Layout:** `AppLayout` provides consistent navigation.
+- [ ] **Dashboard First:** App opens to a central hub of all campaigns.
+- [ ] **Non-Modal Export:** `ExportTray` allows interaction while exporting.
+- [ ] **Visual Feedback:** `ConfidenceBar`, `BudgetTracker`, and loading skeletons are used throughout.
+- [ ] **Proactive Estimates:** Discovery form shows cost/time before starting.
+- [ ] **Guided Experience:** Onboarding tour and empty states guide the user.
+
+### **UI Enhancement Checklist**
+
+- [ ] **Persistent Layout:** `AppLayout` provides consistent navigation.
+- [ ] **Dashboard First:** App opens to a central hub of all campaigns.
+- [ ] **Non-Modal Export:** `ExportTray` allows interaction while exporting.
+- [ ] **Visual Feedback:** `ConfidenceBar`, `BudgetTracker`, and loading skeletons are used throughout.
+- [ ] **Proactive Estimates:** Discovery form shows cost/time before starting.
+- [ ] **Guided Experience:** Onboarding tour and empty states guide the user.
 
 ### **Performance Defaults**
 
