@@ -44,12 +44,12 @@ wait_for_env() {
     
     while [ $wait_time -lt $max_wait ]; do
         if [ -f ".env" ]; then
-            # Check if .env has real values (not just templates)
-            if ! grep -q "your_.*_here" .env; then
-                echo "✅ Production .env file ready"
+            # Check if .env has critical template values (not just optional ones)
+            if ! grep -q "your_supabase.*_here\|your_service_role_key_here\|your-project-ref\.supabase\.co" .env; then
+                echo "✅ Production .env file ready (core credentials configured)"
                 return 0
             else
-                echo "⏳ .env file exists but contains template values..."
+                echo "⏳ .env file exists but contains critical template values..."
             fi
         fi
         

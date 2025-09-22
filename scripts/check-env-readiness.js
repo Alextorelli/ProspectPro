@@ -22,24 +22,25 @@ function checkEnvFile() {
 
   const envContent = fs.readFileSync(envPath, "utf8");
 
-  // Check for template values
-  const templatePatterns = [
-    /your_.*_here/,
+  // Check for critical template values (not optional API keys)
+  const criticalTemplatePatterns = [
     /https:\/\/your-project-ref\.supabase\.co/,
     /your_service_role_key_here/,
+    /your_supabase.*_here/,
   ];
 
-  const hasTemplateValues = templatePatterns.some((pattern) =>
+  const hasCriticalTemplateValues = criticalTemplatePatterns.some((pattern) =>
     pattern.test(envContent)
   );
 
-  if (hasTemplateValues) {
-    console.log("⚠️  .env file exists but contains template values");
+  if (hasCriticalTemplateValues) {
+    console.log("⚠️  .env file exists but contains critical template values");
+    console.log("   Missing: Core Supabase credentials");
     console.log("   Consider triggering workflow: npm run prod:init");
     return false;
   }
 
-  console.log("✅ .env file exists with real values");
+  console.log("✅ .env file exists with core credentials configured");
   return true;
 }
 
