@@ -1,16 +1,22 @@
 name: Generate Production Environment Configuration
 
-# Trigger on push to main branch or deployment events
+# Trigger on push to main branch, server initialization, or manual dispatch
 on:
   push:
     branches: [main]
   deployment:
+  repository_dispatch:
+    types: [server-init, prod-server-start]
   workflow_dispatch:
     inputs:
       deployment_target:
         description: "Deployment target (production/staging)"
         required: false
         default: "production"
+      trigger_source:
+        description: "What triggered this workflow"
+        required: false
+        default: "manual"
 
 jobs:
   generate-env-and-deploy:
@@ -204,19 +210,30 @@ jobs:
             startup.log
           retention-days: 30
 
-      - name: Deploy to Production (Example)
-        if: github.ref == 'refs/heads/main'
+      - name: Prepare Production Environment
+        if: github.ref == 'refs/heads/main' || github.event_name == 'repository_dispatch'
         run: |
-          echo "🚀 Ready for production deployment..."
-          echo "📁 .env file is available for deployment step"
-          echo "🔗 Deployment would continue here with your chosen platform"
+          echo "🚀 Production environment ready for server initialization..."
+          echo "📁 Generated .env file available for production server"
+          echo "🎯 Trigger source: ${{ github.event.action || 'push' }}"
 
-          # Example deployment commands:
-          # Railway: railway deploy
-          # Vercel: vercel --prod
-          # Docker: docker build -t prospectpro . && docker push
+          # Validate .env file is production-ready
+          if grep -q "your_.*_here" .env; then
+            echo "⚠️  Warning: Template values detected in .env - ensure secrets are properly injected"
+          fi
 
-          echo "✅ Environment configuration ready for production deployment"
+          echo "ENV_BUILD_TIME=$(date -u +'%Y-%m-%d_%H-%M-%S_UTC')" >> environment.log
+          echo "✅ Environment configuration ready for production server initialization"
+
+      - name: Server Initialization Signal
+        if: github.ref == 'refs/heads/main' || github.event_name == 'repository_dispatch'
+        run: |
+          echo "🔔 Signaling server initialization readiness..."
+          if [ -f environment.log ]; then
+            echo "Environment details:"
+            cat environment.log
+          fi
+          echo "✅ Production server can now be initialized with generated environment"
 
       - name: Deployment Summary
         run: |
