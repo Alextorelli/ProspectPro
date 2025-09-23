@@ -22,6 +22,10 @@ jobs:
   generate-env-and-deploy:
     name: Generate .env and Deploy
     runs-on: ubuntu-latest
+    outputs:
+      env-content: ${{ steps.generate-env.outputs.ENV_CONTENT }}
+      build-timestamp: ${{ steps.generate-env.outputs.BUILD_TIMESTAMP }}
+      build-commit: ${{ steps.generate-env.outputs.BUILD_COMMIT }}
 
     steps:
       - name: Checkout Repository

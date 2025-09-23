@@ -159,10 +159,45 @@ async function waitForWorkflowCompletion() {
 
 // Step 4: Extract environment from workflow outputs
 async function extractEnvironment(runId) {
-  console.log("\n🔧 Extracting environment from workflow outputs...");
+  console.log("\n🔧 Extracting environment from workflow job outputs...");
 
-  // Get workflow run details with outputs
-  const options = {
+  // Get workflow jobs to access outputs
+  const jobsOptions = {
+    hostname: "api.github.com",
+    port: 443,
+    path: `/repos/${REPO_OWNER}/${REPO_NAME}/actions/runs/${runId}/jobs`,
+    method: "GET",
+    headers: {
+      Authorization: `token ${GITHUB_TOKEN}`,
+      Accept: "application/vnd.github.v3+json",
+      "User-Agent": "ProspectPro-Environment-Puller",
+    },
+  };
+
+  const jobsResponse = await makeRequest(jobsOptions);
+
+  if (!jobsResponse.jobs || jobsResponse.jobs.length === 0) {
+    throw new Error("No jobs found in workflow run");
+  }
+
+  // Find the main job (should be "Generate .env and Deploy")
+  const mainJob = jobsResponse.jobs.find(job => 
+    job.name === "Generate .env and Deploy" || 
+    job.name.includes("generate-env-and-deploy")
+  );
+
+  if (!mainJob) {
+    throw new Error("Main job not found in workflow run");
+  }
+
+  // Check if job has outputs
+  if (mainJob.outputs && mainJob.outputs["env-content"]) {
+    console.log("✅ Found env-content in job outputs");
+    return mainJob.outputs["env-content"];
+  }
+
+  // Alternative: Try to get outputs from the workflow run level
+  const runOptions = {
     hostname: "api.github.com",
     port: 443,
     path: `/repos/${REPO_OWNER}/${REPO_NAME}/actions/runs/${runId}`,
@@ -174,12 +209,11 @@ async function extractEnvironment(runId) {
     },
   };
 
-  const runDetails = await makeRequest(options);
+  const runDetails = await makeRequest(runOptions);
 
-  // Check for outputs in the workflow run
-  if (runDetails.outputs && runDetails.outputs.ENV_CONTENT) {
-    console.log("✅ Found ENV_CONTENT in workflow outputs");
-    return runDetails.outputs.ENV_CONTENT;
+  if (runDetails.outputs && runDetails.outputs["env-content"]) {
+    console.log("✅ Found env-content in workflow run outputs");
+    return runDetails.outputs["env-content"];
   }
 
   // Production mode: No fallbacks, workflow outputs required
