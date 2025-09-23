@@ -4,6 +4,48 @@
 
 ProspectPro is a lead generation platform built with Node.js/Express that implements a zero-tolerance policy for fake data. The system exclusively uses real business data obtained through multiple API integrations (Google Places, Foursquare Places, website scraping, email verification) to provide high-quality business leads with complete contact information.
 
+## Deployment Architecture
+
+### Docker Containerization
+
+ProspectPro uses a comprehensive Docker-based deployment system with distinct configurations:
+
+1. **Production Deployment** (`docker-compose.yml`)
+   - Secured with Supabase Vault integration for API keys
+   - NGINX reverse proxy with SSL termination
+   - Volume mounts for logs, data, and configuration
+   - Health checks and automatic restart policies
+
+2. **Development Environment** (`docker-compose.dev.yml`)
+   - Hot-reload enabled for rapid development
+   - Debug endpoints exposed
+   - Local development conveniences
+
+3. **Secure Authentication Options**
+   - `vault-startup.sh`: Pulls API keys from Supabase Vault at runtime
+   - `secure-start.sh`: Local secure credential storage
+   - `keychain-start.sh`: System keychain integration
+   - `1password-start.sh`: 1Password CLI integration
+   - `docker-compose.secrets.yml`: GitHub secrets integration
+
+### Deployment Commands
+
+```bash
+# Production deployment with Vault integration
+npm run vault:deploy
+
+# Development with live API keys from Vault
+npm run vault:dev  
+
+# Standard Docker commands
+npm run docker:build
+npm run docker:dev
+npm run docker:prod
+npm run docker:stop
+npm run docker:logs
+npm run docker:shell
+```
+
 ## Core Architecture
 
 ### 4-Stage Data Pipeline
@@ -485,7 +527,27 @@ FOR ALL USING (auth.uid() = user_id);
 
 ## Development Workflows
 
-### Local Setup
+### Local Docker Setup
+
+```bash
+# Clone repository
+git clone https://github.com/Alextorelli/ProspectPro.git
+cd ProspectPro
+
+# Development with Supabase Vault (recommended)
+npm run vault:dev
+
+# OR local development with secure credential options
+npm run secure:local     # Local secure credential storage
+npm run secure:keychain  # System keychain integration
+npm run secure:1password # 1Password CLI integration
+npm run secure:github    # GitHub secrets integration
+
+# Direct terminal access inside container
+npm run docker:shell
+```
+
+### Local Non-Docker Setup
 
 ```bash
 cd ProspectPro
@@ -497,10 +559,88 @@ npm run dev           # Start development server with nodemon
 ### Testing Critical Validations
 
 ```bash
-node test/test-real-data.js         # Verify no fake data generation
-node test/test-website-validation.js # Verify all URLs work
-node debug/inspect-business-data.js  # Debug specific business data
+# Docker validation tests
+docker-compose exec prospectpro node tests/validation/test-real-data.js
+docker-compose exec prospectpro node tests/validation/test-website-validation.js
+
+# Direct testing
+node tests/validation/test-real-data.js         # Verify no fake data generation
+node tests/validation/test-website-validation.js # Verify all URLs work
+node debug/inspect-business-data.js             # Debug specific business data
 ```
+
+## Repository Management
+
+## GitHub Workflow Integration
+
+### Core Workflows
+
+1. **Docker Environment** (`.github/workflows/docker-env.yml`)
+   - Creates Docker-compatible environment files
+   - Integrates with GitHub Secrets for infrastructure
+   - Tests Supabase connection and Docker build
+   - Uploads environment artifact for deployment
+
+2. **CI/CD Pipeline** (`.github/workflows/ci.yml`)
+   - Runs tests and validations for PRs and main branch
+   - Enforces code quality and security standards
+   - Validates Docker builds and configurations
+   - Prevents fake data patterns in code
+
+3. **Repository Maintenance** (`.github/workflows/repository-maintenance.yml`)
+   - Weekly code health checks
+   - Documentation updates
+   - Dependency vulnerability scanning
+
+### Security Architecture
+
+ProspectPro uses a two-tier secret management approach:
+
+1. **GitHub Secrets** (Infrastructure)
+   - `SUPABASE_URL`: Database connection endpoint
+   - `SUPABASE_SECRET_KEY`: Database service role key
+   - `PERSONAL_ACCESS_TOKEN`: Admin authentication
+
+2. **Supabase Vault** (API Keys)
+   - `GOOGLE_PLACES_API_KEY`
+   - `FOURSQUARE_API_KEY`
+   - `HUNTER_IO_API_KEY`
+   - `NEVERBOUNCE_API_KEY`
+   - `APOLLO_API_KEY`
+   - Additional API keys for testing and expansion
+
+## Documentation & Branching Taxonomy
+
+### Documentation Structure
+
+- `README.md`: Project overview and quick start
+- `CHANGELOG.md`: Version history and release notes
+- `PRODUCTION_READY_REPORT.md`: Production readiness checklist
+- `docs/`: Detailed documentation categorized by purpose
+  - `docs/setup/`: Installation and environment guides
+  - `docs/guides/`: User and operational guides
+  - `docs/technical/`: Technical specifications
+  - `docs/deployment/`: Deployment instructions and workflows
+  - `docs/development/`: Development standards and practices
+
+### Branch Management
+
+- `main`: Production-ready code with strict governance
+- `development`: Active development branch
+- `feature/*`: Feature-specific branches
+- `bugfix/*`: Bug fix branches
+- `archive/development-phase`: Archive of development artifacts
+- `archive/deployment-phase`: Archive of legacy deployment configs
+- `archive/testing-reports`: Archive of test reports and validation data
+
+### Repository Governance
+
+The repository enforces strict governance rules through pre-commit hooks:
+
+- Root directory limited to 3 markdown files
+- No development artifacts in main branch
+- Documentation must follow the established schema
+- Prevents fake data patterns in commits
 
 ## Multi-API Integration Strategy
 
