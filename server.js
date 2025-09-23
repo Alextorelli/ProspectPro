@@ -4,6 +4,9 @@
  * @version 3.1.0 - Production Branch Optimized
  */
 
+// Load environment variables first
+require('dotenv').config();
+
 // Production configuration with intelligent defaults
 const config = {
   environment: process.env.NODE_ENV || "production",
