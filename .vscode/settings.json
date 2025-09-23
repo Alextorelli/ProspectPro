@@ -2,9 +2,7 @@
   "[typescript]": {
     "editor.defaultFormatter": "denoland.vscode-deno"
   },
-  "deno.enablePaths": [
-    "supabase/functions"
-  ],
+  "deno.enablePaths": ["supabase/functions"],
   "deno.lint": true,
   "deno.unstable": [
     "bare-node-builtins",
@@ -32,7 +30,7 @@
     "scminput": false
   },
   "github.copilot.inlineSuggest.enable": true,
-  
+
   "files.exclude": {
     "**/*.log": true,
     "**/*.tmp": true,
@@ -43,7 +41,7 @@
     "**/database-validation.log": true,
     "**/server-test.log": true
   },
-  
+
   "files.watcherExclude": {
     "**/*.log": true,
     "**/*.tmp": true,
@@ -73,21 +71,21 @@
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": "explicit"
   },
-  
+
   "eslint.validate": ["javascript", "javascriptreact", "json"],
-  
+
   "files.autoSave": "afterDelay",
   "files.autoSaveDelay": 1000,
-  
+
   "editor.formatOnSave": true,
   "editor.formatOnPaste": true,
-  
+
   "javascript.updateImportsOnFileMove.enabled": "always",
   "javascript.suggest.autoImports": true,
-  
+
   "git.autofetch": true,
   "git.confirmSync": false,
   "git.enableSmartCommit": true,
-  
+
   "terminal.integrated.defaultProfile.linux": "bash"
 }

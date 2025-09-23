@@ -2,12 +2,12 @@ name: Repository Maintenance & Optimization
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
   schedule:
     # Run weekly on Sundays at 2 AM UTC
-    - cron: '0 2 * * 0'
+    - cron: "0 2 * * 0"
   workflow_dispatch:
 
 jobs:
@@ -22,30 +22,30 @@ jobs:
         id: detect-artifacts
         run: |
           echo "🔍 Scanning for development artifacts..."
-          
+
           ARTIFACTS_FOUND=false
-          
+
           # Check for development scripts
           if find . -name "quick-*.js" -o -name "test-*.js" -o -name "demo-*.js" -o -name "*-simulation.js" -o -name "verify-*.js" -o -name "debug-*.js" | grep -q .; then
             echo "⚠️  Development scripts detected:"
             find . -name "quick-*.js" -o -name "test-*.js" -o -name "demo-*.js" -o -name "*-simulation.js" -o -name "verify-*.js" -o -name "debug-*.js"
             ARTIFACTS_FOUND=true
           fi
-          
+
           # Check for temporary files
           if find . -name "*.log" -o -name "*.tmp" -o -name "*.temp" -o -name "diagnostics.json" | grep -q .; then
             echo "⚠️  Temporary files detected:"
             find . -name "*.log" -o -name "*.tmp" -o -name "*.temp" -o -name "diagnostics.json"
             ARTIFACTS_FOUND=true
           fi
-          
+
           # Check for CSV exports (except essential ones)
           if find . -name "*.csv" ! -name "google_places_mece_mapping.csv" | grep -q .; then
             echo "⚠️  CSV export files detected:"
             find . -name "*.csv" ! -name "google_places_mece_mapping.csv"
             ARTIFACTS_FOUND=true
           fi
-          
+
           echo "artifacts_found=$ARTIFACTS_FOUND" >> $GITHUB_OUTPUT
 
       - name: Create issue for artifact cleanup
@@ -55,28 +55,28 @@ jobs:
           script: |
             const title = '🧹 Development Artifacts Detected in Main Branch';
             const body = `## Repository Cleanup Required
-            
+
             Development artifacts have been detected in the main branch that should be archived or removed:
-            
+
             ### Automated Detection Results
             - **Date**: ${new Date().toISOString()}
             - **Branch**: main
             - **Trigger**: Repository maintenance workflow
-            
+
             ### Recommended Actions
             1. Review detected artifacts
             2. Archive development files to appropriate archive branches
             3. Remove temporary files and logs
             4. Update .gitignore if needed
-            
+
             ### Archive Branch Strategy
             - \`archive/development-phase\` - Development scripts and utilities
             - \`archive/old-tests\` - Testing infrastructure
             - \`archive/legacy-files\` - Sample data and examples
             - \`archive/debug-tools\` - Debug logs and diagnostic files
-            
+
             This issue was created automatically by the repository maintenance workflow.`;
-            
+
             github.rest.issues.create({
               owner: context.repo.owner,
               repo: context.repo.repo,
@@ -95,7 +95,7 @@ jobs:
       - name: Validate core production files
         run: |
           echo "✅ Validating production file structure..."
-          
+
           REQUIRED_FILES=(
             "server.js"
             "package.json"
@@ -105,14 +105,14 @@ jobs:
             "modules/core/core-business-discovery-engine.js"
             "modules/core/core-lead-discovery-engine.js"
           )
-          
+
           MISSING_FILES=()
           for file in "${REQUIRED_FILES[@]}"; do
             if [[ ! -f "$file" ]]; then
               MISSING_FILES+=("$file")
             fi
           done
-          
+
           if [[ ${#MISSING_FILES[@]} -eq 0 ]]; then
             echo "✅ All required production files present"
           else
@@ -124,7 +124,7 @@ jobs:
       - name: Check documentation schema compliance
         run: |
           echo "📋 Validating documentation structure..."
-          
+
           # Check for required documentation sections
           if [[ -f "README.md" ]]; then
             if ! grep -q "## ProspectPro" README.md; then
@@ -134,7 +134,7 @@ jobs:
               echo "⚠️  README.md missing Zero Fake Data Policy section"
             fi
           fi
-          
+
           echo "✅ Documentation validation complete"
 
   optimize-repository:
@@ -148,10 +148,10 @@ jobs:
         run: |
           echo "📊 Repository size analysis:"
           du -sh . | head -1
-          
+
           echo "📊 Largest directories:"
           du -sh */ 2>/dev/null | sort -hr | head -10 || echo "No subdirectories found"
-          
+
           echo "📊 File type distribution:"
           find . -type f | grep -E '\.[^./]*$' | rev | cut -d. -f1 | rev | sort | uniq -c | sort -nr | head -10
 
@@ -177,7 +177,7 @@ jobs:
       - name: Check for exposed secrets
         run: |
           echo "🔒 Scanning for potential secrets exposure..."
-          
+
           # Check for common secret patterns (excluding false positives)
           if grep -r -i "password\|secret\|key\|token" --include="*.js" --include="*.json" --exclude-dir=node_modules . | grep -v -E "(placeholder|example|test|demo|fake)" | head -5; then
             echo "⚠️  Potential secrets detected - please review"
