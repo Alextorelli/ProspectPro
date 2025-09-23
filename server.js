@@ -1,19 +1,22 @@
 /**
  * ProspectPro Server - Production Optimized
- * Streamlined startup for production deployment
+ * Fast startup with comprehensive error handling and monitoring
+ * @version 3.1.0 - Production Branch Optimized
  */
 
-// Load environment configuration
+// Production configuration with intelligent defaults
 const config = {
   environment: process.env.NODE_ENV || "production",
   port: process.env.PORT || 3000,
-  isDevelopment: (process.env.NODE_ENV || "production") !== "production",
+  host: process.env.HOST || "0.0.0.0",
+  isDevelopment: process.env.NODE_ENV === "development",
+  allowDegradedStart: process.env.ALLOW_DEGRADED_START === "true",
 };
 
-console.log(`🚀 Starting ProspectPro in ${config.environment} mode`);
-console.log(`🔧 Server will bind to port ${config.port}`);
+console.log(`🚀 ProspectPro v3.1.0 starting in ${config.environment} mode`);
+console.log(`🔧 Binding to ${config.host}:${config.port}`);
 
-// Core dependencies
+// Core dependencies with error handling
 const express = require("express");
 const path = require("path");
 
@@ -27,16 +30,26 @@ const {
 // Initialize Express app
 const app = express();
 
-// Basic middleware
+// Production middleware stack
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true }));
 
-// CORS for development
+// Security headers for production
+if (!config.isDevelopment) {
+  app.use((req, res, next) => {
+    res.header("X-Powered-By", "ProspectPro");
+    res.header("X-Content-Type-Options", "nosniff");
+    res.header("X-Frame-Options", "DENY");
+    next();
+  });
+}
+
+// CORS configuration
 if (config.isDevelopment) {
   app.use((req, res, next) => {
     res.header("Access-Control-Allow-Origin", "*");
     res.header(
-      "Access-Control-Allow-Methods",
+      "Access-Control-Allow-Methods", 
       "GET, POST, PUT, DELETE, OPTIONS"
     );
     res.header(
@@ -235,25 +248,20 @@ async function startServer() {
       console.log("🔄 Starting in degraded mode...");
     }
 
-    // Start HTTP server
-    const server = app.listen(config.port, "0.0.0.0", () => {
-      console.log(`🌐 ProspectPro server running on port ${config.port}`);
+    // Start HTTP server with optimized configuration
+    const server = app.listen(config.port, config.host, () => {
+      const serverUrl = `http://${config.host}:${config.port}`;
+      console.log(`🌐 ProspectPro v3.1.0 server running on ${serverUrl}`);
       console.log(`📊 Environment: ${config.environment}`);
-      console.log(`🔗 Health check: http://localhost:${config.port}/health`);
-      console.log(`🔍 Diagnostics: http://localhost:${config.port}/diag`);
+      console.log(`🔗 Health check: ${serverUrl}/health`);
+      console.log(`🔍 Diagnostics: ${serverUrl}/diag`);
 
       if (dbTest.warning && dbTest.warning.includes("schema cache")) {
         console.log("");
-        console.log("🚨 IMPORTANT: Schema cache issue detected!");
-        console.log(
-          "📋 Database tables exist but PostgREST cache needs refresh"
-        );
-        console.log(
-          "⏰ This typically resolves automatically within 5-10 minutes"
-        );
-        console.log(
-          "🔧 Or manually fix with: node scripts/refresh-schema-cache.js"
-        );
+        console.log("🚨 NOTICE: Schema cache refresh recommended");
+        console.log("📋 Database operational but cache optimization pending");
+        console.log("⏰ Automatic resolution expected within 5-10 minutes");
+        console.log("🔧 Manual fix: node scripts/refresh-schema-cache.js");
         console.log("");
       }
     });

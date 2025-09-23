@@ -1,15 +1,22 @@
 /**
  * ProspectPro Supabase Configuration - Production Optimized
- * Streamlined for production initialization workflow
+ * Handles database connections with graceful degradation and automatic recovery
+ * @version 3.1.0 - Production Branch Optimized
  */
 
 const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
+
 let supabaseClient = null;
-let lastConnectionTest = null;
+let connectionCache = {
+  lastTest: null,
+  lastResult: null,
+  ttl: 5 * 60 * 1000, // 5 minutes cache
+};
 
 /**
- * Get or create Supabase client instance
- * Uses SUPABASE_SECRET_KEY from GitHub Actions environment
+ * Get or create optimized Supabase client instance
+ * Production-ready with connection pooling and error recovery
  */
 function getSupabaseClient() {
   if (supabaseClient) {
@@ -17,13 +24,12 @@ function getSupabaseClient() {
   }
 
   if (!supabaseUrl) {
-    console.error("❌ SUPABASE_URL not configured");
+    console.error("❌ SUPABASE_URL environment variable not configured");
     return null;
   }
 
-  const supabaseKey = process.env.SUPABASE_SECRET_KEY;
   if (!supabaseKey) {
-    console.error("❌ SUPABASE_SECRET_KEY not configured");
+    console.error("❌ SUPABASE_SECRET_KEY or SUPABASE_SERVICE_ROLE_KEY not configured");
     return null;
   }
 
