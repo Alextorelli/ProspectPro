@@ -157,15 +157,15 @@ async function waitForWorkflowCompletion() {
   throw new Error("Workflow timeout - exceeded maximum wait time");
 }
 
-// Step 4: Extract environment from workflow outputs
+// Step 4: Extract environment from workflow artifacts
 async function extractEnvironment(runId) {
-  console.log("\n🔧 Extracting environment from workflow job outputs...");
+  console.log("\n🔧 Extracting environment from workflow artifacts...");
 
-  // Get workflow jobs to access outputs
-  const jobsOptions = {
+  // Get workflow artifacts
+  const artifactsOptions = {
     hostname: "api.github.com",
     port: 443,
-    path: `/repos/${REPO_OWNER}/${REPO_NAME}/actions/runs/${runId}/jobs`,
+    path: `/repos/${REPO_OWNER}/${REPO_NAME}/actions/runs/${runId}/artifacts`,
     method: "GET",
     headers: {
       Authorization: `token ${GITHUB_TOKEN}`,
@@ -174,33 +174,29 @@ async function extractEnvironment(runId) {
     },
   };
 
-  const jobsResponse = await makeRequest(jobsOptions);
+  const artifactsResponse = await makeRequest(artifactsOptions);
 
-  if (!jobsResponse.jobs || jobsResponse.jobs.length === 0) {
-    throw new Error("No jobs found in workflow run");
+  if (!artifactsResponse.artifacts || artifactsResponse.artifacts.length === 0) {
+    throw new Error("No artifacts found for workflow run");
   }
 
-  // Find the main job (should be "Generate .env and Deploy")
-  const mainJob = jobsResponse.jobs.find(job => 
-    job.name === "Generate .env and Deploy" || 
-    job.name.includes("generate-env-and-deploy")
+  // Find the environment artifact
+  const envArtifact = artifactsResponse.artifacts.find(
+    (a) => a.name === "production-environment-config"
   );
 
-  if (!mainJob) {
-    throw new Error("Main job not found in workflow run");
+  if (!envArtifact) {
+    console.log("Available artifacts:", artifactsResponse.artifacts.map(a => a.name));
+    throw new Error("production-environment-config artifact not found");
   }
 
-  // Check if job has outputs
-  if (mainJob.outputs && mainJob.outputs["env-content"]) {
-    console.log("✅ Found env-content in job outputs");
-    return mainJob.outputs["env-content"];
-  }
+  console.log("✅ Found production-environment-config artifact");
 
-  // Alternative: Try to get outputs from the workflow run level
-  const runOptions = {
+  // Download the artifact
+  const downloadOptions = {
     hostname: "api.github.com",
     port: 443,
-    path: `/repos/${REPO_OWNER}/${REPO_NAME}/actions/runs/${runId}`,
+    path: `/repos/${REPO_OWNER}/${REPO_NAME}/actions/artifacts/${envArtifact.id}/zip`,
     method: "GET",
     headers: {
       Authorization: `token ${GITHUB_TOKEN}`,
@@ -209,17 +205,77 @@ async function extractEnvironment(runId) {
     },
   };
 
-  const runDetails = await makeRequest(runOptions);
+  return new Promise((resolve, reject) => {
+    const req = https.request(downloadOptions, (res) => {
+      if (res.statusCode === 302) {
+        // Follow redirect for artifact download
+        const downloadUrl = res.headers.location;
+        console.log("📥 Downloading artifact from:", downloadUrl.substring(0, 50) + "...");
+        
+        https.get(downloadUrl, (zipRes) => {
+          const chunks = [];
+          zipRes.on('data', chunk => chunks.push(chunk));
+          zipRes.on('end', () => {
+            const zipBuffer = Buffer.concat(chunks);
+            // Extract .env content from zip
+            extractEnvFromZip(zipBuffer)
+              .then(resolve)
+              .catch(reject);
+          });
+        }).on('error', reject);
+      } else {
+        reject(new Error(`Failed to download artifact: HTTP ${res.statusCode}`));
+      }
+    });
+    req.on("error", reject);
+    req.end();
+  });
+}
 
-  if (runDetails.outputs && runDetails.outputs["env-content"]) {
-    console.log("✅ Found env-content in workflow run outputs");
-    return runDetails.outputs["env-content"];
-  }
-
-  // Production mode: No fallbacks, workflow outputs required
-  throw new Error(
-    "ENV_CONTENT not found in workflow outputs - workflow must export environment content"
-  );
+// Helper to extract .env content from zip buffer
+function extractEnvFromZip(zipBuffer) {
+  return new Promise((resolve, reject) => {
+    // Simple zip extraction for .env file
+    // This is a basic implementation - in production you might want to use a proper zip library
+    try {
+      const zipString = zipBuffer.toString();
+      
+      // Look for .env file content in the zip
+      // This is a simplified extraction - assumes the .env content is readable in the zip
+      const envStart = zipString.indexOf('# ================================');
+      const envEnd = zipString.indexOf('BUILD_ACTOR=') + zipString.substring(zipString.indexOf('BUILD_ACTOR=')).indexOf('\n');
+      
+      if (envStart !== -1 && envEnd !== -1) {
+        const envContent = zipString.substring(envStart, envEnd + 1);
+        console.log("✅ Extracted .env content from zip artifact");
+        resolve(envContent);
+      } else {
+        // Alternative approach - try to find NODE_ENV as a marker
+        const nodeEnvIndex = zipString.indexOf('NODE_ENV=production');
+        if (nodeEnvIndex !== -1) {
+          // Find start of file (look backwards for comment block)
+          let start = nodeEnvIndex;
+          while (start > 0 && zipString[start] !== '#') start--;
+          
+          // Find end of file (look for BUILD_ACTOR or end)
+          let end = zipString.indexOf('BUILD_ACTOR=', nodeEnvIndex);
+          if (end !== -1) {
+            end = zipString.indexOf('\n', end) + 1;
+          } else {
+            end = zipString.length;
+          }
+          
+          const envContent = zipString.substring(start, end);
+          console.log("✅ Extracted .env content using NODE_ENV marker");
+          resolve(envContent);
+        } else {
+          reject(new Error("Could not extract .env content from artifact zip"));
+        }
+      }
+    } catch (error) {
+      reject(new Error(`Failed to extract .env from zip: ${error.message}`));
+    }
+  });
 }
 
 // Step 5: Save environment file
@@ -254,7 +310,7 @@ function saveEnvironmentFile(envContent) {
 async function main() {
   try {
     console.log(
-      "\n🎯 Starting Production Environment Generation - Workflow Outputs Only"
+      "\n🎯 Starting Production Environment Generation - Workflow Artifacts"
     );
 
     // Step 1: Trigger the workflow
@@ -263,7 +319,7 @@ async function main() {
     // Step 2: Wait for workflow completion
     const workflowRun = await waitForWorkflowCompletion();
 
-    // Step 3: Extract environment content (no fallbacks)
+    // Step 3: Extract environment content from artifacts
     const envContent = await extractEnvironment(workflowRun.id);
 
     // Step 4: Save environment file
@@ -271,7 +327,7 @@ async function main() {
 
     console.log("\n🎉 SUCCESS: Production environment ready!");
     console.log("=========================================================");
-    console.log("✅ Environment file generated from workflow outputs");
+    console.log("✅ Environment file generated from workflow artifacts");
     console.log("🚀 Ready for production server initialization");
   } catch (error) {
     console.error("\n❌ FAILURE: Environment generation failed");
