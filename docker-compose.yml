@@ -1,0 +1,64 @@
+version: '3.8'
+
+services:
+  prospectpro:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - HOST=0.0.0.0
+      - PORT=3000
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_SECRET_KEY=${SUPABASE_SECRET_KEY}
+      - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
+      - GOOGLE_PLACES_API_KEY=${GOOGLE_PLACES_API_KEY}
+      - FOURSQUARE_API_KEY=${FOURSQUARE_API_KEY}
+      - FOURSQUARE_SERVICE_API_KEY=${FOURSQUARE_SERVICE_API_KEY}
+      - FOURSQUARE_PLACES_API_KEY=${FOURSQUARE_PLACES_API_KEY}
+      - HUNTER_IO_API_KEY=${HUNTER_IO_API_KEY}
+      - APOLLO_API_KEY=${APOLLO_API_KEY}
+      - NEVERBOUNCE_API_KEY=${NEVERBOUNCE_API_KEY}
+      - ZEROBOUNCE_API_KEY=${ZEROBOUNCE_API_KEY}
+      - PERSONAL_ACCESS_TOKEN=${PERSONAL_ACCESS_TOKEN}
+      - ALLOW_DEGRADED_START=true
+    volumes:
+      - ./logs:/app/logs
+      - ./data:/app/data
+      - ./uploads:/app/uploads
+      - ./config:/app/config:ro
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - prospectpro-network
+
+  # Optional: Nginx reverse proxy for SSL/domain management
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/ssl/certs:ro
+    depends_on:
+      - prospectpro
+    restart: unless-stopped
+    networks:
+      - prospectpro-network
+    profiles:
+      - with-nginx
+
+volumes:
+  logs:
+  data:
+  uploads:
+
+networks:
+  prospectpro-network:
+    driver: bridge

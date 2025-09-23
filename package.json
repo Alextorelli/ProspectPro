@@ -16,7 +16,14 @@
     "health": "curl http://localhost:3000/health || echo 'Server not running'",
     "diag": "curl http://localhost:3000/diag | json_pp || echo 'Server not running'",
     "test": "echo 'Tests moved to testing branch. Run: git checkout testing && node tests/validation/test-real-data.js'",
-    "postinstall": "echo 'ProspectPro v3.0: Production-ready deployment configured'"
+    "postinstall": "echo 'ProspectPro v3.0: Production-ready deployment configured'",
+    "docker:dev": "./docker/start-dev.sh",
+    "docker:prod": "./docker/deploy-prod.sh",
+    "docker:build": "docker-compose build",
+    "docker:package": "./docker/create-client-package.sh",
+    "docker:logs": "docker-compose logs -f prospectpro",
+    "docker:stop": "docker-compose down",
+    "docker:restart": "docker-compose restart"
   },
   "engines": {
     "node": ">=20.0.0",

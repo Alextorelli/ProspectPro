@@ -1,0 +1,26 @@
+FROM node:18-alpine
+
+# Install development tools
+RUN apk add --no-cache curl git vim nano htop procps
+
+WORKDIR /app
+
+# Install all dependencies (including dev dependencies)
+COPY package*.json ./
+RUN npm install
+
+# Copy source (this will be overridden by volume mount in dev)
+COPY . .
+
+# Create necessary directories
+RUN mkdir -p logs data uploads && \
+    chown -R node:node /app
+
+# Don't switch to non-root user in development for easier debugging
+# USER node
+
+# Expose ports for development
+EXPOSE 3000 5173 9229
+
+# Development command with debugging enabled
+CMD ["npm", "run", "dev"]
