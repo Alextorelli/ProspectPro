@@ -7,7 +7,7 @@
 // Production configuration with intelligent defaults
 const config = {
   environment: process.env.NODE_ENV || "production",
-  port: process.env.PORT || 3000,
+  port: process.env.PORT || 3100,
   host: process.env.HOST || "0.0.0.0",
   isDevelopment: process.env.NODE_ENV === "development",
   allowDegradedStart: process.env.ALLOW_DEGRADED_START === "true",

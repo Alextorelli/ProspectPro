@@ -4,13 +4,13 @@ services:
   prospectpro:
     build: .
     ports:
-      - "3000:3000"
+      - "3100:3100"
     env_file:
       - .env
     environment:
       - NODE_ENV=production
       - HOST=0.0.0.0
-      - PORT=3000
+      - PORT=3100
       - USE_SUPABASE_VAULT=true
       - VAULT_KEY_PREFIX=prospectpro
       - ALLOW_DEGRADED_START=true

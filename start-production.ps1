@@ -24,7 +24,8 @@ $nodeCheck = Get-Command node -ErrorAction SilentlyContinue
 if ($nodeCheck) {
     $nodeVersion = & node --version
     Write-Host "Node.js $nodeVersion found" -ForegroundColor Green
-} else {
+}
+else {
     Write-Host "Node.js not found - install from https://nodejs.org" -ForegroundColor Red
     exit 1
 }
@@ -42,7 +43,8 @@ if (Test-Path ".env") {
         exit 0
     }
     Write-Host "Environment configured" -ForegroundColor Green
-} else {
+}
+else {
     Copy-Item ".env.example" ".env"
     Write-Host "Created .env from template - edit with real credentials" -ForegroundColor Yellow
     exit 0
@@ -62,10 +64,10 @@ Write-Host "Starting Production Server..." -ForegroundColor Green
 Write-Host "=============================" -ForegroundColor Green
 Write-Host ""
 Write-Host "Access Points:" -ForegroundColor Cyan
-Write-Host "  Main UI: http://localhost:3000" -ForegroundColor White
-Write-Host "  Business Discovery: http://localhost:3000/discovery" -ForegroundColor White
-Write-Host "  Results: http://localhost:3000/results" -ForegroundColor White
-Write-Host "  Admin: http://localhost:3000/admin" -ForegroundColor White
+Write-Host "  Main UI: http://localhost:3100" -ForegroundColor White
+Write-Host "  Business Discovery: http://localhost:3100/discovery" -ForegroundColor White
+Write-Host "  Results: http://localhost:3100/results" -ForegroundColor White
+Write-Host "  Admin: http://localhost:3100/admin" -ForegroundColor White
 Write-Host ""
 Write-Host "Features:" -ForegroundColor Cyan
 Write-Host "  Zero fake data guarantee" -ForegroundColor White

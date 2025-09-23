@@ -12,8 +12,8 @@
     "prod:init": "./scripts/init-prod-server.sh",
     "prod:setup-env": "./scripts/pull-env-from-secrets.js",
     "prod:check": "./scripts/production-checklist.sh",
-    "health": "curl http://localhost:3000/health || echo 'Server not running'",
-    "diag": "curl http://localhost:3000/diag | json_pp || echo 'Server not running'",
+    "health": "curl http://localhost:3100/health || echo 'Server not running'",
+    "diag": "curl http://localhost:3100/diag | json_pp || echo 'Server not running'",
     "test": "echo 'Tests moved to testing branch. Run: git checkout testing && node tests/validation/test-real-data.js'",
     "postinstall": "echo 'ProspectPro v3.0: Production-ready deployment configured'",
     "docker:dev": "./docker/start-dev.sh",
@@ -40,6 +40,7 @@
     "mcp:start:api": "cd mcp-servers && node api-server.js",
     "mcp:start:filesystem": "cd mcp-servers && node filesystem-server.js",
     "mcp:start:monitoring": "cd mcp-servers && node monitoring-server.js",
+    "mcp:start:production": "cd mcp-servers && node production-server.js",
     "mcp:start:all": "cd mcp-servers && npm run start:all"
   },
   "engines": {
