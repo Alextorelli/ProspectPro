@@ -14,6 +14,7 @@
  */
 
 const GooglePlacesClient = require("../api-clients/api-google-places-client");
+const FoursquareClient = require("../api-clients/api-foursquare-places-client");
 const EnhancedLeadDiscovery = require("./core-lead-discovery-engine");
 const CampaignCSVExporter = require("./export-campaign-csv-system");
 const logger = require("../utils/logger");
@@ -22,6 +23,7 @@ class EnhancedDiscoveryEngine {
   constructor(apiKeys = {}) {
     this.leadDiscovery = new EnhancedLeadDiscovery(apiKeys);
     this.googleClient = new GooglePlacesClient(apiKeys.googlePlaces);
+    this.foursquareClient = new FoursquareClient(apiKeys.foursquare);
     this.csvExporter = new CampaignCSVExporter();
     this.logger = logger;
     this.sessionStats = {
@@ -37,6 +39,12 @@ class EnhancedDiscoveryEngine {
     this.totalProcessed = 0;
     this.totalCost = 0;
     this.startTime = null;
+
+    // Multi-source discovery tracking
+    this.sourceStats = {
+      foursquare: { searches: 0, businesses: 0, cost: 0 },
+      google: { searches: 0, businesses: 0, cost: 0 },
+    };
   }
 
   /**
@@ -55,12 +63,12 @@ class EnhancedDiscoveryEngine {
       additionalQueries = [],
     } = config;
 
-    console.log(`🚀 Enhanced Discovery Engine v2.0 Starting`);
+    console.log(`🚀 Enhanced Discovery Engine v2.0 - Multi-Source Starting`);
     console.log(
       `🎯 Target: ${targetCount} qualified leads with complete contact info`
     );
     console.log(
-      `📋 Requirements: Complete contacts required: ${requireCompleteContacts}`
+      `� Budget: $${budgetLimit} | Confidence: ${minConfidenceScore}%`
     );
     console.log("=".repeat(70));
 
@@ -68,7 +76,7 @@ class EnhancedDiscoveryEngine {
     let allQualifiedLeads = [];
     let currentQueryIndex = 0;
     let attemptCount = 0;
-    const maxAttempts = 20; // Prevent infinite loops
+    const maxAttempts = 20;
 
     // Generate comprehensive search queries
     const searchQueries = this.generateSearchQueries(businessType, location);
@@ -77,15 +85,15 @@ class EnhancedDiscoveryEngine {
     }
 
     const maxResultsPerQuery = Math.ceil(
-      (targetCount * 3) / searchQueries.length
+      (targetCount * 2.5) / searchQueries.length
     );
 
     console.log(
-      `📋 Generated ${searchQueries.length} search queries, ${maxResultsPerQuery} results each`
+      `📋 Multi-source strategy: ${searchQueries.length} queries, ${maxResultsPerQuery} results each`
     );
     console.log("");
 
-    // Iterative discovery loop
+    // Enhanced multi-source discovery loop
     while (
       allQualifiedLeads.length < targetCount &&
       currentQueryIndex < searchQueries.length &&
@@ -95,42 +103,74 @@ class EnhancedDiscoveryEngine {
       attemptCount++;
       const currentQuery = searchQueries[currentQueryIndex];
 
-      console.log(`🔍 Query ${attemptCount}: "${currentQuery}"`);
+      console.log(`🔍 Multi-Source Query ${attemptCount}: "${currentQuery}"`);
       console.log(
         `   💰 Budget Used: $${this.totalCost.toFixed(3)}/$${budgetLimit}`
       );
 
       try {
-        // Execute Google Places search
-        const searchResults = await this.googleClient.textSearch({
-          query: currentQuery,
-          location: location,
-          type: this.getSearchType(businessType),
-        });
+        // Phase 1: Foursquare Discovery (often cheaper and richer initial data)
+        const foursquareResults = await this.discoverViaFoursquare(
+          currentQuery,
+          location,
+          Math.min(maxResultsPerQuery, 25)
+        );
 
-        if (!searchResults || searchResults.length === 0) {
+        // Phase 2: Google Places Discovery (for complementary data and validation)
+        const remainingBudget = budgetLimit - this.totalCost;
+        let googleResults = [];
+
+        if (
+          remainingBudget > 1.0 &&
+          foursquareResults.length < maxResultsPerQuery
+        ) {
+          const googleLimit = Math.min(
+            maxResultsPerQuery - foursquareResults.length,
+            Math.floor(remainingBudget / 0.032)
+          );
+
+          if (googleLimit > 0) {
+            googleResults = await this.discoverViaGooglePlaces(
+              currentQuery,
+              location,
+              googleLimit
+            );
+          }
+        }
+
+        // Phase 3: Merge and deduplicate results
+        const allDiscoveredBusinesses = this.mergeAndDeduplicateResults(
+          foursquareResults,
+          googleResults
+        );
+
+        console.log(
+          `   📊 Discovery Results: ${foursquareResults.length} Foursquare + ${googleResults.length} Google = ${allDiscoveredBusinesses.length} unique`
+        );
+
+        if (allDiscoveredBusinesses.length === 0) {
           console.log(`   ⚠️ No results for query: ${currentQuery}`);
           currentQueryIndex++;
           continue;
         }
 
-        console.log(`   ✅ Found ${searchResults.length} potential businesses`);
-
-        // Enhanced discovery processing
+        // Phase 4: Enhanced processing with pre-validated data
         const discoveryOptions = {
-          budgetLimit: Math.min(2.0, budgetLimit - this.totalCost), // Remaining budget
+          budgetLimit: Math.min(2.0, remainingBudget),
           qualityThreshold: minConfidenceScore,
-          maxResults: Math.min(maxResultsPerQuery, searchResults.length),
+          maxResults: allDiscoveredBusinesses.length,
           prioritizeLocalBusinesses: true,
           enablePropertyIntelligence: true,
           enableRegistryValidation: true,
           enableRealTimeFeedback: true,
           minimumPreValidationScore: minConfidenceScore - 10,
+          // Pass cached data to avoid redundant API calls
+          preEnrichedData: true,
         };
 
         const enhancedResults =
           await this.leadDiscovery.discoverAndValidateLeads(
-            searchResults,
+            allDiscoveredBusinesses,
             discoveryOptions
           );
 
@@ -174,6 +214,11 @@ class EnhancedDiscoveryEngine {
         console.log(
           `   📊 Total Qualified: ${allQualifiedLeads.length}/${targetCount}`
         );
+        console.log(
+          `   💡 Cost Savings: $${this.calculateCostSavings().toFixed(
+            3
+          )} from multi-source approach`
+        );
 
         if (allQualifiedLeads.length >= targetCount) {
           console.log(
@@ -194,7 +239,7 @@ class EnhancedDiscoveryEngine {
         }
         // If we got good results (2+), try the same query type again with different parameters
       } catch (error) {
-        console.error(`   ❌ Query failed: ${error.message}`);
+        console.error(`   ❌ Multi-source query failed: ${error.message}`);
         currentQueryIndex++;
       }
 
@@ -614,6 +659,397 @@ class EnhancedDiscoveryEngine {
     };
 
     return await this.discoverQualifiedLeads(searchConfig);
+  }
+
+  /**
+   * Discover businesses via Foursquare Places API
+   * @param {string} query - Search query
+   * @param {string} location - Location string
+   * @param {number} maxResults - Maximum results to return
+   * @returns {Array} Array of normalized business objects
+   */
+  async discoverViaFoursquare(query, location, maxResults = 20) {
+    if (!this.foursquareClient) {
+      console.log(`   ⚠️ Foursquare client not configured, skipping`);
+      return [];
+    }
+
+    try {
+      console.log(`   📍 Foursquare search: "${query}" near ${location}`);
+
+      const results = await this.foursquareClient.searchPlaces(query, {
+        near: location,
+        limit: maxResults,
+        categories: this.mapBusinessTypeToFoursquareCategory(query),
+      });
+
+      this.sourceStats.foursquare.searches++;
+      this.sourceStats.foursquare.cost += results.apiCost || 0;
+
+      if (!results.found || !results.places.length) {
+        console.log(`   ⚠️ No Foursquare results for "${query}"`);
+        return [];
+      }
+
+      const normalizedBusinesses = results.places.map((place) => ({
+        // Core business info
+        name: place.name,
+        businessName: place.name,
+        address: place.formattedAddress || place.address,
+        formatted_address: place.formattedAddress,
+        city: place.city,
+        state: place.region,
+        zipCode: place.postalCode,
+        country: place.country,
+
+        // Contact info
+        phone: place.telephone,
+        website: place.website,
+
+        // Location data
+        geometry: {
+          location: {
+            lat: place.latitude,
+            lng: place.longitude,
+          },
+        },
+
+        // Foursquare-specific data
+        fsqId: place.fsqId,
+        categories: place.categories,
+        primaryCategory: place.primaryCategory,
+        businessType: place.businessType,
+
+        // Metadata
+        source: "foursquare",
+        foursquareData: place, // Cache for later validation
+        preValidationScore: this.calculateFoursquarePreScore(place),
+        sourceConfidenceBoost: results.confidenceBoost || 0,
+
+        // For Google Places compatibility
+        place_id: `foursquare_${place.fsqId}`,
+        types: place.categories?.map((cat) => cat.name.toLowerCase()) || [],
+        rating: null, // Foursquare doesn't provide ratings in free tier
+        user_ratings_total: null,
+      }));
+
+      this.sourceStats.foursquare.businesses += normalizedBusinesses.length;
+
+      console.log(
+        `   ✅ Foursquare found ${normalizedBusinesses.length} businesses`
+      );
+      return normalizedBusinesses;
+    } catch (error) {
+      console.warn(`   ⚠️ Foursquare search failed: ${error.message}`);
+      this.sourceStats.foursquare.searches++;
+      return [];
+    }
+  }
+
+  /**
+   * Discover businesses via Google Places API
+   * @param {string} query - Search query
+   * @param {string} location - Location string
+   * @param {number} maxResults - Maximum results to return
+   * @returns {Array} Array of business objects
+   */
+  async discoverViaGooglePlaces(query, location, maxResults = 20) {
+    if (!this.googleClient) {
+      console.log(`   ⚠️ Google Places client not configured, skipping`);
+      return [];
+    }
+
+    try {
+      console.log(`   🔍 Google Places search: "${query}" near ${location}`);
+
+      const searchResults = await this.googleClient.textSearch({
+        query: query,
+        location: location,
+        type: this.getSearchType(query),
+      });
+
+      this.sourceStats.google.searches++;
+      this.sourceStats.google.cost += 0.032; // Approximate Google Places cost
+
+      if (!searchResults || searchResults.length === 0) {
+        console.log(`   ⚠️ No Google Places results for "${query}"`);
+        return [];
+      }
+
+      // Normalize results to match Foursquare format
+      const normalizedBusinesses = searchResults
+        .slice(0, maxResults)
+        .map((place) => ({
+          ...place,
+          source: "google",
+          preValidationScore: this.calculatePreValidationScore(place),
+          sourceConfidenceBoost: 5, // Standard Google boost
+        }));
+
+      this.sourceStats.google.businesses += normalizedBusinesses.length;
+
+      console.log(
+        `   ✅ Google Places found ${normalizedBusinesses.length} businesses`
+      );
+      return normalizedBusinesses;
+    } catch (error) {
+      console.warn(`   ⚠️ Google Places search failed: ${error.message}`);
+      this.sourceStats.google.searches++;
+      return [];
+    }
+  }
+
+  /**
+   * Merge results from multiple sources and remove duplicates
+   * @param {Array} foursquareResults - Results from Foursquare
+   * @param {Array} googleResults - Results from Google Places
+   * @returns {Array} Merged and deduplicated results
+   */
+  mergeAndDeduplicateResults(foursquareResults, googleResults) {
+    const allResults = [...foursquareResults];
+
+    // Add Google results that don't match existing Foursquare results
+    googleResults.forEach((googleBusiness) => {
+      const isDuplicate = foursquareResults.some((foursquareBusiness) =>
+        this.businessesMatch(googleBusiness, foursquareBusiness)
+      );
+
+      if (!isDuplicate) {
+        allResults.push(googleBusiness);
+      } else {
+        // If it's a duplicate, enhance the Foursquare result with Google data
+        const matchingFoursquare = foursquareResults.find((fb) =>
+          this.businessesMatch(googleBusiness, fb)
+        );
+        if (matchingFoursquare) {
+          this.enhanceBusinessWithCrossData(matchingFoursquare, googleBusiness);
+        }
+      }
+    });
+
+    return allResults;
+  }
+
+  /**
+   * Check if two businesses are the same
+   * @param {Object} business1 - First business
+   * @param {Object} business2 - Second business
+   * @returns {boolean} True if they match
+   */
+  businessesMatch(business1, business2) {
+    const name1 = (business1.name || business1.businessName || "")
+      .toLowerCase()
+      .trim();
+    const name2 = (business2.name || business2.businessName || "")
+      .toLowerCase()
+      .trim();
+
+    // Exact name match
+    if (name1 === name2 && name1.length > 3) {
+      return true;
+    }
+
+    // Phone number match (if both have phones)
+    const phone1 = (business1.phone || "").replace(/\D/g, "");
+    const phone2 = (business2.phone || "").replace(/\D/g, "");
+
+    if (phone1 && phone2 && phone1 === phone2 && phone1.length >= 10) {
+      return true;
+    }
+
+    // Address similarity with name similarity
+    const addr1 = (
+      business1.address ||
+      business1.formatted_address ||
+      ""
+    ).toLowerCase();
+    const addr2 = (
+      business2.address ||
+      business2.formatted_address ||
+      ""
+    ).toLowerCase();
+
+    if (
+      addr1 &&
+      addr2 &&
+      this.addressesSimilar(addr1, addr2) &&
+      this.namesSimilar(name1, name2)
+    ) {
+      return true;
+    }
+
+    return false;
+  }
+
+  /**
+   * Enhance a business with cross-platform data
+   * @param {Object} primaryBusiness - Main business to enhance
+   * @param {Object} secondaryBusiness - Secondary business data
+   */
+  enhanceBusinessWithCrossData(primaryBusiness, secondaryBusiness) {
+    // Enhance with missing contact info
+    if (!primaryBusiness.phone && secondaryBusiness.phone) {
+      primaryBusiness.phone = secondaryBusiness.phone;
+    }
+    if (!primaryBusiness.website && secondaryBusiness.website) {
+      primaryBusiness.website = secondaryBusiness.website;
+    }
+
+    // Add cross-platform validation boost
+    primaryBusiness.crossPlatformMatch = true;
+    primaryBusiness.sourceConfidenceBoost += 10;
+    primaryBusiness.preValidationScore = Math.min(
+      primaryBusiness.preValidationScore + 15,
+      100
+    );
+
+    // Store secondary data for validation
+    primaryBusiness.crossPlatformData = {
+      source: secondaryBusiness.source,
+      data: secondaryBusiness,
+    };
+  }
+
+  /**
+   * Calculate pre-validation score for Foursquare businesses
+   * @param {Object} place - Foursquare place object
+   * @returns {number} Score from 0-100
+   */
+  calculateFoursquarePreScore(place) {
+    let score = 0;
+
+    // Business name quality (25 points)
+    if (place.name) {
+      score += this.isGenericBusinessName(place.name) ? 10 : 25;
+    }
+
+    // Address completeness (20 points)
+    if (place.formattedAddress) {
+      score += place.formattedAddress.length > 20 ? 20 : 15;
+    }
+
+    // Contact information (30 points total)
+    if (place.telephone) score += 15;
+    if (place.website) score += 15;
+
+    // Category verification (15 points)
+    if (place.categories && place.categories.length > 0) {
+      score += place.categories.length > 1 ? 15 : 10;
+    }
+
+    // Location data quality (10 points)
+    if (place.latitude && place.longitude) {
+      score += 10;
+    }
+
+    return Math.min(score, 100);
+  }
+
+  /**
+   * Map business type to Foursquare category
+   * @param {string} businessType - Business type string
+   * @returns {string} Foursquare category ID
+   */
+  mapBusinessTypeToFoursquareCategory(businessType) {
+    const categoryMap = {
+      wellness: "4bf58dd8d48988d177941735", // Health & Medical
+      restaurant: "4d4b7105d754a06374d81259", // Food & Dining
+      retail: "4d4b7105d754a06378d81259", // Shop & Service
+      legal: "4d4b7105d754a06379d81259", // Professional Services
+      healthcare: "4d4b7105d754a0637cd81259", // Health & Medical
+      fitness: "4bf58dd8d48988d176941735", // Gym
+      beauty: "4bf58dd8d48988d110941735", // Salon
+      automotive: "4d4b7105d754a06378d81259", // Automotive
+    };
+
+    const type = businessType.toLowerCase();
+
+    // Check for exact matches first
+    for (const [key, categoryId] of Object.entries(categoryMap)) {
+      if (type.includes(key)) {
+        return categoryId;
+      }
+    }
+
+    // Default to professional services
+    return "4d4b7105d754a06379d81259";
+  }
+
+  /**
+   * Calculate cost savings from multi-source approach
+   * @returns {number} Estimated savings in dollars
+   */
+  calculateCostSavings() {
+    const foursquareCount = this.sourceStats.foursquare.businesses;
+    const googleCount = this.sourceStats.google.businesses;
+
+    // If we only used Google, estimate the cost
+    const googleOnlyCost = (foursquareCount + googleCount) * 0.032;
+    const actualCost =
+      this.sourceStats.foursquare.cost + this.sourceStats.google.cost;
+
+    return Math.max(0, googleOnlyCost - actualCost);
+  }
+
+  /**
+   * Helper method to check if names are similar
+   * @param {string} name1 - First name
+   * @param {string} name2 - Second name
+   * @returns {boolean} True if similar
+   */
+  namesSimilar(name1, name2) {
+    if (!name1 || !name2) return false;
+
+    // Remove common business suffixes for comparison
+    const cleanName1 = name1.replace(/\s+(llc|inc|corp|ltd)\.?$/i, "").trim();
+    const cleanName2 = name2.replace(/\s+(llc|inc|corp|ltd)\.?$/i, "").trim();
+
+    // Check if one name contains the other (for cases like "ABC Corp" vs "ABC Corporation")
+    return cleanName1.includes(cleanName2) || cleanName2.includes(cleanName1);
+  }
+
+  /**
+   * Helper method to check if addresses are similar
+   * @param {string} addr1 - First address
+   * @param {string} addr2 - Second address
+   * @returns {boolean} True if similar
+   */
+  addressesSimilar(addr1, addr2) {
+    if (!addr1 || !addr2) return false;
+
+    // Extract street numbers and names for comparison
+    const streetNum1 = addr1.match(/^\d+/);
+    const streetNum2 = addr2.match(/^\d+/);
+
+    // If street numbers match, consider similar
+    if (streetNum1 && streetNum2 && streetNum1[0] === streetNum2[0]) {
+      return true;
+    }
+
+    // Check for substantial overlap in address text
+    const words1 = addr1.split(/\s+/);
+    const words2 = addr2.split(/\s+/);
+    const commonWords = words1.filter(
+      (word) => word.length > 3 && words2.includes(word)
+    );
+
+    return commonWords.length >= 2;
+  }
+
+  /**
+   * Helper method to check if business name is generic
+   * @param {string} name - Business name
+   * @returns {boolean} True if generic
+   */
+  isGenericBusinessName(name) {
+    const genericPatterns = [
+      /business\s+(llc|inc|corp)/i,
+      /company\s+(llc|inc|corp)/i,
+      /^(business|company)$/i,
+      /test\s*business/i,
+      /^(store|shop|office)$/i,
+    ];
+    return genericPatterns.some((pattern) => pattern.test(name));
   }
 }
 

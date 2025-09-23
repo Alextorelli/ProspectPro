@@ -315,17 +315,33 @@ class EnhancedLeadDiscovery {
    * Process single business through enhanced 4-stage pipeline
    */
   async processBusinessThroughPipeline(business, options) {
-    // Prioritize Foursquare and other free APIs first
-    let discoveryResult = await this.foursquareClient.searchPlaces(
-      business.name,
-      {
-        near: business.address,
-        limit: 10,
+    // Check if we already have Foursquare data from discovery stage
+    if (business.source === "foursquare" && business.foursquareData) {
+      console.log(
+        `   📍 Using cached Foursquare data for ${
+          business.name || business.businessName
+        }`
+      );
+      // Skip redundant Foursquare API call since we have the data
+      business.foursquareData = {
+        found: true,
+        places: [business.foursquareData],
+        cached: true,
+      };
+    } else {
+      // Prioritize Foursquare and other free APIs first
+      let discoveryResult = await this.foursquareClient.searchPlaces(
+        business.name,
+        {
+          near: business.address,
+          limit: 10,
+        }
+      );
+      if (discoveryResult.found && discoveryResult.places.length > 0) {
+        business.foursquareData = discoveryResult;
       }
-    );
-    if (discoveryResult.found && discoveryResult.places.length > 0) {
-      business.foursquareData = discoveryResult;
     }
+
     // Now run standard pre-validation
     const stage1Result = await this.stage1_DiscoveryAndPreValidation(business);
     // Early filtering - only proceed if pre-validation score is promising
