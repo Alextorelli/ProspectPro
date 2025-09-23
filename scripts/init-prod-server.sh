@@ -172,62 +172,49 @@ start_production_server() {
 
 # Main execution flow
 main() {
-    local skip_workflow_trigger=false
+    # Production mode: ALWAYS use workflow artifact, no fallback options
+    echo "🔒 Production Mode: Workflow artifact required"
     
-    # Parse command line arguments
+    # Parse command line arguments - only allow help
     while [[ $# -gt 0 ]]; do
         case $1 in
-            --skip-workflow)
-                skip_workflow_trigger=true
-                shift
-                ;;
             --help|-h)
-                echo "Usage: $0 [--skip-workflow] [--help]"
+                echo "Usage: $0 [--help]"
+                echo ""
+                echo "Production Server Initialization"
+                echo "Automatically triggers GitHub Actions workflow to generate environment"
                 echo ""
                 echo "Options:"
-                echo "  --skip-workflow  Skip triggering GitHub Actions workflow"
                 echo "  --help, -h       Show this help message"
+                echo ""
+                echo "Requirements:"
+                echo "  - GHP_TOKEN or GITHUB_TOKEN environment variable"
+                echo "  - Repository secrets: SUPABASE_URL, SUPABASE_SECRET_KEY"
+                echo "  - GitHub Actions workflow must complete successfully"
                 exit 0
                 ;;
             *)
-                echo "Unknown option: $1"
+                echo "❌ Invalid option: $1"
+                echo "Production mode only supports --help"
+                echo "All configuration must come from GitHub Actions workflow artifact"
                 exit 1
                 ;;
         esac
     done
     
-    # Check if .env already exists and is valid
-    if [ -f ".env" ] && ! grep -q "your_supabase.*_here\|your_service_role_key_here\|your-project-ref\.supabase\.co" .env; then
-        echo "✅ Valid .env file already exists, skipping workflow trigger"
-        skip_workflow_trigger=true
+    # Step 1: Always trigger environment generation workflow in production
+    if ! trigger_env_workflow; then
+        echo "❌ Workflow trigger failed - production requires workflow artifact"
+        echo "   Production deployment MUST use GitHub Actions generated environment"
+        echo "   Check GitHub token permissions and repository secrets"
+        exit 1
     fi
     
-    # Step 1: Trigger environment generation workflow (unless skipped)
-    if [ "$skip_workflow_trigger" = false ]; then
-        if ! trigger_env_workflow; then
-            echo "⚠️  Workflow trigger failed or unavailable"
-            echo "   Run manually: npm run prod:setup-env"
-            echo "   Then edit .env file with your Supabase credentials"
-            exit 1
-        fi
-        
-        # Step 2: Check for environment file readiness
-        if ! wait_for_env; then
-            echo "❌ Environment configuration incomplete"
-            echo "   Complete the setup: npm run prod:setup-env"
-            echo "   Edit .env with real credentials, then: npm run prod:check"
-            exit 1
-        fi
-    else
-        echo "⏭️  Skipping workflow trigger"
-        # If skipping workflow, we MUST have a valid .env file
-        if ! wait_for_env; then
-            echo "❌ Cannot start production server"
-            echo "   Missing or incomplete .env file"
-            echo "   Run: npm run prod:setup-env"
-            echo "   Then edit .env with your Supabase credentials"
-            exit 1
-        fi
+    # Step 2: Verify environment file was created from workflow
+    if ! wait_for_env; then
+        echo "❌ Environment configuration failed to generate from workflow"
+        echo "   Production requires valid workflow artifact"
+        exit 1
     fi
     
     # Step 3: Validate environment

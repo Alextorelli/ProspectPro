@@ -182,48 +182,8 @@ async function extractEnvironment(runId) {
     return runDetails.outputs.ENV_CONTENT;
   }
 
-  // Alternative: Check artifacts if outputs aren't available yet
-  console.log("   Checking artifacts as fallback...");
-  return await getEnvironmentFromArtifacts(runId);
-}
-
-// Fallback: Get environment from artifacts
-async function getEnvironmentFromArtifacts(runId) {
-  console.log("📦 Retrieving environment from artifacts...");
-
-  const options = {
-    hostname: "api.github.com",
-    port: 443,
-    path: `/repos/${REPO_OWNER}/${REPO_NAME}/actions/runs/${runId}/artifacts`,
-    method: "GET",
-    headers: {
-      Authorization: `token ${GITHUB_TOKEN}`,
-      Accept: "application/vnd.github.v3+json",
-      "User-Agent": "ProspectPro-Environment-Puller",
-    },
-  };
-
-  const response = await makeRequest(options);
-
-  if (!response.artifacts || response.artifacts.length === 0) {
-    throw new Error("No artifacts found for workflow run");
-  }
-
-  const envArtifact = response.artifacts.find(
-    (a) => a.name === "production-environment"
-  );
-  if (!envArtifact) {
-    throw new Error("Environment artifact not found");
-  }
-
-  console.log("✅ Found environment artifact, but cannot download via API");
-  console.log(
-    "   Please check GitHub Actions UI for manual download if needed"
-  );
-
-  throw new Error(
-    "Artifact download not available via API - workflow outputs required"
-  );
+  // Production mode: No fallbacks, workflow outputs required
+  throw new Error("ENV_CONTENT not found in workflow outputs - workflow must export environment content");
 }
 
 // Step 5: Save environment file
@@ -257,7 +217,7 @@ function saveEnvironmentFile(envContent) {
 // Main execution
 async function main() {
   try {
-    console.log("\n🎯 Starting Enhanced Option B1 Environment Generation");
+    console.log("\n🎯 Starting Production Environment Generation - Workflow Outputs Only");
 
     // Step 1: Trigger the workflow
     await triggerWorkflow();
@@ -265,7 +225,7 @@ async function main() {
     // Step 2: Wait for workflow completion
     const workflowRun = await waitForWorkflowCompletion();
 
-    // Step 3: Extract environment content
+    // Step 3: Extract environment content (no fallbacks)
     const envContent = await extractEnvironment(workflowRun.id);
 
     // Step 4: Save environment file
@@ -273,17 +233,17 @@ async function main() {
 
     console.log("\n🎉 SUCCESS: Production environment ready!");
     console.log("=========================================================");
-    console.log("✅ Environment file generated and saved");
+    console.log("✅ Environment file generated from workflow outputs");
     console.log("🚀 Ready for production server initialization");
   } catch (error) {
     console.error("\n❌ FAILURE: Environment generation failed");
     console.error("=========================================================");
     console.error("Error:", error.message);
-    console.error("\nTroubleshooting:");
-    console.error("1. Check GitHub token permissions");
-    console.error("2. Verify repository secrets are set");
-    console.error("3. Check workflow file exists and is correct");
-    console.error("4. Review GitHub Actions logs");
+    console.error("\nProduction Requirements:");
+    console.error("1. GitHub token with repo permissions (GHP_TOKEN)");
+    console.error("2. Repository secrets: SUPABASE_URL, SUPABASE_SECRET_KEY");
+    console.error("3. Workflow must export ENV_CONTENT output");
+    console.error("4. No fallback options in production mode");
     process.exit(1);
   }
 }
