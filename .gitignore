@@ -43,10 +43,18 @@ yarn-error.log*
 # Environment variables
 .env
 !.env.example
+!.env.docker
 .env.local
+.env.runtime
 .env.development.local
 .env.test.local
 .env.production.local
+
+# Docker runtime files
+docker-compose.override.yml
+.docker/
+docker/logs/
+docker/data/
 
 # Lovable frontend deployment files
 .lovable/
