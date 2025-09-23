@@ -31,6 +31,30 @@
   },
   "github.copilot.inlineSuggest.enable": true,
 
+  // Copilot Chat optimizations
+  "github.copilot.chat.welcomeMessage": "none",
+  "github.copilot.chat.localeOverride": "en",
+  "github.copilot.chat.historyCount": 8, // Limit chat history
+  "github.copilot.chat.completionPhrasesEnabled": false, // Disable unnecessary phrases
+  "github.copilot.chat.dynamicContextTrailingLength": 500, // Control context size
+
+  // Copilot performance settings
+  "github.copilot.advanced.setAutoCompletionTriggerThreshold": 30, // Less aggressive
+  "github.copilot.advanced.connectionTimeout": 45000, // Better performance on slower connections
+
+  // Editor performance optimizations
+  "editor.minimap.enabled": false, // Reduces CPU usage
+  "editor.renderWhitespace": "none", // Reduces rendering overhead
+  "editor.renderControlCharacters": false, // Reduces rendering overhead
+  "editor.renderLineHighlight": "gutter", // Less UI overhead than "all"
+  "editor.bracketPairColorization.enabled": false, // Reduces rendering overhead
+  "editor.guides.bracketPairs": false, // Reduces rendering overhead
+  "workbench.colorTheme": "Default Dark Modern", // Use built-in theme for performance
+  "workbench.list.smoothScrolling": false, // Better performance on lower-end machines
+  "workbench.tree.renderIndentGuides": "none", // Reduces UI overhead
+  "workbench.editor.closeOnFileDelete": true, // Prevents confusion with deleted files
+
+  // File system performance
   "files.exclude": {
     "**/*.log": true,
     "**/*.tmp": true,
@@ -47,7 +71,12 @@
     "**/*.tmp": true,
     "**/*.temp": true,
     "**/diagnostics.json": true,
-    "**/startup.log": true
+    "**/startup.log": true,
+    "**/node_modules/**": true,
+    "**/archive/**": true,
+    "**/.git/**": true,
+    "**/logs/**": true,
+    "**/dist/**": true
   },
 
   "search.exclude": {
@@ -57,8 +86,16 @@
     "**/*.temp": true,
     "**/diagnostics.json": true,
     "**/startup.log": true,
-    "**/production*.log": true
+    "**/production*.log": true,
+    "**/archive/**": true,
+    "**/.git": true,
+    "**/logs/**": true,
+    "**/dist/**": true,
+    "**/coverage/**": true
   },
+
+  "search.searchOnType": false, // Reduces search operations while typing
+  "search.searchOnTypeDebouncePeriod": 800, // Longer debounce for better performance
 
   "files.associations": {
     "*.md": "markdown",
@@ -83,9 +120,21 @@
   "javascript.updateImportsOnFileMove.enabled": "always",
   "javascript.suggest.autoImports": true,
 
+  // Node.js and npm performance optimizations
+  "npm.packageManager": "npm",
+  "npm.exclude": ["**/node_modules/**", "**/archive/**"],
+  "npm.autoDetect": "off", // Prevents constant scanning of folders
+  "js/ts.implicitProjectConfig.checkJs": false, // Reduces TypeScript checking overhead
+
+  // Git optimizations
   "git.autofetch": true,
   "git.confirmSync": false,
   "git.enableSmartCommit": true,
+  "git.fetchOnPull": true,
+  "git.mergeEditor": true, // Better merge conflict resolution
 
-  "terminal.integrated.defaultProfile.linux": "bash"
+  // Terminal optimizations
+  "terminal.integrated.defaultProfile.linux": "bash",
+  "terminal.integrated.gpuAcceleration": "on",
+  "terminal.integrated.scrollback": 1000 // Lower scrollback for memory optimization
 }

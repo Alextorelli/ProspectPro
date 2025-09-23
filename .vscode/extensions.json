@@ -1,5 +1,38 @@
 {
   "recommendations": [
-    "denoland.vscode-deno"
+    // Core Project Requirements
+    "denoland.vscode-deno", // For Supabase functions
+    "supabase.supabase-vscode", // Supabase integration
+
+    // Development Essentials
+    "dbaeumer.vscode-eslint", // Code linting
+    "esbenp.prettier-vscode", // Code formatting
+    "eamodio.gitlens", // Enhanced git features
+
+    // API Development
+    "humao.rest-client", // For API testing
+
+    // Docker Support
+    "ms-azuretools.vscode-docker", // Docker integration
+
+    // Node.js Development
+    "christian-kohler.npm-intellisense", // NPM package intelligence
+
+    // Markdown Documentation
+    "davidanson.vscode-markdownlint", // Markdown linting
+
+    // JSON Support
+    "redhat.vscode-yaml", // YAML support for Docker files
+
+    // GitHub Integration
+    "github.copilot", // Copilot integration
+    "github.copilot-chat" // Copilot Chat
+  ],
+  "unwantedRecommendations": [
+    // Avoiding duplicate functionalities
+    "rangav.vscode-thunder-client", // REST Client already recommended
+    "ms-vscode.js-debug-nightly", // Use stable version instead
+    "vscjava.vscode-java-debug", // Not needed for this project
+    "ms-python.python" // Not needed for this project
   ]
 }

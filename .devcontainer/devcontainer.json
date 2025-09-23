@@ -7,23 +7,96 @@
   "customizations": {
     "vscode": {
       "extensions": [
+        // Core Development
         "denoland.vscode-deno",
         "supabase.supabase-vscode",
-        "eamodio.gitlens",
         "dbaeumer.vscode-eslint",
         "esbenp.prettier-vscode",
+
+        // Productivity
+        "eamodio.gitlens",
+        "github.copilot",
+        "github.copilot-chat",
+        "streetsidesoftware.code-spell-checker",
+        "wayou.vscode-todo-highlight",
+
+        // API Development
         "humao.rest-client",
-        "rangav.vscode-thunder-client"
+        "rangav.vscode-thunder-client",
+
+        // Docker Support
+        "ms-azuretools.vscode-docker",
+
+        // Database Tools
+        "mtxr.sqltools",
+        "mtxr.sqltools-driver-pg",
+
+        // Security
+        "snyk-security.snyk-vulnerability-scanner",
+
+        // Performance
+        "wix.vscode-import-cost",
+
+        // Documentation
+        "bierner.markdown-preview-github-styles",
+
+        // Recommended to Uninstall (using proper format with leading -)
+        "-github.vscode-pull-request-github", // Too much impact on startup
+        "-codezombiech.gitignore", // Limited utility, slows startup
+        "-yzhang.markdown-all-in-one", // Redundant with built-in
+        "-aaron-bond.better-comments" // Visual noise, performance impact
       ],
       "settings": {
         "terminal.integrated.defaultProfile.linux": "bash",
         "deno.enable": true,
-        "deno.enablePaths": ["supabase/functions"]
+        "deno.enablePaths": ["supabase/functions"],
+        "git.autofetch": true,
+        "git.confirmSync": false,
+        "git.enableSmartCommit": true,
+
+        // Editor Performance Settings
+        "editor.minimap.enabled": false,
+        "editor.renderWhitespace": "none",
+        "editor.renderControlCharacters": false,
+        "workbench.colorTheme": "Default Dark Modern",
+        "workbench.list.smoothScrolling": false,
+        "workbench.tree.renderIndentGuides": "none",
+        "workbench.editor.closeOnFileDelete": true,
+
+        // File System Performance
+        "files.watcherExclude": {
+          "**/*.log": true,
+          "**/*.tmp": true,
+          "**/node_modules/**": true,
+          "**/archive/**": true,
+          "**/.git/**": true,
+          "**/logs/**": true
+        },
+
+        // Search Performance
+        "search.exclude": {
+          "**/node_modules": true,
+          "**/*.log": true,
+          "**/archive/**": true,
+          "**/.git": true
+        },
+        "search.searchOnType": false,
+
+        // Copilot Optimization
+        "github.copilot.chat.historyCount": 8,
+        "github.copilot.chat.welcomeMessage": "none",
+        "github.copilot.chat.completionPhrasesEnabled": false,
+        "github.copilot.advanced.setAutoCompletionTriggerThreshold": 30,
+
+        // Terminal Settings
+        "terminal.integrated.gpuAcceleration": "on",
+        "terminal.integrated.scrollback": 1000
       }
     }
   },
   "forwardPorts": [3000, 5432],
-  "postCreateCommand": "bash -lc 'set -e; sudo apt-get update && sudo apt-get install -y docker.io && if [ -f package-lock.json ]; then npm ci; else npm install; fi && npm i supabase --save-dev'",
+  "postCreateCommand": "bash -lc 'set -e; sudo apt-get update && sudo apt-get install -y docker.io && if [ -f package-lock.json ]; then npm ci; else npm install; fi && npm i supabase --save-dev && echo \"VS Code environment optimized for ProspectPro development\"'",
+  "postStartCommand": "bash -c 'echo \"Starting ProspectPro development environment with optimized VS Code settings...\"'",
   "runArgs": ["--init", "-v", "/var/run/docker.sock:/var/run/docker.sock"],
   "remoteUser": "node"
 }
