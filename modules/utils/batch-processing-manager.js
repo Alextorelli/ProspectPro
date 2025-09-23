@@ -1,6 +1,7 @@
 /**
- * Batch Processor for ProspectPro Operations
- * Handles batching of email verification, website scraping, and other operations
+ * Enhanced Batch Processor for ProspectPro Multi-Source Operations
+ * Handles batching of email verification, website scraping, and multi-source API operations
+ * Updated to support Foursquare + Google Places multi-source discovery pipeline
  */
 
 const pLimit = require("p-limit");
@@ -13,19 +14,32 @@ class BatchProcessor {
       emailBatchSize: config.emailBatchSize || 50,
       websiteConcurrency: config.websiteConcurrency || 4,
       googlePlacesConcurrency: config.googlePlacesConcurrency || 6,
+      foursquareConcurrency: config.foursquareConcurrency || 8, // Higher for free API
       emailVerificationConcurrency: config.emailVerificationConcurrency || 2,
+      multiSourceBatchSize: config.multiSourceBatchSize || 25,
       ...config,
     };
 
     // Concurrency limiters
     this.websiteLimit = pLimit(this.config.websiteConcurrency);
     this.googleLimit = pLimit(this.config.googlePlacesConcurrency);
+    this.foursquareLimit = pLimit(this.config.foursquareConcurrency);
     this.emailLimit = pLimit(this.config.emailVerificationConcurrency);
 
     // Batch queues
     this.emailQueue = [];
     this.websiteQueue = [];
+    this.multiSourceQueue = [];
     this.domainCache = new Map();
+
+    // Multi-source processing stats
+    this.multiSourceStats = {
+      foursquareHits: 0,
+      googleHits: 0,
+      crossPlatformMatches: 0,
+      totalProcessed: 0,
+      cacheSaves: 0,
+    };
   }
 
   /**
@@ -338,7 +352,287 @@ class BatchProcessor {
       queues: {
         email: this.emailQueue?.length || 0,
         website: this.websiteQueue?.length || 0,
+        multiSource: this.multiSourceQueue?.length || 0,
       },
+      multiSourceStats: this.multiSourceStats,
+    };
+  }
+
+  /**
+   * Batch multi-source discovery processing (Foursquare + Google Places)
+   * Optimizes API calls by caching and deduplicating across sources
+   */
+  async batchMultiSourceDiscovery(queries, discoveryClients) {
+    const { foursquareClient, googleClient } = discoveryClients;
+
+    logger.info(
+      `🔍 Starting batch multi-source discovery for ${queries.length} queries`
+    );
+
+    const results = {
+      foursquareResults: new Map(),
+      googleResults: new Map(),
+      mergedBusinesses: [],
+      stats: {
+        foursquareQueries: 0,
+        googleQueries: 0,
+        totalBusinesses: 0,
+        duplicatesRemoved: 0,
+      },
+    };
+
+    // Phase 1: Batch Foursquare queries (free/cheap API first)
+    if (foursquareClient) {
+      const foursquareTasks = queries.map((query) =>
+        this.foursquareLimit(async () => {
+          const cacheKey = TTLCache.generateKey("foursquare_search", {
+            query: query.searchQuery,
+            location: query.location,
+          });
+
+          let cachedResult = globalCache.get(cacheKey);
+          if (cachedResult) {
+            this.multiSourceStats.cacheSaves++;
+            return { query, result: cachedResult, cached: true };
+          }
+
+          try {
+            const result = await foursquareClient.searchPlaces(
+              query.searchQuery,
+              {
+                near: query.location,
+                limit: query.maxResults || 20,
+              }
+            );
+
+            globalCache.set(cacheKey, result, 1800000); // 30 minutes cache
+            results.stats.foursquareQueries++;
+            this.multiSourceStats.foursquareHits += result.places?.length || 0;
+
+            return { query, result, cached: false };
+          } catch (error) {
+            logger.warn(`Foursquare query failed: ${error.message}`);
+            return {
+              query,
+              result: { found: false, places: [] },
+              cached: false,
+            };
+          }
+        })
+      );
+
+      const foursquareResults = await Promise.allSettled(foursquareTasks);
+      foursquareResults.forEach((result) => {
+        if (result.status === "fulfilled") {
+          results.foursquareResults.set(
+            result.value.query,
+            result.value.result
+          );
+        }
+      });
+    }
+
+    // Phase 2: Batch Google Places queries (for gaps and validation)
+    if (googleClient) {
+      const googleTasks = queries.map((query) =>
+        this.googleLimit(async () => {
+          const cacheKey = TTLCache.generateKey("google_search", {
+            query: query.searchQuery,
+            location: query.location,
+          });
+
+          let cachedResult = globalCache.get(cacheKey);
+          if (cachedResult) {
+            this.multiSourceStats.cacheSaves++;
+            return { query, result: cachedResult, cached: true };
+          }
+
+          try {
+            const result = await googleClient.textSearch({
+              query: query.searchQuery,
+              location: query.location,
+              type: query.searchType || "establishment",
+            });
+
+            globalCache.set(cacheKey, result, 1800000); // 30 minutes cache
+            results.stats.googleQueries++;
+            this.multiSourceStats.googleHits += result?.length || 0;
+
+            return { query, result, cached: false };
+          } catch (error) {
+            logger.warn(`Google Places query failed: ${error.message}`);
+            return { query, result: [], cached: false };
+          }
+        })
+      );
+
+      const googleResults = await Promise.allSettled(googleTasks);
+      googleResults.forEach((result) => {
+        if (result.status === "fulfilled") {
+          results.googleResults.set(result.value.query, result.value.result);
+        }
+      });
+    }
+
+    // Phase 3: Merge and deduplicate results
+    queries.forEach((query) => {
+      const foursquareData = results.foursquareResults.get(query);
+      const googleData = results.googleResults.get(query);
+
+      const mergedBusinesses = this.mergeMultiSourceResults(
+        foursquareData?.places || [],
+        googleData || [],
+        query
+      );
+
+      results.mergedBusinesses.push(...mergedBusinesses);
+      results.stats.totalBusinesses += mergedBusinesses.length;
+    });
+
+    this.multiSourceStats.totalProcessed += queries.length;
+
+    logger.info(
+      `✅ Batch multi-source discovery complete: ${results.stats.totalBusinesses} businesses from ${results.stats.foursquareQueries} Foursquare + ${results.stats.googleQueries} Google queries`
+    );
+
+    return results;
+  }
+
+  /**
+   * Merge results from Foursquare and Google Places, removing duplicates
+   */
+  mergeMultiSourceResults(foursquareResults, googleResults, query) {
+    const allResults = [];
+    const seenBusinesses = new Map();
+
+    // Add Foursquare results first (often higher quality for discovery)
+    foursquareResults.forEach((business) => {
+      const businessKey = this.generateBusinessKey(business);
+      if (!seenBusinesses.has(businessKey)) {
+        allResults.push({
+          ...business,
+          source: "foursquare",
+          originalQuery: query,
+          discoveryTimestamp: new Date().toISOString(),
+        });
+        seenBusinesses.set(businessKey, "foursquare");
+      }
+    });
+
+    // Add Google results, checking for duplicates
+    googleResults.forEach((business) => {
+      const businessKey = this.generateBusinessKey(business);
+      if (!seenBusinesses.has(businessKey)) {
+        allResults.push({
+          ...business,
+          source: "google",
+          originalQuery: query,
+          discoveryTimestamp: new Date().toISOString(),
+        });
+        seenBusinesses.set(businessKey, "google");
+      } else {
+        // Cross-platform validation - enhance existing business
+        const existingBusiness = allResults.find(
+          (b) => this.generateBusinessKey(b) === businessKey
+        );
+        if (existingBusiness) {
+          existingBusiness.crossPlatformValidation = {
+            sources: [seenBusinesses.get(businessKey), "google"],
+            googleData: business,
+          };
+          this.multiSourceStats.crossPlatformMatches++;
+        }
+      }
+    });
+
+    return allResults;
+  }
+
+  /**
+   * Generate a unique key for business deduplication
+   */
+  generateBusinessKey(business) {
+    const name = (business.name || business.businessName || "")
+      .toLowerCase()
+      .trim();
+    const phone = (business.phone || business.telephone || "").replace(
+      /\D/g,
+      ""
+    );
+
+    if (phone && phone.length >= 10) {
+      return `${name}:${phone}`;
+    }
+
+    const address = (
+      business.address ||
+      business.formattedAddress ||
+      ""
+    ).toLowerCase();
+    if (address && name) {
+      // Use first part of address + business name for matching
+      const addressKey = address.split(",")[0] || address.substring(0, 20);
+      return `${name}:${addressKey}`;
+    }
+
+    return name || "unknown";
+  }
+
+  /**
+   * Batch Foursquare place details fetching with caching
+   */
+  async batchFoursquareDetails(foursquareIds, foursquareClient) {
+    logger.info(
+      `📍 Starting batch Foursquare details for ${foursquareIds.length} places`
+    );
+
+    const detailsTasks = foursquareIds.map((fsqId) =>
+      this.foursquareLimit(async () => {
+        const cacheKey = TTLCache.generateKey("foursquare_details", fsqId);
+        let details = globalCache.get(cacheKey);
+
+        if (!details) {
+          try {
+            details = await foursquareClient.getPlaceDetails(fsqId);
+            globalCache.set(cacheKey, details, 3600000); // 1 hour cache
+          } catch (error) {
+            logger.error(
+              `Foursquare details failed for ${fsqId}:`,
+              error.message
+            );
+            details = { error: error.message, fsqId };
+            globalCache.set(cacheKey, details, 900000); // 15 minutes for errors
+          }
+        }
+
+        return { fsqId, details, success: !details.error };
+      })
+    );
+
+    const results = await Promise.allSettled(detailsTasks);
+    const successful = results.filter(
+      (r) => r.status === "fulfilled" && r.value.success
+    ).length;
+
+    logger.info(
+      `✅ Batch Foursquare details complete: ${successful}/${foursquareIds.length} succeeded`
+    );
+
+    return results
+      .map((r) => (r.status === "fulfilled" ? r.value : null))
+      .filter(Boolean);
+  }
+
+  /**
+   * Reset multi-source processing stats
+   */
+  resetMultiSourceStats() {
+    this.multiSourceStats = {
+      foursquareHits: 0,
+      googleHits: 0,
+      crossPlatformMatches: 0,
+      totalProcessed: 0,
+      cacheSaves: 0,
     };
   }
 }

@@ -1,6 +1,6 @@
 /**
- * Simple Logger for ProspectPro
- * Reduces terminal noise and provides configurable logging levels
+ * Enhanced Logger for ProspectPro Multi-Source Discovery
+ * Supports multi-source API logging, cost tracking, and discovery pipeline monitoring
  */
 
 class Logger {
@@ -11,6 +11,15 @@ class Logger {
       warn: 1,
       info: 2,
       debug: 3,
+    };
+
+    // Multi-source discovery session tracking
+    this.sessionStats = {
+      multiSourceQueries: 0,
+      foursquareHits: 0,
+      googleHits: 0,
+      crossPlatformMatches: 0,
+      costSavings: 0,
     };
   }
 
@@ -40,6 +49,95 @@ class Logger {
     if (this.shouldLog("debug")) {
       console.log(`🔍 DEBUG: ${message}`, ...args);
     }
+  }
+
+  /**
+   * Multi-source discovery logging methods
+   */
+  multiSourceQueryStart(query, location, sources) {
+    if (this.shouldLog("info")) {
+      console.log(`🔍 Multi-Source Query: "${query}" in ${location}`);
+      console.log(`   📋 Sources: ${sources.join(" + ")}`);
+    }
+    this.sessionStats.multiSourceQueries++;
+  }
+
+  multiSourceQueryResult(
+    foursquareCount,
+    googleCount,
+    mergedCount,
+    costSavings
+  ) {
+    if (this.shouldLog("info")) {
+      console.log(
+        `   📊 Results: ${foursquareCount} Foursquare + ${googleCount} Google = ${mergedCount} unique`
+      );
+      if (costSavings > 0) {
+        console.log(`   💰 Cost Savings: $${costSavings.toFixed(3)}`);
+        this.sessionStats.costSavings += costSavings;
+      }
+    }
+
+    this.sessionStats.foursquareHits += foursquareCount;
+    this.sessionStats.googleHits += googleCount;
+
+    if (foursquareCount > 0 && googleCount > 0) {
+      this.sessionStats.crossPlatformMatches++;
+    }
+  }
+
+  crossPlatformMatch(businessName, sources) {
+    if (this.shouldLog("debug")) {
+      console.log(`✅ Cross-platform match: ${businessName}`);
+      console.log(`   📋 Found in: ${sources.join(", ")}`);
+    }
+  }
+
+  cacheHit(source, cacheKey) {
+    if (this.shouldLog("debug")) {
+      console.log(`💾 Cache hit: ${source} - ${cacheKey.substring(0, 50)}...`);
+    }
+  }
+
+  apiCostTracking(source, cost, totalSessionCost) {
+    if (this.shouldLog("debug")) {
+      console.log(
+        `💳 API Cost: ${source} $${cost.toFixed(
+          3
+        )} | Session: $${totalSessionCost.toFixed(3)}`
+      );
+    }
+  }
+
+  /**
+   * Session statistics reporting
+   */
+  logSessionStats() {
+    if (this.shouldLog("info")) {
+      console.log(`📊 Multi-Source Discovery Session Stats:`);
+      console.log(`   🔍 Queries: ${this.sessionStats.multiSourceQueries}`);
+      console.log(`   📍 Foursquare hits: ${this.sessionStats.foursquareHits}`);
+      console.log(`   🔍 Google hits: ${this.sessionStats.googleHits}`);
+      console.log(
+        `   ✅ Cross-platform matches: ${this.sessionStats.crossPlatformMatches}`
+      );
+      console.log(
+        `   💰 Total cost savings: $${this.sessionStats.costSavings.toFixed(3)}`
+      );
+    }
+  }
+
+  /**
+   * Reset session statistics
+   */
+  resetSessionStats() {
+    this.sessionStats = {
+      multiSourceQueries: 0,
+      foursquareHits: 0,
+      googleHits: 0,
+      crossPlatformMatches: 0,
+      costSavings: 0,
+    };
   }
 
   /**
