@@ -264,21 +264,36 @@ jobs:
         run: |
           echo "🔬 Final debug before artifact upload..."
           echo "Working directory: $(pwd)"
-          echo "File permissions and details:"
-          ls -la .env
-          echo "File type:"
-          file .env
-          echo "File readable test:"
-          cat .env | head -3
-          echo "Absolute path:"
-          readlink -f .env
+          echo "Files in current directory:"
+          ls -la
+          echo ""
+          echo "🎯 .env file verification:"
+          if [ -f .env ]; then
+            echo "✅ .env exists"
+            echo "📏 Size: $(stat -c%s .env) bytes"
+            echo "📄 Lines: $(wc -l < .env)"
+            echo "🔒 Permissions: $(stat -c%a .env)"
+            echo "👤 Owner: $(stat -c%U .env)"
+            echo "📂 Absolute path: $(realpath .env)"
+            echo "🔍 File type: $(file .env)"
+            echo "📖 Content preview:"
+            head -3 .env
+            echo "..."
+            tail -3 .env
+          else
+            echo "❌ .env file does not exist!"
+            exit 1
+          fi
 
       - name: Archive Environment Configuration
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: production-environment-config
-          path: .env
+          path: |
+            .env
           retention-days: 30
+          if-no-files-found: warn
+          overwrite: true
 
       - name: Verify Artifact Upload
         run: |
