@@ -11,12 +11,14 @@ ProspectPro is a lead generation platform built with Node.js/Express that implem
 ProspectPro uses a comprehensive Docker-based deployment system with distinct configurations:
 
 1. **Production Deployment** (`docker-compose.yml`)
+
    - Secured with Supabase Vault integration for API keys
    - NGINX reverse proxy with SSL termination
    - Volume mounts for logs, data, and configuration
    - Health checks and automatic restart policies
 
 2. **Development Environment** (`docker-compose.dev.yml`)
+
    - Hot-reload enabled for rapid development
    - Debug endpoints exposed
    - Local development conveniences
@@ -35,7 +37,7 @@ ProspectPro uses a comprehensive Docker-based deployment system with distinct co
 npm run vault:deploy
 
 # Development with live API keys from Vault
-npm run vault:dev  
+npm run vault:dev
 
 # Standard Docker commands
 npm run docker:build
@@ -576,12 +578,14 @@ node debug/inspect-business-data.js             # Debug specific business data
 ### Core Workflows
 
 1. **Docker Environment** (`.github/workflows/docker-env.yml`)
+
    - Creates Docker-compatible environment files
    - Integrates with GitHub Secrets for infrastructure
    - Tests Supabase connection and Docker build
    - Uploads environment artifact for deployment
 
 2. **CI/CD Pipeline** (`.github/workflows/ci.yml`)
+
    - Runs tests and validations for PRs and main branch
    - Enforces code quality and security standards
    - Validates Docker builds and configurations
@@ -597,6 +601,7 @@ node debug/inspect-business-data.js             # Debug specific business data
 ProspectPro uses a two-tier secret management approach:
 
 1. **GitHub Secrets** (Infrastructure)
+
    - `SUPABASE_URL`: Database connection endpoint
    - `SUPABASE_SECRET_KEY`: Database service role key
    - `PERSONAL_ACCESS_TOKEN`: Admin authentication

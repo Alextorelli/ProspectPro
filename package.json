@@ -9,7 +9,6 @@
     "prod": "NODE_ENV=production node server.js",
     "production:start": "./scripts/init-prod-server.sh",
     "production:checklist": "./scripts/production-checklist.sh",
-    "production:validate-db": "node scripts/validate-production-database-v31.js",
     "prod:init": "./scripts/init-prod-server.sh",
     "prod:setup-env": "./scripts/pull-env-from-secrets.js",
     "prod:check": "./scripts/production-checklist.sh",
