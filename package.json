@@ -33,7 +33,14 @@
     "vault:deploy": "echo '🔐 Deploying with Supabase Vault integration...' && docker-compose up --build -d",
     "vault:dev": "echo '🔐 Starting development with Supabase Vault...' && docker-compose -f docker-compose.dev.yml up --build",
     "vault:logs": "docker-compose logs -f prospectpro",
-    "vault:test": "echo '🧪 Testing Vault connection...' && docker-compose exec prospectpro curl -f http://localhost:3000/diag"
+    "vault:test": "echo '🧪 Testing Vault connection...' && docker-compose exec prospectpro curl -f http://localhost:3000/diag",
+    "mcp:install": "cd mcp-servers && npm install",
+    "mcp:test": "cd mcp-servers && node test-servers.js",
+    "mcp:start:database": "cd mcp-servers && node database-server.js",
+    "mcp:start:api": "cd mcp-servers && node api-server.js",
+    "mcp:start:filesystem": "cd mcp-servers && node filesystem-server.js",
+    "mcp:start:monitoring": "cd mcp-servers && node monitoring-server.js",
+    "mcp:start:all": "cd mcp-servers && npm run start:all"
   },
   "engines": {
     "node": ">=20.0.0",
