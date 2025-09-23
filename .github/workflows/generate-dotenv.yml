@@ -285,14 +285,37 @@ jobs:
             exit 1
           fi
 
+      - name: Final Upload Preparation
+        run: |
+          echo "🚀 Preparing for artifact upload..."
+          echo "📂 Working directory: $(pwd)"
+          echo "📋 Full directory listing:"
+          ls -la
+          echo ""
+          echo "🎯 Target file verification:"
+          if [ -f .env ]; then
+            echo "✅ .env file confirmed present"
+            echo "📏 Size: $(stat -c%s .env) bytes"
+            echo "🔒 Permissions: $(stat -c%a .env)"
+            echo "📂 Full path: $(realpath .env)"
+            # Copy to ensure file is accessible
+            cp .env production-env-config.env
+            echo "📋 Backup created: production-env-config.env"
+            ls -la *.env
+          else
+            echo "❌ CRITICAL: .env file missing before upload!"
+            exit 1
+          fi
+
       - name: Archive Environment Configuration
         uses: actions/upload-artifact@v4
         with:
           name: production-environment-config
           path: |
             .env
+            production-env-config.env
           retention-days: 30
-          if-no-files-found: warn
+          if-no-files-found: error
           overwrite: true
 
       - name: Verify Artifact Upload
