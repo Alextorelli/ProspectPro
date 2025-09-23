@@ -260,22 +260,25 @@ jobs:
             exit 1
           fi
 
+      - name: Pre-Archive Debug
+        run: |
+          echo "🔬 Final debug before artifact upload..."
+          echo "Working directory: $(pwd)"
+          echo "File permissions and details:"
+          ls -la .env
+          echo "File type:"
+          file .env
+          echo "File readable test:"
+          cat .env | head -3
+          echo "Absolute path:"
+          readlink -f .env
+
       - name: Archive Environment Configuration
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v3
         with:
           name: production-environment-config
           path: .env
           retention-days: 30
-          if-no-files-found: error
-
-      - name: Archive Environment Logs (if exists)
-        uses: actions/upload-artifact@v4
-        if: hashFiles('environment.log') != ''
-        with:
-          name: environment-logs
-          path: environment.log
-          retention-days: 7
-          if-no-files-found: warn
 
       - name: Verify Artifact Upload
         run: |
