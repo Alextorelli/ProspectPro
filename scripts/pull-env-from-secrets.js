@@ -176,7 +176,10 @@ async function extractEnvironment(runId) {
 
   const artifactsResponse = await makeRequest(artifactsOptions);
 
-  if (!artifactsResponse.artifacts || artifactsResponse.artifacts.length === 0) {
+  if (
+    !artifactsResponse.artifacts ||
+    artifactsResponse.artifacts.length === 0
+  ) {
     throw new Error("No artifacts found for workflow run");
   }
 
@@ -186,7 +189,10 @@ async function extractEnvironment(runId) {
   );
 
   if (!envArtifact) {
-    console.log("Available artifacts:", artifactsResponse.artifacts.map(a => a.name));
+    console.log(
+      "Available artifacts:",
+      artifactsResponse.artifacts.map((a) => a.name)
+    );
     throw new Error("production-environment-config artifact not found");
   }
 
@@ -210,21 +216,26 @@ async function extractEnvironment(runId) {
       if (res.statusCode === 302) {
         // Follow redirect for artifact download
         const downloadUrl = res.headers.location;
-        console.log("📥 Downloading artifact from:", downloadUrl.substring(0, 50) + "...");
-        
-        https.get(downloadUrl, (zipRes) => {
-          const chunks = [];
-          zipRes.on('data', chunk => chunks.push(chunk));
-          zipRes.on('end', () => {
-            const zipBuffer = Buffer.concat(chunks);
-            // Extract .env content from zip
-            extractEnvFromZip(zipBuffer)
-              .then(resolve)
-              .catch(reject);
-          });
-        }).on('error', reject);
+        console.log(
+          "📥 Downloading artifact from:",
+          downloadUrl.substring(0, 50) + "..."
+        );
+
+        https
+          .get(downloadUrl, (zipRes) => {
+            const chunks = [];
+            zipRes.on("data", (chunk) => chunks.push(chunk));
+            zipRes.on("end", () => {
+              const zipBuffer = Buffer.concat(chunks);
+              // Extract .env content from zip
+              extractEnvFromZip(zipBuffer).then(resolve).catch(reject);
+            });
+          })
+          .on("error", reject);
       } else {
-        reject(new Error(`Failed to download artifact: HTTP ${res.statusCode}`));
+        reject(
+          new Error(`Failed to download artifact: HTTP ${res.statusCode}`)
+        );
       }
     });
     req.on("error", reject);
@@ -235,42 +246,79 @@ async function extractEnvironment(runId) {
 // Helper to extract .env content from zip buffer
 function extractEnvFromZip(zipBuffer) {
   return new Promise((resolve, reject) => {
-    // Simple zip extraction for .env file
-    // This is a basic implementation - in production you might want to use a proper zip library
     try {
-      const zipString = zipBuffer.toString();
-      
-      // Look for .env file content in the zip
-      // This is a simplified extraction - assumes the .env content is readable in the zip
-      const envStart = zipString.indexOf('# ================================');
-      const envEnd = zipString.indexOf('BUILD_ACTOR=') + zipString.substring(zipString.indexOf('BUILD_ACTOR=')).indexOf('\n');
-      
-      if (envStart !== -1 && envEnd !== -1) {
-        const envContent = zipString.substring(envStart, envEnd + 1);
-        console.log("✅ Extracted .env content from zip artifact");
+      // Use Node.js built-in to handle the zip
+      const fs = require("fs");
+      const path = require("path");
+      const { execSync } = require("child_process");
+
+      // Save zip to temp file
+      const tempZipPath = "/tmp/env-artifact.zip";
+      const tempExtractPath = "/tmp/env-extract";
+
+      fs.writeFileSync(tempZipPath, zipBuffer);
+
+      // Create extraction directory
+      if (fs.existsSync(tempExtractPath)) {
+        execSync(`rm -rf ${tempExtractPath}`);
+      }
+      fs.mkdirSync(tempExtractPath, { recursive: true });
+
+      // Extract zip using system unzip
+      execSync(`unzip -q ${tempZipPath} -d ${tempExtractPath}`);
+
+      // Find .env file in extracted content
+      const extractedFiles = fs.readdirSync(tempExtractPath);
+      console.log("📁 Extracted files:", extractedFiles);
+
+      let envContent = null;
+
+      // Look for .env file
+      if (extractedFiles.includes(".env")) {
+        envContent = fs.readFileSync(
+          path.join(tempExtractPath, ".env"),
+          "utf8"
+        );
+      } else if (extractedFiles.includes("production-env-config.env")) {
+        envContent = fs.readFileSync(
+          path.join(tempExtractPath, "production-env-config.env"),
+          "utf8"
+        );
+      } else {
+        // Check if there's a subdirectory
+        for (const file of extractedFiles) {
+          const fullPath = path.join(tempExtractPath, file);
+          if (fs.statSync(fullPath).isDirectory()) {
+            const subFiles = fs.readdirSync(fullPath);
+            if (subFiles.includes(".env")) {
+              envContent = fs.readFileSync(path.join(fullPath, ".env"), "utf8");
+              break;
+            }
+            if (subFiles.includes("production-env-config.env")) {
+              envContent = fs.readFileSync(
+                path.join(fullPath, "production-env-config.env"),
+                "utf8"
+              );
+              break;
+            }
+          }
+        }
+      }
+
+      // Cleanup temp files
+      try {
+        fs.unlinkSync(tempZipPath);
+        execSync(`rm -rf ${tempExtractPath}`);
+      } catch (e) {
+        console.warn("⚠️ Could not cleanup temp files:", e.message);
+      }
+
+      if (envContent) {
+        console.log("✅ Successfully extracted .env content from artifact");
+        console.log("📏 Content size:", envContent.length, "bytes");
         resolve(envContent);
       } else {
-        // Alternative approach - try to find NODE_ENV as a marker
-        const nodeEnvIndex = zipString.indexOf('NODE_ENV=production');
-        if (nodeEnvIndex !== -1) {
-          // Find start of file (look backwards for comment block)
-          let start = nodeEnvIndex;
-          while (start > 0 && zipString[start] !== '#') start--;
-          
-          // Find end of file (look for BUILD_ACTOR or end)
-          let end = zipString.indexOf('BUILD_ACTOR=', nodeEnvIndex);
-          if (end !== -1) {
-            end = zipString.indexOf('\n', end) + 1;
-          } else {
-            end = zipString.length;
-          }
-          
-          const envContent = zipString.substring(start, end);
-          console.log("✅ Extracted .env content using NODE_ENV marker");
-          resolve(envContent);
-        } else {
-          reject(new Error("Could not extract .env content from artifact zip"));
-        }
+        reject(new Error("No .env file found in extracted artifact"));
       }
     } catch (error) {
       reject(new Error(`Failed to extract .env from zip: ${error.message}`));
