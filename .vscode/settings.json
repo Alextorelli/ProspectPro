@@ -133,7 +133,22 @@
   "git.fetchOnPull": true,
   "git.mergeEditor": true, // Better merge conflict resolution
 
-  // Terminal optimizations
+  // Terminal optimizations for Windows
+  "terminal.integrated.defaultProfile.windows": "PowerShell",
+  "terminal.integrated.profiles.windows": {
+    "PowerShell": {
+      "source": "PowerShell",
+      "icon": "terminal-powershell"
+    },
+    "Command Prompt": {
+      "path": "cmd.exe",
+      "icon": "terminal-cmd"
+    },
+    "Windows PowerShell": {
+      "path": "powershell.exe",
+      "icon": "terminal-powershell"
+    }
+  },
   "terminal.integrated.defaultProfile.linux": "bash",
   "terminal.integrated.gpuAcceleration": "on",
   "terminal.integrated.scrollback": 1000, // Lower scrollback for memory optimization
@@ -161,6 +176,11 @@
       "enabled": true,
       "autoStart": false,
       "description": "ProspectPro Monitoring and Diagnostics"
+    },
+    "prospectpro-production": {
+      "enabled": true,
+      "autoStart": true,
+      "description": "ProspectPro Production Environment Management and CI/CD Monitoring"
     }
   },
 
