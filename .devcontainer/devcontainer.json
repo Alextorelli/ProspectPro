@@ -40,6 +40,10 @@
         // Documentation
         "bierner.markdown-preview-github-styles",
 
+        // Development Theme & Visual Organization
+        "deepforest.theme", // Vira Deepforest theme for organized development
+        "vscode-icons-team.vscode-icons", // Better file icons for organization
+
         // Recommended to Uninstall (using proper format with leading -)
         "-github.vscode-pull-request-github", // Too much impact on startup
         "-codezombiech.gitignore", // Limited utility, slows startup
@@ -54,14 +58,29 @@
         "git.confirmSync": false,
         "git.enableSmartCommit": true,
 
-        // Editor Performance Settings
+        // Editor Performance Settings - Enhanced for Development
         "editor.minimap.enabled": false,
         "editor.renderWhitespace": "none",
         "editor.renderControlCharacters": false,
-        "workbench.colorTheme": "Default Dark Modern",
+        "workbench.colorTheme": "Vira Deepforest", // Development-specific theme
+        "workbench.iconTheme": "vscode-icons", // Better file icons for organization
         "workbench.list.smoothScrolling": false,
         "workbench.tree.renderIndentGuides": "none",
         "workbench.editor.closeOnFileDelete": true,
+
+        // Development-specific UI enhancements
+        "workbench.colorCustomizations": {
+          "[Vira Deepforest]": {
+            "titleBar.activeBackground": "#1a4d3a",
+            "titleBar.activeForeground": "#ffffff",
+            "statusBar.background": "#1a4d3a",
+            "statusBar.foreground": "#ffffff",
+            "activityBar.background": "#0d2818",
+            "panel.background": "#0a1f14"
+          }
+        },
+        "workbench.settings.editor": "json",
+        "breadcrumbs.enabled": true,
 
         // File System Performance
         "files.watcherExclude": {
@@ -88,9 +107,15 @@
         "github.copilot.chat.completionPhrasesEnabled": false,
         "github.copilot.advanced.setAutoCompletionTriggerThreshold": 30,
 
-        // Terminal Settings
+        // Terminal Settings - Development Enhanced
         "terminal.integrated.gpuAcceleration": "on",
         "terminal.integrated.scrollback": 1000,
+        "terminal.integrated.fontFamily": "Consolas, 'Courier New', monospace",
+        "terminal.integrated.fontSize": 13,
+
+        // Development Environment Indicators
+        "window.title": "🔨 ${folderName} - ProspectPro Development ${separator} ${activeEditorShort}",
+        "workbench.startupEditor": "welcomePageInEmptyWorkbench",
 
         // === MCP (Model Context Protocol) Configuration ===
         "mcp.enable": true,
@@ -117,8 +142,8 @@
     }
   },
   "forwardPorts": [3000, 5432],
-  "postCreateCommand": "bash -lc 'set -e; sudo apt-get update && sudo apt-get install -y docker.io && if [ -f package-lock.json ]; then npm ci; else npm install; fi && npm i supabase --save-dev && npm run mcp:install && npm run mcp:test && echo \"VS Code environment optimized for ProspectPro development with MCP enabled\"'",
-  "postStartCommand": "bash -c 'echo \"Starting ProspectPro development environment with optimized VS Code settings...\"'",
+  "postCreateCommand": "bash -lc 'set -e; echo \"🏗️  Setting up ProspectPro Development Environment...\"; sudo apt-get update && sudo apt-get install -y docker.io; if [ -f package-lock.json ]; then npm ci; else npm install; fi; npm i supabase --save-dev; npm run mcp:install; npm run mcp:test; echo \"🎨 Development environment ready with Vira Deepforest theme and MCP enabled!\"; echo \"🚀 ProspectPro development container is ready for API integration work\"'",
+  "postStartCommand": "bash -c 'echo \"🌲 ProspectPro Development Container Started\"; echo \"Theme: Vira Deepforest | MCP: Enabled | Ready for API Integration\"; echo \"💡 Use Copilot Chat for AI-assisted development with full system context\"'",
   "runArgs": ["--init", "-v", "/var/run/docker.sock:/var/run/docker.sock"],
   "remoteUser": "node"
 }
