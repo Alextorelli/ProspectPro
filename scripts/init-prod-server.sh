@@ -158,15 +158,29 @@ validate_environment() {
     return 0
 }
 
+# Function to validate production database
+validate_production_database() {
+    echo "🔍 Validating production database configuration..."
+    
+    if node ./scripts/validate-production-database-v31.js; then
+        echo "✅ Database validation passed - production ready"
+        return 0
+    else
+        echo "❌ Database validation failed"
+        echo "   Production requires properly configured database"
+        echo "   Check database-validation.log for details"
+        return 1
+    fi
+}
+
 # Function to start production server
 start_production_server() {
-    echo "🌐 Starting ProspectPro production server..."
+    echo "🌐 Starting ProspectPro production server v3.0..."
     
-    # Set production environment
+    # Set production environment - NO degraded mode
     export NODE_ENV=production
-    export ALLOW_DEGRADED_START=true  # Allow startup even if some API keys missing
     
-    # Start server with production optimizations
+    # Start server with production-grade initialization
     node server.js
 }
 
@@ -217,16 +231,24 @@ main() {
         exit 1
     fi
     
-    # Step 3: Validate environment
+    # Step 3: Validate database configuration
+    if ! validate_production_database; then
+        echo "❌ Database validation failed - production requires complete database setup"
+        echo "   Run: database/all-phases-consolidated.sql in Supabase SQL Editor"
+        echo "   Configure: API keys in Supabase Dashboard -> Settings -> Vault"
+        exit 1
+    fi
+    
+    # Step 4: Validate environment
     if ! validate_environment; then
         echo "❌ Environment validation failed"
         exit 1
     fi
     
-    # Step 4: Start production server
+    # Step 5: Start production server
     echo ""
-    echo "🚀 All systems ready - starting production server!"
-    echo "=================================================="
+    echo "🚀 All systems validated - starting production server!"
+    echo "===================================================="
     start_production_server
 }
 
