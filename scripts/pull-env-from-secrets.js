@@ -183,7 +183,9 @@ async function extractEnvironment(runId) {
   }
 
   // Production mode: No fallbacks, workflow outputs required
-  throw new Error("ENV_CONTENT not found in workflow outputs - workflow must export environment content");
+  throw new Error(
+    "ENV_CONTENT not found in workflow outputs - workflow must export environment content"
+  );
 }
 
 // Step 5: Save environment file
@@ -217,7 +219,9 @@ function saveEnvironmentFile(envContent) {
 // Main execution
 async function main() {
   try {
-    console.log("\n🎯 Starting Production Environment Generation - Workflow Outputs Only");
+    console.log(
+      "\n🎯 Starting Production Environment Generation - Workflow Outputs Only"
+    );
 
     // Step 1: Trigger the workflow
     await triggerWorkflow();
