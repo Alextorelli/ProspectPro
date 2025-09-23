@@ -23,7 +23,18 @@
     "docker:package": "./docker/create-client-package.sh",
     "docker:logs": "docker-compose logs -f prospectpro",
     "docker:stop": "docker-compose down",
-    "docker:restart": "docker-compose restart"
+    "docker:restart": "docker-compose restart",
+    "secure:setup": "./docker/secure-start.sh setup",
+    "secure:start": "./docker/secure-start.sh start",
+    "secure:dev": "./docker/secure-start.sh dev",
+    "keychain:setup": "./docker/keychain-start.sh setup",
+    "keychain:start": "./docker/keychain-start.sh start",
+    "1password:setup": "./docker/1password-start.sh setup",
+    "1password:start": "./docker/1password-start.sh start",
+    "vault:deploy": "echo '🔐 Deploying with Supabase Vault integration...' && docker-compose up --build -d",
+    "vault:dev": "echo '🔐 Starting development with Supabase Vault...' && docker-compose -f docker-compose.dev.yml up --build",
+    "vault:logs": "docker-compose logs -f prospectpro",
+    "vault:test": "echo '🧪 Testing Vault connection...' && docker-compose exec prospectpro curl -f http://localhost:3000/diag"
   },
   "engines": {
     "node": ">=20.0.0",

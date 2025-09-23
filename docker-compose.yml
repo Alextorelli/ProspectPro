@@ -5,29 +5,23 @@ services:
     build: .
     ports:
       - "3000:3000"
+    env_file:
+      - .env
     environment:
       - NODE_ENV=production
       - HOST=0.0.0.0
       - PORT=3000
-      - SUPABASE_URL=${SUPABASE_URL}
-      - SUPABASE_SECRET_KEY=${SUPABASE_SECRET_KEY}
-      - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
-      - GOOGLE_PLACES_API_KEY=${GOOGLE_PLACES_API_KEY}
-      - FOURSQUARE_API_KEY=${FOURSQUARE_API_KEY}
-      - FOURSQUARE_SERVICE_API_KEY=${FOURSQUARE_SERVICE_API_KEY}
-      - FOURSQUARE_PLACES_API_KEY=${FOURSQUARE_PLACES_API_KEY}
-      - HUNTER_IO_API_KEY=${HUNTER_IO_API_KEY}
-      - APOLLO_API_KEY=${APOLLO_API_KEY}
-      - NEVERBOUNCE_API_KEY=${NEVERBOUNCE_API_KEY}
-      - ZEROBOUNCE_API_KEY=${ZEROBOUNCE_API_KEY}
-      - PERSONAL_ACCESS_TOKEN=${PERSONAL_ACCESS_TOKEN}
+      - USE_SUPABASE_VAULT=true
+      - VAULT_KEY_PREFIX=prospectpro
       - ALLOW_DEGRADED_START=true
     volumes:
       - ./logs:/app/logs
       - ./data:/app/data
       - ./uploads:/app/uploads
       - ./config:/app/config:ro
+      - ./docker/vault-startup.sh:/app/vault-startup.sh:ro
     restart: unless-stopped
+    command: ["/app/vault-startup.sh"]
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
       interval: 30s
