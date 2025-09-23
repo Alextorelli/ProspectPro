@@ -172,6 +172,84 @@ class ProspectProAPIServer {
             required: ["businessType", "location"],
           },
         },
+        {
+          name: "test_new_api_integration",
+          description:
+            "Test a newly integrated API (e.g., US Chamber, BBB, etc.)",
+          inputSchema: {
+            type: "object",
+            properties: {
+              apiName: {
+                type: "string",
+                description: "Name of the API to test",
+                enum: ["us_chamber", "bbb", "linkedin_sales", "zoominfo"],
+              },
+              testType: {
+                type: "string",
+                description: "Type of test to perform",
+                enum: [
+                  "basic_search",
+                  "verification",
+                  "directory_lookup",
+                  "full_integration",
+                ],
+                default: "basic_search",
+              },
+              query: {
+                type: "string",
+                description: "Search query for testing",
+              },
+              location: {
+                type: "string",
+                description: "Location for testing",
+              },
+              sampleBusiness: {
+                type: "object",
+                description: "Sample business data for verification tests",
+                properties: {
+                  name: { type: "string" },
+                  address: { type: "string" },
+                  phone: { type: "string" },
+                  website: { type: "string" },
+                },
+              },
+            },
+            required: ["apiName", "testType"],
+          },
+        },
+        {
+          name: "compare_api_sources",
+          description:
+            "Compare results from multiple API sources for quality analysis",
+          inputSchema: {
+            type: "object",
+            properties: {
+              businessType: {
+                type: "string",
+                description: "Type of business to search for comparison",
+              },
+              location: {
+                type: "string",
+                description: "Location to search in",
+              },
+              sources: {
+                type: "array",
+                items: {
+                  type: "string",
+                  enum: ["google_places", "foursquare", "us_chamber", "bbb"],
+                },
+                description: "API sources to compare",
+                default: ["google_places", "foursquare"],
+              },
+              maxResults: {
+                type: "number",
+                description: "Maximum results per source",
+                default: 5,
+              },
+            },
+            required: ["businessType", "location"],
+          },
+        },
       ],
     }));
 
@@ -195,6 +273,10 @@ class ProspectProAPIServer {
             return await this.getAPIUsageStats();
           case "simulate_lead_discovery":
             return await this.simulateLeadDiscovery(args);
+          case "test_new_api_integration":
+            return await this.testNewAPIIntegration(args);
+          case "compare_api_sources":
+            return await this.compareAPISources(args);
           default:
             throw new Error(`Unknown tool: ${name}`);
         }
@@ -487,6 +569,270 @@ class ProspectProAPIServer {
         },
       ],
     };
+  }
+
+  async testNewAPIIntegration(args) {
+    const { apiName, testType, query, location, sampleBusiness } = args;
+
+    const result = {
+      api_name: apiName,
+      test_type: testType,
+      timestamp: new Date().toISOString(),
+      success: false,
+      data: null,
+      error: null,
+    };
+
+    try {
+      switch (apiName) {
+        case "us_chamber":
+          result.data = await this.testUSChamberAPI(
+            testType,
+            query,
+            location,
+            sampleBusiness
+          );
+          result.success = true;
+          break;
+        case "bbb":
+          result.data = await this.testBBBAPI(
+            testType,
+            query,
+            location,
+            sampleBusiness
+          );
+          result.success = true;
+          break;
+        default:
+          throw new Error(
+            `API ${apiName} not yet implemented. Available: us_chamber, bbb`
+          );
+      }
+    } catch (error) {
+      result.error = error.message;
+    }
+
+    return {
+      content: [
+        {
+          type: "text",
+          text: JSON.stringify(result, null, 2),
+        },
+      ],
+    };
+  }
+
+  async testUSChamberAPI(testType, query, location, sampleBusiness) {
+    // Load US Chamber API client dynamically
+    try {
+      const USChamberClient = require("../modules/api-clients/us-chamber-client");
+      const chamberClient = new USChamberClient(process.env.USCHAMBER_API_KEY);
+
+      switch (testType) {
+        case "basic_search":
+          if (!query || !location) {
+            throw new Error("query and location required for basic_search");
+          }
+          return await chamberClient.searchChamberMembers(query, location, 5);
+
+        case "verification":
+          if (!sampleBusiness) {
+            throw new Error("sampleBusiness required for verification test");
+          }
+          return await chamberClient.verifyMembership(sampleBusiness);
+
+        case "directory_lookup":
+          // Example: NYC Chamber directory
+          return await chamberClient.getChamberDirectory("nyc-chamber", query);
+
+        case "full_integration":
+          const searchResults = await chamberClient.searchChamberMembers(
+            query || "restaurants",
+            location || "New York, NY",
+            3
+          );
+          if (searchResults.businesses && searchResults.businesses.length > 0) {
+            const verificationResult = await chamberClient.verifyMembership(
+              searchResults.businesses[0]
+            );
+            return {
+              search_results: searchResults,
+              verification_sample: verificationResult,
+              usage_stats: chamberClient.getUsageStats(),
+            };
+          }
+          return searchResults;
+
+        default:
+          throw new Error(`Unknown test type: ${testType}`);
+      }
+    } catch (error) {
+      return {
+        error: `US Chamber API test failed: ${error.message}`,
+        note: "Make sure US_CHAMBER_API_KEY is configured and the API client is properly implemented",
+      };
+    }
+  }
+
+  async testBBBAPI(testType, query, location, sampleBusiness) {
+    // Placeholder for Better Business Bureau API
+    return {
+      note: "BBB API integration not yet implemented",
+      test_type: testType,
+      planned_features: [
+        "Business accreditation lookup",
+        "Rating and review verification",
+        "Complaint history analysis",
+      ],
+    };
+  }
+
+  async compareAPISources(args) {
+    const { businessType, location, sources, maxResults = 5 } = args;
+
+    const comparison = {
+      query: { businessType, location },
+      sources_tested: sources,
+      max_results: maxResults,
+      timestamp: new Date().toISOString(),
+      results: {},
+      analysis: {},
+    };
+
+    // Test each API source
+    for (const source of sources) {
+      try {
+        let sourceResult = null;
+
+        switch (source) {
+          case "google_places":
+            if (this.apiClients.googlePlaces) {
+              sourceResult =
+                await this.apiClients.googlePlaces.searchBusinesses(
+                  businessType,
+                  location,
+                  maxResults
+                );
+            }
+            break;
+
+          case "foursquare":
+            if (this.apiClients.foursquare) {
+              sourceResult = await this.apiClients.foursquare.searchBusinesses(
+                businessType,
+                location,
+                maxResults
+              );
+            }
+            break;
+
+          case "us_chamber":
+            try {
+              const USChamberClient = require("../modules/api-clients/us-chamber-client");
+              const chamberClient = new USChamberClient(
+                process.env.USCHAMBER_API_KEY
+              );
+              sourceResult = await chamberClient.searchChamberMembers(
+                businessType,
+                location,
+                maxResults
+              );
+            } catch (error) {
+              sourceResult = {
+                error: `US Chamber API not available: ${error.message}`,
+              };
+            }
+            break;
+
+          case "bbb":
+            sourceResult = { error: "BBB API not yet implemented" };
+            break;
+
+          default:
+            sourceResult = { error: `Unknown API source: ${source}` };
+        }
+
+        comparison.results[source] = {
+          success: !sourceResult?.error,
+          businesses_found: sourceResult?.businesses?.length || 0,
+          data: sourceResult,
+          response_time: Date.now(), // Simplified timing
+        };
+      } catch (error) {
+        comparison.results[source] = {
+          success: false,
+          error: error.message,
+          businesses_found: 0,
+        };
+      }
+    }
+
+    // Generate analysis
+    comparison.analysis = this.analyzeSourceComparison(comparison.results);
+
+    return {
+      content: [
+        {
+          type: "text",
+          text: JSON.stringify(comparison, null, 2),
+        },
+      ],
+    };
+  }
+
+  analyzeSourceComparison(results) {
+    const analysis = {
+      total_sources: Object.keys(results).length,
+      successful_sources: 0,
+      total_businesses_found: 0,
+      source_ranking: [],
+      recommendations: [],
+    };
+
+    // Calculate metrics
+    Object.entries(results).forEach(([source, result]) => {
+      if (result.success) {
+        analysis.successful_sources++;
+      }
+      analysis.total_businesses_found += result.businesses_found;
+
+      analysis.source_ranking.push({
+        source,
+        success: result.success,
+        businesses_found: result.businesses_found,
+        performance_score: result.success
+          ? result.businesses_found * 10 + 50
+          : 0,
+      });
+    });
+
+    // Sort by performance
+    analysis.source_ranking.sort(
+      (a, b) => b.performance_score - a.performance_score
+    );
+
+    // Generate recommendations
+    if (analysis.successful_sources === 0) {
+      analysis.recommendations.push(
+        "No API sources returned successful results - check API keys and network connectivity"
+      );
+    } else if (analysis.successful_sources === 1) {
+      analysis.recommendations.push(
+        "Consider adding more API sources for better coverage and reliability"
+      );
+    } else {
+      analysis.recommendations.push(
+        `${analysis.successful_sources} sources working well - consider using top performers for production`
+      );
+    }
+
+    if (analysis.total_businesses_found === 0) {
+      analysis.recommendations.push(
+        "No businesses found - try different search terms or broader location"
+      );
+    }
+
+    return analysis;
   }
 
   async run() {

@@ -90,12 +90,34 @@
 
         // Terminal Settings
         "terminal.integrated.gpuAcceleration": "on",
-        "terminal.integrated.scrollback": 1000
+        "terminal.integrated.scrollback": 1000,
+
+        // === MCP (Model Context Protocol) Configuration ===
+        "mcp.enable": true,
+        "mcp.configFile": "${workspaceFolder}/.vscode/mcp-config.json",
+
+        // API Development Specific Settings
+        "rest-client.enableTelemetry": false,
+        "files.associations": {
+          "*.http": "http",
+          "*.rest": "http"
+        },
+
+        // AI-Enhanced Development Settings for API Integration
+        "ai.contextAware": true,
+        "ai.projectContext": {
+          "type": "lead-generation-platform",
+          "framework": "node-express",
+          "database": "supabase",
+          "apis": ["google-places", "foursquare", "hunter-io", "neverbounce"],
+          "deployment": "docker-compose",
+          "monitoring": "custom-diagnostics"
+        }
       }
     }
   },
   "forwardPorts": [3000, 5432],
-  "postCreateCommand": "bash -lc 'set -e; sudo apt-get update && sudo apt-get install -y docker.io && if [ -f package-lock.json ]; then npm ci; else npm install; fi && npm i supabase --save-dev && echo \"VS Code environment optimized for ProspectPro development\"'",
+  "postCreateCommand": "bash -lc 'set -e; sudo apt-get update && sudo apt-get install -y docker.io && if [ -f package-lock.json ]; then npm ci; else npm install; fi && npm i supabase --save-dev && npm run mcp:install && npm run mcp:test && echo \"VS Code environment optimized for ProspectPro development with MCP enabled\"'",
   "postStartCommand": "bash -c 'echo \"Starting ProspectPro development environment with optimized VS Code settings...\"'",
   "runArgs": ["--init", "-v", "/var/run/docker.sock:/var/run/docker.sock"],
   "remoteUser": "node"

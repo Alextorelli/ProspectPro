@@ -1,0 +1,59 @@
+{
+  "timestamp": "2025-09-23T22:12:57.241Z",
+  "servers": {
+    "database-server": {
+      "name": "database-server",
+      "file": "./database-server.js",
+      "loadable": true,
+      "class_instantiable": false,
+      "methods_available": false,
+      "errors": [
+        "Cannot read properties of undefined (reading 'method')"
+      ]
+    },
+    "api-server": {
+      "name": "api-server",
+      "file": "./api-server.js",
+      "loadable": true,
+      "class_instantiable": false,
+      "methods_available": false,
+      "errors": [
+        "Cannot read properties of undefined (reading 'method')"
+      ]
+    },
+    "filesystem-server": {
+      "name": "filesystem-server",
+      "file": "./filesystem-server.js",
+      "loadable": true,
+      "class_instantiable": false,
+      "methods_available": false,
+      "errors": [
+        "Cannot read properties of undefined (reading 'method')"
+      ]
+    },
+    "monitoring-server": {
+      "name": "monitoring-server",
+      "file": "./monitoring-server.js",
+      "loadable": true,
+      "class_instantiable": false,
+      "methods_available": false,
+      "errors": [
+        "Cannot read properties of undefined (reading 'method')"
+      ]
+    }
+  },
+  "configuration": {
+    "vscode_config": false,
+    "mcp_config": false,
+    "errors": [
+      "Expected double-quoted property name in JSON at position 441 (line 24 column 3)"
+    ]
+  },
+  "dependencies": {
+    "package_json": true,
+    "mcp_sdk": true,
+    "supabase": true,
+    "errors": []
+  },
+  "overall_status": "needs_attention"
+}
