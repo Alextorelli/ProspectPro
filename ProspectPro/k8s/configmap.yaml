@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prospectpro-config
+data:
+  DATABASE_URL: "your_database_url"
+  SUPABASE_SECRET_KEY: "your_supabase_secret_key"
+  SUPABASE_SERVICE_ROLE_KEY: "your_supabase_service_role_key"
+  SUPABASE_ANON_KEY: "your_supabase_anon_key"
+  SUPABASE_PUBLISHABLE_KEY: "your_supabase_publishable_key"
+  ALLOW_DEGRADED_START: "true"
+  NODE_ENV: "production"
+  OTHER_CONFIG: "your_other_config_value"
