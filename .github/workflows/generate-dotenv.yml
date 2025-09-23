@@ -241,21 +241,56 @@ jobs:
           }
           "
 
+      - name: Pre-Upload File Verification
+        run: |
+          echo "🔍 Verifying .env file before artifact upload..."
+          echo "📁 Current working directory: $(pwd)"
+          echo "📋 All files in directory:"
+          ls -la
+          echo ""
+          echo "🎯 .env file status:"
+          if [ -f .env ]; then
+            echo "✅ .env file exists"
+            echo "📏 Size: $(wc -c < .env) bytes" 
+            echo "📄 Lines: $(wc -l < .env) lines"
+            echo "📁 Preview (first 5 lines):"
+            head -5 .env
+          else
+            echo "❌ .env file NOT found"
+            exit 1
+          fi
+
       - name: Archive Environment Configuration
         uses: actions/upload-artifact@v4
         with:
           name: production-environment-config
-          path: |
-            .env
+          path: .env
           retention-days: 30
+          if-no-files-found: error
+
+      - name: Archive Environment Logs (if exists)
+        uses: actions/upload-artifact@v4
+        if: hashFiles('environment.log') != ''
+        with:
+          name: environment-logs
+          path: environment.log
+          retention-days: 7
           if-no-files-found: warn
 
-      - name: Verify Artifact Contents
+      - name: Verify Artifact Upload
         run: |
-          echo "🔍 Verifying files to be archived..."
-          ls -la .env || echo ".env file may not exist"
-          echo "📁 .env file contents preview:"
-          head -5 .env || echo "No .env file found"
+          echo "🔍 Verifying files before and after artifact upload..."
+          echo "📁 Current working directory: $(pwd)"
+          echo "📋 Directory contents:"
+          ls -la
+          echo ""
+          echo "🎯 .env file details:"
+          ls -la .env 2>/dev/null || echo "❌ .env file not found"
+          echo "📏 .env file size: $(wc -c < .env 2>/dev/null || echo '0') bytes"
+          echo "📄 .env file lines: $(wc -l < .env 2>/dev/null || echo '0') lines"
+          echo ""
+          echo "📁 .env file contents preview (first 10 lines):"
+          head -10 .env 2>/dev/null || echo "❌ Could not read .env file"
 
       - name: Prepare Production Environment
         if: github.ref == 'refs/heads/main' || github.event_name == 'repository_dispatch'
