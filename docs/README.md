@@ -1,63 +1,85 @@
 # ProspectPro Documentation
 
-This directory contains comprehensive documentation for the ProspectPro lead generation platform.
+## 📚 Documentation Structure
 
-## Current Documentation
+### 🚀 Quick Start
+- [API Keys Setup](setup/API_KEYS_SETUP.md) - Configure API keys for external services
+- [Campaign Setup](guides/CAMPAIGN_SETUP.md) - Set up and run lead generation campaigns
+- [Database Configuration](../database/README.md) - Database setup and configuration
 
-### Core Documentation
+### 📖 User Guides  
+- [Business Discovery](guides/BUSINESS_DISCOVERY.md) - How to discover and validate businesses
+- [Campaign Management](guides/CAMPAIGN_SETUP.md) - Managing lead generation campaigns
+- [CSV Export](guides/CSV_EXPORT.md) - Exporting leads to CSV format
 
-- [`../README.md`](../README.md) - Main project README with quick start and overview
-- [`architecture/`](architecture/) - System architecture and technical design
-- [`deployment/`](deployment/) - Deployment guides and configuration
-- [`development/`](development/) - Development setup and contribution guidelines
+### 🔧 Technical Documentation
+- [System Architecture](technical/ARCHITECTURE.md) - System design and components
+- [API Reference](technical/API_REFERENCE.md) - Complete API documentation
+- [Database Schema](technical/DATABASE_SCHEMA.md) - Database structure and relationships
 
-### Architecture Documentation
+### 🚢 Deployment
+- [Production Deployment](deployment/PRODUCTION_DEPLOYMENT.md) - Deploy to production
+- [Supabase Setup](deployment/SUPABASE_SETUP.md) - Configure Supabase backend
+- [Monitoring & Diagnostics](deployment/MONITORING.md) - System monitoring and troubleshooting
 
-- **Event-Driven Webhooks** - Supabase webhook system implementation
-- **API Integration Patterns** - Multi-source data integration architecture
-- **Data Validation Pipeline** - Quality assurance and validation systems
+### 💻 Development
+- [Contributing Guidelines](development/CONTRIBUTING.md) - How to contribute to the project
+- [Testing Guide](development/TESTING.md) - Running and writing tests
+- [Debugging Guide](development/DEBUGGING.md) - Debugging common issues
 
-### Deployment Documentation
+## 🗄️ Historical Documentation
 
-- **Railway Deployment** - Production deployment on Railway platform
-- **Docker Deployment** - Containerized deployment options
-- **Environment Configuration** - API keys and environment setup
+Historical documents and legacy guides are preserved in dedicated archive branches:
 
-### Development Documentation
+- `archive/development-phase` - Development artifacts and architecture docs
+- `archive/deployment-phase` - Deployment experiments and legacy guides  
+- `archive/testing-reports` - Test reports and validation documents
+- `archive/production-legacy` - Legacy production setup documentation
 
-- **Contributing Guidelines** - Code standards and contribution process
-- **Testing Framework** - Comprehensive testing approach
-- **Code Organization** - Module structure and best practices
+## 📋 Archive Branch Access
 
-## Archive
+To access historical documentation:
 
-The [`archive/`](archive/) directory contains historical documentation that has been superseded by current implementations. These files are preserved for reference but are not actively maintained:
+```bash
+# List all archive branches
+git branch -r | grep archive
 
-- Previous README versions
-- Completion status reports from development phases
-- Legacy integration documentation
-- Outdated testing procedures
+# Switch to specific archive branch
+git checkout archive/development-phase
+git checkout archive/deployment-phase  
+git checkout archive/testing-reports
+git checkout archive/production-legacy
 
-## Quick Links
+# Return to main branch
+git checkout main
+```
 
-### Getting Started
+## 📏 Documentation Standards
 
-1. [Main README](../README.md#quick-start) - Installation and first campaign
-2. [Environment Setup](../README.md#environment-configuration) - API key configuration
-3. [Architecture Overview](../README.md#architecture) - System design understanding
+### Root Directory Policy
+- **MAXIMUM 3 .md FILES**: README.md, CHANGELOG.md, PRODUCTION_READY_REPORT.md
+- All other documentation must be in `docs/` subdirectories
 
-### For Developers
+### File Organization
+- Setup guides → `docs/setup/`
+- User guides → `docs/guides/`
+- Technical docs → `docs/technical/`
+- Deployment guides → `docs/deployment/`
+- Development docs → `docs/development/`
 
-1. [Development Guide](../README.md#development) - Project structure and key modules
-2. [Testing Suite](../README.md#testing) - Running tests and validation
-3. [Contributing](../README.md#contributing) - Code standards and pull requests
+### Naming Conventions
+- Use UPPERCASE for major document names
+- Use descriptive, specific names
+- Include file extensions (.md for markdown)
+- Use underscores for multi-word names
 
-### For Operations
+## 🔄 Maintenance
 
-1. [Deployment Guide](../README.md#deployment) - Production deployment options
-2. [Monitoring](../README.md#monitoring) - Health checks and metrics
-3. [Security](../README.md#security) - Authentication and access control
+This documentation structure is actively maintained:
 
----
+- **Monthly**: Review for documentation sprawl
+- **Per Release**: Update relevant guides and references
+- **Per Feature**: Add/update technical documentation
+- **Archive Creation**: When starting major new development phases
 
-For the most current and comprehensive information, always refer to the main [README.md](../README.md) file.
+For questions about documentation structure or to suggest improvements, please create an issue.
