@@ -275,7 +275,6 @@ const {
   ProspectProMetrics,
 } = require("./modules/monitoring/prometheus-metrics");
 const { SecurityHardening } = require("./modules/utils/security-hardening");
-const RailwayWebhookMonitor = require("./modules/monitoring/railway-webhook-monitor");
 
 const { Client } = require("@googlemaps/google-maps-services-js");
 
@@ -296,7 +295,6 @@ const PORT = process.env.PORT || 3000;
 // Initialize monitoring and security systems
 const metrics = new ProspectProMetrics();
 const security = new SecurityHardening();
-const webhookMonitor = new RailwayWebhookMonitor();
 
 bootDebugger.endPhase(true);
 
@@ -720,8 +718,18 @@ app.get("/diag", async (req, res) => {
     degradedMode = !startupDiagnostics.success;
   }
 
-  // Get deployment status from webhook monitor
-  const deploymentStatus = webhookMonitor.getDeploymentStatus();
+  // Get deployment status (Railway webhook monitor not available)
+  const deploymentStatus = {
+    systemHealth: "unknown",
+    consecutiveFailures: 0,
+    averageBuildTime: 0,
+    lastSuccessfulDeployment: null,
+    webhookStatus: {
+      totalEventsProcessed: 0,
+      lastEventReceived: null,
+      activeBuilds: 0,
+    },
+  };
 
   res.json({
     service: "ProspectPro",
@@ -751,12 +759,16 @@ app.get("/diag", async (req, res) => {
 // API ROUTES
 // =====================================
 
-// Railway webhook endpoint (before auth middleware)
+// Railway webhook endpoint (before auth middleware) - Not implemented
 app.post(
   "/railway-webhook",
   express.raw({ type: "application/json" }),
   async (req, res) => {
-    await webhookMonitor.processWebhook(req, res);
+    // Railway webhook monitor not available
+    res.status(501).json({
+      error: "Railway webhook monitoring not implemented",
+      message: "This feature requires the railway-webhook-monitor module",
+    });
   }
 );
 
@@ -771,15 +783,25 @@ app.get("/deployment-status", (req, res) => {
       .json({ error: "Unauthorized - admin token required" });
   }
 
-  const deploymentStatus = webhookMonitor.getDeploymentStatus();
+  const deploymentStatus = {
+    systemHealth: "unknown",
+    consecutiveFailures: 0,
+    averageBuildTime: 0,
+    lastSuccessfulDeployment: null,
+    webhookStatus: {
+      totalEventsProcessed: 0,
+      lastEventReceived: null,
+      activeBuilds: 0,
+    },
+  };
   const diag = getLastSupabaseDiagnostics();
 
   res.json({
     ...deploymentStatus,
     railwayIntegration: {
       webhookConfigured: !!process.env.RAILWAY_WEBHOOK_SECRET,
-      lastWebhookReceived: webhookMonitor.lastWebhookTimestamp,
-      monitoringActive: true,
+      lastWebhookReceived: null, // webhook monitor not available
+      monitoringActive: false,
     },
     systemStatus: {
       degradedMode,
