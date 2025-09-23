@@ -1,3 +1,37 @@
+# === PRODUCTION GITIGNORE - ENHANCED AUTO-CLEANUP ===
+
+# Runtime & Temporary Files - STRICT ENFORCEMENT
+*.log
+*.tmp
+*.temp
+diagnostics.json
+startup.log
+production*.log
+database-validation.log
+server-test.log
+
+# Development Artifacts - AUTO-ARCHIVE
+quick-*.js
+test-*.js
+demo-*.js
+*-simulation.js
+*-playground.js
+verify-*.js
+validate-*.js
+debug-*.js
+
+# Single-Use Scripts - PREVENT CLUTTER
+launch-*.js
+execute-*.js
+run-*.js
+
+# Output Files - EXCEPT ESSENTIAL
+*.csv
+*.xlsx
+!package.json
+!package-lock.json
+!app.json
+
 # === CORE APPLICATION EXCLUSIONS ===
 
 # Dependencies

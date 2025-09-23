@@ -21,5 +21,73 @@
     "http",
     "net"
   ],
-  "git.ignoreLimitWarning": true
+  "git.ignoreLimitWarning": true,
+
+  // === ENHANCED PRODUCTION WORKSPACE SETTINGS ===
+
+  "github.copilot.enable": {
+    "*": true,
+    "plaintext": false,
+    "markdown": true,
+    "scminput": false
+  },
+  "github.copilot.inlineSuggest.enable": true,
+  
+  "files.exclude": {
+    "**/*.log": true,
+    "**/*.tmp": true,
+    "**/*.temp": true,
+    "**/diagnostics.json": true,
+    "**/startup.log": true,
+    "**/production*.log": true,
+    "**/database-validation.log": true,
+    "**/server-test.log": true
+  },
+  
+  "files.watcherExclude": {
+    "**/*.log": true,
+    "**/*.tmp": true,
+    "**/*.temp": true,
+    "**/diagnostics.json": true,
+    "**/startup.log": true
+  },
+
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/*.log": true,
+    "**/*.tmp": true,
+    "**/*.temp": true,
+    "**/diagnostics.json": true,
+    "**/startup.log": true,
+    "**/production*.log": true
+  },
+
+  "files.associations": {
+    "*.md": "markdown",
+    ".copilot-instructions": "markdown"
+  },
+
+  "markdown.preview.breaks": true,
+  "markdown.preview.linkify": true,
+
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  },
+  
+  "eslint.validate": ["javascript", "javascriptreact", "json"],
+  
+  "files.autoSave": "afterDelay",
+  "files.autoSaveDelay": 1000,
+  
+  "editor.formatOnSave": true,
+  "editor.formatOnPaste": true,
+  
+  "javascript.updateImportsOnFileMove.enabled": "always",
+  "javascript.suggest.autoImports": true,
+  
+  "git.autofetch": true,
+  "git.confirmSync": false,
+  "git.enableSmartCommit": true,
+  
+  "terminal.integrated.defaultProfile.linux": "bash"
 }
