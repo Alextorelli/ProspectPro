@@ -6,7 +6,7 @@ on:
     branches: [main]
   deployment:
   repository_dispatch:
-    types: [server-init, prod-server-start]
+    types: [generate_dotenv, server-init, prod-server-start]
   workflow_dispatch:
     inputs:
       deployment_target:
@@ -58,6 +58,7 @@ jobs:
           SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
 
       - name: Generate Production .env File
+        id: generate-env
         run: |
           echo "🏗️ Generating production .env configuration..."
 
@@ -139,6 +140,15 @@ jobs:
           echo "📄 File size: $(wc -c < .env) bytes"
           echo "📋 Configuration lines: $(wc -l < .env) lines"
 
+          # Export .env content as workflow output for direct access
+          echo "ENV_CONTENT<<ENVEOF" >> $GITHUB_OUTPUT
+          cat .env >> $GITHUB_OUTPUT
+          echo "ENVEOF" >> $GITHUB_OUTPUT
+
+          # Export metadata
+          echo "BUILD_TIMESTAMP=$(date -u +"%Y-%m-%d_%H-%M-%S_UTC")" >> $GITHUB_OUTPUT
+          echo "BUILD_COMMIT=${{ github.sha }}" >> $GITHUB_OUTPUT
+
       - name: Validate Environment Configuration
         run: |
           echo "🧪 Validating generated environment configuration..."
@@ -209,6 +219,14 @@ jobs:
             .env
             startup.log
           retention-days: 30
+          if-no-files-found: warn
+
+      - name: Verify Artifact Contents
+        run: |
+          echo "🔍 Verifying files to be archived..."
+          ls -la .env startup.log || echo "Some files may not exist"
+          echo "📁 .env file contents preview:"
+          head -5 .env || echo "No .env file found"
 
       - name: Prepare Production Environment
         if: github.ref == 'refs/heads/main' || github.event_name == 'repository_dispatch'

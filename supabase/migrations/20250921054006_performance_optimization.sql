@@ -197,10 +197,10 @@ DROP POLICY IF EXISTS "dashboard_exports_user_access" ON public.dashboard_export
 CREATE POLICY "dashboard_exports_user_access_optimized" ON public.dashboard_exports
 FOR ALL TO authenticated USING (user_id = (select auth.uid()));
 
--- Fix railway_webhook_logs policies
-DROP POLICY IF EXISTS "Service role can access all railway webhook logs" ON public.railway_webhook_logs;
+-- Fix production_webhook_logs policies
+DROP POLICY IF EXISTS "Service role can access all railway webhook logs" ON public.production_webhook_logs;
 
-CREATE POLICY "service_role_railway_webhook_logs_access" ON public.railway_webhook_logs
+CREATE POLICY "service_role_production_webhook_logs_access" ON public.production_webhook_logs
 FOR ALL TO service_role USING (true);
 
 -- Fix deployment_metrics policies
@@ -322,7 +322,7 @@ ANALYZE public.campaign_analytics;
 ANALYZE public.api_cost_tracking;
 ANALYZE public.lead_qualification_metrics;
 ANALYZE public.dashboard_exports;
-ANALYZE public.railway_webhook_logs;
+ANALYZE public.production_webhook_logs;
 ANALYZE public.deployment_metrics;
 ANALYZE public.deployment_failures;
 ANALYZE public.foursquare_places;

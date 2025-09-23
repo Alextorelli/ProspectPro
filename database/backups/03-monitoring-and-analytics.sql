@@ -30,6 +30,8 @@ RAISE NOTICE '✅ Phase 3.1 Complete: All lead management prerequisites verified
 END $$;
 -- Phase 3.2: Campaign Analytics and Performance Tracking
 -- ============================================================================
+-- Railway webhook event logs for deployment monitoring and debugging
+CREATE TABLE IF NOT EXISTS railway_webhook_logs (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
   -- Webhook event details
@@ -399,6 +401,11 @@ IF NOT EXISTS (
 RAISE NOTICE 'Created index idx_lead_qualification_rate';
 END IF;
 END $$;
+-- Railway webhook monitoring indexes for deployment debugging
+CREATE INDEX IF NOT EXISTS idx_railway_webhook_logs_event_type ON railway_webhook_logs(event_type);
+CREATE INDEX IF NOT EXISTS idx_railway_webhook_logs_deployment ON railway_webhook_logs(deployment_id);
+CREATE INDEX IF NOT EXISTS idx_railway_webhook_logs_processed ON railway_webhook_logs(processed_at DESC);
+CREATE INDEX IF NOT EXISTS idx_railway_webhook_logs_status ON railway_webhook_logs(processing_status, processed_at DESC);
 -- Deployment metrics indexes for performance analysis
 CREATE INDEX IF NOT EXISTS idx_deployment_metrics_deployment_id ON deployment_metrics(deployment_id);
 CREATE INDEX IF NOT EXISTS idx_deployment_metrics_status ON deployment_metrics(status, recorded_at DESC);
@@ -555,6 +562,7 @@ SELECT DATE(processed_at) as deployment_date,
       AND (event_data->'deployment'->>'buildTime')::integer IS NOT NULL THEN (event_data->'deployment'->>'buildTime')::integer
     END
   ) as avg_build_time_ms
+FROM railway_webhook_logs
 WHERE processed_at >= CURRENT_DATE - INTERVAL '30 days'
   AND event_type LIKE 'deployment.%'
 GROUP BY DATE(processed_at),
@@ -590,6 +598,7 @@ SELECT json_build_object(
             1
           )
         )
+      FROM railway_webhook_logs
       WHERE processed_at >= NOW() - INTERVAL '24 hours'
         AND event_type LIKE 'deployment.%'
     ),
@@ -605,6 +614,7 @@ SELECT json_build_object(
           'success',
           event_type = 'deployment.success'
         )
+      FROM railway_webhook_logs
       WHERE event_type LIKE 'deployment.%'
       ORDER BY processed_at DESC
       LIMIT 1
@@ -624,6 +634,7 @@ SELECT json_build_object(
             END
           )
         )
+      FROM railway_webhook_logs
       WHERE event_type = 'deployment.failed'
         AND processed_at >= NOW() - INTERVAL '7 days'
       ORDER BY processed_at DESC
@@ -653,6 +664,7 @@ SELECT json_build_object(
           'total_successful_builds',
           COUNT(*)
         )
+      FROM railway_webhook_logs
       WHERE event_type = 'deployment.success'
         AND processed_at >= NOW() - INTERVAL '7 days'
         AND (event_data->'deployment'->>'buildTime')::text ~ '^[0-9]+$'
@@ -834,6 +846,7 @@ RAISE NOTICE '- ✅ Real-time cost tracking';
 RAISE NOTICE '- ✅ ROI calculation and analysis';
 RAISE NOTICE '- ✅ Time-based metric aggregation';
 RAISE NOTICE '- ✅ Multi-format export support';
+RAISE NOTICE '- ✅ Railway webhook processing and analytics';
 RAISE NOTICE '- ✅ Automated deployment failure analysis';
 RAISE NOTICE '- ✅ Build performance monitoring';
 RAISE NOTICE '- ✅ Automatic data validation';
@@ -846,6 +859,7 @@ END $$;
 -- Phase 3.8: Security - Row Level Security (RLS) Configuration
 -- ============================================================================
 -- Enable RLS on monitoring tables for security (service role access for internal operations)
+ALTER TABLE railway_webhook_logs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE deployment_metrics ENABLE ROW LEVEL SECURITY;
 ALTER TABLE deployment_failures ENABLE ROW LEVEL SECURITY;
 -- Create secure RLS policies for service role access (internal monitoring operations)
@@ -855,7 +869,9 @@ DO $$ BEGIN IF NOT EXISTS (
   SELECT 1
   FROM pg_policies
   WHERE schemaname = 'public'
+    AND tablename = 'railway_webhook_logs'
     AND policyname = 'Service role can access all railway webhook logs'
+) THEN CREATE POLICY "Service role can access all railway webhook logs" ON railway_webhook_logs FOR ALL USING (auth.role() = 'service_role');
 RAISE NOTICE 'Created policy: Service role can access all railway webhook logs';
 ELSE RAISE NOTICE 'Policy already exists: Service role can access all railway webhook logs';
 END IF;
@@ -883,6 +899,7 @@ ELSE RAISE NOTICE 'Policy already exists: Service role can access all deployment
 END IF;
 END $$;
 DO $$ BEGIN RAISE NOTICE '🔒 Phase 3.8 Complete: RLS security policies configured for monitoring tables';
+RAISE NOTICE '   ✅ railway_webhook_logs: RLS enabled with service role access';
 RAISE NOTICE '   ✅ deployment_metrics: RLS enabled with service role access';
 RAISE NOTICE '   ✅ deployment_failures: RLS enabled with service role access';
 END $$;

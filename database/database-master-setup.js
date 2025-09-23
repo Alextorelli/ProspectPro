@@ -447,8 +447,8 @@ class DatabaseMasterSetup {
     log("blue", `📋 Setup report saved: ${reportPath}`);
     log("blue", "");
     log("green", "Next Steps:");
-    log("green", "1. 🔧 Update Railway environment variables");
-    log("green", "2. 🚀 Deploy application to Railway");
+    log("green", "1. 🔧 Update production environment variables");
+    log("green", "2. 🚀 Deploy application to production");
     log("green", "3. 🧪 Run integration tests");
     log("green", "4. 📊 Access admin dashboard");
     log("blue", "");

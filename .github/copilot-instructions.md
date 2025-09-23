@@ -30,7 +30,7 @@ ProspectPro is a lead generation platform being rebuilt to eliminate ALL fake da
 
 ## Project Overview
 
-ProspectPro is a Node.js/Express lead generation platform with **zero tolerance for fake business data**. Built for Railway deployment with Supabase PostgreSQL backend, it processes real business data through a 4-stage validation pipeline: Discovery → Enrichment → Validation → Export.
+ProspectPro is a Node.js/Express lead generation platform with **zero tolerance for fake business data**. Built for Lovable deployment with Supabase PostgreSQL backend, it processes real business data through a 4-stage validation pipeline: Discovery → Enrichment → Validation → Export.
 
 ## Critical Architecture
 
@@ -143,11 +143,10 @@ cp .env.example .env  # Configure SUPABASE_URL + SUPABASE_SECRET_KEY
 npm run dev           # Starts with nodemon on port 3000
 ```
 
-### Railway Deployment Testing
+### Production Deployment Testing
 
 ```bash
-# Test diagnostics without deployment
-SUPABASE_URL=your_url SUPABASE_SECRET_KEY=your_key node server.js
+npm run prod:init          # Initializes production server (creates .env)
 # Check health endpoints
 curl localhost:3000/health
 curl localhost:3000/diag
@@ -205,17 +204,17 @@ try {
 - Admin dashboard at `/admin-dashboard.html?token=PERSONAL_ACCESS_TOKEN`
 - Business intelligence dashboard with campaign metrics
 
-## Railway Production Considerations
+## Lovable Production Considerations
 
 ### Environment Variables
 
 - `ALLOW_DEGRADED_START=true` for initial deployment debugging
 - `PERSONAL_ACCESS_TOKEN` for admin dashboard authentication
-- `PORT` automatically set by Railway (bind to `0.0.0.0`)
+- `PORT` automatically set by Lovable (bind to `0.0.0.0`)
 
 ### Monitoring Endpoints
 
-- `/health`: Railway health checks with degraded mode support
+- `/health`: Lovable health checks with degraded mode support
 - `/diag`: Full Supabase connection diagnostics with sanitized environment
 - `/ready`: Kubernetes-style readiness probe requiring privileged DB connection
 

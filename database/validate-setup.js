@@ -170,7 +170,7 @@ ${this.results.schemaFilesFound.map((f) => `- \`database/${f}\``).join("\n")}
 
 ### Monitoring Tables  
 - **service_health_metrics** - System health monitoring
-- **webhook_events** - Railway webhook processing logs
+- **webhook_events** - Webhook processing logs
 
 ### Security Features
 - **Row Level Security (RLS)** policies on all tables

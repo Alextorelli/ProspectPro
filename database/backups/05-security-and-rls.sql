@@ -66,6 +66,7 @@ ALTER TABLE api_cost_tracking ENABLE ROW LEVEL SECURITY;
 ALTER TABLE lead_qualification_metrics ENABLE ROW LEVEL SECURITY;
 ALTER TABLE dashboard_exports ENABLE ROW LEVEL SECURITY;
 -- Enable RLS on deployment monitoring tables (private/internal use)
+ALTER TABLE railway_webhook_logs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE deployment_metrics ENABLE ROW LEVEL SECURITY;
 ALTER TABLE deployment_failures ENABLE ROW LEVEL SECURITY;
 -- If PostGIS created spatial_ref_sys in public (older installs), attempt to enable RLS
@@ -563,7 +564,7 @@ RAISE NOTICE '';
 RAISE NOTICE 'Next Steps:';
 RAISE NOTICE '1. ✅ Database schema complete - all phases executed';
 RAISE NOTICE '2. 🔧 Configure application connection strings';
-RAISE NOTICE '3. 🚀 Deploy to production with Supabase integration';
+RAISE NOTICE '3. 🚀 Deploy to Railway with Supabase integration';
 RAISE NOTICE '4. 🧪 Run integration tests and validation';
 RAISE NOTICE '5. 📊 Access admin dashboard and monitoring';
 RAISE NOTICE '';

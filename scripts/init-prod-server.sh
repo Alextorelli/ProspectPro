@@ -1,35 +1,99 @@
 #!/bin/bash
 
-# ProspectPro Production Server Initialization Script
-# Triggers environment generation workflow and starts production server
+#!/bin/bash
+
+# ============================================================================
+# ProspectPro Production Server Initialization v2.0
+# Enhanced Option B1: Direct workflow output retrieval
+# ============================================================================
+
+set -euo pipefail
+
+echo "🚀 ProspectPro Production Server Initialization v2.0"
+echo "=============================================================="
+echo "🎯 Enhanced Option B1: Workflow Output Retrieval"
+echo "🔒 Repository Secrets: Encrypted & Secure"
+echo "⚡ Zero Manual Configuration Required"
+echo ""
+
+# Configuration
+PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+ENV_FILE="${PROJECT_ROOT}/.env"
+LOG_FILE="${PROJECT_ROOT}/startup.log"
+SCRIPTS_DIR="${PROJECT_ROOT}/scripts"
+
+echo "📋 Project root: $PROJECT_ROOT"
+echo "📁 Environment file: $ENV_FILE"
+echo "📄 Log file: $LOG_FILE"
+
+# Initialize log file
+echo "🔧 Initializing startup log..."
+echo "# ProspectPro Production Startup Log" > "$LOG_FILE"
+echo "# Started: $(date -Iseconds)" >> "$LOG_FILE"
+echo "# Enhanced Option B1: Workflow Output Retrieval" >> "$LOG_FILE"
+echo "# ==============================================" >> "$LOG_FILE"
+echo ""
+
+# Check required environment variables
+check_github_token() {
+    echo "🔑 Checking GitHub authentication..."
+    
+    if [[ -n "${GHP_TOKEN:-}" ]]; then
+        echo "✅ GHP_TOKEN found in environment"
+        echo "# GitHub Token: Found GHP_TOKEN in environment" >> "$LOG_FILE"
+        return 0
+    fi
+    
+    if [[ -n "${GITHUB_TOKEN:-}" ]]; then
+        echo "✅ GITHUB_TOKEN found in environment"
+        echo "# GitHub Token: Found GITHUB_TOKEN in environment" >> "$LOG_FILE"
+        return 0
+    fi
+    
+    echo "❌ No GitHub token found!"
+    echo "# ERROR: No GitHub token found" >> "$LOG_FILE"
+    echo ""
+    echo "Required: Set one of these environment variables:"
+    echo "  export GHP_TOKEN='your_github_personal_access_token'"
+    echo "  export GITHUB_TOKEN='your_github_personal_access_token'"
+    echo ""
+    echo "Token Requirements:"
+    echo "  - repo: Full control of private repositories"
+    echo "  - workflow: Update GitHub Action workflows"  
+    echo "  - read:org: Read organization membership"
+    echo ""
+    exit 1
+}
 
 set -e
 
 echo "🚀 ProspectPro Production Server Initialization"
 echo "=============================================="
 
-# Function to trigger GitHub Actions workflow
+# Function to trigger GitHub Actions workflow - Enhanced Option B1
 trigger_env_workflow() {
-    local github_token="${GHP_SECRET:-$GITHUB_TOKEN}"
+    local github_token="${GHP_TOKEN:-$GITHUB_TOKEN}"
     local repo_owner="${GITHUB_REPOSITORY_OWNER:-Alextorelli}"
     local repo_name="${GITHUB_REPOSITORY_NAME:-ProspectPro}"
     
     if [ -z "$github_token" ]; then
-        echo "⚠️  No GitHub token found (GHP_SECRET or GITHUB_TOKEN)"
-        echo "   Set repository secret 'GHP_SECRET' or environment variable 'GHP_SECRET'"
-        echo "   Using local environment generation instead..."
+        echo "⚠️  No GitHub token found (GHP_TOKEN or GITHUB_TOKEN)"
+        echo "   Set repository secret 'GHP_TOKEN' or environment variable 'GHP_TOKEN'"
+        echo "   Cannot proceed with Enhanced Option B1 without authentication"
         return 1
     fi
     
-    echo "🔔 Using new production environment puller script..."
+    echo "� Enhanced Option B1: Direct workflow output retrieval"
     echo "📋 Repository: $repo_owner/$repo_name"
+    echo "🔑 Token source: ${GHP_TOKEN:+GHP_TOKEN}${GITHUB_TOKEN:+GITHUB_TOKEN}"
     
-    # Use the new environment puller script
-    if ./scripts/pull-env-from-secrets.js; then
-        echo "✅ Production environment generated successfully"
+    # Use the new environment puller script v2.0
+    if node ./scripts/pull-env-from-secrets.js; then
+        echo "✅ Production environment generated successfully via workflow outputs"
         return 0
     else
         echo "❌ Environment generation script failed"
+        echo "   Check GitHub token permissions and repository secrets"
         return 1
     fi
 }
