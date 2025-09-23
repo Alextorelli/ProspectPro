@@ -1,1 +1,0 @@
-{"database":{"url":"https://sriycekxdqnesdsgwiuc...supabase.co","hasClient":true,"lastTest":null},"connection":{"success":false,"error":"Could not find the table 'public.campaigns' in the schema cache","duration":91},"environment":{"node_env":"production","port":3000,"supabase_configured":true},"timestamp":"2025-09-23T06:06:43.426Z"}
