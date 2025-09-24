@@ -35,7 +35,7 @@ jobs:
           echo "SERVICE_NAME: $SERVICE_NAME" 
           echo "REGION: $REGION"
           echo "GITHUB_SHA: $GITHUB_SHA"
-          echo "GCP_SA_KEY length: ${#GCP_SA_KEY}" 
+          echo "GCP_SA_KEY length: ${#GCP_SA_KEY}"
         env:
           GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
 
