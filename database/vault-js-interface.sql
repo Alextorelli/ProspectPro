@@ -8,7 +8,9 @@ RETURNS TABLE(
     decrypted_secret TEXT,
     status TEXT,
     error_message TEXT
-) AS $$
+)
+SET search_path = 'vault, public'
+AS $$
 DECLARE
     secret_id UUID;
     decrypted_value TEXT;
@@ -79,7 +81,9 @@ RETURNS TABLE(
     decrypted_secret TEXT,
     status TEXT,
     error_message TEXT
-) AS $$
+)
+SET search_path = 'vault, public'
+AS $$
 DECLARE
     secret_name TEXT;
 BEGIN
@@ -103,7 +107,9 @@ RETURNS TABLE(
     status TEXT,
     details TEXT,
     recommendation TEXT
-) AS $$
+)
+SET search_path = 'vault, public, pg_catalog'
+AS $$
 DECLARE
     vault_enabled BOOLEAN := FALSE;
     secret_count INTEGER := 0;
