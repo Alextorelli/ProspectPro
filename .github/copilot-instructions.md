@@ -217,15 +217,17 @@ class SupabaseVaultLoader {
 #### **Database Vault Functions** (`vault-js-interface.sql`)
 
 ```sql
--- JavaScript-callable vault interface
+-- JavaScript-callable vault interface with security hardening
 CREATE OR REPLACE FUNCTION vault_decrypt_secret(secret_name TEXT)
 RETURNS TABLE(
     secret_key TEXT,
     decrypted_secret TEXT,
     status TEXT,
     error_message TEXT
-) AS $$
--- Secure vault access with proper error handling
+)
+SET search_path = 'vault, public'  -- Security: Prevent search path manipulation
+AS $$
+-- Secure vault access with proper error handling and search path protection
 $$;
 ```
 
@@ -244,6 +246,31 @@ async function getApiKeys() {
   }
 }
 ```
+
+#### **Security Hardening** ⚡ **NEW**
+
+**Search Path Protection**: All vault functions implement `SET search_path` security:
+
+```sql
+-- Prevents search path manipulation attacks on SECURITY DEFINER functions
+CREATE OR REPLACE FUNCTION vault_decrypt_secret(secret_name TEXT)
+RETURNS TABLE(...)
+SET search_path = 'vault, public'  -- Explicit schema restriction
+AS $$ ... $$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Diagnostic function includes system schema access
+CREATE OR REPLACE FUNCTION vault_diagnostic_check()
+RETURNS TABLE(...)
+SET search_path = 'vault, public, pg_catalog'  -- System table access
+AS $$ ... $$ LANGUAGE plpgsql SECURITY DEFINER;
+```
+
+**Benefits**:
+
+- ✅ Eliminates Supabase security linter warnings
+- ✅ Prevents privilege escalation via search path manipulation  
+- ✅ Production-grade security for `SECURITY DEFINER` functions
+- ✅ Explicit schema access control
 
 ## Zero Fake Data Policy 🚨
 
@@ -856,13 +883,14 @@ ProspectPro uses a two-tier secret management approach:
    - `SUPABASE_SECRET_KEY`: Database service role key
    - `PERSONAL_ACCESS_TOKEN`: Admin authentication
 
-2. **Supabase Vault** (API Keys) - **PRODUCTION READY**
+2. **Supabase Vault** (API Keys) - **PRODUCTION READY & SECURITY HARDENED**
    - `GOOGLE_PLACES_API_KEY`
    - `FOURSQUARE_API_KEY`
    - `HUNTER_IO_API_KEY`
    - `NEVERBOUNCE_API_KEY`
    - `APOLLO_API_KEY`
    - Additional API keys for testing and expansion
+   - **Security Feature**: All vault functions use `SET search_path` to prevent search path manipulation attacks
 
 ## Common Implementation Traps
 
@@ -874,6 +902,7 @@ ProspectPro uses a two-tier secret management approach:
 6. **API Cascading Failures**: Implement proper circuit breakers and rate limiting
 7. **Vault Access Errors**: Always provide fallback to environment variables
 8. **Production Degraded Starts**: Ensure `ALLOW_DEGRADED_START=false` in production
+9. **Vault Function Security**: All `SECURITY DEFINER` functions must include `SET search_path` to prevent attacks
 
 ## Success Verification
 
