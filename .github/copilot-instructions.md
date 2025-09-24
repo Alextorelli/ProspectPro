@@ -268,7 +268,7 @@ AS $$ ... $$ LANGUAGE plpgsql SECURITY DEFINER;
 **Benefits**:
 
 - ✅ Eliminates Supabase security linter warnings
-- ✅ Prevents privilege escalation via search path manipulation  
+- ✅ Prevents privilege escalation via search path manipulation
 - ✅ Production-grade security for `SECURITY DEFINER` functions
 - ✅ Explicit schema access control
 
