@@ -52,7 +52,7 @@ steps:
       - '--memory=2Gi'
       - '--cpu=2'
       - '--max-instances=10'
-      - '--set-env-vars=NODE_ENV=production,PORT=3100,ALLOW_DEGRADED_START=true'
+      - '--set-env-vars=NODE_ENV=production,ALLOW_DEGRADED_START=true'
 
 # CRITICAL: Logging configuration required when using custom service account
 options:
