@@ -29,7 +29,35 @@ export GITHUB_TOKEN="your_github_personal_access_token"
 
 ## 🎯 Production Deployment Methods
 
-### Method 1: Complete Automated Setup (Recommended)
+### Method 1: Google Cloud Run Deployment (Production Ready)
+
+ProspectPro supports automated deployment to Google Cloud Run with validated CI/CD pipeline:
+
+```bash
+# Prerequisites: Google Cloud Platform project setup
+# 1. Service Account: prospectpro-deployment@<project-id>.iam.gserviceaccount.com
+# 2. Required Permissions: Cloud Run Admin, Cloud Build, Artifact Registry Writer
+# 3. Regional Alignment: us-central1 for all resources
+
+# Deployment Process:
+# 1. Push to main branch automatically triggers Cloud Build
+# 2. Docker image built and pushed to Artifact Registry
+# 3. Cloud Run service deployed with production configuration
+
+# Health Check URLs:
+# https://prospectpro-<hash>-uc.a.run.app/health
+# https://prospectpro-<hash>-uc.a.run.app/diag
+```
+
+**Cloud Build Trigger Configuration:**
+- **Trigger ID**: `0358b3a4-c7a4-4da9-9610-1e335c4894e0`
+- **Repository Connection**: GitHub App (validated)
+- **Service Account**: `prospectpro-deployment@leadgen-471822.iam.gserviceaccount.com`
+- **Logging**: `CLOUD_LOGGING_ONLY`
+- **Build Time**: ~2 minutes 9 seconds
+- **Status**: ✅ VALIDATED & OPERATIONAL
+
+### Method 2: Complete Automated Setup (Local/Development)
 
 ```bash
 # 1. Generate production environment and start server

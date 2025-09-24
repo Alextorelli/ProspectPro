@@ -1,22 +1,22 @@
-# ProspectPro - Real-Time Lead Generation Platform# ProspectPro - Enhanced Lead Discovery Platform v2.0
+# ProspectPro - Enhanced Lead Discovery Platform v3.0
 
-[![Production Status](https://img.shields.io/badge/Status-Production%20Ready-brightgreen)](https://railway.app)## 🚀 Latest Features (September 2025)
-
+[![Production Status](https://img.shields.io/badge/Status-Production%20Ready-brightgreen)](https://console.cloud.google.com/run/detail/us-central1/prospectpro/metrics?project=leadgen-471822)
+[![Cloud Run](https://img.shields.io/badge/Google%20Cloud%20Run-Active-blue)](https://console.cloud.google.com/run/detail/us-central1/prospectpro?project=leadgen-471822)
 [![Architecture](https://img.shields.io/badge/Architecture-Event%20Driven-blue)](#architecture)
-
-[![Data Quality](https://img.shields.io/badge/Data%20Quality-Zero%20Fake%20Data-orange)](#data-quality)### Enhanced CSV Export System
-
+[![Data Quality](https://img.shields.io/badge/Data%20Quality-Zero%20Fake%20Data-orange)](#data-quality)
 [![API Integration](https://img.shields.io/badge/APIs-Multi%20Source-purple)](#api-integrations)
+[![Build Status](https://img.shields.io/badge/Cloud%20Build-Validated-green)](https://console.cloud.google.com/cloud-build/triggers/detail/0358b3a4-c7a4-4da9-9610-1e335c4894e0?project=leadgen-471822)
+
+## 🚀 Latest Features (September 2025)
+
+### Enhanced CSV Export System
 
 - **Multi-Query Campaigns**: Build comprehensive datasets across multiple searches
-
-> **Zero tolerance for fake business data.** ProspectPro generates high-quality, verified leads through real API integrations and multi-source validation.- **45+ Column CSV Export**: Complete business intelligence with owner/company contact differentiation
-
+- **45+ Column CSV Export**: Complete business intelligence with owner/company contact differentiation
 - **Campaign Analytics**: Query-level analysis with cost efficiency and quality metrics
+- **Testing Support**: Rich metadata for algorithm optimization and A/B testing
 
-## 🚀 Quick Start- **Testing Support**: Rich metadata for algorithm optimization and A/B testing
-
-### Prerequisites### Zero Fake Data Architecture
+### Zero Fake Data Architecture
 
 - Node.js 18+
 

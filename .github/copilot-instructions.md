@@ -126,6 +126,74 @@ npm run health     # Check server health
 npm run diag       # Comprehensive diagnostics
 ```
 
+## **Google Cloud Run Deployment** ⚡ **NEW & VALIDATED**
+
+### **Cloud Build Trigger Configuration** 
+
+ProspectPro now includes a **fully validated** Google Cloud Run deployment pipeline:
+
+#### **Current Production Configuration** (TESTED & WORKING)
+
+```bash
+# Validated Trigger Details
+Trigger ID: 0358b3a4-c7a4-4da9-9610-1e335c4894e0
+Build Status: ACTIVE & VALIDATED ✅
+Service Account: prospectpro-deployment@leadgen-471822.iam.gserviceaccount.com
+Repository: us-central1-docker.pkg.dev/leadgen-471822/prospectpro
+Cloud Run Service: prospectpro (us-central1)
+```
+
+#### **Deployment Architecture**
+
+```bash
+GitHub Push → Cloud Build Trigger → Docker Build → Artifact Registry → Cloud Run Deploy
+      ↓              ↓                    ↓               ↓                 ↓
+  main branch    Auto-trigger        Production Image   Regional Store    Live Service
+   (validated)    (<2 minutes)       (node:20-alpine)   (us-central1)    (2GB/2CPU)
+```
+
+#### **Critical Configuration Requirements**
+
+1. **Service Account**: `prospectpro-deployment@leadgen-471822.iam.gserviceaccount.com`
+   - Cloud Run Admin
+   - Storage Admin  
+   - Cloud Build WorkerPool User
+   - Artifact Registry Writer
+   - Logs Configuration Writer
+
+2. **Logging Configuration**: `CLOUD_LOGGING_ONLY` (CRITICAL)
+
+3. **Regional Alignment**: ALL resources in `us-central1`
+
+4. **Repository Connection**: GitHub App (not webhook)
+
+#### **Trigger Recreation & Validation**
+
+**VALIDATED PROCEDURE** (September 2025):
+- ✅ Trigger accidentally deleted and successfully recreated
+- ✅ All 3 build steps complete successfully (Docker → Push → Deploy)
+- ✅ Build time: ~2 minutes 9 seconds (optimal)
+- ✅ No configuration drift detected
+- ✅ Production service fully operational
+
+#### **Environment Variables**
+
+Cloud Run automatically configures:
+```bash
+NODE_ENV=production
+ALLOW_DEGRADED_START=true  # Required for Supabase schema caching
+PORT=3100                  # Container port (Cloud Run manages external)
+HOST=0.0.0.0              # Container binding
+```
+
+#### **Health Check Endpoints**
+
+```bash
+https://prospectpro-<hash>-uc.a.run.app/health  # Fast health check
+https://prospectpro-<hash>-uc.a.run.app/diag    # Full diagnostics  
+https://prospectpro-<hash>-uc.a.run.app/ready   # Database readiness
+```
+
 ## Core Architecture
 
 ### 4-Stage Data Pipeline
