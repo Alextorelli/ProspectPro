@@ -78,7 +78,7 @@ jobs:
           # Environment Settings
           NODE_ENV=production
           PORT=3100
-          ALLOW_DEGRADED_START=false
+          ALLOW_DEGRADED_START=true
 
           # Supabase Database Connection (from GitHub Secrets)
           SUPABASE_URL=${{ secrets.SUPABASE_URL }}
