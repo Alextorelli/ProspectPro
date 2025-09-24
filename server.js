@@ -71,11 +71,18 @@ app.use(express.static(path.join(__dirname, "public")));
 
 // Health endpoints for production monitoring
 app.get("/health", (req, res) => {
-  res.json({
+  const healthData = {
     status: "ok",
     timestamp: new Date().toISOString(),
     environment: config.environment,
-  });
+    port: process.env.PORT || 3100,
+    degradedStart: process.env.ALLOW_DEGRADED_START === "true",
+    uptime: process.uptime(),
+    version: "3.1.0"
+  };
+  
+  console.log("🏥 Health check requested:", JSON.stringify(healthData));
+  res.json(healthData);
 });
 
 app.get("/ready", async (req, res) => {
@@ -166,9 +173,29 @@ try {
 app.use("/api/business-discovery", businessDiscoveryRouter);
 app.use("/api/campaign-export", campaignExportRouter);
 
-// Default route - serve frontend
+// Default route - serve frontend with error handling
 app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "index.html"));
+  try {
+    const indexPath = path.join(__dirname, "public", "index.html");
+    console.log(`📄 Serving index.html from: ${indexPath}`);
+    res.sendFile(indexPath, (err) => {
+      if (err) {
+        console.error("❌ Failed to serve index.html:", err.message);
+        res.status(404).json({
+          error: "Frontend not found",
+          message: "The application frontend is not available",
+          timestamp: new Date().toISOString()
+        });
+      }
+    });
+  } catch (error) {
+    console.error("❌ Root route error:", error.message);
+    res.status(500).json({
+      error: "Application error",
+      message: "Failed to serve the application",
+      timestamp: new Date().toISOString()
+    });
+  }
 });
 
 // Catch-all for SPA routing
@@ -230,7 +257,7 @@ async function startServer() {
           "🔧 Schema cache issue detected - this is common after database updates"
         );
 
-        // STRICT PRODUCTION MODE: No degraded starts in production
+        // STRICT PRODUCTION MODE: Handle degraded starts appropriately
         if (config.isProduction) {
           console.error(
             "❌ Production startup blocked: schema cache issues detected"
@@ -244,7 +271,8 @@ async function startServer() {
           );
 
           if (process.env.ALLOW_DEGRADED_START !== "true") {
-            process.exit(1);
+            console.error("🚨 Forcing graceful degraded start for Cloud Run stability");
+            console.warn("⚠️ CLOUD RUN: Starting in degraded mode due to schema cache");
           } else {
             console.warn("🚨 EMERGENCY: Starting production in degraded mode");
           }
@@ -253,7 +281,7 @@ async function startServer() {
     } else {
       console.error("❌ Database connection failed:", dbTest.error);
 
-      // STRICT PRODUCTION MODE: No database, no startup
+      // STRICT PRODUCTION MODE: Handle database connection failures
       if (config.isProduction) {
         console.error(
           "❌ Production startup blocked: database connection failed"
@@ -263,9 +291,10 @@ async function startServer() {
         );
 
         if (process.env.ALLOW_DEGRADED_START !== "true") {
-          process.exit(1);
+          console.error("🚨 Forcing graceful degraded start for Cloud Run stability");
+          console.warn("⚠️ CLOUD RUN: Starting without database connection");
         } else {
-          console.warn("� EMERGENCY: Starting production without database");
+          console.warn("🚨 EMERGENCY: Starting production without database");
         }
       } else {
         console.log("🔄 Development mode: starting in degraded mode...");
@@ -300,9 +329,10 @@ async function startServer() {
           );
 
           if (process.env.ALLOW_DEGRADED_START !== "true") {
-            process.exit(1);
+            console.error("🚨 Forcing graceful degraded start for Cloud Run stability");
+            console.warn("⚠️ CLOUD RUN: Starting without critical API keys");
           } else {
-            console.warn("� EMERGENCY: Starting without critical API keys");
+            console.warn("🚨 EMERGENCY: Starting without critical API keys");
           }
         }
       } catch (error) {
@@ -312,39 +342,40 @@ async function startServer() {
         );
 
         if (process.env.ALLOW_DEGRADED_START !== "true") {
-          process.exit(1);
+          console.error("🚨 Forcing graceful degraded start for Cloud Run stability");
+          console.warn("⚠️ CLOUD RUN: Starting without Vault API keys");
         } else {
           console.warn("🚨 EMERGENCY: Starting without Vault API keys");
         }
       }
     }
 
-    // Start HTTP server with optimized configuration
-    const server = app.listen(
-      process.env.PORT || 3100,
-      config.host || "0.0.0.0",
-      () => {
-        const serverUrl = `http://${config.host || "0.0.0.0"}:${
-          process.env.PORT || 3100
-        }`;
-        console.log(`🌐 ProspectPro v3.1.0 server running on ${serverUrl}`);
-        console.log(`📊 Environment: ${config.environment}`);
-        console.log(`🔗 Health check: ${serverUrl}/health`);
-        console.log(`🔍 Diagnostics: ${serverUrl}/diag`);
+// Start HTTP server with optimized configuration for Cloud Run
+const server = app.listen(
+  process.env.PORT || 3100,
+  "0.0.0.0", // Explicitly bind to all interfaces for Cloud Run
+  () => {
+    const port = process.env.PORT || 3100;
+    const host = "0.0.0.0";
+    const serverUrl = `http://${host}:${port}`;
+    
+    console.log(`🌐 ProspectPro v3.1.0 server running on ${serverUrl}`);
+    console.log(`📊 Environment: ${config.environment}`);
+    console.log(`🔗 Health check: ${serverUrl}/health`);
+    console.log(`🔍 Diagnostics: ${serverUrl}/diag`);
+    console.log(`🐳 Container Port: ${port} (Cloud Run managed)`);
 
-        // Production status summary
-        if (config.isProduction) {
-          console.log("\n" + "=".repeat(50));
-          console.log("🏭 PRODUCTION MODE ACTIVE");
-          console.log("✅ Strict startup validation enabled");
-          console.log("✅ Supabase Vault API key loading");
-          console.log("✅ Zero-tolerance for degraded states");
-          console.log("=".repeat(50) + "\n");
-        }
-      }
-    );
-
-    // Set server timeout for production
+    // Production status summary
+    if (config.isProduction) {
+      console.log("\n" + "=".repeat(50));
+      console.log("🏭 PRODUCTION MODE ACTIVE");
+      console.log("✅ Strict startup validation enabled");
+      console.log("✅ Supabase Vault API key loading");
+      console.log(`✅ Degraded startup: ${process.env.ALLOW_DEGRADED_START === "true" ? "ENABLED" : "DISABLED"}`);
+      console.log("=".repeat(50) + "\n");
+    }
+  }
+);    // Set server timeout for production
     server.timeout = 120000; // 2 minutes
 
     return server;

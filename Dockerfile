@@ -19,6 +19,7 @@ RUN mkdir -p uploads \
 # Set environment
 ENV NODE_ENV=production
 ENV HOST=0.0.0.0
+ENV ALLOW_DEGRADED_START=true
 # Note: PORT will be provided by Cloud Run dynamically
 
 # Drop privileges to non-root user for security
@@ -27,9 +28,12 @@ USER node
 # Cloud Run manages ports dynamically, no fixed EXPOSE needed
 # EXPOSE directive removed to let Cloud Run handle port mapping
 
-# Simplified healthcheck using Cloud Run's provided PORT
-HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
-    CMD curl -fsS http://localhost:${PORT:-8080}/health || exit 1
+# Enhanced healthcheck for Cloud Run with fallback
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+    CMD curl -fsS http://localhost:${PORT:-8080}/health || \
+        curl -fsS http://localhost:8080/health || \
+        curl -fsS http://localhost:3100/health || \
+        exit 1
 
 # Start the application
 CMD ["node", "server.js"]

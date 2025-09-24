@@ -52,7 +52,8 @@ steps:
       - '--memory=2Gi'
       - '--cpu=2'
       - '--max-instances=10'
-      - '--set-env-vars=NODE_ENV=production,ALLOW_DEGRADED_START=true'
+      - '--set-env-vars=NODE_ENV=production,ALLOW_DEGRADED_START=true,HOST=0.0.0.0'
+      - '--service-account=prospectpro-deployment@leadgen-471822.iam.gserviceaccount.com'
 
 # CRITICAL: Logging configuration required when using custom service account
 options:
