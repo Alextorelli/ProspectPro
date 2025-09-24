@@ -28,15 +28,24 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Google Cloud CLI
-        uses: google-github-actions/setup-gcloud@v2
-        with:
-          project_id: ${{ secrets.GCP_PROJECT_ID }}
+      - name: Debug environment variables
+        run: |
+          echo "🔍 Debug: Checking environment and secrets"
+          echo "PROJECT_ID: $PROJECT_ID"
+          echo "SERVICE_NAME: $SERVICE_NAME" 
+          echo "REGION: $REGION"
+          echo "GITHUB_SHA: $GITHUB_SHA"
+          echo "GCP_SA_KEY length: ${#GCP_SA_KEY}" 
+        env:
+          GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
 
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v2
         with:
           credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Setup Google Cloud CLI
+        uses: google-github-actions/setup-gcloud@v2
 
       - name: Configure Docker for GCP
         run: |
