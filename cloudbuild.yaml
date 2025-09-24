@@ -4,17 +4,21 @@
 steps:
   # Create Artifact Registry repository if it doesn't exist
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
-    entrypoint: 'gcloud'
+    entrypoint: 'bash'
     args:
-      - 'artifacts'
-      - 'repositories'
-      - 'create'
-      - 'prospectpro'
-      - '--location=us-central1'
-      - '--repository-format=docker'
-      - '--description=ProspectPro container repository'
-    # Continue even if repository already exists
-    allowFailure: true
+      - '-c'
+      - |
+        # Check if repository exists first
+        if ! gcloud artifacts repositories describe prospectpro --location=us-central1 &>/dev/null; then
+          echo "🏗️ Creating Artifact Registry repository..."
+          gcloud artifacts repositories create prospectpro \
+            --location=us-central1 \
+            --repository-format=docker \
+            --description="ProspectPro container repository"
+          echo "✅ Repository created successfully"
+        else
+          echo "✅ Repository already exists"
+        fi
 
   # Build the Docker image
   - name: 'gcr.io/cloud-builders/docker'
