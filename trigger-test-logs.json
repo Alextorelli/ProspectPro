@@ -1,0 +1,3942 @@
+[
+  {
+    "textPayload": "starting build \"f977fcf6-2a9f-44fd-89eb-013cb48c2b0e\"\n",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-0",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "project_id": "leadgen-471822"
+      }
+    },
+    "timestamp": "2025-09-24T04:48:41.074381422Z",
+    "severity": "INFO",
+    "labels": {
+      "build_step": "MAIN",
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:48:42.146200269Z"
+  },
+  {
+    "textPayload": "FETCHSOURCE",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-1",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+        "project_id": "leadgen-471822"
+      }
+    },
+    "timestamp": "2025-09-24T04:48:41.074413235Z",
+    "severity": "INFO",
+    "labels": {
+      "build_step": "MAIN",
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:48:42.146200269Z"
+  },
+  {
+    "textPayload": "hint: Using 'master' as the name for the initial branch. This default branch name",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-2",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "project_id": "leadgen-471822",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+      }
+    },
+    "timestamp": "2025-09-24T04:48:41.608346398Z",
+    "severity": "INFO",
+    "labels": {
+      "build_step": "gsutil:STDERR",
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:48:42.146200269Z"
+  },
+  {
+    "textPayload": "hint: is subject to change. To configure the initial branch name to use in all",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-3",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "project_id": "leadgen-471822",
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+      }
+    },
+    "timestamp": "2025-09-24T04:48:41.608493983Z",
+    "severity": "INFO",
+    "labels": {
+      "build_step": "gsutil:STDERR",
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:48:42.146200269Z"
+  },
+  {
+    "textPayload": "hint: of your new repositories, which will suppress this warning, call:",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-4",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "project_id": "leadgen-471822",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e"
+      }
+    },
+    "timestamp": "2025-09-24T04:48:41.608566945Z",
+    "severity": "INFO",
+    "labels": {
+      "build_step": "gsutil:STDERR",
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:48:42.146200269Z"
+  },
+  {
+    "textPayload": "hint: ",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-5",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+        "project_id": "leadgen-471822",
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e"
+      }
+    },
+    "timestamp": "2025-09-24T04:48:41.608627044Z",
+    "severity": "INFO",
+    "labels": {
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+      "build_step": "gsutil:STDERR"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:48:42.146200269Z"
+  },
+  {
+    "textPayload": "hint: \tgit config --global init.defaultBranch <name>",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-6",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+        "project_id": "leadgen-471822"
+      }
+    },
+    "timestamp": "2025-09-24T04:48:41.608707738Z",
+    "severity": "INFO",
+    "labels": {
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+      "build_step": "gsutil:STDERR"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:48:42.146200269Z"
+  },
+  {
+    "textPayload": "hint: ",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-7",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "project_id": "leadgen-471822",
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+      }
+    },
+    "timestamp": "2025-09-24T04:48:41.608760158Z",
+    "severity": "INFO",
+    "labels": {
+      "build_step": "gsutil:STDERR",
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:48:42.146200269Z"
+  },
+  {
+    "textPayload": "hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-8",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "project_id": "leadgen-471822"
+      }
+    },
+    "timestamp": "2025-09-24T04:48:41.608868266Z",
+    "severity": "INFO",
+    "labels": {
+      "build_step": "gsutil:STDERR",
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:48:42.146200269Z"
+  },
+  {
+    "textPayload": "hint: 'development'. The just-created branch can be renamed via this command:",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-9",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "project_id": "leadgen-471822",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+      }
+    },
+    "timestamp": "2025-09-24T04:48:41.608878413Z",
+    "severity": "INFO",
+    "labels": {
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+      "build_step": "gsutil:STDERR"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:48:42.146200269Z"
+  },
+  {
+    "textPayload": "hint: ",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-10",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "project_id": "leadgen-471822",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+      }
+    },
+    "timestamp": "2025-09-24T04:48:41.608881011Z",
+    "severity": "INFO",
+    "labels": {
+      "build_step": "gsutil:STDERR",
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:48:42.146200269Z"
+  },
+  {
+    "textPayload": "hint: \tgit branch -m <name>",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-11",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "project_id": "leadgen-471822",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+      }
+    },
+    "timestamp": "2025-09-24T04:48:41.608882950Z",
+    "severity": "INFO",
+    "labels": {
+      "build_step": "gsutil:STDERR",
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:48:42.146200269Z"
+  },
+  {
+    "textPayload": "Initialized empty Git repository in /workspace/.git/",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-12",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "project_id": "leadgen-471822",
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+      }
+    },
+    "timestamp": "2025-09-24T04:48:41.611284567Z",
+    "severity": "INFO",
+    "labels": {
+      "build_step": "gsutil:STDOUT",
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:48:42.146200269Z"
+  },
+  {
+    "textPayload": "From https://github.com/Alextorelli/ProspectPro",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-13",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "project_id": "leadgen-471822",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+      }
+    },
+    "timestamp": "2025-09-24T04:48:42.226510310Z",
+    "severity": "INFO",
+    "labels": {
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+      "build_step": "gsutil:STDERR"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:48:43.097122766Z"
+  },
+  {
+    "textPayload": " * branch            18eb9c480054868d2db4b58c3400f27560456175 -> FETCH_HEAD",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-14",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "project_id": "leadgen-471822",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+      }
+    },
+    "timestamp": "2025-09-24T04:48:42.226521136Z",
+    "severity": "INFO",
+    "labels": {
+      "build_step": "gsutil:STDERR",
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:48:43.097122766Z"
+  },
+  {
+    "textPayload": "HEAD is now at 18eb9c4 ...",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-15",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "project_id": "leadgen-471822",
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+      }
+    },
+    "timestamp": "2025-09-24T04:48:42.272018682Z",
+    "severity": "INFO",
+    "labels": {
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+      "build_step": "gsutil:STDOUT"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:48:43.097122766Z"
+  },
+  {
+    "textPayload": "GitCommit:",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-16",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "project_id": "leadgen-471822"
+      }
+    },
+    "timestamp": "2025-09-24T04:48:42.272672870Z",
+    "severity": "INFO",
+    "labels": {
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+      "build_step": "gsutil:STDOUT"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:48:43.097122766Z"
+  },
+  {
+    "textPayload": "18eb9c480054868d2db4b58c3400f27560456175",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-17",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+        "project_id": "leadgen-471822"
+      }
+    },
+    "timestamp": "2025-09-24T04:48:42.274621079Z",
+    "severity": "INFO",
+    "labels": {
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+      "build_step": "gsutil:STDOUT"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:48:43.097122766Z"
+  },
+  {
+    "textPayload": "BUILD",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-18",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "project_id": "leadgen-471822",
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+      }
+    },
+    "timestamp": "2025-09-24T04:48:42.483530181Z",
+    "severity": "INFO",
+    "labels": {
+      "build_step": "MAIN",
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:48:43.097122766Z"
+  },
+  {
+    "textPayload": "Starting Step #0 - \"Build\"",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-19",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+        "project_id": "leadgen-471822"
+      }
+    },
+    "timestamp": "2025-09-24T04:48:43.125693490Z",
+    "severity": "INFO",
+    "labels": {
+      "build_step": "MAIN",
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:48:44.094746739Z"
+  },
+  {
+    "textPayload": "Step #0 - \"Build\": Already have image (with digest): gcr.io/cloud-builders/docker",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-20",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+        "project_id": "leadgen-471822"
+      }
+    },
+    "timestamp": "2025-09-24T04:48:43.136227057Z",
+    "severity": "INFO",
+    "labels": {
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+      "build_step": "Step #0 - \"Build\""
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:48:44.094746739Z"
+  },
+  {
+    "textPayload": "Step #0 - \"Build\": Sending build context to Docker daemon  3.402MB\r\r",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-21",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "project_id": "leadgen-471822"
+      }
+    },
+    "timestamp": "2025-09-24T04:48:44.310643594Z",
+    "severity": "INFO",
+    "labels": {
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+      "build_step": "Step #0 - \"Build\""
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:48:45.092797509Z"
+  },
+  {
+    "textPayload": "Step #0 - \"Build\": Step 1/13 : FROM node:20-alpine",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-22",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "project_id": "leadgen-471822",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+      }
+    },
+    "timestamp": "2025-09-24T04:48:44.317553086Z",
+    "severity": "INFO",
+    "labels": {
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+      "build_step": "Step #0 - \"Build\""
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:48:45.092797509Z"
+  },
+  {
+    "textPayload": "Step #0 - \"Build\": 20-alpine: Pulling from library/node",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-23",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+        "project_id": "leadgen-471822",
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e"
+      }
+    },
+    "timestamp": "2025-09-24T04:48:45.466778379Z",
+    "severity": "INFO",
+    "labels": {
+      "build_step": "Step #0 - \"Build\"",
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:48:46.093189913Z"
+  },
+  {
+    "textPayload": "Step #0 - \"Build\": 9824c27679d3: Already exists",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-24",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "project_id": "leadgen-471822"
+      }
+    },
+    "timestamp": "2025-09-24T04:48:45.902705747Z",
+    "severity": "INFO",
+    "labels": {
+      "build_step": "Step #0 - \"Build\"",
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:48:46.093189913Z"
+  },
+  {
+    "textPayload": "Step #0 - \"Build\": c88300f8759a: Pulling fs layer",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-25",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "project_id": "leadgen-471822",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+      }
+    },
+    "timestamp": "2025-09-24T04:48:45.913248619Z",
+    "severity": "INFO",
+    "labels": {
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+      "build_step": "Step #0 - \"Build\""
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:48:46.093189913Z"
+  },
+  {
+    "textPayload": "Step #0 - \"Build\": fd345d7e43c5: Pulling fs layer",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-26",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "project_id": "leadgen-471822"
+      }
+    },
+    "timestamp": "2025-09-24T04:48:45.913262652Z",
+    "severity": "INFO",
+    "labels": {
+      "build_step": "Step #0 - \"Build\"",
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:48:46.093189913Z"
+  },
+  {
+    "textPayload": "Step #0 - \"Build\": 0de821d16564: Pulling fs layer",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-27",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+        "project_id": "leadgen-471822",
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e"
+      }
+    },
+    "timestamp": "2025-09-24T04:48:45.913263577Z",
+    "severity": "INFO",
+    "labels": {
+      "build_step": "Step #0 - \"Build\"",
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:48:46.093189913Z"
+  },
+  {
+    "textPayload": "Step #0 - \"Build\": 0de821d16564: Verifying Checksum",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-28",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+        "project_id": "leadgen-471822",
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e"
+      }
+    },
+    "timestamp": "2025-09-24T04:48:46.332492006Z",
+    "severity": "INFO",
+    "labels": {
+      "build_step": "Step #0 - \"Build\"",
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:48:47.095353828Z"
+  },
+  {
+    "textPayload": "Step #0 - \"Build\": 0de821d16564: Download complete",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-29",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "project_id": "leadgen-471822",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e"
+      }
+    },
+    "timestamp": "2025-09-24T04:48:46.332504378Z",
+    "severity": "INFO",
+    "labels": {
+      "build_step": "Step #0 - \"Build\"",
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:48:47.095353828Z"
+  },
+  {
+    "textPayload": "Step #0 - \"Build\": fd345d7e43c5: Verifying Checksum",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-30",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "project_id": "leadgen-471822",
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+      }
+    },
+    "timestamp": "2025-09-24T04:48:46.366836261Z",
+    "severity": "INFO",
+    "labels": {
+      "build_step": "Step #0 - \"Build\"",
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:48:47.095353828Z"
+  },
+  {
+    "textPayload": "Step #0 - \"Build\": fd345d7e43c5: Download complete",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-31",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+        "project_id": "leadgen-471822",
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e"
+      }
+    },
+    "timestamp": "2025-09-24T04:48:46.366846950Z",
+    "severity": "INFO",
+    "labels": {
+      "build_step": "Step #0 - \"Build\"",
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:48:47.095353828Z"
+  },
+  {
+    "textPayload": "Step #0 - \"Build\": c88300f8759a: Verifying Checksum",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-32",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+        "project_id": "leadgen-471822",
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e"
+      }
+    },
+    "timestamp": "2025-09-24T04:48:46.736888438Z",
+    "severity": "INFO",
+    "labels": {
+      "build_step": "Step #0 - \"Build\"",
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:48:47.095353828Z"
+  },
+  {
+    "textPayload": "Step #0 - \"Build\": c88300f8759a: Download complete",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-33",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "project_id": "leadgen-471822"
+      }
+    },
+    "timestamp": "2025-09-24T04:48:46.737072263Z",
+    "severity": "INFO",
+    "labels": {
+      "build_step": "Step #0 - \"Build\"",
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:48:47.095353828Z"
+  },
+  {
+    "textPayload": "Step #0 - \"Build\": c88300f8759a: Pull complete",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-34",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "project_id": "leadgen-471822",
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+      }
+    },
+    "timestamp": "2025-09-24T04:48:48.820403441Z",
+    "severity": "INFO",
+    "labels": {
+      "build_step": "Step #0 - \"Build\"",
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:48:49.094156345Z"
+  },
+  {
+    "textPayload": "Step #0 - \"Build\": fd345d7e43c5: Pull complete",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-35",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "project_id": "leadgen-471822",
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+      }
+    },
+    "timestamp": "2025-09-24T04:48:48.989923463Z",
+    "severity": "INFO",
+    "labels": {
+      "build_step": "Step #0 - \"Build\"",
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:48:49.094156345Z"
+  },
+  {
+    "textPayload": "Step #0 - \"Build\": 0de821d16564: Pull complete",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-36",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+        "project_id": "leadgen-471822"
+      }
+    },
+    "timestamp": "2025-09-24T04:48:49.075607668Z",
+    "severity": "INFO",
+    "labels": {
+      "build_step": "Step #0 - \"Build\"",
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:48:49.094156345Z"
+  },
+  {
+    "textPayload": "Step #0 - \"Build\": Digest: sha256:eabac870db94f7342d6c33560d6613f188bbcf4bbe1f4eb47d5e2a08e1a37722",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-37",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "project_id": "leadgen-471822",
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+      }
+    },
+    "timestamp": "2025-09-24T04:48:49.092787053Z",
+    "severity": "INFO",
+    "labels": {
+      "build_step": "Step #0 - \"Build\"",
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:48:50.092119164Z"
+  },
+  {
+    "textPayload": "Step #0 - \"Build\": Status: Downloaded newer image for node:20-alpine",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-38",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "project_id": "leadgen-471822",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e"
+      }
+    },
+    "timestamp": "2025-09-24T04:48:49.099841501Z",
+    "severity": "INFO",
+    "labels": {
+      "build_step": "Step #0 - \"Build\"",
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:48:50.092119164Z"
+  },
+  {
+    "textPayload": "Step #0 - \"Build\":  ---> 6c47bbfd232e",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-39",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+        "project_id": "leadgen-471822",
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e"
+      }
+    },
+    "timestamp": "2025-09-24T04:48:49.103660913Z",
+    "severity": "INFO",
+    "labels": {
+      "build_step": "Step #0 - \"Build\"",
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:48:50.092119164Z"
+  },
+  {
+    "textPayload": "Step #0 - \"Build\": Step 2/13 : WORKDIR /app",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-40",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "project_id": "leadgen-471822"
+      }
+    },
+    "timestamp": "2025-09-24T04:48:49.103675304Z",
+    "severity": "INFO",
+    "labels": {
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+      "build_step": "Step #0 - \"Build\""
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:48:50.092119164Z"
+  },
+  {
+    "textPayload": "Step #0 - \"Build\":  ---> Running in dd322a97b398",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-41",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+        "project_id": "leadgen-471822",
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e"
+      }
+    },
+    "timestamp": "2025-09-24T04:48:49.635786878Z",
+    "severity": "INFO",
+    "labels": {
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+      "build_step": "Step #0 - \"Build\""
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:48:50.092119164Z"
+  },
+  {
+    "textPayload": "Step #0 - \"Build\": Removing intermediate container dd322a97b398",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-42",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+        "project_id": "leadgen-471822",
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e"
+      }
+    },
+    "timestamp": "2025-09-24T04:48:49.740713276Z",
+    "severity": "INFO",
+    "labels": {
+      "build_step": "Step #0 - \"Build\"",
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:48:50.092119164Z"
+  },
+  {
+    "textPayload": "Step #0 - \"Build\":  ---> 5c421c0bcd77",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-43",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+        "project_id": "leadgen-471822"
+      }
+    },
+    "timestamp": "2025-09-24T04:48:49.740912664Z",
+    "severity": "INFO",
+    "labels": {
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+      "build_step": "Step #0 - \"Build\""
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:48:50.092119164Z"
+  },
+  {
+    "textPayload": "Step #0 - \"Build\": Step 3/13 : COPY package*.json ./",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-44",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+        "project_id": "leadgen-471822",
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e"
+      }
+    },
+    "timestamp": "2025-09-24T04:48:49.740923483Z",
+    "severity": "INFO",
+    "labels": {
+      "build_step": "Step #0 - \"Build\"",
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:48:50.092119164Z"
+  },
+  {
+    "textPayload": "Step #0 - \"Build\":  ---> 1f63119a694b",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-45",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+        "project_id": "leadgen-471822"
+      }
+    },
+    "timestamp": "2025-09-24T04:48:49.984436107Z",
+    "severity": "INFO",
+    "labels": {
+      "build_step": "Step #0 - \"Build\"",
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:48:50.092119164Z"
+  },
+  {
+    "textPayload": "Step #0 - \"Build\": Step 4/13 : RUN if [ -f package-lock.json ]; then npm ci --omit=dev; else npm install --omit=dev; fi",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-46",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+        "project_id": "leadgen-471822",
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e"
+      }
+    },
+    "timestamp": "2025-09-24T04:48:49.984496746Z",
+    "severity": "INFO",
+    "labels": {
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+      "build_step": "Step #0 - \"Build\""
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:48:50.092119164Z"
+  },
+  {
+    "textPayload": "Step #0 - \"Build\":  ---> Running in 5de956b9fc9e",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-47",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "project_id": "leadgen-471822",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e"
+      }
+    },
+    "timestamp": "2025-09-24T04:48:50.021988652Z",
+    "severity": "INFO",
+    "labels": {
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+      "build_step": "Step #0 - \"Build\""
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:48:50.092119164Z"
+  },
+  {
+    "textPayload": "Step #0 - \"Build\": ",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-48",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "project_id": "leadgen-471822"
+      }
+    },
+    "timestamp": "2025-09-24T04:48:55.538005983Z",
+    "severity": "INFO",
+    "labels": {
+      "build_step": "Step #0 - \"Build\"",
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:48:56.081425288Z"
+  },
+  {
+    "textPayload": "Step #0 - \"Build\": > prospect-pro-real-api@3.0.0 postinstall",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-49",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "project_id": "leadgen-471822"
+      }
+    },
+    "timestamp": "2025-09-24T04:48:55.538023419Z",
+    "severity": "INFO",
+    "labels": {
+      "build_step": "Step #0 - \"Build\"",
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:48:56.081425288Z"
+  },
+  {
+    "textPayload": "Step #0 - \"Build\": > echo 'ProspectPro v3.0: Production-ready deployment configured'",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-50",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+        "project_id": "leadgen-471822"
+      }
+    },
+    "timestamp": "2025-09-24T04:48:55.538024997Z",
+    "severity": "INFO",
+    "labels": {
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+      "build_step": "Step #0 - \"Build\""
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:48:56.081425288Z"
+  },
+  {
+    "textPayload": "Step #0 - \"Build\": ",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-51",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+        "project_id": "leadgen-471822",
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e"
+      }
+    },
+    "timestamp": "2025-09-24T04:48:55.538025447Z",
+    "severity": "INFO",
+    "labels": {
+      "build_step": "Step #0 - \"Build\"",
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:48:56.081425288Z"
+  },
+  {
+    "textPayload": "Step #0 - \"Build\": ProspectPro v3.0: Production-ready deployment configured",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-52",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "project_id": "leadgen-471822"
+      }
+    },
+    "timestamp": "2025-09-24T04:48:55.547600416Z",
+    "severity": "INFO",
+    "labels": {
+      "build_step": "Step #0 - \"Build\"",
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:48:56.081425288Z"
+  },
+  {
+    "textPayload": "Step #0 - \"Build\": ",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-53",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+        "project_id": "leadgen-471822",
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e"
+      }
+    },
+    "timestamp": "2025-09-24T04:48:55.567545974Z",
+    "severity": "INFO",
+    "labels": {
+      "build_step": "Step #0 - \"Build\"",
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:48:56.081425288Z"
+  },
+  {
+    "textPayload": "Step #0 - \"Build\": added 171 packages, and audited 172 packages in 5s",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-54",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "project_id": "leadgen-471822"
+      }
+    },
+    "timestamp": "2025-09-24T04:48:55.567565672Z",
+    "severity": "INFO",
+    "labels": {
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+      "build_step": "Step #0 - \"Build\""
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:48:56.081425288Z"
+  },
+  {
+    "textPayload": "Step #0 - \"Build\": ",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-55",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "project_id": "leadgen-471822",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e"
+      }
+    },
+    "timestamp": "2025-09-24T04:48:55.568121199Z",
+    "severity": "INFO",
+    "labels": {
+      "build_step": "Step #0 - \"Build\"",
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:48:56.081425288Z"
+  },
+  {
+    "textPayload": "Step #0 - \"Build\": 37 packages are looking for funding",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-56",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "project_id": "leadgen-471822",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+      }
+    },
+    "timestamp": "2025-09-24T04:48:55.568384885Z",
+    "severity": "INFO",
+    "labels": {
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+      "build_step": "Step #0 - \"Build\""
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:48:56.081425288Z"
+  },
+  {
+    "textPayload": "Step #0 - \"Build\":   run `npm fund` for details",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-57",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "project_id": "leadgen-471822",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+      }
+    },
+    "timestamp": "2025-09-24T04:48:55.568395088Z",
+    "severity": "INFO",
+    "labels": {
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+      "build_step": "Step #0 - \"Build\""
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:48:56.081425288Z"
+  },
+  {
+    "textPayload": "Step #0 - \"Build\": ",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-58",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+        "project_id": "leadgen-471822",
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e"
+      }
+    },
+    "timestamp": "2025-09-24T04:48:55.571440202Z",
+    "severity": "INFO",
+    "labels": {
+      "build_step": "Step #0 - \"Build\"",
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:48:56.081425288Z"
+  },
+  {
+    "textPayload": "Step #0 - \"Build\": found 0 vulnerabilities",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-59",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "project_id": "leadgen-471822",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+      }
+    },
+    "timestamp": "2025-09-24T04:48:55.571452428Z",
+    "severity": "INFO",
+    "labels": {
+      "build_step": "Step #0 - \"Build\"",
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:48:56.081425288Z"
+  },
+  {
+    "textPayload": "Step #0 - \"Build\": \u001b[91mnpm notice",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-60",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+        "project_id": "leadgen-471822",
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e"
+      }
+    },
+    "timestamp": "2025-09-24T04:48:55.576270055Z",
+    "severity": "INFO",
+    "labels": {
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+      "build_step": "Step #0 - \"Build\""
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:48:56.081425288Z"
+  },
+  {
+    "textPayload": "Step #0 - \"Build\": npm notice New major version of npm available! 10.8.2 -> 11.6.0",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-61",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "project_id": "leadgen-471822",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+      }
+    },
+    "timestamp": "2025-09-24T04:48:55.576282764Z",
+    "severity": "INFO",
+    "labels": {
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+      "build_step": "Step #0 - \"Build\""
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:48:56.081425288Z"
+  },
+  {
+    "textPayload": "Step #0 - \"Build\": npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.6.0",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-62",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "project_id": "leadgen-471822",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e"
+      }
+    },
+    "timestamp": "2025-09-24T04:48:55.576285103Z",
+    "severity": "INFO",
+    "labels": {
+      "build_step": "Step #0 - \"Build\"",
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:48:56.081425288Z"
+  },
+  {
+    "textPayload": "Step #0 - \"Build\": npm notice To update run: npm install -g npm@11.6.0",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-63",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+        "project_id": "leadgen-471822",
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e"
+      }
+    },
+    "timestamp": "2025-09-24T04:48:55.576285769Z",
+    "severity": "INFO",
+    "labels": {
+      "build_step": "Step #0 - \"Build\"",
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:48:56.081425288Z"
+  },
+  {
+    "textPayload": "Step #0 - \"Build\": npm notice",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-64",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "project_id": "leadgen-471822",
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+      }
+    },
+    "timestamp": "2025-09-24T04:48:55.576286367Z",
+    "severity": "INFO",
+    "labels": {
+      "build_step": "Step #0 - \"Build\"",
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:48:56.081425288Z"
+  },
+  {
+    "textPayload": "Step #0 - \"Build\": \u001b[0mRemoving intermediate container 5de956b9fc9e",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-65",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "project_id": "leadgen-471822",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+      }
+    },
+    "timestamp": "2025-09-24T04:48:57.735082581Z",
+    "severity": "INFO",
+    "labels": {
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+      "build_step": "Step #0 - \"Build\""
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:48:58.095571755Z"
+  },
+  {
+    "textPayload": "Step #0 - \"Build\":  ---> c7f1d616c231",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-66",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+        "project_id": "leadgen-471822",
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e"
+      }
+    },
+    "timestamp": "2025-09-24T04:48:57.735102605Z",
+    "severity": "INFO",
+    "labels": {
+      "build_step": "Step #0 - \"Build\"",
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:48:58.095571755Z"
+  },
+  {
+    "textPayload": "Step #0 - \"Build\": Step 5/13 : COPY . .",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-67",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "project_id": "leadgen-471822",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e"
+      }
+    },
+    "timestamp": "2025-09-24T04:48:57.735103791Z",
+    "severity": "INFO",
+    "labels": {
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+      "build_step": "Step #0 - \"Build\""
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:48:58.095571755Z"
+  },
+  {
+    "textPayload": "Step #0 - \"Build\":  ---> 63b2cda71fe6",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-68",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+        "project_id": "leadgen-471822"
+      }
+    },
+    "timestamp": "2025-09-24T04:48:58.112869159Z",
+    "severity": "INFO",
+    "labels": {
+      "build_step": "Step #0 - \"Build\"",
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:48:59.078712013Z"
+  },
+  {
+    "textPayload": "Step #0 - \"Build\": Step 6/13 : RUN mkdir -p uploads     && chown -R node:node /app/uploads     && apk add --no-cache curl",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-69",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "project_id": "leadgen-471822",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e"
+      }
+    },
+    "timestamp": "2025-09-24T04:48:58.112888434Z",
+    "severity": "INFO",
+    "labels": {
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+      "build_step": "Step #0 - \"Build\""
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:48:59.078712013Z"
+  },
+  {
+    "textPayload": "Step #0 - \"Build\":  ---> Running in 9a4e05406f37",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-70",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+        "project_id": "leadgen-471822"
+      }
+    },
+    "timestamp": "2025-09-24T04:48:58.146099184Z",
+    "severity": "INFO",
+    "labels": {
+      "build_step": "Step #0 - \"Build\"",
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:48:59.078712013Z"
+  },
+  {
+    "textPayload": "Step #0 - \"Build\": fetch https://dl-cdn.alpinelinux.org/alpine/v3.22/main/x86_64/APKINDEX.tar.gz",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-71",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+        "project_id": "leadgen-471822",
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e"
+      }
+    },
+    "timestamp": "2025-09-24T04:48:58.622831011Z",
+    "severity": "INFO",
+    "labels": {
+      "build_step": "Step #0 - \"Build\"",
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:48:59.078712013Z"
+  },
+  {
+    "textPayload": "Step #0 - \"Build\": fetch https://dl-cdn.alpinelinux.org/alpine/v3.22/community/x86_64/APKINDEX.tar.gz",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-72",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "project_id": "leadgen-471822"
+      }
+    },
+    "timestamp": "2025-09-24T04:48:58.749584394Z",
+    "severity": "INFO",
+    "labels": {
+      "build_step": "Step #0 - \"Build\"",
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:48:59.078712013Z"
+  },
+  {
+    "textPayload": "Step #0 - \"Build\": (1/9) Installing brotli-libs (1.1.0-r2)",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-73",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "project_id": "leadgen-471822"
+      }
+    },
+    "timestamp": "2025-09-24T04:48:59.278861718Z",
+    "severity": "INFO",
+    "labels": {
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+      "build_step": "Step #0 - \"Build\""
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:49:00.082158159Z"
+  },
+  {
+    "textPayload": "Step #0 - \"Build\": (2/9) Installing c-ares (1.34.5-r0)",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-74",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "project_id": "leadgen-471822",
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+      }
+    },
+    "timestamp": "2025-09-24T04:48:59.300639888Z",
+    "severity": "INFO",
+    "labels": {
+      "build_step": "Step #0 - \"Build\"",
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:49:00.082158159Z"
+  },
+  {
+    "textPayload": "Step #0 - \"Build\": (3/9) Installing libunistring (1.3-r0)",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-75",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+        "project_id": "leadgen-471822"
+      }
+    },
+    "timestamp": "2025-09-24T04:48:59.307648253Z",
+    "severity": "INFO",
+    "labels": {
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+      "build_step": "Step #0 - \"Build\""
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:49:00.082158159Z"
+  },
+  {
+    "textPayload": "Step #0 - \"Build\": (4/9) Installing libidn2 (2.3.7-r0)",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-76",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "project_id": "leadgen-471822",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+      }
+    },
+    "timestamp": "2025-09-24T04:48:59.329513100Z",
+    "severity": "INFO",
+    "labels": {
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+      "build_step": "Step #0 - \"Build\""
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:49:00.082158159Z"
+  },
+  {
+    "textPayload": "Step #0 - \"Build\": (5/9) Installing nghttp2-libs (1.65.0-r0)",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-77",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+        "project_id": "leadgen-471822",
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e"
+      }
+    },
+    "timestamp": "2025-09-24T04:48:59.335282804Z",
+    "severity": "INFO",
+    "labels": {
+      "build_step": "Step #0 - \"Build\"",
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:49:00.082158159Z"
+  },
+  {
+    "textPayload": "Step #0 - \"Build\": (6/9) Installing libpsl (0.21.5-r3)",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-78",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "project_id": "leadgen-471822",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e"
+      }
+    },
+    "timestamp": "2025-09-24T04:48:59.339958902Z",
+    "severity": "INFO",
+    "labels": {
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+      "build_step": "Step #0 - \"Build\""
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:49:00.082158159Z"
+  },
+  {
+    "textPayload": "Step #0 - \"Build\": (7/9) Installing zstd-libs (1.5.7-r0)",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-79",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "project_id": "leadgen-471822",
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+      }
+    },
+    "timestamp": "2025-09-24T04:48:59.343712028Z",
+    "severity": "INFO",
+    "labels": {
+      "build_step": "Step #0 - \"Build\"",
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:49:00.082158159Z"
+  },
+  {
+    "textPayload": "Step #0 - \"Build\": (8/9) Installing libcurl (8.14.1-r1)",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-80",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "project_id": "leadgen-471822",
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+      }
+    },
+    "timestamp": "2025-09-24T04:48:59.355696296Z",
+    "severity": "INFO",
+    "labels": {
+      "build_step": "Step #0 - \"Build\"",
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:49:00.082158159Z"
+  },
+  {
+    "textPayload": "Step #0 - \"Build\": (9/9) Installing curl (8.14.1-r1)",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-81",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "project_id": "leadgen-471822",
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+      }
+    },
+    "timestamp": "2025-09-24T04:48:59.366622495Z",
+    "severity": "INFO",
+    "labels": {
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+      "build_step": "Step #0 - \"Build\""
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:49:00.082158159Z"
+  },
+  {
+    "textPayload": "Step #0 - \"Build\": Executing busybox-1.37.0-r18.trigger",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-82",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "project_id": "leadgen-471822",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+      }
+    },
+    "timestamp": "2025-09-24T04:48:59.372526252Z",
+    "severity": "INFO",
+    "labels": {
+      "build_step": "Step #0 - \"Build\"",
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:49:00.082158159Z"
+  },
+  {
+    "textPayload": "Step #0 - \"Build\": OK: 15 MiB in 27 packages",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-83",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "project_id": "leadgen-471822",
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+      }
+    },
+    "timestamp": "2025-09-24T04:48:59.380606810Z",
+    "severity": "INFO",
+    "labels": {
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+      "build_step": "Step #0 - \"Build\""
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:49:00.082158159Z"
+  },
+  {
+    "textPayload": "Step #0 - \"Build\": Removing intermediate container 9a4e05406f37",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-84",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "project_id": "leadgen-471822",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+      }
+    },
+    "timestamp": "2025-09-24T04:48:59.857595939Z",
+    "severity": "INFO",
+    "labels": {
+      "build_step": "Step #0 - \"Build\"",
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:49:00.082158159Z"
+  },
+  {
+    "textPayload": "Step #0 - \"Build\":  ---> 776eed50e98a",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-85",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "project_id": "leadgen-471822",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+      }
+    },
+    "timestamp": "2025-09-24T04:48:59.857607Z",
+    "severity": "INFO",
+    "labels": {
+      "build_step": "Step #0 - \"Build\"",
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:49:00.082158159Z"
+  },
+  {
+    "textPayload": "Step #0 - \"Build\": Step 7/13 : ENV NODE_ENV=production",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-86",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "project_id": "leadgen-471822",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+      }
+    },
+    "timestamp": "2025-09-24T04:48:59.857608353Z",
+    "severity": "INFO",
+    "labels": {
+      "build_step": "Step #0 - \"Build\"",
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:49:00.082158159Z"
+  },
+  {
+    "textPayload": "Step #0 - \"Build\":  ---> Running in c51e1744a68c",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-87",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+        "project_id": "leadgen-471822"
+      }
+    },
+    "timestamp": "2025-09-24T04:48:59.886495953Z",
+    "severity": "INFO",
+    "labels": {
+      "build_step": "Step #0 - \"Build\"",
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:49:00.082158159Z"
+  },
+  {
+    "textPayload": "Step #0 - \"Build\": Removing intermediate container c51e1744a68c",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-88",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "project_id": "leadgen-471822",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e"
+      }
+    },
+    "timestamp": "2025-09-24T04:48:59.985433585Z",
+    "severity": "INFO",
+    "labels": {
+      "build_step": "Step #0 - \"Build\"",
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:49:00.082158159Z"
+  },
+  {
+    "textPayload": "Step #0 - \"Build\":  ---> 86a2d1f1530b",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-89",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "project_id": "leadgen-471822",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e"
+      }
+    },
+    "timestamp": "2025-09-24T04:48:59.985446422Z",
+    "severity": "INFO",
+    "labels": {
+      "build_step": "Step #0 - \"Build\"",
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:49:00.082158159Z"
+  },
+  {
+    "textPayload": "Step #0 - \"Build\": Step 8/13 : ENV PORT=3100",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-90",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "project_id": "leadgen-471822",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+      }
+    },
+    "timestamp": "2025-09-24T04:48:59.985447885Z",
+    "severity": "INFO",
+    "labels": {
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+      "build_step": "Step #0 - \"Build\""
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:49:00.082158159Z"
+  },
+  {
+    "textPayload": "Step #0 - \"Build\":  ---> Running in 3867b6ed8a89",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-91",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+        "project_id": "leadgen-471822",
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e"
+      }
+    },
+    "timestamp": "2025-09-24T04:49:00.023355713Z",
+    "severity": "INFO",
+    "labels": {
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+      "build_step": "Step #0 - \"Build\""
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:49:00.082158159Z"
+  },
+  {
+    "textPayload": "Step #0 - \"Build\": Removing intermediate container 3867b6ed8a89",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-92",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "project_id": "leadgen-471822",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+      }
+    },
+    "timestamp": "2025-09-24T04:49:00.136320301Z",
+    "severity": "INFO",
+    "labels": {
+      "build_step": "Step #0 - \"Build\"",
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:49:01.096371897Z"
+  },
+  {
+    "textPayload": "Step #0 - \"Build\":  ---> 35c24754cb26",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-93",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+        "project_id": "leadgen-471822"
+      }
+    },
+    "timestamp": "2025-09-24T04:49:00.136335861Z",
+    "severity": "INFO",
+    "labels": {
+      "build_step": "Step #0 - \"Build\"",
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:49:01.096371897Z"
+  },
+  {
+    "textPayload": "Step #0 - \"Build\": Step 9/13 : ENV HOST=0.0.0.0",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-94",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+        "project_id": "leadgen-471822"
+      }
+    },
+    "timestamp": "2025-09-24T04:49:00.136336976Z",
+    "severity": "INFO",
+    "labels": {
+      "build_step": "Step #0 - \"Build\"",
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:49:01.096371897Z"
+  },
+  {
+    "textPayload": "Step #0 - \"Build\":  ---> Running in 5f404f3caec1",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-95",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+        "project_id": "leadgen-471822",
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e"
+      }
+    },
+    "timestamp": "2025-09-24T04:49:00.167389958Z",
+    "severity": "INFO",
+    "labels": {
+      "build_step": "Step #0 - \"Build\"",
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:49:01.096371897Z"
+  },
+  {
+    "textPayload": "Step #0 - \"Build\": Removing intermediate container 5f404f3caec1",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-96",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+        "project_id": "leadgen-471822",
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e"
+      }
+    },
+    "timestamp": "2025-09-24T04:49:00.265684851Z",
+    "severity": "INFO",
+    "labels": {
+      "build_step": "Step #0 - \"Build\"",
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:49:01.096371897Z"
+  },
+  {
+    "textPayload": "Step #0 - \"Build\":  ---> 829042fe0cfd",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-97",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+        "project_id": "leadgen-471822"
+      }
+    },
+    "timestamp": "2025-09-24T04:49:00.265698086Z",
+    "severity": "INFO",
+    "labels": {
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+      "build_step": "Step #0 - \"Build\""
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:49:01.096371897Z"
+  },
+  {
+    "textPayload": "Step #0 - \"Build\": Step 10/13 : USER node",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-98",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+        "project_id": "leadgen-471822",
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e"
+      }
+    },
+    "timestamp": "2025-09-24T04:49:00.265699341Z",
+    "severity": "INFO",
+    "labels": {
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+      "build_step": "Step #0 - \"Build\""
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:49:01.096371897Z"
+  },
+  {
+    "textPayload": "Step #0 - \"Build\":  ---> Running in d4ad2883a759",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-99",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "project_id": "leadgen-471822",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+      }
+    },
+    "timestamp": "2025-09-24T04:49:00.300549834Z",
+    "severity": "INFO",
+    "labels": {
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+      "build_step": "Step #0 - \"Build\""
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:49:01.096371897Z"
+  },
+  {
+    "textPayload": "Step #0 - \"Build\": Removing intermediate container d4ad2883a759",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-100",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+        "project_id": "leadgen-471822"
+      }
+    },
+    "timestamp": "2025-09-24T04:49:00.404349768Z",
+    "severity": "INFO",
+    "labels": {
+      "build_step": "Step #0 - \"Build\"",
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:49:01.096371897Z"
+  },
+  {
+    "textPayload": "Step #0 - \"Build\":  ---> f517dab8ee50",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-101",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+        "project_id": "leadgen-471822",
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e"
+      }
+    },
+    "timestamp": "2025-09-24T04:49:00.404367152Z",
+    "severity": "INFO",
+    "labels": {
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+      "build_step": "Step #0 - \"Build\""
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:49:01.096371897Z"
+  },
+  {
+    "textPayload": "Step #0 - \"Build\": Step 11/13 : EXPOSE 3100",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-102",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "project_id": "leadgen-471822"
+      }
+    },
+    "timestamp": "2025-09-24T04:49:00.404368005Z",
+    "severity": "INFO",
+    "labels": {
+      "build_step": "Step #0 - \"Build\"",
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:49:01.096371897Z"
+  },
+  {
+    "textPayload": "Step #0 - \"Build\":  ---> Running in f8ad6fdd9acb",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-103",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+        "project_id": "leadgen-471822",
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e"
+      }
+    },
+    "timestamp": "2025-09-24T04:49:00.438379667Z",
+    "severity": "INFO",
+    "labels": {
+      "build_step": "Step #0 - \"Build\"",
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:49:01.096371897Z"
+  },
+  {
+    "textPayload": "Step #0 - \"Build\": Removing intermediate container f8ad6fdd9acb",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-104",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "project_id": "leadgen-471822",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e"
+      }
+    },
+    "timestamp": "2025-09-24T04:49:00.540280080Z",
+    "severity": "INFO",
+    "labels": {
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+      "build_step": "Step #0 - \"Build\""
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:49:01.096371897Z"
+  },
+  {
+    "textPayload": "Step #0 - \"Build\":  ---> b62ef3cee83e",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-105",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+        "project_id": "leadgen-471822"
+      }
+    },
+    "timestamp": "2025-09-24T04:49:00.540301210Z",
+    "severity": "INFO",
+    "labels": {
+      "build_step": "Step #0 - \"Build\"",
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:49:01.096371897Z"
+  },
+  {
+    "textPayload": "Step #0 - \"Build\": Step 12/13 : HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3     CMD curl -fsS http://localhost:3100/health || exit 1",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-106",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+        "project_id": "leadgen-471822",
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e"
+      }
+    },
+    "timestamp": "2025-09-24T04:49:00.540302948Z",
+    "severity": "INFO",
+    "labels": {
+      "build_step": "Step #0 - \"Build\"",
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:49:01.096371897Z"
+  },
+  {
+    "textPayload": "Step #0 - \"Build\":  ---> Running in 3090854dc092",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-107",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+        "project_id": "leadgen-471822"
+      }
+    },
+    "timestamp": "2025-09-24T04:49:00.570359088Z",
+    "severity": "INFO",
+    "labels": {
+      "build_step": "Step #0 - \"Build\"",
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:49:01.096371897Z"
+  },
+  {
+    "textPayload": "Step #0 - \"Build\": Removing intermediate container 3090854dc092",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-108",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "project_id": "leadgen-471822",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e"
+      }
+    },
+    "timestamp": "2025-09-24T04:49:00.685758791Z",
+    "severity": "INFO",
+    "labels": {
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+      "build_step": "Step #0 - \"Build\""
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:49:01.096371897Z"
+  },
+  {
+    "textPayload": "Step #0 - \"Build\":  ---> 33e8347d26b7",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-109",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "project_id": "leadgen-471822",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+      }
+    },
+    "timestamp": "2025-09-24T04:49:00.685774957Z",
+    "severity": "INFO",
+    "labels": {
+      "build_step": "Step #0 - \"Build\"",
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:49:01.096371897Z"
+  },
+  {
+    "textPayload": "Step #0 - \"Build\": Step 13/13 : CMD [\"node\", \"server.js\"]",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-110",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "project_id": "leadgen-471822",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+      }
+    },
+    "timestamp": "2025-09-24T04:49:00.685776251Z",
+    "severity": "INFO",
+    "labels": {
+      "build_step": "Step #0 - \"Build\"",
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:49:01.096371897Z"
+  },
+  {
+    "textPayload": "Step #0 - \"Build\":  ---> Running in e11b0a33be44",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-111",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "project_id": "leadgen-471822",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+      }
+    },
+    "timestamp": "2025-09-24T04:49:00.719783748Z",
+    "severity": "INFO",
+    "labels": {
+      "build_step": "Step #0 - \"Build\"",
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:49:01.096371897Z"
+  },
+  {
+    "textPayload": "Step #0 - \"Build\": Removing intermediate container e11b0a33be44",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-112",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "project_id": "leadgen-471822",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+      }
+    },
+    "timestamp": "2025-09-24T04:49:00.820802497Z",
+    "severity": "INFO",
+    "labels": {
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+      "build_step": "Step #0 - \"Build\""
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:49:01.096371897Z"
+  },
+  {
+    "textPayload": "Step #0 - \"Build\":  ---> bc04bcb16504",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-113",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "project_id": "leadgen-471822",
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+      }
+    },
+    "timestamp": "2025-09-24T04:49:00.820815499Z",
+    "severity": "INFO",
+    "labels": {
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+      "build_step": "Step #0 - \"Build\""
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:49:01.096371897Z"
+  },
+  {
+    "textPayload": "Step #0 - \"Build\": Successfully built bc04bcb16504",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-114",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "project_id": "leadgen-471822",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+      }
+    },
+    "timestamp": "2025-09-24T04:49:00.829541566Z",
+    "severity": "INFO",
+    "labels": {
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+      "build_step": "Step #0 - \"Build\""
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:49:01.096371897Z"
+  },
+  {
+    "textPayload": "Step #0 - \"Build\": Successfully tagged us-central1-docker.pkg.dev/leadgen-471822/cloud-run-source-deploy/prospectpro/prospectpro:18eb9c480054868d2db4b58c3400f27560456175",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-115",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+        "project_id": "leadgen-471822",
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e"
+      }
+    },
+    "timestamp": "2025-09-24T04:49:00.844501768Z",
+    "severity": "INFO",
+    "labels": {
+      "build_step": "Step #0 - \"Build\"",
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:49:01.096371897Z"
+  },
+  {
+    "textPayload": "Finished Step #0 - \"Build\"",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-116",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "project_id": "leadgen-471822",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e"
+      }
+    },
+    "timestamp": "2025-09-24T04:49:01.062827923Z",
+    "severity": "INFO",
+    "labels": {
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+      "build_step": "MAIN"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:49:01.096371897Z"
+  },
+  {
+    "textPayload": "Starting Step #1 - \"Push\"",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-117",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "project_id": "leadgen-471822"
+      }
+    },
+    "timestamp": "2025-09-24T04:49:01.062941186Z",
+    "severity": "INFO",
+    "labels": {
+      "build_step": "MAIN",
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:49:01.096371897Z"
+  },
+  {
+    "textPayload": "Step #1 - \"Push\": Already have image (with digest): gcr.io/cloud-builders/docker",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-118",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "project_id": "leadgen-471822",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+      }
+    },
+    "timestamp": "2025-09-24T04:49:01.064473601Z",
+    "severity": "INFO",
+    "labels": {
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+      "build_step": "Step #1 - \"Push\""
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:49:01.096371897Z"
+  },
+  {
+    "textPayload": "Step #1 - \"Push\": The push refers to repository [us-central1-docker.pkg.dev/leadgen-471822/cloud-run-source-deploy/prospectpro/prospectpro]",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-119",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "project_id": "leadgen-471822",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e"
+      }
+    },
+    "timestamp": "2025-09-24T04:49:01.626457818Z",
+    "severity": "INFO",
+    "labels": {
+      "build_step": "Step #1 - \"Push\"",
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:49:02.080946530Z"
+  },
+  {
+    "textPayload": "Step #1 - \"Push\": 4c02381eac5e: Preparing",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-120",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "project_id": "leadgen-471822",
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+      }
+    },
+    "timestamp": "2025-09-24T04:49:01.785806550Z",
+    "severity": "INFO",
+    "labels": {
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+      "build_step": "Step #1 - \"Push\""
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:49:02.080946530Z"
+  },
+  {
+    "textPayload": "Step #1 - \"Push\": 16ef08d142c0: Preparing",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-121",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+        "project_id": "leadgen-471822"
+      }
+    },
+    "timestamp": "2025-09-24T04:49:01.785820435Z",
+    "severity": "INFO",
+    "labels": {
+      "build_step": "Step #1 - \"Push\"",
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:49:02.080946530Z"
+  },
+  {
+    "textPayload": "Step #1 - \"Push\": 6f9a09a9793b: Preparing",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-122",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "project_id": "leadgen-471822"
+      }
+    },
+    "timestamp": "2025-09-24T04:49:01.787365330Z",
+    "severity": "INFO",
+    "labels": {
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+      "build_step": "Step #1 - \"Push\""
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:49:02.080946530Z"
+  },
+  {
+    "textPayload": "Step #1 - \"Push\": ff629022c645: Preparing",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-123",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+        "project_id": "leadgen-471822",
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e"
+      }
+    },
+    "timestamp": "2025-09-24T04:49:01.787377424Z",
+    "severity": "INFO",
+    "labels": {
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+      "build_step": "Step #1 - \"Push\""
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:49:02.080946530Z"
+  },
+  {
+    "textPayload": "Step #1 - \"Push\": d0ef6c360a76: Preparing",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-124",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "project_id": "leadgen-471822",
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+      }
+    },
+    "timestamp": "2025-09-24T04:49:01.787378214Z",
+    "severity": "INFO",
+    "labels": {
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+      "build_step": "Step #1 - \"Push\""
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:49:02.080946530Z"
+  },
+  {
+    "textPayload": "Step #1 - \"Push\": 00d0857b2a16: Preparing",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-125",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "project_id": "leadgen-471822",
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+      }
+    },
+    "timestamp": "2025-09-24T04:49:01.787378921Z",
+    "severity": "INFO",
+    "labels": {
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+      "build_step": "Step #1 - \"Push\""
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:49:02.080946530Z"
+  },
+  {
+    "textPayload": "Step #1 - \"Push\": fddb0c9d0c8f: Preparing",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-126",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "project_id": "leadgen-471822",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+      }
+    },
+    "timestamp": "2025-09-24T04:49:01.787379761Z",
+    "severity": "INFO",
+    "labels": {
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+      "build_step": "Step #1 - \"Push\""
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:49:02.080946530Z"
+  },
+  {
+    "textPayload": "Step #1 - \"Push\": 689195d1c9ad: Preparing",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-127",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "project_id": "leadgen-471822",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+      }
+    },
+    "timestamp": "2025-09-24T04:49:01.787380205Z",
+    "severity": "INFO",
+    "labels": {
+      "build_step": "Step #1 - \"Push\"",
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:49:02.080946530Z"
+  },
+  {
+    "textPayload": "Step #1 - \"Push\": 418dccb7d85a: Preparing",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-128",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+        "project_id": "leadgen-471822"
+      }
+    },
+    "timestamp": "2025-09-24T04:49:01.787380738Z",
+    "severity": "INFO",
+    "labels": {
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+      "build_step": "Step #1 - \"Push\""
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:49:02.080946530Z"
+  },
+  {
+    "textPayload": "Step #1 - \"Push\": 00d0857b2a16: Waiting",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-129",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "project_id": "leadgen-471822",
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+      }
+    },
+    "timestamp": "2025-09-24T04:49:01.787381321Z",
+    "severity": "INFO",
+    "labels": {
+      "build_step": "Step #1 - \"Push\"",
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:49:02.080946530Z"
+  },
+  {
+    "textPayload": "Step #1 - \"Push\": fddb0c9d0c8f: Waiting",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-130",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "project_id": "leadgen-471822",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e"
+      }
+    },
+    "timestamp": "2025-09-24T04:49:01.787382267Z",
+    "severity": "INFO",
+    "labels": {
+      "build_step": "Step #1 - \"Push\"",
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:49:02.080946530Z"
+  },
+  {
+    "textPayload": "Step #1 - \"Push\": 689195d1c9ad: Waiting",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-131",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+        "project_id": "leadgen-471822"
+      }
+    },
+    "timestamp": "2025-09-24T04:49:01.787382646Z",
+    "severity": "INFO",
+    "labels": {
+      "build_step": "Step #1 - \"Push\"",
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:49:02.080946530Z"
+  },
+  {
+    "textPayload": "Step #1 - \"Push\": 418dccb7d85a: Waiting",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-132",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "project_id": "leadgen-471822",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+      }
+    },
+    "timestamp": "2025-09-24T04:49:01.787383158Z",
+    "severity": "INFO",
+    "labels": {
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+      "build_step": "Step #1 - \"Push\""
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:49:02.080946530Z"
+  },
+  {
+    "textPayload": "Step #1 - \"Push\": ff629022c645: Pushed",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-133",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "project_id": "leadgen-471822",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e"
+      }
+    },
+    "timestamp": "2025-09-24T04:49:03.093874694Z",
+    "severity": "INFO",
+    "labels": {
+      "build_step": "Step #1 - \"Push\"",
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:49:04.080170476Z"
+  },
+  {
+    "textPayload": "Step #1 - \"Push\": d0ef6c360a76: Pushed",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-134",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "project_id": "leadgen-471822",
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+      }
+    },
+    "timestamp": "2025-09-24T04:49:03.100460280Z",
+    "severity": "INFO",
+    "labels": {
+      "build_step": "Step #1 - \"Push\"",
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:49:04.080170476Z"
+  },
+  {
+    "textPayload": "Step #1 - \"Push\": 16ef08d142c0: Pushed",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-135",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "project_id": "leadgen-471822",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e"
+      }
+    },
+    "timestamp": "2025-09-24T04:49:03.284565613Z",
+    "severity": "INFO",
+    "labels": {
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+      "build_step": "Step #1 - \"Push\""
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:49:04.080170476Z"
+  },
+  {
+    "textPayload": "Step #1 - \"Push\": 00d0857b2a16: Layer already exists",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-136",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "project_id": "leadgen-471822",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e"
+      }
+    },
+    "timestamp": "2025-09-24T04:49:03.299406921Z",
+    "severity": "INFO",
+    "labels": {
+      "build_step": "Step #1 - \"Push\"",
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:49:04.080170476Z"
+  },
+  {
+    "textPayload": "Step #1 - \"Push\": fddb0c9d0c8f: Layer already exists",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-137",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "project_id": "leadgen-471822"
+      }
+    },
+    "timestamp": "2025-09-24T04:49:03.317078384Z",
+    "severity": "INFO",
+    "labels": {
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+      "build_step": "Step #1 - \"Push\""
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:49:04.080170476Z"
+  },
+  {
+    "textPayload": "Step #1 - \"Push\": 4c02381eac5e: Pushed",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-138",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "project_id": "leadgen-471822",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e"
+      }
+    },
+    "timestamp": "2025-09-24T04:49:03.444452108Z",
+    "severity": "INFO",
+    "labels": {
+      "build_step": "Step #1 - \"Push\"",
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:49:04.080170476Z"
+  },
+  {
+    "textPayload": "Step #1 - \"Push\": 689195d1c9ad: Layer already exists",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-139",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "project_id": "leadgen-471822",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e"
+      }
+    },
+    "timestamp": "2025-09-24T04:49:03.482221524Z",
+    "severity": "INFO",
+    "labels": {
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+      "build_step": "Step #1 - \"Push\""
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:49:04.080170476Z"
+  },
+  {
+    "textPayload": "Step #1 - \"Push\": 418dccb7d85a: Layer already exists",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-140",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+        "project_id": "leadgen-471822"
+      }
+    },
+    "timestamp": "2025-09-24T04:49:03.514512464Z",
+    "severity": "INFO",
+    "labels": {
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+      "build_step": "Step #1 - \"Push\""
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:49:04.080170476Z"
+  },
+  {
+    "textPayload": "Step #1 - \"Push\": 6f9a09a9793b: Pushed",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-141",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "project_id": "leadgen-471822",
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+      }
+    },
+    "timestamp": "2025-09-24T04:49:05.426442721Z",
+    "severity": "INFO",
+    "labels": {
+      "build_step": "Step #1 - \"Push\"",
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:49:06.090017338Z"
+  },
+  {
+    "textPayload": "Step #1 - \"Push\": 18eb9c480054868d2db4b58c3400f27560456175: digest: sha256:f5eb2932d5b1f742605daf5cfd29791b8a0528b9f56988667712808819e423d7 size: 2207",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-142",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "project_id": "leadgen-471822",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e"
+      }
+    },
+    "timestamp": "2025-09-24T04:49:06.910777545Z",
+    "severity": "INFO",
+    "labels": {
+      "build_step": "Step #1 - \"Push\"",
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:49:07.078926399Z"
+  },
+  {
+    "textPayload": "Finished Step #1 - \"Push\"",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-143",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "project_id": "leadgen-471822",
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+      }
+    },
+    "timestamp": "2025-09-24T04:49:07.165257526Z",
+    "severity": "INFO",
+    "labels": {
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+      "build_step": "MAIN"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:49:08.080500184Z"
+  },
+  {
+    "textPayload": "Starting Step #2 - \"Deploy\"",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-144",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+        "project_id": "leadgen-471822"
+      }
+    },
+    "timestamp": "2025-09-24T04:49:07.165406558Z",
+    "severity": "INFO",
+    "labels": {
+      "build_step": "MAIN",
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:49:08.080500184Z"
+  },
+  {
+    "textPayload": "Step #2 - \"Deploy\": Pulling image: gcr.io/google.com/cloudsdktool/cloud-sdk:slim",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-145",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+        "project_id": "leadgen-471822"
+      }
+    },
+    "timestamp": "2025-09-24T04:49:07.166552046Z",
+    "severity": "INFO",
+    "labels": {
+      "build_step": "Step #2 - \"Deploy\"",
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:49:08.080500184Z"
+  },
+  {
+    "textPayload": "Step #2 - \"Deploy\": slim: Pulling from google.com/cloudsdktool/cloud-sdk",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-146",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+        "project_id": "leadgen-471822"
+      }
+    },
+    "timestamp": "2025-09-24T04:49:08.409241477Z",
+    "severity": "INFO",
+    "labels": {
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+      "build_step": "Step #2 - \"Deploy\""
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:49:09.079441561Z"
+  },
+  {
+    "textPayload": "Step #2 - \"Deploy\": 8fb375ec14f3: Already exists",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-147",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+        "project_id": "leadgen-471822"
+      }
+    },
+    "timestamp": "2025-09-24T04:49:08.409918817Z",
+    "severity": "INFO",
+    "labels": {
+      "build_step": "Step #2 - \"Deploy\"",
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:49:09.079441561Z"
+  },
+  {
+    "textPayload": "Step #2 - \"Deploy\": e39ea9f216eb: Pulling fs layer",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-148",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "project_id": "leadgen-471822",
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+      }
+    },
+    "timestamp": "2025-09-24T04:49:08.417192939Z",
+    "severity": "INFO",
+    "labels": {
+      "build_step": "Step #2 - \"Deploy\"",
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:49:09.079441561Z"
+  },
+  {
+    "textPayload": "Step #2 - \"Deploy\": 901884f2fd71: Pulling fs layer",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-149",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "project_id": "leadgen-471822",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e"
+      }
+    },
+    "timestamp": "2025-09-24T04:49:08.417204106Z",
+    "severity": "INFO",
+    "labels": {
+      "build_step": "Step #2 - \"Deploy\"",
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:49:09.079441561Z"
+  },
+  {
+    "textPayload": "Step #2 - \"Deploy\": 07d374059165: Pulling fs layer",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-150",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "project_id": "leadgen-471822",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+      }
+    },
+    "timestamp": "2025-09-24T04:49:08.417938074Z",
+    "severity": "INFO",
+    "labels": {
+      "build_step": "Step #2 - \"Deploy\"",
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:49:09.079441561Z"
+  },
+  {
+    "textPayload": "Step #2 - \"Deploy\": e39ea9f216eb: Verifying Checksum",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-151",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+        "project_id": "leadgen-471822",
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e"
+      }
+    },
+    "timestamp": "2025-09-24T04:49:08.569756873Z",
+    "severity": "INFO",
+    "labels": {
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+      "build_step": "Step #2 - \"Deploy\""
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:49:09.079441561Z"
+  },
+  {
+    "textPayload": "Step #2 - \"Deploy\": e39ea9f216eb: Download complete",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-152",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "project_id": "leadgen-471822",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+      }
+    },
+    "timestamp": "2025-09-24T04:49:08.569769618Z",
+    "severity": "INFO",
+    "labels": {
+      "build_step": "Step #2 - \"Deploy\"",
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:49:09.079441561Z"
+  },
+  {
+    "textPayload": "Step #2 - \"Deploy\": 07d374059165: Verifying Checksum",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-153",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "project_id": "leadgen-471822",
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+      }
+    },
+    "timestamp": "2025-09-24T04:49:08.593395298Z",
+    "severity": "INFO",
+    "labels": {
+      "build_step": "Step #2 - \"Deploy\"",
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:49:09.079441561Z"
+  },
+  {
+    "textPayload": "Step #2 - \"Deploy\": 07d374059165: Download complete",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-154",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "project_id": "leadgen-471822",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+      }
+    },
+    "timestamp": "2025-09-24T04:49:08.593580711Z",
+    "severity": "INFO",
+    "labels": {
+      "build_step": "Step #2 - \"Deploy\"",
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:49:09.079441561Z"
+  },
+  {
+    "textPayload": "Step #2 - \"Deploy\": e39ea9f216eb: Pull complete",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-155",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+        "project_id": "leadgen-471822"
+      }
+    },
+    "timestamp": "2025-09-24T04:49:08.676532787Z",
+    "severity": "INFO",
+    "labels": {
+      "build_step": "Step #2 - \"Deploy\"",
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:49:09.079441561Z"
+  },
+  {
+    "textPayload": "Step #2 - \"Deploy\": 901884f2fd71: Verifying Checksum",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-156",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+        "project_id": "leadgen-471822",
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e"
+      }
+    },
+    "timestamp": "2025-09-24T04:49:13.291110507Z",
+    "severity": "INFO",
+    "labels": {
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+      "build_step": "Step #2 - \"Deploy\""
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:49:14.078715345Z"
+  },
+  {
+    "textPayload": "Step #2 - \"Deploy\": 901884f2fd71: Download complete",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-157",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "project_id": "leadgen-471822"
+      }
+    },
+    "timestamp": "2025-09-24T04:49:13.291129948Z",
+    "severity": "INFO",
+    "labels": {
+      "build_step": "Step #2 - \"Deploy\"",
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:49:14.078715345Z"
+  },
+  {
+    "textPayload": "Step #2 - \"Deploy\": 901884f2fd71: Pull complete",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-158",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "project_id": "leadgen-471822",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+      }
+    },
+    "timestamp": "2025-09-24T04:49:47.847017191Z",
+    "severity": "INFO",
+    "labels": {
+      "build_step": "Step #2 - \"Deploy\"",
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:49:48.103901091Z"
+  },
+  {
+    "textPayload": "Step #2 - \"Deploy\": 07d374059165: Pull complete",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-159",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+        "project_id": "leadgen-471822",
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e"
+      }
+    },
+    "timestamp": "2025-09-24T04:49:47.928839252Z",
+    "severity": "INFO",
+    "labels": {
+      "build_step": "Step #2 - \"Deploy\"",
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:49:48.103901091Z"
+  },
+  {
+    "textPayload": "Step #2 - \"Deploy\": Digest: sha256:105f06e4f2e392a0bcd131cb908224ecc991dfe2ab460472099a14a4ac511bf0",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-160",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "project_id": "leadgen-471822"
+      }
+    },
+    "timestamp": "2025-09-24T04:49:47.943342154Z",
+    "severity": "INFO",
+    "labels": {
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+      "build_step": "Step #2 - \"Deploy\""
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:49:48.103901091Z"
+  },
+  {
+    "textPayload": "Step #2 - \"Deploy\": Status: Downloaded newer image for gcr.io/google.com/cloudsdktool/cloud-sdk:slim",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-161",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+        "project_id": "leadgen-471822"
+      }
+    },
+    "timestamp": "2025-09-24T04:49:47.950566821Z",
+    "severity": "INFO",
+    "labels": {
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+      "build_step": "Step #2 - \"Deploy\""
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:49:48.103901091Z"
+  },
+  {
+    "textPayload": "Step #2 - \"Deploy\": gcr.io/google.com/cloudsdktool/cloud-sdk:slim",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-162",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+        "project_id": "leadgen-471822",
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e"
+      }
+    },
+    "timestamp": "2025-09-24T04:49:47.953522377Z",
+    "severity": "INFO",
+    "labels": {
+      "build_step": "Step #2 - \"Deploy\"",
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:49:48.103901091Z"
+  },
+  {
+    "textPayload": "Step #2 - \"Deploy\": Deploying...",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-163",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "project_id": "leadgen-471822"
+      }
+    },
+    "timestamp": "2025-09-24T04:49:52.916483119Z",
+    "severity": "INFO",
+    "labels": {
+      "build_step": "Step #2 - \"Deploy\"",
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:49:53.092194821Z"
+  },
+  {
+    "textPayload": "Step #2 - \"Deploy\": Creating Revision..................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................done",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-164",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "project_id": "leadgen-471822",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e"
+      }
+    },
+    "timestamp": "2025-09-24T04:50:47.315911021Z",
+    "severity": "INFO",
+    "labels": {
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+      "build_step": "Step #2 - \"Deploy\""
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:50:48.095881699Z"
+  },
+  {
+    "textPayload": "Step #2 - \"Deploy\": Routing traffic.....done",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-165",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "project_id": "leadgen-471822",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e"
+      }
+    },
+    "timestamp": "2025-09-24T04:50:47.315928190Z",
+    "severity": "INFO",
+    "labels": {
+      "build_step": "Step #2 - \"Deploy\"",
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:50:48.095881699Z"
+  },
+  {
+    "textPayload": "Step #2 - \"Deploy\": Done.",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-166",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+        "project_id": "leadgen-471822"
+      }
+    },
+    "timestamp": "2025-09-24T04:50:47.586733781Z",
+    "severity": "INFO",
+    "labels": {
+      "build_step": "Step #2 - \"Deploy\"",
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:50:48.095881699Z"
+  },
+  {
+    "textPayload": "Step #2 - \"Deploy\": Service [prospectpro] revision [prospectpro-00008-n8v] has been deployed and is serving 100 percent of traffic.",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-167",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "project_id": "leadgen-471822",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e"
+      }
+    },
+    "timestamp": "2025-09-24T04:50:47.658054334Z",
+    "severity": "INFO",
+    "labels": {
+      "build_step": "Step #2 - \"Deploy\"",
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:50:48.095881699Z"
+  },
+  {
+    "textPayload": "Step #2 - \"Deploy\": Service URL: https://prospectpro-184492422840.us-central1.run.app",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-168",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "project_id": "leadgen-471822",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e"
+      }
+    },
+    "timestamp": "2025-09-24T04:50:47.658072726Z",
+    "severity": "INFO",
+    "labels": {
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+      "build_step": "Step #2 - \"Deploy\""
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:50:48.095881699Z"
+  },
+  {
+    "textPayload": "Finished Step #2 - \"Deploy\"",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-169",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "project_id": "leadgen-471822",
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+      }
+    },
+    "timestamp": "2025-09-24T04:50:48.259759193Z",
+    "severity": "INFO",
+    "labels": {
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+      "build_step": "MAIN"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:50:49.097693456Z"
+  },
+  {
+    "textPayload": "PUSH",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-170",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "project_id": "leadgen-471822",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e"
+      }
+    },
+    "timestamp": "2025-09-24T04:50:48.307406299Z",
+    "severity": "INFO",
+    "labels": {
+      "build_step": "MAIN",
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:50:49.097693456Z"
+  },
+  {
+    "textPayload": "Pushing us-central1-docker.pkg.dev/leadgen-471822/cloud-run-source-deploy/prospectpro/prospectpro:18eb9c480054868d2db4b58c3400f27560456175",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-171",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "project_id": "leadgen-471822"
+      }
+    },
+    "timestamp": "2025-09-24T04:50:48.307453170Z",
+    "severity": "INFO",
+    "labels": {
+      "build_step": "MAIN",
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:50:49.097693456Z"
+  },
+  {
+    "textPayload": "The push refers to repository [us-central1-docker.pkg.dev/leadgen-471822/cloud-run-source-deploy/prospectpro/prospectpro]",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-172",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+        "project_id": "leadgen-471822"
+      }
+    },
+    "timestamp": "2025-09-24T04:50:48.803101764Z",
+    "severity": "INFO",
+    "labels": {
+      "build_step": "PUSH:STDOUT",
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:50:49.097693456Z"
+  },
+  {
+    "textPayload": "4c02381eac5e: Preparing",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-173",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+        "project_id": "leadgen-471822",
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e"
+      }
+    },
+    "timestamp": "2025-09-24T04:50:48.972192208Z",
+    "severity": "INFO",
+    "labels": {
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+      "build_step": "PUSH:STDOUT"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:50:49.097693456Z"
+  },
+  {
+    "textPayload": "16ef08d142c0: Preparing",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-174",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "project_id": "leadgen-471822"
+      }
+    },
+    "timestamp": "2025-09-24T04:50:48.972208030Z",
+    "severity": "INFO",
+    "labels": {
+      "build_step": "PUSH:STDOUT",
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:50:49.097693456Z"
+  },
+  {
+    "textPayload": "6f9a09a9793b: Preparing",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-175",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "project_id": "leadgen-471822"
+      }
+    },
+    "timestamp": "2025-09-24T04:50:48.972208824Z",
+    "severity": "INFO",
+    "labels": {
+      "build_step": "PUSH:STDOUT",
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:50:49.097693456Z"
+  },
+  {
+    "textPayload": "ff629022c645: Preparing",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-176",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "project_id": "leadgen-471822",
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+      }
+    },
+    "timestamp": "2025-09-24T04:50:48.972209568Z",
+    "severity": "INFO",
+    "labels": {
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+      "build_step": "PUSH:STDOUT"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:50:49.097693456Z"
+  },
+  {
+    "textPayload": "d0ef6c360a76: Preparing",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-177",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+        "project_id": "leadgen-471822",
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e"
+      }
+    },
+    "timestamp": "2025-09-24T04:50:48.972209946Z",
+    "severity": "INFO",
+    "labels": {
+      "build_step": "PUSH:STDOUT",
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:50:49.097693456Z"
+  },
+  {
+    "textPayload": "00d0857b2a16: Preparing",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-178",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "project_id": "leadgen-471822",
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+      }
+    },
+    "timestamp": "2025-09-24T04:50:48.972210474Z",
+    "severity": "INFO",
+    "labels": {
+      "build_step": "PUSH:STDOUT",
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:50:49.097693456Z"
+  },
+  {
+    "textPayload": "fddb0c9d0c8f: Preparing",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-179",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "project_id": "leadgen-471822",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+      }
+    },
+    "timestamp": "2025-09-24T04:50:48.972210945Z",
+    "severity": "INFO",
+    "labels": {
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+      "build_step": "PUSH:STDOUT"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:50:49.097693456Z"
+  },
+  {
+    "textPayload": "689195d1c9ad: Preparing",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-180",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "project_id": "leadgen-471822"
+      }
+    },
+    "timestamp": "2025-09-24T04:50:48.972211332Z",
+    "severity": "INFO",
+    "labels": {
+      "build_step": "PUSH:STDOUT",
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:50:49.097693456Z"
+  },
+  {
+    "textPayload": "418dccb7d85a: Preparing",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-181",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+        "project_id": "leadgen-471822",
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e"
+      }
+    },
+    "timestamp": "2025-09-24T04:50:48.972211869Z",
+    "severity": "INFO",
+    "labels": {
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+      "build_step": "PUSH:STDOUT"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:50:49.097693456Z"
+  },
+  {
+    "textPayload": "00d0857b2a16: Waiting",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-182",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "project_id": "leadgen-471822",
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+      }
+    },
+    "timestamp": "2025-09-24T04:50:48.972212238Z",
+    "severity": "INFO",
+    "labels": {
+      "build_step": "PUSH:STDOUT",
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:50:49.097693456Z"
+  },
+  {
+    "textPayload": "fddb0c9d0c8f: Waiting",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-183",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "project_id": "leadgen-471822",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+      }
+    },
+    "timestamp": "2025-09-24T04:50:48.972212534Z",
+    "severity": "INFO",
+    "labels": {
+      "build_step": "PUSH:STDOUT",
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:50:49.097693456Z"
+  },
+  {
+    "textPayload": "689195d1c9ad: Waiting",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-184",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+        "project_id": "leadgen-471822",
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e"
+      }
+    },
+    "timestamp": "2025-09-24T04:50:48.972212952Z",
+    "severity": "INFO",
+    "labels": {
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+      "build_step": "PUSH:STDOUT"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:50:49.097693456Z"
+  },
+  {
+    "textPayload": "418dccb7d85a: Waiting",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-185",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "project_id": "leadgen-471822"
+      }
+    },
+    "timestamp": "2025-09-24T04:50:48.972213409Z",
+    "severity": "INFO",
+    "labels": {
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+      "build_step": "PUSH:STDOUT"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:50:49.097693456Z"
+  },
+  {
+    "textPayload": "4c02381eac5e: Layer already exists",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-186",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+        "project_id": "leadgen-471822"
+      }
+    },
+    "timestamp": "2025-09-24T04:50:49.371533366Z",
+    "severity": "INFO",
+    "labels": {
+      "build_step": "PUSH:STDOUT",
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:50:50.097242204Z"
+  },
+  {
+    "textPayload": "6f9a09a9793b: Layer already exists",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-187",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+        "project_id": "leadgen-471822",
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e"
+      }
+    },
+    "timestamp": "2025-09-24T04:50:49.377564151Z",
+    "severity": "INFO",
+    "labels": {
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+      "build_step": "PUSH:STDOUT"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:50:50.097242204Z"
+  },
+  {
+    "textPayload": "d0ef6c360a76: Layer already exists",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-188",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+        "project_id": "leadgen-471822",
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e"
+      }
+    },
+    "timestamp": "2025-09-24T04:50:49.383423689Z",
+    "severity": "INFO",
+    "labels": {
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+      "build_step": "PUSH:STDOUT"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:50:50.097242204Z"
+  },
+  {
+    "textPayload": "16ef08d142c0: Layer already exists",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-189",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+        "project_id": "leadgen-471822"
+      }
+    },
+    "timestamp": "2025-09-24T04:50:49.384686796Z",
+    "severity": "INFO",
+    "labels": {
+      "build_step": "PUSH:STDOUT",
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:50:50.097242204Z"
+  },
+  {
+    "textPayload": "ff629022c645: Layer already exists",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-190",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "project_id": "leadgen-471822",
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+      }
+    },
+    "timestamp": "2025-09-24T04:50:49.391007343Z",
+    "severity": "INFO",
+    "labels": {
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+      "build_step": "PUSH:STDOUT"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:50:50.097242204Z"
+  },
+  {
+    "textPayload": "00d0857b2a16: Layer already exists",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-191",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "project_id": "leadgen-471822",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+      }
+    },
+    "timestamp": "2025-09-24T04:50:49.570909576Z",
+    "severity": "INFO",
+    "labels": {
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+      "build_step": "PUSH:STDOUT"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:50:50.097242204Z"
+  },
+  {
+    "textPayload": "418dccb7d85a: Layer already exists",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-192",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "project_id": "leadgen-471822",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+      }
+    },
+    "timestamp": "2025-09-24T04:50:49.578328307Z",
+    "severity": "INFO",
+    "labels": {
+      "build_step": "PUSH:STDOUT",
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:50:50.097242204Z"
+  },
+  {
+    "textPayload": "689195d1c9ad: Layer already exists",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-193",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "project_id": "leadgen-471822",
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+      }
+    },
+    "timestamp": "2025-09-24T04:50:49.583526888Z",
+    "severity": "INFO",
+    "labels": {
+      "build_step": "PUSH:STDOUT",
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:50:50.097242204Z"
+  },
+  {
+    "textPayload": "fddb0c9d0c8f: Layer already exists",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-194",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "project_id": "leadgen-471822",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e"
+      }
+    },
+    "timestamp": "2025-09-24T04:50:49.591474899Z",
+    "severity": "INFO",
+    "labels": {
+      "build_step": "PUSH:STDOUT",
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:50:50.097242204Z"
+  },
+  {
+    "textPayload": "18eb9c480054868d2db4b58c3400f27560456175: digest: sha256:f5eb2932d5b1f742605daf5cfd29791b8a0528b9f56988667712808819e423d7 size: 2207",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-195",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+        "project_id": "leadgen-471822"
+      }
+    },
+    "timestamp": "2025-09-24T04:50:50.066726197Z",
+    "severity": "INFO",
+    "labels": {
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+      "build_step": "PUSH:STDOUT"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:50:50.097242204Z"
+  },
+  {
+    "textPayload": "DONE",
+    "insertId": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e-196",
+    "resource": {
+      "type": "build",
+      "labels": {
+        "build_id": "f977fcf6-2a9f-44fd-89eb-013cb48c2b0e",
+        "build_trigger_id": "0358b3a4-c7a4-4da9-9610-1e335c4894e0",
+        "project_id": "leadgen-471822"
+      }
+    },
+    "timestamp": "2025-09-24T04:50:50.304652534Z",
+    "severity": "INFO",
+    "labels": {
+      "build_step": "MAIN",
+      "build_tags": "gcp-cloud-build-deploy-cloud-run,gcp-cloud-build-deploy-cloud-run-managed,prospectpro,trigger-0358b3a4-c7a4-4da9-9610-1e335c4894e0"
+    },
+    "logName": "projects/leadgen-471822/logs/cloudbuild",
+    "receiveTimestamp": "2025-09-24T04:50:50.477603707Z"
+  }
+]
