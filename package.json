@@ -49,6 +49,7 @@
   },
   "dependencies": {
     "@googlemaps/google-maps-services-js": "^3.4.2",
+    "@modelcontextprotocol/sdk": "^1.18.1",
     "@supabase/supabase-js": "^2.57.4",
     "axios": "^1.12.2",
     "bcryptjs": "^2.4.3",
