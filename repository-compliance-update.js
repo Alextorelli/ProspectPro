@@ -10,11 +10,19 @@ console.log("============================");
 console.log("");
 
 console.log("✅ PRODUCTION ENVIRONMENT:");
-console.log("   ✅ Cloud Build Trigger: 0358b3a4-c7a4-4da9-9610-1e335c4894e0 (VALIDATED)");
+console.log(
+  "   ✅ Cloud Build Trigger: 0358b3a4-c7a4-4da9-9610-1e335c4894e0 (VALIDATED)"
+);
 console.log("   ✅ Cloud Run Service: prospectpro in us-central1 (ACTIVE)");
-console.log("   ✅ Artifact Registry: us-central1-docker.pkg.dev/leadgen-471822/prospectpro");
-console.log("   ✅ Service Account: prospectpro-deployment@leadgen-471822.iam.gserviceaccount.com");
-console.log("   ✅ GitHub Actions: generate-dotenv.yml (ALLOW_DEGRADED_START=true)");
+console.log(
+  "   ✅ Artifact Registry: us-central1-docker.pkg.dev/leadgen-471822/prospectpro"
+);
+console.log(
+  "   ✅ Service Account: prospectpro-deployment@leadgen-471822.iam.gserviceaccount.com"
+);
+console.log(
+  "   ✅ GitHub Actions: generate-dotenv.yml (ALLOW_DEGRADED_START=true)"
+);
 console.log("   ✅ Deployment Pipeline: End-to-end tested and validated");
 console.log("");
 
@@ -44,10 +52,16 @@ console.log("==============================");
 console.log("");
 
 console.log("POTENTIAL SYNC ISSUES:");
-console.log("   ⚠️  Dev Container Theme: Vira Deepforest (good for distinction)");
-console.log("   ⚠️  MCP Configuration: Referenced but missing .vscode/mcp-config.json");
+console.log(
+  "   ⚠️  Dev Container Theme: Vira Deepforest (good for distinction)"
+);
+console.log(
+  "   ⚠️  MCP Configuration: Referenced but missing .vscode/mcp-config.json"
+);
 console.log("   ⚠️  Production Learnings: Need to sync optimization settings");
-console.log("   ⚠️  Environment Variables: Dev might need ALLOW_DEGRADED_START update");
+console.log(
+  "   ⚠️  Environment Variables: Dev might need ALLOW_DEGRADED_START update"
+);
 console.log("");
 
 console.log("REQUIRED DEV ENVIRONMENT UPDATES:");
@@ -62,7 +76,9 @@ console.log("=========================");
 console.log("");
 
 console.log("HIGH PRIORITY (Complete Before Closing):");
-console.log("   1. Update .github/copilot-instructions.md with trigger validation");
+console.log(
+  "   1. Update .github/copilot-instructions.md with trigger validation"
+);
 console.log("   2. Create missing .vscode/mcp-config.json for dev container");
 console.log("   3. Update production documentation with Cloud Run info");
 console.log("   4. Sync dev environment with production learnings");

@@ -37,17 +37,25 @@ console.log("==================================");
 console.log("");
 
 console.log("✅ PRODUCTION ENVIRONMENT:");
-console.log("   ✅ Cloud Build Trigger: 0358b3a4-c7a4-4da9-9610-1e335c4894e0 (VALIDATED)");
+console.log(
+  "   ✅ Cloud Build Trigger: 0358b3a4-c7a4-4da9-9610-1e335c4894e0 (VALIDATED)"
+);
 console.log("   ✅ Cloud Run Service: prospectpro (us-central1) (ACTIVE)");
-console.log("   ✅ Artifact Registry: us-central1-docker.pkg.dev/leadgen-471822/prospectpro");
-console.log("   ✅ Service Account: prospectpro-deployment@leadgen-471822.iam.gserviceaccount.com");
+console.log(
+  "   ✅ Artifact Registry: us-central1-docker.pkg.dev/leadgen-471822/prospectpro"
+);
+console.log(
+  "   ✅ Service Account: prospectpro-deployment@leadgen-471822.iam.gserviceaccount.com"
+);
 console.log("   ✅ Health Endpoints: /health, /diag, /ready (OPERATIONAL)");
 console.log("");
 
 console.log("✅ DEVELOPMENT ENVIRONMENT:");
 console.log("   ✅ Dev Container: .devcontainer/devcontainer.json configured");
 console.log("   ✅ Theme: Vira Deepforest for visual distinction");
-console.log("   ✅ MCP Configuration: .vscode/mcp-config.json present and complete");
+console.log(
+  "   ✅ MCP Configuration: .vscode/mcp-config.json present and complete"
+);
 console.log("   ✅ Extensions: Full development stack configured");
 console.log("   ✅ Post-create Commands: Automated setup scripted");
 console.log("");

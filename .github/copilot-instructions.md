@@ -128,7 +128,7 @@ npm run diag       # Comprehensive diagnostics
 
 ## **Google Cloud Run Deployment** ⚡ **NEW & VALIDATED**
 
-### **Cloud Build Trigger Configuration** 
+### **Cloud Build Trigger Configuration**
 
 ProspectPro now includes a **fully validated** Google Cloud Run deployment pipeline:
 
@@ -155,8 +155,9 @@ GitHub Push → Cloud Build Trigger → Docker Build → Artifact Registry → C
 #### **Critical Configuration Requirements**
 
 1. **Service Account**: `prospectpro-deployment@leadgen-471822.iam.gserviceaccount.com`
+
    - Cloud Run Admin
-   - Storage Admin  
+   - Storage Admin
    - Cloud Build WorkerPool User
    - Artifact Registry Writer
    - Logs Configuration Writer
@@ -170,6 +171,7 @@ GitHub Push → Cloud Build Trigger → Docker Build → Artifact Registry → C
 #### **Trigger Recreation & Validation**
 
 **VALIDATED PROCEDURE** (September 2025):
+
 - ✅ Trigger accidentally deleted and successfully recreated
 - ✅ All 3 build steps complete successfully (Docker → Push → Deploy)
 - ✅ Build time: ~2 minutes 9 seconds (optimal)
@@ -179,6 +181,7 @@ GitHub Push → Cloud Build Trigger → Docker Build → Artifact Registry → C
 #### **Environment Variables**
 
 Cloud Run automatically configures:
+
 ```bash
 NODE_ENV=production
 ALLOW_DEGRADED_START=true  # Required for Supabase schema caching
@@ -190,7 +193,7 @@ HOST=0.0.0.0              # Container binding
 
 ```bash
 https://prospectpro-<hash>-uc.a.run.app/health  # Fast health check
-https://prospectpro-<hash>-uc.a.run.app/diag    # Full diagnostics  
+https://prospectpro-<hash>-uc.a.run.app/diag    # Full diagnostics
 https://prospectpro-<hash>-uc.a.run.app/ready   # Database readiness
 ```
 

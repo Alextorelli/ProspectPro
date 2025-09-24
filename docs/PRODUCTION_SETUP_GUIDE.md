@@ -50,6 +50,7 @@ ProspectPro supports automated deployment to Google Cloud Run with validated CI/
 ```
 
 **Cloud Build Trigger Configuration:**
+
 - **Trigger ID**: `0358b3a4-c7a4-4da9-9610-1e335c4894e0`
 - **Repository Connection**: GitHub App (validated)
 - **Service Account**: `prospectpro-deployment@leadgen-471822.iam.gserviceaccount.com`
