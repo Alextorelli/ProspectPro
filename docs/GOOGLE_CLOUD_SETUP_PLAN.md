@@ -17,7 +17,7 @@ Navigate to **APIs & Services** → **Library** and enable these APIs:
 ```text
 # Core APIs for deployment
 ✅ Cloud Run API
-✅ Cloud Build API  
+✅ Cloud Build API
 ✅ Container Registry API
 ✅ Cloud Resource Manager API
 ✅ Cloud SQL Admin API (for future scaling)
@@ -30,6 +30,7 @@ Navigate to **APIs & Services** → **Library** and enable these APIs:
 ```
 
 **Quick Enable via Cloud Shell:**
+
 ```bash
 gcloud services enable run.googleapis.com \
   cloudbuild.googleapis.com \
@@ -53,7 +54,7 @@ gcloud services enable run.googleapis.com \
 
    ```text
    ✅ Cloud Run Admin
-   ✅ Cloud Build Service Account  
+   ✅ Cloud Build Service Account
    ✅ Storage Admin
    ✅ Container Registry Service Agent
    ✅ Cloud SQL Client (for future)
@@ -93,6 +94,7 @@ DOMAIN_NAME=prospectpro.appsmithery.co
 
 1. Open the downloaded JSON service account key file
 2. Copy the **entire contents** (it should look like this):
+
 ```json
 {
   "type": "service_account",
@@ -107,6 +109,7 @@ DOMAIN_NAME=prospectpro.appsmithery.co
   "client_x509_cert_url": "..."
 }
 ```
+
 3. Paste the entire JSON content as the value for `GCP_SA_KEY`
 
 ## 🎯 **Phase 3: Cloud Run Configuration**
@@ -135,6 +138,7 @@ Request timeout: 300 seconds
 ### **Environment Variables**
 
 These will be set automatically via GitHub Actions:
+
 ```bash
 NODE_ENV=production
 SUPABASE_URL=[From GitHub Secrets]
@@ -170,14 +174,16 @@ PORT=3100
 ### **Cloud Monitoring (Automatic)**
 
 Cloud Run automatically provides:
+
 - ✅ Request latency metrics
-- ✅ Error rate tracking  
+- ✅ Error rate tracking
 - ✅ CPU/Memory utilization
 - ✅ Request count and traffic
 
 ### **Custom Alerts (Recommended)**
 
 Set up alerts for:
+
 ```bash
 - Response time > 10 seconds
 - Error rate > 5%
@@ -188,17 +194,20 @@ Set up alerts for:
 ## 📋 **Pre-Deployment Checklist**
 
 ### **Google Cloud Console Verified:**
+
 - [ ] Project created with proper billing account
 - [ ] All required APIs enabled
 - [ ] Service account created with proper roles
 - [ ] Service account JSON key downloaded
 
 ### **GitHub Repository Configured:**
+
 - [ ] All secrets added to GitHub repository
 - [ ] GitHub Actions workflow file committed
 - [ ] Cloud Build configuration committed
 
 ### **DNS Ready:**
+
 - [ ] Domain ownership verified
 - [ ] DNS provider access confirmed
 - [ ] CNAME record ready to create
@@ -211,25 +220,25 @@ Set up alerts for:
 const monthlyCosts = {
   cloudRun: {
     requests: "1000 × $0.0000004 = $0.40",
-    cpu: "2 vCPU × 30s avg × 1000 requests × $0.00002400 = $1.44", 
+    cpu: "2 vCPU × 30s avg × 1000 requests × $0.00002400 = $1.44",
     memory: "2GB × 30s × 1000 requests × $0.00000250 = $0.15",
-    subtotal: "$1.99"
+    subtotal: "$1.99",
   },
-  
+
   cloudBuild: {
-    buildMinutes: "10 builds × 2 min × $0.003 = $0.06"
+    buildMinutes: "10 builds × 2 min × $0.003 = $0.06",
   },
-  
+
   storage: {
-    containerImages: "~$0.50"
+    containerImages: "~$0.50",
   },
-  
+
   networking: {
-    dataTransfer: "~$1.00"
+    dataTransfer: "~$1.00",
   },
-  
+
   totalMonthly: "$3.55 + your API costs",
-  freeTrierCoverage: "First 6 months likely FREE with $300 credit"
+  freeTrierCoverage: "First 6 months likely FREE with $300 credit",
 };
 ```
 
