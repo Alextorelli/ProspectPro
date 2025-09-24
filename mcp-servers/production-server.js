@@ -66,6 +66,15 @@ class ProductionMCPServer {
         case "performance_metrics":
           return await this.performanceMetrics();
 
+        case "vault_api_key_status":
+          return await this.vaultApiKeyStatus();
+
+        case "production_startup_validator":
+          return await this.productionStartupValidator();
+
+        case "github_workflow_optimizer":
+          return await this.githubWorkflowOptimizer();
+
         default:
           throw new Error(`Unknown tool: ${request.params.name}`);
       }
@@ -406,6 +415,242 @@ class ProductionMCPServer {
         },
       ],
     };
+  }
+
+  // === NEW ENHANCED TOOLS FOR VAULT AND PRODUCTION OPTIMIZATION ===
+
+  // Vault API Key Status Monitor
+  async vaultApiKeyStatus() {
+    try {
+      console.log("🔑 Checking Supabase Vault API key status...");
+
+      // Test Supabase connection
+      const supabaseUrl = process.env.SUPABASE_URL;
+      const supabaseKey = process.env.SUPABASE_SECRET_KEY;
+
+      if (!supabaseUrl || !supabaseKey) {
+        return {
+          content: [{
+            type: "text",
+            text: "❌ Supabase credentials not configured in environment"
+          }]
+        };
+      }
+
+      const supabase = createClient(supabaseUrl, supabaseKey);
+
+      // Check vault diagnostic function
+      const { data, error } = await supabase.rpc('vault_diagnostic_check');
+
+      if (error) {
+        return {
+          content: [{
+            type: "text",
+            text: `❌ Vault diagnostic failed: ${error.message}`
+          }]
+        };
+      }
+
+      let report = "🔐 **Supabase Vault API Key Status Report**\n\n";
+      
+      if (data && data.length > 0) {
+        data.forEach(check => {
+          const statusIcon = check.status === 'ENABLED' || check.status === 'COMPLETE' ? '✅' : 
+                           check.status === 'PARTIAL' ? '⚠️' : '❌';
+          
+          report += `${statusIcon} **${check.check_name}**: ${check.status}\n`;
+          report += `   Details: ${check.details}\n`;
+          report += `   Recommendation: ${check.recommendation}\n\n`;
+        });
+      } else {
+        report += "⚠️ No diagnostic data returned from vault\n";
+      }
+
+      return {
+        content: [{
+          type: "text",
+          text: report
+        }]
+      };
+
+    } catch (error) {
+      return {
+        content: [{
+          type: "text",
+          text: `❌ Error checking vault status: ${error.message}`
+        }]
+      };
+    }
+  }
+
+  // Production Startup Validator
+  async productionStartupValidator() {
+    try {
+      console.log("🔍 Running production startup validation...");
+
+      const issues = [];
+      const validations = [];
+
+      // Check 1: Environment variables
+      const requiredEnvs = ['SUPABASE_URL', 'SUPABASE_SECRET_KEY'];
+      requiredEnvs.forEach(env => {
+        const value = process.env[env];
+        if (!value || value.includes('your_')) {
+          issues.push(`Missing or template value for ${env}`);
+        } else {
+          validations.push(`✅ ${env} configured`);
+        }
+      });
+
+      // Check 2: Production mode settings
+      const nodeEnv = process.env.NODE_ENV;
+      if (nodeEnv === 'production') {
+        validations.push("✅ NODE_ENV set to production");
+        
+        // Check degraded start setting
+        if (process.env.ALLOW_DEGRADED_START === 'true') {
+          issues.push("❌ ALLOW_DEGRADED_START=true is not recommended for production");
+        } else {
+          validations.push("✅ Strict production mode enabled (no degraded starts)");
+        }
+      } else {
+        issues.push(`NODE_ENV is '${nodeEnv}', should be 'production'`);
+      }
+
+      // Check 3: Port configuration
+      const port = process.env.PORT;
+      if (port && port !== '3000') {
+        validations.push(`✅ Custom port configured: ${port}`);
+      } else {
+        validations.push("ℹ️ Using default/standard port configuration");
+      }
+
+      let report = "🏭 **Production Startup Validation Report**\n\n";
+      
+      report += "**Validations Passed:**\n";
+      validations.forEach(validation => {
+        report += `${validation}\n`;
+      });
+
+      if (issues.length > 0) {
+        report += "\n**Issues Found:**\n";
+        issues.forEach(issue => {
+          report += `❌ ${issue}\n`;
+        });
+        
+        report += "\n**Recommendations:**\n";
+        report += "1. Ensure GitHub Actions workflows have generated proper .env\n";
+        report += "2. Configure API keys in Supabase Vault\n";
+        report += "3. Set ALLOW_DEGRADED_START=false for strict production mode\n";
+        report += "4. Verify all secrets are present and valid\n";
+      }
+
+      return {
+        content: [{
+          type: "text",
+          text: report
+        }]
+      };
+
+    } catch (error) {
+      return {
+        content: [{
+          type: "text",
+          text: `❌ Production validation failed: ${error.message}`
+        }]
+      };
+    }
+  }
+
+  // GitHub Workflow Optimizer
+  async githubWorkflowOptimizer() {
+    try {
+      console.log("⚙️ Analyzing GitHub Actions workflows...");
+
+      const workflowsDir = path.join(process.cwd(), '.github', 'workflows');
+      
+      if (!fs.existsSync(workflowsDir)) {
+        return {
+          content: [{
+            type: "text",
+            text: "❌ No .github/workflows directory found"
+          }]
+        };
+      }
+
+      const workflows = fs.readdirSync(workflowsDir)
+        .filter(file => file.endsWith('.yml') || file.endsWith('.yaml'));
+
+      let report = "⚙️ **GitHub Actions Workflow Analysis**\n\n";
+      
+      const optimizations = [];
+      const issues = [];
+
+      workflows.forEach(workflow => {
+        const workflowPath = path.join(workflowsDir, workflow);
+        const content = fs.readFileSync(workflowPath, 'utf8');
+        
+        report += `📋 **${workflow}:**\n`;
+
+        // Check triggers
+        if (content.includes('push:') && content.includes('branches: [main]')) {
+          if (workflow.includes('repository-maintenance') || workflow.includes('docker-env')) {
+            issues.push(`${workflow}: Triggers on every push (may cause cascade failures)`);
+            optimizations.push(`Consider schedule-only or manual triggers for ${workflow}`);
+          } else {
+            report += "  ✅ Push trigger configured for main branch\n";
+          }
+        }
+
+        // Check for workflow_dispatch
+        if (content.includes('workflow_dispatch:')) {
+          report += "  ✅ Manual trigger available\n";
+        } else {
+          optimizations.push(`Add workflow_dispatch to ${workflow} for manual testing`);
+        }
+
+        // Check for proper permissions
+        if (content.includes('permissions:')) {
+          report += "  ✅ Permissions configured\n";
+        } else {
+          if (content.includes('GITHUB_TOKEN') || content.includes('secrets.')) {
+            issues.push(`${workflow}: Uses secrets but no permissions specified`);
+          }
+        }
+
+        report += "\n";
+      });
+
+      if (optimizations.length > 0) {
+        report += "**Optimization Recommendations:**\n";
+        optimizations.forEach(opt => {
+          report += `💡 ${opt}\n`;
+        });
+        report += "\n";
+      }
+
+      if (issues.length > 0) {
+        report += "**Issues Found:**\n";
+        issues.forEach(issue => {
+          report += `⚠️ ${issue}\n`;
+        });
+      }
+
+      return {
+        content: [{
+          type: "text",
+          text: report
+        }]
+      };
+
+    } catch (error) {
+      return {
+        content: [{
+          type: "text",
+          text: `❌ Workflow analysis failed: ${error.message}`
+        }]
+      };
+    }
   }
 
   // Additional helper methods...

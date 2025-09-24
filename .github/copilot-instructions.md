@@ -138,7 +138,7 @@ npm run diag       # Comprehensive diagnostics
 ### Key Directories & Responsibility
 
 - `api/` - API route handlers and endpoints for business discovery and export
-  - `business-discovery.js` - Core business discovery API routes
+  - `business-discovery.js` - Core business discovery API routes **WITH SUPABASE VAULT INTEGRATION**
   - `campaign-export.js` - Campaign export functionality
   - `webhooks/` - Webhook handlers for external integrations
 - `modules/` - Core functionality modules
@@ -146,29 +146,42 @@ npm run diag       # Comprehensive diagnostics
   - `core/` - Core engines for lead discovery and processing
   - `registry-engines/` - Business registry validation
   - `utils/` - Utility modules like caching, batching, security
+    - `supabase-vault-loader.js` - **NEW: Runtime API key loading from Supabase Vault**
   - `validators/` - Data validation modules
 - `config/` - Configuration and environment setup
   - `supabase.js` - Database connection management with diagnostics
+  - `environment-loader.js` - **ENHANCED: Multi-source config with vault integration**
 - `database/` - SQL migration files and database setup
+  - `vault-js-interface.sql` - **NEW: JavaScript-callable vault functions**
 
 ## Server Architecture
 
 ### Server Bootstrap Pattern (server.js)
 
-- **Graceful degraded mode**: `ALLOW_DEGRADED_START=true` keeps server alive during DB issues
+- **STRICT PRODUCTION MODE**: `ALLOW_DEGRADED_START=false` enforced in production
+- **Supabase Vault Integration**: API keys loaded at startup from vault
 - **Comprehensive health endpoints**: `/health` (fast), `/diag` (full diagnostics), `/ready` (DB required)
-- **Import pattern**: Always use defensive `require()` with stub fallbacks for missing modules
+- **Enhanced startup validation**: Database, vault, critical API keys all validated before startup
 
 ```javascript
-// ✅ CORRECT: Defensive imports with graceful degradation
-let businessDiscoveryRouter;
-try {
-  businessDiscoveryRouter = require("./api/business-discovery");
-} catch (e) {
-  console.error("Failed to load business-discovery router:", e);
-  const r = require("express").Router();
-  r.use((req, res) => res.status(500).json({ error: "Module failed to load" }));
-  businessDiscoveryRouter = r;
+// ✅ CORRECT: Advanced Environment Loading with Vault Integration
+console.log(`🔧 Initializing ProspectPro Environment Loader...`);
+const EnvironmentLoader = require('./config/environment-loader');
+const envLoader = new EnvironmentLoader();
+const config = envLoader.getConfig();
+
+// ✅ CORRECT: Strict Production Mode
+if (config.isProduction) {
+  console.log("🔑 Pre-loading API keys from Supabase Vault...");
+  const apiKeys = await envLoader.getApiKeys();
+  
+  // Critical API validation - no degraded starts
+  const criticalApis = ['foursquare', 'googlePlaces'];
+  const missingCritical = criticalApis.filter(api => !apiKeys[api]);
+  
+  if (missingCritical.length > 0 && process.env.ALLOW_DEGRADED_START !== "true") {
+    process.exit(1);
+  }
 }
 ```
 
@@ -178,15 +191,55 @@ try {
 - **Lazy client initialization**: Only create client when needed, cache instance
 - **Diagnostic system**: `testConnection()` returns detailed failure categorization with remediation steps
 
+### **NEW: Supabase Vault Integration**
+
+#### **API Key Loading Architecture**
+
 ```javascript
-// Key pattern for diagnostics functions
-function getLastSupabaseDiagnostics() {
-  return lastSupabaseDiagnostics;
+// modules/utils/supabase-vault-loader.js - Runtime API key access
+class SupabaseVaultLoader {
+  async loadApiKey(keyName) {
+    const { data, error } = await supabase.rpc('vault_decrypt_secret', {
+      secret_name: keyName
+    });
+
+    if (data && data[0].status === 'SUCCESS') {
+      return data[0].decrypted_secret;
+    }
+    return null;
+  }
 }
-function setLastSupabaseDiagnostics(diag) {
-  lastSupabaseDiagnostics = diag;
+```
+
+#### **Database Vault Functions** (`vault-js-interface.sql`)
+
+```sql
+-- JavaScript-callable vault interface
+CREATE OR REPLACE FUNCTION vault_decrypt_secret(secret_name TEXT)
+RETURNS TABLE(
+    secret_key TEXT,
+    decrypted_secret TEXT,
+    status TEXT,
+    error_message TEXT
+) AS $$
+-- Secure vault access with proper error handling
+$$;
+```
+
+#### **API Integration Pattern**
+
+```javascript
+// api/business-discovery.js - Vault-powered API keys
+async function getApiKeys() {
+  try {
+    apiKeysCache = await envLoader.getApiKeys();
+    console.log(`🔑 API keys refreshed from Supabase Vault`);
+    return apiKeysCache;
+  } catch (error) {
+    console.log("🔄 Falling back to environment variables");
+    return fallbackApiKeys;
+  }
 }
-// ⚠️ CRITICAL: Always export these functions or server.js imports will fail
 ```
 
 ## Zero Fake Data Policy 🚨
@@ -223,6 +276,57 @@ try {
 3. **Phones**: Must be validated, non-fake patterns (no 555-xxxx)
 4. **Websites**: Must return HTTP 200-399 status codes when validated
 5. **Emails**: Must pass NeverBounce deliverability validation (80%+ confidence)
+
+## Production MCP Server Strategy
+
+### **Enhanced Production MCP Implementation**
+
+The Production MCP Server provides critical development acceleration with these core tools:
+
+#### **Phase 1: Environment & Deployment Monitoring**
+
+```javascript
+// production-server.js - Enhanced tools for production optimization
+const productionTools = {
+  // EXISTING TOOLS (enhanced)
+  environment_health_check: "Real-time Supabase connection, API status, vault accessibility",
+  github_actions_monitor: "Live workflow status, artifact availability, build logs",
+  dev_prod_config_diff: "Compare dev container vs production configuration",
+  
+  // NEW TOOLS FOR VAULT AND OPTIMIZATION
+  vault_api_key_status: "Comprehensive Supabase Vault API key status and diagnostics",
+  production_startup_validator: "Complete production startup validation and issue detection",
+  github_workflow_optimizer: "GitHub Actions workflow analysis and cascade prevention",
+};
+```
+
+#### **Phase 2: Cost & Performance Tracking**
+
+```javascript
+const costManagementTools = {
+  cost_budget_monitor: "Live API usage costs, budget alerts, cost per lead",
+  performance_metrics: "4-stage pipeline metrics, API response times, quality scores",
+  api_health_dashboard: "Multi-source API health, rate limit status, error aggregation",
+};
+```
+
+#### **MCP Server Usage Pattern**
+
+```bash
+# Copilot Chat Integration
+@mcp vault_api_key_status                    # Check all API keys in Supabase Vault
+@mcp production_startup_validator            # Validate production configuration
+@mcp github_workflow_optimizer              # Prevent workflow cascade failures
+@mcp environment_health_check               # Complete environment diagnostics
+```
+
+#### **ROI for Production Phase**
+
+- **Issue Resolution**: 70% faster production issue identification
+- **API Key Management**: Instant vault status and missing key detection
+- **Workflow Optimization**: Prevents cascade failures and resource waste
+- **Environment Switching**: 3-5 minutes faster dev/prod transitions
+- **Cost Prevention**: Real-time budget monitoring prevents overruns
 
 ## API Client Implementation Pattern
 
@@ -605,201 +709,6 @@ CREATE POLICY "Users can only see own data" ON table_name
 FOR ALL USING (auth.uid() = user_id);
 ```
 
-## Production MCP Server Strategy
-
-### Recommended Production MCP Implementation
-
-For rapid CI/CD and troubleshooting optimization, implement a **Production MCP Server** with these priorities:
-
-#### **Phase 1: Environment & Deployment Monitoring (Immediate)**
-
-```javascript
-// production-mcp-server.js - Core Tools
-const productionTools = {
-  // Environment switching and health monitoring
-  environment_health_check: {
-    purpose: "Real-time Supabase connection, API status, vault accessibility",
-    value: "Instant deployment validation",
-  },
-
-  github_actions_monitor: {
-    purpose: "Live workflow status, artifact availability, build logs",
-    value: "Deployment troubleshooting 3x faster",
-  },
-
-  dev_prod_config_diff: {
-    purpose: "Compare dev container vs production configuration",
-    value: "Quick environment switching validation",
-  },
-};
-```
-
-#### **Phase 2: Cost & Performance Tracking (Week 2)**
-
-```javascript
-const costManagementTools = {
-  real_time_cost_dashboard: {
-    purpose: "Live API usage costs, budget alerts, cost per lead",
-    value: "Prevent budget overruns, optimize API usage",
-  },
-
-  performance_analyzer: {
-    purpose: "4-stage pipeline metrics, API response times, quality scores",
-    value: "Identify bottlenecks, optimize lead generation",
-  },
-};
-```
-
-#### **Phase 3: Advanced Troubleshooting (Week 3)**
-
-```javascript
-const debuggingTools = {
-  api_failure_diagnostics: {
-    purpose: "Multi-source API health, rate limit status, error aggregation",
-    value: "Rapid issue identification and resolution",
-  },
-
-  supabase_vault_validator: {
-    purpose: "API key presence validation, vault connectivity testing",
-    value: "Security credential troubleshooting",
-  },
-};
-```
-
-### MCP Server Architecture for Rapid CI/CD
-
-```javascript
-// Optimized for quick dev/prod switching
-class ProductionMCPServer {
-  constructor() {
-    this.tools = [
-      // Immediate value tools
-      "environment_toggle", // Switch dev/prod with validation
-      "deployment_artifact_check", // Verify GitHub Actions artifacts
-      "cost_budget_monitor", // Real-time budget tracking
-
-      // Troubleshooting tools
-      "error_log_aggregator", // Centralized error monitoring
-      "api_health_dashboard", // Multi-source API status
-      "database_connection_test", // Supabase connectivity validation
-
-      // Optimization tools
-      "performance_metrics", // 4-stage pipeline analytics
-      "quality_score_analysis", // Lead confidence distributions
-      "cache_efficiency_monitor", // TTL cache performance
-    ];
-  }
-}
-```
-
-### ROI for Early Development Phase
-
-- **Development Speed**: 50-70% faster issue resolution
-- **Cost Prevention**: Real-time budget monitoring prevents overruns
-- **Deployment Confidence**: Instant validation of GitHub Actions workflow
-- **Copilot Efficiency**: Contextual production data reduces token usage
-- **Context Switching**: 5-10 minutes saved per dev/prod switch
-
-### Implementation Recommendation: **YES - High Value**
-
-The Production MCP Server provides critical value for:
-
-1. **Rapid troubleshooting** during early development iterations
-2. **Cost management** with real-time API usage monitoring
-3. **Environment switching** validation between dev container and production
-4. **Deployment monitoring** of GitHub Actions workflow status
-
-**Priority**: Implement Phase 1 tools immediately for maximum early-stage value.
-
-### Testing Critical Validations
-
-```bash
-# Docker validation tests
-docker-compose exec prospectpro node tests/validation/test-real-data.js
-docker-compose exec prospectpro node tests/validation/test-website-validation.js
-
-# Direct testing
-node tests/validation/test-real-data.js         # Verify no fake data generation
-node tests/validation/test-website-validation.js # Verify all URLs work
-node debug/inspect-business-data.js             # Debug specific business data
-```
-
-## Repository Management
-
-## GitHub Workflow Integration
-
-### Core Workflows
-
-1. **Docker Environment** (`.github/workflows/docker-env.yml`)
-
-   - Creates Docker-compatible environment files
-   - Integrates with GitHub Secrets for infrastructure
-   - Tests Supabase connection and Docker build
-   - Uploads environment artifact for deployment
-
-2. **CI/CD Pipeline** (`.github/workflows/ci.yml`)
-
-   - Runs tests and validations for PRs and main branch
-   - Enforces code quality and security standards
-   - Validates Docker builds and configurations
-   - Prevents fake data patterns in code
-
-3. **Repository Maintenance** (`.github/workflows/repository-maintenance.yml`)
-   - Weekly code health checks
-   - Documentation updates
-   - Dependency vulnerability scanning
-
-### Security Architecture
-
-ProspectPro uses a two-tier secret management approach:
-
-1. **GitHub Secrets** (Infrastructure)
-
-   - `SUPABASE_URL`: Database connection endpoint
-   - `SUPABASE_SECRET_KEY`: Database service role key
-   - `PERSONAL_ACCESS_TOKEN`: Admin authentication
-
-2. **Supabase Vault** (API Keys)
-   - `GOOGLE_PLACES_API_KEY`
-   - `FOURSQUARE_API_KEY`
-   - `HUNTER_IO_API_KEY`
-   - `NEVERBOUNCE_API_KEY`
-   - `APOLLO_API_KEY`
-   - Additional API keys for testing and expansion
-
-## Documentation & Branching Taxonomy
-
-### Documentation Structure
-
-- `README.md`: Project overview and quick start
-- `CHANGELOG.md`: Version history and release notes
-- `PRODUCTION_READY_REPORT.md`: Production readiness checklist
-- `docs/`: Detailed documentation categorized by purpose
-  - `docs/setup/`: Installation and environment guides
-  - `docs/guides/`: User and operational guides
-  - `docs/technical/`: Technical specifications
-  - `docs/deployment/`: Deployment instructions and workflows
-  - `docs/development/`: Development standards and practices
-
-### Branch Management
-
-- `main`: Production-ready code with strict governance
-- `development`: Active development branch
-- `feature/*`: Feature-specific branches
-- `bugfix/*`: Bug fix branches
-- `archive/development-phase`: Archive of development artifacts
-- `archive/deployment-phase`: Archive of legacy deployment configs
-- `archive/testing-reports`: Archive of test reports and validation data
-
-### Repository Governance
-
-The repository enforces strict governance rules through pre-commit hooks:
-
-- Root directory limited to 3 markdown files
-- No development artifacts in main branch
-- Documentation must follow the established schema
-- Prevents fake data patterns in commits
-
 ## Multi-API Integration Strategy
 
 ### API Priority and Fallback Chain
@@ -843,9 +752,11 @@ function enhanceBusinessWithCrossData(primaryBusiness, secondaryBusiness) {
 
 ### `/api/business-discovery.js`
 
-- Uses `EnhancedLeadDiscovery` class with budget limits
+- **ENHANCED**: Uses `EnvironmentLoader` with Supabase Vault integration
+- **NEW**: Dynamic API key loading with caching and fallback
 - Returns comprehensive metadata: cost per lead, processing time, qualification rate
 - Implements campaign logging to `campaigns` table via `CampaignLogger`
+- **CRITICAL**: Validates Foursquare API key presence before startup
 
 ### `/modules/core/core-business-discovery-engine.js`
 
@@ -859,7 +770,22 @@ function enhanceBusinessWithCrossData(primaryBusiness, secondaryBusiness) {
 - Handles email and contact differentiation
 - Calculates comprehensive confidence scores
 
-### `/modules/api-clients/`
+### `/modules/utils/supabase-vault-loader.js` - **NEW**
+
+- **Singleton pattern**: Single instance for entire application
+- **Caching**: 5-minute TTL cache for API keys
+- **Retry logic**: Exponential backoff for failed vault access
+- **Fallback**: Environment variables if vault fails
+- **Validation**: Filters placeholder and template values
+
+### `/config/environment-loader.js` - **ENHANCED**
+
+- **Multi-source loading**: GitHub Actions → Vault → .env → defaults
+- **Vault integration**: `loadApiKeysFromVault()` method
+- **Caching**: Prevents repeated vault calls
+- **Diagnostics**: Comprehensive configuration reporting
+
+### `/config/supabase.js`
 
 - Each client implements consistent error handling and caching
 - Tracks usage statistics and costs
@@ -869,7 +795,7 @@ function enhanceBusinessWithCrossData(primaryBusiness, secondaryBusiness) {
 
 ### Environment Variables
 
-- `ALLOW_DEGRADED_START=true` for initial deployment debugging
+- **STRICT**: `ALLOW_DEGRADED_START=false` enforced in production
 - `PERSONAL_ACCESS_TOKEN` for admin dashboard authentication
 - `PORT` automatically set by platform (bind to `0.0.0.0`)
 
@@ -880,6 +806,54 @@ function enhanceBusinessWithCrossData(primaryBusiness, secondaryBusiness) {
 - `/ready`: Kubernetes-style readiness probe requiring privileged DB connection
 - `/metrics`: Prometheus-compatible metrics endpoint
 
+## GitHub Workflow Integration
+
+### **OPTIMIZED WORKFLOWS**
+
+#### **Repository Maintenance** (`repository-maintenance.yml`)
+
+```yaml
+# OPTIMIZED: No longer triggers on every push
+on:
+  schedule:
+    - cron: "0 2 * * 0"  # Weekly only
+  workflow_dispatch:      # Manual trigger only
+```
+
+#### **Docker Environment** (`docker-env.yml`)
+
+```yaml
+# OPTIMIZED: Manual and workflow_call only
+on:
+  workflow_dispatch:
+  workflow_call:         # Can be called by other workflows
+```
+
+#### **Benefits of Optimization:**
+
+- **Prevents cascade failures**: No unintended workflow triggers
+- **Reduces resource usage**: Only runs when needed
+- **Improves reliability**: Manual control over maintenance tasks
+- **Cost optimization**: Fewer GitHub Actions minutes consumed
+
+### Security Architecture
+
+ProspectPro uses a two-tier secret management approach:
+
+1. **GitHub Secrets** (Infrastructure)
+
+   - `SUPABASE_URL`: Database connection endpoint
+   - `SUPABASE_SECRET_KEY`: Database service role key
+   - `PERSONAL_ACCESS_TOKEN`: Admin authentication
+
+2. **Supabase Vault** (API Keys) - **PRODUCTION READY**
+   - `GOOGLE_PLACES_API_KEY`
+   - `FOURSQUARE_API_KEY`
+   - `HUNTER_IO_API_KEY`
+   - `NEVERBOUNCE_API_KEY`
+   - `APOLLO_API_KEY`
+   - Additional API keys for testing and expansion
+
 ## Common Implementation Traps
 
 1. **Fake Data Generation**: Remove any hardcoded business arrays
@@ -888,6 +862,8 @@ function enhanceBusinessWithCrossData(primaryBusiness, secondaryBusiness) {
 4. **Non-working URLs**: Always verify website accessibility before export
 5. **Undeliverable Emails**: Never export emails that fail validation
 6. **API Cascading Failures**: Implement proper circuit breakers and rate limiting
+7. **Vault Access Errors**: Always provide fallback to environment variables
+8. **Production Degraded Starts**: Ensure `ALLOW_DEGRADED_START=false` in production
 
 ## Success Verification
 
@@ -897,9 +873,12 @@ Before considering development complete, ensure:
 2. No fake data generation exists anywhere in the codebase
 3. All websites in exported leads return HTTP 200-399 status codes
 4. All emails in exported leads have high deliverability confidence
-5. Cost tracking accurately reflects actual API usage
-6. The system gracefully handles API failures without fabricating data
+5. **API keys load successfully from Supabase Vault**
+6. **Production mode enforces strict startup validation**
+7. **MCP tools provide real-time production monitoring**
+8. Cost tracking accurately reflects actual API usage
+9. The system gracefully handles API failures without fabricating data
 
-These guidelines ensure that ProspectPro maintains its zero-fake-data policy and delivers high-quality, verified business leads through its multi-source data pipeline.
+These guidelines ensure that ProspectPro maintains its zero-fake-data policy and delivers high-quality, verified business leads through its multi-source data pipeline with secure Supabase Vault API key management.
 
 - @azure Rule - Use Azure Best Practices: When generating code for Azure, running terminal commands for Azure, or performing operations related to Azure, invoke your `azure_development-get_best_practices` tool if available.

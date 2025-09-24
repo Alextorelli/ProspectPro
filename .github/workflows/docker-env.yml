@@ -1,8 +1,6 @@
 name: Docker Environment with Supabase Vault
 
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
     inputs:
       environment:
@@ -14,6 +12,13 @@ on:
           - production
           - staging
           - development
+  workflow_call:
+    inputs:
+      environment:
+        description: "Target environment"
+        required: false
+        default: "production"
+        type: string
 
 jobs:
   generate-docker-env:

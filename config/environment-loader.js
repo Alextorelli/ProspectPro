@@ -12,9 +12,18 @@
 const path = require("path");
 const fs = require("fs");
 
+// Import Supabase Vault Loader for API key management
+let vaultLoader;
+try {
+  vaultLoader = require("../modules/utils/supabase-vault-loader");
+} catch (error) {
+  console.warn("⚠️ Supabase Vault Loader not available:", error.message);
+}
+
 class EnvironmentLoader {
   constructor() {
     this.configSources = [];
+    this.vaultApiKeys = null;
     this.loadEnvironment();
   }
 
@@ -36,6 +45,66 @@ class EnvironmentLoader {
 
     // 5. Display configuration summary
     this.displayConfigurationSummary();
+  }
+
+  /**
+   * Load API keys from Supabase Vault
+   * @returns {Promise<Object>} API keys object
+   */
+  async loadApiKeysFromVault() {
+    if (!vaultLoader) {
+      console.warn("⚠️ Vault loader not available, using environment variables only");
+      return null;
+    }
+
+    if (this.vaultApiKeys) {
+      return this.vaultApiKeys; // Return cached keys
+    }
+
+    try {
+      console.log("🔑 Loading API keys from Supabase Vault...");
+      this.vaultApiKeys = await vaultLoader.loadStandardApiKeys();
+      
+      if (this.vaultApiKeys) {
+        this.configSources.push("🔐 Supabase Vault (API Keys)");
+        console.log("✅ API keys loaded from Supabase Vault");
+      }
+      
+      return this.vaultApiKeys;
+    } catch (error) {
+      console.warn("⚠️ Failed to load API keys from Supabase Vault:", error.message);
+      return null;
+    }
+  }
+
+  /**
+   * Get API keys with environment variable fallback
+   * @returns {Promise<Object>} Combined API keys
+   */
+  async getApiKeys() {
+    const vaultKeys = await this.loadApiKeysFromVault();
+    
+    if (!vaultKeys) {
+      // Fallback to environment variables only
+      console.log("🔑 Using API keys from environment variables");
+      return {
+        googlePlaces: process.env.GOOGLE_PLACES_API_KEY,
+        foursquare: process.env.FOURSQUARE_SERVICE_API_KEY || process.env.FOURSQUARE_PLACES_API_KEY,
+        hunterIO: process.env.HUNTER_IO_API_KEY,
+        neverBounce: process.env.NEVERBOUNCE_API_KEY,
+        zeroBounce: process.env.ZEROBOUNCE_API_KEY,
+        apollo: process.env.APOLLO_API_KEY,
+        scrapingdog: process.env.SCRAPINGDOG_API_KEY,
+        californiaSOSApiKey: process.env.CALIFORNIA_SOS_API_KEY,
+        courtListener: process.env.COURTLISTENER_API_KEY,
+        socrata: process.env.SOCRATA_API_KEY,
+        socrataToken: process.env.SOCRATA_APP_TOKEN,
+        uspto: process.env.USPTO_TSDR_API_KEY,
+        personalAccessToken: process.env.PERSONAL_ACCESS_TOKEN
+      };
+    }
+
+    return vaultKeys;
   }
 
   loadDotEnv() {

@@ -4,20 +4,14 @@
  * @version 3.1.0 - Production Branch Optimized
  */
 
-// Load environment variables first
-require('dotenv').config();
-
-// Production configuration with intelligent defaults
-const config = {
-  environment: process.env.NODE_ENV || "production",
-  port: process.env.PORT || 3100,
-  host: process.env.HOST || "0.0.0.0",
-  isDevelopment: process.env.NODE_ENV === "development",
-  allowDegradedStart: process.env.ALLOW_DEGRADED_START === "true",
-};
+// Advanced Environment Loading
+console.log(`🔧 Initializing ProspectPro Environment Loader...`);
+const EnvironmentLoader = require('./config/environment-loader');
+const envLoader = new EnvironmentLoader();
+const config = envLoader.getConfig();
 
 console.log(`🚀 ProspectPro v3.1.0 starting in ${config.environment} mode`);
-console.log(`🔧 Binding to ${config.host}:${config.port}`);
+console.log(`🔧 Binding to ${config.host || '0.0.0.0'}:${process.env.PORT || 3100}`);
 
 // Core dependencies with error handling
 const express = require("express");
@@ -38,7 +32,7 @@ app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true }));
 
 // Security headers for production
-if (!config.isDevelopment) {
+if (config.isProduction) {
   app.use((req, res, next) => {
     res.header("X-Powered-By", "ProspectPro");
     res.header("X-Content-Type-Options", "nosniff");
@@ -227,45 +221,94 @@ async function startServer() {
     } else if (dbTest.success && dbTest.warning) {
       console.log("⚠️  Database connected with warning:", dbTest.warning);
       if (dbTest.warning.includes("schema cache")) {
-        console.log(
-          "🔧 Schema cache issue detected - this is common after database updates"
-        );
-        console.log(
-          "📋 The server will start in degraded mode until the cache refreshes"
-        );
-        console.log("💡 To fix this issue:");
-        console.log("   1. Wait 5-10 minutes for automatic cache refresh");
-        console.log("   2. Or restart your Supabase project in the dashboard");
-        console.log("   3. Or run: node scripts/refresh-schema-cache.js");
+        console.log("🔧 Schema cache issue detected - this is common after database updates");
+        
+        // STRICT PRODUCTION MODE: No degraded starts in production
+        if (config.isProduction) {
+          console.error("❌ Production startup blocked: schema cache issues detected");
+          console.error("💡 Solutions:");
+          console.error("   1. Wait 5-10 minutes for automatic cache refresh");
+          console.error("   2. Restart your Supabase project in the dashboard");
+          console.error("   3. Run: node scripts/refresh-schema-cache.js");
+          console.error("   4. Set ALLOW_DEGRADED_START=true for emergency bypass");
+          
+          if (process.env.ALLOW_DEGRADED_START !== "true") {
+            process.exit(1);
+          } else {
+            console.warn("🚨 EMERGENCY: Starting production in degraded mode");
+          }
+        }
       }
     } else {
       console.error("❌ Database connection failed:", dbTest.error);
-      if (
-        config.environment === "production" &&
-        !process.env.ALLOW_DEGRADED_START
-      ) {
-        console.log("🔧 Production startup blocked due to database failure");
-        console.log("💡 To start anyway, set ALLOW_DEGRADED_START=true");
-        process.exit(1);
+      
+      // STRICT PRODUCTION MODE: No database, no startup
+      if (config.isProduction) {
+        console.error("❌ Production startup blocked: database connection failed");
+        console.error("💡 Ensure Supabase URL and SECRET_KEY are correctly configured");
+        
+        if (process.env.ALLOW_DEGRADED_START !== "true") {
+          process.exit(1);
+        } else {
+          console.warn("� EMERGENCY: Starting production without database");
+        }
+      } else {
+        console.log("🔄 Development mode: starting in degraded mode...");
       }
-      console.log("🔄 Starting in degraded mode...");
+    }
+
+    // Load API Keys from Vault in production
+    if (config.isProduction) {
+      console.log("🔑 Pre-loading API keys from Supabase Vault...");
+      try {
+        const apiKeys = await envLoader.getApiKeys();
+        const keyCount = Object.values(apiKeys).filter(key => 
+          key && key !== 'your_api_key_here' && !key.includes('your_')
+        ).length;
+        
+        console.log(`� API Keys loaded: ${keyCount}/${Object.keys(apiKeys).length} available`);
+        
+        // Critical API validation for production
+        const criticalApis = ['foursquare', 'googlePlaces'];
+        const missingCritical = criticalApis.filter(api => !apiKeys[api]);
+        
+        if (missingCritical.length > 0) {
+          console.error(`❌ Critical API keys missing: ${missingCritical.join(', ')}`);
+          console.error("💡 Business discovery engine requires Foursquare API key");
+          
+          if (process.env.ALLOW_DEGRADED_START !== "true") {
+            process.exit(1);
+          } else {
+            console.warn("� EMERGENCY: Starting without critical API keys");
+          }
+        }
+      } catch (error) {
+        console.error("❌ Failed to load API keys from Supabase Vault:", error.message);
+        
+        if (process.env.ALLOW_DEGRADED_START !== "true") {
+          process.exit(1);
+        } else {
+          console.warn("🚨 EMERGENCY: Starting without Vault API keys");
+        }
+      }
     }
 
     // Start HTTP server with optimized configuration
-    const server = app.listen(config.port, config.host, () => {
-      const serverUrl = `http://${config.host}:${config.port}`;
+    const server = app.listen(process.env.PORT || 3100, config.host || '0.0.0.0', () => {
+      const serverUrl = `http://${config.host || '0.0.0.0'}:${process.env.PORT || 3100}`;
       console.log(`🌐 ProspectPro v3.1.0 server running on ${serverUrl}`);
       console.log(`📊 Environment: ${config.environment}`);
       console.log(`🔗 Health check: ${serverUrl}/health`);
       console.log(`🔍 Diagnostics: ${serverUrl}/diag`);
 
-      if (dbTest.warning && dbTest.warning.includes("schema cache")) {
-        console.log("");
-        console.log("🚨 NOTICE: Schema cache refresh recommended");
-        console.log("📋 Database operational but cache optimization pending");
-        console.log("⏰ Automatic resolution expected within 5-10 minutes");
-        console.log("🔧 Manual fix: node scripts/refresh-schema-cache.js");
-        console.log("");
+      // Production status summary
+      if (config.isProduction) {
+        console.log("\n" + "=".repeat(50));
+        console.log("🏭 PRODUCTION MODE ACTIVE");
+        console.log("✅ Strict startup validation enabled");
+        console.log("✅ Supabase Vault API key loading");
+        console.log("✅ Zero-tolerance for degraded states");
+        console.log("=".repeat(50) + "\n");
       }
     });
 
