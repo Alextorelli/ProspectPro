@@ -18,18 +18,18 @@ RUN mkdir -p uploads \
 
 # Set environment
 ENV NODE_ENV=production
-ENV PORT=3000
+ENV PORT=3100
 ENV HOST=0.0.0.0
 
 # Drop privileges to non-root user for security
 USER node
 
-# Expose port (Railway will override this)
-EXPOSE 3000
+# Expose port (Cloud Run will use this)
+EXPOSE 3100
 
 # Container healthcheck against /health endpoint
 HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
-    CMD curl -fsS http://localhost:3000/health || exit 1
+    CMD curl -fsS http://localhost:3100/health || exit 1
 
 # Start the application
 CMD ["node", "server.js"]
