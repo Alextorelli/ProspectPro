@@ -1,13 +1,27 @@
 # Cloud Build configuration for ProspectPro deployment
-# Fixes service account logging requirements
+# Fixes service account logging requirements and repository naming
 
 steps:
+  # Create Artifact Registry repository if it doesn't exist
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: 'gcloud'
+    args:
+      - 'artifacts'
+      - 'repositories'
+      - 'create'
+      - 'prospectpro'
+      - '--location=us-central1'
+      - '--repository-format=docker'
+      - '--description=ProspectPro container repository'
+    # Continue even if repository already exists
+    allowFailure: true
+
   # Build the Docker image
   - name: 'gcr.io/cloud-builders/docker'
     args: [
       'build',
-      '-t', 'us-central1-docker.pkg.dev/$PROJECT_ID/rmpcgab-prospectpro-us-central1-alextorelli-prospectpro--majuv/prospectpro:$COMMIT_SHA',
-      '-t', 'us-central1-docker.pkg.dev/$PROJECT_ID/rmpcgab-prospectpro-us-central1-alextorelli-prospectpro--majuv/prospectpro:latest',
+      '-t', 'us-central1-docker.pkg.dev/$PROJECT_ID/prospectpro/app:$COMMIT_SHA',
+      '-t', 'us-central1-docker.pkg.dev/$PROJECT_ID/prospectpro/app:latest',
       '.'
     ]
 
@@ -16,7 +30,7 @@ steps:
     args: [
       'push',
       '--all-tags',
-      'us-central1-docker.pkg.dev/$PROJECT_ID/rmpcgab-prospectpro-us-central1-alextorelli-prospectpro--majuv/prospectpro'
+      'us-central1-docker.pkg.dev/$PROJECT_ID/prospectpro/app'
     ]
 
   # Deploy to Cloud Run
@@ -26,7 +40,7 @@ steps:
       - 'run'
       - 'deploy'
       - 'prospectpro'
-      - '--image=us-central1-docker.pkg.dev/$PROJECT_ID/rmpcgab-prospectpro-us-central1-alextorelli-prospectpro--majuv/prospectpro:latest'
+      - '--image=us-central1-docker.pkg.dev/$PROJECT_ID/prospectpro/app:latest'
       - '--region=us-central1'
       - '--platform=managed'
       - '--allow-unauthenticated'
