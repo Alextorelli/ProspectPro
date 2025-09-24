@@ -2,17 +2,17 @@ name: Deploy to Google Cloud Run
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   workflow_dispatch:
     inputs:
       environment:
-        description: 'Environment to deploy to'
+        description: "Environment to deploy to"
         required: true
-        default: 'production'
+        default: "production"
         type: choice
         options:
-        - production
-        - staging
+          - production
+          - staging
 
 env:
   PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
@@ -23,74 +23,74 @@ jobs:
   deploy:
     name: Deploy to Cloud Run
     runs-on: ubuntu-latest
-    
+
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Setup Google Cloud CLI
-      uses: google-github-actions/setup-gcloud@v2
-      with:
-        project_id: ${{ secrets.GCP_PROJECT_ID }}
+      - name: Setup Google Cloud CLI
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
 
-    - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v2
-      with:
-        credentials_json: ${{ secrets.GCP_SA_KEY }}
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
 
-    - name: Configure Docker for GCP
-      run: |
-        gcloud auth configure-docker --quiet
+      - name: Configure Docker for GCP
+        run: |
+          gcloud auth configure-docker --quiet
 
-    - name: Build Docker image
-      run: |
-        docker build -t gcr.io/$PROJECT_ID/$SERVICE_NAME:$GITHUB_SHA .
-        docker build -t gcr.io/$PROJECT_ID/$SERVICE_NAME:latest .
+      - name: Build Docker image
+        run: |
+          docker build -t gcr.io/$PROJECT_ID/$SERVICE_NAME:$GITHUB_SHA .
+          docker build -t gcr.io/$PROJECT_ID/$SERVICE_NAME:latest .
 
-    - name: Push Docker image to Container Registry
-      run: |
-        docker push gcr.io/$PROJECT_ID/$SERVICE_NAME:$GITHUB_SHA
-        docker push gcr.io/$PROJECT_ID/$SERVICE_NAME:latest
+      - name: Push Docker image to Container Registry
+        run: |
+          docker push gcr.io/$PROJECT_ID/$SERVICE_NAME:$GITHUB_SHA
+          docker push gcr.io/$PROJECT_ID/$SERVICE_NAME:latest
 
-    - name: Deploy to Cloud Run
-      run: |
-        gcloud run deploy $SERVICE_NAME \
-          --image gcr.io/$PROJECT_ID/$SERVICE_NAME:$GITHUB_SHA \
-          --region $REGION \
-          --platform managed \
-          --allow-unauthenticated \
-          --port 3100 \
-          --memory 2Gi \
-          --cpu 2 \
-          --min-instances 0 \
-          --max-instances 10 \
-          --concurrency 100 \
-          --timeout 300 \
-          --set-env-vars="NODE_ENV=production" \
-          --set-env-vars="SUPABASE_URL=${{ secrets.SUPABASE_URL }}" \
-          --set-env-vars="SUPABASE_SECRET_KEY=${{ secrets.SUPABASE_SECRET_KEY }}" \
-          --set-env-vars="PORT=3100" \
-          --quiet
+      - name: Deploy to Cloud Run
+        run: |
+          gcloud run deploy $SERVICE_NAME \
+            --image gcr.io/$PROJECT_ID/$SERVICE_NAME:$GITHUB_SHA \
+            --region $REGION \
+            --platform managed \
+            --allow-unauthenticated \
+            --port 3100 \
+            --memory 2Gi \
+            --cpu 2 \
+            --min-instances 0 \
+            --max-instances 10 \
+            --concurrency 100 \
+            --timeout 300 \
+            --set-env-vars="NODE_ENV=production" \
+            --set-env-vars="SUPABASE_URL=${{ secrets.SUPABASE_URL }}" \
+            --set-env-vars="SUPABASE_SECRET_KEY=${{ secrets.SUPABASE_SECRET_KEY }}" \
+            --set-env-vars="PORT=3100" \
+            --quiet
 
-    - name: Get service URL
-      id: get-url
-      run: |
-        SERVICE_URL=$(gcloud run services describe $SERVICE_NAME --region=$REGION --format='value(status.url)')
-        echo "SERVICE_URL=$SERVICE_URL" >> $GITHUB_OUTPUT
-        echo "🚀 Service deployed at: $SERVICE_URL"
+      - name: Get service URL
+        id: get-url
+        run: |
+          SERVICE_URL=$(gcloud run services describe $SERVICE_NAME --region=$REGION --format='value(status.url)')
+          echo "SERVICE_URL=$SERVICE_URL" >> $GITHUB_OUTPUT
+          echo "🚀 Service deployed at: $SERVICE_URL"
 
-    - name: Test deployment
-      run: |
-        echo "Testing health endpoint..."
-        curl -f ${{ steps.get-url.outputs.SERVICE_URL }}/health || echo "Health check failed (might be cold start)"
-        
-        echo "Testing diagnostic endpoint..."
-        curl -f ${{ steps.get-url.outputs.SERVICE_URL }}/diag || echo "Diagnostic check failed"
+      - name: Test deployment
+        run: |
+          echo "Testing health endpoint..."
+          curl -f ${{ steps.get-url.outputs.SERVICE_URL }}/health || echo "Health check failed (might be cold start)"
 
-    - name: Deployment summary
-      run: |
-        echo "✅ Deployment completed successfully!"
-        echo "🌐 Service URL: ${{ steps.get-url.outputs.SERVICE_URL }}"
-        echo "📊 Health Check: ${{ steps.get-url.outputs.SERVICE_URL }}/health"
-        echo "🔍 Diagnostics: ${{ steps.get-url.outputs.SERVICE_URL }}/diag"
-        echo "📋 API Docs: ${{ steps.get-url.outputs.SERVICE_URL }}/api"
+          echo "Testing diagnostic endpoint..."
+          curl -f ${{ steps.get-url.outputs.SERVICE_URL }}/diag || echo "Diagnostic check failed"
+
+      - name: Deployment summary
+        run: |
+          echo "✅ Deployment completed successfully!"
+          echo "🌐 Service URL: ${{ steps.get-url.outputs.SERVICE_URL }}"
+          echo "📊 Health Check: ${{ steps.get-url.outputs.SERVICE_URL }}/health"
+          echo "🔍 Diagnostics: ${{ steps.get-url.outputs.SERVICE_URL }}/diag"
+          echo "📋 API Docs: ${{ steps.get-url.outputs.SERVICE_URL }}/api"
