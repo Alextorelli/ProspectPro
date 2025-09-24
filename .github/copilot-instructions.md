@@ -136,7 +136,7 @@ ProspectPro now includes a **fully validated** Google Cloud Run deployment pipel
 
 ```bash
 # Validated Trigger Details
-Trigger ID: 0358b3a4-c7a4-4da9-9610-1e335c4894e0
+Trigger ID: ae04dd92-4509-43ee-9f70-da3caf15dbb4
 Build Status: ACTIVE & VALIDATED ✅
 Service Account: prospectpro-deployment@leadgen-471822.iam.gserviceaccount.com
 Repository: us-central1-docker.pkg.dev/leadgen-471822/prospectpro
