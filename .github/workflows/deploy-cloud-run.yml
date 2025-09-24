@@ -1,18 +1,9 @@
-name: Deploy to Google Cloud Run
+name: Deploy to Google Cloud Run (Simple)
 
 on:
   push:
     branches: [main]
   workflow_dispatch:
-    inputs:
-      environment:
-        description: "Environment to deploy to"
-        required: true
-        default: "production"
-        type: choice
-        options:
-          - production
-          - staging
 
 env:
   PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
@@ -28,17 +19,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Debug environment variables
-        run: |
-          echo "🔍 Debug: Checking environment and secrets"
-          echo "PROJECT_ID: $PROJECT_ID"
-          echo "SERVICE_NAME: $SERVICE_NAME" 
-          echo "REGION: $REGION"
-          echo "GITHUB_SHA: $GITHUB_SHA"
-          echo "GCP_SA_KEY length: ${#GCP_SA_KEY}"
-        env:
-          GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
-
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v2
         with:
@@ -47,26 +27,12 @@ jobs:
       - name: Setup Google Cloud CLI
         uses: google-github-actions/setup-gcloud@v2
 
-      - name: Configure Docker for GCP
-        run: |
-          gcloud auth configure-docker --quiet
-
-      - name: Build Docker image
-        run: |
-          docker build -t gcr.io/$PROJECT_ID/$SERVICE_NAME:$GITHUB_SHA .
-          docker build -t gcr.io/$PROJECT_ID/$SERVICE_NAME:latest .
-
-      - name: Push Docker image to Container Registry
-        run: |
-          docker push gcr.io/$PROJECT_ID/$SERVICE_NAME:$GITHUB_SHA
-          docker push gcr.io/$PROJECT_ID/$SERVICE_NAME:latest
-
-      - name: Deploy to Cloud Run
+      - name: Deploy to Cloud Run (Source-based)
         run: |
           gcloud run deploy $SERVICE_NAME \
-            --image gcr.io/$PROJECT_ID/$SERVICE_NAME:$GITHUB_SHA \
-            --region $REGION \
+            --source . \
             --platform managed \
+            --region $REGION \
             --allow-unauthenticated \
             --port 3100 \
             --memory 2Gi \
@@ -75,10 +41,10 @@ jobs:
             --max-instances 10 \
             --concurrency 100 \
             --timeout 300 \
-            --set-env-vars="NODE_ENV=production" \
-            --set-env-vars="SUPABASE_URL=${{ secrets.SUPABASE_URL }}" \
-            --set-env-vars="SUPABASE_SECRET_KEY=${{ secrets.SUPABASE_SECRET_KEY }}" \
-            --set-env-vars="PORT=3100" \
+            --set-env-vars NODE_ENV=production \
+            --set-env-vars SUPABASE_URL="${{ secrets.SUPABASE_URL }}" \
+            --set-env-vars SUPABASE_SECRET_KEY="${{ secrets.SUPABASE_SECRET_KEY }}" \
+            --set-env-vars PORT=3100 \
             --quiet
 
       - name: Get service URL
@@ -90,16 +56,19 @@ jobs:
 
       - name: Test deployment
         run: |
-          echo "Testing health endpoint..."
-          curl -f ${{ steps.get-url.outputs.SERVICE_URL }}/health || echo "Health check failed (might be cold start)"
-
-          echo "Testing diagnostic endpoint..."
-          curl -f ${{ steps.get-url.outputs.SERVICE_URL }}/diag || echo "Diagnostic check failed"
+          echo "⏳ Waiting for service to be ready..."
+          sleep 30
+          
+          echo "🧪 Testing health endpoint..."
+          curl -f ${{ steps.get-url.outputs.SERVICE_URL }}/health || echo "❌ Health check failed"
+          
+          echo "🧪 Testing diagnostic endpoint..."
+          curl -f ${{ steps.get-url.outputs.SERVICE_URL }}/diag || echo "❌ Diagnostic check failed"
 
       - name: Deployment summary
         run: |
-          echo "✅ Deployment completed successfully!"
+          echo "✅ Deployment completed!"
           echo "🌐 Service URL: ${{ steps.get-url.outputs.SERVICE_URL }}"
-          echo "📊 Health Check: ${{ steps.get-url.outputs.SERVICE_URL }}/health"
+          echo "📊 Health: ${{ steps.get-url.outputs.SERVICE_URL }}/health"
           echo "🔍 Diagnostics: ${{ steps.get-url.outputs.SERVICE_URL }}/diag"
-          echo "📋 API Docs: ${{ steps.get-url.outputs.SERVICE_URL }}/api"
+          echo "📋 Business Discovery API: ${{ steps.get-url.outputs.SERVICE_URL }}/api/business-discovery"
