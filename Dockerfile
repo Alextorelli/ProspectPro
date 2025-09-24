@@ -31,9 +31,9 @@ USER node
 # Enhanced healthcheck for Cloud Run with fallback
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
     CMD curl -fsS http://localhost:${PORT:-8080}/health || \
-        curl -fsS http://localhost:8080/health || \
-        curl -fsS http://localhost:3100/health || \
-        exit 1
+    curl -fsS http://localhost:8080/health || \
+    curl -fsS http://localhost:3100/health || \
+    exit 1
 
 # Start the application
 CMD ["node", "server.js"]

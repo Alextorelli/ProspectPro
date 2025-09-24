@@ -78,9 +78,9 @@ app.get("/health", (req, res) => {
     port: process.env.PORT || 3100,
     degradedStart: process.env.ALLOW_DEGRADED_START === "true",
     uptime: process.uptime(),
-    version: "3.1.0"
+    version: "3.1.0",
   };
-  
+
   console.log("🏥 Health check requested:", JSON.stringify(healthData));
   res.json(healthData);
 });
@@ -184,7 +184,7 @@ app.get("/", (req, res) => {
         res.status(404).json({
           error: "Frontend not found",
           message: "The application frontend is not available",
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         });
       }
     });
@@ -193,7 +193,7 @@ app.get("/", (req, res) => {
     res.status(500).json({
       error: "Application error",
       message: "Failed to serve the application",
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
   }
 });
@@ -271,8 +271,12 @@ async function startServer() {
           );
 
           if (process.env.ALLOW_DEGRADED_START !== "true") {
-            console.error("🚨 Forcing graceful degraded start for Cloud Run stability");
-            console.warn("⚠️ CLOUD RUN: Starting in degraded mode due to schema cache");
+            console.error(
+              "🚨 Forcing graceful degraded start for Cloud Run stability"
+            );
+            console.warn(
+              "⚠️ CLOUD RUN: Starting in degraded mode due to schema cache"
+            );
           } else {
             console.warn("🚨 EMERGENCY: Starting production in degraded mode");
           }
@@ -291,7 +295,9 @@ async function startServer() {
         );
 
         if (process.env.ALLOW_DEGRADED_START !== "true") {
-          console.error("🚨 Forcing graceful degraded start for Cloud Run stability");
+          console.error(
+            "🚨 Forcing graceful degraded start for Cloud Run stability"
+          );
           console.warn("⚠️ CLOUD RUN: Starting without database connection");
         } else {
           console.warn("🚨 EMERGENCY: Starting production without database");
@@ -329,7 +335,9 @@ async function startServer() {
           );
 
           if (process.env.ALLOW_DEGRADED_START !== "true") {
-            console.error("🚨 Forcing graceful degraded start for Cloud Run stability");
+            console.error(
+              "🚨 Forcing graceful degraded start for Cloud Run stability"
+            );
             console.warn("⚠️ CLOUD RUN: Starting without critical API keys");
           } else {
             console.warn("🚨 EMERGENCY: Starting without critical API keys");
@@ -342,7 +350,9 @@ async function startServer() {
         );
 
         if (process.env.ALLOW_DEGRADED_START !== "true") {
-          console.error("🚨 Forcing graceful degraded start for Cloud Run stability");
+          console.error(
+            "🚨 Forcing graceful degraded start for Cloud Run stability"
+          );
           console.warn("⚠️ CLOUD RUN: Starting without Vault API keys");
         } else {
           console.warn("🚨 EMERGENCY: Starting without Vault API keys");
@@ -350,32 +360,38 @@ async function startServer() {
       }
     }
 
-// Start HTTP server with optimized configuration for Cloud Run
-const server = app.listen(
-  process.env.PORT || 3100,
-  "0.0.0.0", // Explicitly bind to all interfaces for Cloud Run
-  () => {
-    const port = process.env.PORT || 3100;
-    const host = "0.0.0.0";
-    const serverUrl = `http://${host}:${port}`;
-    
-    console.log(`🌐 ProspectPro v3.1.0 server running on ${serverUrl}`);
-    console.log(`📊 Environment: ${config.environment}`);
-    console.log(`🔗 Health check: ${serverUrl}/health`);
-    console.log(`🔍 Diagnostics: ${serverUrl}/diag`);
-    console.log(`🐳 Container Port: ${port} (Cloud Run managed)`);
+    // Start HTTP server with optimized configuration for Cloud Run
+    const server = app.listen(
+      process.env.PORT || 3100,
+      "0.0.0.0", // Explicitly bind to all interfaces for Cloud Run
+      () => {
+        const port = process.env.PORT || 3100;
+        const host = "0.0.0.0";
+        const serverUrl = `http://${host}:${port}`;
 
-    // Production status summary
-    if (config.isProduction) {
-      console.log("\n" + "=".repeat(50));
-      console.log("🏭 PRODUCTION MODE ACTIVE");
-      console.log("✅ Strict startup validation enabled");
-      console.log("✅ Supabase Vault API key loading");
-      console.log(`✅ Degraded startup: ${process.env.ALLOW_DEGRADED_START === "true" ? "ENABLED" : "DISABLED"}`);
-      console.log("=".repeat(50) + "\n");
-    }
-  }
-);    // Set server timeout for production
+        console.log(`🌐 ProspectPro v3.1.0 server running on ${serverUrl}`);
+        console.log(`📊 Environment: ${config.environment}`);
+        console.log(`🔗 Health check: ${serverUrl}/health`);
+        console.log(`🔍 Diagnostics: ${serverUrl}/diag`);
+        console.log(`🐳 Container Port: ${port} (Cloud Run managed)`);
+
+        // Production status summary
+        if (config.isProduction) {
+          console.log("\n" + "=".repeat(50));
+          console.log("🏭 PRODUCTION MODE ACTIVE");
+          console.log("✅ Strict startup validation enabled");
+          console.log("✅ Supabase Vault API key loading");
+          console.log(
+            `✅ Degraded startup: ${
+              process.env.ALLOW_DEGRADED_START === "true"
+                ? "ENABLED"
+                : "DISABLED"
+            }`
+          );
+          console.log("=".repeat(50) + "\n");
+        }
+      }
+    ); // Set server timeout for production
     server.timeout = 120000; // 2 minutes
 
     return server;

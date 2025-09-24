@@ -1,0 +1,42 @@
+steps:
+  # Build the simplified Docker image
+  - name: 'gcr.io/cloud-builders/docker'
+    args: [
+      'build',
+      '-f', 'Dockerfile.simple',
+      '-t', 'us-central1-docker.pkg.dev/$PROJECT_ID/prospectpro/simple:$COMMIT_SHA',
+      '-t', 'us-central1-docker.pkg.dev/$PROJECT_ID/prospectpro/simple:latest',
+      '.'
+    ]
+
+  # Push the Docker image to Artifact Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    args: [
+      'push',
+      '--all-tags',
+      'us-central1-docker.pkg.dev/$PROJECT_ID/prospectpro/simple'
+    ]
+
+  # Deploy simplified version to Cloud Run
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: 'gcloud'
+    args:
+      - 'run'
+      - 'deploy'
+      - 'prospectpro'
+      - '--image=us-central1-docker.pkg.dev/$PROJECT_ID/prospectpro/simple:latest'
+      - '--region=us-central1'
+      - '--platform=managed'
+      - '--allow-unauthenticated'
+      - '--memory=1Gi'
+      - '--cpu=1'
+      - '--max-instances=10'
+      - '--timeout=300'
+      - '--set-env-vars=NODE_ENV=production'
+      - '--service-account=prospectpro-deployment@leadgen-471822.iam.gserviceaccount.com'
+
+options:
+  logging: CLOUD_LOGGING_ONLY
+  machineType: 'E2_HIGHCPU_4'
+
+timeout: '600s'
