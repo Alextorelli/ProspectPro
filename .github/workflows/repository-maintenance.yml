@@ -7,14 +7,14 @@ on:
   workflow_dispatch:
     inputs:
       maintenance_type:
-        description: 'Type of maintenance to run'
+        description: "Type of maintenance to run"
         required: false
-        default: 'full'
+        default: "full"
         type: choice
         options:
-        - full
-        - artifacts-only
-        - security-only
+          - full
+          - artifacts-only
+          - security-only
 
 jobs:
   detect-development-artifacts:

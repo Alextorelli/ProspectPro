@@ -53,7 +53,9 @@ class EnvironmentLoader {
    */
   async loadApiKeysFromVault() {
     if (!vaultLoader) {
-      console.warn("⚠️ Vault loader not available, using environment variables only");
+      console.warn(
+        "⚠️ Vault loader not available, using environment variables only"
+      );
       return null;
     }
 
@@ -64,15 +66,18 @@ class EnvironmentLoader {
     try {
       console.log("🔑 Loading API keys from Supabase Vault...");
       this.vaultApiKeys = await vaultLoader.loadStandardApiKeys();
-      
+
       if (this.vaultApiKeys) {
         this.configSources.push("🔐 Supabase Vault (API Keys)");
         console.log("✅ API keys loaded from Supabase Vault");
       }
-      
+
       return this.vaultApiKeys;
     } catch (error) {
-      console.warn("⚠️ Failed to load API keys from Supabase Vault:", error.message);
+      console.warn(
+        "⚠️ Failed to load API keys from Supabase Vault:",
+        error.message
+      );
       return null;
     }
   }
@@ -83,13 +88,15 @@ class EnvironmentLoader {
    */
   async getApiKeys() {
     const vaultKeys = await this.loadApiKeysFromVault();
-    
+
     if (!vaultKeys) {
       // Fallback to environment variables only
       console.log("🔑 Using API keys from environment variables");
       return {
         googlePlaces: process.env.GOOGLE_PLACES_API_KEY,
-        foursquare: process.env.FOURSQUARE_SERVICE_API_KEY || process.env.FOURSQUARE_PLACES_API_KEY,
+        foursquare:
+          process.env.FOURSQUARE_SERVICE_API_KEY ||
+          process.env.FOURSQUARE_PLACES_API_KEY,
         hunterIO: process.env.HUNTER_IO_API_KEY,
         neverBounce: process.env.NEVERBOUNCE_API_KEY,
         zeroBounce: process.env.ZEROBOUNCE_API_KEY,
@@ -100,7 +107,7 @@ class EnvironmentLoader {
         socrata: process.env.SOCRATA_API_KEY,
         socrataToken: process.env.SOCRATA_APP_TOKEN,
         uspto: process.env.USPTO_TSDR_API_KEY,
-        personalAccessToken: process.env.PERSONAL_ACCESS_TOKEN
+        personalAccessToken: process.env.PERSONAL_ACCESS_TOKEN,
       };
     }
 

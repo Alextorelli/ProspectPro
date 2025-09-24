@@ -166,7 +166,7 @@ npm run diag       # Comprehensive diagnostics
 ```javascript
 // ✅ CORRECT: Advanced Environment Loading with Vault Integration
 console.log(`🔧 Initializing ProspectPro Environment Loader...`);
-const EnvironmentLoader = require('./config/environment-loader');
+const EnvironmentLoader = require("./config/environment-loader");
 const envLoader = new EnvironmentLoader();
 const config = envLoader.getConfig();
 
@@ -174,12 +174,15 @@ const config = envLoader.getConfig();
 if (config.isProduction) {
   console.log("🔑 Pre-loading API keys from Supabase Vault...");
   const apiKeys = await envLoader.getApiKeys();
-  
+
   // Critical API validation - no degraded starts
-  const criticalApis = ['foursquare', 'googlePlaces'];
-  const missingCritical = criticalApis.filter(api => !apiKeys[api]);
-  
-  if (missingCritical.length > 0 && process.env.ALLOW_DEGRADED_START !== "true") {
+  const criticalApis = ["foursquare", "googlePlaces"];
+  const missingCritical = criticalApis.filter((api) => !apiKeys[api]);
+
+  if (
+    missingCritical.length > 0 &&
+    process.env.ALLOW_DEGRADED_START !== "true"
+  ) {
     process.exit(1);
   }
 }
@@ -199,11 +202,11 @@ if (config.isProduction) {
 // modules/utils/supabase-vault-loader.js - Runtime API key access
 class SupabaseVaultLoader {
   async loadApiKey(keyName) {
-    const { data, error } = await supabase.rpc('vault_decrypt_secret', {
-      secret_name: keyName
+    const { data, error } = await supabase.rpc("vault_decrypt_secret", {
+      secret_name: keyName,
     });
 
-    if (data && data[0].status === 'SUCCESS') {
+    if (data && data[0].status === "SUCCESS") {
       return data[0].decrypted_secret;
     }
     return null;
@@ -289,14 +292,19 @@ The Production MCP Server provides critical development acceleration with these 
 // production-server.js - Enhanced tools for production optimization
 const productionTools = {
   // EXISTING TOOLS (enhanced)
-  environment_health_check: "Real-time Supabase connection, API status, vault accessibility",
-  github_actions_monitor: "Live workflow status, artifact availability, build logs",
+  environment_health_check:
+    "Real-time Supabase connection, API status, vault accessibility",
+  github_actions_monitor:
+    "Live workflow status, artifact availability, build logs",
   dev_prod_config_diff: "Compare dev container vs production configuration",
-  
+
   // NEW TOOLS FOR VAULT AND OPTIMIZATION
-  vault_api_key_status: "Comprehensive Supabase Vault API key status and diagnostics",
-  production_startup_validator: "Complete production startup validation and issue detection",
-  github_workflow_optimizer: "GitHub Actions workflow analysis and cascade prevention",
+  vault_api_key_status:
+    "Comprehensive Supabase Vault API key status and diagnostics",
+  production_startup_validator:
+    "Complete production startup validation and issue detection",
+  github_workflow_optimizer:
+    "GitHub Actions workflow analysis and cascade prevention",
 };
 ```
 
@@ -305,8 +313,10 @@ const productionTools = {
 ```javascript
 const costManagementTools = {
   cost_budget_monitor: "Live API usage costs, budget alerts, cost per lead",
-  performance_metrics: "4-stage pipeline metrics, API response times, quality scores",
-  api_health_dashboard: "Multi-source API health, rate limit status, error aggregation",
+  performance_metrics:
+    "4-stage pipeline metrics, API response times, quality scores",
+  api_health_dashboard:
+    "Multi-source API health, rate limit status, error aggregation",
 };
 ```
 
@@ -816,8 +826,8 @@ function enhanceBusinessWithCrossData(primaryBusiness, secondaryBusiness) {
 # OPTIMIZED: No longer triggers on every push
 on:
   schedule:
-    - cron: "0 2 * * 0"  # Weekly only
-  workflow_dispatch:      # Manual trigger only
+    - cron: "0 2 * * 0" # Weekly only
+  workflow_dispatch: # Manual trigger only
 ```
 
 #### **Docker Environment** (`docker-env.yml`)
@@ -826,7 +836,7 @@ on:
 # OPTIMIZED: Manual and workflow_call only
 on:
   workflow_dispatch:
-  workflow_call:         # Can be called by other workflows
+  workflow_call: # Can be called by other workflows
 ```
 
 #### **Benefits of Optimization:**

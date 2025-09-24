@@ -20,9 +20,13 @@ const API_KEY_CACHE_TTL = 300000; // 5 minutes
  */
 async function getApiKeys() {
   const now = Date.now();
-  
+
   // Return cached keys if still valid
-  if (apiKeysCache && lastApiKeyLoad && (now - lastApiKeyLoad) < API_KEY_CACHE_TTL) {
+  if (
+    apiKeysCache &&
+    lastApiKeyLoad &&
+    now - lastApiKeyLoad < API_KEY_CACHE_TTL
+  ) {
     return apiKeysCache;
   }
 
@@ -30,16 +34,20 @@ async function getApiKeys() {
     console.log("🔑 Refreshing API keys from Supabase Vault...");
     apiKeysCache = await envLoader.getApiKeys();
     lastApiKeyLoad = now;
-    
-    const keyCount = Object.values(apiKeysCache).filter(key => 
-      key && key !== 'your_api_key_here' && !key.includes('your_')
+
+    const keyCount = Object.values(apiKeysCache).filter(
+      (key) => key && key !== "your_api_key_here" && !key.includes("your_")
     ).length;
-    
-    console.log(`🔑 API keys refreshed: ${keyCount}/${Object.keys(apiKeysCache).length} available`);
+
+    console.log(
+      `🔑 API keys refreshed: ${keyCount}/${
+        Object.keys(apiKeysCache).length
+      } available`
+    );
     return apiKeysCache;
   } catch (error) {
     console.error("❌ Failed to load API keys from vault:", error.message);
-    
+
     // Fallback to environment variables
     console.log("🔄 Falling back to environment variables");
     apiKeysCache = {
@@ -47,7 +55,9 @@ async function getApiKeys() {
       apollo: process.env.APOLLO_API_KEY,
       neverBounce: process.env.NEVERBOUNCE_API_KEY,
       googlePlaces: process.env.GOOGLE_PLACES_API_KEY,
-      foursquare: process.env.FOURSQUARE_SERVICE_API_KEY || process.env.FOURSQUARE_PLACES_API_KEY,
+      foursquare:
+        process.env.FOURSQUARE_SERVICE_API_KEY ||
+        process.env.FOURSQUARE_PLACES_API_KEY,
       zeroBounce: process.env.ZEROBOUNCE_API_KEY,
       courtListener: process.env.COURTLISTENER_API_KEY,
       socrata: process.env.SOCRATA_API_KEY,
@@ -56,7 +66,7 @@ async function getApiKeys() {
       californiaSOSApiKey: process.env.CALIFORNIA_SOS_API_KEY,
       scrapingdog: process.env.SCRAPINGDOG_API_KEY,
     };
-    
+
     lastApiKeyLoad = now;
     return apiKeysCache;
   }
@@ -70,7 +80,7 @@ router.post("/discover-businesses", async (req, res) => {
   try {
     // Load fresh API keys from vault
     const apiKeys = await getApiKeys();
-    
+
     // Initialize Enhanced Discovery Engine v2.0 with vault API keys
     const discoveryEngine = new EnhancedDiscoveryEngine(apiKeys);
     const campaignLogger = new CampaignLogger();
@@ -97,8 +107,10 @@ router.post("/discover-businesses", async (req, res) => {
     if (!apiKeys.foursquare && !apiKeys.googlePlaces) {
       return res.status(500).json({
         success: false,
-        error: "Critical API keys missing: Foursquare or Google Places required for business discovery",
-        details: "Configure API keys in Supabase Vault or environment variables"
+        error:
+          "Critical API keys missing: Foursquare or Google Places required for business discovery",
+        details:
+          "Configure API keys in Supabase Vault or environment variables",
       });
     }
 

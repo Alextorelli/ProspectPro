@@ -4,7 +4,7 @@
  * @version 1.0.0 - Production Ready
  */
 
-const { getSupabaseClient } = require('../../config/supabase');
+const { getSupabaseClient } = require("../../config/supabase");
 
 class SupabaseVaultLoader {
   constructor() {
@@ -35,8 +35,8 @@ class SupabaseVaultLoader {
       }
 
       // Query vault for the secret using the JavaScript interface
-      const { data, error } = await supabase.rpc('vault_decrypt_secret', {
-        secret_name: keyName
+      const { data, error } = await supabase.rpc("vault_decrypt_secret", {
+        secret_name: keyName,
       });
 
       if (error) {
@@ -46,33 +46,46 @@ class SupabaseVaultLoader {
 
       if (data && data.length > 0) {
         const result = data[0];
-        
-        if (result.status === 'SUCCESS' && result.decrypted_secret) {
+
+        if (result.status === "SUCCESS" && result.decrypted_secret) {
           // Cache the key
           this.setCachedKey(keyName, result.decrypted_secret);
           console.log(`✅ Loaded ${keyName} from Supabase Vault`);
           return result.decrypted_secret;
         } else {
-          console.warn(`⚠️ Vault issue for ${keyName}: ${result.status} - ${result.error_message || 'No details'}`);
+          console.warn(
+            `⚠️ Vault issue for ${keyName}: ${result.status} - ${
+              result.error_message || "No details"
+            }`
+          );
           return null;
         }
       }
 
-      console.warn(`⚠️ No valid API key found for ${keyName} in Supabase Vault`);
+      console.warn(
+        `⚠️ No valid API key found for ${keyName} in Supabase Vault`
+      );
       return null;
-
     } catch (error) {
       const attempts = this.loadAttempts.get(keyName) || 0;
       this.loadAttempts.set(keyName, attempts + 1);
 
       if (attempts < this.maxRetries) {
-        console.warn(`⚠️ Retry ${attempts + 1}/${this.maxRetries} loading ${keyName}:`, error.message);
+        console.warn(
+          `⚠️ Retry ${attempts + 1}/${this.maxRetries} loading ${keyName}:`,
+          error.message
+        );
         // Exponential backoff
-        await new Promise(resolve => setTimeout(resolve, Math.pow(2, attempts) * 1000));
+        await new Promise((resolve) =>
+          setTimeout(resolve, Math.pow(2, attempts) * 1000)
+        );
         return await this.loadApiKey(keyName);
       }
 
-      console.error(`❌ Failed to load ${keyName} after ${this.maxRetries} attempts:`, error.message);
+      console.error(
+        `❌ Failed to load ${keyName} after ${this.maxRetries} attempts:`,
+        error.message
+      );
       return null;
     }
   }
@@ -83,8 +96,8 @@ class SupabaseVaultLoader {
    * @returns {Promise<Object>} Object with keyName: apiKey pairs
    */
   async loadApiKeys(keyNames) {
-    console.log('🔑 Loading API keys from Supabase Vault...');
-    
+    console.log("🔑 Loading API keys from Supabase Vault...");
+
     const apiKeys = {};
     const loadPromises = keyNames.map(async (keyName) => {
       const key = await this.loadApiKey(keyName);
@@ -95,15 +108,17 @@ class SupabaseVaultLoader {
     });
 
     const results = await Promise.all(loadPromises);
-    
-    const loaded = results.filter(r => r.key).length;
+
+    const loaded = results.filter((r) => r.key).length;
     const total = keyNames.length;
-    
-    console.log(`🔑 Vault loading complete: ${loaded}/${total} API keys loaded`);
-    
+
+    console.log(
+      `🔑 Vault loading complete: ${loaded}/${total} API keys loaded`
+    );
+
     if (loaded === 0) {
-      console.warn('⚠️ No API keys loaded from Supabase Vault');
-      console.warn('💡 Ensure vault is configured and API keys are stored');
+      console.warn("⚠️ No API keys loaded from Supabase Vault");
+      console.warn("💡 Ensure vault is configured and API keys are stored");
     }
 
     return apiKeys;
@@ -115,51 +130,64 @@ class SupabaseVaultLoader {
    */
   async loadStandardApiKeys() {
     const standardKeys = [
-      'GOOGLE_PLACES_API_KEY',
-      'FOURSQUARE_SERVICE_API_KEY',
-      'FOURSQUARE_PLACES_API_KEY',
-      'HUNTER_IO_API_KEY',
-      'NEVERBOUNCE_API_KEY',
-      'ZEROBOUNCE_API_KEY',
-      'APOLLO_API_KEY',
-      'SCRAPINGDOG_API_KEY',
-      'CALIFORNIA_SOS_API_KEY',
-      'COURTLISTENER_API_KEY',
-      'SOCRATA_API_KEY',
-      'SOCRATA_APP_TOKEN',
-      'USPTO_TSDR_API_KEY',
-      'PERSONAL_ACCESS_TOKEN'
+      "GOOGLE_PLACES_API_KEY",
+      "FOURSQUARE_SERVICE_API_KEY",
+      "FOURSQUARE_PLACES_API_KEY",
+      "HUNTER_IO_API_KEY",
+      "NEVERBOUNCE_API_KEY",
+      "ZEROBOUNCE_API_KEY",
+      "APOLLO_API_KEY",
+      "SCRAPINGDOG_API_KEY",
+      "CALIFORNIA_SOS_API_KEY",
+      "COURTLISTENER_API_KEY",
+      "SOCRATA_API_KEY",
+      "SOCRATA_APP_TOKEN",
+      "USPTO_TSDR_API_KEY",
+      "PERSONAL_ACCESS_TOKEN",
     ];
 
     const vaultKeys = await this.loadApiKeys(standardKeys);
-    
+
     // Combine with environment variables (environment takes precedence for security)
     const combinedKeys = {
-      googlePlaces: process.env.GOOGLE_PLACES_API_KEY || vaultKeys.GOOGLE_PLACES_API_KEY,
-      foursquare: process.env.FOURSQUARE_SERVICE_API_KEY || 
-                  vaultKeys.FOURSQUARE_SERVICE_API_KEY || 
-                  process.env.FOURSQUARE_PLACES_API_KEY ||
-                  vaultKeys.FOURSQUARE_PLACES_API_KEY,
+      googlePlaces:
+        process.env.GOOGLE_PLACES_API_KEY || vaultKeys.GOOGLE_PLACES_API_KEY,
+      foursquare:
+        process.env.FOURSQUARE_SERVICE_API_KEY ||
+        vaultKeys.FOURSQUARE_SERVICE_API_KEY ||
+        process.env.FOURSQUARE_PLACES_API_KEY ||
+        vaultKeys.FOURSQUARE_PLACES_API_KEY,
       hunterIO: process.env.HUNTER_IO_API_KEY || vaultKeys.HUNTER_IO_API_KEY,
-      neverBounce: process.env.NEVERBOUNCE_API_KEY || vaultKeys.NEVERBOUNCE_API_KEY,
-      zeroBounce: process.env.ZEROBOUNCE_API_KEY || vaultKeys.ZEROBOUNCE_API_KEY,
+      neverBounce:
+        process.env.NEVERBOUNCE_API_KEY || vaultKeys.NEVERBOUNCE_API_KEY,
+      zeroBounce:
+        process.env.ZEROBOUNCE_API_KEY || vaultKeys.ZEROBOUNCE_API_KEY,
       apollo: process.env.APOLLO_API_KEY || vaultKeys.APOLLO_API_KEY,
-      scrapingdog: process.env.SCRAPINGDOG_API_KEY || vaultKeys.SCRAPINGDOG_API_KEY,
-      californiaSOSApiKey: process.env.CALIFORNIA_SOS_API_KEY || vaultKeys.CALIFORNIA_SOS_API_KEY,
-      courtListener: process.env.COURTLISTENER_API_KEY || vaultKeys.COURTLISTENER_API_KEY,
+      scrapingdog:
+        process.env.SCRAPINGDOG_API_KEY || vaultKeys.SCRAPINGDOG_API_KEY,
+      californiaSOSApiKey:
+        process.env.CALIFORNIA_SOS_API_KEY || vaultKeys.CALIFORNIA_SOS_API_KEY,
+      courtListener:
+        process.env.COURTLISTENER_API_KEY || vaultKeys.COURTLISTENER_API_KEY,
       socrata: process.env.SOCRATA_API_KEY || vaultKeys.SOCRATA_API_KEY,
-      socrataToken: process.env.SOCRATA_APP_TOKEN || vaultKeys.SOCRATA_APP_TOKEN,
+      socrataToken:
+        process.env.SOCRATA_APP_TOKEN || vaultKeys.SOCRATA_APP_TOKEN,
       uspto: process.env.USPTO_TSDR_API_KEY || vaultKeys.USPTO_TSDR_API_KEY,
-      personalAccessToken: process.env.PERSONAL_ACCESS_TOKEN || vaultKeys.PERSONAL_ACCESS_TOKEN
+      personalAccessToken:
+        process.env.PERSONAL_ACCESS_TOKEN || vaultKeys.PERSONAL_ACCESS_TOKEN,
     };
 
     // Log configuration summary
-    const configuredCount = Object.values(combinedKeys).filter(key => 
-      key && key !== 'your_api_key_here' && !key.includes('your_')
+    const configuredCount = Object.values(combinedKeys).filter(
+      (key) => key && key !== "your_api_key_here" && !key.includes("your_")
     ).length;
-    
-    console.log(`🔑 Final API configuration: ${configuredCount}/${Object.keys(combinedKeys).length} keys available`);
-    
+
+    console.log(
+      `🔑 Final API configuration: ${configuredCount}/${
+        Object.keys(combinedKeys).length
+      } keys available`
+    );
+
     return combinedKeys;
   }
 
@@ -181,7 +209,7 @@ class SupabaseVaultLoader {
   setCachedKey(keyName, key) {
     this.cache.set(keyName, {
       key: key,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     });
   }
 
@@ -203,7 +231,7 @@ class SupabaseVaultLoader {
     const now = Date.now();
     const total = this.cache.size;
     let valid = 0;
-    
+
     for (const [keyName, cached] of this.cache.entries()) {
       if (now - cached.timestamp < this.cacheTTL) {
         valid++;

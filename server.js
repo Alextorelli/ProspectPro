@@ -4,14 +4,19 @@
  * @version 3.1.0 - Production Branch Optimized
  */
 
+// CRITICAL: Load environment variables FIRST before any other imports
+require('dotenv').config();
+
 // Advanced Environment Loading
 console.log(`🔧 Initializing ProspectPro Environment Loader...`);
-const EnvironmentLoader = require('./config/environment-loader');
+const EnvironmentLoader = require("./config/environment-loader");
 const envLoader = new EnvironmentLoader();
 const config = envLoader.getConfig();
 
 console.log(`🚀 ProspectPro v3.1.0 starting in ${config.environment} mode`);
-console.log(`🔧 Binding to ${config.host || '0.0.0.0'}:${process.env.PORT || 3100}`);
+console.log(
+  `🔧 Binding to ${config.host || "0.0.0.0"}:${process.env.PORT || 3100}`
+);
 
 // Core dependencies with error handling
 const express = require("express");
@@ -221,17 +226,23 @@ async function startServer() {
     } else if (dbTest.success && dbTest.warning) {
       console.log("⚠️  Database connected with warning:", dbTest.warning);
       if (dbTest.warning.includes("schema cache")) {
-        console.log("🔧 Schema cache issue detected - this is common after database updates");
-        
+        console.log(
+          "🔧 Schema cache issue detected - this is common after database updates"
+        );
+
         // STRICT PRODUCTION MODE: No degraded starts in production
         if (config.isProduction) {
-          console.error("❌ Production startup blocked: schema cache issues detected");
+          console.error(
+            "❌ Production startup blocked: schema cache issues detected"
+          );
           console.error("💡 Solutions:");
           console.error("   1. Wait 5-10 minutes for automatic cache refresh");
           console.error("   2. Restart your Supabase project in the dashboard");
           console.error("   3. Run: node scripts/refresh-schema-cache.js");
-          console.error("   4. Set ALLOW_DEGRADED_START=true for emergency bypass");
-          
+          console.error(
+            "   4. Set ALLOW_DEGRADED_START=true for emergency bypass"
+          );
+
           if (process.env.ALLOW_DEGRADED_START !== "true") {
             process.exit(1);
           } else {
@@ -241,12 +252,16 @@ async function startServer() {
       }
     } else {
       console.error("❌ Database connection failed:", dbTest.error);
-      
+
       // STRICT PRODUCTION MODE: No database, no startup
       if (config.isProduction) {
-        console.error("❌ Production startup blocked: database connection failed");
-        console.error("💡 Ensure Supabase URL and SECRET_KEY are correctly configured");
-        
+        console.error(
+          "❌ Production startup blocked: database connection failed"
+        );
+        console.error(
+          "💡 Ensure Supabase URL and SECRET_KEY are correctly configured"
+        );
+
         if (process.env.ALLOW_DEGRADED_START !== "true") {
           process.exit(1);
         } else {
@@ -262,20 +277,28 @@ async function startServer() {
       console.log("🔑 Pre-loading API keys from Supabase Vault...");
       try {
         const apiKeys = await envLoader.getApiKeys();
-        const keyCount = Object.values(apiKeys).filter(key => 
-          key && key !== 'your_api_key_here' && !key.includes('your_')
+        const keyCount = Object.values(apiKeys).filter(
+          (key) => key && key !== "your_api_key_here" && !key.includes("your_")
         ).length;
-        
-        console.log(`� API Keys loaded: ${keyCount}/${Object.keys(apiKeys).length} available`);
-        
+
+        console.log(
+          `� API Keys loaded: ${keyCount}/${
+            Object.keys(apiKeys).length
+          } available`
+        );
+
         // Critical API validation for production
-        const criticalApis = ['foursquare', 'googlePlaces'];
-        const missingCritical = criticalApis.filter(api => !apiKeys[api]);
-        
+        const criticalApis = ["foursquare", "googlePlaces"];
+        const missingCritical = criticalApis.filter((api) => !apiKeys[api]);
+
         if (missingCritical.length > 0) {
-          console.error(`❌ Critical API keys missing: ${missingCritical.join(', ')}`);
-          console.error("💡 Business discovery engine requires Foursquare API key");
-          
+          console.error(
+            `❌ Critical API keys missing: ${missingCritical.join(", ")}`
+          );
+          console.error(
+            "💡 Business discovery engine requires Foursquare API key"
+          );
+
           if (process.env.ALLOW_DEGRADED_START !== "true") {
             process.exit(1);
           } else {
@@ -283,8 +306,11 @@ async function startServer() {
           }
         }
       } catch (error) {
-        console.error("❌ Failed to load API keys from Supabase Vault:", error.message);
-        
+        console.error(
+          "❌ Failed to load API keys from Supabase Vault:",
+          error.message
+        );
+
         if (process.env.ALLOW_DEGRADED_START !== "true") {
           process.exit(1);
         } else {
@@ -294,23 +320,29 @@ async function startServer() {
     }
 
     // Start HTTP server with optimized configuration
-    const server = app.listen(process.env.PORT || 3100, config.host || '0.0.0.0', () => {
-      const serverUrl = `http://${config.host || '0.0.0.0'}:${process.env.PORT || 3100}`;
-      console.log(`🌐 ProspectPro v3.1.0 server running on ${serverUrl}`);
-      console.log(`📊 Environment: ${config.environment}`);
-      console.log(`🔗 Health check: ${serverUrl}/health`);
-      console.log(`🔍 Diagnostics: ${serverUrl}/diag`);
+    const server = app.listen(
+      process.env.PORT || 3100,
+      config.host || "0.0.0.0",
+      () => {
+        const serverUrl = `http://${config.host || "0.0.0.0"}:${
+          process.env.PORT || 3100
+        }`;
+        console.log(`🌐 ProspectPro v3.1.0 server running on ${serverUrl}`);
+        console.log(`📊 Environment: ${config.environment}`);
+        console.log(`🔗 Health check: ${serverUrl}/health`);
+        console.log(`🔍 Diagnostics: ${serverUrl}/diag`);
 
-      // Production status summary
-      if (config.isProduction) {
-        console.log("\n" + "=".repeat(50));
-        console.log("🏭 PRODUCTION MODE ACTIVE");
-        console.log("✅ Strict startup validation enabled");
-        console.log("✅ Supabase Vault API key loading");
-        console.log("✅ Zero-tolerance for degraded states");
-        console.log("=".repeat(50) + "\n");
+        // Production status summary
+        if (config.isProduction) {
+          console.log("\n" + "=".repeat(50));
+          console.log("🏭 PRODUCTION MODE ACTIVE");
+          console.log("✅ Strict startup validation enabled");
+          console.log("✅ Supabase Vault API key loading");
+          console.log("✅ Zero-tolerance for degraded states");
+          console.log("=".repeat(50) + "\n");
+        }
       }
-    });
+    );
 
     // Set server timeout for production
     server.timeout = 120000; // 2 minutes
