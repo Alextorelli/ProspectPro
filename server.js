@@ -5,7 +5,7 @@
  */
 
 // CRITICAL: Load environment variables FIRST before any other imports
-require('dotenv').config();
+require("dotenv").config();
 
 // Advanced Environment Loading
 console.log(`🔧 Initializing ProspectPro Environment Loader...`);
