@@ -48,7 +48,7 @@ steps:
       - '--region=us-central1'
       - '--platform=managed'
       - '--allow-unauthenticated'
-      - '--port=3100'
+      # Removed --port=3100 to let Cloud Run manage port dynamically
       - '--memory=2Gi'
       - '--cpu=2'
       - '--max-instances=10'
