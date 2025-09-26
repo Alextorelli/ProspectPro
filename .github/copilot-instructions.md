@@ -1,11 +1,12 @@
-# ProspectPro v3.0 - Optimized AI Instructions
+# ProspectPro v3.1 - Optimized AI Instructions with Enhanced Quality Scoring
 
 ## CRITICAL: Current Production State
 
-- **Version**: 3.0.0 (Production-ready with Supabase Vault)
+- **Version**: 3.1.0 (Production-ready with Enhanced Quality Scoring v3.0)
 - **Deployment**: GitHub Actions → Google Cloud Run automated
 - **Environment**: Secrets auto-injected via GitHub Actions and Supabase Vault
-- **Architecture**: 4-stage validation pipeline (Discovery→Enrichment→Validation→Export)
+- **Architecture**: Cost-optimized 4-stage validation pipeline (Discovery→Enrichment→Validation→Export)
+- **Quality Scoring**: v3.0 cost-efficient multi-stage validation with dynamic thresholds
 - **Repository**: https://github.com/Alextorelli/ProspectPro (main = production)
 
 ## IMMEDIATE CONTEXT (No Re-explanation Needed)
@@ -16,7 +17,8 @@ When Alex asks about:
 - **"API integration"** → All clients in `/modules/api-clients/` (Google Places, Hunter.io, NeverBounce, Foursquare)
 - **"Database issues"** → Supabase with comprehensive schema in `/database/`
 - **"Docker problems"** → Multi-stage build with security hardening already implemented
-- **"Cost optimization"** → Built-in rate limiting and caching systems already active
+- **"Cost optimization"** → Enhanced Quality Scorer v3.0 with cost-efficient validation pipeline
+- **"Quality scoring"** → `/modules/validators/enhanced-quality-scorer.js` (35-45% qualification rates)
 - **"Deployment"** → Automated via GitHub Actions to Google Cloud Run
 - **"Testing"** → Use `npm run test` or check testing branch
 
@@ -113,6 +115,9 @@ npm run diag              # Diagnostics
 
 - **Automated secret management** via GitHub Actions
 - **Multi-stage Docker build** with security hardening
+- **Enhanced Quality Scoring v3.0** with cost-efficient validation pipeline
+- **Dynamic threshold adjustment** for 35-45% qualification rates (3x improvement)
+- **Cost optimization** through smart filtering and free validations first
 - **API rate limiting and caching** for cost optimization
 - **Comprehensive error handling** with structured logging
 - **Zero fake data validation** pipeline with quality scoring

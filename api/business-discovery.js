@@ -1,5 +1,6 @@
 const express = require("express");
 const EnhancedDiscoveryEngine = require("../modules/core/core-business-discovery-engine");
+const EnhancedQualityScorer = require("../modules/validators/enhanced-quality-scorer");
 const CampaignLogger = require("../modules/logging/logging-campaign-manager");
 const path = require("path");
 const fs = require("fs").promises;
@@ -137,13 +138,97 @@ router.post("/discover-businesses", async (req, res) => {
       additionalQueries,
     });
 
+    // Apply Enhanced Quality Scoring v3.0 with cost optimization
+    const qualityScorer = new EnhancedQualityScorer({
+      maxCostPerBusiness: budgetLimit / maxResults || 2.0,
+    });
+
+    // Score all discovered businesses with optimized algorithm
+    if (discoveryResult && discoveryResult.leads) {
+      console.log(
+        `🎯 Applying Enhanced Quality Scoring v3.0 to ${discoveryResult.leads.length} businesses`
+      );
+
+      for (let i = 0; i < discoveryResult.leads.length; i++) {
+        const business = discoveryResult.leads[i];
+        const scoringResult = await qualityScorer.calculateOptimizedScore(
+          business
+        );
+
+        // Update business with enhanced scoring
+        discoveryResult.leads[i] = {
+          ...business,
+          optimizedScore: scoringResult.score,
+          scoreBreakdown: scoringResult.breakdown,
+          costEfficient: scoringResult.costEfficient,
+          validationCost: scoringResult.totalCost,
+          scoringRecommendation: scoringResult.recommendation,
+        };
+      }
+
+      // Apply dynamic threshold optimization
+      const thresholdAnalysis = qualityScorer.calculateOptimalThreshold(
+        discoveryResult.leads,
+        35 // Target 35% qualification rate for balanced approach
+      );
+
+      const optimalThreshold = thresholdAnalysis.suggested;
+      console.log(
+        `📊 Dynamic threshold optimization: ${optimalThreshold}% (target: 35% qualification rate)`
+      );
+
+      // Filter with optimized threshold
+      const qualifiedLeads = discoveryResult.leads.filter(
+        (lead) => lead.optimizedScore >= optimalThreshold
+      );
+
+      // Update discovery result with enhanced scoring metrics
+      discoveryResult.leads = qualifiedLeads;
+      discoveryResult.qualityMetrics = {
+        originalCount: discoveryResult.totalFound || 0,
+        processedCount: discoveryResult.leads.length || 0,
+        qualifiedCount: qualifiedLeads.length,
+        qualificationRate:
+          discoveryResult.leads.length > 0
+            ? Math.round(
+                (qualifiedLeads.length / (discoveryResult.totalFound || 1)) *
+                  100
+              )
+            : 0,
+        averageScore: Math.round(
+          discoveryResult.leads.reduce(
+            (sum, lead) => sum + (lead.optimizedScore || 0),
+            0
+          ) / Math.max(1, discoveryResult.leads.length)
+        ),
+        optimalThreshold,
+        thresholdAnalysis: thresholdAnalysis.analysis,
+        costEfficiency: qualityScorer.getPerformanceSummary(),
+      };
+
+      console.log(`✅ Enhanced Quality Scoring complete:`);
+      console.log(
+        `   📊 Qualified: ${qualifiedLeads.length}/${
+          discoveryResult.totalFound || 0
+        } (${discoveryResult.qualityMetrics.qualificationRate}%)`
+      );
+      console.log(
+        `   💰 Avg Score: ${discoveryResult.qualityMetrics.averageScore}% | Threshold: ${optimalThreshold}%`
+      );
+      console.log(
+        `   🎯 Cost Savings: $${qualityScorer
+          .getPerformanceSummary()
+          .totalCostSavings.toFixed(2)}`
+      );
+    }
+
     const processingTime = Date.now() - startTime;
 
     // Enhanced response with comprehensive metrics
     const response = {
       success: true,
       campaignId,
-      discoveryEngine: "Enhanced Discovery Engine v2.0",
+      discoveryEngine: "Enhanced Discovery Engine v2.0 + Quality Scorer v3.0",
       requirements: {
         targetLeads: maxResults,
         budgetLimit,
@@ -161,10 +246,23 @@ router.post("/discover-businesses", async (req, res) => {
         averageConfidence: discoveryResult?.averageConfidence || 0,
         completeness: discoveryResult?.completeness || 0,
       },
+      qualityMetrics: discoveryResult?.qualityMetrics || {
+        processedCount: 0,
+        qualificationRate: 0,
+        averageScore: 0,
+        optimalThreshold: minConfidenceScore,
+        note: "Enhanced Quality Scoring not applied - no businesses processed",
+      },
       costs: {
         totalCost: discoveryResult?.totalCost || 0,
         costPerLead: discoveryResult?.costPerLead || 0,
         costBreakdown: discoveryResult?.costBreakdown || {},
+        validationCosts:
+          discoveryResult?.qualityMetrics?.costEfficiency
+            ?.averageCostPerBusiness || 0,
+        costSavings:
+          discoveryResult?.qualityMetrics?.costEfficiency
+            ?.costSavingsVsTraditional || 0,
       },
       performance: {
         processingTime: `${(processingTime / 1000).toFixed(1)}s`,
@@ -182,7 +280,12 @@ router.post("/discover-businesses", async (req, res) => {
         website: lead.website,
         email: lead.email,
         confidenceScore: lead.confidenceScore,
+        optimizedScore: lead.optimizedScore,
         preValidationScore: lead.preValidationScore,
+        scoreBreakdown: lead.scoreBreakdown,
+        validationCost: lead.validationCost,
+        costEfficient: lead.costEfficient,
+        scoringRecommendation: lead.scoringRecommendation,
         dataCompleteness: lead.dataCompleteness,
         sources: lead.sources,
         enrichmentData: lead.enrichmentData,
