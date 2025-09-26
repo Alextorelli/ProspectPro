@@ -24,53 +24,52 @@ export const useBusinessDiscovery = () => {
       setProgress(0);
 
       try {
-        const response = await fetch(BUSINESS_DISCOVERY_ENDPOINT, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            businessType: config.search_terms,
-            location: config.location,
-            maxResults: config.max_results,
-            budgetLimit: config.budget_limit,
-            requireCompleteContacts: false,
-            minConfidenceScore: config.min_confidence_score,
-          }),
-        });
+        // Get the current session for authentication
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
+
+        const headers: Record<string, string> = {
+          "Content-Type": "application/json",
+        };
+
+        // Add auth header if user is authenticated
+        if (session?.access_token) {
+          headers.Authorization = `Bearer ${session.access_token}`;
+        }
+
+        const response = await fetch(
+          EDGE_FUNCTIONS.ENHANCED_BUSINESS_DISCOVERY,
+          {
+            method: "POST",
+            headers,
+            body: JSON.stringify({
+              search_query: `${config.search_terms} in ${config.location}`,
+              business_type: config.business_type,
+              budget_limit: config.budget_limit,
+              max_results: config.max_results,
+              validation_config: {
+                include_email_validation: config.include_email_validation,
+                include_website_validation: config.include_website_validation,
+                min_confidence_score: config.min_confidence_score,
+              },
+            }),
+          }
+        );
 
         if (!response.ok) {
           const errorText = await response.text();
           throw new Error(`Discovery failed: ${response.status} ${errorText}`);
         }
 
-        const result = await response.json();
+        const result: EdgeFunctionResponse<BusinessDiscoveryResponse> =
+          await response.json();
 
-        if (!result.success) {
+        if (!result.success || !result.data) {
           throw new Error(result.error || "Discovery failed");
         }
 
-        // Transform the response to match expected interface
-        const transformedData: BusinessDiscoveryResponse = {
-          campaign_id: result.campaignId,
-          total_found: result.results?.totalFound || 0,
-          qualified_count: result.results?.qualified || 0,
-          total_cost: result.costs?.totalCost || 0,
-          processing_time: result.performance?.processingTime || '0s',
-          businesses: (result.leads || []).map((lead: any) => ({
-            id: Math.random().toString(36).substr(2, 9),
-            business_name: lead.businessName || 'Unknown Business',
-            address: lead.address,
-            phone: lead.phone,
-            website: lead.website,
-            email: lead.email,
-            confidence_score: lead.optimizedScore || 0,
-            validation_status: 'validated' as const,
-            created_at: new Date().toISOString(),
-          })),
-        };
-
-        return transformedData;
+        return result.data;
       } catch (error) {
         console.error("Business discovery error:", error);
         throw error;
@@ -78,7 +77,7 @@ export const useBusinessDiscovery = () => {
         setLoading(false);
       }
     },
-    onSuccess: (data: BusinessDiscoveryResponse) => {
+    onSuccess: (data) => {
       // Create campaign record
       const campaign = {
         campaign_id: data.campaign_id,
@@ -88,7 +87,7 @@ export const useBusinessDiscovery = () => {
         leads_found: data.total_found,
         leads_qualified: data.qualified_count,
         leads_validated: data.businesses.filter(
-          (b: any) => b.validation_status === "validated"
+          (b) => b.validation_status === "validated"
         ).length,
         created_at: new Date().toISOString(),
         completed_at: new Date().toISOString(),
@@ -99,7 +98,7 @@ export const useBusinessDiscovery = () => {
       addLeads(data.businesses);
       setProgress(100);
     },
-    onError: (error: any) => {
+    onError: (error) => {
       setError(error instanceof Error ? error.message : "Discovery failed");
       setProgress(0);
     },
@@ -110,6 +109,5 @@ export const useBusinessDiscovery = () => {
     isDiscovering: discoveryMutation.isPending,
     progress,
     error: discoveryMutation.error,
-    data: discoveryMutation.data,
   };
 };
