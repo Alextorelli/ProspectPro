@@ -16,9 +16,6 @@
     "ms-azuretools.vscode-docker", // Docker integration
 
     // Node.js Development
-    "christian-kohler.npm-intellisense", // NPM package intelligence
-
-    // Markdown Documentation
     "davidanson.vscode-markdownlint", // Markdown linting
 
     // JSON Support

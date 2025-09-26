@@ -1,10 +1,15 @@
 #!/usr/bin/env node
 
 /**
- * ProspectPro Production MCP Server
- * Optimized for rapid CI/CD, environment switching, and troubleshooting
+ * ProspectPro Production MCP Server - Enhanced & Consolidated
+ * Optimized for rapid CI/CD, environment switching, troubleshooting, and comprehensive development support
  *
- * Phase 1: Core production monitoring and environment management
+ * Consolidated Features:
+ * - Production monitoring and health checks
+ * - Database analytics and lead management
+ * - System diagnostics and performance monitoring
+ * - API testing and integration management
+ * - Filesystem analysis and codebase insights
  */
 
 const { Server } = require("@modelcontextprotocol/sdk/server/index.js");
@@ -22,8 +27,8 @@ class ProductionMCPServer {
   constructor() {
     this.server = new Server(
       {
-        name: "prospectpro-production",
-        version: "1.0.0",
+        name: "prospectpro-production-enhanced",
+        version: "2.0.0",
       },
       {
         capabilities: {
@@ -32,48 +37,81 @@ class ProductionMCPServer {
       }
     );
 
+    this.supabase = null;
+    this.apiClients = {};
+    this.workspaceRoot = process.env.WORKSPACE_ROOT || process.cwd();
     this.setupTools();
     this.setupErrorHandling();
   }
 
   setupTools() {
-    // Phase 1: Environment & Deployment Monitoring
-
-    // 1. Environment Health Check
     this.server.setRequestHandler(CallToolRequestSchema, async (request) => {
       switch (request.params.name) {
+        // === PRODUCTION MONITORING TOOLS ===
         case "environment_health_check":
           return await this.environmentHealthCheck();
-
         case "github_actions_monitor":
           return await this.githubActionsMonitor(request.params.arguments);
-
         case "dev_prod_config_diff":
           return await this.devProdConfigDiff();
-
         case "cost_budget_monitor":
           return await this.costBudgetMonitor();
-
         case "api_health_dashboard":
           return await this.apiHealthDashboard();
-
-        case "deployment_artifact_check":
-          return await this.deploymentArtifactCheck();
-
-        case "supabase_vault_validator":
-          return await this.supabaseVaultValidator();
-
-        case "performance_metrics":
-          return await this.performanceMetrics();
-
         case "vault_api_key_status":
           return await this.vaultApiKeyStatus();
-
         case "production_startup_validator":
           return await this.productionStartupValidator();
-
         case "github_workflow_optimizer":
           return await this.githubWorkflowOptimizer();
+
+        // === SYSTEM DIAGNOSTICS TOOLS (from monitoring-server) ===
+        case "get_system_health":
+          return await this.getSystemHealth(request.params.arguments);
+        case "read_diagnostics":
+          return await this.readDiagnostics(request.params.arguments);
+        case "analyze_logs":
+          return await this.analyzeLogs(request.params.arguments);
+        case "validate_configuration":
+          return await this.validateConfiguration(request.params.arguments);
+        case "generate_performance_report":
+          return await this.generatePerformanceReport(request.params.arguments);
+        case "monitor_api_quotas":
+          return await this.monitorAPIQuotas(request.params.arguments);
+
+        // === DATABASE ANALYTICS TOOLS (from database-server) ===
+        case "query_leads":
+          return await this.queryLeads(request.params.arguments);
+        case "get_campaign_stats":
+          return await this.getCampaignStats(request.params.arguments);
+        case "analyze_lead_quality":
+          return await this.analyzeLeadQuality(request.params.arguments);
+        case "get_api_costs":
+          return await this.getApiCosts(request.params.arguments);
+
+        // === API TESTING TOOLS (from api-server) ===
+        case "test_google_places":
+          return await this.testGooglePlaces(request.params.arguments);
+        case "test_foursquare_places":
+          return await this.testFoursquarePlaces(request.params.arguments);
+        case "test_email_discovery":
+          return await this.testEmailDiscovery(request.params.arguments);
+        case "verify_email":
+          return await this.verifyEmail(request.params.arguments);
+        case "get_api_usage_stats":
+          return await this.getAPIUsageStats();
+        case "simulate_lead_discovery":
+          return await this.simulateLeadDiscovery(request.params.arguments);
+
+        // === FILESYSTEM ANALYSIS TOOLS (from filesystem-server) ===
+        case "analyze_project_structure":
+          return await this.analyzeProjectStructure(request.params.arguments);
+        case "find_code_patterns":
+          return await this.findCodePatterns(request.params.arguments);
+        case "analyze_api_clients":
+          return await this.analyzeAPIClients(request.params.arguments);
+        case "check_fake_data_violations":
+          return await this.checkFakeDataViolations(request.params.arguments);
 
         default:
           throw new Error(`Unknown tool: ${request.params.name}`);
@@ -81,7 +119,55 @@ class ProductionMCPServer {
     });
   }
 
-  // Core Environment Health Check
+  async initializeSupabase() {
+    if (!this.supabase) {
+      if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SECRET_KEY) {
+        throw new Error("Missing Supabase configuration");
+      }
+
+      this.supabase = createClient(
+        process.env.SUPABASE_URL,
+        process.env.SUPABASE_SECRET_KEY
+      );
+
+      // Test connection
+      const { data, error } = await this.supabase
+        .from("enhanced_leads")
+        .select("count")
+        .limit(1);
+
+      if (error && !error.message.includes("does not exist")) {
+        throw new Error(`Supabase connection failed: ${error.message}`);
+      }
+    }
+  }
+
+  async initializeAPIClients() {
+    if (Object.keys(this.apiClients).length === 0) {
+      try {
+        const GooglePlacesClient = require("../modules/api-clients/google-places-client");
+        const FoursquareClient = require("../modules/api-clients/foursquare-places-client");
+        const HunterIOClient = require("../modules/api-clients/hunter-io-client");
+        const NeverBounceClient = require("../modules/api-clients/neverbounce-client");
+
+        this.apiClients = {
+          googlePlaces: new GooglePlacesClient(
+            process.env.GOOGLE_PLACES_API_KEY
+          ),
+          foursquare: new FoursquareClient(process.env.FOURSQUARE_API_KEY),
+          hunterIO: new HunterIOClient(process.env.HUNTER_IO_API_KEY),
+          neverBounce: new NeverBounceClient(process.env.NEVERBOUNCE_API_KEY),
+        };
+      } catch (error) {
+        console.error(
+          "Warning: Some API clients could not be loaded:",
+          error.message
+        );
+      }
+    }
+  }
+
+  // === PRODUCTION MONITORING METHODS ===
   async environmentHealthCheck() {
     const results = {
       timestamp: new Date().toISOString(),
@@ -693,6 +779,1115 @@ class ProductionMCPServer {
     }
   }
 
+  // === SYSTEM DIAGNOSTICS METHODS (from monitoring-server) ===
+
+  async getSystemHealth(args = {}) {
+    const { includeDetailedMetrics = false } = args;
+
+    const health = {
+      timestamp: new Date().toISOString(),
+      status: "unknown",
+      components: {},
+      metrics: {},
+    };
+
+    try {
+      // Check critical files
+      const packageJson = await this.checkFile("package.json");
+      const dockerCompose = await this.checkFile("docker-compose.yml");
+      const server = await this.checkFile("server.js");
+
+      health.components = {
+        filesystem: {
+          status: "healthy",
+          package_json: packageJson.exists,
+          docker_compose: dockerCompose.exists,
+          server_file: server.exists,
+        },
+      };
+
+      // Check diagnostics file
+      try {
+        const diagnosticsPath = path.join(
+          this.workspaceRoot,
+          "diagnostics.json"
+        );
+        const diagnosticsContent = await fs.readFileSync(
+          diagnosticsPath,
+          "utf8"
+        );
+        const diagnostics = JSON.parse(diagnosticsContent);
+
+        health.components.diagnostics = {
+          status: diagnostics.status || "unknown",
+          last_check: diagnostics.timestamp,
+          database_connection: diagnostics.database?.status === "connected",
+        };
+      } catch (error) {
+        health.components.diagnostics = {
+          status: "unavailable",
+          error: "Diagnostics file not found or invalid",
+        };
+      }
+
+      // Overall health determination
+      const criticalComponents = ["filesystem"];
+      const healthyComponents = criticalComponents.filter(
+        (comp) => health.components[comp]?.status === "healthy"
+      );
+
+      health.status =
+        healthyComponents.length === criticalComponents.length
+          ? "healthy"
+          : healthyComponents.length > 0
+          ? "degraded"
+          : "unhealthy";
+
+      if (includeDetailedMetrics) {
+        health.metrics = await this.gatherDetailedMetrics();
+      }
+    } catch (error) {
+      health.status = "error";
+      health.error = error.message;
+    }
+
+    return {
+      content: [
+        {
+          type: "text",
+          text: JSON.stringify(health, null, 2),
+        },
+      ],
+    };
+  }
+
+  async readDiagnostics(args = {}) {
+    const { includeHistory = true } = args;
+
+    try {
+      const diagnosticsPath = path.join(this.workspaceRoot, "diagnostics.json");
+      const content = await fs.readFileSync(diagnosticsPath, "utf8");
+      const diagnostics = JSON.parse(content);
+
+      const analysis = {
+        current_diagnostics: diagnostics,
+        analysis: {
+          timestamp: diagnostics.timestamp,
+          status: diagnostics.status,
+          critical_issues: [],
+          warnings: [],
+          recommendations: [],
+        },
+      };
+
+      // Analyze diagnostics data
+      if (diagnostics.database) {
+        if (diagnostics.database.status !== "connected") {
+          analysis.analysis.critical_issues.push("Database connection failed");
+        }
+        if (diagnostics.database.error) {
+          analysis.analysis.critical_issues.push(
+            `Database error: ${diagnostics.database.error}`
+          );
+        }
+      }
+
+      return {
+        content: [
+          {
+            type: "text",
+            text: JSON.stringify(analysis, null, 2),
+          },
+        ],
+      };
+    } catch (error) {
+      return {
+        content: [
+          {
+            type: "text",
+            text: JSON.stringify(
+              {
+                error: `Failed to read diagnostics: ${error.message}`,
+                suggestion:
+                  "Run the application to generate diagnostics.json file",
+              },
+              null,
+              2
+            ),
+          },
+        ],
+      };
+    }
+  }
+
+  async analyzeLogs(args = {}) {
+    const { logType = "all", timeRange = "24h" } = args;
+
+    const logFiles = [
+      "startup.log",
+      "production.log",
+      "database-validation.log",
+    ];
+    const analysis = {
+      log_type: logType,
+      time_range: timeRange,
+      log_files_checked: [],
+      patterns_found: { errors: [], warnings: [], info: [] },
+      summary: {},
+    };
+
+    for (const logFile of logFiles) {
+      try {
+        const logPath = path.join(this.workspaceRoot, logFile);
+        const content = await fs.readFileSync(logPath, "utf8");
+        const stats = await fs.statSync(logPath);
+
+        analysis.log_files_checked.push({
+          file: logFile,
+          size: stats.size,
+          last_modified: stats.mtime,
+          line_count: content.split("\n").length,
+        });
+
+        const errorPatterns = content.match(/ERROR|Error:|error:/gi) || [];
+        if (errorPatterns.length > 0) {
+          analysis.patterns_found.errors.push({
+            file: logFile,
+            count: errorPatterns.length,
+          });
+        }
+      } catch (error) {
+        analysis.log_files_checked.push({
+          file: logFile,
+          error: `Could not read: ${error.message}`,
+        });
+      }
+    }
+
+    analysis.summary = {
+      total_log_files: analysis.log_files_checked.filter((f) => !f.error)
+        .length,
+      total_errors: analysis.patterns_found.errors.reduce(
+        (sum, e) => sum + e.count,
+        0
+      ),
+      health_status:
+        analysis.patterns_found.errors.length === 0
+          ? "healthy"
+          : "needs_attention",
+    };
+
+    return {
+      content: [
+        {
+          type: "text",
+          text: JSON.stringify(analysis, null, 2),
+        },
+      ],
+    };
+  }
+
+  async validateConfiguration(args = {}) {
+    const { strict = true } = args;
+
+    const validation = {
+      validation_mode: strict ? "strict" : "standard",
+      results: {},
+      issues: [],
+      recommendations: [],
+    };
+
+    // Check critical files
+    const criticalFiles = ["package.json", "server.js", "docker-compose.yml"];
+    validation.results.critical_files = {};
+
+    for (const file of criticalFiles) {
+      const fileInfo = await this.checkFile(file);
+      validation.results.critical_files[file] = fileInfo;
+
+      if (!fileInfo.exists) {
+        validation.issues.push(`Missing critical file: ${file}`);
+      }
+    }
+
+    if (validation.issues.length === 0) {
+      validation.recommendations.push(
+        "Configuration appears to be complete and healthy"
+      );
+    }
+
+    return {
+      content: [
+        {
+          type: "text",
+          text: JSON.stringify(validation, null, 2),
+        },
+      ],
+    };
+  }
+
+  async generatePerformanceReport(args = {}) {
+    const { includeRecommendations = true } = args;
+
+    const report = {
+      generated_at: new Date().toISOString(),
+      performance_metrics: {},
+      analysis: {},
+      recommendations: [],
+    };
+
+    // File system performance metrics
+    const metrics = await this.gatherDetailedMetrics();
+    report.performance_metrics = metrics;
+
+    const totalFiles = Object.values(metrics.file_counts || {}).reduce(
+      (sum, count) => sum + count,
+      0
+    );
+
+    report.analysis = {
+      total_files: totalFiles,
+      estimated_complexity:
+        totalFiles > 100 ? "complex" : totalFiles > 50 ? "moderate" : "simple",
+    };
+
+    if (includeRecommendations) {
+      report.recommendations.push(
+        "Use MCP servers to offload AI processing tasks"
+      );
+    }
+
+    return {
+      content: [
+        {
+          type: "text",
+          text: JSON.stringify(report, null, 2),
+        },
+      ],
+    };
+  }
+
+  async monitorAPIQuotas(args = {}) {
+    const { alertThreshold = 80 } = args;
+
+    const quotaMonitoring = {
+      alert_threshold: alertThreshold,
+      api_services: {},
+      alerts: [],
+      recommendations: [],
+    };
+
+    // Mock API quota data (integrate with actual APIs in production)
+    const apiServices = [
+      {
+        name: "Google Places",
+        quota: 1000,
+        used: 250,
+        cost_per_request: 0.032,
+      },
+      { name: "Hunter.io", quota: 100, used: 45, cost_per_request: 0.04 },
+      { name: "NeverBounce", quota: 1000, used: 320, cost_per_request: 0.008 },
+    ];
+
+    apiServices.forEach((service) => {
+      const usagePercent = (service.used / service.quota) * 100;
+      quotaMonitoring.api_services[service.name] = {
+        quota_limit: service.quota,
+        requests_used: service.used,
+        usage_percentage: Math.round(usagePercent),
+        status: usagePercent >= alertThreshold ? "alert" : "ok",
+      };
+    });
+
+    return {
+      content: [
+        {
+          type: "text",
+          text: JSON.stringify(quotaMonitoring, null, 2),
+        },
+      ],
+    };
+  }
+
+  // === DATABASE ANALYTICS METHODS (from database-server) ===
+
+  async queryLeads(args = {}) {
+    const { filters = {}, limit = 10, orderBy = "confidence_score" } = args;
+
+    await this.initializeSupabase();
+
+    let query = this.supabase
+      .from("enhanced_leads")
+      .select("*")
+      .order(orderBy, { ascending: false })
+      .limit(limit);
+
+    // Apply filters
+    Object.entries(filters).forEach(([key, value]) => {
+      query = query.eq(key, value);
+    });
+
+    const { data, error } = await query;
+
+    if (error) {
+      throw new Error(`Query failed: ${error.message}`);
+    }
+
+    return {
+      content: [
+        {
+          type: "text",
+          text: JSON.stringify(
+            {
+              results: data,
+              count: data.length,
+              query_info: { filters, limit, orderBy },
+            },
+            null,
+            2
+          ),
+        },
+      ],
+    };
+  }
+
+  async getCampaignStats(args = {}) {
+    const { campaignId, timeRange = "24h" } = args;
+
+    await this.initializeSupabase();
+
+    const intervalMap = {
+      "24h": "1 day",
+      "7d": "7 days",
+      "30d": "30 days",
+    };
+
+    const { data, error } = await this.supabase.rpc("get_campaign_statistics", {
+      p_campaign_id: campaignId,
+      p_time_interval: intervalMap[timeRange] || "1 day",
+    });
+
+    if (error) {
+      throw new Error(`Campaign stats query failed: ${error.message}`);
+    }
+
+    return {
+      content: [
+        {
+          type: "text",
+          text: JSON.stringify(
+            {
+              campaign_id: campaignId,
+              time_range: timeRange,
+              statistics: data,
+            },
+            null,
+            2
+          ),
+        },
+      ],
+    };
+  }
+
+  async analyzeLeadQuality(args = {}) {
+    const { businessType, minConfidence = 70 } = args;
+
+    await this.initializeSupabase();
+
+    let query = this.supabase
+      .from("enhanced_leads")
+      .select(
+        "confidence_score, business_name, email_confidence, phone_confidence, website_confidence"
+      )
+      .gte("confidence_score", minConfidence);
+
+    if (businessType) {
+      query = query.ilike("business_type", `%${businessType}%`);
+    }
+
+    const { data, error } = await query;
+
+    if (error) {
+      throw new Error(`Quality analysis failed: ${error.message}`);
+    }
+
+    const analysis = {
+      total_leads: data.length,
+      average_confidence:
+        data.reduce((sum, lead) => sum + lead.confidence_score, 0) /
+        data.length,
+      confidence_distribution: {
+        high: data.filter((l) => l.confidence_score >= 85).length,
+        medium: data.filter(
+          (l) => l.confidence_score >= 70 && l.confidence_score < 85
+        ).length,
+        low: data.filter((l) => l.confidence_score < 70).length,
+      },
+    };
+
+    return {
+      content: [
+        {
+          type: "text",
+          text: JSON.stringify(analysis, null, 2),
+        },
+      ],
+    };
+  }
+
+  async getApiCosts(args = {}) {
+    const { timeRange = "24h" } = args;
+
+    await this.initializeSupabase();
+
+    const { data, error } = await this.supabase
+      .from("api_costs")
+      .select("*")
+      .gte(
+        "created_at",
+        new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
+      )
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      throw new Error(`API costs query failed: ${error.message}`);
+    }
+
+    const totalCost =
+      data?.reduce((sum, cost) => sum + (cost.cost || 0), 0) || 0;
+
+    return {
+      content: [
+        {
+          type: "text",
+          text: JSON.stringify(
+            {
+              time_range: timeRange,
+              total_cost: totalCost,
+              total_requests: data?.length || 0,
+              recent_costs: data?.slice(0, 5) || [],
+            },
+            null,
+            2
+          ),
+        },
+      ],
+    };
+  }
+
+  // === API TESTING METHODS (from api-server) ===
+
+  async testGooglePlaces(args = {}) {
+    const { query, location = "New York, NY", limit = 5 } = args;
+
+    await this.initializeAPIClients();
+
+    if (!this.apiClients.googlePlaces) {
+      throw new Error("Google Places API client not available");
+    }
+
+    const results = await this.apiClients.googlePlaces.searchBusinesses(
+      query,
+      location,
+      limit
+    );
+
+    return {
+      content: [
+        {
+          type: "text",
+          text: JSON.stringify(
+            {
+              api: "Google Places",
+              query,
+              location,
+              results: results.businesses || [],
+              success: results.found,
+              error: results.error || null,
+            },
+            null,
+            2
+          ),
+        },
+      ],
+    };
+  }
+
+  async testFoursquarePlaces(args = {}) {
+    const { query, location = "New York, NY", limit = 5 } = args;
+
+    await this.initializeAPIClients();
+
+    if (!this.apiClients.foursquare) {
+      throw new Error("Foursquare API client not available");
+    }
+
+    const results = await this.apiClients.foursquare.searchBusinesses(
+      query,
+      location,
+      limit
+    );
+
+    return {
+      content: [
+        {
+          type: "text",
+          text: JSON.stringify(
+            {
+              api: "Foursquare Places",
+              query,
+              location,
+              results: results.businesses || [],
+              success: results.found,
+              error: results.error || null,
+            },
+            null,
+            2
+          ),
+        },
+      ],
+    };
+  }
+
+  async testEmailDiscovery(args = {}) {
+    const { domain, limit = 5 } = args;
+
+    await this.initializeAPIClients();
+
+    if (!this.apiClients.hunterIO) {
+      throw new Error("Hunter.io API client not available");
+    }
+
+    const results = await this.apiClients.hunterIO.findEmails(domain, limit);
+
+    return {
+      content: [
+        {
+          type: "text",
+          text: JSON.stringify(
+            {
+              api: "Hunter.io",
+              domain,
+              emails: results.emails || [],
+              success: results.found,
+              error: results.error || null,
+            },
+            null,
+            2
+          ),
+        },
+      ],
+    };
+  }
+
+  async verifyEmail(args = {}) {
+    const { email } = args;
+
+    await this.initializeAPIClients();
+
+    if (!this.apiClients.neverBounce) {
+      throw new Error("NeverBounce API client not available");
+    }
+
+    const result = await this.apiClients.neverBounce.verifyEmail(email);
+
+    return {
+      content: [
+        {
+          type: "text",
+          text: JSON.stringify(
+            {
+              api: "NeverBounce",
+              email,
+              verification: result,
+            },
+            null,
+            2
+          ),
+        },
+      ],
+    };
+  }
+
+  async getAPIUsageStats() {
+    await this.initializeAPIClients();
+
+    const stats = {};
+
+    Object.entries(this.apiClients).forEach(([name, client]) => {
+      if (client && typeof client.getUsageStats === "function") {
+        stats[name] = client.getUsageStats();
+      }
+    });
+
+    return {
+      content: [
+        {
+          type: "text",
+          text: JSON.stringify(
+            {
+              api_usage_statistics: stats,
+              generated_at: new Date().toISOString(),
+            },
+            null,
+            2
+          ),
+        },
+      ],
+    };
+  }
+
+  async simulateLeadDiscovery(args = {}) {
+    const { businessType, location, maxResults = 3 } = args;
+
+    await this.initializeAPIClients();
+
+    const results = {
+      businessType,
+      location,
+      maxResults,
+      discovery_results: {},
+      processing_summary: {
+        total_discovered: 0,
+        errors: [],
+      },
+    };
+
+    try {
+      // Business Discovery
+      if (this.apiClients.googlePlaces) {
+        const googleResults =
+          await this.apiClients.googlePlaces.searchBusinesses(
+            businessType,
+            location,
+            maxResults
+          );
+        results.discovery_results.google_places = googleResults;
+        results.processing_summary.total_discovered +=
+          googleResults.businesses?.length || 0;
+      }
+
+      if (this.apiClients.foursquare) {
+        const foursquareResults =
+          await this.apiClients.foursquare.searchBusinesses(
+            businessType,
+            location,
+            maxResults
+          );
+        results.discovery_results.foursquare = foursquareResults;
+        results.processing_summary.total_discovered +=
+          foursquareResults.businesses?.length || 0;
+      }
+    } catch (error) {
+      results.processing_summary.errors.push(error.message);
+    }
+
+    return {
+      content: [
+        {
+          type: "text",
+          text: JSON.stringify(results, null, 2),
+        },
+      ],
+    };
+  }
+
+  // === FILESYSTEM ANALYSIS METHODS (from filesystem-server) ===
+
+  async analyzeProjectStructure(args = {}) {
+    const { includeFiles = true } = args;
+
+    const structure = await this.walkDirectory(
+      this.workspaceRoot,
+      includeFiles
+    );
+    const analysis = this.analyzeStructure(structure);
+
+    return {
+      content: [
+        {
+          type: "text",
+          text: JSON.stringify(
+            {
+              workspace_root: this.workspaceRoot,
+              structure_analysis: analysis,
+              directory_tree: structure,
+            },
+            null,
+            2
+          ),
+        },
+      ],
+    };
+  }
+
+  async findCodePatterns(args = {}) {
+    const {
+      pattern,
+      fileExtensions = [".js", ".json", ".md", ".sql"],
+      excludeDirectories = ["node_modules", ".git", "archive"],
+    } = args;
+
+    const results = [];
+    const regex = new RegExp(pattern, "gi");
+
+    const searchInDirectory = async (dirPath) => {
+      try {
+        const items = await fs.readdirSync(dirPath);
+
+        for (const item of items) {
+          const itemPath = path.join(dirPath, item);
+          const stats = await fs.statSync(itemPath);
+
+          if (stats.isDirectory()) {
+            if (!excludeDirectories.includes(item) && !item.startsWith(".")) {
+              await searchInDirectory(itemPath);
+            }
+          } else if (fileExtensions.includes(path.extname(item))) {
+            try {
+              const content = await fs.readFileSync(itemPath, "utf8");
+              const matches = [...content.matchAll(regex)];
+
+              if (matches.length > 0) {
+                results.push({
+                  file: path.relative(this.workspaceRoot, itemPath),
+                  matches: matches.length,
+                  details: matches.slice(0, 5).map((match) => ({
+                    match: match[0],
+                  })),
+                });
+              }
+            } catch (readError) {
+              // Skip files that can't be read
+            }
+          }
+        }
+      } catch (error) {
+        // Skip directories that can't be accessed
+      }
+    };
+
+    await searchInDirectory(this.workspaceRoot);
+
+    return {
+      content: [
+        {
+          type: "text",
+          text: JSON.stringify(
+            {
+              pattern,
+              total_matches: results.reduce((sum, r) => sum + r.matches, 0),
+              files_with_matches: results.length,
+              results,
+            },
+            null,
+            2
+          ),
+        },
+      ],
+    };
+  }
+
+  async analyzeAPIClients(args = {}) {
+    const { detailed = false } = args;
+    const apiClientsPath = path.join(
+      this.workspaceRoot,
+      "modules",
+      "api-clients"
+    );
+
+    try {
+      const files = await fs.readdirSync(apiClientsPath);
+      const analysis = { clients: [], summary: {} };
+
+      for (const file of files) {
+        if (path.extname(file) === ".js") {
+          const filePath = path.join(apiClientsPath, file);
+          const content = await fs.readFileSync(filePath, "utf8");
+
+          const clientAnalysis = {
+            name: file,
+            size: content.length,
+            method_count: (content.match(/async\s+\w+\(|^\s*\w+\s*\(/gm) || [])
+              .length,
+            error_handling: (content.match(/try\s*{|catch\s*\(/g) || []).length,
+            caching_implemented:
+              content.includes("cache") || content.includes("Cache"),
+          };
+
+          analysis.clients.push(clientAnalysis);
+        }
+      }
+
+      analysis.summary = {
+        total_clients: analysis.clients.length,
+        total_methods: analysis.clients.reduce(
+          (sum, c) => sum + c.method_count,
+          0
+        ),
+        clients_with_caching: analysis.clients.filter(
+          (c) => c.caching_implemented
+        ).length,
+      };
+
+      return {
+        content: [
+          {
+            type: "text",
+            text: JSON.stringify(analysis, null, 2),
+          },
+        ],
+      };
+    } catch (error) {
+      throw new Error(`Failed to analyze API clients: ${error.message}`);
+    }
+  }
+
+  async checkFakeDataViolations(args = {}) {
+    const { strict = true } = args;
+
+    const suspiciousPatterns = [
+      "Artisan\\s+Bistro",
+      "Downtown\\s+Café?",
+      "Business\\s+LLC",
+      "\\(555\\)\\s*\\d{3}-\\d{4}",
+      "example\\.com",
+      "generateFake",
+      "mockData",
+    ];
+
+    const violations = [];
+
+    for (const pattern of suspiciousPatterns) {
+      const patternResults = await this.findCodePatterns({
+        pattern,
+        fileExtensions: [".js", ".json"],
+        excludeDirectories: ["node_modules", ".git", "archive", "tests"],
+      });
+
+      const data = JSON.parse(patternResults.content[0].text);
+      if (data.results.length > 0) {
+        violations.push({
+          pattern,
+          severity: strict ? "HIGH" : "MEDIUM",
+          matches: data.results,
+        });
+      }
+    }
+
+    return {
+      content: [
+        {
+          type: "text",
+          text: JSON.stringify(
+            {
+              check_mode: strict ? "strict" : "standard",
+              total_violations: violations.length,
+              violations,
+              recommendation:
+                violations.length > 0
+                  ? "IMMEDIATE ACTION REQUIRED: Remove all fake data patterns"
+                  : "No fake data violations detected - good!",
+            },
+            null,
+            2
+          ),
+        },
+      ],
+    };
+  }
+
+  // === HELPER METHODS ===
+
+  async checkFile(relativePath) {
+    try {
+      const filePath = path.join(this.workspaceRoot, relativePath);
+      const stats = await fs.statSync(filePath);
+      return {
+        exists: true,
+        size: stats.size,
+        modified: stats.mtime,
+      };
+    } catch (error) {
+      return {
+        exists: false,
+        error: error.message,
+      };
+    }
+  }
+
+  async gatherDetailedMetrics() {
+    const metrics = {
+      disk_usage: {},
+      file_counts: {},
+    };
+
+    try {
+      // Count files by extension
+      const fileExtensions = await this.countFilesByExtension();
+      metrics.file_counts = fileExtensions;
+
+      // Calculate directory sizes for key directories
+      const directories = ["modules", "api", "database", "mcp-servers"];
+      for (const dir of directories) {
+        try {
+          const dirPath = path.join(this.workspaceRoot, dir);
+          const size = await this.getDirectorySize(dirPath);
+          metrics.disk_usage[dir] = size;
+        } catch (error) {
+          metrics.disk_usage[dir] = { error: error.message };
+        }
+      }
+    } catch (error) {
+      metrics.error = error.message;
+    }
+
+    return metrics;
+  }
+
+  async countFilesByExtension() {
+    const counts = {};
+
+    const countInDirectory = async (dirPath) => {
+      try {
+        const items = await fs.readdirSync(dirPath);
+
+        for (const item of items) {
+          const itemPath = path.join(dirPath, item);
+          const stats = await fs.statSync(itemPath);
+
+          if (stats.isDirectory()) {
+            if (
+              item !== "node_modules" &&
+              !item.startsWith(".") &&
+              item !== "archive"
+            ) {
+              await countInDirectory(itemPath);
+            }
+          } else {
+            const ext = path.extname(item) || "no-extension";
+            counts[ext] = (counts[ext] || 0) + 1;
+          }
+        }
+      } catch (error) {
+        // Skip inaccessible directories
+      }
+    };
+
+    await countInDirectory(this.workspaceRoot);
+    return counts;
+  }
+
+  async getDirectorySize(dirPath) {
+    let totalSize = 0;
+
+    try {
+      const items = await fs.readdirSync(dirPath);
+
+      for (const item of items) {
+        const itemPath = path.join(dirPath, item);
+        const stats = await fs.statSync(itemPath);
+
+        if (stats.isDirectory()) {
+          if (item !== "node_modules" && !item.startsWith(".")) {
+            totalSize += await this.getDirectorySize(itemPath);
+          }
+        } else {
+          totalSize += stats.size;
+        }
+      }
+    } catch (error) {
+      // Skip inaccessible directories
+    }
+
+    return totalSize;
+  }
+
+  async walkDirectory(dirPath, includeFiles, currentDepth = 0, maxDepth = 4) {
+    if (currentDepth > maxDepth) return null;
+
+    const result = {
+      name: path.basename(dirPath),
+      type: "directory",
+      children: [],
+    };
+
+    try {
+      const items = await fs.readdirSync(dirPath);
+
+      for (const item of items) {
+        if (item.startsWith(".") && !item.includes("vscode")) continue;
+        if (["node_modules", "archive"].includes(item)) continue;
+
+        const itemPath = path.join(dirPath, item);
+        const stats = await fs.statSync(itemPath);
+
+        if (stats.isDirectory()) {
+          const childResult = await this.walkDirectory(
+            itemPath,
+            includeFiles,
+            currentDepth + 1,
+            maxDepth
+          );
+          if (childResult) result.children.push(childResult);
+        } else if (includeFiles) {
+          result.children.push({
+            name: item,
+            type: "file",
+            size: stats.size,
+            extension: path.extname(item),
+          });
+        }
+      }
+    } catch (error) {
+      result.error = error.message;
+    }
+
+    return result;
+  }
+
+  analyzeStructure(structure) {
+    const analysis = {
+      total_directories: 0,
+      total_files: 0,
+      file_types: {},
+      key_directories: [],
+    };
+
+    const analyzeNode = (node) => {
+      if (node.type === "directory") {
+        analysis.total_directories++;
+
+        // Identify key directories
+        const keyDirs = [
+          "api",
+          "modules",
+          "config",
+          "database",
+          "mcp-servers",
+          "scripts",
+        ];
+        if (keyDirs.includes(node.name)) {
+          analysis.key_directories.push({
+            name: node.name,
+            children_count: node.children?.length || 0,
+          });
+        }
+
+        if (node.children) {
+          node.children.forEach(analyzeNode);
+        }
+      } else if (node.type === "file") {
+        analysis.total_files++;
+        const ext = node.extension || "no-extension";
+        analysis.file_types[ext] = (analysis.file_types[ext] || 0) + 1;
+      }
+    };
+
+    analyzeNode(structure);
+    return analysis;
+  }
+
   // Additional helper methods...
   async makeHttpsRequest(options) {
     return new Promise((resolve, reject) => {
@@ -726,7 +1921,15 @@ class ProductionMCPServer {
   async run() {
     const transport = new StdioServerTransport();
     await this.server.connect(transport);
-    console.error("🚀 ProspectPro Production MCP Server running");
+    console.error(
+      "🚀 ProspectPro Production MCP Server v2.0 - Enhanced & Consolidated"
+    );
+    console.error(
+      "   📊 Production Monitoring | 🗄️  Database Analytics | 🔧 System Diagnostics"
+    );
+    console.error(
+      "   🔌 API Testing | 📁 Filesystem Analysis | 🛡️  Security Validation"
+    );
   }
 }
 

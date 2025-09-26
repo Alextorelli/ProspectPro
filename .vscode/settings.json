@@ -193,5 +193,6 @@
     "apis": ["google-places", "foursquare", "hunter-io", "neverbounce"],
     "deployment": "docker-compose",
     "monitoring": "custom-diagnostics"
-  }
+  },
+  "deno.enable": true
 }
