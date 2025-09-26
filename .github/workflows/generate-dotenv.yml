@@ -196,20 +196,20 @@ jobs:
       - name: Validate Supabase Vault Integration
         run: |
           echo "🔑 Validating Supabase Vault API key integration..."
-          
+
           # Test Supabase connection and Vault access
           node -e "
           require('dotenv').config();
-          
+
           console.log('🔍 Testing Supabase Vault configuration...');
           console.log('📍 SUPABASE_URL:', process.env.SUPABASE_URL ? 'Present' : 'Missing');
           console.log('🔑 SUPABASE_SECRET_KEY:', process.env.SUPABASE_SECRET_KEY ? 'Present' : 'Missing');
-          
+
           if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SECRET_KEY) {
             console.log('❌ Supabase configuration incomplete');
             process.exit(1);
           }
-          
+
           // Expected API keys in Supabase Vault
           const expectedVaultKeys = [
             'GOOGLE_PLACES_API_KEY',
@@ -218,7 +218,7 @@ jobs:
             'NEVERBOUNCE_API_KEY',
             'APOLLO_API_KEY'
           ];
-          
+
           console.log('✅ Supabase configuration validated');
           console.log('🔑 Expected API keys in Vault:');
           expectedVaultKeys.forEach(key => console.log('   📝', key));
