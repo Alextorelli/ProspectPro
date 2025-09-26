@@ -1,35 +1,35 @@
 {
   "recommendations": [
-    // Core Project Requirements
-    "denoland.vscode-deno", // For Supabase functions
-    "supabase.supabase-vscode", // Supabase integration
+    // Essential Development Tools
+    "esbenp.prettier-vscode",
+    "dbaeumer.vscode-eslint",
+    "eamodio.gitlens",
 
-    // Development Essentials
-    "dbaeumer.vscode-eslint", // Code linting
-    "esbenp.prettier-vscode", // Code formatting
-    "eamodio.gitlens", // Enhanced git features
+    // API Development & Testing
+    "humao.rest-client",
 
-    // API Development
-    "humao.rest-client", // For API testing
+    // Docker & Container Support
+    "ms-azuretools.vscode-docker",
 
-    // Docker Support
-    "ms-azuretools.vscode-docker", // Docker integration
+    // GitHub & AI Integration
+    "github.copilot",
+    "github.copilot-chat",
 
-    // Node.js Development
-    "davidanson.vscode-markdownlint", // Markdown linting
+    // Supabase & Database (Deno restricted to functions only)
+    "supabase.supabase-vscode",
+    "denoland.vscode-deno",
 
-    // JSON Support
-    "redhat.vscode-yaml", // YAML support for Docker files
-
-    // GitHub Integration
-    "github.copilot", // Copilot integration
-    "github.copilot-chat" // Copilot Chat
+    // Documentation & Configuration
+    "davidanson.vscode-markdownlint",
+    "redhat.vscode-yaml"
   ],
   "unwantedRecommendations": [
-    // Avoiding duplicate functionalities
-    "rangav.vscode-thunder-client", // REST Client already recommended
-    "ms-vscode.js-debug-nightly", // Use stable version instead
-    "vscjava.vscode-java-debug", // Not needed for this project
-    "ms-python.python" // Not needed for this project
+    // Avoiding conflicts and redundancy
+    "rangav.vscode-thunder-client",
+    "ms-vscode.js-debug-nightly",
+    "vscjava.vscode-java-debug",
+    "ms-python.python",
+    "ms-vscode.vscode-typescript-next",
+    "ms-vscode.vscode-json"
   ]
 }

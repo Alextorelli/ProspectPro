@@ -1,29 +1,11 @@
 {
   "version": "0.2.0",
   "configurations": [
-    
     {
-      "name": "Debug Server",
+      "name": "Debug Production Server",
       "type": "node",
       "request": "launch",
       "program": "${workspaceFolder}/server.js",
-      "env": {
-        "NODE_ENV": "development"
-      },
-      "console": "integratedTerminal",
-      "skipFiles": ["<node_internals>/**", "**/node_modules/**"],
-      "outFiles": ["${workspaceFolder}/**/*.js"],
-      "resolveSourceMapLocations": [
-        "${workspaceFolder}/**",
-        "!**/node_modules/**"
-      ],
-      "restart": true
-    },
-    {
-      "name": "Debug Enhanced Server",
-      "type": "node",
-      "request": "launch",
-      "program": "${workspaceFolder}/server-enhanced.js",
       "env": {
         "NODE_ENV": "development",
         "ALLOW_DEGRADED_START": "true"
@@ -36,6 +18,38 @@
         "!**/node_modules/**"
       ],
       "restart": true
+    },
+    {
+      "name": "Debug MCP Production Server",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/mcp-servers/production-server.js",
+      "env": {
+        "NODE_ENV": "development"
+      },
+      "console": "integratedTerminal",
+      "skipFiles": ["<node_internals>/**", "**/node_modules/**"],
+      "outFiles": ["${workspaceFolder}/**/*.js"],
+      "resolveSourceMapLocations": [
+        "${workspaceFolder}/**",
+        "!**/node_modules/**"
+      ]
+    },
+    {
+      "name": "Debug MCP Development Server",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/mcp-servers/development-server.js",
+      "env": {
+        "NODE_ENV": "development"
+      },
+      "console": "integratedTerminal",
+      "skipFiles": ["<node_internals>/**", "**/node_modules/**"],
+      "outFiles": ["${workspaceFolder}/**/*.js"],
+      "resolveSourceMapLocations": [
+        "${workspaceFolder}/**",
+        "!**/node_modules/**"
+      ]
     },
     {
       "name": "Debug Current File",

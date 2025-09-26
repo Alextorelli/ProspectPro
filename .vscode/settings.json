@@ -1,28 +1,22 @@
 {
-  "[typescript]": {
-    "editor.defaultFormatter": "denoland.vscode-deno"
-  },
+  // === DENO CONFIGURATION (RESTRICTED TO SUPABASE ONLY) ===
+  "deno.enable": false,
   "deno.enablePaths": ["supabase/functions"],
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
   "deno.lint": true,
-  "deno.unstable": [
-    "bare-node-builtins",
-    "byonm",
-    "sloppy-imports",
-    "unsafe-proto",
-    "webgpu",
-    "broadcast-channel",
-    "worker-options",
-    "cron",
-    "kv",
-    "ffi",
-    "fs",
-    "http",
-    "net"
-  ],
+  "deno.unstable": ["bare-node-builtins", "byonm", "sloppy-imports"],
+
+  // === GIT OPTIMIZATIONS ===
   "git.ignoreLimitWarning": true,
+  "git.autofetch": true,
+  "git.confirmSync": false,
+  "git.enableSmartCommit": true,
+  "git.fetchOnPull": true,
+  "git.mergeEditor": true,
 
-  // === ENHANCED PRODUCTION WORKSPACE SETTINGS ===
-
+  // === GITHUB COPILOT OPTIMIZATIONS ===
   "github.copilot.enable": {
     "*": true,
     "plaintext": false,
@@ -30,31 +24,34 @@
     "scminput": false
   },
   "github.copilot.inlineSuggest.enable": true,
-
-  // Copilot Chat optimizations
   "github.copilot.chat.welcomeMessage": "none",
   "github.copilot.chat.localeOverride": "en",
-  "github.copilot.chat.historyCount": 8, // Limit chat history
-  "github.copilot.chat.completionPhrasesEnabled": false, // Disable unnecessary phrases
-  "github.copilot.chat.dynamicContextTrailingLength": 500, // Control context size
+  "github.copilot.chat.historyCount": 8,
+  "github.copilot.chat.completionPhrasesEnabled": false,
+  "github.copilot.chat.dynamicContextTrailingLength": 500,
+  "github.copilot.advanced.setAutoCompletionTriggerThreshold": 30,
+  "github.copilot.advanced.connectionTimeout": 45000,
 
-  // Copilot performance settings
-  "github.copilot.advanced.setAutoCompletionTriggerThreshold": 30, // Less aggressive
-  "github.copilot.advanced.connectionTimeout": 45000, // Better performance on slower connections
+  // === EDITOR PERFORMANCE OPTIMIZATIONS ===
+  "editor.minimap.enabled": false,
+  "editor.renderWhitespace": "none",
+  "editor.renderControlCharacters": false,
+  "editor.renderLineHighlight": "gutter",
+  "editor.bracketPairColorization.enabled": false,
+  "editor.guides.bracketPairs": false,
+  "editor.formatOnSave": true,
+  "editor.formatOnPaste": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  },
 
-  // Editor performance optimizations
-  "editor.minimap.enabled": false, // Reduces CPU usage
-  "editor.renderWhitespace": "none", // Reduces rendering overhead
-  "editor.renderControlCharacters": false, // Reduces rendering overhead
-  "editor.renderLineHighlight": "gutter", // Less UI overhead than "all"
-  "editor.bracketPairColorization.enabled": false, // Reduces rendering overhead
-  "editor.guides.bracketPairs": false, // Reduces rendering overhead
-  "workbench.colorTheme": "Default Dark Modern", // Use built-in theme for performance
-  "workbench.list.smoothScrolling": false, // Better performance on lower-end machines
-  "workbench.tree.renderIndentGuides": "none", // Reduces UI overhead
-  "workbench.editor.closeOnFileDelete": true, // Prevents confusion with deleted files
+  // === WORKBENCH OPTIMIZATIONS ===
+  "workbench.colorTheme": "Default Dark Modern",
+  "workbench.list.smoothScrolling": false,
+  "workbench.tree.renderIndentGuides": "none",
+  "workbench.editor.closeOnFileDelete": true,
 
-  // File system performance
+  // === FILE SYSTEM PERFORMANCE ===
   "files.exclude": {
     "**/*.log": true,
     "**/*.tmp": true,
@@ -79,6 +76,14 @@
     "**/dist/**": true
   },
 
+  "files.autoSave": "afterDelay",
+  "files.autoSaveDelay": 1000,
+  "files.associations": {
+    "*.md": "markdown",
+    ".copilot-instructions": "markdown"
+  },
+
+  // === SEARCH OPTIMIZATIONS ===
   "search.exclude": {
     "**/node_modules": true,
     "**/*.log": true,
@@ -93,47 +98,27 @@
     "**/dist/**": true,
     "**/coverage/**": true
   },
+  "search.searchOnType": false,
+  "search.searchOnTypeDebouncePeriod": 800,
 
-  "search.searchOnType": false, // Reduces search operations while typing
-  "search.searchOnTypeDebouncePeriod": 800, // Longer debounce for better performance
+  // === JAVASCRIPT/NODE.JS SETTINGS ===
+  "javascript.updateImportsOnFileMove.enabled": "always",
+  "javascript.suggest.autoImports": true,
+  "js/ts.implicitProjectConfig.checkJs": false,
 
-  "files.associations": {
-    "*.md": "markdown",
-    ".copilot-instructions": "markdown"
-  },
+  // === LINTING AND FORMATTING ===
+  "eslint.validate": ["javascript", "javascriptreact", "json"],
 
+  // === NPM OPTIMIZATIONS ===
+  "npm.packageManager": "npm",
+  "npm.exclude": ["**/node_modules/**", "**/archive/**"],
+  "npm.autoDetect": "off",
+
+  // === MARKDOWN SETTINGS ===
   "markdown.preview.breaks": true,
   "markdown.preview.linkify": true,
 
-  "editor.codeActionsOnSave": {
-    "source.fixAll.eslint": "explicit"
-  },
-
-  "eslint.validate": ["javascript", "javascriptreact", "json"],
-
-  "files.autoSave": "afterDelay",
-  "files.autoSaveDelay": 1000,
-
-  "editor.formatOnSave": true,
-  "editor.formatOnPaste": true,
-
-  "javascript.updateImportsOnFileMove.enabled": "always",
-  "javascript.suggest.autoImports": true,
-
-  // Node.js and npm performance optimizations
-  "npm.packageManager": "npm",
-  "npm.exclude": ["**/node_modules/**", "**/archive/**"],
-  "npm.autoDetect": "off", // Prevents constant scanning of folders
-  "js/ts.implicitProjectConfig.checkJs": false, // Reduces TypeScript checking overhead
-
-  // Git optimizations
-  "git.autofetch": true,
-  "git.confirmSync": false,
-  "git.enableSmartCommit": true,
-  "git.fetchOnPull": true,
-  "git.mergeEditor": true, // Better merge conflict resolution
-
-  // Terminal optimizations for Windows
+  // === TERMINAL OPTIMIZATIONS ===
   "terminal.integrated.defaultProfile.windows": "PowerShell",
   "terminal.integrated.profiles.windows": {
     "PowerShell": {
@@ -153,6 +138,7 @@
   "terminal.integrated.gpuAcceleration": "on",
   "terminal.integrated.scrollback": 1000,
 
+  // === MCP CONFIGURATION ===
   "mcp.enable": true,
   "mcp.servers": {
     "prospectpro-production": {
@@ -167,6 +153,7 @@
     }
   },
 
+  // === AI PROJECT CONTEXT ===
   "ai.contextAware": true,
   "ai.projectContext": {
     "type": "lead-generation-platform",
@@ -175,6 +162,5 @@
     "apis": ["google-places", "foursquare", "hunter-io", "neverbounce"],
     "deployment": "docker-compose",
     "monitoring": "custom-diagnostics"
-  },
-  "deno.enable": true
+  }
 }
