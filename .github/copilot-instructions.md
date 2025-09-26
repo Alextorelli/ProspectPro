@@ -3,8 +3,8 @@
 ## CRITICAL: Current Production State
 
 - **Version**: 3.0.0 (Production-ready with Supabase Vault)
-- **Deployment**: GitHub Actions → Railway/Docker automated
-- **Environment**: Secrets auto-injected via `.scripts/pull-env-from-secrets.js`
+- **Deployment**: GitHub Actions → Google Cloud Run automated
+- **Environment**: Secrets auto-injected via GitHub Actions and Supabase Vault
 - **Architecture**: 4-stage validation pipeline (Discovery→Enrichment→Validation→Export)
 - **Repository**: https://github.com/Alextorelli/ProspectPro (main = production)
 
@@ -17,7 +17,7 @@ When Alex asks about:
 - **"Database issues"** → Supabase with comprehensive schema in `/database/`
 - **"Docker problems"** → Multi-stage build with security hardening already implemented
 - **"Cost optimization"** → Built-in rate limiting and caching systems already active
-- **"Deployment"** → Automated via GitHub Actions with secret injection
+- **"Deployment"** → Automated via GitHub Actions to Google Cloud Run
 - **"Testing"** → Use `npm run test` or check testing branch
 
 ## ALEX'S TECHNICAL PROFILE
@@ -69,7 +69,7 @@ npm run diag              # Diagnostics
 - **NeverBounce**: Email verification
 - **Foursquare**: Additional business data
 - **Supabase**: Database with real-time subscriptions
-- **Railway**: Production hosting with automated deployment
+- **Google Cloud Run**: Production hosting with automated deployment
 
 ### MCP Infrastructure (CONSOLIDATED v2.0)
 
@@ -98,7 +98,7 @@ npm run diag              # Diagnostics
 ### For Deployment Issues:
 
 1. Check GitHub Actions workflow status
-2. Verify Railway deployment completion
+2. Verify Google Cloud Run deployment completion
 3. Run health checks: `npm run health`
 4. Check Docker container status
 
@@ -122,7 +122,7 @@ npm run diag              # Diagnostics
 
 ## DEVELOPMENT WORKFLOW (ESTABLISHED)
 
-1. **Main branch** = Production (auto-deployed to Railway)
+1. **Main branch** = Production (auto-deployed to Google Cloud Run)
 2. **Testing branch** = Development/testing environment
 3. **GitHub Actions** = Automated CI/CD with secret injection
 4. **Codespaces** = Primary development environment
@@ -132,7 +132,7 @@ npm run diag              # Diagnostics
 
 - Start with health checks: `npm run health` and `npm run diag`
 - Check GitHub Actions for deployment status
-- Review Railway logs for runtime issues
+- Review Google Cloud Run logs for runtime issues
 - Use Supabase dashboard for database troubleshooting
 - Reference existing working implementations before creating new code
 
