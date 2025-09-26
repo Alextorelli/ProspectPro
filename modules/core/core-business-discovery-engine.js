@@ -331,6 +331,9 @@ class EnhancedDiscoveryEngine {
           !isPatternSource(ownerEmailSource) &&
           ownerEmailConfidence >= 60);
 
+      const hasVerifiedEmail =
+        emailVerifiedEvidence || companyEmailVerified || ownerEmailVerified;
+
       const hasConfidence =
         (lead.finalConfidenceScore || lead.confidenceScore) >=
         minimumConfidence;

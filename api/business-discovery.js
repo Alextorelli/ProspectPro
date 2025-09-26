@@ -95,8 +95,8 @@ router.post("/discover-businesses", async (req, res) => {
       location,
       maxResults = 10,
       budgetLimit = 50,
-      requireCompleteContacts = true,
-      minConfidenceScore = 70,
+      requireCompleteContacts = false, // More lenient default
+      minConfidenceScore = 50, // Lower threshold for better results
       additionalQueries = [],
     } = req.body;
 
@@ -427,8 +427,8 @@ router.post("/discover", async (req, res) => {
       location,
       targetCount: maxResults,
       budgetLimit,
-      requireCompleteContacts: true,
-      minConfidenceScore,
+      requireCompleteContacts: false, // More lenient for legacy compatibility
+      minConfidenceScore: Math.max(minConfidenceScore - 20, 30), // Lower threshold
     });
 
     const processingTime = Date.now() - startTime;
