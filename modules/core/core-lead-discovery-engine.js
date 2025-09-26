@@ -72,8 +72,14 @@ class EnhancedLeadDiscovery {
     this.apiUsageStats = {};
 
     // High Priority: API Prioritization & Caching
-    this.cache = new Map(); // Simple in-memory cache
-    this.cacheTTL = 3600000; // 1 hour in milliseconds
+    this.cache = new Map(); // Fresh cache for each session - NO STALE DATA
+    this.cacheTTL = 900000; // Reduced to 15 minutes for fresher data
+
+    // Clear any global caches to ensure fresh discoveries
+    if (typeof globalCache !== "undefined" && globalCache.clear) {
+      globalCache.clear();
+      console.log("🔄 Global cache cleared for fresh business discovery");
+    }
 
     console.log(
       "🔧 Enhanced Lead Discovery Algorithm initialized with government APIs and caching"

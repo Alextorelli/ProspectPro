@@ -45,6 +45,14 @@ class EnhancedDiscoveryEngine {
       foursquare: { searches: 0, businesses: 0, cost: 0 },
       google: { searches: 0, businesses: 0, cost: 0 },
     };
+
+    // CACHE RESET: Clear all cached data for fresh discoveries
+    this.discoveryCache = new Map(); // Fresh cache per session
+    this.lastCacheReset = Date.now();
+
+    console.log(
+      "🔄 Discovery caches cleared - ensuring fresh business discoveries"
+    );
   }
 
   /**
@@ -109,36 +117,36 @@ class EnhancedDiscoveryEngine {
       );
 
       try {
-        // Phase 1: Foursquare Discovery (often cheaper and richer initial data)
+        // ESSENTIAL DUAL-SOURCE DISCOVERY: Both APIs required for comprehensive coverage
+        console.log(
+          `   📍 Foursquare search: "${currentQuery}" near ${location}`
+        );
         const foursquareResults = await this.discoverViaFoursquare(
           currentQuery,
           location,
-          Math.min(maxResultsPerQuery, 25)
+          maxResultsPerQuery
         );
 
-        // Phase 2: Google Places Discovery (for complementary data and validation)
-        const remainingBudget = budgetLimit - this.totalCost;
-        let googleResults = [];
+        console.log(
+          `   🔍 Google Places search: "${currentQuery}" near ${location}`
+        );
+        const googleResults = await this.discoverViaGooglePlaces(
+          currentQuery,
+          location,
+          maxResultsPerQuery
+        );
 
-        if (
-          remainingBudget > 1.0 &&
-          foursquareResults.length < maxResultsPerQuery
-        ) {
-          const googleLimit = Math.min(
-            maxResultsPerQuery - foursquareResults.length,
-            Math.floor(remainingBudget / 0.032)
+        // CRITICAL: Ensure both APIs contribute to discovery diversity
+        if (foursquareResults.length === 0 && googleResults.length === 0) {
+          console.log(
+            `   ⚠️ No results from either API for query: ${currentQuery}`
           );
-
-          if (googleLimit > 0) {
-            googleResults = await this.discoverViaGooglePlaces(
-              currentQuery,
-              location,
-              googleLimit
-            );
-          }
+          currentQueryIndex++;
+          attemptCount++;
+          continue;
         }
 
-        // Phase 3: Merge and deduplicate results
+        // Phase 3: Merge and deduplicate results ensuring maximum diversity
         const allDiscoveredBusinesses = this.mergeAndDeduplicateResults(
           foursquareResults,
           googleResults
@@ -149,12 +157,16 @@ class EnhancedDiscoveryEngine {
         );
 
         if (allDiscoveredBusinesses.length === 0) {
-          console.log(`   ⚠️ No results for query: ${currentQuery}`);
+          console.log(
+            `   ⚠️ No unique businesses after deduplication for: ${currentQuery}`
+          );
           currentQueryIndex++;
+          attemptCount++;
           continue;
         }
 
         // Phase 4: Enhanced processing with pre-validated data
+        const remainingBudget = budgetLimit - this.totalCost;
         const discoveryOptions = {
           budgetLimit: Math.min(2.0, remainingBudget),
           qualityThreshold: minConfidenceScore,
@@ -429,25 +441,34 @@ class EnhancedDiscoveryEngine {
 
     // Add industry-specific variations
     const industryVariations = this.getIndustryVariations(industry);
-    const locationVariations = this.getLocationVariations(location);
-
-    const expandedQueries = [];
-    baseQueries.forEach((base) => expandedQueries.push(base));
-
-    // Add industry variations
     industryVariations.forEach((variation) => {
-      expandedQueries.push(`${variation} in ${location}`);
-      expandedQueries.push(`${variation} ${location}`);
+      baseQueries.push(`${variation} in ${location}`);
+      baseQueries.push(`${variation} near ${location}`);
     });
 
-    // Add location variations
-    locationVariations.forEach((locVariation) => {
-      expandedQueries.push(`${industry} in ${locVariation}`);
+    // Add location-specific variations for geographic diversity
+    const locationVariations = this.getLocationVariations(location);
+    locationVariations.forEach((locVar) => {
+      baseQueries.push(`${industry} in ${locVar}`);
+      baseQueries.push(`${industry} near ${locVar}`);
+      // Add industry variations to location variations
+      industryVariations.slice(0, 2).forEach((indVar) => {
+        baseQueries.push(`${indVar} in ${locVar}`);
+      });
     });
 
-    return expandedQueries.slice(0, 15); // Limit to top 15 queries
+    // ENHANCED: Add neighborhood and area-specific searches
+    const neighborhoods = this.getNeighborhoodVariations(location);
+    neighborhoods.forEach((neighborhood) => {
+      baseQueries.push(`${industry} ${neighborhood}`);
+      baseQueries.push(`${industry} near ${neighborhood}`);
+    });
+
+    console.log(
+      `📋 Generated ${baseQueries.length} diverse search queries for maximum coverage`
+    );
+    return baseQueries;
   }
-
   /**
    * Get industry-specific variations
    */
@@ -471,31 +492,155 @@ class EnhancedDiscoveryEngine {
    * Get location-specific variations
    */
   getLocationVariations(location) {
+    const variations = [];
+
     if (location.includes(",")) {
       const parts = location.split(",");
       const city = parts[0].trim();
       const state = parts[1]?.trim();
 
-      const variations = [city];
+      variations.push(location, city);
       if (state) {
         variations.push(`${city}, ${state}`);
+        variations.push(`${city} ${state}`);
+        variations.push(state);
       }
 
-      // Add metro area variations for major cities
+      // ENHANCED: Add comprehensive metro area variations for major cities
       const metroAreas = {
-        "San Diego": ["San Diego County", "North County San Diego"],
-        "Los Angeles": ["LA", "Greater Los Angeles"],
-        "San Francisco": ["Bay Area", "SF"],
+        "San Diego": [
+          "San Diego County",
+          "North County San Diego",
+          "East County San Diego",
+          "South Bay San Diego",
+        ],
+        "Los Angeles": [
+          "LA",
+          "Greater Los Angeles",
+          "LA Metro",
+          "Orange County",
+          "Inland Empire",
+        ],
+        "San Francisco": [
+          "Bay Area",
+          "SF",
+          "Silicon Valley",
+          "Peninsula",
+          "East Bay",
+        ],
+        "New York": [
+          "NYC",
+          "Manhattan",
+          "Brooklyn",
+          "Queens",
+          "Bronx",
+          "Staten Island",
+          "Tri-State Area",
+        ],
+        Chicago: [
+          "Chicagoland",
+          "Cook County",
+          "Greater Chicago",
+          "North Shore",
+        ],
+        Houston: [
+          "Greater Houston",
+          "Harris County",
+          "The Woodlands",
+          "Sugar Land",
+        ],
+        Phoenix: ["Phoenix Metro", "Maricopa County", "Scottsdale", "Tempe"],
+        Philadelphia: [
+          "Philly",
+          "Delaware Valley",
+          "Main Line",
+          "South Jersey",
+        ],
+        Atlanta: [
+          "Metro Atlanta",
+          "Fulton County",
+          "Gwinnett County",
+          "North Atlanta",
+        ],
+        Miami: [
+          "Miami-Dade",
+          "South Florida",
+          "Broward County",
+          "Palm Beach County",
+        ],
       };
 
       if (metroAreas[city]) {
         variations.push(...metroAreas[city]);
       }
-
-      return variations;
+    } else {
+      variations.push(location);
     }
 
-    return [location];
+    return variations;
+  }
+
+  /**
+   * Get neighborhood and area variations for deeper geographic coverage
+   */
+  getNeighborhoodVariations(location) {
+    const neighborhoods = [];
+    const cityLower = location.toLowerCase();
+
+    // San Diego neighborhoods and suburbs
+    if (cityLower.includes("san diego")) {
+      neighborhoods.push(
+        "Downtown San Diego",
+        "La Jolla",
+        "Pacific Beach",
+        "Mission Valley",
+        "Hillcrest",
+        "North Park",
+        "South Park",
+        "Chula Vista",
+        "Escondido",
+        "Carlsbad",
+        "Encinitas",
+        "Del Mar",
+        "Poway",
+        "Santee",
+        "El Cajon"
+      );
+    }
+
+    // Los Angeles neighborhoods and suburbs
+    if (cityLower.includes("los angeles") || cityLower.includes(" la ")) {
+      neighborhoods.push(
+        "Hollywood",
+        "Beverly Hills",
+        "Santa Monica",
+        "Venice",
+        "Pasadena",
+        "Glendale",
+        "Burbank",
+        "Long Beach",
+        "Torrance",
+        "El Segundo",
+        "Culver City"
+      );
+    }
+
+    // New York neighborhoods and boroughs
+    if (cityLower.includes("new york") || cityLower.includes("nyc")) {
+      neighborhoods.push(
+        "Midtown Manhattan",
+        "Lower East Side",
+        "Upper West Side",
+        "SoHo",
+        "Brooklyn Heights",
+        "Williamsburg",
+        "Astoria",
+        "Flushing",
+        "Battery Park"
+      );
+    }
+
+    return neighborhoods;
   }
 
   /**
@@ -670,12 +815,15 @@ class EnhancedDiscoveryEngine {
    */
   async discoverViaFoursquare(query, location, maxResults = 20) {
     if (!this.foursquareClient) {
-      console.log(`   ⚠️ Foursquare client not configured, skipping`);
+      console.warn(
+        `⚠️ Foursquare Service Key not configured, returning mock response`
+      );
+      // Return empty results instead of mock data for fresh discoveries
       return [];
     }
 
     try {
-      console.log(`   📍 Foursquare search: "${query}" near ${location}`);
+      this.sourceStats.foursquare.searches++;
 
       const results = await this.foursquareClient.searchPlaces(query, {
         near: location,
@@ -683,7 +831,6 @@ class EnhancedDiscoveryEngine {
         categories: this.mapBusinessTypeToFoursquareCategory(query),
       });
 
-      this.sourceStats.foursquare.searches++;
       this.sourceStats.foursquare.cost += results.apiCost || 0;
 
       if (!results.found || !results.places.length) {
@@ -1050,6 +1197,48 @@ class EnhancedDiscoveryEngine {
       /^(store|shop|office)$/i,
     ];
     return genericPatterns.some((pattern) => pattern.test(name));
+  }
+
+  /**
+   * Calculate pre-validation score to filter businesses early
+   * @param {Object} business - Business data object
+   * @returns {number} Pre-validation score (0-100)
+   */
+  calculatePreValidationScore(business) {
+    let score = 0;
+
+    // Business name quality (25 points max)
+    if (business.name) {
+      score += !this.isGenericBusinessName(business.name) ? 25 : 15;
+    }
+
+    // Address completeness (20 points max)
+    if (business.formatted_address || business.address) {
+      const address = business.formatted_address || business.address;
+      score += address.split(",").length >= 3 ? 20 : 15; // Simple completeness check
+    }
+
+    // Phone number presence (20 points max)
+    if (business.formatted_phone_number || business.phone) {
+      const phone = business.formatted_phone_number || business.phone;
+      score += phone && phone.match(/\d{10,}/) ? 20 : 10;
+    }
+
+    // Google rating and review indicators (15 points max)
+    if (business.rating >= 4.0 && business.user_ratings_total >= 10) {
+      score += 15;
+    } else if (business.rating >= 3.5) {
+      score += 10;
+    }
+
+    // Website presence (20 points max)
+    if (business.website && business.website !== "http://example.com") {
+      score += 20;
+    } else if (business.website) {
+      score += 10;
+    }
+
+    return Math.min(score, 100);
   }
 }
 

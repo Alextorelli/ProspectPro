@@ -75,7 +75,12 @@ async function getApiKeys() {
 // Enhanced business discovery endpoint with v2.0 quality-focused engine
 router.post("/discover-businesses", async (req, res) => {
   const startTime = Date.now();
-  let campaignId = null;
+  const campaignId = `campaign_${Date.now()}_${Math.random()
+    .toString(36)
+    .substr(2, 9)}`;
+
+  // Initialize campaign logger at function level for error handling
+  const campaignLogger = new CampaignLogger();
 
   try {
     // Load fresh API keys from vault
@@ -83,7 +88,6 @@ router.post("/discover-businesses", async (req, res) => {
 
     // Initialize Enhanced Discovery Engine v2.0 with vault API keys
     const discoveryEngine = new EnhancedDiscoveryEngine(apiKeys);
-    const campaignLogger = new CampaignLogger();
 
     const {
       businessType,
@@ -113,11 +117,6 @@ router.post("/discover-businesses", async (req, res) => {
           "Configure API keys in Supabase Vault or environment variables",
       });
     }
-
-    // Generate campaign ID for tracking
-    campaignId = `campaign_${Date.now()}_${Math.random()
-      .toString(36)
-      .substr(2, 9)}`;
 
     console.log(
       `🚀 Starting Enhanced Discovery v2.0 - Campaign: ${campaignId}`
@@ -152,30 +151,31 @@ router.post("/discover-businesses", async (req, res) => {
         minConfidenceScore,
       },
       results: {
-        totalFound: discoveryResult.totalFound,
-        qualified: discoveryResult.qualified.length,
+        totalFound: discoveryResult?.totalFound || 0,
+        qualified: discoveryResult?.leads?.length || 0,
         qualificationRate: `${(
-          (discoveryResult.qualified.length / discoveryResult.totalFound) *
+          ((discoveryResult?.leads?.length || 0) /
+            (discoveryResult?.totalFound || 1)) *
           100
         ).toFixed(1)}%`,
-        averageConfidence: discoveryResult.averageConfidence,
-        completeness: discoveryResult.completeness,
+        averageConfidence: discoveryResult?.averageConfidence || 0,
+        completeness: discoveryResult?.completeness || 0,
       },
       costs: {
-        totalCost: discoveryResult.totalCost,
-        costPerLead: discoveryResult.costPerLead,
-        costBreakdown: discoveryResult.costBreakdown,
+        totalCost: discoveryResult?.totalCost || 0,
+        costPerLead: discoveryResult?.costPerLead || 0,
+        costBreakdown: discoveryResult?.costBreakdown || {},
       },
       performance: {
         processingTime: `${(processingTime / 1000).toFixed(1)}s`,
         avgTimePerLead: `${(
           processingTime /
           1000 /
-          discoveryResult.qualified.length
+          (discoveryResult?.leads?.length || 1)
         ).toFixed(1)}s`,
-        iterationsCompleted: discoveryResult.iterationsCompleted,
+        iterationsCompleted: discoveryResult?.iterationsCompleted || 0,
       },
-      leads: discoveryResult.qualified.map((lead) => ({
+      leads: (discoveryResult?.leads || []).map((lead) => ({
         businessName: lead.businessName,
         address: lead.address,
         phone: lead.phone,
@@ -203,7 +203,7 @@ router.post("/discover-businesses", async (req, res) => {
       businessType,
       location,
       targetCount: maxResults,
-      businesses: discoveryResult.qualified.map((lead) => ({
+      businesses: (discoveryResult?.leads || []).map((lead) => ({
         name: lead.businessName,
         address: lead.address,
         phone: lead.phone,
@@ -229,9 +229,13 @@ router.post("/discover-businesses", async (req, res) => {
     });
 
     console.log(
-      `✅ Campaign ${campaignId} completed: ${discoveryResult.qualified.length}/${maxResults} qualified leads`
+      `✅ Campaign ${campaignId} completed: ${
+        discoveryResult?.leads?.length || 0
+      }/${maxResults} qualified leads`
     );
-    console.log(`💰 Total cost: $${discoveryResult.totalCost.toFixed(4)}`);
+    console.log(
+      `💰 Total cost: $${(discoveryResult?.totalCost || 0).toFixed(4)}`
+    );
     console.log(`⏱️ Processing time: ${(processingTime / 1000).toFixed(1)}s`);
 
     res.json(response);
@@ -277,6 +281,13 @@ router.post("/discover", async (req, res) => {
   );
 
   try {
+    // Load fresh API keys from vault
+    const apiKeys = await getApiKeys();
+
+    // Initialize Enhanced Discovery Engine v2.0 with vault API keys
+    const discoveryEngine = new EnhancedDiscoveryEngine(apiKeys);
+    const campaignLogger = new CampaignLogger();
+
     // Map legacy parameters to new format
     const {
       query: businessType,
@@ -325,7 +336,7 @@ router.post("/discover", async (req, res) => {
       businessType,
       location,
       targetCount: maxResults,
-      businesses: discoveryResult.qualified.map((lead) => ({
+      businesses: (discoveryResult?.leads || []).map((lead) => ({
         name: lead.businessName,
         address: lead.address,
         phone: lead.phone,
@@ -352,7 +363,7 @@ router.post("/discover", async (req, res) => {
     // Return response in legacy format for backward compatibility
     res.json({
       success: true,
-      results: discoveryResult.qualified.map((lead) => ({
+      results: (discoveryResult?.leads || []).map((lead) => ({
         name: lead.businessName,
         address: lead.address,
         phone: lead.phone,
@@ -367,14 +378,16 @@ router.post("/discover", async (req, res) => {
         validationResults: lead.validationResults,
       })),
       metadata: {
-        totalProcessed: discoveryResult.totalFound,
-        totalQualified: discoveryResult.qualified.length,
+        totalProcessed: discoveryResult?.totalFound || 0,
+        totalQualified: discoveryResult?.leads?.length || 0,
         qualificationRate: Math.round(
-          (discoveryResult.qualified.length / discoveryResult.totalFound) * 100
+          ((discoveryResult?.leads?.length || 0) /
+            (discoveryResult?.totalFound || 1)) *
+            100
         ),
-        averageConfidence: discoveryResult.averageConfidence,
-        totalCost: discoveryResult.totalCost,
-        costPerLead: discoveryResult.costPerLead,
+        averageConfidence: discoveryResult?.averageConfidence || 0,
+        totalCost: discoveryResult?.totalCost || 0,
+        costPerLead: discoveryResult?.costPerLead || 0,
         processingTime: Date.now() - startTime,
         discoveryEngine: "Enhanced Discovery Engine v2.0 (Legacy Compatible)",
         campaignId,

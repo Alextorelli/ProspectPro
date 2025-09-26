@@ -171,6 +171,7 @@ try {
 
 // Mount API routes
 app.use("/api/business-discovery", businessDiscoveryRouter);
+app.use("/api/business", businessDiscoveryRouter); // Frontend compatibility
 app.use("/api/campaign-export", campaignExportRouter);
 
 // Default route - serve frontend with error handling
