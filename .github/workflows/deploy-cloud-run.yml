@@ -43,9 +43,9 @@ jobs:
           echo "🔐 Setting up Cloud Build service account permissions..."
           PROJECT_NUMBER=$(gcloud projects describe $PROJECT_ID --format="value(projectNumber)")
           CLOUD_BUILD_SA="${PROJECT_NUMBER}@cloudbuild.gserviceaccount.com"
-          
+
           echo "📋 Cloud Build Service Account: $CLOUD_BUILD_SA"
-          
+
           # Grant required roles to Cloud Build service account
           gcloud projects add-iam-policy-binding $PROJECT_ID \
             --member="serviceAccount:$CLOUD_BUILD_SA" \
@@ -94,23 +94,23 @@ jobs:
         run: |
           echo "⏳ Waiting for service to be ready..."
           sleep 45
-          
+
           SERVICE_URL="${{ steps.get-url.outputs.SERVICE_URL }}"
-          
+
           echo "🧪 Testing health endpoint..."
           if curl -f --max-time 30 "$SERVICE_URL/health"; then
             echo "✅ Health check passed"
           else
             echo "❌ Health check failed"
           fi
-          
+
           echo "🧪 Testing diagnostic endpoint..."
           if curl -f --max-time 30 "$SERVICE_URL/diag"; then
             echo "✅ Diagnostic check passed"
           else
             echo "❌ Diagnostic check failed"
           fi
-          
+
           echo "🧪 Testing business discovery API..."
           if curl -X POST --max-time 30 -H "Content-Type: application/json" \
             -d '{"businessType":"test","location":"San Francisco, CA","maxResults":1}' \
