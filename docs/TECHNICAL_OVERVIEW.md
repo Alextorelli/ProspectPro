@@ -30,6 +30,7 @@ This document provides an end‑to‑end, implementation‑level overview of Pro
 **Architecture**: Consolidated AI-enhanced development infrastructure providing intelligent assistants with direct access to ProspectPro systems.
 
 - `mcp-servers/production-server.js`: **28 tools** across 5 capability areas:
+
   - Database Analytics (4 tools): Query leads, campaign stats, quality analysis, API costs
   - System Monitoring (7 tools): Health checks, diagnostics, logs, Docker status, configuration validation
   - API Testing (8 tools): Google Places, Foursquare, Hunter.io, NeverBounce testing with cost tracking
