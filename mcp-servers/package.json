@@ -1,15 +1,14 @@
 {
     "name": "prospectpro-mcp-servers",
-    "version": "1.0.0",
-    "description": "Model Context Protocol servers for ProspectPro AI-enhanced development",
-    "main": "index.js",
+    "version": "2.0.0",
+    "description": "Consolidated Model Context Protocol servers for ProspectPro AI-enhanced development",
+    "main": "production-server.js",
     "scripts": {
-        "start:database": "node database-server.js",
-        "start:api": "node api-server.js",
-        "start:filesystem": "node filesystem-server.js",
-        "start:monitoring": "node monitoring-server.js",
-        "start:all": "concurrently \"npm run start:database\" \"npm run start:filesystem\" \"npm run start:monitoring\"",
-        "test": "node test-servers.js"
+        "start:production": "node production-server.js",
+        "start:development": "node development-server.js",
+        "start:all": "concurrently \"npm run start:production\" \"npm run start:development\"",
+        "test": "node test-servers.js",
+        "validate": "npm run test && echo '✅ All MCP servers validated successfully'"
     },
     "dependencies": {
         "@modelcontextprotocol/sdk": "^1.0.0",

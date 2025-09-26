@@ -151,40 +151,22 @@
   },
   "terminal.integrated.defaultProfile.linux": "bash",
   "terminal.integrated.gpuAcceleration": "on",
-  "terminal.integrated.scrollback": 1000, // Lower scrollback for memory optimization
+  "terminal.integrated.scrollback": 1000,
 
-  // === MCP (Model Context Protocol) Configuration ===
   "mcp.enable": true,
-  "mcp.configFile": "${workspaceFolder}/.vscode/mcp-config.json",
   "mcp.servers": {
-    "prospectpro-database": {
-      "enabled": true,
-      "autoStart": true,
-      "description": "ProspectPro Database Access via Supabase"
-    },
-    "prospectpro-apis": {
-      "enabled": true,
-      "autoStart": false,
-      "description": "ProspectPro API Clients (Google Places, Foursquare, Hunter.io)"
-    },
-    "prospectpro-filesystem": {
-      "enabled": true,
-      "autoStart": true,
-      "description": "ProspectPro Codebase Analysis and File Management"
-    },
-    "prospectpro-monitoring": {
-      "enabled": true,
-      "autoStart": false,
-      "description": "ProspectPro Monitoring and Diagnostics"
-    },
     "prospectpro-production": {
       "enabled": true,
       "autoStart": true,
-      "description": "ProspectPro Production Environment Management and CI/CD Monitoring"
+      "description": "ProspectPro Enhanced Production Server - Monitoring, Analytics, Diagnostics, API Testing, Filesystem Analysis"
+    },
+    "prospectpro-development": {
+      "enabled": true,
+      "autoStart": false,
+      "description": "ProspectPro Development Server - New API Integration, Performance Benchmarking, Development Utilities"
     }
   },
 
-  // AI-Enhanced Development Settings
   "ai.contextAware": true,
   "ai.projectContext": {
     "type": "lead-generation-platform",

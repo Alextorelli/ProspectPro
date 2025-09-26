@@ -25,6 +25,25 @@ This document provides an end‑to‑end, implementation‑level overview of Pro
   - `business-discovery.js`: HTTP routes for discovering and enriching leads.
   - `dashboard-export.js`, `export.js`: Export endpoints.
 
+### 1.2 MCP (Model Context Protocol) Infrastructure v2.0
+
+**Architecture**: Consolidated AI-enhanced development infrastructure providing intelligent assistants with direct access to ProspectPro systems.
+
+- `mcp-servers/production-server.js`: **28 tools** across 5 capability areas:
+  - Database Analytics (4 tools): Query leads, campaign stats, quality analysis, API costs
+  - System Monitoring (7 tools): Health checks, diagnostics, logs, Docker status, configuration validation
+  - API Testing (8 tools): Google Places, Foursquare, Hunter.io, NeverBounce testing with cost tracking
+  - Filesystem Analysis (6 tools): Project structure, code patterns, fake data detection, error handling
+  - Production Monitoring (3 tools): Health endpoints, deployment status, system metrics
+
+- `mcp-servers/development-server.js`: **8 specialized tools** for development workflows:
+  - New API Integration (4 tools): US Chamber, BBB, LinkedIn, ZoomInfo API testing
+  - Development Utilities (2 tools): Performance benchmarking, API client templates
+  - Code Generation (2 tools): Boilerplate generation, test suite creation
+
+**Benefits**: 60% reduction in server processes (5→2), 100% tool preservation, enhanced AI productivity.
+**Integration**: Auto-configured in VS Code, comprehensive test coverage via `npm run test`.
+
 ## 2. Data Pipeline (4 Stages)
 
 1. Discovery (free): Google Places + Yellow Pages scrapers; extracts core business candidates.
@@ -118,6 +137,9 @@ This document provides an end‑to‑end, implementation‑level overview of Pro
 - `modules/prometheus-metrics.js` — metrics
 - `modules/enhanced-lead-discovery.js` — lead pipeline core
 - `modules/api-clients/*` — external API integrations
+- `mcp-servers/production-server.js` — consolidated MCP server (28 tools)
+- `mcp-servers/development-server.js` — development MCP server (8 tools)
+- `mcp-servers/test-servers.js` — MCP comprehensive test suite
 - `database/03-monitoring-and-analytics.sql` — analytics/webhook tables + indexes
 - `database/05-security-and-rls.sql` — RLS + security policies
 - `database/06-webhook-hardening.sql` — webhook idempotency

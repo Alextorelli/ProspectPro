@@ -1,53 +1,85 @@
 {
-  "timestamp": "2025-09-23T22:12:57.241Z",
+  "timestamp": "2025-09-26T05:55:51.735Z",
   "servers": {
-    "database-server": {
-      "name": "database-server",
-      "file": "./database-server.js",
+    "production-server": {
+      "name": "production-server",
+      "file": "./production-server.js",
       "loadable": true,
-      "class_instantiable": false,
-      "methods_available": false,
-      "errors": [
-        "Cannot read properties of undefined (reading 'method')"
-      ]
+      "class_instantiable": true,
+      "server_methods": [
+        "setupTools",
+        "initializeSupabase",
+        "initializeAPIClients",
+        "environmentHealthCheck",
+        "githubActionsMonitor",
+        "devProdConfigDiff",
+        "costBudgetMonitor",
+        "apiHealthDashboard",
+        "vaultApiKeyStatus",
+        "productionStartupValidator",
+        "githubWorkflowOptimizer",
+        "getSystemHealth",
+        "readDiagnostics",
+        "analyzeLogs",
+        "validateConfiguration",
+        "generatePerformanceReport",
+        "monitorAPIQuotas",
+        "queryLeads",
+        "getCampaignStats",
+        "analyzeLeadQuality",
+        "getApiCosts",
+        "testGooglePlaces",
+        "testFoursquarePlaces",
+        "testEmailDiscovery",
+        "verifyEmail",
+        "getAPIUsageStats",
+        "simulateLeadDiscovery",
+        "analyzeProjectStructure",
+        "findCodePatterns",
+        "analyzeAPIClients",
+        "checkFakeDataViolations",
+        "checkFile",
+        "gatherDetailedMetrics",
+        "countFilesByExtension",
+        "getDirectorySize",
+        "walkDirectory",
+        "analyzeStructure",
+        "makeHttpsRequest",
+        "setupErrorHandling",
+        "run"
+      ],
+      "errors": []
     },
-    "api-server": {
-      "name": "api-server",
-      "file": "./api-server.js",
+    "development-server": {
+      "name": "development-server",
+      "file": "./development-server.js",
       "loadable": true,
-      "class_instantiable": false,
-      "methods_available": false,
-      "errors": [
-        "Cannot read properties of undefined (reading 'method')"
-      ]
-    },
-    "filesystem-server": {
-      "name": "filesystem-server",
-      "file": "./filesystem-server.js",
-      "loadable": true,
-      "class_instantiable": false,
-      "methods_available": false,
-      "errors": [
-        "Cannot read properties of undefined (reading 'method')"
-      ]
-    },
-    "monitoring-server": {
-      "name": "monitoring-server",
-      "file": "./monitoring-server.js",
-      "loadable": true,
-      "class_instantiable": false,
-      "methods_available": false,
-      "errors": [
-        "Cannot read properties of undefined (reading 'method')"
-      ]
+      "class_instantiable": true,
+      "server_methods": [
+        "setupTools",
+        "testNewAPIIntegration",
+        "testUSChamberAPI",
+        "testBBBAPI",
+        "testLinkedInSalesAPI",
+        "testZoomInfoAPI",
+        "compareAPISources",
+        "benchmarkAPIPerformance",
+        "analyzeErrorHandling",
+        "getConfigurationOverview",
+        "checkDockerStatus",
+        "generateAPIClientTemplate",
+        "validateEnvironmentSetup",
+        "createTestScenario",
+        "setupErrorHandling",
+        "run"
+      ],
+      "errors": []
     }
   },
   "configuration": {
-    "vscode_config": false,
-    "mcp_config": false,
-    "errors": [
-      "Expected double-quoted property name in JSON at position 441 (line 24 column 3)"
-    ]
+    "vscode_config": true,
+    "package_json": true,
+    "errors": []
   },
   "dependencies": {
     "package_json": true,
@@ -55,5 +87,5 @@
     "supabase": true,
     "errors": []
   },
-  "overall_status": "needs_attention"
+  "overall_status": "healthy"
 }
