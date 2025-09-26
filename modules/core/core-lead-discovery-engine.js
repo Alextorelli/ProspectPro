@@ -1,6 +1,6 @@
 /**
  * Enhanced Lead Discovery Algorithm
- * Integrates multiple data sources with cost optimization and intelligent pre-validation
+ * Integrates multiple data sources with cost optimization and Enhanced Quality Scoring v3.0
  */
 
 const CaliforniaSOS = require("../api-clients/california-sos-client");
@@ -8,7 +8,6 @@ const NewYorkSOS = require("../api-clients/newyork-sos-client");
 const NYTaxParcels = require("../api-clients/ny-tax-parcels-client");
 const GooglePlacesClient = require("../api-clients/api-google-places-client");
 const RegistryValidationEngine = require("../registry-engines/registry-validation-core-engine");
-const ValidationRouter = require("../routing/validation-smart-router");
 const { batchProcessor } = require("../utils/batch-processing-manager");
 const logger = require("../utils/logger");
 // Import API clients
@@ -21,9 +20,6 @@ const FoursquareClient = require("../api-clients/api-foursquare-places-client");
 
 class EnhancedLeadDiscovery {
   constructor(apiKeys = {}) {
-    // Initialize validation router
-    this.validationRouter = new ValidationRouter();
-
     // Initialize Registry Validation Engine with all providers
     this.registryEngine = new RegistryValidationEngine({
       concurrency: 3,

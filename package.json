@@ -1,7 +1,7 @@
 {
   "name": "prospect-pro-real-api",
-  "version": "3.0.0",
-  "description": "Production-grade lead generation platform with zero-fake-data policy and Supabase Vault integration",
+  "version": "3.1.0",
+  "description": "Production-grade lead generation platform with Enhanced Quality Scoring v3.0, zero-fake-data policy and Supabase Vault integration",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
