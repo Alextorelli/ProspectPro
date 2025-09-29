@@ -15,7 +15,7 @@ const config = envLoader.getConfig();
 
 console.log(`🚀 ProspectPro v3.1.0 starting in ${config.environment} mode`);
 console.log(
-  `🔧 Binding to ${config.host || "0.0.0.0"}:${process.env.PORT || 3100}`
+  `🔧 Container binding to all interfaces (0.0.0.0) on port ${process.env.PORT || 3100}`
 );
 
 // Core dependencies with error handling
@@ -365,14 +365,24 @@ async function startServer() {
       "0.0.0.0", // Explicitly bind to all interfaces for Cloud Run
       () => {
         const port = process.env.PORT || 3100;
-        const host = "0.0.0.0";
-        const serverUrl = `http://${host}:${port}`;
+        
+        // Determine the actual accessible URL based on environment
+        let publicUrl;
+        if (process.env.RAILWAY_STATIC_URL) {
+          publicUrl = process.env.RAILWAY_STATIC_URL;
+        } else if (process.env.CLOUD_RUN_SERVICE_URL) {
+          publicUrl = process.env.CLOUD_RUN_SERVICE_URL;
+        } else if (config.isProduction) {
+          publicUrl = `https://prospectpro-production.com`; // Will be actual Cloud Run URL
+        } else {
+          publicUrl = `http://localhost:${port}`;
+        }
 
-        console.log(`🌐 ProspectPro v3.1.0 server running on ${serverUrl}`);
+        console.log(`🌐 ProspectPro v3.1.0 accessible at: ${publicUrl}`);
         console.log(`📊 Environment: ${config.environment}`);
-        console.log(`🔗 Health check: ${serverUrl}/health`);
-        console.log(`🔍 Diagnostics: ${serverUrl}/diag`);
-        console.log(`🐳 Container Port: ${port} (Cloud Run managed)`);
+        console.log(`🔗 Health check: ${publicUrl}/health`);
+        console.log(`🔍 Diagnostics: ${publicUrl}/diag`);
+        console.log(`🐳 Container internal port: ${port} (platform managed)`);
 
         // Production status summary
         if (config.isProduction) {

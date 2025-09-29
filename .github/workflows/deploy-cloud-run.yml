@@ -70,7 +70,6 @@ jobs:
             --set-env-vars NODE_ENV=production \
             --set-env-vars SUPABASE_URL="${{ secrets.SUPABASE_URL }}" \
             --set-env-vars SUPABASE_SECRET_KEY="${{ secrets.SUPABASE_SECRET_KEY }}" \
-            --set-env-vars PORT=3100 \
             --set-env-vars ALLOW_DEGRADED_START=true \
             --quiet
 
