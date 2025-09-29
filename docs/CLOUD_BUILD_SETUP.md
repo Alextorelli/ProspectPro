@@ -7,8 +7,18 @@ Configure these in your Cloud Build trigger in Google Cloud Console:
 ### Supabase Configuration
 
 ```
-_SUPABASE_URL: your-project.supabase.co
-_SUPABASE_SECRET_KEY: your-supabase-service-role-key
+### Supabase Configuration
+```
+3. **Add Substitution Variables**:
+   - `_SUPABASE_URL` = `https://your-project.supabase.co`
+   - `_SUPABASE_SECRET_KEY` = `your-service-role-key`
+   - `_WEBHOOK_AUTH_TOKEN` = `your-secure-webhook-token`
+```
+
+### Webhook Configuration
+```
+_WEBHOOK_AUTH_TOKEN: your-secure-webhook-token-for-database-triggers
+```
 ```
 
 ## Setting Up the Trigger

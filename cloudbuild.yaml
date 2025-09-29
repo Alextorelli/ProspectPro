@@ -62,6 +62,7 @@ steps:
       - '--set-env-vars=ALLOW_DEGRADED_START=true'
       - '--set-env-vars=SUPABASE_URL=${_SUPABASE_URL}'
       - '--set-env-vars=SUPABASE_SECRET_KEY=${_SUPABASE_SECRET_KEY}'
+      - '--set-env-vars=WEBHOOK_AUTH_TOKEN=${_WEBHOOK_AUTH_TOKEN}'
       - '--service-account=prospectpro-deployment@leadgen-471822.iam.gserviceaccount.com'
     id: 'deploy-cloud-run'
     waitFor: ['push-container']
@@ -84,6 +85,7 @@ steps:
 substitutions:
   _SUPABASE_URL: ''
   _SUPABASE_SECRET_KEY: ''
+  _WEBHOOK_AUTH_TOKEN: ''
 
 # Build configuration optimized for production
 options:
