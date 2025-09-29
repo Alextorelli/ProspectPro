@@ -324,7 +324,7 @@ async function startServer() {
         );
 
         // Critical API validation for production
-        const criticalApis = ["foursquare", "googlePlaces"];
+        const criticalApis = ["googlePlaces"]; // Foursquare is optional enhancement
         const missingCritical = criticalApis.filter((api) => !apiKeys[api]);
 
         if (missingCritical.length > 0) {
@@ -332,7 +332,7 @@ async function startServer() {
             `❌ Critical API keys missing: ${missingCritical.join(", ")}`
           );
           console.error(
-            "💡 Business discovery engine requires Foursquare API key"
+            "💡 Business discovery requires Google Places API key"
           );
 
           if (process.env.ALLOW_DEGRADED_START !== "true") {

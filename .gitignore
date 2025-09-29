@@ -1,6 +1,43 @@
-# === PRODUCTION GITIGNORE - ENHANCED AUTO-CLEANUP ===
+# === PRODUCTION GITIGNORE - CLEAN REPOSITORY ENFORCEMENT ===
 
-# Runtime & Temporary Files - STRICT ENFORCEMENT
+# Deployment Troubleshooting (archive only)
+*-troubleshooting.js
+*-deployment-*.js
+*-cloud-*.js
+*-fix.js
+*-analysis.js
+*-monitoring.js
+artifact-registry-*.js
+cloud-build-*.js
+cloud-run-*.js
+deployment-*.js
+github-secrets-*.js
+manual-trigger-*.js
+service-account-*.js
+trigger-*.js
+verify-*.js
+
+# Temporary Status Files
+DEPLOYMENT_STATUS_*.md
+deployment-status-*.md
+*-status-report.js
+*-initialization-*.js
+
+# Development Artifacts - AUTO-ARCHIVE
+quick-*.js
+test-*.js
+demo-*.js
+*-simulation.js
+*-playground.js
+validate-*.js
+debug-*.js
+
+# Single-Use Scripts - PREVENT CLUTTER
+launch-*.js
+execute-*.js
+run-*.js
+
+# Build and Log Files
 *.log
 *.tmp
 *.temp
@@ -9,21 +46,8 @@ startup.log
 production*.log
 database-validation.log
 server-test.log
-
-# Development Artifacts - AUTO-ARCHIVE
-quick-*.js
-test-*.js
-demo-*.js
-*-simulation.js
-*-playground.js
-verify-*.js
-validate-*.js
-debug-*.js
-
-# Single-Use Scripts - PREVENT CLUTTER
-launch-*.js
-execute-*.js
-run-*.js
+build-*.json
+trigger-test-*.json
 
 # Output Files - EXCEPT ESSENTIAL
 *.csv
