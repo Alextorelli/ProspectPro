@@ -15,6 +15,7 @@
     "health": "curl http://localhost:3100/health || echo 'Server not running'",
     "diag": "curl http://localhost:3100/diag | json_pp || echo 'Server not running'",
     "test": "echo 'Tests moved to testing branch. Run: git checkout testing && node tests/validation/test-real-data.js'",
+    "cleanup": "./scripts/enforce-repository-cleanliness.sh",
     "postinstall": "echo 'ProspectPro v3.0: Production-ready deployment configured'",
     "docker:dev": "./docker/start-dev.sh",
     "docker:prod": "./docker/deploy-prod.sh",

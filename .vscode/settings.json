@@ -60,7 +60,11 @@
     "**/startup.log": true,
     "**/production*.log": true,
     "**/database-validation.log": true,
-    "**/server-test.log": true
+    "**/server-test.log": true,
+    "**/test-*.js": true,
+    "**/*-analysis.js": true,
+    "**/*-troubleshooting.js": true,
+    "**/*-fix.js": true
   },
 
   "files.watcherExclude": {

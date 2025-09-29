@@ -1,12 +1,16 @@
 # === PRODUCTION GITIGNORE - CLEAN REPOSITORY ENFORCEMENT ===
 
-# Deployment Troubleshooting (archive only)
+# NEVER ALLOW IN ROOT - DEVELOPMENT ARTIFACTS
 *-troubleshooting.js
 *-deployment-*.js
 *-cloud-*.js
 *-fix.js
 *-analysis.js
 *-monitoring.js
+*-status-*.js
+*-validation-*.js
+*-trigger-*.js
+*-verification.js
 artifact-registry-*.js
 cloud-build-*.js
 cloud-run-*.js
@@ -16,28 +20,26 @@ manual-trigger-*.js
 service-account-*.js
 trigger-*.js
 verify-*.js
+production-*-status.js
+production-*-report.js
 
-# Temporary Status Files
+# NEVER ALLOW IN ROOT - TEMPORARY STATUS FILES
 DEPLOYMENT_STATUS_*.md
 deployment-status-*.md
 *-status-report.js
 *-initialization-*.js
+*-mcp-status.js
 
-# Development Artifacts - AUTO-ARCHIVE
-quick-*.js
+# NEVER ALLOW IN ROOT - TEST FILES
 test-*.js
+*-test.js
+debug-*.js
 demo-*.js
 *-simulation.js
 *-playground.js
 validate-*.js
-debug-*.js
 
-# Single-Use Scripts - PREVENT CLUTTER
-launch-*.js
-execute-*.js
-run-*.js
-
-# Build and Log Files
+# NEVER ALLOW IN ROOT - BUILD/LOG FILES
 *.log
 *.tmp
 *.temp

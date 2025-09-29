@@ -17,9 +17,9 @@ echo "⚡ Zero Manual Configuration Required"
 echo ""
 
 # Configuration
-PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+PROJECT_ROOT="$(pwd)"
+LOG_FILE="${PROJECT_ROOT}/logs/startup.log"
 ENV_FILE="${PROJECT_ROOT}/.env"
-LOG_FILE="${PROJECT_ROOT}/startup.log"
 SCRIPTS_DIR="${PROJECT_ROOT}/scripts"
 
 echo "📋 Project root: $PROJECT_ROOT"

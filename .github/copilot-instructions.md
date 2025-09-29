@@ -9,6 +9,28 @@
 - **Quality Scoring**: v3.0 cost-efficient multi-stage validation with dynamic thresholds
 - **Repository**: https://github.com/Alextorelli/ProspectPro (main = production)
 
+## CRITICAL: REPOSITORY CLEANLINESS ENFORCEMENT
+
+**NEVER CREATE FILES IN ROOT DIRECTORY**
+- ❌ NO test files, analysis files, troubleshooting scripts in root
+- ❌ NO temporary files, debug files, status files in root  
+- ❌ NO *-analysis.js, *-fix.js, *-troubleshooting.js files
+- ❌ NO deployment-*.js, cloud-*.js, trigger-*.js files
+- ✅ ONLY core production files: server.js, package.json, Dockerfile, etc.
+
+**FILE ORGANIZATION RULES**
+- Scripts → `scripts/` folder ONLY
+- Tests → `scripts/` folder ONLY  
+- Documentation → `docs/` folder ONLY
+- Archive material → `archive/` folder ONLY
+- Temporary files → Use .tmp extension (auto-ignored)
+
+**PRODUCTION-FIRST APPROACH**
+- Main branch = CLEAN production code only
+- No development artifacts in root
+- All debugging/troubleshooting goes to archive folders
+- Maintain professional repository structure
+
 ## IMMEDIATE CONTEXT (No Re-explanation Needed)
 
 When Alex asks about:

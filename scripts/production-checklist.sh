@@ -10,8 +10,9 @@ set -euo pipefail
 echo "📋 ProspectPro Production Readiness Checklist v3.0"
 echo "=================================================="
 
-PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-CHECKLIST_LOG="${PROJECT_ROOT}/production-checklist.log"
+# Configuration
+PROJECT_ROOT="$(dirname "$(realpath "$0")")/.."
+CHECKLIST_LOG="${PROJECT_ROOT}/logs/production-checklist.log"
 
 # Initialize checklist log
 cat > "$CHECKLIST_LOG" << EOF
@@ -167,7 +168,7 @@ echo "4.1 Testing production server initialization..."
 export NODE_ENV=production
 
 # Start server in background for testing
-timeout 30s node "${PROJECT_ROOT}/server.js" > "${PROJECT_ROOT}/server-test.log" 2>&1 &
+timeout 30s node "${PROJECT_ROOT}/server.js" > "${PROJECT_ROOT}/logs/server-test.log" 2>&1 &
 SERVER_PID=$!
 
 # Wait for server to start
