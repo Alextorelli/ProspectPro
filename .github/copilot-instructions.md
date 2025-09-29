@@ -100,9 +100,10 @@ Git Push → Cloud Build Trigger → Container Build → Cloud Run Deploy
 ```
 
 ### **Webhook Infrastructure (Production Ready)**
+
 ```
 /api/webhooks/campaign-lifecycle    # Real-time campaign monitoring
-/api/webhooks/cost-alert           # Budget protection & cost monitoring  
+/api/webhooks/cost-alert           # Budget protection & cost monitoring
 /api/webhooks/lead-enrichment      # Automated lead processing pipeline
 ```
 

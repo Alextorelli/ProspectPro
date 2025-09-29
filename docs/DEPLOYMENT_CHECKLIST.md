@@ -3,15 +3,17 @@
 ## 📋 **DEPLOYMENT FINALIZATION CHECKLIST**
 
 ### **Phase 1: Cloud Build Trigger Setup**
+
 - [ ] **Go to Google Cloud Console → Cloud Build → Triggers**
 - [ ] **Create New Trigger** with these settings:
   - Name: `prospectpro-main-deploy`
-  - Event: Push to branch  
+  - Event: Push to branch
   - Repository: `Alextorelli/ProspectPro`
   - Branch: `^main$`
   - Configuration: Cloud Build configuration file (`cloudbuild.yaml`)
 
 ### **Phase 2: Configure Substitution Variables**
+
 - [ ] **Add these substitution variables in the trigger:**
   ```
   _SUPABASE_URL = https://your-project.supabase.co
@@ -20,12 +22,14 @@
   ```
 
 ### **Phase 3: Verify Service Account Permissions**
+
 - [ ] **Ensure Cloud Build service account has:**
   - Cloud Run Admin
   - Artifact Registry Writer
   - Service Account User
 
 ### **Phase 4: Initial Deployment**
+
 - [ ] **Trigger deployment via git push:**
   ```bash
   git add .
@@ -34,11 +38,13 @@
   ```
 
 ### **Phase 5: Monitor Deployment**
+
 - [ ] **Check build progress**: https://console.cloud.google.com/cloud-build/builds
 - [ ] **Verify Cloud Run service**: https://console.cloud.google.com/run
 - [ ] **Note your Cloud Run URL**: `https://prospectpro-xxxxxx.us-central1.run.app`
 
 ### **Phase 6: Configure Webhooks (Post-Deployment)**
+
 - [ ] **Update database configuration** (run in Supabase SQL Editor):
   ```sql
   -- Replace [YOUR_CLOUD_RUN_URL] with actual URL
@@ -49,7 +55,9 @@
   ```
 
 ### **Phase 7: Validation & Testing**
+
 - [ ] **Test health endpoints:**
+
   ```bash
   curl https://[YOUR_CLOUD_RUN_URL]/health
   curl https://[YOUR_CLOUD_RUN_URL]/diag
@@ -57,6 +65,7 @@
   ```
 
 - [ ] **Test webhook endpoints:**
+
   ```bash
   curl https://[YOUR_CLOUD_RUN_URL]/api/webhooks/campaign-lifecycle/health
   curl https://[YOUR_CLOUD_RUN_URL]/api/webhooks/cost-alert/health
@@ -73,6 +82,7 @@
 ## 🎯 **Success Criteria**
 
 ### **✅ Deployment Successful When:**
+
 - [ ] Cloud Build completes without errors
 - [ ] Cloud Run service is running and accessible
 - [ ] Health endpoints return 200 status
@@ -81,6 +91,7 @@
 - [ ] Main API returns valid business discovery results
 
 ### **✅ Webhooks Working When:**
+
 - [ ] Database triggers execute without errors
 - [ ] Webhook logs show successful HTTP 200 responses
 - [ ] Real-time campaign updates are processed
@@ -90,16 +101,19 @@
 ## 📞 **Troubleshooting Guide**
 
 ### **Build Failures:**
+
 - Check Cloud Build logs for specific error messages
 - Verify substitution variables are correctly set
 - Ensure service account permissions are configured
 
 ### **Runtime Errors:**
+
 - Check Cloud Run logs for application errors
 - Verify environment variables are injected correctly
 - Test database connectivity via `/diag` endpoint
 
 ### **Webhook Issues:**
+
 - Verify webhook URLs are correctly configured in database
 - Check webhook authentication token matches
 - Monitor webhook execution logs in database
