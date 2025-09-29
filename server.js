@@ -15,7 +15,9 @@ const config = envLoader.getConfig();
 
 console.log(`🚀 ProspectPro v3.1.0 starting in ${config.environment} mode`);
 console.log(
-  `🔧 Container binding to all interfaces (0.0.0.0) on port ${process.env.PORT || 3100}`
+  `🔧 Container binding to all interfaces (0.0.0.0) on port ${
+    process.env.PORT || 3100
+  }`
 );
 
 // Core dependencies with error handling
@@ -365,7 +367,7 @@ async function startServer() {
       "0.0.0.0", // Explicitly bind to all interfaces for Cloud Run
       () => {
         const port = process.env.PORT || 3100;
-        
+
         // Determine the actual accessible URL based on environment
         let publicUrl;
         if (process.env.RAILWAY_STATIC_URL) {
