@@ -5,6 +5,7 @@
 Once your Cloud Run deployment is live, configure these webhook URLs in your Supabase project:
 
 ### 1. Supabase Dashboard Configuration
+
 **Settings → Database → Webhooks**
 
 ```
@@ -25,6 +26,7 @@ Authentication: Bearer token (use your WEBHOOK_AUTH_TOKEN)
 ```
 
 ### 2. Database Configuration Settings
+
 Execute in Supabase SQL Editor:
 
 ```sql
@@ -38,6 +40,7 @@ ALTER DATABASE SET app.webhook_token = '[YOUR_WEBHOOK_AUTH_TOKEN]';
 ```
 
 ### 3. Environment Variables for Cloud Build
+
 Add to your Cloud Build trigger substitution variables:
 
 ```
@@ -67,11 +70,12 @@ Your current webhook infrastructure is **production-ready** and comprehensive. T
 ## Testing Webhooks
 
 After deployment, test webhooks:
+
 ```bash
 # Test campaign lifecycle webhook
 curl -X POST https://[YOUR_CLOUD_RUN_URL]/api/webhooks/campaign-lifecycle/health
 
-# Test cost alert webhook  
+# Test cost alert webhook
 curl -X POST https://[YOUR_CLOUD_RUN_URL]/api/webhooks/cost-alert/health
 
 # Test lead enrichment webhook
