@@ -1,14 +1,13 @@
-# Cloud Build configuration for ProspectPro deployment
-# Fixes service account logging requirements and repository naming
+# Cloud Build Configuration for ProspectPro v3.1
+# Native Google Cloud deployment with Supabase Vault integration
 
 steps:
-  # Create Artifact Registry repository if it doesn't exist
+  # Step 1: Create Artifact Registry repository if needed
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: 'bash'
     args:
       - '-c'
       - |
-        # Check if repository exists first
         if ! gcloud artifacts repositories describe prospectpro --location=us-central1 &>/dev/null; then
           echo "🏗️ Creating Artifact Registry repository..."
           gcloud artifacts repositories create prospectpro \
@@ -19,47 +18,79 @@ steps:
         else
           echo "✅ Repository already exists"
         fi
+    id: 'setup-registry'
 
-  # Build the Docker image
+  # Step 2: Build Docker container
   - name: 'gcr.io/cloud-builders/docker'
-    args: [
-      'build',
-      '-t', 'us-central1-docker.pkg.dev/$PROJECT_ID/prospectpro/app:$COMMIT_SHA',
-      '-t', 'us-central1-docker.pkg.dev/$PROJECT_ID/prospectpro/app:latest',
-      '.'
-    ]
+    args: 
+      - 'build'
+      - '-t'
+      - 'us-central1-docker.pkg.dev/$PROJECT_ID/prospectpro/app:$COMMIT_SHA'
+      - '-t'
+      - 'us-central1-docker.pkg.dev/$PROJECT_ID/prospectpro/app:latest'
+      - '.'
+    id: 'build-container'
+    waitFor: ['setup-registry']
 
-  # Push the Docker image to Artifact Registry
+  # Step 3: Push container to Artifact Registry
   - name: 'gcr.io/cloud-builders/docker'
-    args: [
-      'push',
-      '--all-tags',
-      'us-central1-docker.pkg.dev/$PROJECT_ID/prospectpro/app'
-    ]
+    args:
+      - 'push'
+      - '--all-tags'
+      - 'us-central1-docker.pkg.dev/$PROJECT_ID/prospectpro/app'
+    id: 'push-container'
+    waitFor: ['build-container']
 
-  # Deploy to Cloud Run
+  # Step 4: Deploy to Cloud Run with environment variables
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: 'gcloud'
     args:
       - 'run'
       - 'deploy'
       - 'prospectpro'
-      - '--image=us-central1-docker.pkg.dev/$PROJECT_ID/prospectpro/app:latest'
-      - '--region=us-central1'
+      - '--image=us-central1-docker.pkg.dev/$PROJECT_ID/prospectpro/app:$COMMIT_SHA'
       - '--platform=managed'
+      - '--region=us-central1'
       - '--allow-unauthenticated'
-      # Removed --port=3100 to let Cloud Run manage port dynamically
       - '--memory=2Gi'
       - '--cpu=2'
+      - '--min-instances=0'
       - '--max-instances=10'
-      - '--set-env-vars=NODE_ENV=production,ALLOW_DEGRADED_START=true,HOST=0.0.0.0'
+      - '--concurrency=100'
+      - '--timeout=300'
+      - '--set-env-vars=NODE_ENV=production'
+      - '--set-env-vars=ALLOW_DEGRADED_START=true'
+      - '--set-env-vars=SUPABASE_URL=${_SUPABASE_URL}'
+      - '--set-env-vars=SUPABASE_SECRET_KEY=${_SUPABASE_SECRET_KEY}'
       - '--service-account=prospectpro-deployment@leadgen-471822.iam.gserviceaccount.com'
+    id: 'deploy-cloud-run'
+    waitFor: ['push-container']
 
-# CRITICAL: Logging configuration required when using custom service account
+  # Step 5: Wait for deployment and test health
+  - name: 'gcr.io/cloud-builders/curl'
+    args:
+      - '-f'
+      - '--max-time'
+      - '45'
+      - '--retry'
+      - '5'
+      - '--retry-delay'
+      - '15'
+      - 'https://prospectpro-184492422840.us-central1.run.app/health'
+    id: 'health-check'
+    waitFor: ['deploy-cloud-run']
+
+# Substitution variables (set in Cloud Build trigger)
+substitutions:
+  _SUPABASE_URL: ''
+  _SUPABASE_SECRET_KEY: ''
+
+# Build configuration optimized for production
 options:
-  logging: CLOUD_LOGGING_ONLY
   machineType: 'E2_HIGHCPU_8'
   diskSizeGb: 100
+  substitutionOption: 'ALLOW_LOOSE'
+  logging: CLOUD_LOGGING_ONLY
 
-# Timeout for the entire build (20 minutes)
+# Build timeout (20 minutes for comprehensive build and test)
 timeout: '1200s'

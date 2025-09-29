@@ -1,13 +1,27 @@
-# ProspectPro v3.1 - Optimized AI Instructions with Enhanced Quality Scoring
+# ProspectPro v3.1 - Cloud-Native Deployment Architecture
 
 ## CRITICAL: Current Production State
 
-- **Version**: 3.1.0 (Production-ready with Enhanced Quality Scoring v3.0)
-- **Deployment**: GitHub Actions → Google Cloud Run automated
-- **Environment**: Secrets auto-injected via GitHub Actions and Supabase Vault
-- **Architecture**: Cost-optimized 4-stage validation pipeline (Discovery→Enrichment→Validation→Export)
+- **Version**: 3.1.0 (Production-ready with Cloud-Native Deployment)
+- **Deployment**: Google Cloud Build → Google Cloud Run (native integration)
+- **Environment**: Supabase Vault for secrets, Cloud Build for environment injection
+- **Architecture**: Cloud-native 4-stage validation pipeline (Discovery→Enrichment→Validation→Export)
 - **Quality Scoring**: v3.0 cost-efficient multi-stage validation with dynamic thresholds
-- **Repository**: https://github.com/Alextorelli/ProspectPro (main = production)
+- **Repository**: https://github.com/Alextorelli/ProspectPro (GitHub for code only)
+
+## CRITICAL: CLOUD-NATIVE DEPLOYMENT APPROACH
+
+**DEPLOYMENT PHILOSOPHY**
+- ✅ Google Cloud Build: Container builds and deployment
+- ✅ Google Cloud Run: Serverless hosting with auto-scaling
+- ✅ Supabase Vault: Centralized secrets management
+- ✅ GitHub: Code repository and documentation only
+- ❌ NO GitHub Actions, workflows, or CI/CD complexity
+
+**PLATFORM SPECIALIZATION**
+- **GitHub**: Minimal repo management, documentation, Git API
+- **Google Cloud**: Build, deploy, host, monitor, scale
+- **Supabase**: Database, real-time, secrets vault, edge functions
 
 ## CRITICAL: REPOSITORY CLEANLINESS ENFORCEMENT
 
@@ -17,7 +31,7 @@
 - ❌ NO temporary files, debug files, status files in root
 - ❌ NO _-analysis.js, _-fix.js, \*-troubleshooting.js files
 - ❌ NO deployment-_.js, cloud-_.js, trigger-\*.js files
-- ✅ ONLY core production files: server.js, package.json, Dockerfile, etc.
+- ✅ ONLY core production files: server.js, package.json, Dockerfile, cloudbuild.yaml
 
 **FILE ORGANIZATION RULES**
 
@@ -25,6 +39,7 @@
 - Tests → `scripts/` folder ONLY
 - Documentation → `docs/` folder ONLY
 - Archive material → `archive/` folder ONLY
+- GitHub Actions → `archive/github-actions/` (deprecated)
 - Temporary files → Use .tmp extension (auto-ignored)
 
 **PRODUCTION-FIRST APPROACH**
@@ -38,13 +53,14 @@
 
 When Alex asks about:
 
-- **"Environment setup"** → Point to `npm run prod-setup-env` (automated via GitHub Actions)
+- **"Deployment"** → Google Cloud Build automatic triggers (native integration)
+- **"Environment setup"** → Supabase Vault + Cloud Build substitution variables
 - **"API integration"** → All clients in `/modules/api-clients/` (Google Places, Hunter.io, NeverBounce, Foursquare)
 - **"Database issues"** → Supabase with comprehensive schema in `/database/`
-- **"Docker problems"** → Multi-stage build with security hardening already implemented
+- **"Container problems"** → Multi-stage Dockerfile + Cloud Build optimization
 - **"Cost optimization"** → Enhanced Quality Scorer v3.0 with cost-efficient validation pipeline
 - **"Quality scoring"** → `/modules/validators/enhanced-quality-scorer.js` (35-45% qualification rates)
-- **"Deployment"** → Automated via GitHub Actions to Google Cloud Run
+- **"Build issues"** → Check Cloud Build logs in Google Cloud Console
 - **"Testing"** → Use `npm run test` or check testing branch
 
 ## ALEX'S TECHNICAL PROFILE
@@ -54,7 +70,7 @@ When Alex asks about:
 - **Primary Models**: Claude Sonnet 4.0, GPT-5 occasionally
 - **Environment**: GitHub Codespaces exclusively
 - **Focus**: Lead generation with zero fake data tolerance
-- **Usage Pattern**: Debugging, testing, CI/CD, architecture discussions
+- **Usage Pattern**: Debugging, testing, cloud-native architecture, monitoring
 
 ## RESPONSE OPTIMIZATION RULES
 
@@ -68,6 +84,13 @@ When Alex asks about:
 
 ## CURRENT PRODUCTION ARCHITECTURE (ESTABLISHED - DO NOT RE-EXPLAIN)
 
+### **Cloud-Native Deployment Pipeline**
+```
+Git Push → Cloud Build Trigger → Container Build → Cloud Run Deploy
+              ↓
+    Supabase Vault (inject secrets) → Environment Variables
+```
+
 ### File Structure (REFERENCE ONLY)
 
 ```
@@ -76,17 +99,18 @@ When Alex asks about:
 /modules/campaign-csv-exporter.js    # Export system with analytics
 /modules/api-clients/                # All API integrations
 /database/database-master-setup.js   # Schema and migrations
-.scripts/pull-env-from-secrets.js    # Environment automation
+cloudbuild.yaml                      # Cloud Build configuration
+Dockerfile                           # Container build instructions
 ```
 
-### Current Working Scripts (USE THESE)
+### Current Working Commands (USE THESE)
 
 ```bash
-npm run prod-setup-env     # Automated secret injection
-npm run production-start   # Launch production
 npm run prod-check        # Validate environment
-npm run health            # Health check
-npm run diag              # Diagnostics
+npm run production-start  # Launch production locally
+npm run health           # Health check
+npm run diag             # Diagnostics
+# Cloud deployment: Automatic via git push to main
 ```
 
 ### API Integration Stack (WORKING)
