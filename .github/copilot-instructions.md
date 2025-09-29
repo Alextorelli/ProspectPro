@@ -57,12 +57,14 @@ When Alex asks about:
 
 - **"Deployment"** → Google Cloud Build automatic triggers (native integration)
 - **"Environment setup"** → Supabase Vault + Cloud Build substitution variables
+- **"Webhook configuration"** → 3 production endpoints already implemented (campaign-lifecycle, cost-alert, lead-enrichment)
 - **"API integration"** → All clients in `/modules/api-clients/` (Google Places, Hunter.io, NeverBounce, Foursquare)
 - **"Database issues"** → Supabase with comprehensive schema in `/database/`
 - **"Container problems"** → Multi-stage Dockerfile + Cloud Build optimization
 - **"Cost optimization"** → Enhanced Quality Scorer v3.0 with cost-efficient validation pipeline
 - **"Quality scoring"** → `/modules/validators/enhanced-quality-scorer.js` (35-45% qualification rates)
 - **"Build issues"** → Check Cloud Build logs in Google Cloud Console
+- **"Webhook setup"** → Follow `/docs/CLOUD_NATIVE_WEBHOOK_SETUP.md`
 - **"Testing"** → Use `npm run test` or check testing branch
 
 ## ALEX'S TECHNICAL PROFILE
@@ -73,6 +75,7 @@ When Alex asks about:
 - **Environment**: GitHub Codespaces exclusively
 - **Focus**: Lead generation with zero fake data tolerance
 - **Usage Pattern**: Debugging, testing, cloud-native architecture, monitoring
+- **Deployment Preference**: Cloud-native platform specialization over complex CI/CD
 
 ## RESPONSE OPTIMIZATION RULES
 
@@ -92,16 +95,27 @@ When Alex asks about:
 Git Push → Cloud Build Trigger → Container Build → Cloud Run Deploy
               ↓
     Supabase Vault (inject secrets) → Environment Variables
+              ↓
+    Database Triggers → Webhook Endpoints → Real-time Processing
+```
+
+### **Webhook Infrastructure (Production Ready)**
+```
+/api/webhooks/campaign-lifecycle    # Real-time campaign monitoring
+/api/webhooks/cost-alert           # Budget protection & cost monitoring  
+/api/webhooks/lead-enrichment      # Automated lead processing pipeline
 ```
 
 ### File Structure (REFERENCE ONLY)
 
 ```
 /api/business-discovery.js           # Core discovery logic
+/api/webhooks/                       # 3 production webhook endpoints
 /modules/enhanced-lead-discovery.js  # Main business processing
 /modules/campaign-csv-exporter.js    # Export system with analytics
 /modules/api-clients/                # All API integrations
 /database/database-master-setup.js   # Schema and migrations
+/docs/CLOUD_NATIVE_WEBHOOK_SETUP.md  # Webhook configuration guide
 cloudbuild.yaml                      # Cloud Build configuration
 Dockerfile                           # Container build instructions
 ```
