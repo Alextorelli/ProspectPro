@@ -38,29 +38,6 @@ jobs:
           gcloud services enable artifactregistry.googleapis.com || true
           echo "✅ APIs enabled"
 
-      - name: Set up Cloud Build permissions
-        run: |
-          echo "🔐 Setting up Cloud Build service account permissions..."
-          PROJECT_NUMBER=$(gcloud projects describe $PROJECT_ID --format="value(projectNumber)")
-          CLOUD_BUILD_SA="${PROJECT_NUMBER}@cloudbuild.gserviceaccount.com"
-
-          echo "📋 Cloud Build Service Account: $CLOUD_BUILD_SA"
-
-          # Grant required roles to Cloud Build service account
-          gcloud projects add-iam-policy-binding $PROJECT_ID \
-            --member="serviceAccount:$CLOUD_BUILD_SA" \
-            --role="roles/run.admin" || true
-            
-          gcloud projects add-iam-policy-binding $PROJECT_ID \
-            --member="serviceAccount:$CLOUD_BUILD_SA" \
-            --role="roles/storage.admin" || true
-            
-          gcloud projects add-iam-policy-binding $PROJECT_ID \
-            --member="serviceAccount:$CLOUD_BUILD_SA" \
-            --role="roles/iam.serviceAccountUser" || true
-            
-          echo "✅ Cloud Build permissions configured"
-
       - name: Deploy to Cloud Run (Source-based)
         run: |
           echo "🚀 Deploying ProspectPro to Cloud Run..."
