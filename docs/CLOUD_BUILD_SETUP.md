@@ -5,6 +5,7 @@
 Configure these in your Cloud Build trigger in Google Cloud Console:
 
 ### Supabase Configuration
+
 ```
 _SUPABASE_URL: your-project.supabase.co
 _SUPABASE_SECRET_KEY: your-supabase-service-role-key
@@ -14,6 +15,7 @@ _SUPABASE_SECRET_KEY: your-supabase-service-role-key
 
 1. **Go to Google Cloud Console → Cloud Build → Triggers**
 2. **Create New Trigger**:
+
    - **Name**: `prospectpro-main-deploy`
    - **Event**: Push to branch
    - **Repository**: Alextorelli/ProspectPro
@@ -21,6 +23,7 @@ _SUPABASE_SECRET_KEY: your-supabase-service-role-key
    - **Configuration**: Cloud Build configuration file (cloudbuild.yaml)
 
 3. **Add Substitution Variables**:
+
    - `_SUPABASE_URL` = `https://your-project.supabase.co`
    - `_SUPABASE_SECRET_KEY` = `your-service-role-key`
 
@@ -29,6 +32,7 @@ _SUPABASE_SECRET_KEY: your-supabase-service-role-key
 ## Required Permissions
 
 Ensure the Cloud Build service account has:
+
 - Cloud Run Admin
 - Artifact Registry Writer
 - Service Account User
@@ -36,6 +40,7 @@ Ensure the Cloud Build service account has:
 ## Testing
 
 After setup, push to main branch to trigger deployment:
+
 ```bash
 git add .
 git commit -m "test cloud build deployment"

@@ -12,6 +12,7 @@
 ## CRITICAL: CLOUD-NATIVE DEPLOYMENT APPROACH
 
 **DEPLOYMENT PHILOSOPHY**
+
 - ✅ Google Cloud Build: Container builds and deployment
 - ✅ Google Cloud Run: Serverless hosting with auto-scaling
 - ✅ Supabase Vault: Centralized secrets management
@@ -19,6 +20,7 @@
 - ❌ NO GitHub Actions, workflows, or CI/CD complexity
 
 **PLATFORM SPECIALIZATION**
+
 - **GitHub**: Minimal repo management, documentation, Git API
 - **Google Cloud**: Build, deploy, host, monitor, scale
 - **Supabase**: Database, real-time, secrets vault, edge functions
@@ -85,6 +87,7 @@ When Alex asks about:
 ## CURRENT PRODUCTION ARCHITECTURE (ESTABLISHED - DO NOT RE-EXPLAIN)
 
 ### **Cloud-Native Deployment Pipeline**
+
 ```
 Git Push → Cloud Build Trigger → Container Build → Cloud Run Deploy
               ↓
