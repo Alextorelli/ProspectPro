@@ -331,9 +331,7 @@ async function startServer() {
           console.error(
             `❌ Critical API keys missing: ${missingCritical.join(", ")}`
           );
-          console.error(
-            "💡 Business discovery requires Google Places API key"
-          );
+          console.error("💡 Business discovery requires Google Places API key");
 
           if (process.env.ALLOW_DEGRADED_START !== "true") {
             console.error(
