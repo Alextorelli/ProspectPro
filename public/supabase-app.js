@@ -6,7 +6,7 @@ class ProspectProSupabase {
     // Initialize Supabase client
     this.supabase = createClient(
       "https://sriycekxdqnesdsgwiuc.supabase.co",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNyaXljZWt4ZHFuZXNkc2d3aXVjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mjc2NjA4MTcsImV4cCI6MjA0MzIzNjgxN30.2da2b08ae6022ec746772c59d477980ab3d073dba908b"
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNyaXljZWt4ZHFuZXNkc2d3aXVjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc5NjU3ODksImV4cCI6MjA3MzU0MTc4OX0.Rx_1Hjz2eayKie0RpPB28i7_683ZwhVJ_5Eu_rzTWpI"
     );
 
     this.selectedTool = "business-discovery";
