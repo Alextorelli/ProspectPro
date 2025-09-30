@@ -33,7 +33,7 @@
 **PRODUCTION WEBHOOK ENDPOINTS (OPERATIONAL)**
 
 - ✅ `/api/webhooks/campaign-lifecycle` - Real-time campaign monitoring
-- ✅ `/api/webhooks/cost-alert` - Budget protection & cost monitoring  
+- ✅ `/api/webhooks/cost-alert` - Budget protection & cost monitoring
 - ✅ `/api/webhooks/lead-enrichment` - Automated lead processing pipeline
 - ✅ Authentication: Bearer token (wh_f7616c7477f7e2072912c82360bf048ce88950be5d746490a0b3e74ba2bab3a2)
 - ✅ Cloud Run URL: https://prospectpro-184492422840.us-central1.run.app
@@ -41,6 +41,7 @@
 **NEXT: SUPABASE WEBHOOK CONFIGURATION**
 
 Required SQL to activate real-time processing:
+
 ```sql
 SELECT set_config('app.campaign_lifecycle_webhook_url', 'https://prospectpro-184492422840.us-central1.run.app/api/webhooks/campaign-lifecycle', false);
 SELECT set_config('app.cost_alert_webhook_url', 'https://prospectpro-184492422840.us-central1.run.app/api/webhooks/cost-alert', false);
@@ -129,31 +130,37 @@ Git Push → Cloud Build Trigger → Container Build → Cloud Run Deploy
 /api/webhooks/cost-alert           # Budget protection & cost monitoring
 /api/webhooks/lead-enrichment      # Automated lead processing pipeline
 ```
+
               ↓
     Database Triggers → Webhook Endpoints → Real-time Processing
+
 ```
 
 ### **Webhook Infrastructure (Production Ready)**
 
 ```
-/api/webhooks/campaign-lifecycle    # Real-time campaign monitoring
-/api/webhooks/cost-alert           # Budget protection & cost monitoring
-/api/webhooks/lead-enrichment      # Automated lead processing pipeline
+
+/api/webhooks/campaign-lifecycle # Real-time campaign monitoring
+/api/webhooks/cost-alert # Budget protection & cost monitoring
+/api/webhooks/lead-enrichment # Automated lead processing pipeline
+
 ```
 
 ### File Structure (REFERENCE ONLY)
 
 ```
-/api/business-discovery.js           # Core discovery logic
-/api/webhooks/                       # 3 production webhook endpoints
-/modules/enhanced-lead-discovery.js  # Main business processing
-/modules/campaign-csv-exporter.js    # Export system with analytics
-/modules/api-clients/                # All API integrations
-/database/database-master-setup.js   # Schema and migrations
-/docs/CLOUD_NATIVE_WEBHOOK_SETUP.md  # Webhook configuration guide
-cloudbuild.yaml                      # Cloud Build configuration
-Dockerfile                           # Container build instructions
-```
+
+/api/business-discovery.js # Core discovery logic
+/api/webhooks/ # 3 production webhook endpoints
+/modules/enhanced-lead-discovery.js # Main business processing
+/modules/campaign-csv-exporter.js # Export system with analytics
+/modules/api-clients/ # All API integrations
+/database/database-master-setup.js # Schema and migrations
+/docs/CLOUD_NATIVE_WEBHOOK_SETUP.md # Webhook configuration guide
+cloudbuild.yaml # Cloud Build configuration
+Dockerfile # Container build instructions
+
+````
 
 ### Current Working Commands (USE THESE)
 
@@ -164,7 +171,7 @@ npm run health           # Health check
 npm run diag             # Diagnostics
 # Cloud deployment: Automatic via git push to main
 # Webhook testing: node scripts/test-webhooks.js <CLOUD_RUN_URL> <WEBHOOK_TOKEN>
-```
+````
 
 ### API Integration Stack (WORKING)
 
