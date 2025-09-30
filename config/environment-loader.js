@@ -65,14 +65,18 @@ class EnvironmentLoader {
 
     try {
       console.log("🔑 Loading API keys from Supabase Vault...");
-      
+
       // CLOUD RUN BYPASS: Skip vault loading in Cloud Run due to schema cache issues
       if (process.env.K_SERVICE || process.env.CLOUD_RUN_SERVICE) {
-        console.warn("⚠️ Cloud Run detected: skipping vault loading due to schema cache issues");
-        console.warn("💡 Using webhook-only mode - API keys from environment variables");
+        console.warn(
+          "⚠️ Cloud Run detected: skipping vault loading due to schema cache issues"
+        );
+        console.warn(
+          "💡 Using webhook-only mode - API keys from environment variables"
+        );
         return null;
       }
-      
+
       this.vaultApiKeys = await vaultLoader.loadStandardApiKeys();
 
       if (this.vaultApiKeys) {
