@@ -53,11 +53,15 @@ class EnvironmentLoader {
    */
   async loadApiKeysFromVault() {
     // PRODUCTION/CLOUD RUN: Always use environment variables (no vault)
-    if (process.env.NODE_ENV === 'production' || 
-        process.env.K_SERVICE || 
-        process.env.CLOUD_RUN_SERVICE ||
-        process.env.GOOGLE_CLOUD_PROJECT) {
-      console.log("☁️ Production/Cloud Run detected: using direct environment variables");
+    if (
+      process.env.NODE_ENV === "production" ||
+      process.env.K_SERVICE ||
+      process.env.CLOUD_RUN_SERVICE ||
+      process.env.GOOGLE_CLOUD_PROJECT
+    ) {
+      console.log(
+        "☁️ Production/Cloud Run detected: using direct environment variables"
+      );
       console.log("💡 Vault bypassed for Cloud Run compatibility");
       return null; // Force fallback to environment variables
     }
@@ -74,7 +78,9 @@ class EnvironmentLoader {
     }
 
     try {
-      console.log("🔑 Loading API keys from Supabase Vault (local development)...");
+      console.log(
+        "🔑 Loading API keys from Supabase Vault (local development)..."
+      );
 
       this.vaultApiKeys = await vaultLoader.loadStandardApiKeys();
 
@@ -103,7 +109,7 @@ class EnvironmentLoader {
     if (!vaultKeys) {
       // Fallback to environment variables only
       console.log("🔑 Using API keys from environment variables");
-      
+
       const envApiKeys = {
         googlePlaces: process.env.GOOGLE_PLACES_API_KEY,
         foursquare:
@@ -115,7 +121,6 @@ class EnvironmentLoader {
         apollo: process.env.APOLLO_API_KEY,
         scrapingdog: process.env.SCRAPINGDOG_API_KEY,
         californiaSOSApiKey: process.env.CALIFORNIA_SOS_API_KEY,
-        courtListener: process.env.COURTLISTENER_API_KEY,
         socrata: process.env.SOCRATA_API_KEY,
         socrataToken: process.env.SOCRATA_APP_TOKEN,
         uspto: process.env.USPTO_TSDR_API_KEY,
@@ -124,15 +129,17 @@ class EnvironmentLoader {
 
       // Log which API keys are available
       const availableKeys = Object.entries(envApiKeys)
-        .filter(([key, value]) => value && !value.includes('your_'))
+        .filter(([key, value]) => value && !value.includes("your_"))
         .map(([key]) => key);
-      
+
       if (availableKeys.length > 0) {
-        console.log(`✅ Found ${availableKeys.length} API keys in environment variables`);
-        console.log(`   Available: ${availableKeys.join(', ')}`);
+        console.log(
+          `✅ Found ${availableKeys.length} API keys in environment variables`
+        );
+        console.log(`   Available: ${availableKeys.join(", ")}`);
       } else {
         console.warn("⚠️ No API keys found in environment variables");
-        if (process.env.ALLOW_DEGRADED_START === 'true') {
+        if (process.env.ALLOW_DEGRADED_START === "true") {
           console.log("💡 Continuing in webhook-only mode");
         }
       }

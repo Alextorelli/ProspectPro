@@ -47,7 +47,10 @@ class CaliforniaSOSClient {
 
     if (!this.apiKey) {
       console.warn(
-        "⚠️ California SOS API key not found. Set CALIFORNIA_SOS_API_KEY environment variable."
+        "⚠️ California SOS API key not found. This API requires a subscription key from https://calico.sos.ca.gov"
+      );
+      console.warn(
+        "💡 To get access: Contact California Secretary of State API team for subscription"
       );
     }
   }

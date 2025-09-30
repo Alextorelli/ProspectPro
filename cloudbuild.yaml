@@ -74,9 +74,7 @@ steps:
       - '--set-env-vars=USPTO_TSDR_API_KEY=${_USPTO_TSDR_API_KEY}'
       - '--set-env-vars=ZEROBOUNCE_API_KEY=${_ZEROBOUNCE_API_KEY}'
       - '--set-env-vars=CALIFORNIA_SOS_API_KEY=${_CALIFORNIA_SOS_API_KEY}'
-      - '--set-env-vars=COURTLISTENER_API_KEY=${_COURTLISTENER_API_KEY}'
       - '--set-env-vars=PERSONAL_ACCESS_TOKEN=${_PERSONAL_ACCESS_TOKEN}'
-      - '--set-env-vars=K_SERVICE=prospectpro'
       - '--service-account=prospectpro-deployment@leadgen-471822.iam.gserviceaccount.com'
     id: 'deploy-cloud-run'
     waitFor: ['push-container']
@@ -125,7 +123,6 @@ substitutions:
   _USPTO_TSDR_API_KEY: ''
   _ZEROBOUNCE_API_KEY: ''
   _CALIFORNIA_SOS_API_KEY: ''
-  _COURTLISTENER_API_KEY: ''
   _PERSONAL_ACCESS_TOKEN: ''
 
 # Build configuration optimized for production
