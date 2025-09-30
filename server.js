@@ -317,11 +317,13 @@ async function startServer() {
 
           if (process.env.ALLOW_DEGRADED_START !== "true") {
             console.error(
-              "🚨 Forcing graceful degraded start for Cloud Run stability"
+              "🚨 CLOUD RUN: Schema cache issue - forcing degraded start for stability"
             );
             console.warn(
               "⚠️ CLOUD RUN: Starting in degraded mode due to schema cache"
             );
+            // Force degraded start in Cloud Run environment
+            process.env.ALLOW_DEGRADED_START = "true";
           } else {
             console.warn("🚨 EMERGENCY: Starting production in degraded mode");
           }
@@ -341,9 +343,11 @@ async function startServer() {
 
         if (process.env.ALLOW_DEGRADED_START !== "true") {
           console.error(
-            "🚨 Forcing graceful degraded start for Cloud Run stability"
+            "🚨 CLOUD RUN: Database connection failed - forcing degraded start"
           );
           console.warn("⚠️ CLOUD RUN: Starting without database connection");
+          // Force degraded start in Cloud Run environment
+          process.env.ALLOW_DEGRADED_START = "true";
         } else {
           console.warn("🚨 EMERGENCY: Starting production without database");
         }
