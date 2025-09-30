@@ -7038,3 +7038,4 @@ Refreshing configuration tree...
 {"type":"measure","name":"lsp.diagnostic","count":925,"duration":0.021},
 {"type":"mark","name":"lsp.diagnostic"},
 {"type":"measure","name":"lsp.diagnostic","count":926,"duration":0.021},
+{"type":"mark","name":"lsp.inlay_hint","count":92,"args":{"textDocument":{"uri":"file:///workspaces/ProspectPro/.github/copilot-instructions.md"},"range":{"start":{"line":26,"character":0},"end":{"line":208,"character":65}}}},
