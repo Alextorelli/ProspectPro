@@ -24,12 +24,12 @@ function storeCampaignResults(campaignId, results) {
 router.get("/:campaignId/export", async (req, res) => {
   try {
     const { campaignId } = req.params;
-    
+
     console.log(`📊 Exporting campaign ${campaignId}`);
-    
+
     // Get stored results
     const campaign = campaignResults.get(campaignId);
-    
+
     if (!campaign || !campaign.leads) {
       return res.status(404).json({
         error: "Campaign not found or no leads available",
@@ -40,7 +40,7 @@ router.get("/:campaignId/export", async (req, res) => {
 
     // Generate simple CSV
     const csvContent = generateSimpleCSV(campaign);
-    
+
     // Set response headers
     const timestamp = new Date().toISOString().slice(0, 10);
     const filename = `campaign_${campaignId.slice(0, 8)}_${timestamp}.csv`;
@@ -52,7 +52,6 @@ router.get("/:campaignId/export", async (req, res) => {
 
     console.log(`✅ Export completed: ${campaign.leads.length} leads exported`);
     res.send(csvContent);
-
   } catch (error) {
     console.error("❌ Export error:", error);
     res.status(500).json({
@@ -68,16 +67,16 @@ router.get("/:campaignId/export", async (req, res) => {
 function generateSimpleCSV(campaign) {
   const headers = [
     "Business Name",
-    "Address", 
+    "Address",
     "Phone",
     "Website",
     "Email",
     "Confidence Score",
     "Discovery Source",
-    "Timestamp"
+    "Timestamp",
   ];
 
-  const rows = campaign.leads.map(lead => [
+  const rows = campaign.leads.map((lead) => [
     cleanField(lead.businessName || ""),
     cleanField(lead.address || ""),
     cleanField(lead.phone || ""),
@@ -85,18 +84,21 @@ function generateSimpleCSV(campaign) {
     cleanField(lead.email || ""),
     lead.optimizedScore || lead.confidence_score || 0,
     cleanField(lead.discovery_source || "Google Places"),
-    new Date().toLocaleDateString()
+    new Date().toLocaleDateString(),
   ]);
 
   const csvContent = [
     headers.join(","),
-    ...rows.map(row => 
-      row.map(field => 
-        typeof field === "string" && (field.includes(",") || field.includes('"'))
-          ? `"${field.replace(/"/g, '""')}"` 
-          : field
-      ).join(",")
-    )
+    ...rows.map((row) =>
+      row
+        .map((field) =>
+          typeof field === "string" &&
+          (field.includes(",") || field.includes('"'))
+            ? `"${field.replace(/"/g, '""')}"`
+            : field
+        )
+        .join(",")
+    ),
   ].join("\n");
 
   return csvContent;
@@ -107,7 +109,9 @@ function generateSimpleCSV(campaign) {
  */
 function cleanField(value) {
   if (value === null || value === undefined) return "";
-  return String(value).replace(/[\r\n]+/g, " ").trim();
+  return String(value)
+    .replace(/[\r\n]+/g, " ")
+    .trim();
 }
 
 /**

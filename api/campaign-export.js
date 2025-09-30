@@ -481,7 +481,7 @@ async function logCampaignExport(campaignId, exportedCount, totalCount) {
       console.error("Cannot log export: Database connection not available");
       return;
     }
-    
+
     await supabase.from("dashboard_exports").insert({
       campaign_id: campaignId,
       export_type: "lead_export",

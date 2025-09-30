@@ -688,11 +688,16 @@ class ProspectProRealAPI {
                     <div class="stat-label">With Owners</div>
                 </div>
                 <div class="stat-item">
-                    <div class="stat-value">${businesses.filter(b => b.email).length}</div>
+                    <div class="stat-value">${
+                      businesses.filter((b) => b.email).length
+                    }</div>
                     <div class="stat-label">With Emails</div>
                 </div>
                 <div class="stat-item">
-                    <div class="stat-value">${businesses.filter(b => b.email && b.email.includes('@')).length}</div>
+                    <div class="stat-value">${
+                      businesses.filter((b) => b.email && b.email.includes("@"))
+                        .length
+                    }</div>
                     <div class="stat-label">Verified Emails</div>
                 </div>
                 <div class="stat-item">
