@@ -115,7 +115,7 @@ class EnvironmentLoader {
         foursquare:
           process.env.FOURSQUARE_SERVICE_API_KEY ||
           process.env.FOURSQUARE_PLACES_API_KEY,
-        hunterIO: process.env.HUNTER_IO_API_KEY,
+        hunterIO: process.env.HUNTER_API_KEY,
         neverBounce: process.env.NEVERBOUNCE_API_KEY,
         zeroBounce: process.env.ZEROBOUNCE_API_KEY,
         apollo: process.env.APOLLO_API_KEY,
