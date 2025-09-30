@@ -178,7 +178,9 @@ try {
 } catch (e) {
   console.error("Failed to load campaign-lifecycle webhook:", e.message);
   const router = require("express").Router();
-  router.use((req, res) => res.status(503).json({ error: "Webhook service unavailable" }));
+  router.use((req, res) =>
+    res.status(503).json({ error: "Webhook service unavailable" })
+  );
   campaignLifecycleWebhook = router;
 }
 
@@ -188,7 +190,9 @@ try {
 } catch (e) {
   console.error("Failed to load cost-alert webhook:", e.message);
   const router = require("express").Router();
-  router.use((req, res) => res.status(503).json({ error: "Webhook service unavailable" }));
+  router.use((req, res) =>
+    res.status(503).json({ error: "Webhook service unavailable" })
+  );
   costAlertWebhook = router;
 }
 
@@ -198,7 +202,9 @@ try {
 } catch (e) {
   console.error("Failed to load lead-enrichment webhook:", e.message);
   const router = require("express").Router();
-  router.use((req, res) => res.status(503).json({ error: "Webhook service unavailable" }));
+  router.use((req, res) =>
+    res.status(503).json({ error: "Webhook service unavailable" })
+  );
   leadEnrichmentWebhook = router;
 }
 
