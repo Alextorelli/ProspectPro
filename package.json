@@ -17,7 +17,14 @@
     "clean": "rm -rf dist/ node_modules/ && echo 'Cleaned build artifacts'",
     "archive:legacy": "mkdir -p archive/legacy-server && mv server.js api/ modules/ docker/ archive/legacy-server/ 2>/dev/null || echo 'Legacy files managed separately'",
     "health": "echo 'Use Edge Function endpoints for health checks'",
-    "test": "echo 'Test Edge Functions via Supabase dashboard or curl'"
+    "test": "echo 'Test Edge Functions via Supabase dashboard or curl'",
+    "mcp:install": "cd mcp-servers && npm install",
+    "mcp:test": "cd mcp-servers && npm run test",
+    "mcp:start": "cd mcp-servers && npm run start:all",
+    "mcp:troubleshoot": "cd mcp-servers && npm run start:troubleshooting",
+    "debug:quick": "echo 'Common issue: Check anon key sync between frontend and Supabase dashboard'",
+    "debug:edge-function": "echo 'Test Edge Function: curl -X POST https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/business-discovery -H \"Authorization: Bearer YOUR_ANON_KEY\" -H \"Content-Type: application/json\" -d \"{\\\"businessType\\\": \\\"test\\\", \\\"location\\\": \\\"test\\\"}\"'",
+    "debug:vercel": "echo 'Check Vercel deployment: curl -I https://your-vercel-url.vercel.app'"
   },
   "keywords": [
     "leads",

@@ -6,13 +6,18 @@
     "scripts": {
         "start:production": "node supabase-production-server.js",
         "start:development": "node supabase-development-server.js",
-        "start:all": "concurrently \"npm run start:production\" \"npm run start:development\"",
-        "test": "node test-supabase-servers.js",
-        "validate": "npm run test && echo '✅ All Supabase MCP servers validated successfully'"
+        "start:troubleshooting": "node supabase-troubleshooting-server.js",
+        "start:all": "concurrently \"npm run start:production\" \"npm run start:development\" \"npm run start:troubleshooting\"",
+        "test": "node test-servers.js",
+        "validate": "npm run test && echo '✅ All Supabase MCP servers validated successfully'",
+        "install:deps": "npm install",
+        "debug:anon-key": "echo 'Use troubleshooting server: diagnose_anon_key_mismatch tool'",
+        "debug:edge-functions": "echo 'Use troubleshooting server: test_edge_function tool'",
+        "debug:database": "echo 'Use troubleshooting server: validate_database_permissions tool'"
     },
     "dependencies": {
-        "@modelcontextprotocol/sdk": "^1.0.0",
-        "@supabase/supabase-js": "^2.39.0"
+        "@modelcontextprotocol/sdk": "^1.18.2",
+        "@supabase/supabase-js": "^2.58.0"
     },
     "devDependencies": {
         "concurrently": "^8.2.2"

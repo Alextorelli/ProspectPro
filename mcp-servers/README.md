@@ -1,14 +1,51 @@
-# ProspectPro MCP (Model Context Protocol) Implementation v2.0
+# ProspectPro Enhanced MCP (Model Context Protocol) Implementation v3.0
 
 ## Overview
 
-This directory contains the **consolidated MCP server implementation** that provides AI assistants with comprehensive access to ProspectPro's data, APIs, and diagnostics. Version 2.0 consolidates what were previously 5 separate servers into 2 optimized servers for better performance and maintenance.
+This directory contains the **enhanced MCP server implementation** that provides AI assistants with comprehensive access to ProspectPro's data, APIs, diagnostics, and **troubleshooting capabilities**. Version 3.0 adds a specialized troubleshooting server for systematic debugging of Supabase-first deployment issues.
 
-**Architecture**: Consolidated from 5 servers → 2 servers (60% reduction in processes)  
-**Tools**: 36 tools total across production and development workflows  
-**Status**: Production-ready with comprehensive test coverage
+**Architecture**: 3 specialized servers for production, development, and troubleshooting workflows  
+**Tools**: 42 tools total across all servers (6 new troubleshooting tools)  
+**Status**: Production-ready with comprehensive test coverage and automated troubleshooting
 
-## Consolidated MCP Servers
+## Enhanced MCP Servers v3.0
+
+### 1. Production Server (`supabase-production-server.js`) - **v2.0.0**
+
+**Purpose**: Comprehensive production monitoring, database analytics, system diagnostics, API testing, and filesystem analysis (28 tools)
+
+### 2. Development Server (`supabase-development-server.js`) - **v1.0.0**
+
+**Purpose**: Development utilities, new API integration testing, and performance benchmarking (8 tools)
+
+### 3. 🆕 Troubleshooting Server (`supabase-troubleshooting-server.js`) - **v1.0.0**
+
+**Purpose**: Systematic debugging and diagnosis of Supabase deployment and authentication issues
+
+**Specialized Troubleshooting Capabilities** (6 tools):
+
+#### Supabase Edge Function Testing
+
+- `test_edge_function` - Test Supabase Edge Function connectivity with authentication
+- `generate_debugging_commands` - Create custom curl commands and debugging scripts
+
+#### Database & Authentication Diagnosis
+
+- `validate_database_permissions` - Check RLS policies and anon key permissions
+- `diagnose_anon_key_mismatch` - Compare frontend vs Supabase anon keys
+- `run_rls_diagnostics` - Generate Row Level Security diagnostic queries
+
+#### Deployment Validation
+
+- `check_vercel_deployment` - Validate Vercel deployment status and configuration
+
+**When to Use Troubleshooting Server**:
+
+- Frontend shows "Discovery Failed" or "API request failed: 404"
+- Edge Functions return 401 Unauthorized errors
+- Database queries fail with RLS violations
+- Vercel deployment returns 401 or access denied
+- Anon key synchronization issues between frontend and Supabase
 
 ### 1. Production Server (`production-server.js`) - **v2.0.0**
 
@@ -79,24 +116,55 @@ This directory contains the **consolidated MCP server implementation** that prov
 - Generate boilerplate for new API clients
 - Create test suites for API integrations
 
-## Installation & Setup
-
-### 1. Install MCP Dependencies
+## Quick Start
 
 ```bash
-# Install consolidated MCP server dependencies
-npm install
-```
+# Start production monitoring
+npm run start:production
 
-### 2. Test Consolidated Implementation
+# Start development server
+npm run start:development
 
-```bash
-# Test both consolidated MCP servers
+# Start troubleshooting server (for debugging deployment issues)
+npm run start:troubleshooting
+
+# Start all servers
+npm run start:all
+
+# Test all servers
 npm run test
-
-# View detailed test results
-cat test-results.json
 ```
+
+## 🚨 Quick Troubleshooting (NEW in v3.0)
+
+### Frontend Shows "Discovery Failed" or "API request failed: 404"
+
+**IMMEDIATE DIAGNOSIS** with MCP Troubleshooting Server:
+
+```bash
+npm run start:troubleshooting
+```
+
+In your AI assistant, use these MCP tools in systematic order:
+
+1. `test_edge_function` - Verify backend works independently of frontend
+2. `diagnose_anon_key_mismatch` - Check for authentication sync issues (90% of problems)
+3. `validate_database_permissions` - Verify RLS policies are configured correctly
+4. `check_vercel_deployment` - Validate frontend deployment status
+5. `generate_debugging_commands` - Get custom debugging scripts for your config
+
+**Manual Quick Test** (if MCP not available):
+
+```bash
+# Test Edge Function directly (bypasses frontend completely)
+curl -X POST 'https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/business-discovery' \
+  -H 'Authorization: Bearer YOUR_CURRENT_ANON_KEY' \
+  -H 'Content-Type: application/json' \
+  -d '{"businessType": "test", "location": "test"}'
+```
+
+**Expected Results**: Real business data response = backend working, frontend issue  
+**If 401 error**: Authentication or RLS policy issue
 
 ### 3. VS Code Configuration
 
