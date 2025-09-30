@@ -1,21 +1,35 @@
 {
-  "rewrites": [
-    { "source": "/", "destination": "/index-supabase.html" },
-    { "source": "/app.js", "destination": "/supabase-app.js" }
-  ],
-  "headers": [
-    {
-      "source": "/(.*)",
-      "headers": [
+    "rewrites": [
         {
-          "key": "X-Frame-Options",
-          "value": "SAMEORIGIN"
+            "source": "/",
+            "destination": "/index-supabase.html"
         },
         {
-          "key": "Cache-Control",
-          "value": "public, max-age=31536000, immutable"
+            "source": "/app.js",
+            "destination": "/supabase-app.js"
         }
-      ]
-    }
-  ]
+    ],
+    "headers": [
+        {
+            "source": "/(.*)",
+            "headers": [
+                {
+                    "key": "X-Frame-Options",
+                    "value": "SAMEORIGIN"
+                },
+                {
+                    "key": "Access-Control-Allow-Origin",
+                    "value": "*"
+                },
+                {
+                    "key": "Access-Control-Allow-Methods",
+                    "value": "GET, POST, PUT, DELETE, OPTIONS"
+                },
+                {
+                    "key": "Access-Control-Allow-Headers",
+                    "value": "Content-Type, Authorization"
+                }
+            ]
+        }
+    ]
 }
