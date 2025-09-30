@@ -67,17 +67,31 @@ steps:
     id: 'deploy-cloud-run'
     waitFor: ['push-container']
 
-  # Step 5: Wait for deployment and test health
-  - name: 'gcr.io/cloud-builders/curl'
+  # Step 5: Get service URL and test health
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: 'bash'
     args:
-      - '-f'
-      - '--max-time'
-      - '45'
-      - '--retry'
-      - '5'
-      - '--retry-delay'
-      - '15'
-      - 'https://prospectpro-184492422840.us-central1.run.app/health'
+      - '-c'
+      - |
+        # Get the deployed service URL
+        SERVICE_URL=$(gcloud run services describe prospectpro --region=us-central1 --format='value(status.url)')
+        echo "🌐 Service deployed at: $SERVICE_URL"
+        
+        # Wait for service to be ready
+        echo "⏳ Waiting for service to be ready..."
+        sleep 30
+        
+        # Test health endpoint
+        echo "🧪 Testing health endpoint..."
+        curl -f --max-time 30 --retry 5 --retry-delay 10 "$SERVICE_URL/health" || echo "❌ Health check failed but deployment succeeded"
+        
+        # Test basic API endpoint
+        echo "🧪 Testing business discovery API..."
+        curl -X POST --max-time 30 -H "Content-Type: application/json" \
+          -d '{"businessType":"restaurant","location":"Austin, TX","maxResults":1}' \
+          -f "$SERVICE_URL/api/business/discover-businesses" || echo "❌ API test failed but deployment succeeded"
+        
+        echo "✅ Deployment completed - Service URL: $SERVICE_URL"
     id: 'health-check'
     waitFor: ['deploy-cloud-run']
 

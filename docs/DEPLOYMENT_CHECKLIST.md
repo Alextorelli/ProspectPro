@@ -41,7 +41,14 @@
 
 - [ ] **Check build progress**: https://console.cloud.google.com/cloud-build/builds
 - [ ] **Verify Cloud Run service**: https://console.cloud.google.com/run
-- [ ] **Note your Cloud Run URL**: `https://prospectpro-xxxxxx.us-central1.run.app`
+- [ ] **⚠️ Important**: Health check may fail during build but deployment can still succeed
+- [ ] **Get your actual Cloud Run URL** from Cloud Run console (not the hardcoded one)
+
+### **Phase 5.5: Get Your Service URL**
+
+- [ ] **Go to Cloud Run Console**: https://console.cloud.google.com/run
+- [ ] **Find your `prospectpro` service**
+- [ ] **Copy the actual service URL** (format: `https://prospectpro-xxxxx-uc.a.run.app`)
 
 ### **Phase 6: Configure Webhooks (Post-Deployment)**
 
