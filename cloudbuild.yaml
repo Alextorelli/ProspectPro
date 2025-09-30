@@ -74,8 +74,8 @@ steps:
       - '-c'
       - |
         # Get the deployed service URL
-        SERVICE_URL=$(gcloud run services describe prospectpro --region=us-central1 --format='value(status.url)')
-        echo "🌐 Service deployed at: $SERVICE_URL"
+        SERVICE_URL=$$(gcloud run services describe prospectpro --region=us-central1 --format='value(status.url)')
+        echo "🌐 Service deployed at: $$SERVICE_URL"
         
         # Wait for service to be ready
         echo "⏳ Waiting for service to be ready..."
@@ -83,15 +83,15 @@ steps:
         
         # Test health endpoint
         echo "🧪 Testing health endpoint..."
-        curl -f --max-time 30 --retry 5 --retry-delay 10 "$SERVICE_URL/health" || echo "❌ Health check failed but deployment succeeded"
+        curl -f --max-time 30 --retry 5 --retry-delay 10 "$$SERVICE_URL/health" || echo "❌ Health check failed but deployment succeeded"
         
         # Test basic API endpoint
         echo "🧪 Testing business discovery API..."
         curl -X POST --max-time 30 -H "Content-Type: application/json" \
           -d '{"businessType":"restaurant","location":"Austin, TX","maxResults":1}' \
-          -f "$SERVICE_URL/api/business/discover-businesses" || echo "❌ API test failed but deployment succeeded"
+          -f "$$SERVICE_URL/api/business/discover-businesses" || echo "❌ API test failed but deployment succeeded"
         
-        echo "✅ Deployment completed - Service URL: $SERVICE_URL"
+        echo "✅ Deployment completed - Service URL: $$SERVICE_URL"
     id: 'health-check'
     waitFor: ['deploy-cloud-run']
 
