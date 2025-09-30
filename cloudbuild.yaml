@@ -41,7 +41,7 @@ steps:
     id: 'push-container'
     waitFor: ['build-container']
 
-  # Step 4: Deploy to Cloud Run with environment variables
+  # Step 4: Deploy to Cloud Run with Google Secret Manager
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: 'gcloud'
     args:
@@ -60,21 +60,21 @@ steps:
       - '--timeout=300'
       - '--set-env-vars=NODE_ENV=production'
       - '--set-env-vars=ALLOW_DEGRADED_START=true'
-      - '--set-env-vars=SUPABASE_URL=${_SUPABASE_URL}'
-      - '--set-env-vars=SUPABASE_SECRET_KEY=${_SUPABASE_SECRET_KEY}'
-      - '--set-env-vars=WEBHOOK_AUTH_TOKEN=${_WEBHOOK_AUTH_TOKEN}'
-      - '--set-env-vars=GOOGLE_PLACES_API_KEY=${_GOOGLE_PLACES_API_KEY}'
-      - '--set-env-vars=HUNTER_API_KEY=${_HUNTER_API_KEY}'
-      - '--set-env-vars=NEVERBOUNCE_API_KEY=${_NEVERBOUNCE_API_KEY}'
-      - '--set-env-vars=FOURSQUARE_SERVICE_API_KEY=${_FOURSQUARE_SERVICE_API_KEY}'
-      - '--set-env-vars=APOLLO_API_KEY=${_APOLLO_API_KEY}'
-      - '--set-env-vars=SCRAPINGDOG_API_KEY=${_SCRAPINGDOG_API_KEY}'
-      - '--set-env-vars=SOCRATA_API_KEY=${_SOCRATA_API_KEY}'
-      - '--set-env-vars=SOCRATA_APP_TOKEN=${_SOCRATA_APP_TOKEN}'
-      - '--set-env-vars=USPTO_TSDR_API_KEY=${_USPTO_TSDR_API_KEY}'
-      - '--set-env-vars=ZEROBOUNCE_API_KEY=${_ZEROBOUNCE_API_KEY}'
-      - '--set-env-vars=CALIFORNIA_SOS_API_KEY=${_CALIFORNIA_SOS_API_KEY}'
-      - '--set-env-vars=PERSONAL_ACCESS_TOKEN=${_PERSONAL_ACCESS_TOKEN}'
+      - '--set-secrets=SUPABASE_URL=supabase-url:latest'
+      - '--set-secrets=SUPABASE_SECRET_KEY=supabase-secret-key:latest'
+      - '--set-secrets=WEBHOOK_AUTH_TOKEN=webhook-auth-token:latest'
+      - '--set-secrets=GOOGLE_PLACES_API_KEY=google-places-api-key:latest'
+      - '--set-secrets=HUNTER_API_KEY=hunter-api-key:latest'
+      - '--set-secrets=NEVERBOUNCE_API_KEY=neverbounce-api-key:latest'
+      - '--set-secrets=FOURSQUARE_SERVICE_API_KEY=foursquare-api-key:latest'
+      - '--set-secrets=APOLLO_API_KEY=apollo-api-key:latest'
+      - '--set-secrets=SCRAPINGDOG_API_KEY=scrapingdog-api-key:latest'
+      - '--set-secrets=SOCRATA_API_KEY=socrata-api-key:latest'
+      - '--set-secrets=SOCRATA_APP_TOKEN=socrata-app-token:latest'
+      - '--set-secrets=USPTO_TSDR_API_KEY=uspto-api-key:latest'
+      - '--set-secrets=ZEROBOUNCE_API_KEY=zerobounce-api-key:latest'
+      - '--set-secrets=CALIFORNIA_SOS_API_KEY=california-sos-api-key:latest'
+      - '--set-secrets=PERSONAL_ACCESS_TOKEN=personal-access-token:latest'
       - '--service-account=prospectpro-deployment@leadgen-471822.iam.gserviceaccount.com'
     id: 'deploy-cloud-run'
     waitFor: ['push-container']
@@ -106,24 +106,6 @@ steps:
         echo "✅ Deployment completed - Service URL: $$SERVICE_URL"
     id: 'health-check'
     waitFor: ['deploy-cloud-run']
-
-# Substitution variables (set in Cloud Build trigger)
-substitutions:
-  _SUPABASE_URL: ''
-  _SUPABASE_SECRET_KEY: ''
-  _WEBHOOK_AUTH_TOKEN: ''
-  _GOOGLE_PLACES_API_KEY: ''
-  _HUNTER_API_KEY: ''
-  _NEVERBOUNCE_API_KEY: ''
-  _FOURSQUARE_SERVICE_API_KEY: ''
-  _APOLLO_API_KEY: ''
-  _SCRAPINGDOG_API_KEY: ''
-  _SOCRATA_API_KEY: ''
-  _SOCRATA_APP_TOKEN: ''
-  _USPTO_TSDR_API_KEY: ''
-  _ZEROBOUNCE_API_KEY: ''
-  _CALIFORNIA_SOS_API_KEY: ''
-  _PERSONAL_ACCESS_TOKEN: ''
 
 # Build configuration optimized for production
 options:
