@@ -1,0 +1,33 @@
+# Supabase-First Static Deployment Configuration
+# Deploys only static frontend to Cloud Storage + CDN
+
+steps:
+  # Build static frontend
+  - name: 'node:18'
+    entrypoint: 'npm'
+    args: ['install']
+    
+  - name: 'node:18'
+    entrypoint: 'npm'
+    args: ['run', 'build:static']
+
+  # Deploy to Cloud Storage
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: 'gsutil'
+    args: ['-m', 'rsync', '-r', '-d', './dist/', 'gs://prospectpro-static-frontend/']
+
+  # Set public permissions
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: 'gsutil'
+    args: ['iam', 'ch', 'allUsers:objectViewer', 'gs://prospectpro-static-frontend']
+
+  # Invalidate CDN cache (if using Cloud CDN)
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: 'gcloud'
+    args: ['compute', 'url-maps', 'invalidate-cdn-cache', 'prospectpro-url-map', '--path="/*"', '--async']
+
+# Create Cloud Storage bucket if it doesn't exist
+options:
+  logging: CLOUD_LOGGING_ONLY
+  
+timeout: '600s'

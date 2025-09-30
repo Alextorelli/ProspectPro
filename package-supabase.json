@@ -1,0 +1,28 @@
+{
+    "name": "prospectpro-supabase-first",
+    "version": "4.0.0",
+    "description": "ProspectPro - Supabase-First Lead Discovery Platform",
+    "scripts": {
+        "build:static": "mkdir -p dist && cp public/index-supabase.html dist/index.html && cp public/supabase-app.js dist/app.js",
+        "deploy:static": "gcloud builds submit --config cloudbuild-static.yaml",
+        "serve:local": "cd public && python3 -m http.server 8080",
+        "test:edge-functions": "supabase functions serve",
+        "deploy:edge-functions": "supabase functions deploy business-discovery && supabase functions deploy campaign-export",
+        "db:setup": "supabase db reset",
+        "db:migrate": "supabase migration up"
+    },
+    "keywords": [
+        "leads",
+        "business-discovery",
+        "supabase",
+        "edge-functions",
+        "static-site"
+    ],
+    "author": "Alex Torelli",
+    "license": "MIT",
+    "dependencies": {},
+    "devDependencies": {},
+    "engines": {
+        "node": ">=18.0.0"
+    }
+}
