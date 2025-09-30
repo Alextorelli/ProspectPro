@@ -171,10 +171,46 @@ try {
   campaignExportRouter = router;
 }
 
+// Webhook routes with graceful degradation
+let campaignLifecycleWebhook;
+try {
+  campaignLifecycleWebhook = require("./api/webhooks/campaign-lifecycle");
+} catch (e) {
+  console.error("Failed to load campaign-lifecycle webhook:", e.message);
+  const router = require("express").Router();
+  router.use((req, res) => res.status(503).json({ error: "Webhook service unavailable" }));
+  campaignLifecycleWebhook = router;
+}
+
+let costAlertWebhook;
+try {
+  costAlertWebhook = require("./api/webhooks/cost-alert");
+} catch (e) {
+  console.error("Failed to load cost-alert webhook:", e.message);
+  const router = require("express").Router();
+  router.use((req, res) => res.status(503).json({ error: "Webhook service unavailable" }));
+  costAlertWebhook = router;
+}
+
+let leadEnrichmentWebhook;
+try {
+  leadEnrichmentWebhook = require("./api/webhooks/lead-enrichment");
+} catch (e) {
+  console.error("Failed to load lead-enrichment webhook:", e.message);
+  const router = require("express").Router();
+  router.use((req, res) => res.status(503).json({ error: "Webhook service unavailable" }));
+  leadEnrichmentWebhook = router;
+}
+
 // Mount API routes
 app.use("/api/business-discovery", businessDiscoveryRouter);
 app.use("/api/business", businessDiscoveryRouter); // Frontend compatibility
 app.use("/api/campaign-export", campaignExportRouter);
+
+// Mount webhook routes
+app.use("/api/webhooks/campaign-lifecycle", campaignLifecycleWebhook);
+app.use("/api/webhooks/cost-alert", costAlertWebhook);
+app.use("/api/webhooks/lead-enrichment", leadEnrichmentWebhook);
 
 // Default route - serve frontend with error handling
 app.get("/", (req, res) => {
