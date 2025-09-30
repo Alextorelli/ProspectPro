@@ -341,6 +341,16 @@ router.post("/discover-businesses", async (req, res) => {
     );
     console.log(`⏱️ Processing time: ${(processingTime / 1000).toFixed(1)}s`);
 
+    // Store results for export functionality
+    if (global.storeCampaignResults && discoveryResult?.leads) {
+      try {
+        global.storeCampaignResults(campaignId, response);
+        console.log(`📊 Campaign results stored for export: ${campaignId}`);
+      } catch (storeError) {
+        console.warn("Failed to store campaign results:", storeError.message);
+      }
+    }
+
     res.json(response);
   } catch (error) {
     const processingTime = Date.now() - startTime;

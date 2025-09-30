@@ -136,37 +136,31 @@ app.get("/diag", async (req, res) => {
   }
 });
 
-// API Routes with graceful degradation
+// Business API Route with enhanced error handling
 let businessDiscoveryRouter;
 try {
   businessDiscoveryRouter = require("./api/business-discovery");
 } catch (e) {
-  console.error("Failed to load business-discovery router:", e.message);
+  console.error("Failed to load business-discovery API:", e.message);
   const router = require("express").Router();
   router.use((req, res) =>
-    res.status(503).json({
-      error: "Business discovery service unavailable",
-      details: config.isDevelopment
-        ? e.message
-        : "Service initialization failed",
-    })
+    res.status(503).json({ error: "Business discovery service unavailable" })
   );
   businessDiscoveryRouter = router;
 }
 
+// Campaign Export Route - Using simple export temporarily 
 let campaignExportRouter;
 try {
-  campaignExportRouter = require("./api/campaign-export");
+  const { router, storeCampaignResults } = require("./api/simple-export");
+  campaignExportRouter = router;
+  // Make storeCampaignResults available globally for business discovery
+  global.storeCampaignResults = storeCampaignResults;
 } catch (e) {
-  console.error("Failed to load campaign-export router:", e.message);
+  console.error("Failed to load simple-export:", e.message);
   const router = require("express").Router();
   router.use((req, res) =>
-    res.status(503).json({
-      error: "Campaign export service unavailable",
-      details: config.isDevelopment
-        ? e.message
-        : "Service initialization failed",
-    })
+    res.status(503).json({ error: "Export service unavailable" })
   );
   campaignExportRouter = router;
 }

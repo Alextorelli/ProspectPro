@@ -6,7 +6,7 @@ const express = require("express");
 const createCsvWriter = require("csv-writer").createObjectCsvWriter;
 const path = require("path");
 const fs = require("fs").promises;
-const supabase = require("../config/supabase");
+const { getSupabaseClient } = require("../config/supabase");
 
 const router = express.Router();
 
@@ -27,6 +27,14 @@ router.get("/:campaignId/export", async (req, res) => {
     console.log(
       `📊 Exporting campaign ${campaignId} (format: ${format}, min confidence: ${minConfidence})`
     );
+
+    const supabase = getSupabaseClient();
+    if (!supabase) {
+      return res.status(500).json({
+        error: "Database connection not available",
+        details: "Supabase client not initialized",
+      });
+    }
 
     // Get campaign details
     const { data: campaign, error: campaignError } = await supabase
@@ -113,6 +121,14 @@ router.get("/:campaignId/export", async (req, res) => {
 router.get("/:campaignId/exports", async (req, res) => {
   try {
     const { campaignId } = req.params;
+
+    const supabase = getSupabaseClient();
+    if (!supabase) {
+      return res.status(500).json({
+        error: "Database connection not available",
+        details: "Supabase client not initialized",
+      });
+    }
 
     const { data: exports, error } = await supabase
       .from("dashboard_exports")
@@ -460,6 +476,12 @@ function sanitizeFilename(filename) {
 
 async function logCampaignExport(campaignId, exportedCount, totalCount) {
   try {
+    const supabase = getSupabaseClient();
+    if (!supabase) {
+      console.error("Cannot log export: Database connection not available");
+      return;
+    }
+    
     await supabase.from("dashboard_exports").insert({
       campaign_id: campaignId,
       export_type: "lead_export",
