@@ -211,7 +211,7 @@ try {
 // Mount API routes
 app.use("/api/business-discovery", businessDiscoveryRouter);
 app.use("/api/business", businessDiscoveryRouter); // Frontend compatibility
-app.use("/api/campaign-export", campaignExportRouter);
+app.use("/api/campaigns", campaignExportRouter);
 
 // Mount webhook routes
 app.use("/api/webhooks/campaign-lifecycle", campaignLifecycleWebhook);

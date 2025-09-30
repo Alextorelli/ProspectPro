@@ -539,7 +539,7 @@ class ProspectProRealAPI {
       console.log("✅ API Response:", result);
 
       // Store results and campaign ID for export functionality
-      this.searchResults = result.businesses || [];
+      this.searchResults = result.leads || result.businesses || [];
       this.lastSearchCampaignId =
         result.campaign?.id || result.campaignId || null;
       this.lastSearchCampaignName =
@@ -641,8 +641,8 @@ class ProspectProRealAPI {
 
   showResults(result) {
     const resultsSection = document.getElementById("resultsSection");
-    const businesses = result.businesses || [];
-    const stats = result.stats || {};
+    const businesses = result.leads || result.businesses || [];
+    const stats = result.results || result.stats || {};
     const costs = result.costs || {};
     const performance = result.performance || {};
 
@@ -680,21 +680,19 @@ class ProspectProRealAPI {
 
             <div class="results-stats">
                 <div class="stat-item">
-                    <div class="stat-value">${stats.returned || 0}</div>
+                    <div class="stat-value">${stats.totalFound || 0}</div>
                     <div class="stat-label">Results</div>
                 </div>
                 <div class="stat-item">
-                    <div class="stat-value">${stats.withOwners || 0}</div>
+                    <div class="stat-value">${stats.qualified || 0}</div>
                     <div class="stat-label">With Owners</div>
                 </div>
                 <div class="stat-item">
-                    <div class="stat-value">${stats.withEmails || 0}</div>
+                    <div class="stat-value">${businesses.filter(b => b.email).length}</div>
                     <div class="stat-label">With Emails</div>
                 </div>
                 <div class="stat-item">
-                    <div class="stat-value">${
-                      stats.withVerifiedEmails || 0
-                    }</div>
+                    <div class="stat-value">${businesses.filter(b => b.email && b.email.includes('@')).length}</div>
                     <div class="stat-label">Verified Emails</div>
                 </div>
                 <div class="stat-item">
