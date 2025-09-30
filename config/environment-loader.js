@@ -52,6 +52,16 @@ class EnvironmentLoader {
    * @returns {Promise<Object>} API keys object
    */
   async loadApiKeysFromVault() {
+    // PRODUCTION/CLOUD RUN: Always use environment variables (no vault)
+    if (process.env.NODE_ENV === 'production' || 
+        process.env.K_SERVICE || 
+        process.env.CLOUD_RUN_SERVICE ||
+        process.env.GOOGLE_CLOUD_PROJECT) {
+      console.log("☁️ Production/Cloud Run detected: using direct environment variables");
+      console.log("💡 Vault bypassed for Cloud Run compatibility");
+      return null; // Force fallback to environment variables
+    }
+
     if (!vaultLoader) {
       console.warn(
         "⚠️ Vault loader not available, using environment variables only"
@@ -64,18 +74,7 @@ class EnvironmentLoader {
     }
 
     try {
-      console.log("🔑 Loading API keys from Supabase Vault...");
-
-      // CLOUD RUN BYPASS: Skip vault loading in Cloud Run due to schema cache issues
-      if (process.env.K_SERVICE || process.env.CLOUD_RUN_SERVICE) {
-        console.warn(
-          "⚠️ Cloud Run detected: skipping vault loading due to schema cache issues"
-        );
-        console.warn(
-          "💡 Using webhook-only mode - API keys from environment variables"
-        );
-        return null;
-      }
+      console.log("🔑 Loading API keys from Supabase Vault (local development)...");
 
       this.vaultApiKeys = await vaultLoader.loadStandardApiKeys();
 
@@ -104,7 +103,8 @@ class EnvironmentLoader {
     if (!vaultKeys) {
       // Fallback to environment variables only
       console.log("🔑 Using API keys from environment variables");
-      return {
+      
+      const envApiKeys = {
         googlePlaces: process.env.GOOGLE_PLACES_API_KEY,
         foursquare:
           process.env.FOURSQUARE_SERVICE_API_KEY ||
@@ -121,6 +121,23 @@ class EnvironmentLoader {
         uspto: process.env.USPTO_TSDR_API_KEY,
         personalAccessToken: process.env.PERSONAL_ACCESS_TOKEN,
       };
+
+      // Log which API keys are available
+      const availableKeys = Object.entries(envApiKeys)
+        .filter(([key, value]) => value && !value.includes('your_'))
+        .map(([key]) => key);
+      
+      if (availableKeys.length > 0) {
+        console.log(`✅ Found ${availableKeys.length} API keys in environment variables`);
+        console.log(`   Available: ${availableKeys.join(', ')}`);
+      } else {
+        console.warn("⚠️ No API keys found in environment variables");
+        if (process.env.ALLOW_DEGRADED_START === 'true') {
+          console.log("💡 Continuing in webhook-only mode");
+        }
+      }
+
+      return envApiKeys;
     }
 
     return vaultKeys;
