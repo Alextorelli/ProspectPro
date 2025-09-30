@@ -1,14 +1,14 @@
 {
     "name": "prospectpro-mcp-servers",
-    "version": "2.0.0",
-    "description": "Consolidated Model Context Protocol servers for ProspectPro AI-enhanced development",
-    "main": "production-server.js",
+    "version": "2.1.0",
+    "description": "Consolidated MCP servers for ProspectPro Supabase-First AI development",
+    "main": "supabase-production-server.js",
     "scripts": {
-        "start:production": "node production-server.js",
-        "start:development": "node development-server.js",
+        "start:production": "node supabase-production-server.js",
+        "start:development": "node supabase-development-server.js",
         "start:all": "concurrently \"npm run start:production\" \"npm run start:development\"",
-        "test": "node test-servers.js",
-        "validate": "npm run test && echo '✅ All MCP servers validated successfully'"
+        "test": "node test-supabase-servers.js",
+        "validate": "npm run test && echo '✅ All Supabase MCP servers validated successfully'"
     },
     "dependencies": {
         "@modelcontextprotocol/sdk": "^1.0.0",
@@ -22,8 +22,10 @@
         "model-context-protocol",
         "ai",
         "prospectpro",
-        "lead-generation"
+        "supabase",
+        "edge-functions",
+        "serverless"
     ],
-    "author": "ProspectPro Team",
+    "author": "Alex Torelli",
     "license": "MIT"
 }

@@ -5,31 +5,37 @@
     "dbaeumer.vscode-eslint",
     "eamodio.gitlens",
 
+    // Supabase-First Development Stack
+    "supabase.supabase-vscode",
+    "denoland.vscode-deno",
+
     // API Development & Testing
     "humao.rest-client",
-
-    // Docker & Container Support
-    "ms-azuretools.vscode-docker",
 
     // GitHub & AI Integration
     "github.copilot",
     "github.copilot-chat",
 
-    // Supabase & Database (Deno restricted to functions only)
-    "supabase.supabase-vscode",
-    "denoland.vscode-deno",
-
     // Documentation & Configuration
     "davidanson.vscode-markdownlint",
-    "redhat.vscode-yaml"
+    "redhat.vscode-yaml",
+
+    // TypeScript & Edge Function Development
+    "ms-vscode.vscode-typescript-next",
+    "bradlc.vscode-tailwindcss"
   ],
   "unwantedRecommendations": [
-    // Avoiding conflicts and redundancy
-    "rangav.vscode-thunder-client",
+    // Container tools (no longer needed with Supabase Edge Functions)
+    "ms-azuretools.vscode-docker",
+
+    // Node.js specific tools (Edge Functions use Deno)
     "ms-vscode.js-debug-nightly",
+
+    // Redundant API testing tools
+    "rangav.vscode-thunder-client",
+
+    // Language extensions not used in this project
     "vscjava.vscode-java-debug",
-    "ms-python.python",
-    "ms-vscode.vscode-typescript-next",
-    "ms-vscode.vscode-json"
+    "ms-python.python"
   ]
 }

@@ -115,7 +115,7 @@ Update the Supabase configuration in `supabase-app.js`:
 ```javascript
 this.supabase = createClient(
   "https://sriycekxdqnesdsgwiuc.supabase.co",
-  "your_anon_key_here" // Get from Supabase dashboard
+  "sb_secret_bY8n_a7-hP0Lxd9dPT_efg_3WzpnXN_" // Get from Supabase dashboard
 );
 ```
 

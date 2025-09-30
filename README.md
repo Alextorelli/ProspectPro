@@ -1,183 +1,200 @@
-# Supabase CLI
+# 🎯 ProspectPro v4.0 - Supabase-First Lead Discovery Platform
 
-[![Coverage Status](https://coveralls.io/repos/github/supabase/cli/badge.svg?branch=main)](https://coveralls.io/github/supabase/cli?branch=main) [![Bitbucket Pipelines](https://img.shields.io/bitbucket/pipelines/supabase-cli/setup-cli/master?style=flat-square&label=Bitbucket%20Canary)](https://bitbucket.org/supabase-cli/setup-cli/pipelines) [![Gitlab Pipeline Status](https://img.shields.io/gitlab/pipeline-status/sweatybridge%2Fsetup-cli?label=Gitlab%20Canary)
-](https://gitlab.com/sweatybridge/setup-cli/-/pipelines)
+[![Version](https://img.shields.io/badge/version-4.0.0-blue.svg)](https://github.com/Alextorelli/ProspectPro)
+[![Architecture](https://img.shields.io/badge/architecture-Supabase--First-green.svg)](https://supabase.com)
+[![Deployment](https://img.shields.io/badge/deployment-Edge%20Functions-purple.svg)](https://supabase.com/edge-functions)
+[![Cost](https://img.shields.io/badge/hosting-$1--5%2Fmonth-success.svg)](https://cloud.google.com/storage)
 
-[Supabase](https://supabase.io) is an open source Firebase alternative. We're building the features of Firebase using enterprise-grade open source tools.
+Modern, serverless lead discovery platform built with Supabase Edge Functions and static hosting.
 
-This repository contains all the functionality for Supabase CLI.
+## 🚀 **Architecture Overview**
 
-- [x] Running Supabase locally
-- [x] Managing database migrations
-- [x] Creating and deploying Supabase Functions
-- [x] Generating types directly from your database schema
-- [x] Making authenticated HTTP requests to [Management API](https://supabase.com/docs/reference/api/introduction)
+```
+Static Frontend → Supabase Edge Functions → Supabase Database
+                                      ↓
+                     Supabase Environment Variables → External APIs
+                                      ↓
+                     Real-time Database Updates → Live Frontend Updates
+```
 
-## Getting started
+### **Core Components**
 
-### Install the CLI
+- 🌐 **Frontend**: Static HTML/JS with Supabase client
+- ⚡ **Backend**: Supabase Edge Functions (TypeScript/Deno)
+- 🗄️ **Database**: Supabase PostgreSQL with RLS
+- 🔑 **Authentication**: Supabase Auth (ready to use)
+- 📁 **Storage**: Supabase Storage (ready to use)
+- 🔄 **Real-time**: Supabase Real-time subscriptions
 
-Available via [NPM](https://www.npmjs.com) as dev dependency. To install:
+## 🎯 **Key Features**
+
+- **Zero-Container Deployment** - No Docker, no Cloud Run, just Edge Functions
+- **90% Cost Reduction** - Static hosting vs. container hosting
+- **Global Edge Performance** - <100ms cold starts worldwide
+- **Enhanced Quality Scoring v3.0** - Integrated into Edge Functions
+- **Real-time Updates** - Native Supabase real-time capabilities
+- **Minimal Codebase** - 80% less code than traditional server architecture
+
+## ⚡ **Quick Start**
+
+### **Prerequisites**
+
+- Supabase CLI installed
+- Supabase project: `sriycekxdqnesdsgwiuc`
+- Google Places API key
+- Static hosting service (Cloud Storage, Vercel, Netlify)
+
+### **1. Clone and Setup**
 
 ```bash
-npm i supabase --save-dev
+git clone https://github.com/Alextorelli/ProspectPro
+cd ProspectPro
+supabase link --project-ref sriycekxdqnesdsgwiuc
 ```
 
-To install the beta release channel:
+### **2. Deploy Edge Functions**
 
 ```bash
-npm i supabase@beta --save-dev
+supabase functions deploy business-discovery
+supabase functions deploy campaign-export
 ```
 
-When installing with yarn 4, you need to disable experimental fetch with the following nodejs config.
+### **3. Setup Database**
+
+Run the SQL schema in your Supabase dashboard:
+
+```sql
+-- Copy contents from /database/supabase-first-schema.sql
+```
+
+### **4. Configure Environment**
+
+Add to Supabase environment variables:
 
 ```
-NODE_OPTIONS=--no-experimental-fetch yarn add supabase
+GOOGLE_PLACES_API_KEY=your_key_here
+HUNTER_IO_API_KEY=your_key_here
+NEVERBOUNCE_API_KEY=your_key_here
 ```
 
-> **Note**
-For Bun versions below v1.0.17, you must add `supabase` as a [trusted dependency](https://bun.sh/guides/install/trusted) before running `bun add -D supabase`.
-
-<details>
-  <summary><b>macOS</b></summary>
-
-  Available via [Homebrew](https://brew.sh). To install:
-
-  ```sh
-  brew install supabase/tap/supabase
-  ```
-
-  To install the beta release channel:
-  
-  ```sh
-  brew install supabase/tap/supabase-beta
-  brew link --overwrite supabase-beta
-  ```
-  
-  To upgrade:
-
-  ```sh
-  brew upgrade supabase
-  ```
-</details>
-
-<details>
-  <summary><b>Windows</b></summary>
-
-  Available via [Scoop](https://scoop.sh). To install:
-
-  ```powershell
-  scoop bucket add supabase https://github.com/supabase/scoop-bucket.git
-  scoop install supabase
-  ```
-
-  To upgrade:
-
-  ```powershell
-  scoop update supabase
-  ```
-</details>
-
-<details>
-  <summary><b>Linux</b></summary>
-
-  Available via [Homebrew](https://brew.sh) and Linux packages.
-
-  #### via Homebrew
-
-  To install:
-
-  ```sh
-  brew install supabase/tap/supabase
-  ```
-
-  To upgrade:
-
-  ```sh
-  brew upgrade supabase
-  ```
-
-  #### via Linux packages
-
-  Linux packages are provided in [Releases](https://github.com/supabase/cli/releases). To install, download the `.apk`/`.deb`/`.rpm`/`.pkg.tar.zst` file depending on your package manager and run the respective commands.
-
-  ```sh
-  sudo apk add --allow-untrusted <...>.apk
-  ```
-
-  ```sh
-  sudo dpkg -i <...>.deb
-  ```
-
-  ```sh
-  sudo rpm -i <...>.rpm
-  ```
-
-  ```sh
-  sudo pacman -U <...>.pkg.tar.zst
-  ```
-</details>
-
-<details>
-  <summary><b>Other Platforms</b></summary>
-
-  You can also install the CLI via [go modules](https://go.dev/ref/mod#go-install) without the help of package managers.
-
-  ```sh
-  go install github.com/supabase/cli@latest
-  ```
-
-  Add a symlink to the binary in `$PATH` for easier access:
-
-  ```sh
-  ln -s "$(go env GOPATH)/bin/cli" /usr/bin/supabase
-  ```
-
-  This works on other non-standard Linux distros.
-</details>
-
-<details>
-  <summary><b>Community Maintained Packages</b></summary>
-
-  Available via [pkgx](https://pkgx.sh/). Package script [here](https://github.com/pkgxdev/pantry/blob/main/projects/supabase.com/cli/package.yml).
-  To install in your working directory:
-
-  ```bash
-  pkgx install supabase
-  ```
-
-  Available via [Nixpkgs](https://nixos.org/). Package script [here](https://github.com/NixOS/nixpkgs/blob/master/pkgs/development/tools/supabase-cli/default.nix).
-</details>
-
-### Run the CLI
+### **5. Deploy Frontend**
 
 ```bash
-supabase bootstrap
+npm run build:static
+npm run deploy:static
 ```
 
-Or using npx:
+## 📁 **Project Structure**
+
+```
+/supabase/functions/
+├── business-discovery/     # Main discovery Edge Function
+└── campaign-export/        # CSV export Edge Function
+
+/public/
+├── index-supabase.html    # Static frontend
+└── supabase-app.js        # Frontend with Supabase client
+
+/database/
+└── supabase-first-schema.sql  # Database schema
+
+/docs/                     # Documentation
+/archive/                  # Legacy files (deprecated)
+```
+
+## 🔧 **Development**
+
+### **Local Development**
 
 ```bash
-npx supabase bootstrap
+# Serve Edge Functions locally
+supabase functions serve
+
+# Serve frontend locally
+npm run serve:local
 ```
 
-The bootstrap command will guide you through the process of setting up a Supabase project using one of the [starter](https://github.com/supabase-community/supabase-samples/blob/main/samples.json) templates.
+### **Testing Edge Functions**
 
-## Docs
+```bash
+# Test business discovery
+curl -X POST 'http://localhost:54321/functions/v1/business-discovery' \
+  -H 'Content-Type: application/json' \
+  -d '{"businessType": "restaurant", "location": "San Francisco, CA"}'
 
-Command & config reference can be found [here](https://supabase.com/docs/reference/cli/about).
-
-## Breaking changes
-
-We follow semantic versioning for changes that directly impact CLI commands, flags, and configurations.
-
-However, due to dependencies on other service images, we cannot guarantee that schema migrations, seed.sql, and generated types will always work for the same CLI major version. If you need such guarantees, we encourage you to pin a specific version of CLI in package.json.
-
-## Developing
-
-To run from source:
-
-```sh
-# Go >= 1.22
-go run . help
+# Test campaign export
+curl -X GET 'http://localhost:54321/functions/v1/campaign-export/CAMPAIGN_ID'
 ```
+
+## 📊 **API Endpoints**
+
+### **Business Discovery**
+
+```
+POST https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/business-discovery
+```
+
+**Request:**
+
+```json
+{
+  "businessType": "restaurant",
+  "location": "San Francisco, CA",
+  "maxResults": 10,
+  "budgetLimit": 50,
+  "minConfidenceScore": 50
+}
+```
+
+### **Campaign Export**
+
+```
+GET https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/campaign-export/{campaignId}
+```
+
+## 💰 **Cost Comparison**
+
+| Component       | Before (v3.x)          | After (v4.0)                  |
+| --------------- | ---------------------- | ----------------------------- |
+| **Hosting**     | Cloud Run $10-50/month | Static hosting $1-5/month     |
+| **Backend**     | Express.js server      | Supabase Edge Functions       |
+| **Database**    | Manual integration     | Native Supabase               |
+| **Deployment**  | Docker build 2-5 min   | Function deploy 30 sec        |
+| **Maintenance** | High complexity        | Minimal - managed by Supabase |
+| **Scaling**     | Manual configuration   | Auto-scaling serverless       |
+
+## 🎯 **Key Benefits**
+
+1. **🔥 80% Code Reduction** - From 400+ lines server.js to 50 lines core logic
+2. **💰 90% Cost Reduction** - Static hosting vs. container hosting
+3. **⚡ Global Performance** - Edge Functions in 18+ regions
+4. **🔧 Zero Maintenance** - Supabase manages infrastructure
+5. **📈 Auto-scaling** - No capacity planning required
+6. **🔄 Real-time Ready** - Native subscriptions out of the box
+
+## 🔮 **Next Steps**
+
+- [ ] Enable Supabase Auth for user management
+- [ ] Add real-time lead updates via Supabase subscriptions
+- [ ] Implement Supabase Storage for file uploads
+- [ ] Configure custom domain with SSL
+- [ ] Set up monitoring and analytics
+
+## 📚 **Documentation**
+
+- [Deployment Guide](DEPLOYMENT_SUCCESS.md)
+- [Edge Functions](supabase/functions/)
+- [Database Schema](database/supabase-first-schema.sql)
+- [Frontend Guide](public/)
+
+## 🤝 **Contributing**
+
+This is a personal project optimized for Supabase-first architecture. For questions or suggestions, please open an issue.
+
+## 📄 **License**
+
+MIT License - see [LICENSE](LICENSE) for details.
+
+---
+
+**Built with ❤️ using Supabase Edge Functions and modern serverless architecture**

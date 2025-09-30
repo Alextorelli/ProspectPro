@@ -1,12 +1,13 @@
 {
-  // === DENO CONFIGURATION (RESTRICTED TO SUPABASE ONLY) ===
-  "deno.enable": false,
+  // === SUPABASE-FIRST CONFIGURATION ===
+  "deno.enable": true,
   "deno.enablePaths": ["supabase/functions"],
   "[typescript]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
   "deno.lint": true,
   "deno.unstable": ["bare-node-builtins", "byonm", "sloppy-imports"],
+  "supabase.projectRef": "sriycekxdqnesdsgwiuc",
 
   // === GIT OPTIMIZATIONS ===
   "git.ignoreLimitWarning": true,
@@ -42,7 +43,8 @@
   "editor.formatOnSave": true,
   "editor.formatOnPaste": true,
   "editor.codeActionsOnSave": {
-    "source.fixAll.eslint": "explicit"
+    "source.fixAll.eslint": "explicit",
+    "source.organizeImports": "explicit"
   },
 
   // === WORKBENCH OPTIMIZATIONS ===
@@ -50,29 +52,33 @@
   "workbench.list.smoothScrolling": false,
   "workbench.tree.renderIndentGuides": "none",
   "workbench.editor.closeOnFileDelete": true,
+  "workbench.colorCustomizations": {
+    "statusBar.background": "#667eea",
+    "statusBar.foreground": "#ffffff"
+  },
 
-  // === FILE SYSTEM PERFORMANCE ===
+  // === FILE SYSTEM PERFORMANCE (SUPABASE-FIRST) ===
   "files.exclude": {
+    "archive/": true,
+    "logs/": true,
+    "node_modules/": true,
+    "dist/": true,
+    "server.js": true,
+    "api/": true,
+    "modules/": true,
+    "docker/": true,
+    "cloudbuild.yaml": true,
+    "Dockerfile": true,
+    "docker-compose*.yml": true,
     "**/*.log": true,
     "**/*.tmp": true,
-    "**/*.temp": true,
-    "**/diagnostics.json": true,
-    "**/startup.log": true,
-    "**/production*.log": true,
-    "**/database-validation.log": true,
-    "**/server-test.log": true,
-    "**/test-*.js": true,
-    "**/*-analysis.js": true,
-    "**/*-troubleshooting.js": true,
-    "**/*-fix.js": true
+    "**/*.temp": true
   },
 
   "files.watcherExclude": {
     "**/*.log": true,
     "**/*.tmp": true,
     "**/*.temp": true,
-    "**/diagnostics.json": true,
-    "**/startup.log": true,
     "**/node_modules/**": true,
     "**/archive/**": true,
     "**/.git/**": true,
@@ -84,87 +90,72 @@
   "files.autoSaveDelay": 1000,
   "files.associations": {
     "*.md": "markdown",
+    "*.sql": "sql",
+    "*.ts": "typescript",
     ".copilot-instructions": "markdown"
   },
 
-  // === SEARCH OPTIMIZATIONS ===
+  // === SEARCH OPTIMIZATIONS (SUPABASE-FIRST) ===
   "search.exclude": {
+    "archive/": true,
+    "logs/": true,
+    "node_modules/": true,
+    "dist/": true,
+    "server.js": true,
+    "api/": true,
+    "modules/": true,
+    "docker/": true,
     "**/node_modules": true,
     "**/*.log": true,
     "**/*.tmp": true,
     "**/*.temp": true,
-    "**/diagnostics.json": true,
-    "**/startup.log": true,
-    "**/production*.log": true,
-    "**/archive/**": true,
     "**/.git": true,
-    "**/logs/**": true,
-    "**/dist/**": true,
     "**/coverage/**": true
   },
   "search.searchOnType": false,
   "search.searchOnTypeDebouncePeriod": 800,
 
-  // === JAVASCRIPT/NODE.JS SETTINGS ===
+  // === TYPESCRIPT/JAVASCRIPT SETTINGS ===
+  "typescript.preferences.includePackageJsonAutoImports": "on",
+  "typescript.suggest.autoImports": true,
+  "typescript.preferences.importModuleSpecifier": "relative",
   "javascript.updateImportsOnFileMove.enabled": "always",
   "javascript.suggest.autoImports": true,
   "js/ts.implicitProjectConfig.checkJs": false,
 
-  // === LINTING AND FORMATTING ===
-  "eslint.validate": ["javascript", "javascriptreact", "json"],
-
-  // === NPM OPTIMIZATIONS ===
-  "npm.packageManager": "npm",
-  "npm.exclude": ["**/node_modules/**", "**/archive/**"],
-  "npm.autoDetect": "off",
+  // === EXPLORER NESTING ===
+  "explorer.fileNesting.enabled": true,
+  "explorer.fileNesting.patterns": {
+    "*.ts": "${capture}.d.ts,${capture}.js,${capture}.js.map",
+    "package.json": "package-lock.json,yarn.lock,pnpm-lock.yaml,package-supabase.json",
+    "README.md": "LICENSE,CHANGELOG.md",
+    "index-supabase.html": "supabase-app.js"
+  },
 
   // === MARKDOWN SETTINGS ===
   "markdown.preview.breaks": true,
   "markdown.preview.linkify": true,
 
   // === TERMINAL OPTIMIZATIONS ===
-  "terminal.integrated.defaultProfile.windows": "PowerShell",
-  "terminal.integrated.profiles.windows": {
-    "PowerShell": {
-      "source": "PowerShell",
-      "icon": "terminal-powershell"
-    },
-    "Command Prompt": {
-      "path": "cmd.exe",
-      "icon": "terminal-cmd"
-    },
-    "Windows PowerShell": {
-      "path": "powershell.exe",
-      "icon": "terminal-powershell"
+  "terminal.integrated.defaultProfile.linux": "bash",
+  "terminal.integrated.profiles.linux": {
+    "bash": {
+      "path": "bash",
+      "args": []
     }
   },
-  "terminal.integrated.defaultProfile.linux": "bash",
   "terminal.integrated.gpuAcceleration": "on",
   "terminal.integrated.scrollback": 1000,
 
-  // === MCP CONFIGURATION ===
-  "mcp.enable": true,
-  "mcp.servers": {
-    "prospectpro-production": {
-      "enabled": true,
-      "autoStart": true,
-      "description": "ProspectPro Enhanced Production Server - Monitoring, Analytics, Diagnostics, API Testing, Filesystem Analysis"
-    },
-    "prospectpro-development": {
-      "enabled": true,
-      "autoStart": false,
-      "description": "ProspectPro Development Server - New API Integration, Performance Benchmarking, Development Utilities"
-    }
-  },
-
-  // === AI PROJECT CONTEXT ===
+  // === AI PROJECT CONTEXT (UPDATED FOR SUPABASE) ===
   "ai.contextAware": true,
   "ai.projectContext": {
     "type": "lead-generation-platform",
-    "framework": "node-express",
-    "database": "supabase",
-    "apis": ["google-places", "foursquare", "hunter-io", "neverbounce"],
-    "deployment": "docker-compose",
-    "monitoring": "custom-diagnostics"
+    "framework": "supabase-edge-functions",
+    "frontend": "static-html-js",
+    "database": "supabase-postgresql",
+    "apis": ["google-places", "hunter-io", "neverbounce"],
+    "deployment": "supabase-functions",
+    "hosting": "static-hosting"
   }
 }
