@@ -122,8 +122,8 @@ class ProspectProSupabase {
       });
     });
 
-    // Input fields for cost calculation
-    const businessTypeInput = document.getElementById("business-type");
+    // Input fields for cost calculation - updated for new form structure
+    const businessTypeInput = document.getElementById("businessType");
     const locationInput = document.getElementById("location");
 
     [businessTypeInput, locationInput].forEach((input) => {
@@ -144,22 +144,35 @@ class ProspectProSupabase {
     }
 
     try {
-      const businessType = document
-        .getElementById("business-type")
+      // Get form values with new field structure
+      const businessType = document.getElementById("businessType").value.trim();
+      const additionalKeywords = document
+        .getElementById("additionalKeywords")
         .value.trim();
       const location = document.getElementById("location").value.trim();
+      const searchRadius = document.getElementById("searchRadius").value;
+      const expandGeography =
+        document.getElementById("expandGeography").checked;
+
+      // Combine business type with keywords if provided
+      const finalBusinessType = additionalKeywords
+        ? `${businessType} ${additionalKeywords}`
+        : businessType;
+
       const quantityBtn = document.querySelector(".lead-quantity-btn.active");
       const quantity = quantityBtn ? parseInt(quantityBtn.textContent) : 3;
 
       console.log("📊 Discovery parameters:", {
-        businessType,
+        businessType: finalBusinessType,
         location,
         quantity,
+        searchRadius,
+        expandGeography,
       });
 
-      if (!businessType || !location) {
+      if (!finalBusinessType || !location) {
         console.log("❌ Missing required parameters");
-        this.showError("Please enter both business type and location");
+        this.showError("Please select a business type and enter a location");
         return;
       }
 
@@ -185,12 +198,18 @@ class ProspectProSupabase {
       console.log("✅ Pre-flight checks passed");
 
       const payload = {
-        businessType,
+        businessType: finalBusinessType,
         location,
         maxResults: quantity,
         budgetLimit: 50,
         requireCompleteContacts: false,
         minConfidenceScore: 50,
+        searchRadius: parseInt(searchRadius),
+        expandGeography,
+        // Verification options
+        chamberVerification: true, // Always enabled
+        professionalLicensing: true, // Always enabled
+        apolloDiscovery: document.getElementById("apolloDiscovery").checked,
       };
 
       console.log(
@@ -261,7 +280,7 @@ class ProspectProSupabase {
       // Store results for potential export
       this.searchResults = data.leads || [];
       this.lastSearchCampaignId = data.campaignId;
-      this.lastSearchCampaignName = `${businessType} in ${location}`;
+      this.lastSearchCampaignName = `${finalBusinessType} in ${location}`;
 
       // Show results
       this.showResults(data);

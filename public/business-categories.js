@@ -1,213 +1,474 @@
-// Business Categories for Google Places API Integration
-// Aligned with Google Places business types for optimal search results
+// MECE Business Categories for Google Places & Foursquare API Integration
+// Optimized taxonomy based on comprehensive business classification
 
 const BUSINESS_CATEGORIES = {
-    'Professional Services': {
-        name: 'Professional Services',
-        description: 'Business-to-business and professional services',
-        types: [
-            'accounting',
-            'lawyer',
-            'consultant',
-            'real estate agency',
-            'insurance agency',
-            'corporate office'
-        ]
-    },
-    'Health & Medical Services': {
-        name: 'Health & Medical Services', 
-        description: 'Healthcare and medical service providers',
-        types: [
-            'doctor',
-            'dentist',
-            'hospital',
-            'pharmacy',
-            'drugstore',
-            'chiropractor',
-            'physiotherapist',
-            'dental clinic',
-            'medical lab',
-            'veterinary care',
-            'wellness center',
-            'skin care clinic'
-        ]
-    },
-    'Personal Care & Beauty': {
-        name: 'Personal Care & Beauty',
-        description: 'Personal grooming and beauty services',
-        types: [
-            'hair salon',
-            'hair care',
-            'beauty salon',
-            'barber shop',
-            'nail salon',
-            'spa',
-            'massage',
-            'beautician',
-            'makeup artist',
-            'body art service',
-            'tanning studio',
-            'sauna'
-        ]
-    },
-    'Home & Property Services': {
-        name: 'Home & Property Services',
-        description: 'Construction, maintenance, and property services',
-        types: [
-            'electrician',
-            'plumber',
-            'painter',
-            'roofing contractor',
-            'general contractor',
-            'locksmith',
-            'moving company',
-            'laundry',
-            'storage',
-            'catering service'
-        ]
-    },
-    'Automotive Services': {
-        name: 'Automotive Services',
-        description: 'Vehicle-related services and sales',
-        types: [
-            'car repair',
-            'car wash',
-            'car dealer',
-            'car rental',
-            'gas station',
-            'electric vehicle charging station',
-            'auto parts store'
-        ]
-    },
-    'Food & Beverage': {
-        name: 'Food & Beverage',
-        description: 'Restaurants, cafes, and food services',
-        types: [
-            'restaurant',
-            'cafe',
-            'bakery',
-            'bar',
-            'fast food restaurant',
-            'pizza restaurant',
-            'chinese restaurant',
-            'mexican restaurant',
-            'italian restaurant',
-            'japanese restaurant',
-            'indian restaurant',
-            'meal delivery',
-            'meal takeaway',
-            'catering service',
-            'pub',
-            'wine bar',
-            'coffee shop',
-            'ice cream shop',
-            'food court'
-        ]
-    },
-    'Retail & Commerce': {
-        name: 'Retail & Commerce',
-        description: 'Retail stores and commercial establishments',
-        types: [
-            'clothing store',
-            'shoe store',
-            'electronics store',
-            'furniture store',
-            'home goods store',
-            'jewelry store',
-            'book store',
-            'gift shop',
-            'department store',
-            'shopping mall',
-            'supermarket',
-            'grocery store',
-            'convenience store',
-            'pet store',
-            'sporting goods store',
-            'bicycle store'
-        ]
-    },
-    'Technology & Digital Services': {
-        name: 'Technology & Digital Services',
-        description: 'IT, technology, and digital services',
-        types: [
-            'electronics store',
-            'cell phone store',
-            'telecommunications service provider',
-            'internet cafe'
-        ]
-    },
-    'Education & Training': {
-        name: 'Education & Training',
-        description: 'Educational institutions and training services',
-        types: [
-            'school',
-            'university',
-            'primary school',
-            'secondary school',
-            'preschool',
-            'library',
-            'summer camp organizer'
-        ]
-    },
-    'Event & Entertainment Services': {
-        name: 'Event & Entertainment Services',
-        description: 'Entertainment, events, and recreational services',
-        types: [
-            'event venue',
-            'wedding venue',
-            'banquet hall',
-            'movie theater',
-            'bowling alley',
-            'amusement park',
-            'casino',
-            'night club',
-            'tourist attraction',
-            'museum',
-            'zoo',
-            'aquarium',
-            'park'
-        ]
-    }
+  "Professional Services": {
+    name: "Professional Services",
+    description: "Business-to-business and professional services",
+    types: [
+      "accounting",
+      "lawyer",
+      "attorney",
+      "consultant",
+      "real estate agency",
+      "insurance agency",
+      "corporate office",
+      "business center",
+      "financial advisor",
+      "tax preparation",
+      "notary",
+      "employment agency",
+      "marketing agency",
+      "advertising agency",
+      "architecture firm",
+      "engineering office",
+      "recruiter",
+    ],
+  },
+  "Financial Services": {
+    name: "Financial Services",
+    description: "Banking, investment, and financial services",
+    types: [
+      "bank",
+      "credit union",
+      "atm",
+      "mortgage broker",
+      "investment firm",
+      "stock broker",
+      "cryptocurrency exchange",
+      "check cashing service",
+      "money transfer service",
+      "payday lender",
+      "financial planner",
+    ],
+  },
+  "Healthcare & Medical": {
+    name: "Healthcare & Medical",
+    description: "Healthcare and medical service providers",
+    types: [
+      "doctor",
+      "dentist",
+      "hospital",
+      "pharmacy",
+      "drugstore",
+      "chiropractor",
+      "physiotherapist",
+      "dental clinic",
+      "medical lab",
+      "veterinary care",
+      "wellness center",
+      "skin care clinic",
+      "optical clinic",
+      "mental health clinic",
+      "urgent care",
+      "medical center",
+      "health insurance office",
+      "medical equipment supplier",
+      "optometrist",
+      "orthodontist",
+      "psychologist",
+      "psychiatrist",
+      "acupuncture clinic",
+      "physical therapy",
+      "occupational therapist",
+      "speech therapist",
+    ],
+  },
+  "Personal Care & Beauty": {
+    name: "Personal Care & Beauty",
+    description: "Personal grooming and beauty services",
+    types: [
+      "hair salon",
+      "hair care",
+      "beauty salon",
+      "barber shop",
+      "nail salon",
+      "spa",
+      "massage",
+      "beautician",
+      "makeup artist",
+      "body art service",
+      "tanning studio",
+      "sauna",
+      "tattoo parlor",
+      "piercing shop",
+      "waxing salon",
+      "eyebrow threading",
+      "cosmetics store",
+      "day spa",
+      "facial spa",
+    ],
+  },
+  "Home & Property Services": {
+    name: "Home & Property Services",
+    description: "Construction, maintenance, and property services",
+    types: [
+      "electrician",
+      "plumber",
+      "painter",
+      "roofing contractor",
+      "general contractor",
+      "locksmith",
+      "moving company",
+      "laundry",
+      "dry cleaning",
+      "storage",
+      "hvac contractor",
+      "landscaping",
+      "pest control",
+      "cleaning service",
+      "home inspector",
+      "flooring contractor",
+      "handyman",
+      "property management",
+      "gardener",
+      "pool service",
+      "window cleaning",
+      "carpet cleaning",
+      "appliance repair",
+      "fence contractor",
+      "gutter service",
+    ],
+  },
+  "Automotive Services": {
+    name: "Automotive Services",
+    description: "Vehicle-related services and sales",
+    types: [
+      "car repair",
+      "car wash",
+      "car dealer",
+      "car rental",
+      "gas station",
+      "electric vehicle charging station",
+      "auto parts store",
+      "tire shop",
+      "auto body shop",
+      "motorcycle dealer",
+      "truck dealer",
+      "rv dealer",
+      "automotive glass service",
+      "oil change service",
+      "towing service",
+      "auto detailing",
+      "smog check station",
+      "transmission shop",
+    ],
+  },
+  "Food & Dining": {
+    name: "Food & Dining",
+    description: "Restaurants, cafes, and food services",
+    types: [
+      "restaurant",
+      "cafe",
+      "bakery",
+      "bar",
+      "fast food restaurant",
+      "pizza restaurant",
+      "chinese restaurant",
+      "mexican restaurant",
+      "italian restaurant",
+      "japanese restaurant",
+      "indian restaurant",
+      "meal delivery",
+      "meal takeaway",
+      "catering service",
+      "pub",
+      "wine bar",
+      "cocktail bar",
+      "coffee shop",
+      "ice cream shop",
+      "food court",
+      "donut shop",
+      "deli",
+      "steakhouse",
+      "sushi restaurant",
+      "seafood restaurant",
+      "burger joint",
+      "taco place",
+      "food truck",
+      "brewery",
+      "distillery",
+      "winery",
+      "juice bar",
+      "smoothie shop",
+      "tea house",
+      "dessert shop",
+      "sandwich shop",
+      "barbecue restaurant",
+      "brunch restaurant",
+      "buffet",
+      "food stand",
+    ],
+  },
+  "Retail & Shopping": {
+    name: "Retail & Shopping",
+    description: "Retail stores and commercial establishments",
+    types: [
+      "clothing store",
+      "shoe store",
+      "electronics store",
+      "furniture store",
+      "home goods store",
+      "jewelry store",
+      "book store",
+      "gift shop",
+      "department store",
+      "shopping mall",
+      "supermarket",
+      "grocery store",
+      "convenience store",
+      "pet store",
+      "sporting goods store",
+      "bicycle store",
+      "toy store",
+      "hardware store",
+      "garden center",
+      "liquor store",
+      "music store",
+      "art supply store",
+      "office supply store",
+      "optical store",
+      "antique shop",
+      "thrift store",
+      "hobby shop",
+      "vape shop",
+      "tobacco shop",
+      "florist",
+      "craft store",
+      "party supply store",
+      "dollar store",
+      "discount store",
+      "outlet store",
+      "boutique",
+      "second hand store",
+    ],
+  },
+  "Technology & IT Services": {
+    name: "Technology & IT Services",
+    description: "IT, technology, and digital services",
+    types: [
+      "cell phone store",
+      "telecommunications service provider",
+      "internet cafe",
+      "computer repair",
+      "it services",
+      "software company",
+      "data center",
+      "co-working space",
+      "tech support",
+      "web design",
+      "app development",
+      "cybersecurity firm",
+      "managed services provider",
+    ],
+  },
+  "Education & Training": {
+    name: "Education & Training",
+    description: "Educational institutions and training services",
+    types: [
+      "school",
+      "university",
+      "primary school",
+      "secondary school",
+      "preschool",
+      "library",
+      "summer camp organizer",
+      "tutoring center",
+      "vocational school",
+      "college",
+      "driving school",
+      "language school",
+      "music school",
+      "art school",
+      "dance studio",
+      "cooking school",
+      "training center",
+      "daycare",
+      "kindergarten",
+      "charter school",
+      "private school",
+      "public school",
+      "community college",
+      "technical school",
+    ],
+  },
+  "Entertainment & Recreation": {
+    name: "Entertainment & Recreation",
+    description: "Entertainment, events, and recreational services",
+    types: [
+      "event venue",
+      "wedding venue",
+      "banquet hall",
+      "movie theater",
+      "bowling alley",
+      "amusement park",
+      "casino",
+      "night club",
+      "tourist attraction",
+      "museum",
+      "zoo",
+      "aquarium",
+      "park",
+      "sports complex",
+      "gym",
+      "fitness center",
+      "yoga studio",
+      "golf course",
+      "tennis court",
+      "swimming pool",
+      "arcade",
+      "karaoke venue",
+      "comedy club",
+      "theater",
+      "concert hall",
+      "art gallery",
+      "botanical garden",
+      "beach",
+      "ski resort",
+      "marina",
+      "stadium",
+      "arena",
+      "convention center",
+      "escape room",
+      "paintball",
+      "trampoline park",
+      "mini golf",
+      "rock climbing gym",
+    ],
+  },
+  "Hospitality & Lodging": {
+    name: "Hospitality & Lodging",
+    description: "Hotels, lodging, and accommodation services",
+    types: [
+      "hotel",
+      "motel",
+      "resort",
+      "bed and breakfast",
+      "hostel",
+      "vacation rental",
+      "campground",
+      "rv park",
+      "inn",
+      "lodge",
+      "extended stay hotel",
+      "boutique hotel",
+      "guest house",
+    ],
+  },
+  "Transportation & Transit": {
+    name: "Transportation & Transit",
+    description: "Transportation and transit services",
+    types: [
+      "airport",
+      "train station",
+      "bus station",
+      "subway station",
+      "taxi stand",
+      "parking lot",
+      "parking garage",
+      "ferry terminal",
+      "bike rental",
+      "scooter rental",
+      "limousine service",
+      "shuttle service",
+      "travel agency",
+      "bus tour agency",
+      "cruise agency",
+      "car sharing",
+      "ride share location",
+      "truck stop",
+      "rest area",
+    ],
+  },
+  "Religious & Community": {
+    name: "Religious & Community",
+    description: "Religious institutions and community organizations",
+    types: [
+      "church",
+      "mosque",
+      "synagogue",
+      "temple",
+      "religious center",
+      "community center",
+      "non-profit organization",
+      "social club",
+      "civic organization",
+      "funeral home",
+      "cemetery",
+      "crematorium",
+      "place of worship",
+      "spiritual center",
+      "meditation center",
+    ],
+  },
+  "Government & Public Services": {
+    name: "Government & Public Services",
+    description: "Government offices and public services",
+    types: [
+      "city hall",
+      "courthouse",
+      "police station",
+      "fire station",
+      "post office",
+      "embassy",
+      "consulate",
+      "dmv",
+      "public library",
+      "public school",
+      "government office",
+      "social services office",
+      "municipal building",
+      "county office",
+      "public works",
+      "tax office",
+      "passport office",
+      "voter registration office",
+    ],
+  },
 };
 
 // Helper functions for the frontend
 window.BusinessCategories = {
-    getCategories: () => Object.keys(BUSINESS_CATEGORIES),
-    
-    getCategory: (categoryName) => BUSINESS_CATEGORIES[categoryName],
-    
-    // Helper function to capitalize words for display
-    capitalizeWords: function(str) {
-        return str.split(' ').map(word => 
-            word.charAt(0).toUpperCase() + word.slice(1)
-        ).join(' ');
-    },
-    
-    getTypesForCategory: function(categoryName) {
-        const category = BUSINESS_CATEGORIES[categoryName];
-        if (category) {
-            // Return capitalized versions for display
-            return category.types.map(type => this.capitalizeWords(type));
-        }
-        return [];
-    },
-    
-    // Get raw (uncapitalized) business type for API calls
-    getRawTypeForDisplay: function(displayType) {
-        return displayType.toLowerCase();
-    },
-    
-    getCategoryForType: (businessType) => {
-        for (const [categoryName, category] of Object.entries(BUSINESS_CATEGORIES)) {
-            if (category.types.includes(businessType)) {
-                return categoryName;
-            }
-        }
-        return null;
-    },
-    
-    getAllTypes: () => {
-        return Object.values(BUSINESS_CATEGORIES)
-            .flatMap(category => category.types);
+  getCategories: () => Object.keys(BUSINESS_CATEGORIES),
+
+  getCategory: (categoryName) => BUSINESS_CATEGORIES[categoryName],
+
+  // Helper function to capitalize words for display
+  capitalizeWords: function (str) {
+    return str
+      .split(" ")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ");
+  },
+
+  getTypesForCategory: function (categoryName) {
+    const category = BUSINESS_CATEGORIES[categoryName];
+    if (category) {
+      // Return capitalized versions for display
+      return category.types.map((type) => this.capitalizeWords(type));
     }
+    return [];
+  },
+
+  // Get raw (uncapitalized) business type for API calls
+  getRawTypeForDisplay: function (displayType) {
+    return displayType.toLowerCase();
+  },
+
+  getCategoryForType: (businessType) => {
+    for (const [categoryName, category] of Object.entries(
+      BUSINESS_CATEGORIES
+    )) {
+      if (category.types.includes(businessType)) {
+        return categoryName;
+      }
+    }
+    return null;
+  },
+
+  getAllTypes: () => {
+    return Object.values(BUSINESS_CATEGORIES).flatMap(
+      (category) => category.types
+    );
+  },
 };

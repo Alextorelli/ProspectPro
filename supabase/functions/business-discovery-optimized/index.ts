@@ -755,6 +755,166 @@ class OptimizedGooglePlacesAPI {
   }
 }
 
+// Foursquare Places API integration for enhanced business discovery
+class OptimizedFoursquareAPI {
+  private apiKey: string;
+  private cache = new Map();
+  private cacheTTL = 3600000; // 1 hour
+
+  constructor(apiKey: string) {
+    this.apiKey = apiKey;
+  }
+
+  async searchBusinesses(
+    businessType: string,
+    location: string,
+    maxResults: number
+  ) {
+    const cacheKey = `foursquare_${businessType}_${location}_${maxResults}`;
+
+    // Check cache first
+    const cached = this.cache.get(cacheKey);
+    if (cached && Date.now() - cached.timestamp < this.cacheTTL) {
+      console.log("📦 Using cached Foursquare results");
+      return cached.data;
+    }
+
+    console.log(`🔍 Searching Foursquare: ${businessType} in ${location}`);
+
+    // Foursquare Places API v3
+    const url = `https://api.foursquare.com/v3/places/search`;
+    const params = new URLSearchParams({
+      query: businessType,
+      near: location,
+      limit: Math.min(maxResults * 2, 50).toString(), // Get more for filtering
+      fields:
+        "fsq_id,name,location,contact,website,categories,rating,stats,hours",
+    });
+
+    try {
+      const response = await fetch(`${url}?${params}`, {
+        headers: {
+          Authorization: this.apiKey,
+          Accept: "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Foursquare API error: ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      if (!data.results) {
+        console.log("❌ No Foursquare results found");
+        return [];
+      }
+
+      // Transform Foursquare data to our business format
+      const transformedResults = data.results.map(
+        (place: {
+          fsq_id: string;
+          name: string;
+          location: {
+            lat?: number;
+            lng?: number;
+            address?: string;
+            locality?: string;
+            admin_district?: string;
+            postcode?: string;
+            country?: string;
+          };
+          contact?: { phone?: string };
+          website?: string;
+          rating?: number;
+          stats?: { total_tips?: number };
+          categories?: Array<{ name: string }>;
+          hours?: unknown;
+        }) => ({
+          place_id: place.fsq_id,
+          name: place.name,
+          formatted_address: this.formatAddress(place.location),
+          formatted_phone_number: place.contact?.phone || "",
+          website: place.website || "",
+          rating: place.rating || 0,
+          user_ratings_total: place.stats?.total_tips || 0,
+          business_status: "OPERATIONAL",
+          types: place.categories?.map((cat) => cat.name.toLowerCase()) || [],
+          geometry: {
+            location: {
+              lat: place.location?.lat || 0,
+              lng: place.location?.lng || 0,
+            },
+          },
+          // Foursquare-specific enhancements
+          foursquare_data: {
+            fsq_id: place.fsq_id,
+            categories: place.categories,
+            hours: place.hours,
+            stats: place.stats,
+          },
+          data_source: "foursquare",
+        })
+      );
+
+      // Cache results
+      this.cache.set(cacheKey, {
+        data: transformedResults,
+        timestamp: Date.now(),
+      });
+
+      console.log(
+        `📊 Found ${transformedResults.length} businesses from Foursquare`
+      );
+      return transformedResults;
+    } catch (error) {
+      console.error("❌ Foursquare API error:", error);
+      return []; // Return empty array on error, don't fail the whole request
+    }
+  }
+
+  private formatAddress(location: {
+    address?: string;
+    locality?: string;
+    admin_district?: string;
+    postcode?: string;
+    country?: string;
+  }): string {
+    if (!location) return "";
+
+    const parts = [];
+    if (location.address) parts.push(location.address);
+    if (location.locality) parts.push(location.locality);
+    if (location.admin_district) parts.push(location.admin_district);
+    if (location.postcode) parts.push(location.postcode);
+    if (location.country) parts.push(location.country);
+
+    return parts.join(", ");
+  }
+}
+
+// Helper function to remove duplicate businesses
+function removeDuplicates(businesses: unknown[]): unknown[] {
+  const uniqueBusinesses = [];
+  const seen = new Set();
+
+  for (const business of businesses) {
+    const businessObj = business as {
+      name?: string;
+      formatted_address?: string;
+    };
+    const key = `${(businessObj.name || "").toLowerCase()}_${(
+      businessObj.formatted_address || ""
+    ).toLowerCase()}`;
+    if (!seen.has(key)) {
+      seen.add(key);
+      uniqueBusinesses.push(business);
+    }
+  }
+
+  return uniqueBusinesses;
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -787,28 +947,54 @@ serve(async (req) => {
 
     // Get API keys from environment
     const googlePlacesKey = Deno.env.get("GOOGLE_PLACES_API_KEY");
+    const foursquareKey = Deno.env.get("FOURSQUARE_API_KEY");
+
     if (!googlePlacesKey) {
       throw new Error("Google Places API key not configured");
     }
 
     // Initialize optimized components
     const placesAPI = new OptimizedGooglePlacesAPI(googlePlacesKey);
+    const foursquareAPI = foursquareKey
+      ? new OptimizedFoursquareAPI(foursquareKey)
+      : null;
     const qualityScorer = new OptimizedQualityScorer({
       maxCostPerBusiness: budgetLimit / maxResults,
     });
 
-    // Step 1: Search for businesses (with intelligent caching)
-    const rawBusinesses = await placesAPI.searchBusinesses(
+    // Step 1: Search for businesses from multiple sources
+    const allRawBusinesses = [];
+
+    // Google Places search
+    const googleBusinesses = await placesAPI.searchBusinesses(
       businessType,
       location,
       maxResults
     );
     console.log(
-      `📊 Found ${rawBusinesses.length} raw businesses from Google Places`
+      `📊 Found ${googleBusinesses.length} businesses from Google Places`
     );
+    allRawBusinesses.push(...googleBusinesses);
+
+    // Foursquare search (if API key available)
+    if (foursquareAPI) {
+      const foursquareBusinesses = await foursquareAPI.searchBusinesses(
+        businessType,
+        location,
+        Math.max(maxResults - googleBusinesses.length, 2) // Get additional businesses
+      );
+      console.log(
+        `📊 Found ${foursquareBusinesses.length} businesses from Foursquare`
+      );
+      allRawBusinesses.push(...foursquareBusinesses);
+    }
+
+    // Remove duplicates based on name and location similarity
+    const uniqueBusinesses = removeDuplicates(allRawBusinesses);
+    console.log(`📊 Total unique businesses: ${uniqueBusinesses.length}`);
 
     // Step 2: Score and filter businesses
-    const scoredBusinesses = rawBusinesses.map((business: unknown) =>
+    const scoredBusinesses = uniqueBusinesses.map((business: unknown) =>
       qualityScorer.scoreBusiness(business)
     );
     const qualifiedLeads = scoredBusinesses
@@ -979,7 +1165,7 @@ serve(async (req) => {
           totalFound: enhancedLeads.length,
           qualified: enhancedLeads.length,
           qualificationRate: `${(
-            (enhancedLeads.length / rawBusinesses.length) *
+            (enhancedLeads.length / allRawBusinesses.length) *
             100
           ).toFixed(1)}%`,
           averageConfidence: Math.round(
