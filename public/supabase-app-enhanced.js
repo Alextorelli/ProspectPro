@@ -4,15 +4,15 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.58.0";
 class ProspectProSupabase {
   constructor() {
     console.log("🔧 ProspectPro initializing with enhanced error tracking...");
-    
+
     // Enhanced error tracking
-    window.addEventListener('error', (e) => {
-      console.error('🚨 Global JavaScript Error:', e.error);
-      console.error('📍 File:', e.filename, 'Line:', e.lineno);
+    window.addEventListener("error", (e) => {
+      console.error("🚨 Global JavaScript Error:", e.error);
+      console.error("📍 File:", e.filename, "Line:", e.lineno);
     });
-    
-    window.addEventListener('unhandledrejection', (e) => {
-      console.error('🚨 Unhandled Promise Rejection:', e.reason);
+
+    window.addEventListener("unhandledrejection", (e) => {
+      console.error("🚨 Unhandled Promise Rejection:", e.reason);
     });
 
     try {
@@ -24,11 +24,13 @@ class ProspectProSupabase {
 
       console.log("✅ Supabase client created successfully");
       console.log("📍 URL:", this.supabase.supabaseUrl);
-      console.log("🔑 Key (first 50):", this.supabase.supabaseKey.substring(0, 50) + "...");
-      
+      console.log(
+        "🔑 Key (first 50):",
+        this.supabase.supabaseKey.substring(0, 50) + "..."
+      );
+
       // Test client immediately
       this.testSupabaseClient();
-
     } catch (error) {
       console.error("🚨 CRITICAL: Supabase client creation failed:", error);
       this.showError("Failed to initialize Supabase client: " + error.message);
@@ -48,22 +50,24 @@ class ProspectProSupabase {
   async testSupabaseClient() {
     try {
       console.log("🧪 Testing Supabase client connectivity...");
-      
+
       // Test if functions object exists
       if (!this.supabase.functions) {
         throw new Error("Supabase functions object is undefined");
       }
-      
+
       console.log("✅ Supabase functions object exists");
-      console.log("📋 Functions methods:", Object.getOwnPropertyNames(this.supabase.functions));
-      
+      console.log(
+        "📋 Functions methods:",
+        Object.getOwnPropertyNames(this.supabase.functions)
+      );
+
       // Test if invoke method exists
-      if (typeof this.supabase.functions.invoke !== 'function') {
+      if (typeof this.supabase.functions.invoke !== "function") {
         throw new Error("Supabase functions.invoke is not a function");
       }
-      
+
       console.log("✅ Supabase functions.invoke method exists");
-      
     } catch (error) {
       console.error("🚨 Supabase client test failed:", error);
     }
@@ -71,7 +75,7 @@ class ProspectProSupabase {
 
   initializeUI() {
     console.log("🎨 Initializing UI...");
-    
+
     try {
       this.attachEventListeners();
       this.updateCost();
@@ -107,7 +111,7 @@ class ProspectProSupabase {
     // Lead quantity buttons
     const quantityButtons = document.querySelectorAll(".lead-quantity-btn");
     console.log(`🔢 Found ${quantityButtons.length} quantity buttons`);
-    
+
     quantityButtons.forEach((btn) => {
       btn.addEventListener("click", () => {
         document
@@ -127,25 +131,31 @@ class ProspectProSupabase {
         input.addEventListener("input", () => this.updateCost());
       }
     });
-    
+
     console.log("✅ Event listeners attached");
   }
 
   async startDiscovery() {
     console.log("🚀 === STARTING DISCOVERY ===");
-    
+
     if (this.campaignRunning) {
       console.log("⚠️ Campaign already running, skipping...");
       return;
     }
 
     try {
-      const businessType = document.getElementById("business-type").value.trim();
+      const businessType = document
+        .getElementById("business-type")
+        .value.trim();
       const location = document.getElementById("location").value.trim();
       const quantityBtn = document.querySelector(".lead-quantity-btn.active");
       const quantity = quantityBtn ? parseInt(quantityBtn.textContent) : 3;
 
-      console.log("📊 Discovery parameters:", { businessType, location, quantity });
+      console.log("📊 Discovery parameters:", {
+        businessType,
+        location,
+        quantity,
+      });
 
       if (!businessType || !location) {
         console.log("❌ Missing required parameters");
@@ -159,19 +169,19 @@ class ProspectProSupabase {
 
       // Enhanced pre-flight checks
       console.log("🔍 Pre-flight checks...");
-      
+
       if (!this.supabase) {
         throw new Error("Supabase client is not initialized");
       }
-      
+
       if (!this.supabase.functions) {
         throw new Error("Supabase functions object is missing");
       }
-      
-      if (typeof this.supabase.functions.invoke !== 'function') {
+
+      if (typeof this.supabase.functions.invoke !== "function") {
         throw new Error("Supabase functions.invoke is not a function");
       }
-      
+
       console.log("✅ Pre-flight checks passed");
 
       const payload = {
@@ -183,7 +193,10 @@ class ProspectProSupabase {
         minConfidenceScore: 50,
       };
 
-      console.log("📦 Edge Function payload:", JSON.stringify(payload, null, 2));
+      console.log(
+        "📦 Edge Function payload:",
+        JSON.stringify(payload, null, 2)
+      );
       console.log("📞 Calling Edge Function: business-discovery");
 
       const startTime = Date.now();
@@ -197,7 +210,9 @@ class ProspectProSupabase {
       );
 
       const endTime = Date.now();
-      console.log(`⏱️ Edge Function call completed in ${endTime - startTime}ms`);
+      console.log(
+        `⏱️ Edge Function call completed in ${endTime - startTime}ms`
+      );
 
       console.log("📥 Raw Edge Function result:", result);
 
@@ -213,9 +228,11 @@ class ProspectProSupabase {
           hint: error.hint,
           code: error.code,
           status: error.status,
-          statusCode: error.statusCode
+          statusCode: error.statusCode,
         });
-        throw new Error(`Edge Function error: ${error.message || JSON.stringify(error)}`);
+        throw new Error(
+          `Edge Function error: ${error.message || JSON.stringify(error)}`
+        );
       }
 
       if (!data) {
@@ -228,7 +245,9 @@ class ProspectProSupabase {
 
       if (!data.success) {
         console.error("🚨 Edge Function returned failure:", data);
-        throw new Error(data.error || data.message || "Business discovery failed");
+        throw new Error(
+          data.error || data.message || "Business discovery failed"
+        );
       }
 
       console.log("🎉 Edge Function success!");
@@ -236,7 +255,7 @@ class ProspectProSupabase {
         totalFound: data.results?.totalFound,
         qualified: data.results?.qualified,
         campaignId: data.campaignId,
-        leadsCount: data.leads?.length
+        leadsCount: data.leads?.length,
       });
 
       // Store results for potential export
@@ -247,8 +266,9 @@ class ProspectProSupabase {
       // Show results
       this.showResults(data);
 
-      console.log(`✅ Discovery completed: ${this.searchResults.length} leads found`);
-      
+      console.log(
+        `✅ Discovery completed: ${this.searchResults.length} leads found`
+      );
     } catch (error) {
       console.error("🚨 === DISCOVERY ERROR ===");
       console.error("Error type:", typeof error);
@@ -256,18 +276,17 @@ class ProspectProSupabase {
       console.error("Error message:", error.message);
       console.error("Error stack:", error.stack);
       console.error("Full error object:", error);
-      
+
       // Show detailed error to user
       let errorMessage = "Business discovery failed";
-      
+
       if (error.message) {
         errorMessage = error.message;
-      } else if (typeof error === 'string') {
+      } else if (typeof error === "string") {
         errorMessage = error;
       }
-      
+
       this.showError(`Discovery Failed: ${errorMessage}`);
-      
     } finally {
       console.log("🏁 Discovery cleanup...");
       this.campaignRunning = false;
@@ -279,7 +298,7 @@ class ProspectProSupabase {
   // Rest of methods remain the same but with enhanced logging...
   showResults(data) {
     console.log("📊 Displaying results...", data);
-    
+
     const resultsContainer = document.getElementById("results-container");
     const resultsSection = document.getElementById("search-results");
 
@@ -308,25 +327,45 @@ class ProspectProSupabase {
       </div>
       
       <div class="leads-grid">
-        ${data.leads.map(lead => `
+        ${data.leads
+          .map(
+            (lead) => `
           <div class="lead-card" data-score="${lead.optimizedScore}">
             <div class="lead-header">
               <h4>${lead.businessName}</h4>
-              <span class="confidence-score score-${this.getScoreClass(lead.optimizedScore)}">
+              <span class="confidence-score score-${this.getScoreClass(
+                lead.optimizedScore
+              )}">
                 ${lead.optimizedScore}%
               </span>
             </div>
             <div class="lead-details">
               <p><i class="icon-location"></i> ${lead.address}</p>
-              ${lead.phone ? `<p><i class="icon-phone"></i> ${lead.phone}</p>` : ''}
-              ${lead.website ? `<p><i class="icon-web"></i> <a href="${lead.website}" target="_blank">${lead.website}</a></p>` : ''}
-              ${lead.email ? `<p><i class="icon-email"></i> ${lead.email}</p>` : ''}
+              ${
+                lead.phone
+                  ? `<p><i class="icon-phone"></i> ${lead.phone}</p>`
+                  : ""
+              }
+              ${
+                lead.website
+                  ? `<p><i class="icon-web"></i> <a href="${lead.website}" target="_blank">${lead.website}</a></p>`
+                  : ""
+              }
+              ${
+                lead.email
+                  ? `<p><i class="icon-email"></i> ${lead.email}</p>`
+                  : ""
+              }
             </div>
             <div class="lead-footer">
-              <span class="cost-indicator">Cost: $${lead.validationCost.toFixed(3)}</span>
+              <span class="cost-indicator">Cost: $${lead.validationCost.toFixed(
+                3
+              )}</span>
             </div>
           </div>
-        `).join('')}
+        `
+          )
+          .join("")}
       </div>
     `;
 
@@ -338,13 +377,13 @@ class ProspectProSupabase {
     if (exportButton) {
       exportButton.style.display = "block";
     }
-    
+
     console.log("✅ Results displayed successfully");
   }
 
   showError(message) {
     console.error("🚨 Showing error to user:", message);
-    
+
     const resultsContainer = document.getElementById("results-container");
     const resultsSection = document.getElementById("search-results");
 
@@ -459,7 +498,9 @@ class ProspectProSupabase {
 
 // Initialize the application
 document.addEventListener("DOMContentLoaded", () => {
-  console.log("🚀 DOM loaded, initializing ProspectPro Enhanced Error Tracking...");
+  console.log(
+    "🚀 DOM loaded, initializing ProspectPro Enhanced Error Tracking..."
+  );
   try {
     window.prospectPro = new ProspectProSupabase();
     console.log("✅ ProspectPro initialized successfully");
