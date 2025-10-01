@@ -126,34 +126,96 @@
         text-align: center;
       }
 
-      .lead-quantity-buttons {
+      /* Enhancement Options Styles */
+      .enhancement-options {
         display: flex;
-        gap: 10px;
+        flex-direction: column;
+        gap: 12px;
         margin-top: 10px;
-        justify-content: center;
       }
 
-      .lead-quantity-btn {
-        background: #e9ecef;
-        border: 2px solid #dee2e6;
-        color: #495057;
-        padding: 8px 16px;
-        border-radius: 20px;
+      .enhancement-option {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        padding: 12px;
+        border: 2px solid #e1e5e9;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+      }
+
+      .enhancement-option:hover {
+        border-color: #667eea;
+        background: #f8f9ff;
+      }
+
+      .enhancement-option.apollo-option {
+        border-color: #ffd700;
+        background: #fffef7;
+      }
+
+      .enhancement-option.apollo-option:hover {
+        border-color: #ffb000;
+        background: #fffaed;
+      }
+
+      .enhancement-checkbox {
+        margin-top: 4px;
+        transform: scale(1.2);
+        accent-color: #667eea;
+      }
+
+      .enhancement-label {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
         cursor: pointer;
+        flex: 1;
+      }
+
+      .enhancement-title {
+        font-weight: 600;
+        color: #2c3e50;
+        font-size: 0.95rem;
+      }
+
+      .enhancement-description {
+        font-size: 0.85rem;
+        color: #666;
+        line-height: 1.3;
+      }
+
+      .enhancement-boost {
+        font-size: 0.8rem;
+        color: #28a745;
         font-weight: 500;
-        transition: all 0.2s ease;
       }
 
-      .lead-quantity-btn:hover {
-        background: #667eea;
-        border-color: #667eea;
-        color: white;
+      .enhancement-cost {
+        font-size: 0.8rem;
+        color: #ffa500;
+        font-weight: 600;
       }
 
-      .lead-quantity-btn.active {
-        background: #667eea;
-        border-color: #667eea;
-        color: white;
+      .apollo-option .enhancement-title {
+        color: #b8860b;
+      }
+
+      .cost-breakdown {
+        margin-top: 10px;
+        font-size: 0.9rem;
+      }
+
+      .cost-line {
+        display: flex;
+        justify-content: space-between;
+        margin: 2px 0;
+        color: #666;
+      }
+
+      .apollo-cost {
+        color: #ffa500;
+        font-weight: 500;
       }
 
       .cost-estimate {
@@ -358,6 +420,16 @@
 
       .info-link:hover {
         text-decoration: underline;
+      }
+
+      .verified-badge {
+        background: #28a745;
+        color: white;
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-size: 0.7rem;
+        font-weight: 500;
+        margin-left: 8px;
       }
 
       .recommendation {
@@ -567,19 +639,19 @@
     <div class="container">
       <div class="header">
         <h1>🎯 ProspectPro</h1>
-        <p>Supabase-First Lead Discovery Platform</p>
+        <p>Verified Business Intelligence & Contact Discovery</p>
       </div>
 
       <div class="nav-tabs">
         <button
           class="nav-tab active"
-          onclick="window.prospectProApp?.showPage('discoveryPage'); this.parentElement.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active')); this.classList.add('active')"
+          onclick="prospectProApp?.showPage('discoveryPage'); this.parentElement.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active')); this.classList.add('active')"
         >
           🔍 Discovery
         </button>
         <button
           class="nav-tab"
-          onclick="window.prospectProApp?.showSettings(); this.parentElement.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active')); this.classList.add('active')"
+          onclick="prospectProApp?.showSettings(); this.parentElement.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active')); this.classList.add('active')"
         >
           ⚙️ Dashboard
         </button>
@@ -589,32 +661,15 @@
       <div id="discoveryPage" class="page-content">
         <div class="search-form">
           <div class="form-group">
-            <label for="business-type">Business Type</label>
-            <select
-              id="categorySelect"
-              style="
-                width: 100%;
-                padding: 15px;
-                border: 2px solid #e1e5e9;
-                border-radius: 10px;
-                font-size: 1rem;
-                margin-bottom: 10px;
-              "
-            >
-              <option value="">Select Business Category</option>
-            </select>
+            <label for="businessType">Business Type</label>
             <input
               type="text"
-              id="business-type"
+              id="businessType"
               placeholder="e.g., restaurant, retail store, dental office"
-              style="
-                width: 100%;
-                padding: 15px;
-                border: 2px solid #e1e5e9;
-                border-radius: 10px;
-                font-size: 1rem;
-              "
             />
+            <select id="categorySelect" style="margin-top: 10px">
+              <option value="">Or choose from common categories...</option>
+            </select>
           </div>
 
           <div class="form-group">
@@ -622,70 +677,138 @@
             <input
               type="text"
               id="location"
-              placeholder="e.g., San Diego, CA or 90210"
-              style="
-                width: 100%;
-                padding: 15px;
-                border: 2px solid #e1e5e9;
-                border-radius: 10px;
-                font-size: 1rem;
-              "
+              placeholder="e.g., San Francisco, CA or New York, NY"
             />
           </div>
 
           <div class="form-group">
-            <label>Number of Leads</label>
+            <label for="quantity">Number of Leads</label>
             <div class="quantity-control">
               <input
                 type="range"
-                id="lead-quantity"
-                min="3"
-                max="15"
-                value="3"
+                id="quantity"
                 class="quantity-slider"
+                min="1"
+                max="20"
+                value="5"
               />
-              <div id="lead-quantity-display" class="quantity-display">
-                3 leads
+              <div class="quantity-display">
+                <span id="quantityDisplay">5</span> leads
               </div>
             </div>
-            <div class="lead-quantity-buttons">
-              <button type="button" class="lead-quantity-btn active">3</button>
-              <button type="button" class="lead-quantity-btn">5</button>
-              <button type="button" class="lead-quantity-btn">10</button>
-              <button type="button" class="lead-quantity-btn">15</button>
+          </div>
+
+          <!-- P1 Enhancement Options -->
+          <div class="form-group">
+            <label>Verified Contact Discovery Options</label>
+            <div class="enhancement-options">
+              <div class="enhancement-option">
+                <input
+                  type="checkbox"
+                  id="tradeAssociations"
+                  class="enhancement-checkbox"
+                />
+                <label for="tradeAssociations" class="enhancement-label">
+                  <span class="enhancement-title"
+                    >Trade Association Verification</span
+                  >
+                  <span class="enhancement-description"
+                    >Cross-reference with industry association directories (Spa,
+                    Beauty, Professional)</span
+                  >
+                  <span class="enhancement-boost">+15-20 confidence boost</span>
+                </label>
+              </div>
+              <div class="enhancement-option">
+                <input
+                  type="checkbox"
+                  id="professionalLicensing"
+                  class="enhancement-checkbox"
+                />
+                <label for="professionalLicensing" class="enhancement-label">
+                  <span class="enhancement-title"
+                    >Professional License Verification</span
+                  >
+                  <span class="enhancement-description"
+                    >Verify with state licensing boards (CPA, Healthcare,
+                    Legal)</span
+                  >
+                  <span class="enhancement-boost">+25 confidence boost</span>
+                </label>
+              </div>
+              <div class="enhancement-option">
+                <input
+                  type="checkbox"
+                  id="chamberVerification"
+                  class="enhancement-checkbox"
+                />
+                <label for="chamberVerification" class="enhancement-label">
+                  <span class="enhancement-title"
+                    >Chamber of Commerce Verification</span
+                  >
+                  <span class="enhancement-description"
+                    >Validate membership and contact details from chamber
+                    directories</span
+                  >
+                  <span class="enhancement-boost">+15 confidence boost</span>
+                </label>
+              </div>
+              <div class="enhancement-option apollo-option">
+                <input
+                  type="checkbox"
+                  id="apolloDiscovery"
+                  class="enhancement-checkbox"
+                />
+                <label for="apolloDiscovery" class="enhancement-label">
+                  <span class="enhancement-title"
+                    >Owner/Executive Contact Discovery (Premium)</span
+                  >
+                  <span class="enhancement-description"
+                    >Find verified owner and executive contacts with
+                    email/LinkedIn profiles</span
+                  >
+                  <span class="enhancement-cost"
+                    >$1.00 per verified contact</span
+                  >
+                  <span class="enhancement-boost">+30 confidence boost</span>
+                </label>
+              </div>
             </div>
           </div>
 
           <div class="cost-estimate">
             <h3>Estimated Cost</h3>
-            <div class="cost-amount">$0.42</div>
+            <div class="cost-amount" id="estimatedCost">$0.42</div>
+            <div
+              class="cost-breakdown"
+              id="costBreakdown"
+              style="display: none"
+            >
+              <div class="cost-line">
+                Base cost: <span id="baseCost">$0.42</span>
+              </div>
+              <div
+                class="cost-line apollo-cost"
+                id="apolloCostLine"
+                style="display: none"
+              >
+                Apollo enrichment: <span id="apolloCost">$0.00</span>
+              </div>
+            </div>
           </div>
 
-          <button id="start-discovery" class="btn">🚀 Search Businesses</button>
+          <button id="searchBtn" class="btn">🚀 Search Businesses</button>
         </div>
 
         <!-- Campaign Progress -->
-        <div
-          id="campaign-progress"
-          class="campaign-progress"
-          style="display: none"
-        >
+        <div id="campaignProgress" class="campaign-progress">
           <div class="progress-spinner"></div>
           <h3>Discovering businesses...</h3>
           <p id="progressText">Initializing search parameters...</p>
         </div>
 
         <!-- Results Container -->
-        <div id="search-results" style="display: none">
-          <div id="results-container"></div>
-          <button
-            id="export-csv"
-            class="btn btn-secondary"
-            style="display: none"
-          >
-            📥 Export to CSV
-          </button>
-        </div>
+        <div id="results" class="results"></div>
       </div>
 
       <!-- Settings/Dashboard Page -->
@@ -693,27 +816,27 @@
         <h2>📊 Dashboard & Statistics</h2>
 
         <div class="admin-dashboard">
-          <div class="dashboard-card" id="total-campaigns">
+          <div class="dashboard-card">
             <h3>Total Campaigns</h3>
-            <div class="dashboard-value">0</div>
+            <div class="dashboard-value" id="totalCampaigns">0</div>
             <div class="dashboard-label">Completed</div>
           </div>
 
-          <div class="dashboard-card" id="total-leads">
+          <div class="dashboard-card">
             <h3>Total Leads</h3>
-            <div class="dashboard-value">0</div>
+            <div class="dashboard-value" id="totalLeads">0</div>
             <div class="dashboard-label">Discovered</div>
           </div>
 
-          <div class="dashboard-card" id="avg-confidence">
+          <div class="dashboard-card">
             <h3>Avg Confidence</h3>
-            <div class="dashboard-value">0%</div>
+            <div class="dashboard-value" id="avgConfidence">0%</div>
             <div class="dashboard-label">Quality Score</div>
           </div>
 
-          <div class="dashboard-card" id="total-cost">
+          <div class="dashboard-card">
             <h3>Total Spent</h3>
-            <div class="dashboard-value">$0.00</div>
+            <div class="dashboard-value" id="totalCost">$0.00</div>
             <div class="dashboard-label">API Costs</div>
           </div>
         </div>
@@ -732,15 +855,13 @@
     </div>
 
     <!-- Load Supabase-First JavaScript -->
-    <script type="module" src="supabase-app-fixed.js"></script>
+    <script type="module" src="supabase-app-enhanced.js"></script>
 
     <script>
       // Update quantity display when slider changes
       document.addEventListener("DOMContentLoaded", () => {
-        const quantitySlider = document.getElementById("lead-quantity");
-        const quantityDisplay = document.getElementById(
-          "lead-quantity-display"
-        );
+        const quantitySlider = document.getElementById("quantity");
+        const quantityDisplay = document.getElementById("quantityDisplay");
 
         if (quantitySlider && quantityDisplay) {
           quantitySlider.oninput = () => {
@@ -750,24 +871,6 @@
               window.prospectProApp.updateCostEstimate();
             }
           };
-        }
-
-        // Handle category selection
-        const categorySelect = document.getElementById("categorySelect");
-        const businessTypeInput = document.getElementById("business-type");
-
-        if (categorySelect && businessTypeInput) {
-          categorySelect.addEventListener("change", (e) => {
-            if (e.target.value) {
-              businessTypeInput.value = e.target.value;
-              // Reset the select to placeholder
-              categorySelect.value = "";
-              // Trigger cost update if app is loaded
-              if (window.prospectProApp) {
-                window.prospectProApp.updateCostEstimate();
-              }
-            }
-          });
         }
       });
     </script>

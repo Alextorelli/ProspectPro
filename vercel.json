@@ -1,8 +1,11 @@
 {
-    "buildCommand": "echo 'Static build - no build step needed'",
-    "outputDirectory": "public",
-    "installCommand": "echo 'No install needed for static site'",
-    "framework": null,
+    "version": 2,
+    "public": true,
+    "cleanUrls": true,
+    "routes": [
+        { "handle": "filesystem" },
+        { "src": "/(.*)", "dest": "/public/$1" }
+    ],
     "headers": [
         {
             "source": "/(.*)",
