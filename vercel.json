@@ -3,8 +3,13 @@
     "public": true,
     "cleanUrls": true,
     "routes": [
-        { "handle": "filesystem" },
-        { "src": "/(.*)", "dest": "/public/$1" }
+        {
+            "handle": "filesystem"
+        },
+        {
+            "src": "/(.*)",
+            "dest": "/public/$1"
+        }
     ],
     "headers": [
         {
