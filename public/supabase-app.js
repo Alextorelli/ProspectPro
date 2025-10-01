@@ -193,11 +193,44 @@ class ProspectProSupabase {
       document.getElementById("quantity")?.value || "5"
     );
     this.selectedQuantity = quantity;
-    const estimatedCost = quantity * this.costPerLead;
 
+    // Base cost calculation
+    const baseCost = quantity * this.costPerLead;
+
+    // Apollo enhancement cost
+    const apolloEnabled =
+      document.getElementById("apolloDiscovery")?.checked || false;
+    const apolloCost = apolloEnabled ? quantity * 1.0 : 0;
+
+    // Total cost
+    const totalCost = baseCost + apolloCost;
+
+    // Update main cost display
     const costElement = document.getElementById("estimatedCost");
     if (costElement) {
-      costElement.textContent = `$${estimatedCost.toFixed(2)}`;
+      costElement.textContent = `$${totalCost.toFixed(2)}`;
+    }
+
+    // Update cost breakdown
+    const baseCostElement = document.getElementById("baseCost");
+    const apolloCostElement = document.getElementById("apolloCost");
+    const apolloCostLine = document.getElementById("apolloCostLine");
+    const costBreakdown = document.getElementById("costBreakdown");
+
+    if (baseCostElement) {
+      baseCostElement.textContent = `$${baseCost.toFixed(2)}`;
+    }
+
+    if (apolloCostElement) {
+      apolloCostElement.textContent = `$${apolloCost.toFixed(2)}`;
+    }
+
+    if (apolloCostLine) {
+      apolloCostLine.style.display = apolloEnabled ? "flex" : "none";
+    }
+
+    if (costBreakdown) {
+      costBreakdown.style.display = apolloEnabled ? "block" : "none";
     }
   }
 
@@ -219,6 +252,21 @@ class ProspectProSupabase {
     if (quantitySlider) {
       quantitySlider.oninput = () => this.updateCostEstimate();
     }
+
+    // Enhancement option checkboxes
+    const enhancementCheckboxes = [
+      "tradeAssociations",
+      "professionalLicensing",
+      "chamberVerification",
+      "apolloDiscovery",
+    ];
+
+    enhancementCheckboxes.forEach((id) => {
+      const checkbox = document.getElementById(id);
+      if (checkbox) {
+        checkbox.onchange = () => this.updateCostEstimate();
+      }
+    });
 
     // Settings button
     const settingsBtn = document.getElementById("settingsBtn");
@@ -245,6 +293,16 @@ class ProspectProSupabase {
       document.getElementById("quantity")?.value || "5"
     );
 
+    // Get enhancement options
+    const tradeAssociations =
+      document.getElementById("tradeAssociations")?.checked || false;
+    const professionalLicensing =
+      document.getElementById("professionalLicensing")?.checked || false;
+    const chamberVerification =
+      document.getElementById("chamberVerification")?.checked || false;
+    const apolloDiscovery =
+      document.getElementById("apolloDiscovery")?.checked || false;
+
     if (!businessType || !location) {
       this.showError("Please enter both business type and location");
       return;
@@ -259,7 +317,22 @@ class ProspectProSupabase {
         `🔍 Starting business discovery: ${businessType} in ${location}`
       );
 
-      // Call Supabase Edge Function instead of server.js
+      // Log enhancement options
+      if (
+        tradeAssociations ||
+        professionalLicensing ||
+        chamberVerification ||
+        apolloDiscovery
+      ) {
+        console.log("🚀 P1 Enhancements enabled:", {
+          tradeAssociations,
+          professionalLicensing,
+          chamberVerification,
+          apolloDiscovery,
+        });
+      }
+
+      // Call Supabase Edge Function with enhancement options
       const { data, error } = await this.supabase.functions.invoke(
         "business-discovery",
         {
@@ -270,6 +343,11 @@ class ProspectProSupabase {
             budgetLimit: 50,
             requireCompleteContacts: false,
             minConfidenceScore: 50,
+            // P1 Enhancement options
+            tradeAssociations,
+            professionalLicensing,
+            chamberVerification,
+            apolloDiscovery,
           },
         }
       );
