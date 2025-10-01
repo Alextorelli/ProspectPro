@@ -2,10 +2,10 @@
     "name": "prospectpro-mcp-servers",
     "version": "2.1.0",
     "description": "Consolidated MCP servers for ProspectPro Supabase-First AI development",
-    "main": "supabase-production-server.js",
+    "main": "production-server.js",
     "scripts": {
-        "start:production": "node supabase-production-server.js",
-        "start:development": "node supabase-development-server.js",
+        "start:production": "node production-server.js",
+        "start:development": "node development-server.js",
         "start:troubleshooting": "node supabase-troubleshooting-server.js",
         "start:all": "concurrently \"npm run start:production\" \"npm run start:development\" \"npm run start:troubleshooting\"",
         "test": "node test-servers.js",
