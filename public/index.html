@@ -573,13 +573,13 @@
       <div class="nav-tabs">
         <button
           class="nav-tab active"
-          onclick="prospectProApp?.showPage('discoveryPage'); this.parentElement.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active')); this.classList.add('active')"
+          onclick="window.prospectProApp?.showPage('discoveryPage'); this.parentElement.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active')); this.classList.add('active')"
         >
           🔍 Discovery
         </button>
         <button
           class="nav-tab"
-          onclick="prospectProApp?.showSettings(); this.parentElement.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active')); this.classList.add('active')"
+          onclick="window.prospectProApp?.showSettings(); this.parentElement.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active')); this.classList.add('active')"
         >
           ⚙️ Dashboard
         </button>
@@ -589,33 +589,26 @@
       <div id="discoveryPage" class="page-content">
         <div class="search-form">
           <div class="form-group">
-            <label for="business-type">Business Type</label>
-            <input
-              type="text"
-              id="business-type"
-              placeholder="e.g., restaurant, retail store, dental office"
-            />
-            <select id="categorySelect" style="margin-top: 10px">
-              <option value="">Or choose from common categories...</option>
-              <option value="restaurant">🍽️ Restaurant</option>
-              <option value="coffee shop">☕ Coffee Shop</option>
-              <option value="retail store">🛍️ Retail Store</option>
-              <option value="gym">💪 Gym</option>
-              <option value="fitness center">🏋️ Fitness Center</option>
-              <option value="salon">💇 Hair Salon</option>
-              <option value="spa">🧖 Spa</option>
-              <option value="dental office">🦷 Dental Office</option>
-              <option value="law firm">⚖️ Law Firm</option>
-              <option value="accounting firm">📊 Accounting Firm</option>
-              <option value="real estate">🏠 Real Estate</option>
-              <option value="auto repair">🚗 Auto Repair</option>
-              <option value="veterinary clinic">🐕 Veterinary Clinic</option>
-              <option value="medical practice">🏥 Medical Practice</option>
-              <option value="hotel">🏨 Hotel</option>
-              <option value="bar">🍺 Bar</option>
-              <option value="pharmacy">💊 Pharmacy</option>
-              <option value="bookstore">📚 Bookstore</option>
-            </select>
+            <label>Number of Leads</label>
+            <div class="quantity-control">
+              <input
+                type="range"
+                id="lead-quantity"
+                min="3"
+                max="15"
+                value="3"
+                class="quantity-slider"
+              />
+              <div id="lead-quantity-display" class="quantity-display">
+                3 leads
+              </div>
+            </div>
+            <div class="lead-quantity-buttons">
+              <button type="button" class="lead-quantity-btn active">3</button>
+              <button type="button" class="lead-quantity-btn">5</button>
+              <button type="button" class="lead-quantity-btn">10</button>
+              <button type="button" class="lead-quantity-btn">15</button>
+            </div>
           </div>
 
           <div class="form-group">
@@ -623,7 +616,14 @@
             <input
               type="text"
               id="location"
-              placeholder="e.g., San Francisco, CA or New York, NY"
+              placeholder="e.g., San Diego, CA or 90210"
+              style="
+                width: 100%;
+                padding: 15px;
+                border: 2px solid #e1e5e9;
+                border-radius: 10px;
+                font-size: 1rem;
+              "
             />
           </div>
 
@@ -654,7 +654,7 @@
 
           <div class="cost-estimate">
             <h3>Estimated Cost</h3>
-            <div class="cost-amount" id="estimatedCost">$0.42</div>
+            <div class="cost-amount">$0.42</div>
           </div>
 
           <button id="start-discovery" class="btn">🚀 Search Businesses</button>
@@ -674,7 +674,11 @@
         <!-- Results Container -->
         <div id="search-results" style="display: none">
           <div id="results-container"></div>
-          <button id="export-csv" style="display: none">
+          <button
+            id="export-csv"
+            class="btn btn-secondary"
+            style="display: none"
+          >
             📥 Export to CSV
           </button>
         </div>
@@ -685,27 +689,27 @@
         <h2>📊 Dashboard & Statistics</h2>
 
         <div class="admin-dashboard">
-          <div class="dashboard-card">
+          <div class="dashboard-card" id="total-campaigns">
             <h3>Total Campaigns</h3>
-            <div class="dashboard-value" id="totalCampaigns">0</div>
+            <div class="dashboard-value">0</div>
             <div class="dashboard-label">Completed</div>
           </div>
 
-          <div class="dashboard-card">
+          <div class="dashboard-card" id="total-leads">
             <h3>Total Leads</h3>
-            <div class="dashboard-value" id="totalLeads">0</div>
+            <div class="dashboard-value">0</div>
             <div class="dashboard-label">Discovered</div>
           </div>
 
-          <div class="dashboard-card">
+          <div class="dashboard-card" id="avg-confidence">
             <h3>Avg Confidence</h3>
-            <div class="dashboard-value" id="avgConfidence">0%</div>
+            <div class="dashboard-value">0%</div>
             <div class="dashboard-label">Quality Score</div>
           </div>
 
-          <div class="dashboard-card">
+          <div class="dashboard-card" id="total-cost">
             <h3>Total Spent</h3>
-            <div class="dashboard-value" id="totalCost">$0.00</div>
+            <div class="dashboard-value">$0.00</div>
             <div class="dashboard-label">API Costs</div>
           </div>
         </div>
@@ -724,7 +728,7 @@
     </div>
 
     <!-- Load Supabase-First JavaScript -->
-    <script type="module" src="supabase-app-enhanced.js"></script>
+    <script type="module" src="supabase-app-fixed.js"></script>
 
     <script>
       // Update quantity display when slider changes

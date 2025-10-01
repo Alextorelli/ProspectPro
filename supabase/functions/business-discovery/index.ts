@@ -18,6 +18,21 @@ interface BusinessDiscoveryRequest {
   additionalQueries?: string[];
 }
 
+interface PlaceResult {
+  place_id: string;
+  name: string;
+  formatted_address: string;
+  formatted_phone_number?: string;
+  international_phone_number?: string;
+  website?: string;
+  rating?: number;
+  user_ratings_total?: number;
+  businessName?: string;
+  address?: string;
+  phone?: string;
+  email?: string;
+}
+
 interface BusinessLead {
   businessName: string;
   address: string;
@@ -50,7 +65,7 @@ class EnhancedQualityScorer {
     this.dynamicThreshold = 50;
   }
 
-  scoreBusiness(business: any): BusinessLead {
+  scoreBusiness(business: PlaceResult): BusinessLead {
     // Pre-validation scoring (free)
     const preValidationScore = this.calculatePreValidationScore(business);
 
@@ -63,26 +78,43 @@ class EnhancedQualityScorer {
       ? Math.min(preValidationScore + 5, 100)
       : preValidationScore;
 
+    // Enhanced email enrichment
+    let email = business.email;
+    if (!email && business.website) {
+      const domain = this.extractDomain(business.website);
+      if (domain !== "example.com") {
+        email = `contact@${domain}`;
+      }
+    }
+    if (!email) {
+      email = undefined; // Don't show generic emails
+    }
+
     return {
-      businessName: business.name || business.businessName || "",
+      businessName: business.businessName || business.name || "",
       address: business.address || business.formatted_address || "",
-      phone: business.phone || business.formatted_phone_number || "",
-      website: business.website || business.url || "",
-      email: business.email || `hello@${this.extractDomain(business.website)}`,
+      phone:
+        business.phone ||
+        business.formatted_phone_number ||
+        business.international_phone_number,
+      website: business.website,
+      email,
       optimizedScore,
       preValidationScore,
       scoreBreakdown: {
         businessName: this.scoreBusinessName(
-          business.name || business.businessName
+          business.businessName || business.name
         ),
         address: this.scoreAddress(
           business.address || business.formatted_address
         ),
         phone: this.scorePhone(
-          business.phone || business.formatted_phone_number
+          business.phone ||
+            business.formatted_phone_number ||
+            business.international_phone_number
         ),
-        website: this.scoreWebsite(business.website || business.url),
-        email: 0, // Will be validated separately
+        website: this.scoreWebsite(business.website),
+        email: email ? 60 : 0, // Score based on email presence
         external: 0, // External validation score
         total: optimizedScore,
       },
@@ -92,20 +124,24 @@ class EnhancedQualityScorer {
     };
   }
 
-  private calculatePreValidationScore(business: any): number {
+  private calculatePreValidationScore(business: PlaceResult): number {
     let score = 0;
 
     // Business name (25 points)
-    score += this.scoreBusinessName(business.name || business.businessName);
+    score += this.scoreBusinessName(business.businessName || business.name);
 
     // Address (25 points)
     score += this.scoreAddress(business.address || business.formatted_address);
 
     // Phone (20 points)
-    score += this.scorePhone(business.phone || business.formatted_phone_number);
+    score += this.scorePhone(
+      business.phone ||
+        business.formatted_phone_number ||
+        business.international_phone_number
+    );
 
     // Website (20 points)
-    score += this.scoreWebsite(business.website || business.url);
+    score += this.scoreWebsite(business.website);
 
     // Rating/Reviews (10 points)
     if (business.rating && business.rating >= 4.0) score += 10;
@@ -114,21 +150,21 @@ class EnhancedQualityScorer {
     return Math.min(score, 100);
   }
 
-  private scoreBusinessName(name: string): number {
+  private scoreBusinessName(name?: string): number {
     if (!name || name.length < 3) return 0;
     if (/^(business|company|llc|inc|corp)$/i.test(name)) return 30;
     if (name.length > 50) return 70;
     return 90;
   }
 
-  private scoreAddress(address: string): number {
+  private scoreAddress(address?: string): number {
     if (!address || address.length < 10) return 0;
     if (/\b\d{1,3}\s+main\s+st\b/i.test(address)) return 40;
     if (address.includes(",") && address.length > 20) return 100;
     return 80;
   }
 
-  private scorePhone(phone: string): number {
+  private scorePhone(phone?: string): number {
     if (!phone) return 0;
     const cleanPhone = phone.replace(/\D/g, "");
     if (cleanPhone.length !== 10) return 0;
@@ -136,7 +172,7 @@ class EnhancedQualityScorer {
     return 80;
   }
 
-  private scoreWebsite(website: string): number {
+  private scoreWebsite(website?: string): number {
     if (!website) return 0;
     if (!/^https?:\/\/.+/.test(website)) return 40;
     if (website.includes("facebook.com") || website.includes("yelp.com"))
@@ -175,7 +211,7 @@ class GooglePlacesAPI {
     businessType: string,
     location: string,
     maxResults: number = 20
-  ): Promise<any[]> {
+  ): Promise<PlaceResult[]> {
     const query = `${businessType} ${location}`;
     const url = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${encodeURIComponent(
       query
@@ -189,14 +225,49 @@ class GooglePlacesAPI {
         throw new Error(`Google Places API error: ${data.status}`);
       }
 
-      return data.results.slice(0, maxResults);
+      // Get detailed information for each place
+      const detailedResults = [];
+      for (const place of data.results.slice(0, maxResults)) {
+        try {
+          const details = await this.getPlaceDetails(place.place_id);
+          // Merge basic info with detailed info
+          detailedResults.push({
+            ...place,
+            ...details,
+            // Ensure we have consistent field names
+            businessName: details.name || place.name,
+            address: details.formatted_address || place.formatted_address,
+            phone:
+              details.formatted_phone_number ||
+              details.international_phone_number,
+            website: details.website,
+            email: null, // Will be enriched later
+          });
+        } catch (error) {
+          console.error(
+            `Failed to get details for place ${place.place_id}:`,
+            error
+          );
+          // Include basic info even if details fail
+          detailedResults.push({
+            ...place,
+            businessName: place.name,
+            address: place.formatted_address,
+            phone: null,
+            website: null,
+            email: null,
+          });
+        }
+      }
+
+      return detailedResults;
     } catch (error) {
       console.error("Google Places API error:", error);
       throw error;
     }
   }
 
-  async getPlaceDetails(placeId: string): Promise<any> {
+  async getPlaceDetails(placeId: string): Promise<PlaceResult> {
     const url = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=name,formatted_address,formatted_phone_number,website,rating,user_ratings_total&key=${this.apiKey}`;
 
     try {
@@ -236,7 +307,6 @@ serve(async (req) => {
       budgetLimit = 50,
       requireCompleteContacts = false,
       minConfidenceScore = 50,
-      additionalQueries = [],
     } = requestBody;
 
     // Validate required parameters
@@ -466,7 +536,7 @@ serve(async (req) => {
       JSON.stringify({
         success: false,
         error: "Business discovery failed",
-        details: error.message,
+        details: error instanceof Error ? error.message : String(error),
         timestamp: new Date().toISOString(),
       }),
       {
