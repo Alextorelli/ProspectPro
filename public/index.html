@@ -126,6 +126,36 @@
         text-align: center;
       }
 
+      .lead-quantity-buttons {
+        display: flex;
+        gap: 10px;
+        margin-top: 10px;
+        justify-content: center;
+      }
+
+      .lead-quantity-btn {
+        background: #e9ecef;
+        border: 2px solid #dee2e6;
+        color: #495057;
+        padding: 8px 16px;
+        border-radius: 20px;
+        cursor: pointer;
+        font-weight: 500;
+        transition: all 0.2s ease;
+      }
+
+      .lead-quantity-btn:hover {
+        background: #667eea;
+        border-color: #667eea;
+        color: white;
+      }
+
+      .lead-quantity-btn.active {
+        background: #667eea;
+        border-color: #667eea;
+        color: white;
+      }
+
       .cost-estimate {
         background: #f8f9fa;
         padding: 20px;
@@ -559,14 +589,32 @@
       <div id="discoveryPage" class="page-content">
         <div class="search-form">
           <div class="form-group">
-            <label for="businessType">Business Type</label>
+            <label for="business-type">Business Type</label>
             <input
               type="text"
-              id="businessType"
+              id="business-type"
               placeholder="e.g., restaurant, retail store, dental office"
             />
             <select id="categorySelect" style="margin-top: 10px">
               <option value="">Or choose from common categories...</option>
+              <option value="restaurant">🍽️ Restaurant</option>
+              <option value="coffee shop">☕ Coffee Shop</option>
+              <option value="retail store">🛍️ Retail Store</option>
+              <option value="gym">💪 Gym</option>
+              <option value="fitness center">🏋️ Fitness Center</option>
+              <option value="salon">💇 Hair Salon</option>
+              <option value="spa">🧖 Spa</option>
+              <option value="dental office">🦷 Dental Office</option>
+              <option value="law firm">⚖️ Law Firm</option>
+              <option value="accounting firm">📊 Accounting Firm</option>
+              <option value="real estate">🏠 Real Estate</option>
+              <option value="auto repair">🚗 Auto Repair</option>
+              <option value="veterinary clinic">🐕 Veterinary Clinic</option>
+              <option value="medical practice">🏥 Medical Practice</option>
+              <option value="hotel">🏨 Hotel</option>
+              <option value="bar">🍺 Bar</option>
+              <option value="pharmacy">💊 Pharmacy</option>
+              <option value="bookstore">📚 Bookstore</option>
             </select>
           </div>
 
@@ -580,19 +628,27 @@
           </div>
 
           <div class="form-group">
-            <label for="quantity">Number of Leads</label>
+            <label for="lead-quantity">Number of Leads</label>
             <div class="quantity-control">
               <input
                 type="range"
-                id="quantity"
+                id="lead-quantity"
                 class="quantity-slider"
                 min="1"
                 max="20"
                 value="5"
               />
               <div class="quantity-display">
-                <span id="quantityDisplay">5</span> leads
+                <span id="lead-quantity-display">5</span> leads
               </div>
+            </div>
+
+            <!-- Quick select buttons for common quantities -->
+            <div class="lead-quantity-buttons">
+              <button type="button" class="lead-quantity-btn">3</button>
+              <button type="button" class="lead-quantity-btn active">5</button>
+              <button type="button" class="lead-quantity-btn">10</button>
+              <button type="button" class="lead-quantity-btn">15</button>
             </div>
           </div>
 
@@ -601,18 +657,27 @@
             <div class="cost-amount" id="estimatedCost">$0.42</div>
           </div>
 
-          <button id="searchBtn" class="btn">🚀 Search Businesses</button>
+          <button id="start-discovery" class="btn">🚀 Search Businesses</button>
         </div>
 
         <!-- Campaign Progress -->
-        <div id="campaignProgress" class="campaign-progress">
+        <div
+          id="campaign-progress"
+          class="campaign-progress"
+          style="display: none"
+        >
           <div class="progress-spinner"></div>
           <h3>Discovering businesses...</h3>
           <p id="progressText">Initializing search parameters...</p>
         </div>
 
         <!-- Results Container -->
-        <div id="results" class="results"></div>
+        <div id="search-results" style="display: none">
+          <div id="results-container"></div>
+          <button id="export-csv" style="display: none">
+            📥 Export to CSV
+          </button>
+        </div>
       </div>
 
       <!-- Settings/Dashboard Page -->
@@ -659,13 +724,15 @@
     </div>
 
     <!-- Load Supabase-First JavaScript -->
-    <script type="module" src="app.js"></script>
+    <script type="module" src="supabase-app-enhanced.js"></script>
 
     <script>
       // Update quantity display when slider changes
       document.addEventListener("DOMContentLoaded", () => {
-        const quantitySlider = document.getElementById("quantity");
-        const quantityDisplay = document.getElementById("quantityDisplay");
+        const quantitySlider = document.getElementById("lead-quantity");
+        const quantityDisplay = document.getElementById(
+          "lead-quantity-display"
+        );
 
         if (quantitySlider && quantityDisplay) {
           quantitySlider.oninput = () => {
@@ -675,6 +742,24 @@
               window.prospectProApp.updateCostEstimate();
             }
           };
+        }
+
+        // Handle category selection
+        const categorySelect = document.getElementById("categorySelect");
+        const businessTypeInput = document.getElementById("business-type");
+
+        if (categorySelect && businessTypeInput) {
+          categorySelect.addEventListener("change", (e) => {
+            if (e.target.value) {
+              businessTypeInput.value = e.target.value;
+              // Reset the select to placeholder
+              categorySelect.value = "";
+              // Trigger cost update if app is loaded
+              if (window.prospectProApp) {
+                window.prospectProApp.updateCostEstimate();
+              }
+            }
+          });
         }
       });
     </script>
