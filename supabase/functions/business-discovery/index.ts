@@ -16,6 +16,12 @@ interface BusinessDiscoveryRequest {
   requireCompleteContacts?: boolean;
   minConfidenceScore?: number;
   additionalQueries?: string[];
+  enhancementOptions?: {
+    apolloDiscovery?: boolean;
+    chamberVerification?: boolean;
+    tradeAssociations?: boolean;
+    professionalLicensing?: boolean;
+  };
 }
 
 interface PlaceResult {
@@ -53,6 +59,37 @@ interface BusinessLead {
   validationCost: number;
   costEfficient: boolean;
   scoringRecommendation: string;
+  enhancementData?: {
+    chamberMembership?: {
+      verified: boolean;
+      chambers: string[];
+      membershipLevel: string;
+      memberSince: string;
+      confidenceBoost: number;
+    };
+    tradeAssociations?: {
+      verified: boolean;
+      associationType: string;
+      membershipType: string;
+      confidenceBoost: number;
+    }[];
+    apolloData?: {
+      ownerContacts: {
+        name: string;
+        title: string;
+        email: string;
+      }[];
+      organizationData: Record<string, unknown>;
+      cost: number;
+    };
+    professionalLicenses?: {
+      licensedProfessional: boolean;
+      licenseType: string;
+      licenseNumber: string;
+      state: string;
+      confidenceBoost: number;
+    }[];
+  };
 }
 
 // Enhanced Quality Scorer v3.0 - Cost-efficient validation pipeline
@@ -78,17 +115,46 @@ class EnhancedQualityScorer {
       ? Math.min(preValidationScore + 5, 100)
       : preValidationScore;
 
-    // Enhanced email enrichment
+    // Enhanced email enrichment with improved patterns
     let email = business.email;
     if (!email && business.website) {
       const domain = this.extractDomain(business.website);
-      if (domain !== "example.com") {
-        email = `contact@${domain}`;
+      if (
+        domain !== "example.com" &&
+        !domain.includes("facebook.com") &&
+        !domain.includes("yelp.com")
+      ) {
+        // Generate realistic email patterns with proper sanitization
+        const businessName = (business.businessName || business.name || "")
+          .toLowerCase()
+          .replace(/[^a-z0-9]/g, "") // Remove all non-alphanumeric characters
+          .replace(/\s+/g, "")
+          .substring(0, 20); // Limit length
+
+        const emailPatterns = [
+          `info@${domain}`,
+          `contact@${domain}`,
+          `hello@${domain}`,
+        ];
+
+        // Only add business name email if it's reasonable length and format
+        if (
+          businessName &&
+          businessName.length >= 3 &&
+          businessName.length <= 15
+        ) {
+          emailPatterns.unshift(`${businessName}@${domain}`);
+        }
+
+        email = emailPatterns[0]; // Use the most appropriate pattern
       }
     }
     if (!email) {
       email = undefined; // Don't show generic emails
     }
+
+    // Enhancement data initialization
+    const enhancementData: BusinessLead["enhancementData"] = {};
 
     return {
       businessName: business.businessName || business.name || "",
@@ -121,6 +187,7 @@ class EnhancedQualityScorer {
       validationCost,
       costEfficient: validationCost <= this.maxCostPerBusiness,
       scoringRecommendation: this.getRecommendation(optimizedScore),
+      enhancementData,
     };
   }
 
@@ -183,8 +250,16 @@ class EnhancedQualityScorer {
   private extractDomain(website: string): string {
     if (!website) return "example.com";
     try {
-      const url = new URL(website);
-      return url.hostname;
+      const url = new URL(
+        website.startsWith("http") ? website : `https://${website}`
+      );
+      let hostname = url.hostname;
+      // Remove www. prefix for email generation
+      if (hostname.startsWith("www.")) {
+        hostname = hostname.substring(4);
+      }
+      // Remove any trailing parameters or paths that might interfere
+      return hostname.split("/")[0].split("?")[0];
     } catch {
       return "example.com";
     }
@@ -307,7 +382,16 @@ serve(async (req) => {
       budgetLimit = 50,
       requireCompleteContacts = false,
       minConfidenceScore = 50,
+      enhancementOptions = {},
     } = requestBody;
+
+    // Extract enhancement options
+    const {
+      apolloDiscovery: _apolloDiscovery = false,
+      chamberVerification: _chamberVerification = false,
+      tradeAssociations: _tradeAssociations = false,
+      professionalLicensing: _professionalLicensing = false,
+    } = enhancementOptions;
 
     // Validate required parameters
     if (!businessType || !location) {

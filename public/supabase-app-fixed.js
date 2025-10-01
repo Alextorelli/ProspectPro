@@ -428,6 +428,7 @@ class ProspectProSupabase {
     console.log("🎨 Initializing UI...");
     try {
       this.setupBusinessTypeCascade();
+      this.setupEnhancementControls();
       this.attachEventListeners();
       this.updateCost();
       this.showWelcomeMessage();
@@ -527,6 +528,133 @@ class ProspectProSupabase {
     );
   }
 
+  setupEnhancementControls() {
+    console.log("🚀 Setting up enhancement controls...");
+
+    const searchForm =
+      document.querySelector("form") ||
+      document.querySelector(".search-container");
+    if (!searchForm) {
+      console.warn("Search form not found for enhancement controls");
+      return;
+    }
+
+    // Create enhancement options section
+    const enhancementSection = document.createElement("div");
+    enhancementSection.className = "enhancement-section";
+    enhancementSection.innerHTML = `
+      <div style="margin: 20px 0; padding: 15px; border: 2px solid #e1e5e9; border-radius: 10px; background: #f8f9fa;">
+        <h3 style="margin: 0 0 15px 0; color: #495057; font-size: 1.1rem;">🚀 Enhanced Discovery Options</h3>
+        
+        <label style="display: flex; align-items: center; margin-bottom: 12px; cursor: pointer;">
+          <input type="checkbox" id="enable-chamber" checked style="margin-right: 10px; transform: scale(1.2);">
+          <span style="font-weight: 500;">Chamber of Commerce Verification</span>
+          <span style="margin-left: auto; color: #28a745; font-weight: bold;">FREE</span>
+        </label>
+        
+        <label style="display: flex; align-items: center; margin-bottom: 12px; cursor: pointer;">
+          <input type="checkbox" id="enable-associations" checked style="margin-right: 10px; transform: scale(1.2);">
+          <span style="font-weight: 500;">Trade Association Verification</span>
+          <span style="margin-left: auto; color: #28a745; font-weight: bold;">FREE</span>
+        </label>
+        
+        <label style="display: flex; align-items: center; margin-bottom: 15px; cursor: pointer;">
+          <input type="checkbox" id="enable-apollo" style="margin-right: 10px; transform: scale(1.2);">
+          <span style="font-weight: 500;">Apollo.io Owner Discovery</span>
+          <span style="margin-left: auto; color: #007bff; font-weight: bold;">$1.00/org</span>
+        </label>
+        
+        <div id="enhancement-cost-estimate" style="padding: 10px; border-radius: 5px; font-size: 0.9em; font-weight: 500;"></div>
+      </div>
+    `;
+
+    // Find the best insertion point (before the start discovery button)
+    const startButton = document.getElementById("start-discovery");
+    if (startButton && startButton.parentNode) {
+      startButton.parentNode.insertBefore(enhancementSection, startButton);
+    } else {
+      // Fallback: append to search form
+      searchForm.appendChild(enhancementSection);
+    }
+
+    // Add event listeners for cost calculation
+    const apolloCheckbox = document.getElementById("enable-apollo");
+    const chamberCheckbox = document.getElementById("enable-chamber");
+    const associationsCheckbox = document.getElementById("enable-associations");
+
+    if (apolloCheckbox) {
+      apolloCheckbox.addEventListener("change", () =>
+        this.updateEnhancementEstimate()
+      );
+    }
+    if (chamberCheckbox) {
+      chamberCheckbox.addEventListener("change", () =>
+        this.updateEnhancementEstimate()
+      );
+    }
+    if (associationsCheckbox) {
+      associationsCheckbox.addEventListener("change", () =>
+        this.updateEnhancementEstimate()
+      );
+    }
+
+    // Initial estimate
+    this.updateEnhancementEstimate();
+
+    console.log("✅ Enhancement controls setup completed");
+  }
+
+  updateEnhancementEstimate() {
+    const apolloEnabled =
+      document.getElementById("enable-apollo")?.checked || false;
+    const chamberEnabled =
+      document.getElementById("enable-chamber")?.checked || false;
+    const associationsEnabled =
+      document.getElementById("enable-associations")?.checked || false;
+    const maxResults =
+      parseInt(document.getElementById("quantity-input")?.value) || 10;
+    const estimateDiv = document.getElementById("enhancement-cost-estimate");
+
+    if (!estimateDiv) return;
+
+    let message = "";
+    let totalCost = 0;
+    const enhancements = [];
+
+    if (chamberEnabled) {
+      enhancements.push("Chamber Verification");
+    }
+
+    if (associationsEnabled) {
+      enhancements.push("Trade Associations");
+    }
+
+    if (apolloEnabled) {
+      totalCost = maxResults * 1.0;
+      enhancements.push("Apollo Owner Discovery");
+    }
+
+    if (enhancements.length === 0) {
+      message = "❌ No enhancements selected - basic discovery only";
+      estimateDiv.style.background = "#fff3cd";
+      estimateDiv.style.color = "#856404";
+    } else if (totalCost === 0) {
+      message = `💰 Free enhanced discovery with: ${enhancements.join(", ")}`;
+      estimateDiv.style.background = "#d4edda";
+      estimateDiv.style.color = "#155724";
+    } else {
+      message = `📊 Enhanced discovery cost: $${totalCost.toFixed(
+        2
+      )} for ${maxResults} businesses<br>✅ Includes: ${enhancements.join(
+        ", "
+      )}`;
+      estimateDiv.style.background = "#d1ecf1";
+      estimateDiv.style.color = "#0c5460";
+    }
+
+    estimateDiv.innerHTML = message;
+  }
+
   attachEventListeners() {
     console.log("🔗 Attaching event listeners...");
 
@@ -596,6 +724,7 @@ class ProspectProSupabase {
         });
 
         this.updateCost();
+        this.updateEnhancementEstimate();
       });
     }
 
@@ -837,6 +966,14 @@ class ProspectProSupabase {
 
       console.log("✅ Pre-flight checks passed");
 
+      // Get enhancement options
+      const apolloEnabled =
+        document.getElementById("enable-apollo")?.checked || false;
+      const chamberEnabled =
+        document.getElementById("enable-chamber")?.checked || false;
+      const associationsEnabled =
+        document.getElementById("enable-associations")?.checked || false;
+
       const payload = {
         businessType,
         location,
@@ -844,6 +981,12 @@ class ProspectProSupabase {
         budgetLimit: 50,
         requireCompleteContacts: true,
         minConfidenceScore: 50,
+        enhancementOptions: {
+          apolloDiscovery: apolloEnabled,
+          chamberVerification: chamberEnabled,
+          tradeAssociations: associationsEnabled,
+          professionalLicensing: false, // Not implemented yet
+        },
       };
 
       console.log(
