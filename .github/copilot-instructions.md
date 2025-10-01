@@ -98,25 +98,27 @@ CREATE TABLE leads (
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 ```
-  target_count INTEGER DEFAULT 10,
-  results_count INTEGER DEFAULT 0,
-  total_cost DECIMAL(10,4) DEFAULT 0,
-  created_at TIMESTAMPTZ DEFAULT NOW()
+
+target_count INTEGER DEFAULT 10,
+results_count INTEGER DEFAULT 0,
+total_cost DECIMAL(10,4) DEFAULT 0,
+created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 -- Leads table for storing discovered businesses
 CREATE TABLE leads (
-  id BIGSERIAL PRIMARY KEY,
-  campaign_id TEXT REFERENCES campaigns(id),
-  business_name TEXT NOT NULL,
-  address TEXT,
-  phone TEXT,
-  website TEXT,
-  email TEXT,
-  confidence_score INTEGER DEFAULT 0,
-  created_at TIMESTAMPTZ DEFAULT NOW()
+id BIGSERIAL PRIMARY KEY,
+campaign_id TEXT REFERENCES campaigns(id),
+business_name TEXT NOT NULL,
+address TEXT,
+phone TEXT,
+website TEXT,
+email TEXT,
+confidence_score INTEGER DEFAULT 0,
+created_at TIMESTAMPTZ DEFAULT NOW()
 );
-```
+
+````
 
 ## CRITICAL: REPOSITORY CLEANLINESS ENFORCEMENT
 
@@ -206,7 +208,7 @@ cd public && vercel --prod
 
 # Check database permissions
 # Run in Supabase SQL editor: SELECT * FROM campaigns LIMIT 1;
-```
+````
 
 **ENVIRONMENT VERIFICATION CHECKLIST**
 

@@ -125,7 +125,12 @@
           "type": "verified-business-intelligence-platform",
           "framework": "supabase-edge-functions",
           "database": "supabase-postgresql",
-          "apis": ["google-places", "apollo-contacts", "chamber-commerce", "professional-licensing"],
+          "apis": [
+            "google-places",
+            "apollo-contacts",
+            "chamber-commerce",
+            "professional-licensing"
+          ],
           "deployment": "supabase-edge-functions",
           "dataPolicy": "zero-fake-data-verified-contacts-only"
         }
