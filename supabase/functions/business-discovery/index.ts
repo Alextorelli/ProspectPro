@@ -115,43 +115,8 @@ class EnhancedQualityScorer {
       ? Math.min(preValidationScore + 5, 100)
       : preValidationScore;
 
-    // Enhanced email enrichment with improved patterns
-    let email = business.email;
-    if (!email && business.website) {
-      const domain = this.extractDomain(business.website);
-      if (
-        domain !== "example.com" &&
-        !domain.includes("facebook.com") &&
-        !domain.includes("yelp.com")
-      ) {
-        // Generate realistic email patterns with proper sanitization
-        const businessName = (business.businessName || business.name || "")
-          .toLowerCase()
-          .replace(/[^a-z0-9]/g, "") // Remove all non-alphanumeric characters
-          .replace(/\s+/g, "")
-          .substring(0, 20); // Limit length
-
-        const emailPatterns = [
-          `info@${domain}`,
-          `contact@${domain}`,
-          `hello@${domain}`,
-        ];
-
-        // Only add business name email if it's reasonable length and format
-        if (
-          businessName &&
-          businessName.length >= 3 &&
-          businessName.length <= 15
-        ) {
-          emailPatterns.unshift(`${businessName}@${domain}`);
-        }
-
-        email = emailPatterns[0]; // Use the most appropriate pattern
-      }
-    }
-    if (!email) {
-      email = undefined; // Don't show generic emails
-    }
+    // Only use real email if provided by the source
+    const email = business.email || undefined;
 
     // Enhancement data initialization
     const enhancementData: BusinessLead["enhancementData"] = {};
