@@ -1,14 +1,35 @@
-# ProspectPro v4.0 - Supabase-First Serverless Architecture
+# ProspectPro v4.1 - Verified Business Intelligence Platform
 
 ## CRITICAL: Current Production State
 
-- **Version**: 4.0.0 (Supabase-First Serverless Architecture - PRODUCTION READY)
+- **Version**: 4.1.0 (Verified Data Architecture - PRODUCTION READY)
 - **Deployment**: Static Frontend + Supabase Edge Functions (serverless, auto-scaling)
 - **Environment**: Supabase environment variables + Edge Function secrets
-- **Architecture**: Supabase-first serverless with Edge Functions + Real-time database
-- **Quality Scoring**: v3.0 integrated into Edge Functions with cost optimization
+- **Architecture**: Supabase-first serverless with verified contact discovery
+- **Quality Standard**: Zero fake data - verified contacts only
 - **Backend**: 100% Supabase Edge Functions (business-discovery, campaign-export)
-- **Repository**: https://github.com/Alextorelli/ProspectPro (Supabase-first codebase)
+- **Repository**: https://github.com/Alextorelli/ProspectPro (Verified data codebase)
+
+## CRITICAL: VERIFIED DATA ARCHITECTURE
+
+**ZERO FAKE DATA PHILOSOPHY**
+
+- ✅ Verified Contacts Only: No pattern-generated emails or fake data
+- ✅ Professional Verification: Apollo, licensing boards, chamber directories
+- ✅ Transparent Sources: Clear attribution for all contact data
+- ✅ Quality Baseline: Verification assumed, not advertised
+- ✅ Real Business Intelligence: Authentic professional contacts only
+- ❌ NO fake email patterns (info@, contact@, hello@, sales@)
+- ❌ NO generated contact information
+- ❌ NO speculative data points
+
+**VERIFICATION SOURCES**
+
+- **Apollo API**: Executive and owner contact discovery ($1.00 per verified contact)
+- **Professional Licensing**: State licensing boards (CPA, Healthcare, Legal)
+- **Chamber of Commerce**: Membership verification and directory contacts
+- **Trade Associations**: Industry-specific membership validation
+- **Google Places**: Verified business listings and authentic contact data
 
 ## CRITICAL: SUPABASE-FIRST ARCHITECTURE
 
@@ -33,22 +54,50 @@
 
 **PRODUCTION EDGE FUNCTIONS (OPERATIONAL)**
 
-- ✅ `business-discovery` - Main business discovery with Google Places API integration
-- ✅ `campaign-export` - CSV export functionality with database integration
-- ✅ Real-time database integration with campaigns and leads tables
+- ✅ `business-discovery` - Main business discovery with verified contact integration
+- ✅ `business-discovery-optimized` - Enhanced v3.0 with zero fake data
+- ✅ `campaign-export` - CSV export with verification status and professional contacts
+- ✅ Real-time database integration with verified leads tracking
 - ✅ Global edge deployment with <100ms cold starts
 - ✅ Functions URL: https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/
 
-**DATABASE INTEGRATION**
+**VERIFIED DATA INTEGRATION**
 
-Core tables managed by Supabase:
+Core tables for verified business intelligence:
 
 ```sql
--- Campaigns table for tracking discovery sessions
+-- Campaigns table for tracking verified discovery sessions
 CREATE TABLE campaigns (
   id TEXT PRIMARY KEY,
   business_type TEXT NOT NULL,
   location TEXT NOT NULL,
+  verification_level TEXT DEFAULT 'basic',
+  target_count INTEGER DEFAULT 10,
+  results_count INTEGER DEFAULT 0,
+  total_cost DECIMAL(10,4) DEFAULT 0,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Leads table for verified business contacts
+CREATE TABLE leads (
+  id BIGSERIAL PRIMARY KEY,
+  campaign_id TEXT REFERENCES campaigns(id),
+  business_name TEXT NOT NULL,
+  address TEXT,
+  phone TEXT,
+  website TEXT,
+  email TEXT, -- Only verified emails, no patterns
+  owner_contact TEXT, -- Apollo verified contacts
+  linkedin_profile TEXT,
+  confidence_score INTEGER DEFAULT 0,
+  verification_status TEXT DEFAULT 'basic',
+  data_source TEXT DEFAULT 'google_places',
+  apollo_verified BOOLEAN DEFAULT FALSE,
+  chamber_verified BOOLEAN DEFAULT FALSE,
+  license_verified BOOLEAN DEFAULT FALSE,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+```
   target_count INTEGER DEFAULT 10,
   results_count INTEGER DEFAULT 0,
   total_cost DECIMAL(10,4) DEFAULT 0,

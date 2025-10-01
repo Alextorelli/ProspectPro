@@ -1,5 +1,5 @@
 {
-  "name": "ProspectPro Development",
+  "name": "ProspectPro - Verified Business Intelligence",
   "image": "mcr.microsoft.com/devcontainers/javascript-node:20",
   "features": {
     "ghcr.io/devcontainers/features/git:1": {}
@@ -24,9 +24,6 @@
         "humao.rest-client",
         "rangav.vscode-thunder-client",
 
-        // Docker Support
-        "ms-azuretools.vscode-docker",
-
         // Database Tools
         "mtxr.sqltools",
         "mtxr.sqltools-driver-pg",
@@ -42,13 +39,7 @@
 
         // Development Theme & Visual Organization
         "deepforest.theme", // Vira Deepforest theme for organized development
-        "vscode-icons-team.vscode-icons", // Better file icons for organization
-
-        // Recommended to Uninstall (using proper format with leading -)
-        "-github.vscode-pull-request-github", // Too much impact on startup
-        "-codezombiech.gitignore", // Limited utility, slows startup
-        "-yzhang.markdown-all-in-one", // Redundant with built-in
-        "-aaron-bond.better-comments" // Visual noise, performance impact
+        "vscode-icons-team.vscode-icons" // Better file icons for organization
       ],
       "settings": {
         "terminal.integrated.defaultProfile.linux": "bash",
@@ -114,7 +105,7 @@
         "terminal.integrated.fontSize": 13,
 
         // Development Environment Indicators
-        "window.title": "🔨 ${folderName} - ProspectPro Development ${separator} ${activeEditorShort}",
+        "window.title": "🎯 ${folderName} - Verified Business Intelligence ${separator} ${activeEditorShort}",
         "workbench.startupEditor": "welcomePageInEmptyWorkbench",
 
         // === MCP (Model Context Protocol) Configuration ===
@@ -128,22 +119,22 @@
           "*.rest": "http"
         },
 
-        // AI-Enhanced Development Settings for API Integration
+        // AI-Enhanced Development Settings for Verified Data Integration
         "ai.contextAware": true,
         "ai.projectContext": {
-          "type": "lead-generation-platform",
-          "framework": "node-express",
-          "database": "supabase",
-          "apis": ["google-places", "foursquare", "hunter-io", "neverbounce"],
-          "deployment": "docker-compose",
-          "monitoring": "custom-diagnostics"
+          "type": "verified-business-intelligence-platform",
+          "framework": "supabase-edge-functions",
+          "database": "supabase-postgresql",
+          "apis": ["google-places", "apollo-contacts", "chamber-commerce", "professional-licensing"],
+          "deployment": "supabase-edge-functions",
+          "dataPolicy": "zero-fake-data-verified-contacts-only"
         }
       }
     }
   },
   "forwardPorts": [3000, 5432],
-  "postCreateCommand": "bash -lc 'set -e; echo \"🏗️  Setting up ProspectPro Development Environment...\"; sudo apt-get update && sudo apt-get install -y docker.io; if [ -f package-lock.json ]; then npm ci; else npm install; fi; npm i supabase --save-dev; npm run mcp:install; npm run mcp:test; echo \"🎨 Development environment ready with Vira Deepforest theme and MCP enabled!\"; echo \"🚀 ProspectPro development container is ready for API integration work\"'",
-  "postStartCommand": "bash -c 'echo \"🌲 ProspectPro Development Container Started\"; echo \"Theme: Vira Deepforest | MCP: Enabled | Ready for API Integration\"; echo \"💡 Use Copilot Chat for AI-assisted development with full system context\"'",
+  "postCreateCommand": "bash -lc 'set -e; echo \"� Setting up ProspectPro Verified Business Intelligence Environment...\"; sudo apt-get update && sudo apt-get install -y docker.io; if [ -f package-lock.json ]; then npm ci; else npm install; fi; npm i supabase --save-dev; npm run mcp:install; npm run mcp:test; echo \"✅ Verified data environment ready with zero fake data policy!\"; echo \"🚀 ProspectPro verified business intelligence development ready\"'",
+  "postStartCommand": "bash -c 'echo \"� ProspectPro Verified Business Intelligence Started\"; echo \"Data Policy: Zero Fake Data | Contacts: Verified Only | Architecture: Supabase Edge Functions\"; echo \"💡 Use Copilot Chat for AI-assisted development with verified data context\"'",
   "runArgs": ["--init", "-v", "/var/run/docker.sock:/var/run/docker.sock"],
   "remoteUser": "node"
 }

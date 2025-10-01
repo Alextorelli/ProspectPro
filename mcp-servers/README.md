@@ -2,50 +2,64 @@
 
 ## Overview
 
-This directory contains the **enhanced MCP server implementation** that provides AI assistants with comprehensive access to ProspectPro's data, APIs, diagnostics, and **troubleshooting capabilities**. Version 3.0 adds a specialized troubleshooting server for systematic debugging of Supabase-first deployment issues.
+This directory contains the **enhanced MCP server implementation** that provides AI assistants with comprehensive access to ProspectPro's verified business intelligence data, APIs, diagnostics, and **troubleshooting capabilities**. Version 3.0 includes specialized troubleshooting for verified data architecture and zero fake data policy enforcement.
 
-**Architecture**: 3 specialized servers for production, development, and troubleshooting workflows  
-**Tools**: 42 tools total across all servers (6 new troubleshooting tools)  
-**Status**: Production-ready with comprehensive test coverage and automated troubleshooting
+**Architecture**: 3 specialized servers for verified data production, development, and troubleshooting workflows  
+**Tools**: 42 tools total across all servers (6 troubleshooting + 36 verified data tools)  
+**Status**: Production-ready with verified data architecture and zero fake data policy
 
-## Enhanced MCP Servers v3.0
+## Enhanced MCP Servers v3.0 - Verified Data Architecture
 
-### 1. Production Server (`supabase-production-server.js`) - **v2.0.0**
+### 1. Production Server (`production-server.js`) - **v2.1.0**
 
-**Purpose**: Comprehensive production monitoring, database analytics, system diagnostics, API testing, and filesystem analysis (28 tools)
+**Purpose**: Comprehensive verified business intelligence monitoring, contact verification analytics, Apollo API diagnostics, and professional data source management (28 tools)
 
-### 2. Development Server (`supabase-development-server.js`) - **v1.0.0**
+**Verified Data Capabilities**:
+- Contact verification status tracking
+- Apollo API integration monitoring
+- Professional licensing validation
+- Chamber of Commerce verification tracking
+- Fake data pattern detection and elimination
 
-**Purpose**: Development utilities, new API integration testing, and performance benchmarking (8 tools)
+### 2. Development Server (`development-server.js`) - **v1.1.0**
 
-### 3. 🆕 Troubleshooting Server (`supabase-troubleshooting-server.js`) - **v1.0.0**
+**Purpose**: Verified contact discovery development, Apollo API testing, professional data source integration, and contact verification benchmarking (8 tools)
 
-**Purpose**: Systematic debugging and diagnosis of Supabase deployment and authentication issues
+**Enhanced Features**:
+- Apollo contact discovery testing
+- Professional licensing API validation
+- Chamber directory integration testing
+- Zero fake data policy enforcement
 
-**Specialized Troubleshooting Capabilities** (6 tools):
+### 3. 🆕 Troubleshooting Server (`supabase-troubleshooting-server.js`) - **v1.1.0**
 
-#### Supabase Edge Function Testing
+**Purpose**: Systematic debugging of verified data architecture, contact verification issues, and zero fake data policy violations
 
-- `test_edge_function` - Test Supabase Edge Function connectivity with authentication
-- `generate_debugging_commands` - Create custom curl commands and debugging scripts
+**Verified Data Troubleshooting Capabilities** (6 enhanced tools):
 
-#### Database & Authentication Diagnosis
+#### Verified Contact Testing
 
-- `validate_database_permissions` - Check RLS policies and anon key permissions
-- `diagnose_anon_key_mismatch` - Compare frontend vs Supabase anon keys
-- `run_rls_diagnostics` - Generate Row Level Security diagnostic queries
+- `test_edge_function` - Test verified contact discovery with Apollo API authentication
+- `generate_debugging_commands` - Create contact verification curl commands and debugging scripts
 
-#### Deployment Validation
+#### Professional Data Source Diagnosis
 
-- `check_vercel_deployment` - Validate Vercel deployment status and configuration
+- `validate_database_permissions` - Check verified contact RLS policies and Apollo integration permissions
+- `diagnose_anon_key_mismatch` - Compare frontend vs Supabase authentication for contact APIs
+- `run_rls_diagnostics` - Generate professional data verification diagnostic queries
+
+#### Verified Data Deployment Validation
+
+- `check_vercel_deployment` - Validate deployment with verified contact display and fake data elimination
 
 **When to Use Troubleshooting Server**:
 
-- Frontend shows "Discovery Failed" or "API request failed: 404"
-- Edge Functions return 401 Unauthorized errors
-- Database queries fail with RLS violations
-- Vercel deployment returns 401 or access denied
-- Anon key synchronization issues between frontend and Supabase
+- Verified contact discovery fails or returns fake data patterns
+- Apollo API returns authentication errors
+- Professional licensing verification fails
+- Contact verification status not updating
+- Fake email patterns appearing in exports
+- Chamber of Commerce directory access issues
 
 ### 1. Production Server (`production-server.js`) - **v2.0.0**
 

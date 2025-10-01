@@ -1,15 +1,15 @@
 {
-  "name": "prospectpro-supabase-first",
-  "version": "4.0.0",
-  "description": "ProspectPro - Supabase-First Lead Discovery Platform with Edge Functions",
+  "name": "prospectpro-verified-business-intelligence",
+  "version": "4.1.0",
+  "description": "ProspectPro - Verified Business Intelligence Platform with Zero Fake Data Policy",
   "scripts": {
-    "build:static": "mkdir -p dist && cp public/index-supabase.html dist/index.html && cp public/supabase-app.js dist/app.js",
+    "build:static": "mkdir -p dist && cp public/index-supabase.html dist/index.html && cp public/supabase-app-enhanced.js dist/app.js",
     "deploy:vercel": "cd public && vercel --prod",
     "deploy:netlify": "cd public && netlify deploy --prod --dir=.",
     "deploy:gcs": "npm run build:static && gsutil -m rsync -r -d ./dist/ gs://prospectpro-static-frontend/",
     "serve:local": "cd public && python3 -m http.server 8080",
     "test:edge-functions": "supabase functions serve",
-    "deploy:edge-functions": "supabase functions deploy business-discovery && supabase functions deploy campaign-export",
+    "deploy:edge-functions": "supabase functions deploy business-discovery && supabase functions deploy business-discovery-optimized && supabase functions deploy campaign-export",
     "db:setup": "echo 'Run SQL from /database/supabase-first-schema.sql in Supabase dashboard'",
     "db:status": "supabase db status",
     "functions:list": "supabase functions list",
@@ -18,21 +18,26 @@
     "archive:legacy": "mkdir -p archive/legacy-server && mv server.js api/ modules/ docker/ archive/legacy-server/ 2>/dev/null || echo 'Legacy files managed separately'",
     "health": "echo 'Use Edge Function endpoints for health checks'",
     "test": "echo 'Test Edge Functions via Supabase dashboard or curl'",
+    "test:verified-contacts": "echo 'Test verified contact discovery with zero fake data validation'",
     "mcp:install": "cd mcp-servers && npm install",
     "mcp:test": "cd mcp-servers && npm run test",
     "mcp:start": "cd mcp-servers && npm run start:all",
     "mcp:troubleshoot": "cd mcp-servers && npm run start:troubleshooting",
-    "debug:quick": "echo 'Common issue: Check anon key sync between frontend and Supabase dashboard'",
-    "debug:edge-function": "echo 'Test Edge Function: curl -X POST https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/business-discovery -H \"Authorization: Bearer YOUR_ANON_KEY\" -H \"Content-Type: application/json\" -d \"{\\\"businessType\\\": \\\"test\\\", \\\"location\\\": \\\"test\\\"}\"'",
-    "debug:vercel": "echo 'Check Vercel deployment: curl -I https://your-vercel-url.vercel.app'"
+    "debug:quick": "echo 'Common issue: Check anon key sync and verified contact authentication'",
+    "debug:edge-function": "echo 'Test Verified Edge Function: curl -X POST https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/business-discovery-optimized -H \"Authorization: Bearer YOUR_ANON_KEY\" -H \"Content-Type: application/json\" -d \"{\\\"businessType\\\": \\\"test\\\", \\\"location\\\": \\\"test\\\"}\"'",
+    "debug:vercel": "echo 'Check Vercel deployment: curl -I https://your-vercel-url.vercel.app'",
+    "debug:fake-data": "echo 'Verify zero fake data: Check CSV exports for pattern emails (info@, contact@, etc.)'"
   },
   "keywords": [
-    "leads",
-    "business-discovery",
+    "verified-business-intelligence",
+    "professional-contacts",
+    "apollo-api",
+    "chamber-of-commerce",
+    "professional-licensing",
+    "zero-fake-data",
     "supabase",
     "edge-functions",
-    "static-site",
-    "serverless"
+    "verified-contacts"
   ],
   "author": "Alex Torelli",
   "license": "MIT",
@@ -46,9 +51,11 @@
     "url": "https://github.com/Alextorelli/ProspectPro"
   },
   "architecture": {
-    "frontend": "Static HTML/JS",
-    "backend": "Supabase Edge Functions",
-    "database": "Supabase PostgreSQL",
+    "frontend": "Static HTML/JS with verified contact display",
+    "backend": "Supabase Edge Functions with zero fake data",
+    "database": "Supabase PostgreSQL with verification tracking",
+    "contacts": "Apollo API + Professional Licensing + Chamber Directories",
+    "dataPolicy": "Zero fake data - verified contacts only",
     "hosting": "Static hosting (Cloud Storage/CDN)",
     "deployment": "Supabase CLI + gsutil"
   }
