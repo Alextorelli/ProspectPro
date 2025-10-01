@@ -37,7 +37,7 @@ class ProspectProSupabase {
       return;
     }
 
-    this.selectedTool = "business-discovery";
+    this.selectedTool = "business-discovery-optimized";
     this.searchResults = [];
     this.lastSearchCampaignId = null;
     this.lastSearchCampaignName = null;
@@ -216,13 +216,13 @@ class ProspectProSupabase {
         "📦 Edge Function payload:",
         JSON.stringify(payload, null, 2)
       );
-      console.log("📞 Calling Edge Function: business-discovery");
+      console.log("📞 Calling Edge Function: business-discovery-optimized");
 
       const startTime = Date.now();
 
       // Call Supabase Edge Function with enhanced error tracking
       const result = await this.supabase.functions.invoke(
-        "business-discovery",
+        "business-discovery-optimized",
         {
           body: payload,
         }
