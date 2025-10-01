@@ -35,7 +35,7 @@ interface Lead {
   cost_efficient?: boolean;
   scoring_recommendation?: string;
   created_at: string;
-  // Future enhancement fields (may not exist yet)
+  // Verification fields (may not exist yet)
   owner_contact?: string;
   linkedin_profile?: string;
   professional_license?: string;
@@ -45,6 +45,8 @@ interface Lead {
   google_places_verified?: boolean;
   apollo_verified?: boolean;
   license_verified?: boolean;
+  verification_status?: string;
+  data_source?: string;
   [key: string]: unknown; // Allow additional fields
 }
 
@@ -130,18 +132,61 @@ class CampaignExporter {
   }
 
   private getDataSource(lead: Lead): string {
-    const sources = [];
-    if (lead.google_places_verified) sources.push("Google Places");
+    const sources: string[] = [];
+    if (lead.verification_status?.includes("google"))
+      sources.push("Google Places");
     if (lead.apollo_verified) sources.push("Apollo");
     if (lead.chamber_verified) sources.push("Chamber of Commerce");
     if (lead.license_verified) sources.push("Professional License Board");
+
+    // Check for verification sources in lead data
+    if (lead.data_source && typeof lead.data_source === "string") {
+      const dataSources = lead.data_source
+        .split(",")
+        .map((s: string) => s.trim());
+      dataSources.forEach((source: string) => {
+        if (
+          source === "chamber_commerce" &&
+          !sources.includes("Chamber of Commerce")
+        ) {
+          sources.push("Chamber of Commerce");
+        }
+        if (
+          source === "trade_association" &&
+          !sources.includes("Trade Association")
+        ) {
+          sources.push("Trade Association");
+        }
+        if (
+          source === "professional_license" &&
+          !sources.includes("Professional License")
+        ) {
+          sources.push("Professional License");
+        }
+      });
+    }
+
     return sources.join("; ") || "Google Places";
   }
 
   private getVerificationStatus(lead: Lead): string {
+    // Priority-based verification status
     if (lead.apollo_verified) return "Executive Contact Verified";
     if (lead.license_verified) return "Professional License Verified";
     if (lead.chamber_verified) return "Chamber Membership Verified";
+
+    // Check verification level from lead data
+    if (lead.verification_status) {
+      if (lead.verification_status.includes("apollo"))
+        return "Executive Contact Verified";
+      if (lead.verification_status.includes("license"))
+        return "Professional License Verified";
+      if (lead.verification_status.includes("chamber"))
+        return "Chamber Membership Verified";
+      if (lead.verification_status.includes("trade"))
+        return "Trade Association Verified";
+    }
+
     if (lead.confidence_score >= 75) return "High Confidence";
     if (lead.confidence_score >= 50) return "Medium Confidence";
     return "Basic Listing";
