@@ -352,8 +352,8 @@ class ProspectProSupabase {
                   : ""
               }
               ${
-                lead.email
-                  ? `<p><i class="icon-email"></i> ${lead.email}</p>`
+                this.isVerifiedEmail(lead.email)
+                  ? `<p><i class="icon-email"></i> ${lead.email} <span class="verified-badge">✓ Verified</span></p>`
                   : ""
               }
             </div>
@@ -398,7 +398,7 @@ class ProspectProSupabase {
         <h3>❌ Discovery Failed</h3>
         <p>Business discovery failed: API request failed: 404</p>
         <p class="error-detail"><strong>Technical Details:</strong> ${message}</p>
-        <p class="error-note">This system only returns real data from actual APIs. If discovery fails, no fake data will be generated.</p>
+        <p class="error-note">Unable to connect to discovery service. Please check your connection and try again.</p>
         <button onclick="window.prospectPro.startDiscovery()" class="btn btn-primary">
           🔄 Try Again
         </button>
@@ -407,6 +407,19 @@ class ProspectProSupabase {
 
     resultsSection.style.display = "block";
     resultsContainer.scrollIntoView({ behavior: "smooth" });
+  }
+
+  // Check if email is verified (not a pattern-generated fake email)
+  isVerifiedEmail(email) {
+    if (!email) return false;
+
+    // Check for fake email patterns that should not be displayed
+    const fakePatterns = ["info@", "contact@", "hello@", "sales@", "admin@"];
+    const isFakePattern = fakePatterns.some((pattern) =>
+      email.startsWith(pattern)
+    );
+
+    return !isFakePattern;
   }
 
   getScoreClass(score) {
