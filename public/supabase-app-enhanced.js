@@ -484,6 +484,68 @@ class ProspectProSupabase {
     }
   }
 
+  updateCostEstimate() {
+    // Get quantity from slider
+    const quantitySlider = document.getElementById("quantity");
+    const quantity = quantitySlider ? parseInt(quantitySlider.value) : 5;
+
+    // Base cost per lead
+    let baseCost = 0.084;
+
+    // Get business category and type to adjust cost
+    const businessCategory = document.getElementById("businessCategory")?.value;
+    const businessType = document.getElementById("businessType")?.value;
+
+    // Adjust cost based on business type complexity
+    let complexityMultiplier = 1.0;
+    if (
+      businessCategory === "Healthcare & Medical" ||
+      businessCategory === "Financial Services"
+    ) {
+      complexityMultiplier = 1.3; // Higher cost for regulated industries
+    } else if (
+      businessCategory === "Professional Services" ||
+      businessCategory === "Technology & Software"
+    ) {
+      complexityMultiplier = 1.2; // Moderate increase for professional services
+    }
+
+    // Check if Hunter.io email validation is enabled (from admin panel or default)
+    let emailValidationCost = 0;
+    try {
+      const adminConfig = JSON.parse(
+        localStorage.getItem("prospectpro_admin_config") || "{}"
+      );
+      if (adminConfig.hunterEnabled !== false) {
+        // Default to enabled
+        emailValidationCost += 0.02; // Hunter.io cost per verification
+      }
+      if (adminConfig.neverBounceEnabled === true) {
+        // Default to disabled
+        emailValidationCost += 0.01; // NeverBounce cost per verification
+      }
+    } catch (e) {
+      // Default costs if admin config not available
+      emailValidationCost = 0.02; // Just Hunter.io by default
+    }
+
+    const totalCostPerLead =
+      baseCost * complexityMultiplier + emailValidationCost;
+    const estimatedCost = (quantity * totalCostPerLead).toFixed(2);
+
+    // Update cost display
+    const costDisplay = document.querySelector(".estimated-cost");
+    if (costDisplay) {
+      costDisplay.textContent = `Estimated cost: $${estimatedCost}`;
+    }
+
+    // Also update any legacy cost displays
+    const legacyCostDisplay = document.querySelector(".cost-estimate");
+    if (legacyCostDisplay) {
+      legacyCostDisplay.textContent = `Estimated cost: $${estimatedCost}`;
+    }
+  }
+
   showWelcomeMessage() {
     console.log("🎉 ProspectPro Enhanced Error Tracking Version Ready!");
   }

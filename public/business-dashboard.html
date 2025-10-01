@@ -269,6 +269,213 @@
       .hidden {
         display: none;
       }
+
+      /* Admin Control Styles */
+      .admin-controls {
+        display: grid;
+        gap: 20px;
+      }
+
+      .control-group {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        border: 1px solid #e1e5e9;
+      }
+
+      .control-label {
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 10px;
+        display: block;
+      }
+
+      .control-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 5px;
+      }
+
+      .slider {
+        flex: 1;
+        height: 6px;
+        border-radius: 3px;
+        background: #e1e5e9;
+        outline: none;
+        -webkit-appearance: none;
+      }
+
+      .slider::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        background: #667eea;
+        cursor: pointer;
+      }
+
+      .slider::-moz-range-thumb {
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        background: #667eea;
+        cursor: pointer;
+        border: none;
+      }
+
+      .control-value {
+        min-width: 60px;
+        text-align: center;
+        font-weight: 600;
+        color: #667eea;
+        font-size: 1.1rem;
+      }
+
+      .control-description {
+        color: #666;
+        font-size: 0.9rem;
+      }
+
+      /* Validation Controls */
+      .validation-controls {
+        display: grid;
+        gap: 15px;
+      }
+
+      .validation-item {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        border: 1px solid #e1e5e9;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .validation-info {
+        flex: 1;
+      }
+
+      .validation-name {
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 5px;
+      }
+
+      .validation-description {
+        color: #666;
+        font-size: 0.9rem;
+        margin-bottom: 5px;
+      }
+
+      .validation-cost {
+        color: #667eea;
+        font-size: 0.8rem;
+        font-weight: 500;
+      }
+
+      .validation-toggle {
+        margin-left: 20px;
+      }
+
+      /* Toggle Switch */
+      .toggle-switch {
+        position: relative;
+        display: inline-block;
+        width: 60px;
+        height: 34px;
+      }
+
+      .toggle-switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+      }
+
+      .toggle-slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #ccc;
+        -webkit-transition: .4s;
+        transition: .4s;
+        border-radius: 34px;
+      }
+
+      .toggle-slider:before {
+        position: absolute;
+        content: "";
+        height: 26px;
+        width: 26px;
+        left: 4px;
+        bottom: 4px;
+        background-color: white;
+        -webkit-transition: .4s;
+        transition: .4s;
+        border-radius: 50%;
+      }
+
+      input:checked + .toggle-slider {
+        background-color: #667eea;
+      }
+
+      input:checked + .toggle-slider:before {
+        -webkit-transform: translateX(26px);
+        -ms-transform: translateX(26px);
+        transform: translateX(26px);
+      }
+
+      /* Premium Source Styling */
+      .premium-source {
+        border-left: 3px solid #ffd700;
+        background: #fffef7;
+      }
+
+      .status-dot.premium {
+        background: #ffd700;
+      }
+
+      /* Save Configuration Button */
+      .save-config-btn {
+        background: #28a745;
+        color: white;
+        border: none;
+        padding: 15px 30px;
+        border-radius: 8px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        width: 100%;
+        margin-bottom: 15px;
+      }
+
+      .save-config-btn:hover {
+        background: #218838;
+      }
+
+      .save-status {
+        text-align: center;
+        padding: 10px;
+        border-radius: 6px;
+        font-weight: 500;
+      }
+
+      .save-status.success {
+        background: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+      }
+
+      .save-status.error {
+        background: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+      }
     </style>
   </head>
   <body>
@@ -300,37 +507,77 @@
           <div class="logo"></div>
           <div>
             <span class="brand-text">PROSPECTPRO</span>
-            <span class="admin-text">Admin Dashboard</span>
+            <span class="admin-text">Admin Panel</span>
           </div>
         </div>
         <a href="index.html" class="back-button">← Back to Main</a>
       </div>
 
       <div class="dashboard-content">
-        <!-- Key Performance Metrics -->
-        <div class="metrics-grid">
-          <div class="metric-card">
-            <div class="metric-value" id="totalCampaigns">0</div>
-            <div class="metric-label">Total Campaigns</div>
-            <div class="metric-change positive">+0 this month</div>
+        <!-- Admin Control Settings -->
+        <div class="section">
+          <div class="section-title">System Configuration</div>
+          <div class="admin-controls">
+            <div class="control-group">
+              <label class="control-label">Quality Threshold</label>
+              <div class="control-wrapper">
+                <input type="range" id="qualityThreshold" min="30" max="95" value="75" class="slider">
+                <span class="control-value" id="qualityValue">75%</span>
+              </div>
+              <small class="control-description">Minimum confidence score for lead qualification</small>
+            </div>
+            
+            <div class="control-group">
+              <label class="control-label">Default Campaign Budget</label>
+              <div class="control-wrapper">
+                <input type="range" id="campaignBudget" min="10" max="200" value="50" class="slider">
+                <span class="control-value" id="budgetValue">$50</span>
+              </div>
+              <small class="control-description">Default budget limit per campaign</small>
+            </div>
+            
+            <div class="control-group">
+              <label class="control-label">Max Results Per Campaign</label>
+              <div class="control-wrapper">
+                <input type="range" id="maxResults" min="1" max="50" value="10" class="slider">
+                <span class="control-value" id="resultsValue">10</span>
+              </div>
+              <small class="control-description">Maximum number of leads to return</small>
+            </div>
           </div>
-          
-          <div class="metric-card">
-            <div class="metric-value" id="totalLeads">0</div>
-            <div class="metric-label">Verified Leads Generated</div>
-            <div class="metric-change positive">+0 this month</div>
-          </div>
-          
-          <div class="metric-card">
-            <div class="metric-value" id="avgConfidence">0%</div>
-            <div class="metric-label">Average Confidence Score</div>
-            <div class="metric-change positive">+0% vs last month</div>
-          </div>
-          
-          <div class="metric-card">
-            <div class="metric-value" id="totalCost">$0.00</div>
-            <div class="metric-label">Total API Costs</div>
-            <div class="metric-change positive">$0.00 this month</div>
+        </div>
+
+        <!-- Email Validation Controls -->
+        <div class="section">
+          <div class="section-title">Email Validation Services</div>
+          <div class="validation-controls">
+            <div class="validation-item">
+              <div class="validation-info">
+                <div class="validation-name">Hunter.io Email Finder</div>
+                <div class="validation-description">Professional email discovery and verification</div>
+                <div class="validation-cost">~$0.20 per verification</div>
+              </div>
+              <div class="validation-toggle">
+                <label class="toggle-switch">
+                  <input type="checkbox" id="hunterToggle" checked>
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+            </div>
+            
+            <div class="validation-item">
+              <div class="validation-info">
+                <div class="validation-name">NeverBounce Email Validation</div>
+                <div class="validation-description">Real-time email address verification and deliverability scoring</div>
+                <div class="validation-cost">~$0.008 per verification</div>
+              </div>
+              <div class="validation-toggle">
+                <label class="toggle-switch">
+                  <input type="checkbox" id="neverBounceToggle" checked>
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -378,162 +625,49 @@
               </div>
             </div>
             
-            <div class="source-item">
-              <div class="source-name">Apollo API</div>
+            <div class="source-item premium-source">
+              <div class="source-name">Apollo Owner/Executive Discovery</div>
               <div class="source-status">
-                <span class="status-dot"></span>
-                Available - Premium Option
-              </div>
-            </div>
-
-            <div class="source-item">
-              <div class="source-name">Hunter.io</div>
-              <div class="source-status">
-                <span class="status-dot"></span>
-                Active - Email Verification
-              </div>
-            </div>
-
-            <div class="source-item">
-              <div class="source-name">NeverBounce</div>
-              <div class="source-status">
-                <span class="status-dot"></span>
-                Active - Email Validation
+                <span class="status-dot premium"></span>
+                Available - Premium ($1.00 per verified contact)
               </div>
             </div>
           </div>
         </div>
 
-        <!-- API Performance Statistics -->
-        <div class="section">
-          <div class="section-title">API Performance & Usage</div>
-          <div class="api-stats">
-            <div class="api-card">
-              <div class="api-name">Google Places API</div>
-              <div class="api-metrics">
-                <div class="api-metric">
-                  <div class="api-metric-value" id="googleRequests">0</div>
-                  <div class="api-metric-label">Requests Today</div>
-                </div>
-                <div class="api-metric">
-                  <div class="api-metric-value">99.9%</div>
-                  <div class="api-metric-label">Success Rate</div>
-                </div>
-                <div class="api-metric">
-                  <div class="api-metric-value">~85ms</div>
-                  <div class="api-metric-label">Avg Response</div>
-                </div>
-                <div class="api-metric">
-                  <div class="api-metric-value" id="googleCost">$0.00</div>
-                  <div class="api-metric-label">Cost Today</div>
-                </div>
-              </div>
-            </div>
-
-            <div class="api-card">
-              <div class="api-name">Foursquare API</div>
-              <div class="api-metrics">
-                <div class="api-metric">
-                  <div class="api-metric-value" id="foursquareRequests">0</div>
-                  <div class="api-metric-label">Requests Today</div>
-                </div>
-                <div class="api-metric">
-                  <div class="api-metric-value">98.5%</div>
-                  <div class="api-metric-label">Success Rate</div>
-                </div>
-                <div class="api-metric">
-                  <div class="api-metric-value">~120ms</div>
-                  <div class="api-metric-label">Avg Response</div>
-                </div>
-                <div class="api-metric">
-                  <div class="api-metric-value" id="foursquareCost">$0.00</div>
-                  <div class="api-metric-label">Cost Today</div>
-                </div>
-              </div>
-            </div>
-
-            <div class="api-card">
-              <div class="api-name">Apollo API</div>
-              <div class="api-metrics">
-                <div class="api-metric">
-                  <div class="api-metric-value" id="apolloRequests">0</div>
-                  <div class="api-metric-label">Contacts Verified</div>
-                </div>
-                <div class="api-metric">
-                  <div class="api-metric-value">94.2%</div>
-                  <div class="api-metric-label">Success Rate</div>
-                </div>
-                <div class="api-metric">
-                  <div class="api-metric-value">$1.00</div>
-                  <div class="api-metric-label">Per Contact</div>
-                </div>
-                <div class="api-metric">
-                  <div class="api-metric-value" id="apolloCost">$0.00</div>
-                  <div class="api-metric-label">Cost Today</div>
-                </div>
-              </div>
-            </div>
-
-            <div class="api-card">
-              <div class="api-name">Verification Pipeline</div>
-              <div class="api-metrics">
-                <div class="api-metric">
-                  <div class="api-metric-value" id="verificationRequests">0</div>
-                  <div class="api-metric-label">Verifications Today</div>
-                </div>
-                <div class="api-metric">
-                  <div class="api-metric-value">92.8%</div>
-                  <div class="api-metric-label">Pass Rate</div>
-                </div>
-                <div class="api-metric">
-                  <div class="api-metric-value">~200ms</div>
-                  <div class="api-metric-label">Avg Process Time</div>
-                </div>
-                <div class="api-metric">
-                  <div class="api-metric-value" id="verificationCost">$0.00</div>
-                  <div class="api-metric-label">Cost Today</div>
-                </div>
-              </div>
-            </div>
+        <!-- Current System Performance -->
+        <div class="metrics-grid">
+          <div class="metric-card">
+            <div class="metric-value" id="totalCampaigns">0</div>
+            <div class="metric-label">Total Campaigns</div>
+            <div class="metric-change positive">+0 this month</div>
+          </div>
+          
+          <div class="metric-card">
+            <div class="metric-value" id="totalLeads">0</div>
+            <div class="metric-label">Verified Leads Generated</div>
+            <div class="metric-change positive">+0 this month</div>
+          </div>
+          
+          <div class="metric-card">
+            <div class="metric-value" id="avgConfidence">0%</div>
+            <div class="metric-label">Average Confidence Score</div>
+            <div class="metric-change positive">+0% vs last month</div>
+          </div>
+          
+          <div class="metric-card">
+            <div class="metric-value" id="totalCost">$0.00</div>
+            <div class="metric-label">Total API Costs</div>
+            <div class="metric-change positive">$0.00 this month</div>
           </div>
         </div>
 
-        <!-- System Status -->
+        <!-- Save Configuration -->
         <div class="section">
-          <div class="section-title">System Architecture Status</div>
-          <div class="data-sources">
-            <div class="source-item">
-              <div class="source-name">Supabase Edge Functions</div>
-              <div class="source-status">
-                <span class="status-dot"></span>
-                Operational - Global Deployment
-              </div>
-            </div>
-            
-            <div class="source-item">
-              <div class="source-name">Supabase Database</div>
-              <div class="source-status">
-                <span class="status-dot"></span>
-                Online - RLS Enabled
-              </div>
-            </div>
-            
-            <div class="source-item">
-              <div class="source-name">Vercel Static Hosting</div>
-              <div class="source-status">
-                <span class="status-dot"></span>
-                Deployed - CDN Active
-              </div>
-            </div>
-            
-            <div class="source-item">
-              <div class="source-name">Custom Domain</div>
-              <div class="source-status">
-                <span class="status-dot"></span>
-                Active - prospectpro.appsmithery.co
-              </div>
-            </div>
-          </div>
+          <button class="save-config-btn" onclick="saveConfiguration()">
+            💾 Save Configuration Changes
+          </button>
+          <div class="save-status" id="saveStatus"></div>
         </div>
       </div>
     </div>
@@ -548,7 +682,7 @@
         
         // Store the personal access token in environment/config
         // For demo purposes, using a placeholder - in production this would be from Supabase Vault
-        const validToken = 'your-personal-access-token-here'; // Replace with actual token
+        const validToken = '957cb08d324f6a1e'; // Replace with actual token
         
         if (input.value.trim() === validToken) {
           overlay.classList.add('hidden');
@@ -642,7 +776,75 @@
       // Auto-focus password input on load
       document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('passwordInput').focus();
+        initializeAdminControls();
       });
+
+      // Initialize admin control event listeners
+      function initializeAdminControls() {
+        // Quality threshold slider
+        const qualitySlider = document.getElementById('qualityThreshold');
+        const qualityValue = document.getElementById('qualityValue');
+        
+        qualitySlider.oninput = function() {
+          qualityValue.textContent = this.value + '%';
+        };
+
+        // Campaign budget slider
+        const budgetSlider = document.getElementById('campaignBudget');
+        const budgetValue = document.getElementById('budgetValue');
+        
+        budgetSlider.oninput = function() {
+          budgetValue.textContent = '$' + this.value;
+        };
+
+        // Max results slider
+        const resultsSlider = document.getElementById('maxResults');
+        const resultsValue = document.getElementById('resultsValue');
+        
+        resultsSlider.oninput = function() {
+          resultsValue.textContent = this.value;
+        };
+      }
+
+      // Save configuration to Supabase
+      async function saveConfiguration() {
+        const saveStatus = document.getElementById('saveStatus');
+        const saveBtn = document.querySelector('.save-config-btn');
+        
+        try {
+          saveBtn.textContent = '💾 Saving...';
+          saveBtn.disabled = true;
+
+          const config = {
+            qualityThreshold: document.getElementById('qualityThreshold').value,
+            campaignBudget: document.getElementById('campaignBudget').value,
+            maxResults: document.getElementById('maxResults').value,
+            hunterEnabled: document.getElementById('hunterToggle').checked,
+            neverBounceEnabled: document.getElementById('neverBounceToggle').checked,
+            updatedAt: new Date().toISOString()
+          };
+
+          // In production, this would save to Supabase
+          // For now, save to localStorage as demo
+          localStorage.setItem('prospectpro_admin_config', JSON.stringify(config));
+
+          saveStatus.textContent = '✅ Configuration saved successfully';
+          saveStatus.className = 'save-status success';
+
+          setTimeout(() => {
+            saveStatus.textContent = '';
+            saveStatus.className = 'save-status';
+          }, 3000);
+
+        } catch (error) {
+          console.error('Error saving configuration:', error);
+          saveStatus.textContent = '❌ Failed to save configuration';
+          saveStatus.className = 'save-status error';
+        } finally {
+          saveBtn.textContent = '💾 Save Configuration Changes';
+          saveBtn.disabled = false;
+        }
+      }
     </script>
 
     <!-- Load Supabase client -->

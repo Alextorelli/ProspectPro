@@ -308,7 +308,6 @@
         text-align: center;
         margin: 20px 0;
         width: 100%;
-        max-width: none;
       }
 
       .cost-estimate h3 {
@@ -331,11 +330,9 @@
         font-size: 1.1rem;
         font-weight: 600;
         width: 100%;
-        max-width: none;
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         cursor: pointer;
         transition: all 0.3s ease;
-        width: 100%;
       }
 
       .btn:hover {
@@ -1040,7 +1037,41 @@
           option.textContent = type;
           typeSelect.appendChild(option);
         });
+
+        // Update cost estimate when category changes
+        if (window.prospectProApp && window.prospectProApp.updateCostEstimate) {
+          window.prospectProApp.updateCostEstimate();
+        }
       }
+
+      // Set up event listeners for cost estimation
+      document.addEventListener('DOMContentLoaded', function() {
+        // Business category change listener
+        const categorySelect = document.getElementById('businessCategory');
+        if (categorySelect) {
+          categorySelect.addEventListener('change', updateBusinessTypes);
+        }
+
+        // Business type change listener
+        const typeSelect = document.getElementById('businessType');
+        if (typeSelect) {
+          typeSelect.addEventListener('change', function() {
+            if (window.prospectProApp && window.prospectProApp.updateCostEstimate) {
+              window.prospectProApp.updateCostEstimate();
+            }
+          });
+        }
+
+        // Additional keywords change listener
+        const keywordsInput = document.getElementById('additionalKeywords');
+        if (keywordsInput) {
+          keywordsInput.addEventListener('input', function() {
+            if (window.prospectProApp && window.prospectProApp.updateCostEstimate) {
+              window.prospectProApp.updateCostEstimate();
+            }
+          });
+        }
+      });
     </script>
   </body>
 </html>
