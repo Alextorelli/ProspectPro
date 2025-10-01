@@ -1,4 +1,8 @@
 {
+    "version": 2,
+    "public": true,
+    "cleanUrls": true,
+    "trailingSlash": false,
     "headers": [
         {
             "source": "/(.*)",
@@ -18,6 +22,10 @@
                 {
                     "key": "Access-Control-Allow-Headers",
                     "value": "Content-Type, Authorization"
+                },
+                {
+                    "key": "Cache-Control",
+                    "value": "public, max-age=0, s-maxage=86400"
                 }
             ]
         }
