@@ -1,218 +1,202 @@
-import React, { useState } from 'react'
-import { useBusinessDiscovery } from '../hooks/useBusinessDiscovery'
-import type { CampaignConfig } from '../types'
+import React, { useState } from "react";
+
+const businessCategories = [
+  "Professional Services",
+  "Financial Services",
+  "Healthcare & Medical",
+  "Personal Care & Beauty",
+  "Home & Property Services",
+  "Automotive Services",
+  "Food & Dining",
+  "Retail & Shopping",
+  "Technology & IT Services",
+  "Education & Training",
+  "Entertainment & Recreation",
+  "Hospitality & Lodging",
+  "Transportation & Transit",
+  "Religious & Community",
+  "Government & Public Services",
+];
+
+const businessTypesByCategory: Record<string, string[]> = {
+  "Automotive Services": [
+    "Car Repair",
+    "Auto Dealership",
+    "Car Wash",
+    "Tire Service",
+    "Auto Parts Store",
+  ],
+  "Professional Services": [
+    "Law Firm",
+    "Accounting Firm",
+    "Consulting",
+    "Marketing Agency",
+    "Real Estate",
+  ],
+  // Add more categories as needed
+};
 
 export const BusinessDiscovery: React.FC = () => {
-  const { startDiscovery, isDiscovering, progress } = useBusinessDiscovery()
-  
-  const [config, setConfig] = useState<CampaignConfig>({
-    search_terms: '',
-    location: '',
-    business_type: '',
-    budget_limit: 25,
-    max_results: 50,
-    include_email_validation: true,
-    include_website_validation: true,
-    min_confidence_score: 70,
-  })
+  const [selectedCategory, setSelectedCategory] = useState(
+    "Automotive Services"
+  );
+  const [selectedBusinessType, setSelectedBusinessType] =
+    useState("Car Repair");
+  const [keywords, setKeywords] = useState("");
+  const [location, setLocation] = useState("New York, NY");
+  const [searchRadius, setSearchRadius] = useState("10 miles");
+  const [expandGeography, setExpandGeography] = useState(false);
+  const [numberOfLeads, setNumberOfLeads] = useState(3);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!config.search_terms || !config.location) {
-      alert('Please fill in search terms and location')
-      return
-    }
-    startDiscovery(config)
-  }
-
-  const handleInputChange = (field: keyof CampaignConfig, value: string | number | boolean) => {
-    setConfig(prev => ({ ...prev, [field]: value }))
-  }
+  const availableBusinessTypes =
+    businessTypesByCategory[selectedCategory] || [];
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900">Business Discovery</h1>
-        <p className="mt-1 text-sm text-gray-500">
-          Find and validate real business leads with our zero fake data guarantee
-        </p>
-      </div>
+    <div className="bg-white rounded-lg shadow-sm">
+      <div className="p-6 space-y-6">
+        {/* Business Category */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Business Category
+          </label>
+          <select
+            value={selectedCategory}
+            onChange={(e) => {
+              setSelectedCategory(e.target.value);
+              const types = businessTypesByCategory[e.target.value];
+              if (types && types.length > 0) {
+                setSelectedBusinessType(types[0]);
+              }
+            }}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+          >
+            {businessCategories.map((category) => (
+              <option key={category} value={category}>
+                {category}
+              </option>
+            ))}
+          </select>
+        </div>
 
-      {/* Discovery Form */}
-      <div className="bg-white shadow rounded-lg">
-        <form onSubmit={handleSubmit} className="p-6 space-y-6">
-          {/* Search Configuration */}
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-            <div>
-              <label htmlFor="search_terms" className="block text-sm font-medium text-gray-700">
-                Search Terms *
-              </label>
-              <input
-                type="text"
-                id="search_terms"
-                value={config.search_terms}
-                onChange={(e) => handleInputChange('search_terms', e.target.value)}
-                placeholder="e.g., restaurants, dental offices, law firms"
-                className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                required
-              />
-            </div>
+        {/* Business Type */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Business Type
+          </label>
+          <select
+            value={selectedBusinessType}
+            onChange={(e) => setSelectedBusinessType(e.target.value)}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+          >
+            {availableBusinessTypes.map((type) => (
+              <option key={type} value={type}>
+                {type}
+              </option>
+            ))}
+          </select>
+        </div>
 
-            <div>
-              <label htmlFor="location" className="block text-sm font-medium text-gray-700">
-                Location *
-              </label>
-              <input
-                type="text"
-                id="location"
-                value={config.location}
-                onChange={(e) => handleInputChange('location', e.target.value)}
-                placeholder="e.g., San Francisco, CA"
-                className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                required
-              />
-            </div>
-
-            <div>
-              <label htmlFor="business_type" className="block text-sm font-medium text-gray-700">
-                Business Type (Optional)
-              </label>
-              <input
-                type="text"
-                id="business_type"
-                value={config.business_type}
-                onChange={(e) => handleInputChange('business_type', e.target.value)}
-                placeholder="e.g., restaurant, medical_office"
-                className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
-
-            <div>
-              <label htmlFor="max_results" className="block text-sm font-medium text-gray-700">
-                Max Results
-              </label>
-              <input
-                type="number"
-                id="max_results"
-                value={config.max_results}
-                onChange={(e) => handleInputChange('max_results', parseInt(e.target.value))}
-                min={10}
-                max={500}
-                className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
-          </div>
-
-          {/* Budget and Quality Controls */}
-          <div className="border-t pt-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Budget & Quality Controls</h3>
-            
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
-              <div>
-                <label htmlFor="budget_limit" className="block text-sm font-medium text-gray-700">
-                  Budget Limit ($)
-                </label>
-                <input
-                  type="number"
-                  id="budget_limit"
-                  value={config.budget_limit}
-                  onChange={(e) => handleInputChange('budget_limit', parseFloat(e.target.value))}
-                  min={5}
-                  max={1000}
-                  step={5}
-                  className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                />
-              </div>
-
-              <div>
-                <label htmlFor="min_confidence" className="block text-sm font-medium text-gray-700">
-                  Min Confidence Score (%)
-                </label>
-                <input
-                  type="number"
-                  id="min_confidence"
-                  value={config.min_confidence_score}
-                  onChange={(e) => handleInputChange('min_confidence_score', parseInt(e.target.value))}
-                  min={50}
-                  max={100}
-                  className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Validation Options */}
-          <div className="border-t pt-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Validation Options</h3>
-            
-            <div className="space-y-4">
-              <div className="flex items-center">
-                <input
-                  id="email_validation"
-                  type="checkbox"
-                  checked={config.include_email_validation}
-                  onChange={(e) => handleInputChange('include_email_validation', e.target.checked)}
-                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                />
-                <label htmlFor="email_validation" className="ml-2 block text-sm text-gray-900">
-                  Include Email Validation (+$0.008 per email)
-                </label>
-              </div>
-
-              <div className="flex items-center">
-                <input
-                  id="website_validation"
-                  type="checkbox"
-                  checked={config.include_website_validation}
-                  onChange={(e) => handleInputChange('include_website_validation', e.target.checked)}
-                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                />
-                <label htmlFor="website_validation" className="ml-2 block text-sm text-gray-900">
-                  Include Website Validation (Free)
-                </label>
-              </div>
-            </div>
-          </div>
-
-          {/* Submit Button */}
-          <div className="flex justify-end">
-            <button
-              type="submit"
-              disabled={isDiscovering}
-              className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isDiscovering ? (
-                <>
-                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  Discovering ({progress}%)
-                </>
-              ) : (
-                'Start Discovery'
-              )}
-            </button>
-          </div>
-        </form>
-      </div>
-
-      {/* Progress Indicator */}
-      {isDiscovering && (
-        <div className="bg-white shadow rounded-lg p-6">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">Discovery Progress</h3>
-          <div className="w-full bg-gray-200 rounded-full h-2">
-            <div
-              className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-              style={{ width: `${progress}%` }}
-            ></div>
-          </div>
-          <p className="mt-2 text-sm text-gray-500">
-            Finding and validating real business data... {progress}% complete
+        {/* Additional Keywords */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Additional Keywords (Optional)
+          </label>
+          <input
+            type="text"
+            value={keywords}
+            onChange={(e) => setKeywords(e.target.value)}
+            placeholder="e.g., luxury, organic, 24-hour (comma-separated)"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+          />
+          <p className="text-xs text-gray-500 mt-1">
+            Add comma-separated keywords to refine your search
           </p>
         </div>
-      )}
+
+        {/* Location */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Location
+          </label>
+          <input
+            type="text"
+            value={location}
+            onChange={(e) => setLocation(e.target.value)}
+            placeholder="e.g., San Francisco, CA or New York, NY"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 bg-blue-50"
+          />
+
+          <div className="mt-4 space-y-3">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Search Radius:
+              </label>
+              <select
+                value={searchRadius}
+                onChange={(e) => setSearchRadius(e.target.value)}
+                className="px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+              >
+                <option value="5 miles">5 miles</option>
+                <option value="10 miles">10 miles</option>
+                <option value="25 miles">25 miles</option>
+                <option value="50 miles">50 miles</option>
+                <option value="100 miles">100 miles</option>
+              </select>
+            </div>
+
+            <div className="flex items-center">
+              <input
+                type="checkbox"
+                id="expandGeography"
+                checked={expandGeography}
+                onChange={(e) => setExpandGeography(e.target.checked)}
+                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+              />
+              <label
+                htmlFor="expandGeography"
+                className="ml-2 text-sm text-gray-700"
+              >
+                Expand geography automatically if initial results are limited
+              </label>
+            </div>
+          </div>
+        </div>
+
+        {/* Number of Leads */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Number of Leads
+          </label>
+          <div className="flex items-center space-x-4">
+            <input
+              type="range"
+              min="1"
+              max="10"
+              value={numberOfLeads}
+              onChange={(e) => setNumberOfLeads(parseInt(e.target.value))}
+              className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
+              style={{
+                background: `linear-gradient(to right, #f59e0b 0%, #f59e0b ${
+                  numberOfLeads * 10
+                }%, #e5e7eb ${numberOfLeads * 10}%, #e5e7eb 100%)`,
+              }}
+            />
+            <div className="bg-blue-500 text-white px-3 py-1 rounded-full text-sm font-medium min-w-fit">
+              {numberOfLeads} leads
+            </div>
+          </div>
+        </div>
+
+        {/* Start Discovery Button */}
+        <div className="pt-4">
+          <button
+            type="button"
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+          >
+            🚀 Search Businesses
+          </button>
+        </div>
+      </div>
     </div>
-  )
-}
+  );
+};

@@ -1,65 +1,59 @@
-import React, { ReactNode } from 'react'
-import { Link, useLocation } from 'react-router-dom'
+import React, { ReactNode } from "react";
+import { Link, useLocation } from "react-router-dom";
 
 interface LayoutProps {
-  children: ReactNode
+  children: ReactNode;
 }
 
 const navigation = [
-  { name: 'Dashboard', href: '/', icon: '📊' },
-  { name: 'Discovery', href: '/discovery', icon: '🔍' },
-  { name: 'Results', href: '/results', icon: '📋' },
-  { name: 'Admin', href: '/admin', icon: '⚙️' },
-]
+  { name: "Discovery", href: "/", icon: "🔍" },
+  { name: "Dashboard", href: "/dashboard", icon: "📊" },
+];
 
 export const Layout: React.FC<LayoutProps> = ({ children }) => {
-  const location = useLocation()
+  const location = useLocation();
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Navigation */}
-      <nav className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16">
-            <div className="flex">
-              <div className="flex-shrink-0 flex items-center">
-                <h1 className="text-xl font-bold text-gray-900">ProspectPro</h1>
-              </div>
-              <div className="ml-6 flex space-x-8">
-                {navigation.map((item) => {
-                  const isActive = location.pathname === item.href
-                  return (
-                    <Link
-                      key={item.name}
-                      to={item.href}
-                      className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium ${
-                        isActive
-                          ? 'border-blue-500 text-gray-900'
-                          : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                      }`}
-                    >
-                      <span className="mr-2">{item.icon}</span>
-                      {item.name}
-                    </Link>
-                  )
-                })}
-              </div>
+      {/* Yellow Header */}
+      <div className="bg-yellow-400 px-6 py-4">
+        <div className="flex items-center justify-center">
+          <div className="flex items-center space-x-2">
+            <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">
+              <span className="text-white text-sm">✓</span>
             </div>
-            <div className="flex items-center">
-              <div className="flex items-center space-x-4">
-                <div className="text-sm text-gray-500">
-                  Zero Fake Data™
-                </div>
-              </div>
-            </div>
+            <h1 className="text-2xl font-bold text-gray-900">PROSPECTPRO</h1>
           </div>
         </div>
-      </nav>
+      </div>
+
+      {/* Tab Navigation */}
+      <div className="bg-white border-b">
+        <div className="max-w-4xl mx-auto">
+          <div className="flex">
+            {navigation.map((item) => {
+              const isActive = location.pathname === item.href;
+              return (
+                <Link
+                  key={item.name}
+                  to={item.href}
+                  className={`flex items-center space-x-2 px-6 py-4 border-b-2 text-sm font-medium ${
+                    isActive
+                      ? "border-blue-500 text-blue-600 bg-blue-50"
+                      : "border-transparent text-gray-500 hover:text-gray-700"
+                  }`}
+                >
+                  <span>{item.icon}</span>
+                  <span>{item.name}</span>
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+      </div>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-        {children}
-      </main>
+      <main className="max-w-4xl mx-auto p-6">{children}</main>
     </div>
-  )
-}
+  );
+};

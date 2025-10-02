@@ -9,7 +9,8 @@ function App() {
   return (
     <Layout>
       <Routes>
-        <Route path="/" element={<Dashboard />} />
+        <Route path="/" element={<BusinessDiscovery />} />
+        <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/discovery" element={<BusinessDiscovery />} />
         <Route path="/results" element={<Results />} />
         <Route path="/admin" element={<AdminPanel />} />
