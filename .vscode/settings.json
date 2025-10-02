@@ -147,15 +147,38 @@
   "terminal.integrated.gpuAcceleration": "on",
   "terminal.integrated.scrollback": 1000,
 
-  // === AI PROJECT CONTEXT (UPDATED FOR SUPABASE) ===
+  // === AI PROJECT CONTEXT (UPDATED FOR CLEANED ARCHITECTURE) ===
   "ai.contextAware": true,
   "ai.projectContext": {
-    "type": "lead-generation-platform",
-    "framework": "supabase-edge-functions",
+    "type": "verified-business-intelligence-platform",
+    "version": "4.1.0",
+    "architecture": "supabase-serverless",
+    "backend": "edge-functions-only",
     "frontend": "static-html-js",
-    "database": "supabase-postgresql",
-    "apis": ["google-places", "hunter-io", "neverbounce"],
-    "deployment": "supabase-functions",
-    "hosting": "static-hosting"
+    "database": "supabase-postgresql-rls",
+    "apis": ["google-places", "foursquare", "hunter-io", "neverbounce"],
+    "deployment": "supabase-functions-static-hosting",
+    "core_functions": ["business-discovery-optimized", "campaign-export"],
+    "data_quality": "verified-contacts-only",
+    "taxonomy": "mece-16-categories-300-types"
+  },
+
+  // === MCP SERVER CONFIGURATION (POST-CLEANUP v4.1) ===
+  "mcp.servers": {
+    "prospectpro-production": {
+      "command": "node",
+      "args": ["/workspaces/ProspectPro/mcp-servers/production-server.js"],
+      "description": "ProspectPro Production MCP Server v4.1 - Post-Cleanup Enhanced"
+    },
+    "prospectpro-development": {
+      "command": "node",
+      "args": ["/workspaces/ProspectPro/mcp-servers/development-server.js"],
+      "description": "ProspectPro Development MCP Server v3.0"
+    },
+    "prospectpro-troubleshooting": {
+      "command": "node",
+      "args": ["/workspaces/ProspectPro/mcp-servers/troubleshooting-server.js"],
+      "description": "ProspectPro Troubleshooting MCP Server v2.0"
+    }
   }
 }

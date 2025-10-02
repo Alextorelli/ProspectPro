@@ -1,15 +1,16 @@
 #!/usr/bin/env node
 
 /**
- * ProspectPro Production MCP Server - Enhanced & Consolidated
- * Optimized for rapid CI/CD, environment switching, troubleshooting, and comprehensive development support
+ * ProspectPro Production MCP Server v4.1 - Post-Cleanup Enhanced
+ * Optimized for cleaned database architecture, streamlined Edge Functions, and MECE taxonomy
  *
- * Consolidated Features:
- * - Production monitoring and health checks
- * - Database analytics and lead management
- * - System diagnostics and performance monitoring
- * - API testing and integration management
- * - Filesystem analysis and codebase insights
+ * Updated Features (Oct 2025):
+ * - 2 Essential Edge Functions: business-discovery-optimized + campaign-export
+ * - Cleaned Database: campaigns, leads, dashboard_exports (core tables only)
+ * - MECE Business Taxonomy: 16 categories, 300+ optimized business types
+ * - Security Hardened: No SECURITY DEFINER issues, fixed trigger functions
+ * - Cache-Optimized: Real-time deployment updates via Vercel
+ * - Cost Intelligence: Dynamic pricing with admin panel integration
  */
 
 const { Server } = require("@modelcontextprotocol/sdk/server/index.js");
@@ -27,8 +28,8 @@ class ProductionMCPServer {
   constructor() {
     this.server = new Server(
       {
-        name: "prospectpro-production-enhanced",
-        version: "2.0.0",
+        name: "prospectpro-production-v4.1",
+        version: "4.1.0",
       },
       {
         capabilities: {

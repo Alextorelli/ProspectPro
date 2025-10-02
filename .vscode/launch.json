@@ -2,25 +2,30 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Debug Production Server",
+      "name": "Test Business Discovery Optimized",
       "type": "node",
       "request": "launch",
-      "program": "${workspaceFolder}/server.js",
+      "program": "${workspaceFolder}/supabase/functions/business-discovery-optimized/index.ts",
       "env": {
-        "NODE_ENV": "development",
-        "ALLOW_DEGRADED_START": "true"
+        "SUPABASE_URL": "https://sriycekxdqnesdsgwiuc.supabase.co",
+        "SUPABASE_ANON_KEY": "${env:SUPABASE_ANON_KEY}"
       },
       "console": "integratedTerminal",
-      "skipFiles": ["<node_internals>/**", "**/node_modules/**"],
-      "outFiles": ["${workspaceFolder}/**/*.js"],
-      "resolveSourceMapLocations": [
-        "${workspaceFolder}/**",
-        "!**/node_modules/**"
-      ],
-      "restart": true
+      "skipFiles": ["<node_internals>/**"]
     },
     {
-      "name": "Debug MCP Production Server",
+      "name": "Test Campaign Export",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/supabase/functions/campaign-export/index.ts",
+      "env": {
+        "SUPABASE_URL": "https://sriycekxdqnesdsgwiuc.supabase.co"
+      },
+      "console": "integratedTerminal",
+      "skipFiles": ["<node_internals>/**"]
+    },
+    {
+      "name": "Debug MCP Production Server v4.1",
       "type": "node",
       "request": "launch",
       "program": "${workspaceFolder}/mcp-servers/production-server.js",
@@ -52,6 +57,22 @@
       ]
     },
     {
+      "name": "Debug MCP Troubleshooting Server",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/mcp-servers/troubleshooting-server.js",
+      "env": {
+        "NODE_ENV": "development"
+      },
+      "console": "integratedTerminal",
+      "skipFiles": ["<node_internals>/**", "**/node_modules/**"],
+      "outFiles": ["${workspaceFolder}/**/*.js"],
+      "resolveSourceMapLocations": [
+        "${workspaceFolder}/**",
+        "!**/node_modules/**"
+      ]
+    },
+    {
       "name": "Debug Current File",
       "type": "node",
       "request": "launch",
@@ -61,6 +82,15 @@
       },
       "skipFiles": ["<node_internals>/**", "**/node_modules/**"],
       "console": "integratedTerminal"
+    }
+  ],
+  "compounds": [
+    {
+      "name": "Debug Edge Functions",
+      "configurations": [
+        "Test Business Discovery Optimized",
+        "Test Campaign Export"
+      ]
     }
   ]
 }

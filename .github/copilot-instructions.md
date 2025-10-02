@@ -52,33 +52,37 @@
 
 ## CRITICAL: EDGE FUNCTIONS STATUS
 
-**PRODUCTION EDGE FUNCTIONS (OPERATIONAL)**
+**PRODUCTION EDGE FUNCTIONS (CLEANED & OPTIMIZED)**
 
-- ✅ `business-discovery` - Main business discovery with verified contact integration
-- ✅ `business-discovery-optimized` - Enhanced v3.0 with zero fake data
+- ✅ `business-discovery-optimized` - Enhanced with Foursquare + Google Places dual-source discovery
 - ✅ `campaign-export` - CSV export with verification status and professional contacts
 - ✅ Real-time database integration with verified leads tracking
 - ✅ Global edge deployment with <100ms cold starts
 - ✅ Functions URL: https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/
+- ❌ Removed 4 unused functions: enhanced-business-discovery, business-discovery-edge, diag, business-discovery
 
-**VERIFIED DATA INTEGRATION**
+**CLEANED DATABASE ARCHITECTURE**
 
-Core tables for verified business intelligence:
+Core tables (security hardened, RLS optimized):
 
 ```sql
--- Campaigns table for tracking verified discovery sessions
+-- Campaigns table (cleaned schema)
 CREATE TABLE campaigns (
   id TEXT PRIMARY KEY,
   business_type TEXT NOT NULL,
   location TEXT NOT NULL,
-  verification_level TEXT DEFAULT 'basic',
   target_count INTEGER DEFAULT 10,
+  budget_limit DECIMAL(10,4) DEFAULT 50.0,
+  min_confidence_score INTEGER DEFAULT 50,
+  status TEXT DEFAULT 'pending',
   results_count INTEGER DEFAULT 0,
   total_cost DECIMAL(10,4) DEFAULT 0,
-  created_at TIMESTAMPTZ DEFAULT NOW()
+  processing_time_ms INTEGER,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Leads table for verified business contacts
+-- Leads table (verified contacts only)
 CREATE TABLE leads (
   id BIGSERIAL PRIMARY KEY,
   campaign_id TEXT REFERENCES campaigns(id),
@@ -87,47 +91,84 @@ CREATE TABLE leads (
   phone TEXT,
   website TEXT,
   email TEXT, -- Only verified emails, no patterns
-  owner_contact TEXT, -- Apollo verified contacts
-  linkedin_profile TEXT,
   confidence_score INTEGER DEFAULT 0,
-  verification_status TEXT DEFAULT 'basic',
-  data_source TEXT DEFAULT 'google_places',
-  apollo_verified BOOLEAN DEFAULT FALSE,
-  chamber_verified BOOLEAN DEFAULT FALSE,
-  license_verified BOOLEAN DEFAULT FALSE,
+  score_breakdown JSONB,
+  validation_cost DECIMAL(10,4) DEFAULT 0,
+  cost_efficient BOOLEAN DEFAULT true,
+  scoring_recommendation TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Dashboard exports table
+CREATE TABLE dashboard_exports (
+  id BIGSERIAL PRIMARY KEY,
+  campaign_id TEXT REFERENCES campaigns(id),
+  export_type TEXT DEFAULT 'lead_export',
+  file_format TEXT DEFAULT 'csv',
+  row_count INTEGER DEFAULT 0,
+  export_status TEXT DEFAULT 'completed',
+  completed_at TIMESTAMPTZ DEFAULT NOW(),
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
+
+-- Secure analytics view (no SECURITY DEFINER issues)
+CREATE VIEW campaign_analytics
+WITH (security_invoker = true)
+AS SELECT
+  c.id,
+  c.business_type,
+  c.location,
+  c.target_count,
+  c.min_confidence_score,
+  c.status,
+  c.results_count,
+  c.total_cost,
+  c.budget_limit,
+  c.processing_time_ms,
+  c.created_at,
+  COUNT(l.id) AS actual_leads,
+  COALESCE(AVG(l.confidence_score), 0)::numeric(10,2) AS avg_confidence
+FROM campaigns c
+LEFT JOIN leads l ON l.campaign_id = c.id
+GROUP BY c.id, c.business_type, c.location, c.target_count, c.min_confidence_score,
+         c.status, c.results_count, c.total_cost, c.budget_limit, c.processing_time_ms, c.created_at;
 ```
 
-target_count INTEGER DEFAULT 10,
-results_count INTEGER DEFAULT 0,
-total_cost DECIMAL(10,4) DEFAULT 0,
-created_at TIMESTAMPTZ DEFAULT NOW()
-);
+## CRITICAL: MECE BUSINESS TAXONOMY
 
--- Leads table for storing discovered businesses
-CREATE TABLE leads (
-id BIGSERIAL PRIMARY KEY,
-campaign_id TEXT REFERENCES campaigns(id),
-business_name TEXT NOT NULL,
-address TEXT,
-phone TEXT,
-website TEXT,
-email TEXT,
-confidence_score INTEGER DEFAULT 0,
-created_at TIMESTAMPTZ DEFAULT NOW()
-);
+**16 COMPREHENSIVE CATEGORIES** (300+ optimized business types):
 
-````
+```javascript
+// MECE structure optimized for Google Places & Foursquare APIs
+const BUSINESS_CATEGORIES = {
+  "Professional Services": ["Accounting & Tax", "Legal Services", "Consulting", ...17 types],
+  "Financial Services": ["Banks & Credit Unions", "Insurance", "Investment", ...11 types],
+  "Healthcare & Medical": ["Primary Care", "Specialists", "Dental", ...26 types],
+  "Technology & Software": ["IT Services", "Software Development", "Digital Marketing", ...12 types],
+  "Food & Beverage": ["Restaurants", "Cafes & Coffee", "Bars & Nightlife", ...15 types],
+  "Retail & Shopping": ["Clothing & Fashion", "Electronics", "Home & Garden", ...18 types],
+  "Real Estate & Construction": ["Real Estate", "General Contractors", "Architecture", ...12 types],
+  "Education & Training": ["Schools", "Universities", "Training Centers", ...8 types],
+  "Entertainment & Recreation": ["Entertainment", "Sports & Fitness", "Arts", ...11 types],
+  "Transportation & Logistics": ["Auto Services", "Transportation", "Logistics", ...9 types],
+  "Beauty & Personal Care": ["Salons & Spas", "Beauty Services", "Wellness", ...8 types],
+  "Home & Local Services": ["Cleaning", "Repair Services", "Landscaping", ...12 types],
+  "Manufacturing & Industrial": ["Manufacturing", "Wholesale", "Industrial", ...8 types],
+  "Non-Profit & Government": ["Non-Profit", "Government", "Religious", ...6 types],
+  "Travel & Hospitality": ["Hotels & Lodging", "Travel Services", "Event Planning", ...7 types],
+  "Agriculture & Environment": ["Farming", "Environmental", "Pet Services", ...6 types]
+};
+```
 
 ## CRITICAL: REPOSITORY CLEANLINESS ENFORCEMENT
 
 **CLEAN SUPABASE-FIRST STRUCTURE**
 
 - ✅ Core production files: Edge Functions, static frontend, database schema
-- ✅ `/supabase/functions/` - Edge Function implementations only
-- ✅ `/public/` - Static frontend files (HTML, CSS, JS)
-- ✅ `/database/` - Schema and migration files
+- ✅ `/supabase/functions/` - 2 essential Edge Functions only
+- ✅ `/public/` - Static frontend with MECE taxonomy integration
+- ✅ `/database/` - Cleaned schema with security fixes applied
 - ❌ NO server.js, Express routes, or Node.js backend files
 - ❌ NO Docker containers, Cloud Run configs, or build pipelines
 - ❌ NO complex deployment scripts or container orchestration
@@ -159,11 +200,12 @@ created_at TIMESTAMPTZ DEFAULT NOW()
 
 **VERIFIED WORKING COMPONENTS**
 
-- ✅ Edge Function `business-discovery` returns real business data
-- ✅ Database tables created with proper RLS policies
-- ✅ API integrations (Google Places, Hunter.io, etc.) configured
-- ✅ Vercel deployment successful with public access
-- ✅ Supabase authentication working with anon key
+- ✅ Edge Function `business-discovery-optimized` returns real business data with Foursquare integration
+- ✅ Database tables created with proper RLS policies (no SECURITY DEFINER issues)
+- ✅ API integrations (Google Places, Foursquare, Hunter.io) configured
+- ✅ Vercel deployment successful with real-time cache invalidation
+- ✅ MECE taxonomy integration with 16 categories and 300+ business types
+- ✅ Admin Panel with quality thresholds and cost estimation
 
 **CRITICAL TROUBLESHOOTING PATTERNS**
 
@@ -171,13 +213,13 @@ created_at TIMESTAMPTZ DEFAULT NOW()
 
    - **Root Cause**: Anon key mismatch between frontend and Supabase
    - **Solution**: Get current anon key from Supabase dashboard → Settings → API
-   - **Update**: Replace anon key in `/public/supabase-app.js` line 9
+   - **Update**: Replace anon key in `/public/supabase-app-enhanced.js` line 9
    - **Redeploy**: `cd public && vercel --prod`
 
 2. **"API request failed: 404" Errors**
 
    - **Root Cause**: Database RLS policies blocking anon access
-   - **Solution**: Run `/database/rls-setup.sql` in Supabase SQL editor
+   - **Solution**: Run `/database/remove-security-definer.sql` in Supabase SQL editor
    - **Verify**: Check policies with `SELECT * FROM campaigns WHERE business_type = 'test'`
 
 3. **Edge Function Errors**
@@ -188,35 +230,36 @@ created_at TIMESTAMPTZ DEFAULT NOW()
 
 4. **Frontend Not Loading**
    - **Check**: Vercel deployment status and error logs
-   - **Verify**: DNS records if using custom domain
+   - **Verify**: Cache headers set to `public, max-age=0, s-maxage=0, must-revalidate`
    - **Test**: Access via direct Vercel URL first
 
 **DEBUGGING COMMANDS**
 
 ```bash
-# Test Edge Function directly
-curl -X POST 'https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/business-discovery' \
+# Test optimized Edge Function directly
+curl -X POST 'https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/business-discovery-optimized' \
   -H 'Authorization: Bearer CURRENT_ANON_KEY' \
   -H 'Content-Type: application/json' \
   -d '{"businessType": "coffee shop", "location": "Seattle, WA", "maxResults": 2}'
 
-# Check Supabase connection
+# Check active Edge Functions (should be 2 only)
 supabase functions list
 
-# Deploy frontend
+# Deploy frontend with cache invalidation
 cd public && vercel --prod
 
-# Check database permissions
+# Check database permissions with new schema
 # Run in Supabase SQL editor: SELECT * FROM campaigns LIMIT 1;
-````
+```
 
 **ENVIRONMENT VERIFICATION CHECKLIST**
 
 - [ ] Anon key in frontend matches Supabase dashboard
 - [ ] RLS policies created for campaigns, leads, dashboard_exports tables
-- [ ] Edge Function secrets contain: GOOGLE_PLACES_API_KEY, HUNTER_IO_API_KEY, NEVERBOUNCE_API_KEY
-- [ ] Database tables exist: campaigns, leads, dashboard_exports
+- [ ] Edge Function secrets contain: GOOGLE_PLACES_API_KEY, HUNTER_IO_API_KEY, NEVERBOUNCE_API_KEY, FOURSQUARE_API_KEY
+- [ ] Database tables exist: campaigns, leads, dashboard_exports, campaign_analytics view
 - [ ] Vercel deployment successful and publicly accessible
+- [ ] Cache headers set to `public, max-age=0, s-maxage=0, must-revalidate`
 
 ## IMMEDIATE CONTEXT (No Re-explanation Needed)
 
