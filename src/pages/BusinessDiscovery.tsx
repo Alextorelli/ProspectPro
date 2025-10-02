@@ -399,6 +399,12 @@ export const BusinessDiscovery: React.FC = () => {
   const [expandGeography, setExpandGeography] = useState(false);
   const [numberOfLeads, setNumberOfLeads] = useState(3);
 
+  // Verification options
+  const [chamberVerification, setChamberVerification] = useState(true);
+  const [tradeAssociation, setTradeAssociation] = useState(true);
+  const [professionalLicense, setProfessionalLicense] = useState(true);
+  const [apolloDiscovery, setApolloDiscovery] = useState(false);
+
   const availableBusinessTypes =
     businessTypesByCategory[selectedCategory] || [];
 
@@ -412,13 +418,20 @@ export const BusinessDiscovery: React.FC = () => {
       search_terms: `${selectedBusinessType} ${keywords}`.trim(),
       location: location.trim(),
       business_type: selectedBusinessType,
-      budget_limit: 25,
-      max_results: numberOfLeads * 10, // Convert to reasonable number
-      include_email_validation: true,
+      budget_limit: apolloDiscovery
+        ? numberOfLeads * 1.05
+        : numberOfLeads * 0.14,
+      max_results: numberOfLeads * 3, // Search for more to get the requested amount
+      include_email_validation: apolloDiscovery,
       include_website_validation: true,
       min_confidence_score: 70,
+      chamber_verification: chamberVerification,
+      trade_association: tradeAssociation,
+      professional_license: professionalLicense,
+      apollo_discovery: apolloDiscovery,
     };
 
+    console.log("🚀 Starting discovery with config:", config);
     startDiscovery(config);
   };
 
@@ -533,6 +546,84 @@ export const BusinessDiscovery: React.FC = () => {
           </div>
         </div>
 
+        {/* Verification Sources */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-3">
+            Contact Verification Sources
+          </label>
+          <div className="space-y-3">
+            <div className="flex items-center">
+              <input
+                type="checkbox"
+                id="chamberOfCommerce"
+                checked={chamberVerification}
+                onChange={(e) => setChamberVerification(e.target.checked)}
+                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+              />
+              <label
+                htmlFor="chamberOfCommerce"
+                className="ml-2 text-sm text-gray-700"
+              >
+                Chamber of Commerce Directory{" "}
+                <span className="text-green-600 font-medium">(+15 pts)</span>
+              </label>
+            </div>
+
+            <div className="flex items-center">
+              <input
+                type="checkbox"
+                id="tradeAssociation"
+                checked={tradeAssociation}
+                onChange={(e) => setTradeAssociation(e.target.checked)}
+                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+              />
+              <label
+                htmlFor="tradeAssociation"
+                className="ml-2 text-sm text-gray-700"
+              >
+                Trade Association Membership{" "}
+                <span className="text-green-600 font-medium">(+15-20 pts)</span>
+              </label>
+            </div>
+
+            <div className="flex items-center">
+              <input
+                type="checkbox"
+                id="professionalLicense"
+                checked={professionalLicense}
+                onChange={(e) => setProfessionalLicense(e.target.checked)}
+                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+              />
+              <label
+                htmlFor="professionalLicense"
+                className="ml-2 text-sm text-gray-700"
+              >
+                Professional License Verification{" "}
+                <span className="text-green-600 font-medium">(+25 pts)</span>
+              </label>
+            </div>
+
+            <div className="flex items-center">
+              <input
+                type="checkbox"
+                id="apolloDiscovery"
+                checked={apolloDiscovery}
+                onChange={(e) => setApolloDiscovery(e.target.checked)}
+                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+              />
+              <label
+                htmlFor="apolloDiscovery"
+                className="ml-2 text-sm text-gray-700"
+              >
+                Apollo Executive Discovery{" "}
+                <span className="text-green-600 font-medium">
+                  (+30 pts, $1.00 per contact)
+                </span>
+              </label>
+            </div>
+          </div>
+        </div>
+
         {/* Number of Leads */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -555,6 +646,112 @@ export const BusinessDiscovery: React.FC = () => {
             <div className="bg-blue-500 text-white px-3 py-1 rounded-full text-sm font-medium min-w-fit">
               {numberOfLeads} leads
             </div>
+          </div>
+        </div>
+
+        {/* Verification Sources */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-4">
+            Verification Sources
+          </label>
+          <div className="space-y-4">
+            {/* Chamber of Commerce */}
+            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-md">
+              <div>
+                <div className="text-sm font-medium text-gray-900">
+                  Chamber of Commerce Verification
+                </div>
+                <div className="text-xs text-gray-500">
+                  Validate membership and contact details from chamber
+                  directories
+                </div>
+              </div>
+              <div className="flex items-center space-x-2">
+                <span className="text-xs text-gray-500">Auto</span>
+                <span className="text-xs font-medium text-green-600">
+                  +15 pts
+                </span>
+              </div>
+            </div>
+
+            {/* Trade Association */}
+            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-md">
+              <div>
+                <div className="text-sm font-medium text-gray-900">
+                  Trade Association Verification
+                </div>
+                <div className="text-xs text-gray-500">
+                  Cross-reference with industry association directories (Spa,
+                  Beauty, Professional)
+                </div>
+              </div>
+              <div className="flex items-center space-x-2">
+                <span className="text-xs text-gray-500">Auto</span>
+                <span className="text-xs font-medium text-green-600">
+                  +15-20 pts
+                </span>
+              </div>
+            </div>
+
+            {/* Professional License */}
+            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-md">
+              <div>
+                <div className="text-sm font-medium text-gray-900">
+                  Professional License Verification
+                </div>
+                <div className="text-xs text-gray-500">
+                  Verify with state licensing boards (CPA, Healthcare, Legal)
+                </div>
+              </div>
+              <div className="flex items-center space-x-2">
+                <span className="text-xs text-gray-500">Auto</span>
+                <span className="text-xs font-medium text-green-600">
+                  +25 pts
+                </span>
+              </div>
+            </div>
+
+            {/* Apollo Discovery */}
+            <div className="flex items-center justify-between p-3 bg-blue-50 rounded-md border border-blue-200">
+              <div className="flex-1">
+                <div className="text-sm font-medium text-gray-900">
+                  Apollo Owner/Executive Discovery
+                </div>
+                <div className="text-xs text-gray-500">
+                  Direct owner and executive email verification ($1.00 per
+                  verified contact)
+                </div>
+              </div>
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="apolloDiscovery"
+                  checked={apolloDiscovery}
+                  onChange={(e) => setApolloDiscovery(e.target.checked)}
+                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                />
+                <span className="text-xs text-blue-600 font-medium">
+                  Premium
+                </span>
+              </div>
+            </div>
+          </div>
+          <div className="mt-3 text-xs text-gray-600">
+            &gt; Find verified owner and executive contacts with email/LinkedIn
+            profiles $1.00 per verified contact +30 confidence boost
+          </div>
+        </div>
+
+        {/* Estimated Cost */}
+        <div className="bg-gray-50 p-4 rounded-md">
+          <h3 className="text-sm font-medium text-gray-900 mb-2">
+            Estimated Cost
+          </h3>
+          <div className="text-2xl font-bold text-gray-900">
+            $
+            {apolloDiscovery
+              ? (numberOfLeads * 1.05).toFixed(2)
+              : (numberOfLeads * 0.14).toFixed(2)}
           </div>
         </div>
 

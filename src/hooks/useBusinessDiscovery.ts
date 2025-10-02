@@ -6,8 +6,7 @@ import type { BusinessDiscoveryResponse, CampaignConfig } from "../types";
 
 // Supabase configuration
 const supabaseUrl = "https://sriycekxdqnesdsgwiuc.supabase.co";
-const supabaseAnonKey =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNyaXljZWt4ZHFuZXNkc2d3aXVjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjcyODU0ODEsImV4cCI6MjA0Mjg2MTQ4MX0.gK8n-5YE3MX2Xs85KrNFH8R0gZR0x2f2RhZLSgHHaQ4";
+const supabaseAnonKey = "sb_publishable_GaGUGZiy1Q6ncO7kUZqAVA_SFuCyYaM";
 
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
