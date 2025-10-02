@@ -6,7 +6,8 @@ import type { BusinessDiscoveryResponse, CampaignConfig } from "../types";
 
 // Supabase configuration
 const supabaseUrl = "https://sriycekxdqnesdsgwiuc.supabase.co";
-const supabaseAnonKey = "sb_publishable_GaGUGZiy1Q6ncO7kUZqAVA_SFuCyYaM";
+const supabaseAnonKey =
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNyaXljZWt4ZHFuZXNkc2d3aXVjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc5NjU3ODksImV4cCI6MjA3MzU0MTc4OX0.Rx_1Hjz2eayKie0RpPB28i7_683ZwhVJ_5Eu_rzTWpI";
 
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
@@ -40,6 +41,10 @@ export const useBusinessDiscovery = () => {
               chamberVerification: true,
               professionalLicensing: true,
               tradeAssociations: true,
+            },
+            headers: {
+              Authorization: `Bearer ${supabaseAnonKey}`,
+              apikey: supabaseAnonKey,
             },
           }
         );
