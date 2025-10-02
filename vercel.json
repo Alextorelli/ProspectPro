@@ -1,14 +1,14 @@
 {
     "version": 2,
+    "buildCommand": "npm run build",
+    "outputDirectory": "dist",
     "public": true,
     "cleanUrls": true,
-    "routes": [
+    "trailingSlash": false,
+    "rewrites": [
         {
-            "handle": "filesystem"
-        },
-        {
-            "src": "/(.*)",
-            "dest": "/$1"
+            "source": "/(.*)",
+            "destination": "/index.html"
         }
     ],
     "headers": [
@@ -30,6 +30,10 @@
                 {
                     "key": "Access-Control-Allow-Headers",
                     "value": "Content-Type, Authorization"
+                },
+                {
+                    "key": "Cache-Control",
+                    "value": "public, max-age=0, s-maxage=0, must-revalidate"
                 }
             ]
         }

@@ -207,3 +207,4 @@ modules/api-clients/companies-house-uk-client.js/.deno_lsp/
 /dist/
 *.buildlog
 cloudbuild-*.log
+.vercel

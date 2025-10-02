@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import type { CampaignStore, CampaignResult, BusinessLead } from "../types";
+import type { BusinessLead, CampaignResult, CampaignStore } from "../types";
 
 interface CampaignActions {
   addCampaign: (campaign: CampaignResult) => void;
@@ -27,7 +27,7 @@ const initialState: CampaignStore = {
 
 export const useCampaignStore = create<CampaignStore & CampaignActions>()(
   persist(
-    (set, get) => ({
+    (set) => ({
       ...initialState,
 
       addCampaign: (campaign) =>

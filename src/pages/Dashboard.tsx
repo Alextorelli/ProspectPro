@@ -1,22 +1,27 @@
-import React from 'react'
-import { useCampaignStore } from '../stores/campaignStore'
+import React from "react";
+import { useCampaignStore } from "../stores/campaignStore";
 
 export const Dashboard: React.FC = () => {
-  const { campaigns, leads } = useCampaignStore()
+  const { campaigns, leads } = useCampaignStore();
 
-  const totalCost = campaigns.reduce((sum, campaign) => sum + campaign.total_cost, 0)
-  const totalLeads = leads.length
-  const qualifiedLeads = leads.filter(lead => lead.confidence_score >= 80).length
-  const validatedLeads = leads.filter(lead => lead.validation_status === 'validated').length
+  const totalCost = campaigns.reduce(
+    (sum, campaign) => sum + campaign.total_cost,
+    0
+  );
+  const totalLeads = leads.length;
+  const qualifiedLeads = leads.filter(
+    (lead) => lead.confidence_score >= 80
+  ).length;
+  // Removed unused validatedLeads variable
 
   const stats = [
-    { name: 'Total Campaigns', value: campaigns.length, icon: '🚀' },
-    { name: 'Total Leads', value: totalLeads, icon: '👥' },
-    { name: 'Qualified Leads', value: qualifiedLeads, icon: '✅' },
-    { name: 'Total Cost', value: `$${totalCost.toFixed(2)}`, icon: '💰' },
-  ]
+    { name: "Total Campaigns", value: campaigns.length, icon: "🚀" },
+    { name: "Total Leads", value: totalLeads, icon: "👥" },
+    { name: "Qualified Leads", value: qualifiedLeads, icon: "✅" },
+    { name: "Total Cost", value: `$${totalCost.toFixed(2)}`, icon: "💰" },
+  ];
 
-  const recentCampaigns = campaigns.slice(0, 5)
+  const recentCampaigns = campaigns.slice(0, 5);
 
   return (
     <div className="space-y-6">
@@ -31,7 +36,10 @@ export const Dashboard: React.FC = () => {
       {/* Stats Grid */}
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
         {stats.map((stat) => (
-          <div key={stat.name} className="bg-white overflow-hidden shadow rounded-lg">
+          <div
+            key={stat.name}
+            className="bg-white overflow-hidden shadow rounded-lg"
+          >
             <div className="p-5">
               <div className="flex items-center">
                 <div className="flex-shrink-0">
@@ -62,7 +70,9 @@ export const Dashboard: React.FC = () => {
           {recentCampaigns.length === 0 ? (
             <div className="text-center py-8">
               <span className="text-4xl">🔍</span>
-              <h3 className="mt-2 text-sm font-medium text-gray-900">No campaigns yet</h3>
+              <h3 className="mt-2 text-sm font-medium text-gray-900">
+                No campaigns yet
+              </h3>
               <p className="mt-1 text-sm text-gray-500">
                 Get started by creating your first lead discovery campaign.
               </p>
@@ -84,15 +94,17 @@ export const Dashboard: React.FC = () => {
                 >
                   <div className="flex-1">
                     <div className="flex items-center">
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                        campaign.status === 'completed'
-                          ? 'bg-green-100 text-green-800'
-                          : campaign.status === 'running'
-                          ? 'bg-blue-100 text-blue-800'
-                          : campaign.status === 'failed'
-                          ? 'bg-red-100 text-red-800'
-                          : 'bg-gray-100 text-gray-800'
-                      }`}>
+                      <span
+                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                          campaign.status === "completed"
+                            ? "bg-green-100 text-green-800"
+                            : campaign.status === "running"
+                            ? "bg-blue-100 text-blue-800"
+                            : campaign.status === "failed"
+                            ? "bg-red-100 text-red-800"
+                            : "bg-gray-100 text-gray-800"
+                        }`}
+                      >
                         {campaign.status}
                       </span>
                       <span className="ml-3 text-sm text-gray-900">
@@ -100,7 +112,8 @@ export const Dashboard: React.FC = () => {
                       </span>
                     </div>
                     <div className="mt-1 text-sm text-gray-500">
-                      {campaign.leads_qualified} qualified • ${campaign.total_cost.toFixed(2)} cost
+                      {campaign.leads_qualified} qualified • $
+                      {campaign.total_cost.toFixed(2)} cost
                     </div>
                   </div>
                   <div className="text-sm text-gray-500">
@@ -113,5 +126,5 @@ export const Dashboard: React.FC = () => {
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
