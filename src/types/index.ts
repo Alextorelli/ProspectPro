@@ -23,6 +23,9 @@ export interface CampaignConfig {
   include_email_validation: boolean;
   include_website_validation: boolean;
   min_confidence_score: number;
+  chamber_verification?: boolean;
+  trade_association?: boolean;
+  professional_license?: boolean;
 }
 
 export interface ValidationResult {

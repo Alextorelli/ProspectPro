@@ -902,15 +902,20 @@ class OptimizedGooglePlacesAPI {
     const query = `${businessType} in ${location}`;
     const url = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${encodeURIComponent(
       query
-    )}&key=${
-      this.apiKey
-    }&fields=place_id,name,formatted_address,formatted_phone_number,website,rating`;
+    )}&key=${this.apiKey}`;
 
     const response = await fetch(url);
     const data = await response.json();
 
+    console.log(`🔧 Google Places API status: ${data.status}`);
+    if (data.error_message) {
+      console.log(`⚠️ Google Places API error message: ${data.error_message}`);
+    }
+
     if (data.status !== "OK") {
-      throw new Error(`Google Places API error: ${data.status}`);
+      console.log(`❌ Google Places API failed with status: ${data.status}`);
+      // Return empty results instead of throwing to allow other APIs to work
+      return [];
     }
 
     const results = data.results.slice(0, maxResults * 2); // Get extra for filtering

@@ -38,9 +38,9 @@ export const useBusinessDiscovery = () => {
               requireCompleteContacts: false,
               minConfidenceScore: config.min_confidence_score,
               apolloDiscovery: config.include_email_validation,
-              chamberVerification: true,
-              professionalLicensing: true,
-              tradeAssociations: true,
+              chamberVerification: config.chamber_verification ?? true,
+              professionalLicensing: config.professional_license ?? true,
+              tradeAssociations: config.trade_association ?? true,
             },
             headers: {
               Authorization: `Bearer ${supabaseAnonKey}`,
@@ -80,6 +80,10 @@ export const useBusinessDiscovery = () => {
             confidence_score: lead.optimizedScore || lead.confidenceScore || 0,
             validation_status: "validated" as const,
             created_at: new Date().toISOString(),
+            cost_to_acquire: lead.validationCost || 0,
+            data_sources: lead.enhancementData?.verificationSources || [
+              "google_places",
+            ],
           })),
         };
 

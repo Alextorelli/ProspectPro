@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useBusinessDiscovery } from "../hooks/useBusinessDiscovery";
 
 const businessCategories = [
@@ -386,7 +387,8 @@ const businessTypesByCategory: Record<string, string[]> = {
 };
 
 export const BusinessDiscovery: React.FC = () => {
-  const { startDiscovery, isDiscovering, progress, error } =
+  const navigate = useNavigate();
+  const { startDiscovery, isDiscovering, progress, error, data } =
     useBusinessDiscovery();
 
   const [selectedCategory, setSelectedCategory] = useState(
@@ -406,6 +408,14 @@ export const BusinessDiscovery: React.FC = () => {
   const [professionalLicense, setProfessionalLicense] = useState(true);
   const [apolloDiscovery, setApolloDiscovery] = useState(false);
 
+  // Navigate to results when discovery is successful
+  useEffect(() => {
+    if (data && data.businesses && data.businesses.length > 0) {
+      console.log("✅ Discovery completed, navigating to results...");
+      navigate("/results");
+    }
+  }, [data, navigate]);
+
   const availableBusinessTypes =
     businessTypesByCategory[selectedCategory] || [];
 
@@ -422,14 +432,13 @@ export const BusinessDiscovery: React.FC = () => {
       budget_limit: apolloDiscovery
         ? numberOfLeads * 1.05
         : numberOfLeads * 0.14,
-      max_results: numberOfLeads * 3, // Search for more to get the requested amount
+      max_results: numberOfLeads, // Use exact number requested
       include_email_validation: apolloDiscovery,
       include_website_validation: true,
       min_confidence_score: 70,
       chamber_verification: chamberVerification,
       trade_association: tradeAssociation,
       professional_license: professionalLicense,
-      apollo_discovery: apolloDiscovery,
     };
 
     console.log("🚀 Starting discovery with config:", config);
