@@ -3288,3 +3288,4 @@ TS server started.
 {"type":"mark","name":"lsp.inlay_hint","count":144,"args":{"textDocument":{"uri":"file:///workspaces/ProspectPro/CAMPAIGN_HISTORY_LINKING_COMPLETE.md"},"range":{"start":{"line":0,"character":0},"end":{"line":94,"character":45}}}},
 {"type":"mark","name":"lsp.diagnostic"},
 {"type":"measure","name":"lsp.diagnostic","count":360,"duration":0.002},
+{"type":"mark","name":"lsp.goto_definition","count":19,"args":{"textDocument":{"uri":"file:///workspaces/ProspectPro/src/pages/Campaign.tsx"},"position":{"line":110,"character":18}}},
