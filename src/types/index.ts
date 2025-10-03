@@ -1,6 +1,7 @@
 // Business Discovery Types
 export interface BusinessLead {
   id: string;
+  campaign_id?: string;
   business_name: string;
   address?: string;
   phone?: string;
@@ -41,6 +42,8 @@ export interface ValidationResult {
 
 export interface CampaignResult {
   campaign_id: string;
+  business_type?: string;
+  location?: string;
   status: "running" | "completed" | "failed" | "cancelled";
   progress: number;
   total_cost: number;

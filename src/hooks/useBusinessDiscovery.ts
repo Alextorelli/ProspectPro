@@ -111,6 +111,7 @@ export const useBusinessDiscovery = () => {
           businesses: (data.enriched_leads || data.leads || []).map(
             (lead: any) => ({
               id: lead.id || Math.random().toString(36).substr(2, 9),
+              campaign_id: data.campaign_id,
               business_name:
                 lead.business_name || lead.businessName || "Unknown Business",
               address: lead.address,
@@ -140,10 +141,17 @@ export const useBusinessDiscovery = () => {
         setLoading(false);
       }
     },
-    onSuccess: (data: BusinessDiscoveryResponse) => {
+    onSuccess: (
+      data: BusinessDiscoveryResponse,
+      variables: CampaignConfig & {
+        selectedTier?: keyof typeof ENRICHMENT_TIERS;
+      }
+    ) => {
       // Create campaign record with vault-secured enrichment data
       const campaign = {
         campaign_id: data.campaign_id,
+        business_type: variables.business_type || variables.search_terms,
+        location: variables.location,
         status: "completed" as const,
         progress: 100,
         total_cost: data.total_cost,

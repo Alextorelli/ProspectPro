@@ -36,23 +36,25 @@ export const EDGE_FUNCTIONS = {
   DIAGNOSTICS: `${EDGE_FUNCTIONS_URL}/diag`,
 } as const;
 
-// Progressive Enrichment Tiers (90% cost reduction vs competitors)
+// Progressive Enrichment Tiers (Actual API costs)
 export const ENRICHMENT_TIERS = {
   STARTER: {
     name: "Starter",
-    price: 0.5,
+    price: 0.034, // Google Places API cost per search
     stages: ["business-license", "company-enrichment"],
     description: "Basic business validation and company data",
+    hasOwnershipData: false,
   },
   PROFESSIONAL: {
     name: "Professional",
-    price: 1.5,
+    price: 0.076, // Google Places + Hunter.io ($0.034 + $0.042 average)
     stages: ["business-license", "company-enrichment", "email-discovery"],
     description: "Business validation + verified email discovery",
+    hasOwnershipData: false,
   },
   ENTERPRISE: {
     name: "Enterprise",
-    price: 3.5,
+    price: 0.118, // Google Places + Hunter.io + NeverBounce ($0.034 + $0.042 + $0.042)
     stages: [
       "business-license",
       "company-enrichment",
@@ -60,10 +62,11 @@ export const ENRICHMENT_TIERS = {
       "email-verification",
     ],
     description: "Complete enrichment + email verification",
+    hasOwnershipData: false,
   },
   COMPLIANCE: {
     name: "Compliance",
-    price: 7.5,
+    price: 1.118, // All above + Apollo.io ($0.118 + $1.00)
     stages: [
       "business-license",
       "company-enrichment",
@@ -71,6 +74,7 @@ export const ENRICHMENT_TIERS = {
       "email-verification",
       "person-enrichment",
     ],
-    description: "Full compliance-grade enrichment with person data",
+    description: "Full compliance-grade enrichment with executive contacts",
+    hasOwnershipData: true,
   },
 } as const;

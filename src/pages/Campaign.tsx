@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { ProgressDisplay } from "../components/ProgressDisplay";
 import { useBusinessDiscovery } from "../hooks/useBusinessDiscovery";
 import { useCampaignStore } from "../stores/campaignStore";
@@ -7,34 +7,64 @@ import type { BusinessLead } from "../types";
 
 export const Campaign: React.FC = () => {
   const navigate = useNavigate();
-  const { currentCampaign, leads } = useCampaignStore();
+  const [searchParams] = useSearchParams();
+  const campaignId = searchParams.get("id");
+  const { currentCampaign, campaigns, leads, setCurrentCampaign } =
+    useCampaignStore();
   const { isDiscovering, progress, currentStage, cacheStats, error } =
     useBusinessDiscovery();
   const [showResults, setShowResults] = useState(false);
+
+  // Filter leads for current campaign
+  const campaignLeads = currentCampaign
+    ? leads.filter((lead) => lead.campaign_id === currentCampaign.campaign_id)
+    : [];
+
+  // Load specific campaign from URL parameter
+  useEffect(() => {
+    if (campaignId && !currentCampaign) {
+      const campaign = campaigns.find((c) => c.campaign_id === campaignId);
+      if (campaign) {
+        setCurrentCampaign(campaign);
+        setShowResults(true);
+      }
+    }
+  }, [campaignId, campaigns, currentCampaign, setCurrentCampaign]);
 
   // Show results when campaign completes
   useEffect(() => {
     if (
       currentCampaign &&
       currentCampaign.status === "completed" &&
-      leads.length > 0
+      campaignLeads.length > 0
     ) {
       setShowResults(true);
     }
-  }, [currentCampaign, leads]);
+  }, [currentCampaign, campaignLeads]);
 
-  // If no campaign is running, redirect to discovery
+  // If no campaign is running or found, redirect to discovery
   useEffect(() => {
-    if (!isDiscovering && !currentCampaign) {
+    if (!isDiscovering && !currentCampaign && !campaignId) {
+      navigate("/discovery");
+    } else if (
+      campaignId &&
+      !campaigns.find((c) => c.campaign_id === campaignId)
+    ) {
+      // Campaign ID provided but not found
       navigate("/discovery");
     }
-  }, [isDiscovering, currentCampaign, navigate]);
+  }, [isDiscovering, currentCampaign, campaignId, campaigns, navigate]);
 
   const exportToCsv = () => {
-    if (!leads.length) return;
+    if (!campaignLeads.length) return;
 
-    // CSV headers - let me confirm these columns with you first
-    const headers = [
+    // Determine if this campaign has ownership data
+    const hasOwnershipData =
+      currentCampaign?.tier_used === "Compliance" ||
+      campaignLeads.some((lead) => lead.enrichment_tier === "Compliance");
+
+    // Base CSV headers
+    const baseHeaders = [
       "Business Name",
       "Address",
       "Phone",
@@ -47,11 +77,22 @@ export const Campaign: React.FC = () => {
       "Enrichment Tier",
     ];
 
-    // Convert leads to CSV format
+    // Add ownership columns for Compliance tier
+    const headers = hasOwnershipData
+      ? [
+          ...baseHeaders,
+          "Owner Name",
+          "Owner Email",
+          "Owner Phone",
+          "Owner Confidence Score",
+        ]
+      : baseHeaders;
+
+    // Convert leads to CSV format with conditional ownership data
     const csvContent = [
       headers.join(","),
-      ...leads.map((lead: BusinessLead) =>
-        [
+      ...campaignLeads.map((lead: BusinessLead) => {
+        const baseRow = [
           `"${lead.business_name || ""}"`,
           `"${lead.address || ""}"`,
           `"${lead.phone || ""}"`,
@@ -59,11 +100,24 @@ export const Campaign: React.FC = () => {
           `"${lead.email || ""}"`,
           lead.confidence_score || 0,
           `"${lead.validation_status || ""}"`,
-          `$${(lead.cost_to_acquire || 0).toFixed(2)}`,
+          `$${(lead.cost_to_acquire || 0).toFixed(3)}`,
           `"${(lead.data_sources || []).join("; ")}"`,
           `"${lead.enrichment_tier || ""}"`,
-        ].join(",")
-      ),
+        ];
+
+        // Add ownership data if available
+        if (hasOwnershipData) {
+          const ownerData = (lead as any).owner_data || {};
+          baseRow.push(
+            `"${ownerData.name || ""}"`,
+            `"${ownerData.email || ""}"`,
+            `"${ownerData.phone || ""}"`,
+            ownerData.confidence_score || 0
+          );
+        }
+
+        return baseRow.join(",");
+      }),
     ].join("\n");
 
     // Download CSV file
@@ -169,7 +223,7 @@ export const Campaign: React.FC = () => {
       )}
 
       {/* Results Table */}
-      {showResults && leads.length > 0 && (
+      {showResults && campaignLeads.length > 0 && (
         <div className="bg-white rounded-lg shadow-sm overflow-hidden">
           <div className="px-6 py-4 border-b border-gray-200">
             <div className="flex items-center justify-between">
@@ -177,7 +231,7 @@ export const Campaign: React.FC = () => {
                 Campaign Results
               </h2>
               <div className="text-sm text-gray-500">
-                {leads.length} leads found
+                {campaignLeads.length} leads found
               </div>
             </div>
           </div>
@@ -204,7 +258,7 @@ export const Campaign: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {leads.map((lead: BusinessLead) => (
+                {campaignLeads.map((lead: BusinessLead) => (
                   <tr key={lead.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div>
@@ -317,7 +371,7 @@ export const Campaign: React.FC = () => {
       )}
 
       {/* No Results State */}
-      {showResults && leads.length === 0 && (
+      {showResults && campaignLeads.length === 0 && (
         <div className="bg-white rounded-lg shadow-sm p-12 text-center">
           <svg
             className="mx-auto h-12 w-12 text-gray-400"

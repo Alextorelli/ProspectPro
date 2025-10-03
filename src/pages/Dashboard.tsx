@@ -1,8 +1,10 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import { useCampaignStore } from "../stores/campaignStore";
 
 export const Dashboard: React.FC = () => {
   const { campaigns, leads } = useCampaignStore();
+  const navigate = useNavigate();
 
   const totalCost = campaigns.reduce(
     (sum, campaign) => sum + campaign.total_cost,
@@ -90,7 +92,10 @@ export const Dashboard: React.FC = () => {
               {recentCampaigns.map((campaign) => (
                 <div
                   key={campaign.campaign_id}
-                  className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50"
+                  className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
+                  onClick={() =>
+                    navigate(`/campaign?id=${campaign.campaign_id}`)
+                  }
                 >
                   <div className="flex-1">
                     <div className="flex items-center">
@@ -107,17 +112,29 @@ export const Dashboard: React.FC = () => {
                       >
                         {campaign.status}
                       </span>
-                      <span className="ml-3 text-sm text-gray-900">
-                        Campaign {campaign.campaign_id.slice(0, 8)}
+                      <span className="ml-3 text-sm font-weight-medium text-gray-900">
+                        {campaign.business_type} in {campaign.location}
                       </span>
                     </div>
                     <div className="mt-1 text-sm text-gray-500">
+                      {campaign.leads_found} results •{" "}
                       {campaign.leads_qualified} qualified • $
                       {campaign.total_cost.toFixed(2)} cost
                     </div>
                   </div>
-                  <div className="text-sm text-gray-500">
-                    {new Date(campaign.created_at).toLocaleDateString()}
+                  <div className="flex items-center space-x-3">
+                    <div className="text-sm text-gray-500">
+                      {new Date(campaign.created_at).toLocaleDateString()}
+                    </div>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigate(`/campaign?id=${campaign.campaign_id}`);
+                      }}
+                      className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                    >
+                      View Details →
+                    </button>
                   </div>
                 </div>
               ))}
