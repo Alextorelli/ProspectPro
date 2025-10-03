@@ -68,7 +68,8 @@ export const useBusinessDiscovery = () => {
           total_found: data.results?.totalFound || 0,
           qualified_count: data.results?.qualified || 0,
           total_cost: data.costs?.totalCost || 0,
-          processing_time: data.performance?.processingTime || "0s",
+          processing_time: data.optimization?.processingTime || "0ms",
+          census_intelligence: data.census_intelligence || undefined,
           businesses: (data.leads || []).map((lead: any) => ({
             id: Math.random().toString(36).substr(2, 9),
             business_name: lead.businessName || "Unknown Business",

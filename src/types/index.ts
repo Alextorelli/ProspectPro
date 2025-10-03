@@ -46,6 +46,25 @@ export interface CampaignResult {
   error_message?: string;
 }
 
+// Census Intelligence Types
+export interface CensusIntelligence {
+  business_density: {
+    total_establishments: number;
+    density_score: number;
+    confidence_multiplier: number;
+  };
+  geographic_optimization: {
+    optimal_radius: number;
+    expected_results: number;
+    api_efficiency_score: number;
+  };
+  market_insights: {
+    market_density: "High" | "Medium" | "Low";
+    competition_level: "High" | "Medium" | "Low";
+    search_optimization: string;
+  };
+}
+
 // API Response Types
 export interface EdgeFunctionResponse<T> {
   success: boolean;
@@ -58,10 +77,11 @@ export interface EdgeFunctionResponse<T> {
 export interface BusinessDiscoveryResponse {
   businesses: BusinessLead[];
   total_cost: number;
-  processing_time: number;
+  processing_time: string;
   campaign_id: string;
   qualified_count: number;
   total_found: number;
+  census_intelligence?: CensusIntelligence;
 }
 
 // Store Types
