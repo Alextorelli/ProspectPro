@@ -52,9 +52,10 @@
 - **Frontend**: React/Vite app → `npm run build` → deploy `/dist` to Vercel → Custom domain
 - **Backend**: Supabase Edge Functions → `supabase functions deploy`
 - **Production URL**: https://prospectpro.appsmithery.co/ (ALWAYS ACCESSIBLE)
-- **Hosting**: Vercel project `alex-torellis-projects/prospect-pro` (underlying platform)
+- **Hosting**: Vercel with native Vite framework detection and optimization
 - **Build**: Required before deployment (`npm run build` creates `/dist`)
 - **Domain**: Custom domain always points to latest deployment
+- **Framework**: Native Vite detection enables automatic build optimization
 
 **PLATFORM SPECIALIZATION**
 
@@ -221,7 +222,9 @@ const BUSINESS_CATEGORIES = {
 **VERIFIED WORKING COMPONENTS**
 
 - ✅ React/Vite frontend builds successfully to `/dist`
-- ✅ Vercel deployment linked to custom domain prospectpro.appsmithery.co
+- ✅ Vercel deployment with native Vite framework detection
+- ✅ Custom domain prospectpro.appsmithery.co with optimal CDN caching
+- ✅ Zero build warnings (Node.js + PostCSS optimized)
 - ✅ Edge Function `business-discovery-optimized` returns real business data with Foursquare integration
 - ✅ Database tables created with proper RLS policies (no SECURITY DEFINER issues)
 - ✅ API integrations (Google Places, Foursquare, Hunter.io) configured

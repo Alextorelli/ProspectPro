@@ -10,8 +10,6 @@ build
 
 # Archive and legacy files
 archive/
-api/
-modules/
 docker/
 server.js
 docker-compose*.yml
@@ -28,18 +26,11 @@ yarn-error.log*
 # MCP servers (not needed for frontend build)
 mcp-servers/
 
-# Development configs
-.vscode/
+# Development configs that aren't needed for build
 .codespaces/
-.devcontainer/
 
-# Database files
+# Database files (not needed for frontend)
 database/
-
-# Documentation
-docs/
-*.md
-!README.md
 
 # Test files
 test-*.sh
@@ -47,3 +38,9 @@ test-*.js
 
 # Supabase functions (separate deployment)
 supabase/functions/
+
+# Large documentation files not needed for build
+VERCEL_NATIVE_OPTIMIZATIONS.md
+COST_OPTIMIZATION_SUMMARY.md
+CI_CD_DEPLOYMENT_GUIDE.md
+TECHNICAL_SUMMARY_*.md
