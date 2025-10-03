@@ -19,6 +19,7 @@ alias ppf="cd /workspaces/ProspectPro/supabase/functions"
 alias ppm="cd /workspaces/ProspectPro/mcp-servers"
 
 # Development shortcuts
+
 alias pp-clean="cd /workspaces/ProspectPro && npm run clean"
 alias pp-health="curl -I https://prospectpro.appsmithery.co/"
 

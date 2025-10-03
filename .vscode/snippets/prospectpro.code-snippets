@@ -15,7 +15,7 @@
     ],
     "description": "Debug Edge Function template"
   },
-  
+
   "Deploy Template": {
     "prefix": "deploy-now",
     "body": [
@@ -30,7 +30,7 @@
   },
 
   "MCP Server Status": {
-    "prefix": "mcp-status", 
+    "prefix": "mcp-status",
     "body": [
       "Check MCP server status:",
       "",
@@ -49,7 +49,7 @@
       "Analyze current costs for ${1:timeframe}:",
       "",
       "Focus areas:",
-      "- Copilot usage optimization", 
+      "- Copilot usage optimization",
       "- Codespaces compute hours",
       "- Edge Function invocations",
       "- Storage costs",
@@ -67,7 +67,7 @@
       "## MCP Server",
       "cd /workspaces/ProspectPro/mcp-servers && npm run start:production",
       "",
-      "## Deploy", 
+      "## Deploy",
       "npm run build && cd dist && vercel --prod",
       "",
       "## Test Production",

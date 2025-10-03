@@ -83,13 +83,15 @@ class SupabaseTroubleshootingServer {
         },
         {
           name: "check_production_deployment",
-          description: "Validate production deployment status and configuration at prospectpro.appsmithery.co",
+          description:
+            "Validate production deployment status and configuration at prospectpro.appsmithery.co",
           inputSchema: {
             type: "object",
             properties: {
               url: {
                 type: "string",
-                description: "Production URL to check (default: prospectpro.appsmithery.co)",
+                description:
+                  "Production URL to check (default: prospectpro.appsmithery.co)",
               },
             },
             required: ["url"],
@@ -344,7 +346,9 @@ This indicates:
     }
   }
 
-  async checkProductionDeployment({ url = "https://prospectpro.appsmithery.co/" }) {
+  async checkProductionDeployment({
+    url = "https://prospectpro.appsmithery.co/",
+  }) {
     try {
       const { stdout, stderr } = await execAsync(`curl -I "${url}"`);
 

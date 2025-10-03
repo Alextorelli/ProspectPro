@@ -209,7 +209,7 @@ const BUSINESS_CATEGORIES = {
 **CURRENT DEPLOYMENT STATE**
 
 - **Production URL**: https://prospectpro.appsmithery.co/ (PRIMARY ACCESS POINT)
-- **Hosting Platform**: Vercel project `alex-torellis-projects/prospect-pro` 
+- **Hosting Platform**: Vercel project `alex-torellis-projects/prospect-pro`
 - **Custom Domain**: Always accessible via prospectpro.appsmithery.co
 - **Build Process**: `npm run build` → `/dist` directory
 - **Deployment Source**: Always deploy from `/dist` directory
@@ -257,7 +257,7 @@ const BUSINESS_CATEGORIES = {
    - **Verify**: API keys in Edge Function secrets are configured
    - **Test**: Direct curl to Edge Function with anon Bearer token
 
-4. **Frontend Not Loading**
+5. **Frontend Not Loading**
    - **Check**: Vercel deployment status and error logs
    - **Verify**: Cache headers set to `public, max-age=0, s-maxage=0, must-revalidate`
    - **Test**: Access via direct Vercel URL first

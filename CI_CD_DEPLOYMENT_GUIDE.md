@@ -1,6 +1,7 @@
 # ProspectPro CI/CD Deployment Guide - Custom Domain Consistency
 
 ## 🎯 **Primary Production URL**
+
 **https://prospectpro.appsmithery.co/** (ALWAYS ACCESSIBLE)
 
 This custom domain always points to the latest deployment, regardless of the underlying Vercel URL.
@@ -8,6 +9,7 @@ This custom domain always points to the latest deployment, regardless of the und
 ## 🚀 **CI/CD Deployment Process**
 
 ### **1. Frontend Deployment**
+
 ```bash
 # Standard deployment process (always use this)
 npm run build                    # Build React/Vite app
@@ -22,6 +24,7 @@ npm run frontend:deploy         # Build and deploy in one command
 ```
 
 ### **2. Backend Deployment**
+
 ```bash
 # Deploy Edge Functions
 supabase functions deploy business-discovery-optimized
@@ -55,18 +58,21 @@ Custom Domain: prospectpro.appsmithery.co
 After each deployment, verify:
 
 1. **Custom Domain Accessible**
+
    ```bash
    curl -I https://prospectpro.appsmithery.co/
    # Should return 200 OK
    ```
 
 2. **React App Loading**
+
    ```bash
    curl -s https://prospectpro.appsmithery.co/ | grep -i "ProspectPro"
    # Should find title and app content
    ```
 
 3. **Edge Functions Working**
+
    ```bash
    # Test from browser console or with proper auth
    fetch('/api/business-discovery-optimized', {method: 'POST', ...})
@@ -81,17 +87,20 @@ After each deployment, verify:
 ## 🔧 **Key Configuration Files**
 
 ### **Vercel Configuration** (`vercel.json`)
+
 - **outputDirectory**: `"dist"` (React build output)
 - **buildCommand**: `"npm run build"`
 - **Custom domain**: Configured in Vercel dashboard
 
 ### **Package.json Scripts**
+
 - `npm run build` - Build React app
 - `npm run frontend:deploy` - Build and deploy
 - `npm run deploy:critical` - Deploy core Edge Functions
 - `npm run health:check` - Test custom domain
 
 ### **Smart Deployment Script** (`scripts/deploy.sh`)
+
 - Auto-detects React/Vite vs static frontend
 - Builds if necessary
 - Deploys from correct directory
@@ -100,6 +109,7 @@ After each deployment, verify:
 ## 🎛️ **CI/CD Integration Points**
 
 ### **GitHub Actions (Future)**
+
 ```yaml
 # Example workflow for automated deployment
 name: Deploy to Production
@@ -116,6 +126,7 @@ jobs:
 ```
 
 ### **Manual Deployment (Current)**
+
 ```bash
 # Complete deployment process
 git push origin main           # Push code changes
@@ -127,20 +138,24 @@ npm run health:check          # Verify deployment
 ## 🚨 **Common Issues & Solutions**
 
 ### **Issue: Blank Page**
+
 **Cause**: Deploying source files instead of built app
 **Solution**: Always deploy from `/dist` after `npm run build`
 
 ### **Issue: 404 on Custom Domain**
+
 **Cause**: Domain not properly linked or build failed
 **Solution**: Check Vercel dashboard domain settings
 
 ### **Issue: Old Vercel URL References**
+
 **Cause**: Documentation or configs pointing to temporary URLs
 **Solution**: All references should use `prospectpro.appsmithery.co`
 
 ## 📊 **Monitoring & Maintenance**
 
 ### **Health Checks**
+
 ```bash
 # Automated health check
 npm run health:check
@@ -151,6 +166,7 @@ curl -I https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/business-discovery
 ```
 
 ### **Performance Monitoring**
+
 - Custom domain should always resolve to latest deployment
 - Edge Functions should respond within 100ms
 - React app should load within 2 seconds
