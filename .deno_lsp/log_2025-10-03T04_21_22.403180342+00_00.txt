@@ -6485,3 +6485,7 @@ TS server started.
 {"type":"measure","name":"lsp.diagnostic","count":381,"duration":0.001},
 {"type":"mark","name":"lsp.diagnostic"},
 {"type":"measure","name":"lsp.diagnostic","count":382,"duration":0.001},
+{"type":"mark","name":"lsp.diagnostic"},
+{"type":"measure","name":"lsp.diagnostic","count":383,"duration":0.001},
+{"type":"mark","name":"lsp.diagnostic"},
+{"type":"measure","name":"lsp.diagnostic","count":384,"duration":0.001},
