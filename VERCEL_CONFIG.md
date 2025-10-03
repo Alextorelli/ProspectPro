@@ -21,12 +21,14 @@ This file configures Vercel to properly build and deploy the ProspectPro React/V
 ## Custom Domain:
 
 The deployment automatically serves at:
+
 - Primary: https://prospectpro.appsmithery.co/
 - Fallback: https://[deployment-url].vercel.app/
 
 ## Framework Settings:
 
 If using Vercel dashboard, ensure:
+
 - Framework Preset: "Vite" (not "Other")
 - Build Command: `npm run build`
 - Output Directory: `dist`
