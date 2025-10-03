@@ -214,10 +214,8 @@ class EnrichmentOrchestrator {
 
           const licenseResult = await this.callBusinessLicense({
             action: "searchCompany",
-            params: {
-              companyName: request.businessName,
-              state: request.state,
-            },
+            companyName: request.businessName,
+            state: request.state,
           });
 
           if (licenseResult.success && licenseResult.data) {
@@ -261,13 +259,12 @@ class EnrichmentOrchestrator {
 
             const companyParams: Record<string, unknown> = {
               action: "enrichCompany",
-              params: {},
             };
 
             if (request.website) {
-              companyParams.params = { website: request.website };
+              companyParams.website = request.website;
             } else if (request.businessName) {
-              companyParams.params = { companyName: request.businessName };
+              companyParams.companyName = request.businessName;
             }
 
             const companyResult = await this.callPeopleDataLabs(companyParams);
@@ -428,13 +425,10 @@ class EnrichmentOrchestrator {
 
             const personResult = await this.callPeopleDataLabs({
               action: "searchPerson",
-              params: {
-                companyName: request.businessName,
-                jobTitle: "CEO OR Owner OR President OR Director",
-                minLikelihood: 7,
-              },
+              companyName: request.businessName,
+              jobTitle: "CEO OR Owner OR President OR Director",
+              minLikelihood: 7,
             });
-
             if (personResult.success && personResult.data?.results) {
               response.enrichedData.personEnrichment =
                 personResult.data.results.map((person: any) => ({
