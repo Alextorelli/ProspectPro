@@ -1,0 +1,49 @@
+# Build outputs (handled by vercel.json)
+dist
+build
+
+# Development files
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Archive and legacy files
+archive/
+api/
+modules/
+docker/
+server.js
+docker-compose*.yml
+Dockerfile
+cloudbuild*.yaml
+
+# Logs and temp files
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# MCP servers (not needed for frontend build)
+mcp-servers/
+
+# Development configs
+.vscode/
+.codespaces/
+.devcontainer/
+
+# Database files
+database/
+
+# Documentation
+docs/
+*.md
+!README.md
+
+# Test files
+test-*.sh
+test-*.js
+
+# Supabase functions (separate deployment)
+supabase/functions/
