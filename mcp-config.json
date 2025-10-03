@@ -1,0 +1,84 @@
+{
+    "version": "1.0",
+    "description": "ProspectPro MCP Server Configuration - Cost Optimized",
+    "servers": {
+        "prospectpro-production": {
+            "autoStart": true,
+            "lazyLoad": true,
+            "maxMemory": "128MB",
+            "priority": "high",
+            "description": "Main production server with 28 tools",
+            "tools": [
+                "monitor_api_performance",
+                "analyze_database_metrics",
+                "check_edge_function_health",
+                "track_api_costs",
+                "monitor_supabase_usage"
+            ]
+        },
+        "prospectpro-development": {
+            "autoStart": false,
+            "onDemand": true,
+            "maxMemory": "64MB",
+            "priority": "low",
+            "description": "Development tools for new integrations",
+            "activationKeywords": [
+                "develop",
+                "integrate",
+                "new api",
+                "test integration"
+            ]
+        },
+        "prospectpro-troubleshooting": {
+            "autoStart": false,
+            "onDemand": true,
+            "maxMemory": "64MB",
+            "priority": "low",
+            "description": "Debugging and troubleshooting tools",
+            "activationKeywords": [
+                "debug",
+                "error",
+                "fix",
+                "troubleshoot",
+                "404",
+                "500"
+            ]
+        }
+    },
+    "globalSettings": {
+        "maxConcurrentServers": 1,
+        "memoryThreshold": "256MB",
+        "smartLoading": true,
+        "contextOptimization": true
+    },
+    "contextFilters": {
+        "allowedExtensions": [
+            ".ts",
+            ".js",
+            ".json",
+            ".md"
+        ],
+        "excludedPaths": [
+            "archive/**",
+            "node_modules/**",
+            ".deno_lsp/**",
+            "logs/**",
+            "dist/**"
+        ],
+        "maxContextLength": 200,
+        "maxFileSize": 50000
+    },
+    "costOptimization": {
+        "enabled": true,
+        "tokenReduction": 40,
+        "cacheResponses": true,
+        "smartContext": true,
+        "quickCommands": {
+            "run prod mcp": "cd /workspaces/ProspectPro/mcp-servers && npm run start:production",
+            "deploy vercel": "cd public && vercel --prod",
+            "deploy edge": "supabase functions deploy business-discovery-optimized",
+            "check logs": "supabase functions logs --follow",
+            "test function": "curl -X POST \"http://localhost:54321/functions/v1/business-discovery-optimized\" -H \"Content-Type: application/json\" -d '{\"businessType\":\"test\",\"location\":\"test\"}'"
+        }
+    }
+}

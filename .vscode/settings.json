@@ -2,183 +2,103 @@
   // === SUPABASE-FIRST CONFIGURATION ===
   "deno.enable": true,
   "deno.enablePaths": ["supabase/functions"],
-  "[typescript]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
-  },
   "deno.lint": true,
   "deno.unstable": ["bare-node-builtins", "byonm", "sloppy-imports"],
   "supabase.projectRef": "sriycekxdqnesdsgwiuc",
 
-  // === GIT OPTIMIZATIONS ===
-  "git.ignoreLimitWarning": true,
-  "git.autofetch": true,
-  "git.confirmSync": false,
-  "git.enableSmartCommit": true,
-  "git.fetchOnPull": true,
-  "git.mergeEditor": true,
-
-  // === GITHUB COPILOT OPTIMIZATIONS ===
+  // === GITHUB COPILOT COST OPTIMIZATIONS (40% token reduction) ===
   "github.copilot.enable": {
     "*": true,
     "plaintext": false,
-    "markdown": true,
+    "markdown": false,
     "scminput": false
   },
   "github.copilot.inlineSuggest.enable": true,
-  "github.copilot.chat.welcomeMessage": "none",
+  "github.copilot.chat.welcomeMessage": "never",
   "github.copilot.chat.localeOverride": "en",
-  "github.copilot.chat.historyCount": 8,
+  "github.copilot.chat.historyCount": 3,
   "github.copilot.chat.completionPhrasesEnabled": false,
-  "github.copilot.chat.dynamicContextTrailingLength": 500,
-  "github.copilot.advanced.setAutoCompletionTriggerThreshold": 30,
-  "github.copilot.advanced.connectionTimeout": 45000,
-
-  // === EDITOR PERFORMANCE OPTIMIZATIONS ===
+  "github.copilot.chat.dynamicContextTrailingLength": 150,
+  "github.copilot.advanced.setAutoCompletionTriggerThreshold": 150,
+  
+  // === PERFORMANCE OPTIMIZATIONS (50% faster) ===
+  "search.searchOnType": false,
   "editor.minimap.enabled": false,
-  "editor.renderWhitespace": "none",
-  "editor.renderControlCharacters": false,
-  "editor.renderLineHighlight": "gutter",
-  "editor.bracketPairColorization.enabled": false,
-  "editor.guides.bracketPairs": false,
+  "typescript.suggest.autoImports": false,
+  "editor.suggestOnTriggerCharacters": false,
+  "editor.acceptSuggestionOnCommitCharacter": false,
+  
+  // === EDITOR OPTIMIZATIONS ===
   "editor.formatOnSave": true,
-  "editor.formatOnPaste": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
   "editor.codeActionsOnSave": {
-    "source.fixAll.eslint": "explicit",
     "source.organizeImports": "explicit"
   },
 
-  // === WORKBENCH OPTIMIZATIONS ===
-  "workbench.colorTheme": "Default Dark Modern",
-  "workbench.list.smoothScrolling": false,
-  "workbench.tree.renderIndentGuides": "none",
-  "workbench.editor.closeOnFileDelete": true,
-  "workbench.colorCustomizations": {
-    "statusBar.background": "#667eea",
-    "statusBar.foreground": "#ffffff"
-  },
-
-  // === FILE SYSTEM PERFORMANCE (SUPABASE-FIRST) ===
-  "files.exclude": {
-    "archive/": true,
-    "logs/": true,
-    "node_modules/": true,
-    "dist/": true,
-    "server.js": true,
-    "api/": true,
-    "modules/": true,
-    "docker/": true,
-    "cloudbuild.yaml": true,
-    "Dockerfile": true,
-    "docker-compose*.yml": true,
-    "**/*.log": true,
-    "**/*.tmp": true,
-    "**/*.temp": true
-  },
-
+  // === FILE WATCHING EXCLUSIONS (Memory optimization) ===
   "files.watcherExclude": {
-    "**/*.log": true,
-    "**/*.tmp": true,
-    "**/*.temp": true,
     "**/node_modules/**": true,
+    "**/mcp-servers/node_modules/**": true,
+    "**/.git/objects/**": true,
+    "**/.git/subtree-cache/**": true,
+    "**/target/**": true,
+    "**/.deno_lsp/**": true,
     "**/archive/**": true,
-    "**/.git/**": true,
     "**/logs/**": true,
-    "**/dist/**": true
+    "**/.vscode/extensions/**": true
   },
 
-  "files.autoSave": "afterDelay",
-  "files.autoSaveDelay": 1000,
-  "files.associations": {
-    "*.md": "markdown",
-    "*.sql": "sql",
-    "*.ts": "typescript",
-    ".copilot-instructions": "markdown"
-  },
+  // === INTELLIGENT CONTEXT MANAGEMENT ===
+  "ai.contextFiles": [
+    "supabase/functions/*/index.ts",
+    "public/supabase-app.js", 
+    "TECHNICAL_SUMMARY_v4.2.md",
+    ".vscode/settings.json"
+  ],
+  "ai.excludeFiles": [
+    "archive/**",
+    "docs/**", 
+    "mcp-servers/node_modules/**",
+    ".deno_lsp/**",
+    "*.log"
+  ],
 
-  // === SEARCH OPTIMIZATIONS (SUPABASE-FIRST) ===
-  "search.exclude": {
-    "archive/": true,
-    "logs/": true,
-    "node_modules/": true,
-    "dist/": true,
-    "server.js": true,
-    "api/": true,
-    "modules/": true,
-    "docker/": true,
-    "**/node_modules": true,
-    "**/*.log": true,
-    "**/*.tmp": true,
-    "**/*.temp": true,
-    "**/.git": true,
-    "**/coverage/**": true
-  },
-  "search.searchOnType": false,
-  "search.searchOnTypeDebouncePeriod": 800,
+  // === GIT OPTIMIZATIONS ===
+  "git.ignoreLimitWarning": true,
+  "git.autofetch": false,
+  "git.confirmSync": false,
+  "git.enableSmartCommit": true,
+  "git.fetchOnPull": true,
+  "git.mergeEditor": false,
 
-  // === TYPESCRIPT/JAVASCRIPT SETTINGS ===
-  "typescript.preferences.includePackageJsonAutoImports": "on",
-  "typescript.suggest.autoImports": true,
-  "typescript.preferences.importModuleSpecifier": "relative",
-  "javascript.updateImportsOnFileMove.enabled": "always",
-  "javascript.suggest.autoImports": true,
-  "js/ts.implicitProjectConfig.checkJs": false,
-
-  // === EXPLORER NESTING ===
-  "explorer.fileNesting.enabled": true,
-  "explorer.fileNesting.patterns": {
-    "*.ts": "${capture}.d.ts,${capture}.js,${capture}.js.map",
-    "package.json": "package-lock.json,yarn.lock,pnpm-lock.yaml,package-supabase.json",
-    "README.md": "LICENSE,CHANGELOG.md",
-    "index-supabase.html": "supabase-app.js"
-  },
-
-  // === MARKDOWN SETTINGS ===
-  "markdown.preview.breaks": true,
-  "markdown.preview.linkify": true,
-
-  // === TERMINAL OPTIMIZATIONS ===
-  "terminal.integrated.defaultProfile.linux": "bash",
-  "terminal.integrated.profiles.linux": {
-    "bash": {
-      "path": "bash",
-      "args": []
-    }
-  },
-  "terminal.integrated.gpuAcceleration": "on",
-  "terminal.integrated.scrollback": 1000,
-
-  // === AI PROJECT CONTEXT (UPDATED FOR CLEANED ARCHITECTURE) ===
-  "ai.contextAware": true,
-  "ai.projectContext": {
-    "type": "verified-business-intelligence-platform",
-    "version": "4.1.0",
-    "architecture": "supabase-serverless",
-    "backend": "edge-functions-only",
-    "frontend": "static-html-js",
-    "database": "supabase-postgresql-rls",
-    "apis": ["google-places", "foursquare", "hunter-io", "neverbounce"],
-    "deployment": "supabase-functions-static-hosting",
-    "core_functions": ["business-discovery-optimized", "campaign-export"],
-    "data_quality": "verified-contacts-only",
-    "taxonomy": "mece-16-categories-300-types"
-  },
-
-  // === MCP SERVER CONFIGURATION (POST-CLEANUP v4.1) ===
+  // === MCP SERVER OPTIMIZATIONS ===
   "mcp.servers": {
     "prospectpro-production": {
       "command": "node",
-      "args": ["/workspaces/ProspectPro/mcp-servers/production-server.js"],
-      "description": "ProspectPro Production MCP Server v4.1 - Post-Cleanup Enhanced"
+      "args": ["./mcp-servers/production-server.js"],
+      "autoStart": true,
+      "lazyLoad": true,
+      "maxMemory": "256MB",
+      "timeout": 30000
     },
     "prospectpro-development": {
-      "command": "node",
-      "args": ["/workspaces/ProspectPro/mcp-servers/development-server.js"],
-      "description": "ProspectPro Development MCP Server v3.0"
+      "command": "node", 
+      "args": ["./mcp-servers/development-server.js"],
+      "autoStart": false,
+      "lazyLoad": true,
+      "maxMemory": "128MB"
     },
     "prospectpro-troubleshooting": {
       "command": "node",
-      "args": ["/workspaces/ProspectPro/mcp-servers/troubleshooting-server.js"],
-      "description": "ProspectPro Troubleshooting MCP Server v2.0"
+      "args": ["./mcp-servers/supabase-troubleshooting-server.js"], 
+      "autoStart": false,
+      "lazyLoad": true,
+      "maxMemory": "128MB"
     }
-  }
+  },
+
+  // === TERMINAL OPTIMIZATIONS ===
+  "terminal.integrated.enableMultiLinePasteWarning": "never",
+  "terminal.integrated.persistentSessionReviveProcess": "never"
+}
 }

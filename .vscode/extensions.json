@@ -1,52 +1,41 @@
 {
   "recommendations": [
-    // Essential Development Tools
-    "esbenp.prettier-vscode",
-    "dbaeumer.vscode-eslint",
-    "eamodio.gitlens",
-
-    // Supabase-First Development Stack (v4.1)
+    // === CORE DEVELOPMENT (Keep Always) ===
     "supabase.supabase",
     "denoland.vscode-deno",
-
-    // API Development & Testing
-    "humao.rest-client",
-
-    // GitHub & AI Integration
     "github.copilot",
     "github.copilot-chat",
-    "ms-vscode.vscode-ai-toolkit",
+    "esbenp.prettier-vscode",
+    "dbaeumer.vscode-eslint",
 
-    // Documentation & Configuration
-    "davidanson.vscode-markdownlint",
-    "redhat.vscode-yaml",
-    "ms-vscode.vscode-json",
-
-    // Static Frontend Development
+    // === ESSENTIAL TOOLS ===
+    "eamodio.gitlens",
     "bradlc.vscode-tailwindcss",
-    "ms-vscode.live-server",
-
-    // Database & Analytics
-    "ms-mssql.mssql",
-    "ms-playwright.playwright"
+    "davidanson.vscode-markdownlint",
+    "redhat.vscode-yaml"
   ],
+
   "unwantedRecommendations": [
-    // Container tools (no longer needed with serverless architecture)
+    // === REMOVE FOR COST OPTIMIZATION ===
+    "ms-vscode.vscode-ai-toolkit", // Redundant with Copilot
+    "ms-mssql.mssql", // Using Supabase
+    "ms-playwright.playwright", // Not using E2E tests currently
+    "humao.rest-client", // Using Supabase dashboard
+    "ms-vscode.live-server", // Static hosting via Vercel
+    "ms-vscode.vscode-json", // Built-in is sufficient
+
+    // === CONTAINER TOOLS (Serverless Architecture) ===
     "ms-azuretools.vscode-docker",
     "ms-kubernetes-tools.vscode-kubernetes-tools",
 
-    // Server-side tools (replaced by Edge Functions)
+    // === SERVER-SIDE TOOLS (Edge Functions Only) ===
     "ms-vscode.js-debug-nightly",
     "ms-vscode.node-debug2",
 
-    // Redundant formatting tools
+    // === REDUNDANT TOOLS ===
     "hookyqr.beautify",
-
-    // Language extensions not used in cleaned architecture
     "vscjava.vscode-java-debug",
     "ms-python.python",
-
-    // Deprecated TypeScript extensions
     "ms-vscode.vscode-typescript-next"
   ]
 }
