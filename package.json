@@ -15,7 +15,7 @@
     "frontend:build": "npm run build",
     "frontend:deploy": "npm run build && cd dist && vercel --prod",
     "static:deploy": "npm run build && cd dist && vercel --prod",
-    "health:check": "curl -f https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/business-discovery-optimized/health || echo 'Health check failed'",
+    "health:check": "curl -f https://prospectpro.appsmithery.co/ || echo 'Health check failed'",
     "cost:analyze": "echo 'Check GitHub billing dashboard for usage trends'",
     "build": "tsc && vite build",
     "preview": "vite preview",

@@ -294,12 +294,14 @@ Row-Level Security (RLS)
 Real-time Subscriptions (ready)
 ```
 
-### **Static Frontend (Vercel)**
+### **Static Frontend (Custom Domain)**
 
 ```
-Vercel CDN
+Primary URL: https://prospectpro.appsmithery.co/
     ↓
-Static HTML/CSS/JS
+Vercel CDN (underlying platform)
+    ↓
+React/Vite Application
     ↓
 Supabase Client Library
     ↓

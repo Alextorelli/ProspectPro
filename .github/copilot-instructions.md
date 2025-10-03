@@ -39,13 +39,22 @@
 **DEPLOYMENT PHILOSOPHY**
 
 - ✅ Supabase Edge Functions: All backend logic (OPERATIONAL)
-- ✅ Static Frontend: HTML/JS calling Edge Functions directly (READY)
+- ✅ React/Vite Frontend: Built and deployed to consistent Vercel domain (READY)
 - ✅ Supabase Database: Native integration with Row Level Security
 - ✅ Supabase Real-time: Ready for live updates and notifications
-- ✅ Static Hosting: Cloud Storage or CDN (cost-effective)
+- ✅ Vercel Static Hosting: Consistent domain deployment (cost-effective)
 - ❌ NO server.js, Express.js, or Node.js containers
 - ❌ NO Cloud Run containers or complex deployment pipelines
 - ✅ Supabase Environment Variables: Native Edge Function configuration
+
+**CI/CD DEPLOYMENT PROCESS**
+
+- **Frontend**: React/Vite app → `npm run build` → deploy `/dist` to Vercel → Custom domain
+- **Backend**: Supabase Edge Functions → `supabase functions deploy`
+- **Production URL**: https://prospectpro.appsmithery.co/ (ALWAYS ACCESSIBLE)
+- **Hosting**: Vercel project `alex-torellis-projects/prospect-pro` (underlying platform)
+- **Build**: Required before deployment (`npm run build` creates `/dist`)
+- **Domain**: Custom domain always points to latest deployment
 
 **PLATFORM SPECIALIZATION**
 
@@ -183,7 +192,7 @@ const BUSINESS_CATEGORIES = {
 **FILE ORGANIZATION RULES**
 
 - Edge Functions → `/supabase/functions/` folder ONLY
-- Frontend → `/public/` folder ONLY
+- Frontend → React/Vite app in root with `/dist` build output
 - Database → `/database/` folder ONLY
 - Documentation → `/docs/` folder ONLY
 - Archive material → `/archive/` folder ONLY
@@ -199,7 +208,11 @@ const BUSINESS_CATEGORIES = {
 
 **CURRENT DEPLOYMENT STATE**
 
-- **Vercel URL**: https://prospect-bk0sh7f6l-alex-torellis-projects.vercel.app
+- **Production URL**: https://prospectpro.appsmithery.co/ (PRIMARY ACCESS POINT)
+- **Hosting Platform**: Vercel project `alex-torellis-projects/prospect-pro` 
+- **Custom Domain**: Always accessible via prospectpro.appsmithery.co
+- **Build Process**: `npm run build` → `/dist` directory
+- **Deployment Source**: Always deploy from `/dist` directory
 - **Edge Functions**: OPERATIONAL (business-discovery tested successfully)
 - **Database**: RLS policies configured, test campaign inserted
 - **API Keys**: All configured in Supabase Edge Function secrets
@@ -207,29 +220,38 @@ const BUSINESS_CATEGORIES = {
 
 **VERIFIED WORKING COMPONENTS**
 
+- ✅ React/Vite frontend builds successfully to `/dist`
+- ✅ Vercel deployment linked to custom domain prospectpro.appsmithery.co
 - ✅ Edge Function `business-discovery-optimized` returns real business data with Foursquare integration
 - ✅ Database tables created with proper RLS policies (no SECURITY DEFINER issues)
 - ✅ API integrations (Google Places, Foursquare, Hunter.io) configured
-- ✅ Vercel deployment successful with real-time cache invalidation
+- ✅ Smart deployment script handles build and deploy process
 - ✅ MECE taxonomy integration with 16 categories and 300+ business types
 - ✅ Admin Panel with quality thresholds and cost estimation
 
 **CRITICAL TROUBLESHOOTING PATTERNS**
 
-1. **"Invalid JWT" / 401 Errors**
+1. **"Blank Page" / Frontend Not Loading**
+
+   - **Root Cause**: Deploying source files instead of built React app
+   - **Solution**: Build first with `npm run build`, then deploy from `/dist`
+   - **Command**: `npm run build && cd dist && vercel --prod`
+   - **Auto-Deploy**: Use `./scripts/deploy.sh` for smart detection
+
+2. **"Invalid JWT" / 401 Errors**
 
    - **Root Cause**: Anon key mismatch between frontend and Supabase
    - **Solution**: Get current anon key from Supabase dashboard → Settings → API
-   - **Update**: Replace anon key in `/public/supabase-app-enhanced.js` line 9
-   - **Redeploy**: `cd public && vercel --prod`
+   - **Update**: Replace anon key in React app's Supabase configuration
+   - **Redeploy**: `npm run build && cd dist && vercel --prod`
 
-2. **"API request failed: 404" Errors**
+3. **"API request failed: 404" Errors**
 
    - **Root Cause**: Database RLS policies blocking anon access
    - **Solution**: Run `/database/remove-security-definer.sql` in Supabase SQL editor
    - **Verify**: Check policies with `SELECT * FROM campaigns WHERE business_type = 'test'`
 
-3. **Edge Function Errors**
+4. **Edge Function Errors**
 
    - **Check**: Supabase dashboard → Edge Functions → Logs
    - **Verify**: API keys in Edge Function secrets are configured
@@ -249,11 +271,14 @@ curl -X POST 'https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/business-dis
   -H 'Content-Type: application/json' \
   -d '{"businessType": "coffee shop", "location": "Seattle, WA", "maxResults": 2}'
 
-# Check active Edge Functions (should be 2 only)
+# Check active Edge Functions (should be 6 active)
 supabase functions list
 
-# Deploy frontend with cache invalidation
-cd public && vercel --prod
+# Deploy frontend to custom domain
+npm run build && cd dist && vercel --prod
+
+# Test production URL
+curl -I https://prospectpro.appsmithery.co/
 
 # Check database permissions with new schema
 # Run in Supabase SQL editor: SELECT * FROM campaigns LIMIT 1;
@@ -265,7 +290,7 @@ cd public && vercel --prod
 - [ ] RLS policies created for campaigns, leads, dashboard_exports tables
 - [ ] Edge Function secrets contain: GOOGLE_PLACES_API_KEY, HUNTER_IO_API_KEY, NEVERBOUNCE_API_KEY, FOURSQUARE_API_KEY
 - [ ] Database tables exist: campaigns, leads, dashboard_exports, campaign_analytics view
-- [ ] Vercel deployment successful and publicly accessible
+- [ ] Custom domain prospectpro.appsmithery.co accessible and properly linked
 - [ ] Cache headers set to `public, max-age=0, s-maxage=0, must-revalidate`
 
 ## IMMEDIATE CONTEXT (No Re-explanation Needed)

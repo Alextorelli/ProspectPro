@@ -82,14 +82,14 @@ class SupabaseTroubleshootingServer {
           },
         },
         {
-          name: "check_vercel_deployment",
-          description: "Validate Vercel deployment status and configuration",
+          name: "check_production_deployment",
+          description: "Validate production deployment status and configuration at prospectpro.appsmithery.co",
           inputSchema: {
             type: "object",
             properties: {
               url: {
                 type: "string",
-                description: "Vercel deployment URL to check",
+                description: "Production URL to check (default: prospectpro.appsmithery.co)",
               },
             },
             required: ["url"],
@@ -167,8 +167,8 @@ class SupabaseTroubleshootingServer {
           return await this.validateDatabasePermissions(
             request.params.arguments
           );
-        case "check_vercel_deployment":
-          return await this.checkVercelDeployment(request.params.arguments);
+        case "check_production_deployment":
+          return await this.checkProductionDeployment(request.params.arguments);
         case "diagnose_anon_key_mismatch":
           return await this.diagnoseAnonKeyMismatch(request.params.arguments);
         case "run_rls_diagnostics":
@@ -344,7 +344,7 @@ This indicates:
     }
   }
 
-  async checkVercelDeployment({ url }) {
+  async checkProductionDeployment({ url = "https://prospectpro.appsmithery.co/" }) {
     try {
       const { stdout, stderr } = await execAsync(`curl -I "${url}"`);
 
@@ -355,7 +355,7 @@ This indicates:
         content: [
           {
             type: "text",
-            text: `Vercel Deployment Check for: ${url}
+            text: `Production Deployment Check for: ${url}
 
 Status Code: ${statusCode}
 ${
@@ -368,7 +368,7 @@ Headers:
 ${headers.slice(0, 10).join("\n")}
 
 Analysis:
-${this.analyzeVercelResponse(statusCode, headers)}
+${this.analyzeProductionResponse(statusCode, headers)}
 
 ${stderr ? `Errors: ${stderr}` : ""}`,
           },
@@ -379,28 +379,29 @@ ${stderr ? `Errors: ${stderr}` : ""}`,
         content: [
           {
             type: "text",
-            text: `Vercel deployment check failed: ${error.message}`,
+            text: `Production deployment check failed: ${error.message}`,
           },
         ],
       };
     }
   }
 
-  analyzeVercelResponse(statusCode, headers) {
+  analyzeProductionResponse(statusCode, headers) {
     if (statusCode === "401") {
       return `❌ 401 Unauthorized - Deployment protection is enabled
-Fix: Go to Vercel dashboard → Settings → Deployment Protection → Disable`;
+Fix: Check domain configuration and Vercel project settings`;
     }
 
     if (statusCode === "404") {
-      return "❌ 404 Not Found - Deployment URL invalid or site not deployed";
+      return `❌ 404 Not Found - Check if React app was built and deployed from /dist
+Fix: npm run build && cd dist && vercel --prod`;
     }
 
     if (statusCode === "200") {
-      return "✅ Deployment is live and accessible";
+      return "✅ Production deployment is live and accessible";
     }
 
-    return `⚠️ Unexpected status code ${statusCode} - check Vercel deployment logs`;
+    return `⚠️ Unexpected status code ${statusCode} - check deployment logs`;
   }
 
   async diagnoseAnonKeyMismatch({

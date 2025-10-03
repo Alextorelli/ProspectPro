@@ -21,7 +21,7 @@
 - **Ctrl+Shift+D**: Deploy Edge Function (prompts for name)
 - **Ctrl+Shift+L**: View function logs (prompts for name)
 - **Ctrl+Shift+M**: Start production MCP server
-- **Ctrl+Shift+V**: Deploy to Vercel
+- **Ctrl+Shift+V**: Deploy to production domain
 
 ### 4. **NPM Script Optimization** (`package.json`)
 
@@ -35,7 +35,7 @@
 - **pp-dev**: Start local development server
 - **pp-deploy**: Deploy Edge Functions
 - **pp-mcp**: Start production MCP server
-- **pp-vercel**: Deploy frontend to Vercel
+- **pp-vercel**: Deploy frontend to production domain
 - **pp-status**: Check running MCP servers
 
 ### 6. **Smart Automation Scripts**
