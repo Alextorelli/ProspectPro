@@ -19,21 +19,21 @@ check_directory() {
 }
 
 # Auto-detect correct deployment source
-if check_directory "frontend/dist" "index.html" && [ -f "frontend/package.json" ]; then
-    echo "📦 Detected React frontend with build output..."
-    echo "📂 Deploying from: frontend/dist/"
-    cd frontend/dist && vercel --prod
+if check_directory "dist" "index.html" && [ -f "package.json" ] && grep -q "vite" package.json; then
+    echo "📦 Detected built React/Vite app..."
+    echo "📂 Deploying from: dist/"
+    cd dist && vercel --prod
     
-elif check_directory "frontend" "package.json"; then
-    echo "📦 Detected React frontend - building first..."
+elif [ -f "package.json" ] && grep -q "vite" package.json; then
+    echo "📦 Detected React/Vite app - building first..."
     echo "🔨 Building React app..."
-    cd frontend && npm run build
+    npm run build
     
     if [ $? -eq 0 ] && [ -d "dist" ]; then
         echo "✅ Build successful - deploying..."
         cd dist && vercel --prod
     else
-        echo "❌ Build failed - check frontend build process"
+        echo "❌ Build failed - check build process"
         exit 1
     fi
     
