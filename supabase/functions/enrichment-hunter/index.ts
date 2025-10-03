@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { API_SECRETS, createVaultClient } from "../_shared/vault-client.ts";
 
 /**
  * Hunter.io Comprehensive Email Discovery & Verification Edge Function
@@ -12,6 +13,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
  * - Person/Company Enrichment: $0.034 per enrichment
  *
  * Features:
+ * - Secure vault integration for API keys
  * - Circuit breakers per endpoint
  * - Cost tracking and budgeting
  * - Confidence scoring
@@ -516,11 +518,9 @@ serve(async (req) => {
   try {
     console.log(`🔍 Hunter.io Email Enrichment Edge Function`);
 
-    // Get Hunter.io API key
-    const hunterApiKey = Deno.env.get("HUNTER_IO_API_KEY");
-    if (!hunterApiKey) {
-      throw new Error("Hunter.io API key not configured");
-    }
+    // Get Hunter.io API key from vault
+    const vaultClient = createVaultClient();
+    const hunterApiKey = await vaultClient.getSecret(API_SECRETS.HUNTER_IO);
 
     // Parse request
     const requestData: HunterRequest = await req.json();

@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { API_SECRETS, createVaultClient } from "../_shared/vault-client.ts";
 
 /**
  * NeverBounce Email Verification Edge Function
@@ -10,6 +11,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
  * - Syntax validation: FREE (doesn't count against quota)
  *
  * Features:
+ * - Secure vault integration for API keys
  * - Real-time email verification
  * - Batch verification support
  * - Quota tracking
@@ -258,11 +260,11 @@ serve(async (req) => {
   try {
     console.log(`✅ NeverBounce Email Verification Edge Function`);
 
-    // Get NeverBounce API key
-    const neverBounceApiKey = Deno.env.get("NEVERBOUNCE_API_KEY");
-    if (!neverBounceApiKey) {
-      throw new Error("NeverBounce API key not configured");
-    }
+    // Get NeverBounce API key from vault
+    const vaultClient = createVaultClient();
+    const neverBounceApiKey = await vaultClient.getSecret(
+      API_SECRETS.NEVERBOUNCE
+    );
 
     // Parse request
     const requestData: NeverBounceRequest = await req.json();

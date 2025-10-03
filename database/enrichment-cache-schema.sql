@@ -25,8 +25,7 @@ CREATE INDEX IF NOT EXISTS idx_enrichment_cache_created ON enrichment_cache(crea
 
 -- Composite index for cache lookups
 CREATE INDEX IF NOT EXISTS idx_enrichment_cache_lookup 
-ON enrichment_cache(request_type, cache_key) 
-WHERE expires_at > NOW();
+ON enrichment_cache(request_type, cache_key);
 
 -- Cache Statistics Table
 CREATE TABLE IF NOT EXISTS enrichment_cache_stats (
