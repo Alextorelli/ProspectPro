@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { ProgressDisplay } from "../components/ProgressDisplay";
+import { TierSelector } from "../components/TierSelector";
 import { useBusinessDiscovery } from "../hooks/useBusinessDiscovery";
+import { ENRICHMENT_TIERS } from "../lib/supabase";
 
 const businessCategories = [
   "Professional Services",
@@ -388,8 +391,15 @@ const businessTypesByCategory: Record<string, string[]> = {
 
 export const BusinessDiscovery: React.FC = () => {
   const navigate = useNavigate();
-  const { startDiscovery, isDiscovering, progress, error, data } =
-    useBusinessDiscovery();
+  const {
+    startDiscovery,
+    isDiscovering,
+    progress,
+    currentStage,
+    cacheStats,
+    error,
+    data,
+  } = useBusinessDiscovery();
 
   const [selectedCategory, setSelectedCategory] = useState(
     "Home & Property Services"
@@ -402,22 +412,30 @@ export const BusinessDiscovery: React.FC = () => {
   const [expandGeography, setExpandGeography] = useState(false);
   const [numberOfLeads, setNumberOfLeads] = useState(3);
 
+  // Progressive enrichment tier selection
+  const [selectedTier, setSelectedTier] =
+    useState<keyof typeof ENRICHMENT_TIERS>("PROFESSIONAL");
+
   // Verification options
   const [chamberVerification, setChamberVerification] = useState(true);
   const [tradeAssociation, setTradeAssociation] = useState(true);
   const [professionalLicense, setProfessionalLicense] = useState(true);
-  const [apolloDiscovery, setApolloDiscovery] = useState(false);
 
   // Navigate to results when discovery is successful
   useEffect(() => {
     if (data && data.businesses && data.businesses.length > 0) {
-      console.log("✅ Discovery completed, navigating to results...");
+      console.log(
+        "✅ Progressive enrichment completed, navigating to results..."
+      );
       navigate("/results");
     }
   }, [data, navigate]);
 
   const availableBusinessTypes =
     businessTypesByCategory[selectedCategory] || [];
+
+  const currentTierConfig = ENRICHMENT_TIERS[selectedTier];
+  const estimatedCost = numberOfLeads * currentTierConfig.price;
 
   const handleSearch = () => {
     if (!location.trim()) {
@@ -429,19 +447,19 @@ export const BusinessDiscovery: React.FC = () => {
       search_terms: `${selectedBusinessType} ${keywords}`.trim(),
       location: location.trim(),
       business_type: selectedBusinessType,
-      budget_limit: apolloDiscovery
-        ? numberOfLeads * 1.05
-        : numberOfLeads * 0.14,
-      max_results: numberOfLeads, // Use exact number requested
-      include_email_validation: apolloDiscovery,
+      budget_limit: estimatedCost,
+      max_results: numberOfLeads,
+      include_email_validation:
+        selectedTier === "ENTERPRISE" || selectedTier === "COMPLIANCE",
       include_website_validation: true,
       min_confidence_score: 70,
       chamber_verification: chamberVerification,
       trade_association: tradeAssociation,
       professional_license: professionalLicense,
+      selectedTier: selectedTier,
     };
 
-    console.log("🚀 Starting discovery with config:", config);
+    console.log("🚀 Starting vault-secured progressive enrichment:", config);
     startDiscovery(config);
   };
 
@@ -556,6 +574,13 @@ export const BusinessDiscovery: React.FC = () => {
           </div>
         </div>
 
+        {/* Progressive Enrichment Tier Selection */}
+        <TierSelector
+          selectedTier={selectedTier}
+          onTierChange={setSelectedTier}
+          numberOfLeads={numberOfLeads}
+        />
+
         {/* Verification Sources */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-3">
@@ -612,25 +637,10 @@ export const BusinessDiscovery: React.FC = () => {
                 <span className="text-green-600 font-medium">(+25 pts)</span>
               </label>
             </div>
-
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                id="apolloDiscovery"
-                checked={apolloDiscovery}
-                onChange={(e) => setApolloDiscovery(e.target.checked)}
-                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-              />
-              <label
-                htmlFor="apolloDiscovery"
-                className="ml-2 text-sm text-gray-700"
-              >
-                Apollo Executive Discovery{" "}
-                <span className="text-green-600 font-medium">
-                  (+30 pts, $1.00 per contact)
-                </span>
-              </label>
-            </div>
+          </div>
+          <div className="mt-3 text-xs text-gray-600">
+            🔐 All verification sources are automatically included with your
+            selected enrichment tier
           </div>
         </div>
 
@@ -720,50 +730,42 @@ export const BusinessDiscovery: React.FC = () => {
                 </span>
               </div>
             </div>
+          </div>
+          <div className="mt-3 text-xs text-gray-600">
+            💡 Executive discovery and person enrichment included in Enterprise
+            and Compliance tiers
+          </div>
+        </div>
 
-            {/* Apollo Discovery */}
-            <div className="flex items-center justify-between p-3 bg-blue-50 rounded-md border border-blue-200">
-              <div className="flex-1">
-                <div className="text-sm font-medium text-gray-900">
-                  Apollo Owner/Executive Discovery
-                </div>
-                <div className="text-xs text-gray-500">
-                  Direct owner and executive email verification ($1.00 per
-                  verified contact)
-                </div>
+        {/* Estimated Cost Display */}
+        <div className="bg-gradient-to-r from-blue-50 to-green-50 p-4 rounded-lg border border-blue-200">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-sm font-medium text-gray-900 mb-1">
+                Estimated Cost ({currentTierConfig.name} Tier)
+              </h3>
+              <div className="text-xs text-gray-600">
+                {numberOfLeads} leads × ${currentTierConfig.price} per lead
               </div>
-              <div className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  id="apolloDiscovery"
-                  checked={apolloDiscovery}
-                  onChange={(e) => setApolloDiscovery(e.target.checked)}
-                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                />
-                <span className="text-xs text-blue-600 font-medium">
-                  Premium
-                </span>
+            </div>
+            <div className="text-right">
+              <div className="text-2xl font-bold text-blue-600">
+                ${estimatedCost.toFixed(2)}
+              </div>
+              <div className="text-xs text-green-600 font-medium">
+                90% cheaper than competitors
               </div>
             </div>
           </div>
-          <div className="mt-3 text-xs text-gray-600">
-            &gt; Find verified owner and executive contacts with email/LinkedIn
-            profiles $1.00 per verified contact +30 confidence boost
-          </div>
         </div>
 
-        {/* Estimated Cost */}
-        <div className="bg-gray-50 p-4 rounded-md">
-          <h3 className="text-sm font-medium text-gray-900 mb-2">
-            Estimated Cost
-          </h3>
-          <div className="text-2xl font-bold text-gray-900">
-            $
-            {apolloDiscovery
-              ? (numberOfLeads * 1.05).toFixed(2)
-              : (numberOfLeads * 0.14).toFixed(2)}
-          </div>
-        </div>
+        {/* Progress Display */}
+        <ProgressDisplay
+          isDiscovering={isDiscovering}
+          progress={progress}
+          currentStage={currentStage}
+          cacheStats={cacheStats}
+        />
 
         {/* Start Discovery Button */}
         <div className="pt-4">
@@ -795,10 +797,10 @@ export const BusinessDiscovery: React.FC = () => {
                     d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                   ></path>
                 </svg>
-                Discovering ({progress}%)
+                Progressive Enrichment ({progress}%)
               </>
             ) : (
-              "🚀 Search Businesses"
+              "🚀 Start Progressive Enrichment"
             )}
           </button>
         </div>

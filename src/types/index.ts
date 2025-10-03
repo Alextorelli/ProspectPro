@@ -12,6 +12,9 @@ export interface BusinessLead {
   created_at: string;
   cost_to_acquire: number;
   data_sources: string[];
+  // Progressive enrichment fields
+  enrichment_tier?: string;
+  vault_secured?: boolean;
 }
 
 export interface CampaignConfig {
@@ -47,6 +50,15 @@ export interface CampaignResult {
   created_at: string;
   completed_at?: string;
   error_message?: string;
+  // Progressive enrichment fields
+  tier_used?: string;
+  vault_secured?: boolean;
+  cache_performance?: {
+    cache_hits: number;
+    cache_misses: number;
+    cache_hit_ratio: number;
+    cost_savings: number;
+  };
 }
 
 // Census Intelligence Types
@@ -85,6 +97,17 @@ export interface BusinessDiscoveryResponse {
   qualified_count: number;
   total_found: number;
   census_intelligence?: CensusIntelligence;
+  // Progressive enrichment fields (vault-secured)
+  tier_used?: string;
+  cache_performance?: {
+    cache_hits: number;
+    cache_misses: number;
+    cache_hit_ratio: number;
+    cost_savings: number;
+  };
+  vault_status?: string;
+  stage_progress?: number;
+  current_stage?: string;
 }
 
 // Store Types
