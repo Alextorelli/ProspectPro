@@ -1,4 +1,4 @@
-# Native Vercel Configuration Optim  "functions": { "app/**": { "runtime": "nodejs22.x" } },zations - Implementation Summary
+# Native Vercel Configuration Optim "functions": { "app/\*\*": { "runtime": "nodejs22.x" } },zations - Implementation Summary
 
 ## 🎯 **Problem Solved**
 

@@ -1,11 +1,12 @@
 # ProspectPro CI/CD Deployment Guide - Custom Domain Consistency
 
-## 🎯 **Primary Producti### **Vercel Configuration** (`vercel.json`)
+## 🎯 **Primary Producti### **Vercel Configuration\*\* (`vercel.json`)
+
 - **Framework**: `"vite"` (native detection)
 - **outputDirectory**: `"dist"` (React build output)
 - **buildCommand**: `"npm run build"`
 - **Node.js**: 22.x (Vercel requirement)
-- **Custom domain**: Configured in Vercel dashboardURL**
+- **Custom domain**: Configured in Vercel dashboardURL\*\*
 
 **https://prospectpro.appsmithery.co/** (ALWAYS ACCESSIBLE)
 
