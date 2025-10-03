@@ -11,29 +11,29 @@ const tierDataImprovements = {
   STARTER: [
     "Business verification",
     "Company data",
-    "Phone & website validation"
+    "Phone & website validation",
   ],
   PROFESSIONAL: [
     "Business verification",
-    "Company data", 
+    "Company data",
     "Phone & website validation",
-    "Professional email discovery"
+    "Professional email discovery",
   ],
   ENTERPRISE: [
     "Business verification",
     "Company data",
-    "Phone & website validation", 
+    "Phone & website validation",
     "Professional email discovery",
-    "Email deliverability verification"
+    "Email deliverability verification",
   ],
   COMPLIANCE: [
     "Business verification",
     "Company data",
     "Phone & website validation",
-    "Professional email discovery", 
+    "Professional email discovery",
     "Email deliverability verification",
-    "Executive contact enrichment"
-  ]
+    "Executive contact enrichment",
+  ],
 };
 
 export const TierSelector: React.FC<TierSelectorProps> = ({
@@ -71,13 +71,21 @@ export const TierSelector: React.FC<TierSelectorProps> = ({
               <div className="text-xs text-gray-500 mb-3">
                 {tier.description}
               </div>
-              
+
               {/* Data Improvements */}
               <div className="space-y-1 mb-3">
                 {improvements.map((improvement, index) => (
                   <div key={index} className="flex items-center text-xs">
-                    <svg className="w-3 h-3 text-green-500 mr-1 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    <svg
+                      className="w-3 h-3 text-green-500 mr-1 flex-shrink-0"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                        clipRule="evenodd"
+                      />
                     </svg>
                     <span className="text-gray-600">{improvement}</span>
                   </div>

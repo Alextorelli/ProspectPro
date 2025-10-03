@@ -446,7 +446,7 @@ export const BusinessDiscovery: React.FC = () => {
       include_website_validation: true,
       min_confidence_score: 70,
       chamber_verification: true, // Always enabled based on tier
-      trade_association: true, // Always enabled based on tier  
+      trade_association: true, // Always enabled based on tier
       professional_license: true, // Always enabled based on tier
       selectedTier: selectedTier,
     };
@@ -613,9 +613,7 @@ export const BusinessDiscovery: React.FC = () => {
               <div className="text-2xl font-bold text-blue-600">
                 ${estimatedCost.toFixed(2)}
               </div>
-              <div className="text-xs text-gray-600">
-                Transparent pricing
-              </div>
+              <div className="text-xs text-gray-600">Transparent pricing</div>
             </div>
           </div>
         </div>
