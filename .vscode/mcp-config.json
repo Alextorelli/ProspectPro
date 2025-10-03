@@ -1,0 +1,28 @@
+{
+    "mcpServers": {
+        "prospectpro-production": {
+            "command": "node",
+            "args": [
+                "./mcp-servers/supabase-production-server.js"
+            ],
+            "cwd": "${workspaceFolder}",
+            "env": {}
+        },
+        "prospectpro-development": {
+            "command": "node",
+            "args": [
+                "./mcp-servers/supabase-development-server.js"
+            ],
+            "cwd": "${workspaceFolder}",
+            "env": {}
+        },
+        "prospectpro-troubleshooting": {
+            "command": "node",
+            "args": [
+                "./mcp-servers/supabase-troubleshooting-server.js"
+            ],
+            "cwd": "${workspaceFolder}",
+            "env": {}
+        }
+    }
+}

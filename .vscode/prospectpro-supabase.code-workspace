@@ -1,0 +1,144 @@
+{
+  "folders": [
+    {
+      "name": "ProspectPro",
+      "path": "."
+    }
+  ],
+  "settings": {
+    "files.exclude": {
+      "archive/": true,
+      "logs/": true,
+      "node_modules/": true,
+      "dist/": true,
+      ".git/": false
+    },
+    "search.exclude": {
+      "archive/": true,
+      "logs/": true,
+      "node_modules/": true,
+      "dist/": true
+    },
+    "explorer.fileNesting.enabled": true,
+    "explorer.fileNesting.patterns": {
+      "*.ts": "${capture}.d.ts,${capture}.js,${capture}.js.map",
+      "package.json": "package-lock.json,yarn.lock,pnpm-lock.yaml",
+      "README.md": "LICENSE,CHANGELOG.md"
+    },
+    "typescript.preferences.includePackageJsonAutoImports": "on",
+    "typescript.suggest.autoImports": true,
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+      "source.fixAll": "explicit",
+      "source.organizeImports": "explicit"
+    },
+    "supabase.projectRef": "sriycekxdqnesdsgwiuc",
+    "files.associations": {
+      "*.sql": "sql"
+    },
+    "git.ignoreLimitWarning": true,
+    "typescript.preferences.importModuleSpecifier": "relative"
+  },
+  "extensions": {
+    "recommendations": [
+      "supabase.supabase",
+      "ms-vscode.vscode-typescript-next",
+      "bradlc.vscode-tailwindcss",
+      "esbenp.prettier-vscode",
+      "ms-vscode.vscode-json",
+      "redhat.vscode-yaml",
+      "ms-python.python",
+      "github.copilot",
+      "github.copilot-chat",
+      "ms-vscode.remote-repositories",
+      "ms-vscode.remote-containers"
+    ]
+  },
+  "tasks": {
+    "version": "2.0.0",
+    "tasks": [
+      {
+        "label": "Supabase: Serve Functions",
+        "type": "shell",
+        "command": "supabase functions serve",
+        "group": "build",
+        "presentation": {
+          "echo": true,
+          "reveal": "always",
+          "focus": false,
+          "panel": "shared"
+        },
+        "problemMatcher": []
+      },
+      {
+        "label": "Supabase: Deploy Functions",
+        "type": "shell",
+        "command": "supabase functions deploy business-discovery && supabase functions deploy campaign-export",
+        "group": "build",
+        "presentation": {
+          "echo": true,
+          "reveal": "always",
+          "focus": false,
+          "panel": "shared"
+        },
+        "problemMatcher": []
+      },
+      {
+        "label": "Build Static Site",
+        "type": "shell",
+        "command": "npm run build:static",
+        "group": "build",
+        "presentation": {
+          "echo": true,
+          "reveal": "always",
+          "focus": false,
+          "panel": "shared"
+        },
+        "problemMatcher": []
+      },
+      {
+        "label": "Serve Local Development",
+        "type": "shell",
+        "command": "npm run serve:local",
+        "group": "build",
+        "presentation": {
+          "echo": true,
+          "reveal": "always",
+          "focus": false,
+          "panel": "shared"
+        },
+        "isBackground": true,
+        "problemMatcher": []
+      },
+      {
+        "label": "Deploy to Production",
+        "type": "shell",
+        "command": "npm run deploy:static",
+        "group": "build",
+        "presentation": {
+          "echo": true,
+          "reveal": "always",
+          "focus": false,
+          "panel": "shared"
+        },
+        "dependsOn": "Build Static Site",
+        "problemMatcher": []
+      }
+    ]
+  },
+  "launch": {
+    "version": "0.2.0",
+    "configurations": [
+      {
+        "name": "Preview Static Site",
+        "type": "node",
+        "request": "launch",
+        "program": "${workspaceFolder}/public/index-supabase.html",
+        "console": "integratedTerminal",
+        "env": {
+          "NODE_ENV": "development"
+        }
+      }
+    ]
+  }
+}

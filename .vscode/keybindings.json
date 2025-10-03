@@ -1,0 +1,34 @@
+[
+  {
+    "key": "ctrl+shift+s",
+    "command": "workbench.action.terminal.sendSequence",
+    "args": { "text": "supabase functions serve\n" },
+    "when": "terminalFocus"
+  },
+  {
+    "key": "ctrl+shift+d",
+    "command": "workbench.action.terminal.sendSequence",
+    "args": { "text": "supabase functions deploy " },
+    "when": "terminalFocus"
+  },
+  {
+    "key": "ctrl+shift+l",
+    "command": "workbench.action.terminal.sendSequence",
+    "args": { "text": "supabase functions logs " },
+    "when": "terminalFocus"
+  },
+  {
+    "key": "ctrl+shift+m",
+    "command": "workbench.action.terminal.sendSequence",
+    "args": {
+      "text": "cd /workspaces/ProspectPro/mcp-servers && npm run start:production\n"
+    },
+    "when": "terminalFocus"
+  },
+  {
+    "key": "ctrl+shift+v",
+    "command": "workbench.action.terminal.sendSequence",
+    "args": { "text": "cd public && vercel --prod\n" },
+    "when": "terminalFocus"
+  }
+]
