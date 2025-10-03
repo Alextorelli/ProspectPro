@@ -398,7 +398,6 @@ export const BusinessDiscovery: React.FC = () => {
     currentStage,
     cacheStats,
     error,
-    data,
   } = useBusinessDiscovery();
 
   const [selectedCategory, setSelectedCategory] = useState(
@@ -416,20 +415,13 @@ export const BusinessDiscovery: React.FC = () => {
   const [selectedTier, setSelectedTier] =
     useState<keyof typeof ENRICHMENT_TIERS>("PROFESSIONAL");
 
-  // Verification options
-  const [chamberVerification, setChamberVerification] = useState(true);
-  const [tradeAssociation, setTradeAssociation] = useState(true);
-  const [professionalLicense, setProfessionalLicense] = useState(true);
-
-  // Navigate to results when discovery is successful
+  // Navigate to campaign page when discovery starts
   useEffect(() => {
-    if (data && data.businesses && data.businesses.length > 0) {
-      console.log(
-        "✅ Progressive enrichment completed, navigating to results..."
-      );
-      navigate("/results");
+    if (isDiscovering) {
+      console.log("🚀 Campaign started, navigating to campaign page...");
+      navigate("/campaign");
     }
-  }, [data, navigate]);
+  }, [isDiscovering, navigate]);
 
   const availableBusinessTypes =
     businessTypesByCategory[selectedCategory] || [];
@@ -453,13 +445,13 @@ export const BusinessDiscovery: React.FC = () => {
         selectedTier === "ENTERPRISE" || selectedTier === "COMPLIANCE",
       include_website_validation: true,
       min_confidence_score: 70,
-      chamber_verification: chamberVerification,
-      trade_association: tradeAssociation,
-      professional_license: professionalLicense,
+      chamber_verification: true, // Always enabled based on tier
+      trade_association: true, // Always enabled based on tier  
+      professional_license: true, // Always enabled based on tier
       selectedTier: selectedTier,
     };
 
-    console.log("🚀 Starting vault-secured progressive enrichment:", config);
+    console.log("🚀 Starting campaign:", config);
     startDiscovery(config);
   };
 
@@ -581,69 +573,6 @@ export const BusinessDiscovery: React.FC = () => {
           numberOfLeads={numberOfLeads}
         />
 
-        {/* Verification Sources */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-3">
-            Contact Verification Sources
-          </label>
-          <div className="space-y-3">
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                id="chamberOfCommerce"
-                checked={chamberVerification}
-                onChange={(e) => setChamberVerification(e.target.checked)}
-                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-              />
-              <label
-                htmlFor="chamberOfCommerce"
-                className="ml-2 text-sm text-gray-700"
-              >
-                Chamber of Commerce Directory{" "}
-                <span className="text-green-600 font-medium">(+15 pts)</span>
-              </label>
-            </div>
-
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                id="tradeAssociation"
-                checked={tradeAssociation}
-                onChange={(e) => setTradeAssociation(e.target.checked)}
-                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-              />
-              <label
-                htmlFor="tradeAssociation"
-                className="ml-2 text-sm text-gray-700"
-              >
-                Trade Association Membership{" "}
-                <span className="text-green-600 font-medium">(+15-20 pts)</span>
-              </label>
-            </div>
-
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                id="professionalLicense"
-                checked={professionalLicense}
-                onChange={(e) => setProfessionalLicense(e.target.checked)}
-                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-              />
-              <label
-                htmlFor="professionalLicense"
-                className="ml-2 text-sm text-gray-700"
-              >
-                Professional License Verification{" "}
-                <span className="text-green-600 font-medium">(+25 pts)</span>
-              </label>
-            </div>
-          </div>
-          <div className="mt-3 text-xs text-gray-600">
-            🔐 All verification sources are automatically included with your
-            selected enrichment tier
-          </div>
-        </div>
-
         {/* Number of Leads */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -669,80 +598,12 @@ export const BusinessDiscovery: React.FC = () => {
           </div>
         </div>
 
-        {/* Verification Sources */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-4">
-            Verification Sources
-          </label>
-          <div className="space-y-4">
-            {/* Chamber of Commerce */}
-            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-md">
-              <div>
-                <div className="text-sm font-medium text-gray-900">
-                  Chamber of Commerce Verification
-                </div>
-                <div className="text-xs text-gray-500">
-                  Validate membership and contact details from chamber
-                  directories
-                </div>
-              </div>
-              <div className="flex items-center space-x-2">
-                <span className="text-xs text-gray-500">Auto</span>
-                <span className="text-xs font-medium text-green-600">
-                  +15 pts
-                </span>
-              </div>
-            </div>
-
-            {/* Trade Association */}
-            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-md">
-              <div>
-                <div className="text-sm font-medium text-gray-900">
-                  Trade Association Verification
-                </div>
-                <div className="text-xs text-gray-500">
-                  Cross-reference with industry association directories (Spa,
-                  Beauty, Professional)
-                </div>
-              </div>
-              <div className="flex items-center space-x-2">
-                <span className="text-xs text-gray-500">Auto</span>
-                <span className="text-xs font-medium text-green-600">
-                  +15-20 pts
-                </span>
-              </div>
-            </div>
-
-            {/* Professional License */}
-            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-md">
-              <div>
-                <div className="text-sm font-medium text-gray-900">
-                  Professional License Verification
-                </div>
-                <div className="text-xs text-gray-500">
-                  Verify with state licensing boards (CPA, Healthcare, Legal)
-                </div>
-              </div>
-              <div className="flex items-center space-x-2">
-                <span className="text-xs text-gray-500">Auto</span>
-                <span className="text-xs font-medium text-green-600">
-                  +25 pts
-                </span>
-              </div>
-            </div>
-          </div>
-          <div className="mt-3 text-xs text-gray-600">
-            💡 Executive discovery and person enrichment included in Enterprise
-            and Compliance tiers
-          </div>
-        </div>
-
-        {/* Estimated Cost Display */}
+        {/* Actual Cost Display */}
         <div className="bg-gradient-to-r from-blue-50 to-green-50 p-4 rounded-lg border border-blue-200">
           <div className="flex items-center justify-between">
             <div>
               <h3 className="text-sm font-medium text-gray-900 mb-1">
-                Estimated Cost ({currentTierConfig.name} Tier)
+                Actual Cost ({currentTierConfig.name} Tier)
               </h3>
               <div className="text-xs text-gray-600">
                 {numberOfLeads} leads × ${currentTierConfig.price} per lead
@@ -752,8 +613,8 @@ export const BusinessDiscovery: React.FC = () => {
               <div className="text-2xl font-bold text-blue-600">
                 ${estimatedCost.toFixed(2)}
               </div>
-              <div className="text-xs text-green-600 font-medium">
-                90% cheaper than competitors
+              <div className="text-xs text-gray-600">
+                Transparent pricing
               </div>
             </div>
           </div>
@@ -797,10 +658,10 @@ export const BusinessDiscovery: React.FC = () => {
                     d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                   ></path>
                 </svg>
-                Progressive Enrichment ({progress}%)
+                Running Campaign ({progress}%)
               </>
             ) : (
-              "🚀 Start Progressive Enrichment"
+              "Run Campaign"
             )}
           </button>
         </div>

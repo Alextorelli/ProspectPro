@@ -7,6 +7,35 @@ interface TierSelectorProps {
   numberOfLeads: number;
 }
 
+const tierDataImprovements = {
+  STARTER: [
+    "Business verification",
+    "Company data",
+    "Phone & website validation"
+  ],
+  PROFESSIONAL: [
+    "Business verification",
+    "Company data", 
+    "Phone & website validation",
+    "Professional email discovery"
+  ],
+  ENTERPRISE: [
+    "Business verification",
+    "Company data",
+    "Phone & website validation", 
+    "Professional email discovery",
+    "Email deliverability verification"
+  ],
+  COMPLIANCE: [
+    "Business verification",
+    "Company data",
+    "Phone & website validation",
+    "Professional email discovery", 
+    "Email deliverability verification",
+    "Executive contact enrichment"
+  ]
+};
+
 export const TierSelector: React.FC<TierSelectorProps> = ({
   selectedTier,
   onTierChange,
@@ -15,12 +44,13 @@ export const TierSelector: React.FC<TierSelectorProps> = ({
   return (
     <div>
       <label className="block text-sm font-medium text-gray-700 mb-3">
-        Progressive Enrichment Tier (90% cost reduction vs competitors)
+        Progressive Enrichment Tiers
       </label>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
         {Object.entries(ENRICHMENT_TIERS).map(([key, tier]) => {
           const tierKey = key as keyof typeof ENRICHMENT_TIERS;
           const totalCost = numberOfLeads * tier.price;
+          const improvements = tierDataImprovements[tierKey];
 
           return (
             <div
@@ -38,12 +68,22 @@ export const TierSelector: React.FC<TierSelectorProps> = ({
                   ${tier.price}
                 </div>
               </div>
-              <div className="text-xs text-gray-500 mb-2">
+              <div className="text-xs text-gray-500 mb-3">
                 {tier.description}
               </div>
-              <div className="text-xs text-gray-400 mb-2">
-                Stages: {tier.stages.join(" → ")}
+              
+              {/* Data Improvements */}
+              <div className="space-y-1 mb-3">
+                {improvements.map((improvement, index) => (
+                  <div key={index} className="flex items-center text-xs">
+                    <svg className="w-3 h-3 text-green-500 mr-1 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
+                    <span className="text-gray-600">{improvement}</span>
+                  </div>
+                ))}
               </div>
+
               <div className="text-sm font-medium text-gray-700">
                 Total: ${totalCost.toFixed(2)}
               </div>
@@ -66,25 +106,6 @@ export const TierSelector: React.FC<TierSelectorProps> = ({
             </div>
           );
         })}
-      </div>
-      <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded-md">
-        <div className="flex items-center">
-          <svg
-            className="w-5 h-5 text-green-500 mr-2"
-            fill="currentColor"
-            viewBox="0 0 20 20"
-          >
-            <path
-              fillRule="evenodd"
-              d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z"
-              clipRule="evenodd"
-            />
-          </svg>
-          <div className="text-sm text-green-700">
-            <strong>Vault-secured API access</strong> with 90-day intelligent
-            caching for massive cost savings
-          </div>
-        </div>
       </div>
     </div>
   );
