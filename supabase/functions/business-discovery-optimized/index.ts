@@ -873,7 +873,7 @@ class OptimizedQualityScorer {
   }
 }
 
-// Google Places API with optimization
+// Google Places API with optimization and Place Details for complete contact info
 class OptimizedGooglePlacesAPI {
   private apiKey: string;
   private cache = new Map();
@@ -920,13 +920,100 @@ class OptimizedGooglePlacesAPI {
 
     const results = data.results.slice(0, maxResults * 2); // Get extra for filtering
 
-    // Cache the results
+    // Enrich with Place Details API for complete contact information
+    console.log(
+      `📞 Enriching ${results.length} results with Place Details API...`
+    );
+    const enrichedResults = await this.enrichWithPlaceDetails(results);
+
+    // Cache the enriched results
     this.cache.set(cacheKey, {
-      data: results,
+      data: enrichedResults,
       timestamp: Date.now(),
     });
 
-    return results;
+    return enrichedResults;
+  }
+
+  /**
+   * Enrich business results with Place Details API to get phone numbers and websites
+   * This uses place_id from Text Search to fetch complete contact information
+   */
+  private async enrichWithPlaceDetails(businesses: any[]) {
+    const enrichedBusinesses = [];
+
+    for (const business of businesses) {
+      try {
+        const placeId = business.place_id;
+
+        // Skip if no place_id
+        if (!placeId) {
+          enrichedBusinesses.push(business);
+          continue;
+        }
+
+        // Check Place Details cache
+        const detailsCacheKey = `details_${placeId}`;
+        let details = this.cache.get(detailsCacheKey)?.data;
+
+        // Fetch Place Details if not cached
+        if (!details) {
+          const detailsUrl = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=formatted_phone_number,international_phone_number,website,url,opening_hours&key=${this.apiKey}`;
+
+          const detailsResponse = await fetch(detailsUrl);
+          const detailsData = await detailsResponse.json();
+
+          if (detailsData.status === "OK" && detailsData.result) {
+            details = detailsData.result;
+
+            // Cache the details
+            this.cache.set(detailsCacheKey, {
+              data: details,
+              timestamp: Date.now(),
+            });
+          }
+        }
+
+        // Merge Place Details into business object
+        if (details) {
+          enrichedBusinesses.push({
+            ...business,
+            formatted_phone_number:
+              details.formatted_phone_number ||
+              business.formatted_phone_number ||
+              "",
+            international_phone_number:
+              details.international_phone_number || "",
+            website: details.website || business.website || "",
+            url: details.url || "",
+            opening_hours: details.opening_hours || business.opening_hours,
+            data_enriched: true,
+            enrichment_source: "place_details_api",
+          });
+        } else {
+          // Keep original if Place Details failed
+          enrichedBusinesses.push({
+            ...business,
+            data_enriched: false,
+          });
+        }
+
+        // Rate limiting: 100ms delay between Place Details API calls
+        await new Promise((resolve) => setTimeout(resolve, 100));
+      } catch (error) {
+        console.error(`Error enriching place ${business.place_id}:`, error);
+        enrichedBusinesses.push(business);
+      }
+    }
+
+    const enrichedCount = enrichedBusinesses.filter(
+      (b) => b.data_enriched
+    ).length;
+    console.log(
+      `✅ Successfully enriched ${enrichedCount}/${businesses.length} businesses with Place Details`
+    );
+
+    return enrichedBusinesses;
   }
 }
 
@@ -1112,7 +1199,7 @@ serve(async (req) => {
       apolloDiscovery = false,
     } = requestData;
 
-    console.log(`🚀 Optimized Business Discovery v3.0`);
+    console.log(`🚀 Optimized Business Discovery v3.1 + Census Intelligence`);
     console.log(
       `📋 Request: ${businessType} in ${location} (${maxResults} leads)`
     );
@@ -1120,13 +1207,61 @@ serve(async (req) => {
       `🎯 Enhancements: Trade:${tradeAssociations}, Licensing:${professionalLicensing}, Chamber:${chamberVerification}, Apollo:${apolloDiscovery}`
     );
 
-    // Get API keys from environment
-    const googlePlacesKey = Deno.env.get("GOOGLE_PLACES_API_KEY");
-    const foursquareKey = Deno.env.get("FOURSQUARE_API_KEY");
-    const censusKey = Deno.env.get("CENSUS_API_KEY");
+    // Get API keys from Edge Function secrets (primary) or Vault (fallback)
+    let googlePlacesKey = Deno.env.get("GOOGLE_PLACES_API_KEY");
+    let foursquareKey = Deno.env.get("FOURSQUARE_API_KEY");
+    let censusKey = Deno.env.get("CENSUS_API_KEY");
+
+    // If not in environment, try Vault
+    if (!googlePlacesKey || !foursquareKey || !censusKey) {
+      console.log("🔐 API keys not in environment, checking Supabase Vault...");
+
+      const supabase = createClient(
+        Deno.env.get("SUPABASE_URL") ?? "",
+        Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
+      );
+
+      if (!googlePlacesKey) {
+        const { data: googleData } = await supabase.rpc(
+          "vault_decrypt_secret",
+          {
+            secret_name: "GOOGLE_PLACES_API_KEY",
+          }
+        );
+        googlePlacesKey = googleData?.[0]?.decrypted_secret;
+      }
+
+      if (!foursquareKey) {
+        const { data: foursquareData } = await supabase.rpc(
+          "vault_decrypt_secret",
+          { secret_name: "FOURSQUARE_API_KEY" }
+        );
+        foursquareKey = foursquareData?.[0]?.decrypted_secret;
+      }
+
+      if (!censusKey) {
+        const { data: censusData } = await supabase.rpc(
+          "vault_decrypt_secret",
+          {
+            secret_name: "CENSUS_API_KEY",
+          }
+        );
+        censusKey = censusData?.[0]?.decrypted_secret;
+      }
+    }
+
+    console.log(
+      `🔑 API Keys Retrieved: Google Places: ${
+        googlePlacesKey ? "✓ (" + googlePlacesKey.substring(0, 8) + "...)" : "✗"
+      }, Foursquare: ${foursquareKey ? "✓" : "✗"}, Census: ${
+        censusKey ? "✓" : "✗"
+      }`
+    );
 
     if (!googlePlacesKey) {
-      throw new Error("Google Places API key not configured");
+      throw new Error(
+        "Google Places API key not configured in Edge Function secrets or Vault"
+      );
     }
 
     // Step 0: Census Geographic Intelligence (NEW)
@@ -1185,6 +1320,12 @@ serve(async (req) => {
     console.log(
       `📊 Found ${googleBusinesses.length} businesses from Google Places`
     );
+    if (googleBusinesses.length > 0) {
+      console.log(
+        `📋 First business sample:`,
+        JSON.stringify(googleBusinesses[0], null, 2)
+      );
+    }
     allRawBusinesses.push(...googleBusinesses);
 
     // Foursquare search (if API key available)
