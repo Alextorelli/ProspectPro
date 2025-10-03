@@ -2,66 +2,70 @@
 
 ## Overview
 
-This directory contains the **enhanced MCP server implementation** that provides AI assistants with comprehensive access to ProspectPro's verified business intelligence data, APIs, diagnostics, and **troubleshooting capabilities**. Version 3.0 includes specialized troubleshooting for verified data architecture and zero fake data policy enforcement.
+This directory contains the **enhanced MCP server implementation** that provides AI assistants with comprehensive access to ProspectPro's complete email discovery & verification platform, enrichment APIs, contact validation, and **troubleshooting capabilities**. Version 3.0 includes specialized troubleshooting for email enrichment architecture and verified data with 95% deliverability accuracy.
 
-**Architecture**: 3 specialized servers for verified data production, development, and troubleshooting workflows  
-**Tools**: 42 tools total across all servers (6 troubleshooting + 36 verified data tools)  
-**Status**: Production-ready with verified data architecture and zero fake data policy
+**Architecture**: 3 specialized servers for enrichment production, development, and troubleshooting workflows  
+**Tools**: 42 tools total across all servers (6 troubleshooting + 36 enrichment tools)  
+**Status**: Production-ready with complete email discovery & verification (v4.2)
 
-## Enhanced MCP Servers v3.0 - Verified Data Architecture
+## Enhanced MCP Servers v3.0 - Email Discovery & Verification Architecture
 
 ### 1. Production Server (`production-server.js`) - **v2.1.0**
 
-**Purpose**: Comprehensive verified business intelligence monitoring, contact verification analytics, Apollo API diagnostics, and professional data source management (28 tools)
+**Purpose**: Comprehensive email enrichment monitoring, Hunter.io/NeverBounce analytics, enrichment cost tracking, and deliverability validation (28 tools)
 
-**Verified Data Capabilities**:
+**Enrichment Capabilities**:
 
-- Contact verification status tracking
-- Apollo API integration monitoring
-- Professional licensing validation
-- Chamber of Commerce verification tracking
-- Fake data pattern detection and elimination
+- Email discovery status tracking (Hunter.io)
+- Email verification monitoring (NeverBounce)
+- Apollo API integration monitoring (optional)
+- Enrichment cost breakdown per lead
+- Deliverability accuracy tracking (95%)
+- Circuit breaker status monitoring
 
 ### 2. Development Server (`development-server.js`) - **v1.1.0**
 
-**Purpose**: Verified contact discovery development, Apollo API testing, professional data source integration, and contact verification benchmarking (8 tools)
+**Purpose**: Email enrichment development, Hunter.io/NeverBounce API testing, circuit breaker validation, and deliverability benchmarking (8 tools)
 
 **Enhanced Features**:
 
-- Apollo contact discovery testing
-- Professional licensing API validation
-- Chamber directory integration testing
-- Zero fake data policy enforcement
+- Hunter.io email discovery testing (6 endpoints)
+- NeverBounce verification testing (FREE + paid)
+- Apollo contact enrichment testing (optional)
+- Enrichment orchestrator validation
+- Circuit breaker pattern testing
+- Caching efficiency benchmarks
 
 ### 3. 🆕 Troubleshooting Server (`supabase-troubleshooting-server.js`) - **v1.1.0**
 
-**Purpose**: Systematic debugging of verified data architecture, contact verification issues, and zero fake data policy violations
+**Purpose**: Systematic debugging of email enrichment architecture, Hunter.io/NeverBounce integration issues, and deliverability validation failures
 
-**Verified Data Troubleshooting Capabilities** (6 enhanced tools):
+**Enrichment Troubleshooting Capabilities** (6 enhanced tools):
 
-#### Verified Contact Testing
+#### Email Enrichment Testing
 
-- `test_edge_function` - Test verified contact discovery with Apollo API authentication
-- `generate_debugging_commands` - Create contact verification curl commands and debugging scripts
+- `test_edge_function` - Test Hunter.io/NeverBounce Edge Functions with API authentication
+- `generate_debugging_commands` - Create enrichment curl commands and testing scripts
 
-#### Professional Data Source Diagnosis
+#### Email Verification Diagnosis
 
-- `validate_database_permissions` - Check verified contact RLS policies and Apollo integration permissions
-- `diagnose_anon_key_mismatch` - Compare frontend vs Supabase authentication for contact APIs
-- `run_rls_diagnostics` - Generate professional data verification diagnostic queries
+- `validate_database_permissions` - Check enrichment_data JSONB permissions and RLS policies
+- `diagnose_anon_key_mismatch` - Compare frontend vs Supabase authentication for enrichment APIs
+- `run_rls_diagnostics` - Generate email enrichment diagnostic queries
 
-#### Verified Data Deployment Validation
+#### Enrichment Deployment Validation
 
-- `check_vercel_deployment` - Validate deployment with verified contact display and fake data elimination
+- `check_vercel_deployment` - Validate deployment with verified email display and deliverability scores
 
 **When to Use Troubleshooting Server**:
 
-- Verified contact discovery fails or returns fake data patterns
-- Apollo API returns authentication errors
-- Professional licensing verification fails
-- Contact verification status not updating
-- Fake email patterns appearing in exports
-- Chamber of Commerce directory access issues
+- Hunter.io email discovery fails or returns no results
+- NeverBounce verification returns authentication errors
+- Enrichment orchestrator exceeds budget limits
+- Circuit breakers not resetting after failures
+- Email verification cache not working
+- Apollo API (optional) returns cost errors
+- Deliverability scores not displaying correctly
 
 ### 1. Production Server (`production-server.js`) - **v2.0.0**
 
