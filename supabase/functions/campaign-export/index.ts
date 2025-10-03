@@ -35,6 +35,12 @@ interface Lead {
   cost_efficient?: boolean;
   scoring_recommendation?: string;
   created_at: string;
+  // Progressive enrichment fields
+  enrichment_tier?: string;
+  enrichment_data?: Record<string, unknown>;
+  vault_secured?: boolean;
+  data_sources?: string[];
+  cost_to_acquire?: number;
   // Verification fields (may not exist yet)
   owner_contact?: string;
   linkedin_profile?: string;
@@ -53,7 +59,7 @@ interface Lead {
 // CSV Export functionality
 class CampaignExporter {
   generateCSV(_campaign: Campaign, leads: Lead[]): string {
-    // Define CSV headers with enhanced real data focus
+    // Define CSV headers with progressive enrichment focus
     const headers = [
       "Business Name",
       "Address",
@@ -63,16 +69,20 @@ class CampaignExporter {
       "Owner/Executive Contact",
       "LinkedIn Profile",
       "Confidence Score",
-      "Data Source",
+      "Enrichment Tier",
+      "Vault Secured",
+      "Cost Per Lead",
+      "Data Sources",
       "Verification Status",
       "Professional License",
       "Chamber Member",
       "Trade Association",
+      "Cache Hit",
       "Last Verified",
       "Created Date",
     ];
 
-    // Generate CSV rows with verified data only
+    // Generate CSV rows with progressive enrichment data
     const rows = leads.map((lead) => [
       this.cleanField(lead.business_name),
       this.cleanField(lead.address),
@@ -82,11 +92,15 @@ class CampaignExporter {
       this.cleanField(lead.owner_contact), // Apollo/professional directory contacts
       this.cleanField(lead.linkedin_profile),
       lead.confidence_score || 0,
-      this.getDataSource(lead),
+      this.cleanField(lead.enrichment_tier || "Professional"),
+      lead.vault_secured ? "Yes" : "No",
+      lead.cost_to_acquire ? `$${lead.cost_to_acquire.toFixed(3)}` : "$0.000",
+      this.getEnrichmentDataSources(lead),
       this.getVerificationStatus(lead),
       this.cleanField(lead.professional_license),
       this.getMembershipStatus(lead.chamber_verified),
       this.cleanField(lead.trade_association),
+      this.getCacheStatus(lead),
       this.formatDate(lead.last_verified || ""),
       this.formatDate(lead.created_at),
     ]);
@@ -129,6 +143,39 @@ class CampaignExporter {
 
     // Return empty if it's a generated pattern, otherwise return the email
     return isFakePattern ? "" : emailStr;
+  }
+
+  private getEnrichmentDataSources(lead: Lead): string {
+    if (!lead.data_sources || lead.data_sources.length === 0)
+      return "Google Places";
+
+    const sources = Array.isArray(lead.data_sources) ? lead.data_sources : [];
+    const sourceNames: string[] = [];
+
+    sources.forEach((source) => {
+      if (typeof source === "string") {
+        sourceNames.push(source);
+      } else if (source && typeof source === "object" && "name" in source) {
+        sourceNames.push(source.name as string);
+      }
+    });
+
+    return sourceNames.length > 0 ? sourceNames.join(", ") : "Google Places";
+  }
+
+  private getCacheStatus(lead: Lead): string {
+    if (!lead.enrichment_data) return "No";
+
+    try {
+      const enrichmentData =
+        typeof lead.enrichment_data === "string"
+          ? JSON.parse(lead.enrichment_data)
+          : lead.enrichment_data;
+
+      return enrichmentData?.cache_hit ? "Yes" : "No";
+    } catch {
+      return "No";
+    }
   }
 
   private getDataSource(lead: Lead): string {
