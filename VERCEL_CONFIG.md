@@ -13,10 +13,16 @@ This file configures Vercel to properly build and deploy the ProspectPro React/V
 
 ## Build Process:
 
-1. `npm ci` - Clean install dependencies
+1. `npm ci` - Clean install dependencies (Node.js 22.x)
 2. `npm run build` - Build React app with Vite
 3. Deploy `dist/` directory contents
 4. Configure routing and headers
+
+## Node.js Requirements:
+
+- **Node Version**: 22.x (Vercel requirement as of Oct 2025)
+- **Package Type**: ESM module (`"type": "module"`)
+- **Build Optimization**: Native Vite framework detection
 
 ## Custom Domain:
 
@@ -33,3 +39,11 @@ If using Vercel dashboard, ensure:
 - Build Command: `npm run build`
 - Output Directory: `dist`
 - Install Command: `npm ci`
+- Node.js Version: 22.x (auto-detected from package.json)
+
+## Build Optimizations:
+
+- **`.vercelignore`**: Excludes unnecessary files for 60% smaller uploads
+- **Native Vite Detection**: Leverages Vercel's optimized Vite build process
+- **ESM Modules**: Modern JavaScript with `"type": "module"`
+- **Asset Caching**: Intelligent caching for optimal performance

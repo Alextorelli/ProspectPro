@@ -27,7 +27,7 @@ A clear description of what actually happened.
 
 ## Environment
 
-- **Node.js Version**: [e.g. 18.17.0]
+- **Node.js Version**: [e.g. 22.9.0]
 - **Platform**: [e.g. Railway, Docker, Local]
 - **Browser**: [if applicable, e.g. Chrome 91]
 

@@ -301,7 +301,7 @@ Primary URL: https://prospectpro.appsmithery.co/
     ↓
 Vercel CDN (underlying platform)
     ↓
-React/Vite Application
+React/Vite Application (Node.js 22.x)
     ↓
 Supabase Client Library
     ↓
