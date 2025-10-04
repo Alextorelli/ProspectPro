@@ -95,7 +95,7 @@ supabase functions list
 In terminal, paste this (replace with your actual key):
 
 ```bash
-export SUPABASE_ANON_KEY="paste_your_anon_key_here"
+export SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNyaXljZWt4ZHFuZXNkc2d3aXVjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc5NjU3ODksImV4cCI6MjA3MzU0MTc4OX0.Rx_1Hjz2eayKie0RpPB28i7_683ZwhVJ_5Eu_rzTWpI
 ```
 
 - [ ] Press Enter
@@ -315,6 +315,83 @@ vercel --prod
 1. Get fresh anon key from Supabase Dashboard → Settings → API
 2. Update in terminal: `export SUPABASE_ANON_KEY="new_key"`
 3. Re-run test: `./scripts/test-background-tasks.sh`
+
+- [ ] Fixed
+
+---
+
+### Issue: "Foreign Key Constraint" Error
+
+**What you see**:
+
+```json
+{
+  "success": false,
+  "error": "Failed to create job: insert or update on table \"discovery_jobs\" violates foreign key constraint \"discovery_jobs_campaign_id_fkey\""
+}
+```
+
+**What happened**: The old schema had a foreign key constraint that required the campaign to exist before the job, but the job is created first.
+
+**Fix**:
+
+1. Open Supabase Dashboard → SQL Editor
+2. Run this migration script:
+
+```sql
+-- Drop and recreate table without foreign key constraint
+DROP TABLE IF EXISTS discovery_jobs CASCADE;
+
+CREATE TABLE discovery_jobs (
+  id TEXT PRIMARY KEY,
+  campaign_id TEXT, -- No FK constraint
+  user_id UUID REFERENCES auth.users(id),
+  session_user_id TEXT,
+  status TEXT DEFAULT 'pending' CHECK (status IN ('pending', 'processing', 'completed', 'failed')),
+  progress INTEGER DEFAULT 0 CHECK (progress >= 0 AND progress <= 100),
+  current_stage TEXT DEFAULT 'initializing',
+  config JSONB NOT NULL,
+  results JSONB DEFAULT '[]'::jsonb,
+  metrics JSONB DEFAULT '{}'::jsonb,
+  error TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  started_at TIMESTAMPTZ,
+  completed_at TIMESTAMPTZ,
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX idx_jobs_status ON discovery_jobs(status) WHERE status IN ('pending', 'processing');
+CREATE INDEX idx_jobs_user ON discovery_jobs(user_id);
+CREATE INDEX idx_jobs_session ON discovery_jobs(session_user_id);
+CREATE INDEX idx_jobs_campaign ON discovery_jobs(campaign_id);
+CREATE INDEX idx_jobs_created ON discovery_jobs(created_at DESC);
+
+ALTER TABLE discovery_jobs ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY jobs_select_own ON discovery_jobs
+  FOR SELECT USING (auth.uid() = user_id OR (auth.uid() IS NULL AND session_user_id IS NOT NULL));
+
+CREATE POLICY jobs_insert_own ON discovery_jobs
+  FOR INSERT WITH CHECK (auth.uid() = user_id OR (auth.uid() IS NULL AND session_user_id IS NOT NULL));
+
+CREATE OR REPLACE FUNCTION update_discovery_jobs_updated_at()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.updated_at = NOW();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trigger_update_discovery_jobs_updated_at
+  BEFORE UPDATE ON discovery_jobs
+  FOR EACH ROW
+  EXECUTE FUNCTION update_discovery_jobs_updated_at();
+```
+
+3. Click "RUN"
+4. Re-run test: `./scripts/test-background-tasks.sh`
+
+**Alternative**: Copy/paste from `/database/fix-foreign-key-constraint.sql`
 
 - [ ] Fixed
 
@@ -558,11 +635,11 @@ After deployment, track these:
 - [ ] Confirmed accurate lead data
 - [ ] Achieved zero timeout errors
 
-**Date completed**: ******\_\_\_\_******
+**Date completed**: **\*\***\_\_\_\_**\*\***
 
-**First successful campaign ID**: ******\_\_\_\_******
+**First successful campaign ID**: **\*\***\_\_\_\_**\*\***
 
-**Number of leads generated**: ******\_\_\_\_******
+**Number of leads generated**: **\*\***\_\_\_\_**\*\***
 
 ---
 

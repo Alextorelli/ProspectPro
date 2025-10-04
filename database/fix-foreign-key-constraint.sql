@@ -1,10 +1,14 @@
--- Job Queue System for Background Processing
--- ProspectPro v4.2 - Background Task Architecture
+-- Fix Foreign Key Constraint Issue
+-- ProspectPro v4.2 - Database Migration
 
--- Discovery jobs table (tracks long-running campaigns)
-CREATE TABLE IF NOT EXISTS discovery_jobs (
+-- Step 1: Drop the existing discovery_jobs table if it exists
+-- (This is safe since we haven't deployed to production yet)
+DROP TABLE IF EXISTS discovery_jobs CASCADE;
+
+-- Step 2: Recreate the table without the foreign key constraint
+CREATE TABLE discovery_jobs (
   id TEXT PRIMARY KEY,
-  campaign_id TEXT, -- No foreign key constraint (campaign created later)
+  campaign_id TEXT, -- No FK constraint - campaign is created later
   user_id UUID REFERENCES auth.users(id),
   session_user_id TEXT,
   
@@ -84,6 +88,7 @@ END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 COMMENT ON TABLE discovery_jobs IS 'Background job queue for business discovery campaigns';
+COMMENT ON COLUMN discovery_jobs.campaign_id IS 'Campaign ID (no FK constraint - campaign created after job)';
 COMMENT ON COLUMN discovery_jobs.config IS 'JSON config: {businessType, location, tier, maxResults, etc}';
 COMMENT ON COLUMN discovery_jobs.results IS 'JSON array of discovered and enriched leads';
 COMMENT ON COLUMN discovery_jobs.metrics IS 'JSON metrics: {totalCost, processingTime, apisUsed, etc}';
