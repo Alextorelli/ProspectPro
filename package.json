@@ -18,7 +18,7 @@
     "static:deploy": "npm run build && cd dist && vercel --prod",
     "health:check": "curl -f https://prospectpro.appsmithery.co/ || echo 'Health check failed'",
     "cost:analyze": "echo 'Check GitHub billing dashboard for usage trends'",
-    "build": "tsc && vite build && cp vercel.json dist/",
+    "build": "tsc && vite build && echo '{\"version\":2,\"rewrites\":[{\"source\":\"/(.*)\",\"destination\":\"/index.html\"}],\"headers\":[{\"source\":\"/(.*)\",\"headers\":[{\"key\":\"Cache-Control\",\"value\":\"public, max-age=0, s-maxage=0, must-revalidate\"}]},{\"source\":\"/assets/(.*)\",\"headers\":[{\"key\":\"Cache-Control\",\"value\":\"public, max-age=31536000, immutable\"}]}]}' > dist/vercel.json",
     "preview": "vite preview",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "type-check": "tsc --noEmit",

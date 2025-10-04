@@ -10,6 +10,7 @@ build
 
 # Archive and legacy files
 archive/
+api-legacy/
 docker/
 server.js
 docker-compose*.yml
