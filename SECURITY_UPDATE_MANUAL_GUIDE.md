@@ -22,82 +22,69 @@
 **Impact**: Low security risk, but best practice violation
 **Status**: ⚠️ **FIX AVAILABLE**
 
-#### **Step 4: Fix Linter Warnings**
+#### **Step 4: Fix Linter Warnings - TARGETED FIX**
 
-Apply this additional SQL in Supabase SQL Editor to resolve the warnings:
+Apply this targeted SQL in Supabase SQL Editor to resolve the `validate_api_key_format` search_path issue:
 
 ````sql
--- Fix Search Path Warnings - October 3, 2025
+-- TARGETED FIX: validate_api_key_format search_path issue
+-- October 3, 2025 - Force explicit search_path setting
 
-CREATE OR REPLACE FUNCTION public.validate_api_key_format(api_key TEXT)
+-- Drop and recreate the problematic function
+DROP FUNCTION IF EXISTS public.validate_api_key_format(TEXT);
+
+-- Recreate with very explicit syntax
+CREATE FUNCTION public.validate_api_key_format(api_key TEXT)
 RETURNS BOOLEAN
-SET search_path = public
 LANGUAGE plpgsql
 IMMUTABLE
 SECURITY DEFINER
+SET search_path = public
 AS $$
 BEGIN
-  IF api_key LIKE 'sb_publishable_%' THEN RETURN true; END IF;
-  IF api_key LIKE 'sb_secret_%' THEN RETURN true; END IF;
-  IF api_key LIKE 'eyJ%' AND LENGTH(api_key) > 100 THEN RETURN true; END IF;
+  -- Validate new Supabase API key formats
+  IF api_key LIKE 'sb_publishable_%' THEN
+    RETURN true;
+  END IF;
+
+  IF api_key LIKE 'sb_secret_%' THEN
+    RETURN true;
+  END IF;
+
+  -- Legacy JWT support
+  IF api_key LIKE 'eyJ%' AND LENGTH(api_key) > 100 THEN
+    RETURN true;
+  END IF;
+
   RETURN false;
 END;
 $$;
 
-CREATE OR REPLACE FUNCTION public.validate_security_configuration()
-RETURNS JSONB
-SET search_path = public
-LANGUAGE plpgsql
-SECURITY DEFINER
-AS $$
-DECLARE
-  result JSONB;
-  rls_count INTEGER;
-  policy_count INTEGER;
-  core_tables TEXT[] := ARRAY['campaigns', 'leads', 'dashboard_exports'];
-BEGIN
-  SELECT COUNT(*) INTO rls_count
-  FROM pg_tables t JOIN pg_class c ON c.relname = t.tablename
-  WHERE t.schemaname = 'public' AND c.relrowsecurity = true
-    AND t.tablename = ANY(core_tables);
+-- Update function comment
+COMMENT ON FUNCTION public.validate_api_key_format(TEXT) IS
+'Validates new Supabase API key format with explicit search_path for security compliance';
 
-  SELECT COUNT(*) INTO policy_count FROM pg_policies
-  WHERE schemaname = 'public' AND tablename = ANY(core_tables);
-
-  SELECT jsonb_build_object(
-    'security_status', 'updated_for_new_api_format',
-    'timestamp', NOW(),
-    'rls_enabled_tables', rls_count,
-    'security_policies', policy_count,
-    'new_api_format_support', true,
-    'ready_for_production', (rls_count >= 3 AND policy_count >= 3),
-    'search_path_warnings_fixed', true,
-    'linter_compliance', true
-  ) INTO result;
-
-  RETURN result;
-END;
-$$;
-
--- Update function comments
-COMMENT ON FUNCTION public.validate_api_key_format IS 'Validate new Supabase API key format with explicit search_path for security';
-COMMENT ON FUNCTION public.validate_security_configuration IS 'Security validation with explicit search_path for linter compliance';
-
--- Test the fix
-SELECT public.validate_security_configuration() as updated_security_status;
-
--- Verify search_path fix (optional)
+-- Immediate verification - both functions should now have proper search_path
 SELECT
   p.proname AS function_name,
+  p.prosrc LIKE '%search_path%' AS has_search_path_in_source,
   CASE
     WHEN p.prosrc LIKE '%SET search_path = public%' THEN 'Fixed: search_path = public'
+    WHEN p.prosrc LIKE '%search_path%' THEN 'Has search_path setting'
     ELSE 'No explicit search_path'
-  END AS search_path_status
+  END AS search_path_status,
+  pg_get_functiondef(p.oid) LIKE '%SET search_path%' AS function_def_has_search_path
 FROM pg_proc p
 JOIN pg_namespace n ON n.oid = p.pronamespace
 WHERE n.nspname = 'public'
   AND p.proname IN ('validate_api_key_format', 'validate_security_configuration')
 ORDER BY p.proname;
+
+-- Test the function to ensure it works
+SELECT public.validate_api_key_format('sb_publishable_GaGU6ZiyiO6ncO7kU2qAvA_SFuCyYaM') AS test_result;
+
+-- Final security status check
+SELECT public.validate_security_configuration() AS final_security_status;
 ```**Expected Result After Fix**:
 
 - `search_path_warnings_fixed`: `true`
