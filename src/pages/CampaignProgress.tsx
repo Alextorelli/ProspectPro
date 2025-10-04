@@ -1,7 +1,10 @@
-import React, { useEffect } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { ProgressDisplay } from "../components/ProgressDisplay";
 import { useJobProgress } from "../hooks/useJobProgress";
+import { supabase } from "../lib/supabase";
+import { useCampaignStore } from "../stores/campaignStore";
+import type { BusinessLead, CampaignResult } from "../types";
 
 export const CampaignProgress: React.FC = () => {
   const { campaignId } = useParams<{ campaignId: string }>();
@@ -12,6 +15,28 @@ export const CampaignProgress: React.FC = () => {
   // Use the job progress hook for real-time updates
   const { progress: jobProgress } = useJobProgress(jobId || "");
 
+  const campaigns = useCampaignStore((state) => state.campaigns);
+  const addCampaign = useCampaignStore((state) => state.addCampaign);
+  const updateCampaign = useCampaignStore((state) => state.updateCampaign);
+  const setCurrentCampaign = useCampaignStore(
+    (state) => state.setCurrentCampaign
+  );
+  const clearLeads = useCampaignStore((state) => state.clearLeads);
+  const addLeads = useCampaignStore((state) => state.addLeads);
+  const setLoading = useCampaignStore((state) => state.setLoading);
+  const setError = useCampaignStore((state) => state.setError);
+
+  const [isFetchingResults, setIsFetchingResults] = useState(false);
+  const [resultFetchError, setResultFetchError] = useState<string | null>(null);
+  const hasFetchedResultsRef = useRef(false);
+  const isMountedRef = useRef(true);
+
+  useEffect(() => {
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
+
   // Extract data from job progress
   const progress = jobProgress?.progress || 0;
   const status = jobProgress?.status || "pending";
@@ -20,15 +45,271 @@ export const CampaignProgress: React.FC = () => {
   const isComplete = status === "completed";
   const error = jobProgress?.error;
 
-  // Navigate to results when complete
-  useEffect(() => {
-    if (isComplete && campaignId) {
-      // Small delay to show completion state
-      setTimeout(() => {
-        navigate(`/campaign/${campaignId}/results`);
-      }, 2000);
+  const displayStage = isFetchingResults
+    ? "Preparing final results..."
+    : currentStage;
+  const displayProgress = isFetchingResults
+    ? Math.min(100, Math.max(progress, 96))
+    : progress;
+  const isProcessing = !isComplete || isFetchingResults;
+
+  const fetchResults = useCallback(async () => {
+    if (!campaignId) {
+      return;
     }
-  }, [isComplete, campaignId, navigate]);
+
+    setIsFetchingResults(true);
+    setResultFetchError(null);
+    setLoading(true);
+
+    const metricsAny = metrics as Record<string, any> | undefined;
+
+    const normalizeStatus = (
+      value: string | null | undefined
+    ): CampaignResult["status"] => {
+      switch (value) {
+        case "running":
+        case "completed":
+        case "failed":
+        case "cancelled":
+          return value;
+        default:
+          return "completed";
+      }
+    };
+
+    const normalizeValidationStatus = (
+      value: string | null | undefined
+    ): BusinessLead["validation_status"] => {
+      switch (value) {
+        case "pending":
+        case "validating":
+        case "validated":
+        case "failed":
+          return value;
+        default:
+          return "validated";
+      }
+    };
+
+    const deriveDataSources = (enrichmentData: any): string[] => {
+      if (!enrichmentData) {
+        return [];
+      }
+
+      const fromServices = Array.isArray(
+        enrichmentData?.processingMetadata?.servicesUsed
+      )
+        ? enrichmentData.processingMetadata.servicesUsed
+        : [];
+
+      const fromSources = Array.isArray(enrichmentData?.verificationSources)
+        ? enrichmentData.verificationSources
+        : [];
+
+      return [...fromServices, ...fromSources].filter(Boolean);
+    };
+
+    const wait = (ms: number) =>
+      new Promise<void>((resolve) => {
+        setTimeout(resolve, ms);
+      });
+
+    try {
+      const MAX_ATTEMPTS = 5;
+      let campaignRecord: any = null;
+      let leadsRecords: any[] = [];
+
+      for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt += 1) {
+        const { data: campaignData, error: campaignError } = await supabase
+          .from("campaigns")
+          .select(
+            "id,business_type,location,status,total_cost,results_count,created_at,updated_at"
+          )
+          .eq("id", campaignId)
+          .maybeSingle();
+
+        if (campaignError) {
+          throw campaignError;
+        }
+
+        const { data: leadsData, error: leadsError } = await supabase
+          .from("leads")
+          .select(
+            "id,campaign_id,business_name,address,phone,website,email,confidence_score,validation_cost,enrichment_data,created_at"
+          )
+          .eq("campaign_id", campaignId)
+          .order("confidence_score", { ascending: false });
+
+        if (leadsError) {
+          throw leadsError;
+        }
+
+        campaignRecord = campaignData;
+        leadsRecords = leadsData ?? [];
+
+        if (
+          campaignRecord &&
+          (leadsRecords.length > 0 || attempt === MAX_ATTEMPTS - 1)
+        ) {
+          break;
+        }
+
+        await wait(2000);
+      }
+
+      if (!campaignRecord) {
+        throw new Error(
+          "Campaign record not available yet. Please try again in a moment."
+        );
+      }
+
+      const totalFound =
+        typeof campaignRecord.results_count === "number"
+          ? campaignRecord.results_count
+          : Number(campaignRecord.results_count ?? leadsRecords.length);
+
+      const mappedLeads: BusinessLead[] = leadsRecords.map((lead) => {
+        const enrichmentData = lead.enrichment_data ?? undefined;
+        const rawCost =
+          lead.validation_cost ??
+          enrichmentData?.processingMetadata?.totalCost ??
+          0;
+        const costToAcquire = Number(rawCost) || 0;
+        const tierFromData =
+          enrichmentData?.processingMetadata?.enrichmentTier ||
+          enrichmentData?.enrichmentTier;
+
+        return {
+          id: String(lead.id),
+          campaign_id: lead.campaign_id ?? campaignRecord.id,
+          business_name: lead.business_name ?? "Unknown Business",
+          address: lead.address ?? "",
+          phone: lead.phone ?? "",
+          website: lead.website ?? "",
+          email: lead.email ?? "",
+          confidence_score: Number(lead.confidence_score ?? 0),
+          validation_status: normalizeValidationStatus(
+            enrichmentData?.validationStatus
+          ),
+          created_at: lead.created_at ?? new Date().toISOString(),
+          cost_to_acquire: costToAcquire,
+          data_sources: (() => {
+            const sources = deriveDataSources(enrichmentData);
+            return sources.length > 0 ? sources : ["google_places"];
+          })(),
+          enrichment_tier:
+            tierFromData ??
+            (metricsAny?.tier as string | undefined) ??
+            (metricsAny?.tier_name as string | undefined) ??
+            undefined,
+          vault_secured: true,
+          enrichment_data: enrichmentData,
+        };
+      });
+
+      const leadsQualified = mappedLeads.filter(
+        (lead) => lead.confidence_score >= 70
+      ).length;
+      const leadsValidated = mappedLeads.filter(
+        (lead) => lead.validation_status === "validated"
+      ).length;
+
+      const tierFromMetrics =
+        (metricsAny?.tier as string | undefined) ||
+        (metricsAny?.tier_name as string | undefined);
+
+      const campaignResult: CampaignResult = {
+        campaign_id: campaignRecord.id,
+        business_type: campaignRecord.business_type ?? undefined,
+        location: campaignRecord.location ?? undefined,
+        status: normalizeStatus(campaignRecord.status),
+        progress: 100,
+        total_cost: Number(
+          campaignRecord.total_cost ?? metrics?.total_cost ?? 0
+        ),
+        leads_found: Number.isNaN(totalFound) ? mappedLeads.length : totalFound,
+        leads_qualified: leadsQualified,
+        leads_validated: leadsValidated,
+        created_at: campaignRecord.created_at ?? new Date().toISOString(),
+        completed_at: campaignRecord.updated_at ?? undefined,
+        tier_used: tierFromMetrics ?? undefined,
+        vault_secured: true,
+        cache_performance: undefined,
+      };
+
+      const campaignExists = campaigns.some(
+        (item) => item.campaign_id === campaignResult.campaign_id
+      );
+
+      if (campaignExists) {
+        updateCampaign(campaignResult.campaign_id, campaignResult);
+      } else {
+        addCampaign(campaignResult);
+      }
+
+      clearLeads();
+      addLeads(mappedLeads);
+      setCurrentCampaign(campaignResult);
+
+      if (isMountedRef.current) {
+        setResultFetchError(null);
+        navigate("/results", { replace: true, state: { campaignId } });
+      }
+    } catch (err) {
+      console.error("⚠️ Unable to load campaign results", err);
+      const message =
+        err instanceof Error
+          ? err.message
+          : "Unable to load campaign results. Please try again.";
+
+      if (isMountedRef.current) {
+        setResultFetchError(message);
+      }
+
+      setError(message);
+      hasFetchedResultsRef.current = false;
+    } finally {
+      if (isMountedRef.current) {
+        setIsFetchingResults(false);
+        setLoading(false);
+      }
+    }
+  }, [
+    addCampaign,
+    addLeads,
+    campaignId,
+    campaigns,
+    clearLeads,
+    metrics,
+    navigate,
+    setCurrentCampaign,
+    setError,
+    setLoading,
+    updateCampaign,
+  ]);
+
+  useEffect(() => {
+    if (!isComplete || !campaignId || !jobId) {
+      return;
+    }
+
+    if (hasFetchedResultsRef.current) {
+      return;
+    }
+
+    hasFetchedResultsRef.current = true;
+    fetchResults();
+  }, [campaignId, fetchResults, isComplete, jobId]);
+
+  const handleRetryFetch = () => {
+    if (!campaignId) {
+      return;
+    }
+
+    hasFetchedResultsRef.current = true;
+    fetchResults();
+  };
 
   if (!jobId || !campaignId) {
     return (
@@ -85,11 +366,31 @@ export const CampaignProgress: React.FC = () => {
         </p>
       </div>
 
+      {isFetchingResults && !resultFetchError && (
+        <div className="mb-6 rounded-lg border border-blue-200 bg-blue-50 p-4 text-sm text-blue-700">
+          Finalizing campaign results and syncing verified leads to your
+          vault...
+        </div>
+      )}
+
+      {resultFetchError && (
+        <div className="mb-6 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+          <div className="font-semibold">Unable to load campaign results</div>
+          <p className="mt-1">{resultFetchError}</p>
+          <button
+            onClick={handleRetryFetch}
+            className="mt-3 inline-flex items-center rounded border border-red-300 bg-white px-3 py-1.5 text-xs font-medium text-red-700 shadow-sm transition hover:bg-red-100"
+          >
+            Retry syncing results
+          </button>
+        </div>
+      )}
+
       {/* Progress Display */}
       <ProgressDisplay
-        isDiscovering={!isComplete}
-        progress={progress}
-        currentStage={currentStage}
+        isDiscovering={isProcessing}
+        progress={displayProgress}
+        currentStage={displayStage}
         cacheStats={null} // Real-time updates don't include cache stats
       />
 
@@ -138,10 +439,18 @@ export const CampaignProgress: React.FC = () => {
               Campaign started at {new Date().toLocaleTimeString()}
             </span>
           </div>
-          {currentStage && (
+          {displayStage && (
             <div className="flex items-center text-sm">
               <div className="w-2 h-2 bg-blue-400 rounded-full mr-2 animate-pulse"></div>
-              <span className="text-gray-900 font-medium">{currentStage}</span>
+              <span className="text-gray-900 font-medium">{displayStage}</span>
+            </div>
+          )}
+          {isFetchingResults && (
+            <div className="flex items-center text-sm">
+              <div className="w-2 h-2 bg-purple-400 rounded-full mr-2 animate-pulse"></div>
+              <span className="text-purple-600 font-medium">
+                Finalizing leads and preparing results...
+              </span>
             </div>
           )}
           {status === "completed" && (
@@ -149,6 +458,14 @@ export const CampaignProgress: React.FC = () => {
               <div className="w-2 h-2 bg-green-400 rounded-full mr-2"></div>
               <span className="text-green-600 font-medium">
                 ✅ Discovery completed! Redirecting to results...
+              </span>
+            </div>
+          )}
+          {resultFetchError && (
+            <div className="flex items-center text-sm">
+              <div className="w-2 h-2 bg-red-400 rounded-full mr-2"></div>
+              <span className="text-red-600 font-medium">
+                {resultFetchError}
               </span>
             </div>
           )}
@@ -163,9 +480,9 @@ export const CampaignProgress: React.FC = () => {
         >
           Start New Campaign
         </button>
-        {isComplete && (
+        {!isProcessing && (
           <button
-            onClick={() => navigate(`/campaign/${campaignId}/results`)}
+            onClick={() => navigate("/results", { state: { campaignId } })}
             className="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
           >
             View Complete Results
