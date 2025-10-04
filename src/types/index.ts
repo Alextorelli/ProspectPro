@@ -16,6 +16,52 @@ export interface BusinessLead {
   // Progressive enrichment fields
   enrichment_tier?: string;
   vault_secured?: boolean;
+  enrichment_data?: {
+    emails?: Array<{
+      email: string;
+      confidence: number;
+      verified: boolean;
+      type?: string;
+      firstName?: string;
+      lastName?: string;
+      position?: string;
+    }>;
+    businessLicense?: {
+      isValid: boolean;
+      licenseNumber?: string;
+      status?: string;
+      expirationDate?: string;
+      professionalType?: string;
+      source: string;
+    };
+    companyInfo?: {
+      name?: string;
+      industry?: string;
+      size?: string;
+      founded?: number;
+      revenue?: string;
+      website?: string;
+      description?: string;
+      source: string;
+    };
+    hunterVerified?: boolean;
+    neverBounceVerified?: boolean;
+    licenseVerified?: boolean;
+    processingMetadata?: {
+      servicesUsed?: string[];
+      servicesSkipped?: string[];
+      totalCost?: number;
+      enrichmentCostBreakdown?: {
+        businessLicenseCost: number;
+        companyEnrichmentCost: number;
+        hunterCost: number;
+        neverBounceCost: number;
+        personEnrichmentCost: number;
+        apolloCost: number;
+        complianceCost: number;
+      };
+    };
+  };
 }
 
 export interface CampaignConfig {

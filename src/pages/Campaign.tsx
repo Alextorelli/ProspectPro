@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { EnrichmentButton } from "../components/EnrichmentButton";
 import { ProgressDisplay } from "../components/ProgressDisplay";
 import { useBusinessDiscovery } from "../hooks/useBusinessDiscovery";
 import { useCampaignStore } from "../stores/campaignStore";
@@ -217,6 +218,69 @@ export const Campaign: React.FC = () => {
               <div className="text-lg font-bold text-purple-900">
                 ${(currentCampaign.total_cost || 0).toFixed(2)}
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Enrichment Section */}
+      {currentCampaign && showResults && campaignLeads.length > 0 && (
+        <div className="bg-white rounded-lg shadow-sm p-6">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">
+            Progressive Enrichment
+          </h2>
+          <div className="flex items-start justify-between gap-6">
+            <div className="flex-1">
+              <p className="text-gray-600 mb-4">
+                Enrich your leads with verified emails, business license
+                validation, and more. Only pay for successful enrichments.
+              </p>
+              <div className="grid grid-cols-3 gap-3 text-sm">
+                <div className="bg-blue-50 p-3 rounded">
+                  <div className="font-semibold text-blue-900">
+                    {
+                      campaignLeads.filter(
+                        (l) => l.enrichment_data?.emails?.length
+                      ).length
+                    }
+                  </div>
+                  <div className="text-blue-600 text-xs">With Emails</div>
+                </div>
+                <div className="bg-green-50 p-3 rounded">
+                  <div className="font-semibold text-green-900">
+                    {
+                      campaignLeads.filter(
+                        (l) => l.enrichment_data?.neverBounceVerified
+                      ).length
+                    }
+                  </div>
+                  <div className="text-green-600 text-xs">Email Verified</div>
+                </div>
+                <div className="bg-purple-50 p-3 rounded">
+                  <div className="font-semibold text-purple-900">
+                    {
+                      campaignLeads.filter(
+                        (l) => l.enrichment_data?.licenseVerified
+                      ).length
+                    }
+                  </div>
+                  <div className="text-purple-600 text-xs">
+                    License Verified
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="flex-shrink-0">
+              <EnrichmentButton
+                campaignId={currentCampaign.campaign_id}
+                onComplete={() => {
+                  // Optionally refresh data or show success message
+                  console.log(
+                    "Enrichment completed for campaign:",
+                    currentCampaign.campaign_id
+                  );
+                }}
+              />
             </div>
           </div>
         </div>

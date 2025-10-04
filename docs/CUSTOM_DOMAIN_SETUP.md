@@ -3,12 +3,15 @@
 ## 🎯 **CRITICAL FIX APPLIED**
 
 ### **Dashboard Query Bug Fixed** ✅
+
 **Problem**: Dashboard was trying to query `user_id.eq."null"` as a string, causing PostgreSQL error:
+
 ```
 invalid input syntax for type uuid: "null"
 ```
 
 **Solution**: Updated query logic in `/src/pages/Dashboard.tsx`:
+
 ```typescript
 // OLD (BROKEN):
 .or(`user_id.eq.${user?.id || "null"},session_user_id.eq.${sessionUserId}`)
@@ -30,6 +33,7 @@ if (user?.id) {
 ## 🌐 **CUSTOM DOMAIN SETUP**
 
 ### **Current Status**
+
 - ✅ Latest build deployed: https://prospect-af2g7a72c-appsmithery.vercel.app
 - ⏳ Custom domain needs configuration: `prospectpro.appsmithery.co`
 
@@ -38,10 +42,12 @@ if (user?.id) {
 #### **Option 1: Via Vercel Dashboard** (RECOMMENDED)
 
 1. **Go to Vercel Dashboard**:
+
    - https://vercel.com/appsmithery/prospect-pro
    - Click **Settings** → **Domains**
 
 2. **Add Custom Domain**:
+
    - Click **"Add Domain"**
    - Enter: `prospectpro.appsmithery.co`
    - Click **"Add"**
@@ -50,6 +56,7 @@ if (user?.id) {
    Vercel will show DNS instructions. You need to add one of these:
 
    **Option A - CNAME Record** (if prospectpro is a subdomain):
+
    ```
    Type: CNAME
    Name: prospectpro
@@ -57,6 +64,7 @@ if (user?.id) {
    ```
 
    **Option B - A Record** (if using root domain):
+
    ```
    Type: A
    Name: @
@@ -81,17 +89,19 @@ Then follow DNS configuration instructions.
 ## 📊 **DEPLOYMENT STATUS**
 
 ### **Current Deployments**
-| URL | Status | Type |
-|-----|--------|------|
-| https://prospect-af2g7a72c-appsmithery.vercel.app | ✅ ACTIVE | Latest production |
-| https://prospect-1tpnfb7gc-appsmithery.vercel.app | ✅ ACTIVE | Previous deployment |
-| https://prospectpro.appsmithery.co | ⏳ PENDING | Custom domain (needs DNS) |
+
+| URL                                               | Status     | Type                      |
+| ------------------------------------------------- | ---------- | ------------------------- |
+| https://prospect-af2g7a72c-appsmithery.vercel.app | ✅ ACTIVE  | Latest production         |
+| https://prospect-1tpnfb7gc-appsmithery.vercel.app | ✅ ACTIVE  | Previous deployment       |
+| https://prospectpro.appsmithery.co                | ⏳ PENDING | Custom domain (needs DNS) |
 
 ### **What's Fixed in Latest Deployment**
+
 ✅ Dashboard query handles NULL values properly  
 ✅ Anonymous users can view their campaigns  
 ✅ Authenticated users can view their campaigns  
-✅ No more UUID syntax errors  
+✅ No more UUID syntax errors
 
 ---
 
@@ -102,11 +112,13 @@ Then follow DNS configuration instructions.
 **Open**: https://prospect-af2g7a72c-appsmithery.vercel.app/dashboard
 
 **Expected Behavior**:
+
 - ✅ No error messages
 - ✅ Loading spinner → Campaign list or "No campaigns yet"
 - ✅ No "invalid input syntax" errors in console
 
 **Check Console**:
+
 ```javascript
 // Should see:
 📊 Fetching campaigns for user: session_[timestamp]_[id]
@@ -114,6 +126,7 @@ Then follow DNS configuration instructions.
 ```
 
 **No Longer Should See**:
+
 ```javascript
 ❌ Error: invalid input syntax for type uuid: "null"
 ```
@@ -127,6 +140,7 @@ Then follow DNS configuration instructions.
 3. Click **"Start Discovery"**
 
 **Expected**:
+
 - ✅ Progress bar appears
 - ✅ Navigates to campaign page
 - ✅ Campaign saved to database
@@ -135,9 +149,10 @@ Then follow DNS configuration instructions.
 ### **3. Verify Database**
 
 **Run in Supabase SQL Editor**:
+
 ```sql
 -- Check campaigns with session IDs
-SELECT 
+SELECT
   id,
   business_type,
   location,
@@ -175,6 +190,7 @@ LIMIT 10;
 ### **Verification**
 
 After DNS propagation (5-30 minutes), check:
+
 ```bash
 # Check DNS resolution
 nslookup prospectpro.appsmithery.co
@@ -189,12 +205,14 @@ nslookup prospectpro.appsmithery.co
 ## 🎯 **QUICK COMMANDS**
 
 ### **Check Current Deployment**
+
 ```bash
 curl -I https://prospect-af2g7a72c-appsmithery.vercel.app
 # Should return: HTTP/2 200
 ```
 
 ### **Test Dashboard API Call**
+
 ```bash
 # Check if dashboard loads without errors
 curl -s https://prospect-af2g7a72c-appsmithery.vercel.app/dashboard | grep "Error loading campaigns"
@@ -202,6 +220,7 @@ curl -s https://prospect-af2g7a72c-appsmithery.vercel.app/dashboard | grep "Erro
 ```
 
 ### **Deploy to Production Again** (if needed)
+
 ```bash
 cd /workspaces/ProspectPro
 npm run build
@@ -226,20 +245,25 @@ vercel --prod
 ## 🚨 **TROUBLESHOOTING**
 
 ### **Issue**: Dashboard still shows error
-**Check**: 
+
+**Check**:
+
 1. Are you on the latest deployment? (https://prospect-af2g7a72c-appsmithery.vercel.app)
 2. Clear browser cache: Ctrl+Shift+Delete
 3. Check browser console for errors
 4. Verify session ID exists: `localStorage.getItem('prospect_session_id')`
 
 ### **Issue**: Custom domain not working
+
 **Check**:
+
 1. DNS record added correctly (CNAME → cname.vercel-dns.com)
 2. DNS propagated: `nslookup prospectpro.appsmithery.co`
 3. Vercel shows "Valid Configuration" in Domains settings
 4. SSL certificate issued (can take 10-15 mins)
 
 ### **Issue**: "Too many redirects"
+
 **Fix**: In Cloudflare, set SSL/TLS to "Full" not "Flexible"
 
 ---
