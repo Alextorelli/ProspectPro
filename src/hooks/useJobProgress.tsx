@@ -1,7 +1,7 @@
 // Real-time Job Progress Hook for ProspectPro v4.2
 // Subscribe to Supabase Real-time for live campaign updates
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { supabase } from "../lib/supabase";
 
 interface JobProgress {
@@ -22,56 +22,132 @@ interface JobProgress {
 }
 
 interface RealtimePayload {
-  new: {
-    id: string;
-    status: string;
-    progress: number;
-    current_stage: string;
-    metrics: Record<string, number>;
-    error?: string;
-    completed_at?: string;
-  };
+  new: DiscoveryJobRow;
+}
+
+type DiscoveryJobRow = {
+  id: string;
+  status: string;
+  progress: number | null;
+  current_stage: string | null;
+  metrics: Record<string, number> | null;
+  error?: string | null;
+  completed_at?: string | null;
+};
+
+const NORMALIZED_STATUS: Record<string, JobProgress["status"]> = {
+  pending: "pending",
+  processing: "processing",
+  completed: "completed",
+  failed: "failed",
+};
+
+function normalizeStatus(
+  value: string | null | undefined
+): JobProgress["status"] {
+  if (!value) {
+    return "processing";
+  }
+
+  return NORMALIZED_STATUS[value] ?? "processing";
 }
 
 export function useJobProgress(jobId: string | null) {
   const [progress, setProgress] = useState<JobProgress | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const pollingRef = useRef<number | null>(null);
+
+  const stopPolling = useCallback(() => {
+    if (pollingRef.current !== null) {
+      window.clearInterval(pollingRef.current);
+      pollingRef.current = null;
+    }
+  }, []);
+
+  const updateFromRow = useCallback(
+    (row: DiscoveryJobRow | null) => {
+      if (!row) {
+        return;
+      }
+
+      const next: JobProgress = {
+        jobId: row.id,
+        status: normalizeStatus(row.status),
+        progress: row.progress ?? 0,
+        currentStage: row.current_stage ?? "processing",
+        metrics: (row.metrics ?? undefined) as JobProgress["metrics"],
+        error: row.error ?? undefined,
+        completedAt: row.completed_at ?? undefined,
+      };
+
+      setProgress(next);
+
+      if (next.status === "completed" || next.status === "failed") {
+        stopPolling();
+      }
+    },
+    [stopPolling]
+  );
+
+  const fetchStatus = useCallback(async (): Promise<DiscoveryJobRow | null> => {
+    if (!jobId) {
+      return null;
+    }
+
+    const { data, error } = await supabase
+      .from("discovery_jobs")
+      .select("*")
+      .eq("id", jobId)
+      .single();
+
+    if (error) {
+      console.error("Error fetching job status:", error);
+      return null;
+    }
+
+    updateFromRow(data);
+    return data;
+  }, [jobId, updateFromRow]);
+
+  const startPolling = useCallback(() => {
+    if (pollingRef.current !== null || !jobId) {
+      return;
+    }
+
+    pollingRef.current = window.setInterval(() => {
+      void fetchStatus();
+    }, 4000);
+  }, [fetchStatus, jobId]);
 
   useEffect(() => {
     if (!jobId) {
       setIsLoading(false);
+      stopPolling();
+      setProgress(null);
       return;
     }
 
-    // Fetch initial job status
-    const fetchInitialStatus = async () => {
-      const { data, error } = await supabase
-        .from("discovery_jobs")
-        .select("*")
-        .eq("id", jobId)
-        .single();
+    let isMounted = true;
 
-      if (error) {
-        console.error("Error fetching job status:", error);
-        setIsLoading(false);
+    const bootstrap = async () => {
+      const row = await fetchStatus();
+      if (!isMounted) {
         return;
       }
 
-      setProgress({
-        jobId: data.id,
-        status: data.status,
-        progress: data.progress || 0,
-        currentStage: data.current_stage || "initializing",
-        metrics: data.metrics,
-        error: data.error,
-        completedAt: data.completed_at,
-      });
       setIsLoading(false);
+
+      if (!row) {
+        return;
+      }
+
+      if (row.status !== "completed" && row.status !== "failed") {
+        startPolling();
+      }
     };
 
-    fetchInitialStatus();
+    void bootstrap();
 
-    // Subscribe to real-time updates
     const channel = supabase
       .channel(`discovery_jobs:${jobId}`)
       .on(
@@ -84,34 +160,36 @@ export function useJobProgress(jobId: string | null) {
         },
         (payload: RealtimePayload) => {
           console.log("Real-time update:", payload.new);
-
-          setProgress({
-            jobId: payload.new.id,
-            status: payload.new.status as
-              | "pending"
-              | "processing"
-              | "completed"
-              | "failed",
-            progress: payload.new.progress || 0,
-            currentStage: payload.new.current_stage || "processing",
-            metrics: payload.new.metrics,
-            error: payload.new.error,
-            completedAt: payload.new.completed_at,
-          });
+          updateFromRow(payload.new);
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        if (
+          status === "TIMED_OUT" ||
+          status === "CHANNEL_ERROR" ||
+          status === "CLOSED"
+        ) {
+          console.warn(
+            "Realtime subscription failed. Falling back to polling.",
+            {
+              status,
+              jobId,
+            }
+          );
+          startPolling();
+        }
+      });
 
-    // Cleanup subscription
     return () => {
+      isMounted = false;
       supabase.removeChannel(channel);
+      stopPolling();
     };
-  }, [jobId]);
+  }, [fetchStatus, jobId, startPolling, stopPolling, updateFromRow]);
 
   return { progress, isLoading };
 }
 
-// Stage names for UI display
 export const STAGE_LABELS: Record<string, string> = {
   initializing: "Initializing campaign...",
   discovering_businesses: "Discovering businesses...",
@@ -120,7 +198,6 @@ export const STAGE_LABELS: Record<string, string> = {
   storing_results: "Storing results...",
 };
 
-// Progress component (example)
 export function JobProgressDisplay({ jobId }: { jobId: string }) {
   const { progress, isLoading } = useJobProgress(jobId);
 
