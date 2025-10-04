@@ -1,5 +1,10 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { 
+  EdgeFunctionAuth, 
+  createAuthenticatedClient, 
+  corsHeaders, 
+  handleCORS 
+} from "../_shared/edge-auth.ts";
 
 // Import optimization modules (converted to Deno-compatible imports)
 // Note: These would need to be transpiled or rewritten for Deno, but showing the structure
@@ -180,6 +185,24 @@ const corsHeaders = {
   "Access-Control-Allow-Headers":
     "authorization, x-client-info, apikey, content-type",
 };
+
+serve(async (req) => {
+  // Handle CORS preflight
+  const corsResponse = handleCORS(req);
+  if (corsResponse) return corsResponse;
+
+  try {
+    const startTime = Date.now();
+
+    // Initialize Edge Function authentication
+    const edgeAuth = new EdgeFunctionAuth();
+    const authContext = edgeAuth.getAuthContext();
+    
+    console.log(`🔐 Edge Function Authentication: ${authContext.keyFormat} (${authContext.isValid ? 'Valid' : 'Invalid'})`);
+    
+    if (!authContext.isValid) {
+      throw new Error(`Authentication failed: ${authContext.keyFormat}`);
+    }
 
 interface BusinessDiscoveryRequest {
   businessType: string;
@@ -1464,15 +1487,10 @@ serve(async (req) => {
       .toString(36)
       .substr(2, 9)}`;
 
-    // Store in database (Supabase integration)
-    const supabaseUrl = Deno.env.get("SUPABASE_URL");
-    const supabaseKey = Deno.env.get("SUPABASE_ANON_KEY");
-
-    if (supabaseUrl && supabaseKey) {
-      const supabase = createClient(supabaseUrl, supabaseKey);
-
+    // Store in database (Supabase integration with new authentication)
+    if (authContext.client) {
       try {
-        await supabase.from("campaigns").insert({
+        await authContext.client.from("campaigns").insert({
           id: campaignId,
           business_type: businessType,
           location: location,
@@ -1496,9 +1514,11 @@ serve(async (req) => {
           enhancement_data: lead.enhancementData,
         }));
 
-        await supabase.from("leads").insert(leadsToStore);
+        await authContext.client.from("leads").insert(leadsToStore);
+        
+        console.log(`💾 Stored campaign and ${leadsToStore.length} leads using ${authContext.keyFormat} authentication`);
       } catch (error) {
-        console.error("Database storage error:", error);
+        console.error("Database storage error with new auth:", error);
       }
     }
 

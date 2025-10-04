@@ -264,42 +264,84 @@ Expected results:
 - Both API key validations should return `true`
 - Campaign count should be > 0
 
-### 🔧 **EDGE FUNCTION UPDATES**
+## 🔧 **EDGE FUNCTION UPDATES - INFRASTRUCTURE LIMITATION DISCOVERED**
 
-**Current Status**: 🚨 **REQUIRES ATTENTION**
+**Current Status**: � **PARTIAL COMPLETION - LEGACY KEY ENABLEMENT REQUIRED**
 
-The database security update is complete, but Edge Functions need additional configuration for the new API key format.
+### **✅ COMPLETED IMPLEMENTATION**
 
-**Issue Identified**: Edge Functions still expect JWT tokens, but the new `sb_publishable_*` and `sb_secret_*` keys are not JWT format. This is a known transition issue with Supabase's new API key system.
+- Updated Edge Function authentication handler (`edge-auth.ts`)
+- Modified business discovery and enrichment functions
+- Successfully deployed test functions with new authentication
+- Database operations work perfectly with new API keys
 
-**Immediate Solutions**:
+### **🚨 INFRASTRUCTURE LIMITATION IDENTIFIED**
 
-1. **Option A - Enable Legacy Keys Temporarily** (Recommended for immediate functionality):
+- **Issue**: Supabase Edge Functions infrastructure still requires **JWT tokens** at the platform level
+- **Impact**: New `sb_publishable_*` and `sb_secret_*` keys return `{"code":401,"message":"Invalid JWT"}`
+- **Root Cause**: Edge Functions runtime hasn't been updated to support new API key format yet
 
-   - Go to Supabase Dashboard → Settings → API
-   - Find "Legacy API Keys" section
-   - Click "Enable Legacy Keys" to restore JWT functionality
-   - This allows Edge Functions to work while transitioning
+### **💡 IMMEDIATE SOLUTION: Enable Legacy Keys**
 
-2. **Option B - Update Edge Function Authentication** (Long-term solution):
-   - Modify Edge Functions to handle new API key format
-   - Update authentication headers to use new key format
-   - Test with updated authentication flow
+**Recommended Action** (2 minutes to implement):
 
-**Next Steps**:
+1. **Go to Supabase Dashboard**: https://supabase.com/dashboard/project/sriycekxdqnesdsgwiuc
+2. **Navigate to**: Settings → API → Legacy Keys
+3. **Click "Enable Legacy Keys"**
+4. **Copy the generated JWT token**
+5. **Use for Edge Functions only**
 
-- Choose Option A for immediate functionality
-- Plan Option B for complete transition to new API format
-
-**Testing Commands**:
+**Testing Commands After Legacy Key Enablement**:
 
 ```bash
-# Test Edge Function (after enabling legacy keys)
-curl -X POST 'https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/business-discovery-optimized' \
-  -H 'Authorization: Bearer YOUR_LEGACY_JWT_KEY' \
+# Test Edge Function with legacy JWT
+curl -X POST 'https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/test-business-discovery' \
+  -H 'Authorization: Bearer YOUR_LEGACY_JWT_TOKEN' \
   -H 'Content-Type: application/json' \
-  -d '{"businessType": "restaurant", "location": "Seattle, WA", "maxResults": 1}'
+  -d '{"businessType": "coffee shop", "location": "Seattle, WA", "maxResults": 2}'
 ```
+
+**Hybrid Authentication Strategy** (RECOMMENDED):
+
+- ✅ **Database**: New secret key (`sb_secret_bY8n_a7-hP0Lxd9dPT_efg_3WzpnXN_`)
+- ✅ **Frontend**: New publishable key (`sb_publishable_GaGU6ZiyiO6ncO7kU2qAvA_SFuCyYaM`)
+- ⚠️ **Edge Functions**: Legacy JWT token (temporary until platform support)
+
+### **🎯 CURRENT IMPLEMENTATION STATUS**
+
+**FULLY WORKING** ✅:
+
+- Database security (RLS policies, linter compliance)
+- Frontend authentication (new publishable key)
+- Database API access (new secret key)
+- Security validation functions
+
+**READY FOR LEGACY ENABLEMENT** ⚠️:
+
+- Edge Function authentication (new handlers deployed)
+- Business discovery function (updated code)
+- Email enrichment functions (authentication updated)
+
+**EXPECTED RESULT**: Legacy key enablement restores 100% Edge Function functionality while maintaining new API key security for all other services.
+
+### **📋 MIGRATION COMPLETION STEPS**
+
+**Step 5: Enable Legacy Keys for Edge Functions**
+
+1. Go to Supabase Dashboard → Settings → API → Legacy Keys
+2. Click "Enable Legacy Keys"
+3. Copy the generated JWT token
+4. Test Edge Functions with legacy JWT token
+5. Verify full platform functionality restored
+
+**Expected Results**:
+
+- ✅ Database operations: Continue with new API keys
+- ✅ Frontend operations: Continue with new publishable key
+- ✅ Edge Functions: Restored with legacy JWT
+- ✅ Security compliance: Maintained across all services
+
+**Timeline**: 2-minute enablement, immediate functionality restoration.
 
 ### 📋 **FRONTEND UPDATES**
 

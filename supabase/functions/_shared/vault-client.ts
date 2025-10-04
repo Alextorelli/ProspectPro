@@ -195,14 +195,32 @@ export class VaultClient {
 }
 
 /**
- * Create vault client instance
+ * Create vault client instance with new authentication support
  */
 export function createVaultClient(): VaultClient {
   const supabaseUrl = Deno.env.get("SUPABASE_URL");
-  const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+
+  // Try new secret key format first, then legacy
+  let serviceRoleKey =
+    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ||
+    Deno.env.get("SUPABASE_SECRET_KEY") ||
+    Deno.env.get("SUPABASE_ANON_KEY");
 
   if (!supabaseUrl || !serviceRoleKey) {
     throw new Error("Supabase credentials not configured for vault access");
+  }
+
+  // Validate key format
+  if (serviceRoleKey.startsWith("sb_secret_")) {
+    console.log("✅ Using new secret key format for vault access");
+  } else if (serviceRoleKey.startsWith("sb_publishable_")) {
+    console.log(
+      "⚠️ Using publishable key for vault access (limited permissions)"
+    );
+  } else if (serviceRoleKey.startsWith("eyJ")) {
+    console.log("⚠️ Using legacy JWT key for vault access");
+  } else {
+    console.warn("❓ Unknown key format for vault access");
   }
 
   return new VaultClient(supabaseUrl, serviceRoleKey);

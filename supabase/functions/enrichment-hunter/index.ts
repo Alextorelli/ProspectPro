@@ -1,4 +1,9 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import {
+  EdgeFunctionAuth,
+  corsHeaders,
+  handleCORS,
+} from "../_shared/edge-auth.ts";
 import { API_SECRETS, createVaultClient } from "../_shared/vault-client.ts";
 
 /**
@@ -511,12 +516,28 @@ class HunterAPIClient {
 }
 
 serve(async (req) => {
-  if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
-  }
+  // Handle CORS preflight
+  const corsResponse = handleCORS(req);
+  if (corsResponse) return corsResponse;
 
   try {
     console.log(`🔍 Hunter.io Email Enrichment Edge Function`);
+
+    // Initialize Edge Function authentication
+    const edgeAuth = new EdgeFunctionAuth();
+    const authContext = edgeAuth.getAuthContext();
+
+    console.log(
+      `🔐 Authentication: ${authContext.keyFormat} (${
+        authContext.isValid ? "Valid" : "Invalid"
+      })`
+    );
+
+    if (!authContext.isValid) {
+      console.warn(
+        "⚠️ No valid authentication, proceeding with vault access only"
+      );
+    }
 
     // Get Hunter.io API key from vault
     const vaultClient = createVaultClient();
