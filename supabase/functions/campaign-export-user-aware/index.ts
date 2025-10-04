@@ -117,16 +117,7 @@ async function getCampaignData(
   userContext: any
 ) {
   try {
-    // Set session context for anonymous users
-    if (!userContext.isAuthenticated && userContext.sessionId) {
-      await supabaseClient.rpc("set_config", {
-        setting_name: "app.current_user_id",
-        new_value: userContext.sessionId,
-        is_local: true,
-      });
-    }
-
-    // Get campaign with user authorization
+    // Get campaign with user authorization - RLS policies will handle access control
     const { data: campaign, error: campaignError } = await supabaseClient
       .from("campaigns")
       .select("*")

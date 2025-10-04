@@ -237,18 +237,15 @@ serve(async (req) => {
           total_cost: totalCost,
           processing_time_ms: processingTime,
           status: "completed",
-          // Add user_id if available
-          ...(userContext.userId && { user_id: userContext.userId }),
+          // Add user_id for authenticated users only
+          ...(userContext.isAuthenticated &&
+            userContext.userId && { user_id: userContext.userId }),
+          // Add session_user_id for anonymous users
+          ...(!userContext.isAuthenticated &&
+            userContext.sessionId && {
+              session_user_id: userContext.sessionId,
+            }),
         };
-
-        // Set session user ID for anonymous users
-        if (!userContext.isAuthenticated && userContext.sessionId) {
-          await authContext.client.rpc("set_config", {
-            setting_name: "app.current_user_id",
-            new_value: userContext.sessionId,
-            is_local: true,
-          });
-        }
 
         const { data: campaignInsert, error: campaignError } =
           await authContext.client.from("campaigns").insert(campaignData);
@@ -268,8 +265,14 @@ serve(async (req) => {
             email: lead.email,
             confidence_score: lead.optimizedScore,
             enrichment_data: lead.enhancementData,
-            // Add user_id if available
-            ...(userContext.userId && { user_id: userContext.userId }),
+            // Add user_id for authenticated users only
+            ...(userContext.isAuthenticated &&
+              userContext.userId && { user_id: userContext.userId }),
+            // Add session_user_id for anonymous users
+            ...(!userContext.isAuthenticated &&
+              userContext.sessionId && {
+                session_user_id: userContext.sessionId,
+              }),
           }));
 
           const { data: leadsInsert, error: leadsError } =
