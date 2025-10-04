@@ -2,13 +2,14 @@
 
 ## CRITICAL: Current Production State
 
-- **Version**: 4.2.0 (Email Discovery & Verification System - PRODUCTION READY)
-- **Deployment**: Static Frontend + Supabase Edge Functions (serverless, auto-scaling)
-- **Environment**: Supabase environment variables + Edge Function secrets
-- **Architecture**: Supabase-first serverless with complete contact enrichment
+- **Version**: 4.2.0 (User-Aware Email Discovery & Verification System - PRODUCTION READY)
+- **Deployment**: User-Aware Frontend + Supabase Edge Functions (serverless, auto-scaling)
+- **Environment**: Supabase environment variables + Edge Function secrets + User authentication
+- **Architecture**: Supabase-first serverless with user-aware campaign ownership and complete contact enrichment
 - **Quality Standard**: Zero fake data - verified contacts with 95% email accuracy
-- **Backend**: 100% Supabase Edge Functions (discovery, enrichment, verification, export)
-- **Repository**: https://github.com/Alextorelli/ProspectPro (Complete enrichment codebase)
+- **Backend**: 100% Supabase Edge Functions (user-aware discovery, enrichment, verification, export)
+- **User Management**: Complete authentication system with anonymous and authenticated user support
+- **Repository**: https://github.com/Alextorelli/ProspectPro (Complete user-aware enrichment codebase)
 
 ## CRITICAL: VERIFIED DATA ARCHITECTURE
 
@@ -38,10 +39,11 @@
 
 **DEPLOYMENT PHILOSOPHY**
 
-- ✅ Supabase Edge Functions: All backend logic (OPERATIONAL)
-- ✅ React/Vite Frontend: Built and deployed to consistent Vercel domain (READY)
-- ✅ Supabase Database: Native integration with Row Level Security
+- ✅ Supabase Edge Functions: All backend logic with user authentication (OPERATIONAL)
+- ✅ React/Vite Frontend: User-aware interface deployed to Vercel domain (READY)
+- ✅ Supabase Database: Native integration with Row Level Security and user-campaign linking
 - ✅ Supabase Real-time: Ready for live updates and notifications
+- ✅ Supabase Auth: Complete user authentication with anonymous session support
 - ✅ Vercel Static Hosting: Consistent domain deployment (cost-effective)
 - ❌ NO server.js, Express.js, or Node.js containers
 - ❌ NO Cloud Run containers or complex deployment pipelines
@@ -51,11 +53,12 @@
 
 - **Frontend**: React/Vite app → `npm run build` → deploy `/dist` to Vercel → Custom domain
 - **Backend**: Supabase Edge Functions → `supabase functions deploy`
-- **Production URL**: https://prospectpro.appsmithery.co/ (ALWAYS ACCESSIBLE)
+- **Production URL**: https://prospect-fyhedobh1-appsmithery.vercel.app (ALWAYS ACCESSIBLE)
 - **Hosting**: Vercel with native Vite framework detection and optimization
 - **Build**: Required before deployment (`npm run build` creates `/dist`)
 - **Domain**: Custom domain always points to latest deployment
 - **Framework**: Native Vite detection enables automatic build optimization
+- **User Authentication**: Supabase Auth with JWT tokens and session management
 
 **PLATFORM SPECIALIZATION**
 
@@ -65,24 +68,25 @@
 
 ## CRITICAL: EDGE FUNCTIONS STATUS (v4.2)
 
-**PRODUCTION EDGE FUNCTIONS (6 ACTIVE)**
+**PRODUCTION EDGE FUNCTIONS (6 ACTIVE - USER-AWARE)**
 
-- ✅ `business-discovery-optimized` (v14) - Enhanced with Google Place Details API for 100% phone/website coverage
+- ✅ `business-discovery-user-aware` (v2) - Complete user authentication with session management and database storage
+- ✅ `campaign-export-user-aware` (v2) - User-authorized export with data isolation and access control
 - ✅ `enrichment-hunter` (v1) - Hunter.io email discovery with all 6 API endpoints and 24-hour caching
 - ✅ `enrichment-neverbounce` (v1) - NeverBounce email verification with 1,000 free/month quota management
 - ✅ `enrichment-orchestrator` (v1) - Intelligent multi-service coordination with budget controls
-- ✅ `campaign-export` (v4) - CSV export with verified emails and confidence scores
 - ✅ `test-google-places` (v1) - API testing function
-- ✅ Real-time database integration with enriched contact tracking
+- ✅ Real-time database integration with user-aware campaign and lead tracking
 - ✅ Global edge deployment with <100ms cold starts
+- ✅ User authentication via JWT tokens and new API key format
 - ✅ Functions URL: https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/
 
-**CLEANED DATABASE ARCHITECTURE**
+**USER-AWARE DATABASE ARCHITECTURE**
 
-Core tables (security hardened, RLS optimized):
+Core tables (security hardened, RLS optimized, user-aware):
 
 ```sql
--- Campaigns table (cleaned schema)
+-- Campaigns table (user-aware schema)
 CREATE TABLE campaigns (
   id TEXT PRIMARY KEY,
   business_type TEXT NOT NULL,
@@ -94,11 +98,13 @@ CREATE TABLE campaigns (
   results_count INTEGER DEFAULT 0,
   total_cost DECIMAL(10,4) DEFAULT 0,
   processing_time_ms INTEGER,
+  user_id UUID REFERENCES auth.users(id),
+  session_user_id TEXT,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Leads table (verified contacts with enrichment data)
+-- Leads table (user-aware with enrichment data)
 CREATE TABLE leads (
   id BIGSERIAL PRIMARY KEY,
   campaign_id TEXT REFERENCES campaigns(id),
@@ -111,13 +117,15 @@ CREATE TABLE leads (
   score_breakdown JSONB,
   validation_cost DECIMAL(10,4) DEFAULT 0,
   enrichment_data JSONB, -- Hunter.io, NeverBounce, Apollo results
+  user_id UUID REFERENCES auth.users(id),
+  session_user_id TEXT,
   cost_efficient BOOLEAN DEFAULT true,
   scoring_recommendation TEXT,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Dashboard exports table
+-- Dashboard exports table (user-aware)
 CREATE TABLE dashboard_exports (
   id BIGSERIAL PRIMARY KEY,
   campaign_id TEXT REFERENCES campaigns(id),
@@ -125,31 +133,29 @@ CREATE TABLE dashboard_exports (
   file_format TEXT DEFAULT 'csv',
   row_count INTEGER DEFAULT 0,
   export_status TEXT DEFAULT 'completed',
+  user_id UUID REFERENCES auth.users(id),
+  session_user_id TEXT,
   completed_at TIMESTAMPTZ DEFAULT NOW(),
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Secure analytics view (no SECURITY DEFINER issues)
+-- User-aware analytics view with RLS
 CREATE VIEW campaign_analytics
 WITH (security_invoker = true)
 AS SELECT
-  c.id,
-  c.business_type,
-  c.location,
-  c.target_count,
-  c.min_confidence_score,
-  c.status,
-  c.results_count,
-  c.total_cost,
-  c.budget_limit,
-  c.processing_time_ms,
-  c.created_at,
+  c.id, c.business_type, c.location, c.target_count, c.min_confidence_score,
+  c.status, c.results_count, c.total_cost, c.budget_limit, c.processing_time_ms,
+  c.created_at, c.user_id, c.session_user_id,
   COUNT(l.id) AS actual_leads,
   COALESCE(AVG(l.confidence_score), 0)::numeric(10,2) AS avg_confidence
 FROM campaigns c
 LEFT JOIN leads l ON l.campaign_id = c.id
+WHERE
+    c.user_id = auth.uid() OR
+    (auth.uid() IS NULL AND c.session_user_id IS NOT NULL)
 GROUP BY c.id, c.business_type, c.location, c.target_count, c.min_confidence_score,
-         c.status, c.results_count, c.total_cost, c.budget_limit, c.processing_time_ms, c.created_at;
+         c.status, c.results_count, c.total_cost, c.budget_limit, c.processing_time_ms,
+         c.created_at, c.user_id, c.session_user_id;
 ```
 
 ## CRITICAL: MECE BUSINESS TAXONOMY
@@ -209,28 +215,31 @@ const BUSINESS_CATEGORIES = {
 
 **CURRENT DEPLOYMENT STATE**
 
-- **Production URL**: https://prospectpro.appsmithery.co/ (PRIMARY ACCESS POINT)
-- **Hosting Platform**: Vercel project `alex-torellis-projects/prospect-pro`
-- **Custom Domain**: Always accessible via prospectpro.appsmithery.co
+- **Production URL**: https://prospect-fyhedobh1-appsmithery.vercel.app (PRIMARY ACCESS POINT)
+- **Hosting Platform**: Vercel project `appsmithery/prospect-pro`
+- **Custom Domain**: Always accessible via prospect-fyhedobh1-appsmithery.vercel.app
 - **Build Process**: `npm run build` → `/dist` directory
 - **Deployment Source**: Always deploy from `/dist` directory
-- **Edge Functions**: OPERATIONAL (business-discovery tested successfully)
-- **Database**: RLS policies configured, test campaign inserted
-- **API Keys**: All configured in Supabase Edge Function secrets
+- **Edge Functions**: OPERATIONAL (user-aware discovery and export tested successfully)
+- **Database**: RLS policies configured, user-campaign linking implemented
+- **API Keys**: All configured in Supabase Edge Function secrets (new sb\_\* format)
 - **Anon Key**: Updated to current valid JWT token
+- **User Authentication**: Complete signup/signin system with session management
 
 **VERIFIED WORKING COMPONENTS**
 
 - ✅ React/Vite frontend builds successfully to `/dist`
 - ✅ Vercel deployment with native Vite framework detection
-- ✅ Custom domain prospectpro.appsmithery.co with optimal CDN caching
+- ✅ Custom domain with optimal CDN caching
 - ✅ Zero build warnings (Node.js + PostCSS optimized)
-- ✅ Edge Function `business-discovery-optimized` returns real business data with Foursquare integration
-- ✅ Database tables created with proper RLS policies (no SECURITY DEFINER issues)
+- ✅ Edge Function `business-discovery-user-aware` returns real business data with user context
+- ✅ Edge Function `campaign-export-user-aware` provides user-authorized exports
+- ✅ Database tables created with proper RLS policies and user linking
 - ✅ API integrations (Google Places, Foursquare, Hunter.io) configured
 - ✅ Smart deployment script handles build and deploy process
 - ✅ MECE taxonomy integration with 16 categories and 300+ business types
-- ✅ Admin Panel with quality thresholds and cost estimation
+- ✅ User authentication with anonymous session support
+- ✅ Campaign ownership and data isolation
 
 **CRITICAL TROUBLESHOOTING PATTERNS**
 
@@ -268,11 +277,17 @@ const BUSINESS_CATEGORIES = {
 **DEBUGGING COMMANDS**
 
 ```bash
-# Test optimized Edge Function directly
-curl -X POST 'https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/business-discovery-optimized' \
+# Test user-aware Edge Function directly
+curl -X POST 'https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/business-discovery-user-aware' \
   -H 'Authorization: Bearer CURRENT_ANON_KEY' \
   -H 'Content-Type: application/json' \
-  -d '{"businessType": "coffee shop", "location": "Seattle, WA", "maxResults": 2}'
+  -d '{"businessType": "coffee shop", "location": "Seattle, WA", "maxResults": 2, "sessionUserId": "test_session_123"}'
+
+# Test user-aware export function
+curl -X POST 'https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/campaign-export-user-aware' \
+  -H 'Authorization: Bearer CURRENT_ANON_KEY' \
+  -H 'Content-Type: application/json' \
+  -d '{"campaignId": "CAMPAIGN_ID", "format": "csv", "sessionUserId": "test_session_123"}'
 
 # Check active Edge Functions (should be 6 active)
 supabase functions list
@@ -281,20 +296,21 @@ supabase functions list
 npm run build && cd dist && vercel --prod
 
 # Test production URL
-curl -I https://prospectpro.appsmithery.co/
+curl -I https://prospect-fyhedobh1-appsmithery.vercel.app
 
-# Check database permissions with new schema
+# Check database permissions with user-aware schema
 # Run in Supabase SQL editor: SELECT * FROM campaigns LIMIT 1;
 ```
 
 **ENVIRONMENT VERIFICATION CHECKLIST**
 
 - [ ] Anon key in frontend matches Supabase dashboard
-- [ ] RLS policies created for campaigns, leads, dashboard_exports tables
+- [ ] RLS policies created for campaigns, leads, dashboard_exports tables with user_id and session_user_id columns
 - [ ] Edge Function secrets contain: GOOGLE_PLACES_API_KEY, HUNTER_IO_API_KEY, NEVERBOUNCE_API_KEY, FOURSQUARE_API_KEY
-- [ ] Database tables exist: campaigns, leads, dashboard_exports, campaign_analytics view
-- [ ] Custom domain prospectpro.appsmithery.co accessible and properly linked
+- [ ] Database tables exist with user columns: campaigns, leads, dashboard_exports, campaign_analytics view
+- [ ] Custom domain prospect-fyhedobh1-appsmithery.vercel.app accessible and properly linked
 - [ ] Cache headers set to `public, max-age=0, s-maxage=0, must-revalidate`
+- [ ] User authentication system working (signup/signin/session management)
 
 ## IMMEDIATE CONTEXT (No Re-explanation Needed)
 
@@ -308,8 +324,11 @@ When Alex asks about:
 - **"Frontend"** → Static HTML/JS calling Edge Functions directly
 - **"Cost optimization"** → Static hosting + serverless functions (90% cost reduction)
 - **"Quality scoring"** → Integrated into Edge Functions
-- **"Export functionality"** → `campaign-export` Edge Function
+- **"Export functionality"** → `campaign-export-user-aware` Edge Function
 - **"Testing"** → Direct Edge Function testing via Supabase dashboard
+- **"User authentication"** → Supabase Auth with JWT tokens and session management
+- **"Campaign ownership"** → User-aware RLS policies with user_id and session_user_id
+- **"Data isolation"** → Database-level access control via RLS policies
 
 ## IMMEDIATE CONTEXT (No Re-explanation Needed)
 

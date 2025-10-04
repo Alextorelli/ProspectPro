@@ -1,19 +1,22 @@
 {
     "version": "1.0",
-    "description": "ProspectPro MCP Server Configuration - Cost Optimized",
+    "description": "ProspectPro v4.2 MCP Server Configuration - User-Aware System",
     "servers": {
         "prospectpro-production": {
             "autoStart": true,
             "lazyLoad": true,
             "maxMemory": "128MB",
             "priority": "high",
-            "description": "Main production server with 28 tools",
+            "description": "Main production server with user-aware monitoring (28 tools)",
             "tools": [
                 "monitor_api_performance",
                 "analyze_database_metrics",
                 "check_edge_function_health",
                 "track_api_costs",
-                "monitor_supabase_usage"
+                "monitor_supabase_usage",
+                "track_user_sessions",
+                "monitor_authentication",
+                "analyze_campaign_ownership"
             ]
         },
         "prospectpro-development": {
@@ -21,12 +24,14 @@
             "onDemand": true,
             "maxMemory": "64MB",
             "priority": "low",
-            "description": "Development tools for new integrations",
+            "description": "Development tools for user-aware features",
             "activationKeywords": [
                 "develop",
                 "integrate",
                 "new api",
-                "test integration"
+                "test integration",
+                "user auth",
+                "session management"
             ]
         },
         "prospectpro-troubleshooting": {
@@ -34,14 +39,17 @@
             "onDemand": true,
             "maxMemory": "64MB",
             "priority": "low",
-            "description": "Debugging and troubleshooting tools",
+            "description": "Debugging tools for user context and authentication",
             "activationKeywords": [
                 "debug",
                 "error",
                 "fix",
                 "troubleshoot",
                 "404",
-                "500"
+                "500",
+                "auth error",
+                "jwt",
+                "session"
             ]
         }
     },
@@ -56,7 +64,8 @@
             ".ts",
             ".js",
             ".json",
-            ".md"
+            ".md",
+            ".sql"
         ],
         "excludedPaths": [
             "archive/**",
@@ -75,10 +84,19 @@
         "smartContext": true,
         "quickCommands": {
             "run prod mcp": "cd /workspaces/ProspectPro/mcp-servers && npm run start:production",
-            "deploy vercel": "cd public && vercel --prod",
-            "deploy edge": "supabase functions deploy business-discovery-optimized",
-            "check logs": "supabase functions logs --follow",
-            "test function": "curl -X POST \"http://localhost:54321/functions/v1/business-discovery-optimized\" -H \"Content-Type: application/json\" -d '{\"businessType\":\"test\",\"location\":\"test\"}'"
+            "deploy vercel": "cd public/dist && vercel --prod",
+            "deploy discovery": "supabase functions deploy business-discovery-user-aware",
+            "deploy export": "supabase functions deploy campaign-export-user-aware",
+            "check logs": "supabase functions logs business-discovery-user-aware --follow",
+            "test discovery": "curl -X POST \"https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/business-discovery-user-aware\" -H \"Authorization: Bearer JWT_TOKEN\" -H \"Content-Type: application/json\" -d '{\"businessType\":\"test\",\"location\":\"test\",\"sessionUserId\":\"test_123\"}'",
+            "test export": "curl -X POST \"https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/campaign-export-user-aware\" -H \"Authorization: Bearer JWT_TOKEN\" -H \"Content-Type: application/json\" -d '{\"campaignId\":\"test\",\"format\":\"csv\"}'"
         }
+    },
+    "userAwareFeatures": {
+        "enabled": true,
+        "sessionTracking": true,
+        "authenticationMonitoring": true,
+        "campaignOwnershipTracking": true,
+        "dataIsolationValidation": true
     }
 }
