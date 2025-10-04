@@ -5,10 +5,16 @@ import { ENRICHMENT_TIERS, ensureSession, supabase } from "../lib/supabase";
 import { useCampaignStore } from "../stores/campaignStore";
 import type { BusinessDiscoveryResponse, CampaignConfig } from "../types";
 
-export const useBusinessDiscovery = () => {
+export const useBusinessDiscovery = (
+  onJobCreated?: (jobData: {
+    jobId: string;
+    campaignId: string;
+    status: string;
+    estimatedTime?: number;
+  }) => void
+) => {
   const { sessionUserId } = useAuth();
-  const { addCampaign, setCurrentCampaign, addLeads, setLoading, setError } =
-    useCampaignStore();
+  const { setLoading, setError } = useCampaignStore();
   const [progress, setProgress] = useState(0);
   const [currentStage, setCurrentStage] = useState<string>("");
   const [cacheStats] = useState<any>(null);
@@ -43,9 +49,9 @@ export const useBusinessDiscovery = () => {
         );
         setProgress(20);
 
-        // Call user-aware business discovery with authentication
+        // Call background task business discovery with authentication
         const { data, error } = await supabase.functions.invoke(
-          "business-discovery-user-aware",
+          "business-discovery-background",
           {
             body: {
               businessType: config.search_terms || config.business_type,
@@ -63,51 +69,33 @@ export const useBusinessDiscovery = () => {
         );
 
         if (error) {
-          console.error("❌ User-aware discovery error:", error);
+          console.error("❌ Background discovery error:", error);
           throw new Error(`Discovery failed: ${error.message}`);
         }
 
         if (!data || !data.success) {
-          throw new Error("No data returned from user-aware discovery");
+          throw new Error("No data returned from background discovery");
         }
 
-        console.log("✅ User-aware discovery response:", data);
+        console.log("✅ Background discovery response:", data);
 
-        // Update progress
-        setProgress(90);
-        setCurrentStage("Finalizing results...");
-
-        // Transform the user-aware discovery response
+        // For background tasks, we get jobId and campaignId immediately
+        // The actual processing happens in the background
         const transformedData: BusinessDiscoveryResponse = {
           campaign_id: data.campaignId,
-          total_found: data.results?.totalFound || 0,
-          qualified_count: data.results?.qualified || 0,
-          total_cost:
-            data.optimization?.totalCost ||
-            config.max_results * tierConfig.price,
-          processing_time: data.optimization?.processingTime || "0ms",
+          job_id: data.jobId, // New: job ID for tracking progress
+          status: data.status, // New: processing status
+          estimated_time: data.estimatedTime, // New: estimated completion time
+          realtime_channel: data.realtimeChannel, // New: for real-time updates
+          total_found: 0, // Will be updated via real-time
+          qualified_count: 0, // Will be updated via real-time
+          total_cost: 0, // Will be updated via real-time
+          processing_time: "< 100ms", // Immediate response
           tier_used: tierConfig.name,
           cache_performance: undefined,
           vault_status: "secured",
           census_intelligence: undefined,
-          businesses: (data.leads || []).map((lead: any) => ({
-            id: Math.random().toString(36).substr(2, 9),
-            campaign_id: data.campaignId,
-            business_name: lead.businessName || "Unknown Business",
-            address: lead.address,
-            phone: lead.phone,
-            website: lead.website,
-            email: lead.email,
-            confidence_score: lead.optimizedScore || 0,
-            validation_status: "validated" as const,
-            created_at: new Date().toISOString(),
-            cost_to_acquire: lead.validationCost || tierConfig.price,
-            data_sources: lead.enhancementData?.verificationSources || [
-              "google_places",
-            ],
-            enrichment_tier: tierConfig.name,
-            vault_secured: true,
-          })),
+          businesses: [], // Will be populated via real-time updates
         };
 
         setProgress(100);
@@ -121,37 +109,31 @@ export const useBusinessDiscovery = () => {
         setLoading(false);
       }
     },
-    onSuccess: (
-      data: BusinessDiscoveryResponse,
-      variables: CampaignConfig & {
-        selectedTier?: keyof typeof ENRICHMENT_TIERS;
-      }
-    ) => {
-      // Create campaign record with user-aware discovery data
-      const campaign = {
-        campaign_id: data.campaign_id,
-        business_type: variables.business_type || variables.search_terms,
-        location: variables.location,
-        status: "completed" as const,
-        progress: 100,
-        total_cost: data.total_cost,
-        leads_found: data.total_found,
-        leads_qualified: data.qualified_count,
-        leads_validated: data.businesses.filter(
-          (b: any) => b.validation_status === "validated"
-        ).length,
-        tier_used: data.tier_used,
-        vault_secured: true,
-        cache_performance: data.cache_performance,
-        created_at: new Date().toISOString(),
-        completed_at: new Date().toISOString(),
-      };
+    onSuccess: (data: BusinessDiscoveryResponse) => {
+      console.log("✅ Background job created:", data);
 
-      addCampaign(campaign);
-      setCurrentCampaign(campaign);
-      addLeads(data.businesses);
+      // For background jobs, we don't create the full campaign record immediately
+      // The progress page will handle real-time updates and final campaign creation
+
       setProgress(100);
-      setCurrentStage("Results ready! 🎯");
+      setCurrentStage("Background processing started! 🚀");
+
+      // Navigate to progress page with job ID
+      if (data.job_id && data.campaign_id) {
+        const jobData = {
+          jobId: data.job_id,
+          campaignId: data.campaign_id,
+          status: data.status || "pending",
+          estimatedTime: data.estimated_time,
+        };
+
+        console.log("Job started:", jobData);
+
+        // Call the navigation callback if provided
+        if (onJobCreated) {
+          onJobCreated(jobData);
+        }
+      }
     },
     onError: (error: any) => {
       setError(

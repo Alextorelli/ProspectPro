@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ProgressDisplay } from "../components/ProgressDisplay";
 import { TierSelector } from "../components/TierSelector";
@@ -391,6 +391,18 @@ const businessTypesByCategory: Record<string, string[]> = {
 
 export const BusinessDiscovery: React.FC = () => {
   const navigate = useNavigate();
+
+  // Handle job creation callback for navigation to progress page
+  const handleJobCreated = (jobData: {
+    jobId: string;
+    campaignId: string;
+    status: string;
+    estimatedTime?: number;
+  }) => {
+    console.log("🚀 Job created, navigating to progress page:", jobData);
+    navigate(`/campaign/${jobData.campaignId}/progress?jobId=${jobData.jobId}`);
+  };
+
   const {
     startDiscovery,
     isDiscovering,
@@ -398,7 +410,7 @@ export const BusinessDiscovery: React.FC = () => {
     currentStage,
     cacheStats,
     error,
-  } = useBusinessDiscovery();
+  } = useBusinessDiscovery(handleJobCreated);
 
   const [selectedCategory, setSelectedCategory] = useState(
     "Home & Property Services"
@@ -415,13 +427,8 @@ export const BusinessDiscovery: React.FC = () => {
   const [selectedTier, setSelectedTier] =
     useState<keyof typeof ENRICHMENT_TIERS>("PROFESSIONAL");
 
-  // Navigate to campaign page when discovery starts
-  useEffect(() => {
-    if (isDiscovering) {
-      console.log("🚀 Campaign started, navigating to campaign page...");
-      navigate("/campaign");
-    }
-  }, [isDiscovering, navigate]);
+  // Navigate to progress page via handleJobCreated callback
+  // No longer need useEffect for navigation since we use the callback
 
   const availableBusinessTypes =
     businessTypesByCategory[selectedCategory] || [];

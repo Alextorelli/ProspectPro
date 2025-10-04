@@ -4,6 +4,7 @@ import { AuthProvider } from "./contexts/AuthContext";
 import { AdminPanel } from "./pages/AdminPanel";
 import { BusinessDiscovery } from "./pages/BusinessDiscovery";
 import { Campaign } from "./pages/Campaign";
+import { CampaignProgress } from "./pages/CampaignProgress";
 import { Dashboard } from "./pages/Dashboard";
 import { Results } from "./pages/Results";
 
@@ -16,6 +17,10 @@ function App() {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/discovery" element={<BusinessDiscovery />} />
           <Route path="/campaign" element={<Campaign />} />
+          <Route
+            path="/campaign/:campaignId/progress"
+            element={<CampaignProgress />}
+          />
           <Route path="/results" element={<Results />} />
           <Route path="/admin" element={<AdminPanel />} />
         </Routes>

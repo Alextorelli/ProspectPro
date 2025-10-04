@@ -146,6 +146,11 @@ export interface BusinessDiscoveryResponse {
   qualified_count: number;
   total_found: number;
   census_intelligence?: CensusIntelligence;
+  // Background job fields
+  job_id?: string; // For tracking background processing
+  status?: string; // Job status (pending, processing, completed, failed)
+  estimated_time?: number; // Estimated completion time in seconds
+  realtime_channel?: string; // Channel for real-time updates
   // Progressive enrichment fields (vault-secured)
   tier_used?: string;
   cache_performance?: {
