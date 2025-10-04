@@ -5,10 +5,9 @@ import { ENRICHMENT_TIERS } from "../lib/supabase";
 import { useCampaignStore } from "../stores/campaignStore";
 import type { BusinessDiscoveryResponse, CampaignConfig } from "../types";
 
-// Supabase configuration with current anon key
+// Supabase configuration with current publishable key
 const supabaseUrl = "https://sriycekxdqnesdsgwiuc.supabase.co";
-const supabaseAnonKey =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNyaXljZWt4ZHFuZXNkc2d3aXVjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc5NjU3ODksImV4cCI6MjA3MzU0MTc4OX0.Rx_1Hjz2eayKie0RpPB28i7_683ZwhVJ_5Eu_rzTWpI";
+const supabaseAnonKey = "sb_publishable_GaGU6ZiyiO6ncO7kU2qAvA_SFuCyYaM";
 
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
@@ -17,7 +16,7 @@ export const useBusinessDiscovery = () => {
     useCampaignStore();
   const [progress, setProgress] = useState(0);
   const [currentStage, setCurrentStage] = useState<string>("");
-  const [cacheStats, setCacheStats] = useState<any>(null);
+  const [cacheStats] = useState<any>(null);
 
   const discoveryMutation = useMutation({
     mutationFn: async (
@@ -26,13 +25,10 @@ export const useBusinessDiscovery = () => {
       setLoading(true);
       setError(null);
       setProgress(10);
-      setCurrentStage("Initializing progressive enrichment...");
+      setCurrentStage("Initializing user-aware discovery...");
 
       try {
-        console.log(
-          "🚀 Starting vault-secured progressive enrichment:",
-          config
-        );
+        console.log("🚀 Starting user-aware business discovery:", config);
 
         // Determine enrichment tier
         const tier = config.selectedTier || "PROFESSIONAL";
@@ -41,27 +37,19 @@ export const useBusinessDiscovery = () => {
         setCurrentStage(
           `Using ${tierConfig.name} tier ($${tierConfig.price}/lead)`
         );
-        setProgress(20);
-
-        // Call progressive enrichment orchestrator with vault-secured API access
+        setProgress(20); // Call user-aware business discovery with authentication
         const { data, error } = await supabase.functions.invoke(
-          "enrichment-orchestrator",
+          "business-discovery-user-aware",
           {
             body: {
-              action: "progressive_enrichment",
-              business_type: config.search_terms,
+              businessType: config.search_terms || config.business_type,
               location: config.location,
-              max_results: config.max_results,
-              tier: tier.toLowerCase(),
-              stages: tierConfig.stages,
-              budget_limit: config.max_results * tierConfig.price,
-              min_confidence_score: config.min_confidence_score || 70,
-              cache_strategy: "90_day_intelligent", // Use 90-day intelligent caching
-              require_complete_contacts:
-                config.include_email_validation || false,
-              chamber_verification: config.chamber_verification ?? true,
-              professional_licensing: config.professional_license ?? true,
-              trade_associations: config.trade_association ?? true,
+              maxResults: config.max_results,
+              budgetLimit: config.max_results * tierConfig.price,
+              minConfidenceScore: config.min_confidence_score || 50,
+              sessionUserId: `session_${Date.now()}_${Math.random()
+                .toString(36)
+                .substr(2, 9)}`,
             },
             headers: {
               Authorization: `Bearer ${supabaseAnonKey}`,
@@ -71,70 +59,58 @@ export const useBusinessDiscovery = () => {
         );
 
         if (error) {
-          console.error("❌ Progressive enrichment error:", error);
-          throw new Error(`Enrichment failed: ${error.message}`);
+          console.error("❌ User-aware discovery error:", error);
+          throw new Error(`Discovery failed: ${error.message}`);
         }
 
-        if (!data) {
-          throw new Error("No data returned from progressive enrichment");
+        if (!data || !data.success) {
+          throw new Error("No data returned from user-aware discovery");
         }
 
-        console.log("✅ Progressive enrichment response:", data);
+        console.log("✅ User-aware discovery response:", data);
 
-        // Update progress based on stages completed
-        if (data.stage_progress) {
-          setProgress(30 + data.stage_progress * 50);
-          setCurrentStage(data.current_stage || "Processing...");
-        }
-
-        // Capture cache performance stats
-        if (data.cache_stats) {
-          setCacheStats(data.cache_stats);
-          console.log("📊 Cache performance:", data.cache_stats);
-        }
-
+        // Update progress
         setProgress(90);
         setCurrentStage("Finalizing results...");
 
-        // Transform the vault-secured enrichment response
+        // Transform the user-aware discovery response
         const transformedData: BusinessDiscoveryResponse = {
-          campaign_id:
-            data.campaign_id || Math.random().toString(36).substr(2, 9),
-          total_found: data.total_found || 0,
-          qualified_count: data.qualified_count || 0,
-          total_cost: data.total_cost || config.max_results * tierConfig.price,
-          processing_time: data.processing_time || "0ms",
+          campaign_id: data.campaignId,
+          total_found: data.results?.totalFound || 0,
+          qualified_count: data.results?.qualified || 0,
+          total_cost:
+            data.optimization?.totalCost ||
+            config.max_results * tierConfig.price,
+          processing_time: data.optimization?.processingTime || "0ms",
           tier_used: tierConfig.name,
-          cache_performance: data.cache_stats,
-          vault_status: data.vault_status || "secured",
-          census_intelligence: data.census_intelligence || undefined,
-          businesses: (data.enriched_leads || data.leads || []).map(
-            (lead: any) => ({
-              id: lead.id || Math.random().toString(36).substr(2, 9),
-              campaign_id: data.campaign_id,
-              business_name:
-                lead.business_name || lead.businessName || "Unknown Business",
-              address: lead.address,
-              phone: lead.phone,
-              website: lead.website,
-              email: lead.email,
-              confidence_score:
-                lead.confidence_score || lead.optimizedScore || 0,
-              validation_status: "validated" as const,
-              created_at: new Date().toISOString(),
-              cost_to_acquire: lead.cost_to_acquire || tierConfig.price,
-              data_sources: lead.data_sources || ["vault_secured_apis"],
-              enrichment_tier: tierConfig.name,
-              vault_secured: true,
-            })
-          ),
+          cache_performance: undefined,
+          vault_status: "secured",
+          census_intelligence: undefined,
+          businesses: (data.leads || []).map((lead: any) => ({
+            id: Math.random().toString(36).substr(2, 9),
+            campaign_id: data.campaignId,
+            business_name: lead.businessName || "Unknown Business",
+            address: lead.address,
+            phone: lead.phone,
+            website: lead.website,
+            email: lead.email,
+            confidence_score: lead.optimizedScore || 0,
+            validation_status: "validated" as const,
+            created_at: new Date().toISOString(),
+            cost_to_acquire: lead.validationCost || tierConfig.price,
+            data_sources: lead.enhancementData?.verificationSources || [
+              "google_places",
+            ],
+            enrichment_tier: tierConfig.name,
+            vault_secured: true,
+          })),
         };
 
         setProgress(100);
         setCurrentStage("Complete! 🎉");
         return transformedData;
       } catch (error) {
-        console.error("❌ Progressive enrichment error:", error);
+        console.error("❌ User-aware discovery error:", error);
         setCurrentStage("Failed ❌");
         throw error;
       } finally {
@@ -147,7 +123,7 @@ export const useBusinessDiscovery = () => {
         selectedTier?: keyof typeof ENRICHMENT_TIERS;
       }
     ) => {
-      // Create campaign record with vault-secured enrichment data
+      // Create campaign record with user-aware discovery data
       const campaign = {
         campaign_id: data.campaign_id,
         business_type: variables.business_type || variables.search_terms,
@@ -175,7 +151,7 @@ export const useBusinessDiscovery = () => {
     },
     onError: (error: any) => {
       setError(
-        error instanceof Error ? error.message : "Progressive enrichment failed"
+        error instanceof Error ? error.message : "User-aware discovery failed"
       );
       setProgress(0);
       setCurrentStage("Failed ❌");
