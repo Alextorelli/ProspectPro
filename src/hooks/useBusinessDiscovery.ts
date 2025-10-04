@@ -6,7 +6,7 @@ import { useCampaignStore } from "../stores/campaignStore";
 import type { BusinessDiscoveryResponse, CampaignConfig } from "../types";
 
 export const useBusinessDiscovery = () => {
-  const { user, sessionUserId } = useAuth();
+  const { sessionUserId } = useAuth();
   const { addCampaign, setCurrentCampaign, addLeads, setLoading, setError } =
     useCampaignStore();
   const [progress, setProgress] = useState(0);
@@ -24,6 +24,7 @@ export const useBusinessDiscovery = () => {
 
       try {
         console.log("🚀 Starting user-aware business discovery:", config);
+        console.log("👤 Session User ID:", sessionUserId);
 
         // Determine enrichment tier
         const tier = config.selectedTier || "PROFESSIONAL";
@@ -33,17 +34,6 @@ export const useBusinessDiscovery = () => {
           `Using ${tierConfig.name} tier ($${tierConfig.price}/lead)`
         );
         setProgress(20);
-
-        // Get current session for authentication
-        const {
-          data: { session },
-        } = await supabase.auth.getSession();
-
-        // Build headers with optional authorization
-        const headers: Record<string, string> = {};
-        if (session?.access_token) {
-          headers.Authorization = `Bearer ${session.access_token}`;
-        }
 
         // Call user-aware business discovery with authentication
         const { data, error } = await supabase.functions.invoke(
@@ -55,10 +45,12 @@ export const useBusinessDiscovery = () => {
               maxResults: config.max_results,
               budgetLimit: config.max_results * tierConfig.price,
               minConfidenceScore: config.min_confidence_score || 50,
-              sessionUserId: user ? undefined : sessionUserId,
-              userEmail: user?.email,
+              sessionUserId:
+                sessionUserId ||
+                `session_${Date.now()}_${Math.random()
+                  .toString(36)
+                  .substr(2, 9)}`,
             },
-            headers,
           }
         );
 
