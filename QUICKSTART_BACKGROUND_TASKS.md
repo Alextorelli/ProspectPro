@@ -18,6 +18,7 @@ All good? Let's go! 🚀
 ## Step 1: Deploy Database Schema (5 min)
 
 ### Open Supabase Dashboard
+
 ```
 1. Go to: https://supabase.com/dashboard
 2. Select: ProspectPro-Production
@@ -25,6 +26,7 @@ All good? Let's go! 🚀
 ```
 
 ### Run Schema Script
+
 ```
 1. Click: "+ New query"
 2. Copy entire contents of: /database/job-queue-schema.sql
@@ -34,6 +36,7 @@ All good? Let's go! 🚀
 ```
 
 ### Verify Table Created
+
 ```
 1. Click: "Database" → "Tables" (left sidebar)
 2. Look for: "discovery_jobs" table
@@ -47,18 +50,21 @@ All good? Let's go! 🚀
 ## Step 2: Deploy Edge Function (3 min)
 
 ### Open Terminal in Codespaces
+
 ```
 1. Click: Terminal menu → New Terminal
 2. Should see: @Alextorelli ➜ /workspaces/ProspectPro $
 ```
 
 ### Deploy Function
+
 ```bash
 # Copy and paste this command:
 supabase functions deploy business-discovery-background --no-verify-jwt
 ```
 
 ### Expected Output
+
 ```
 Deploying function business-discovery-background...
 ✓ Function deployed successfully
@@ -66,12 +72,14 @@ Deploying function business-discovery-background...
 ```
 
 ### Verify Deployment
+
 ```bash
 # List all functions:
 supabase functions list
 ```
 
 Should show:
+
 ```
 business-discovery-background (deployed)
 business-discovery-user-aware (deployed)
@@ -86,6 +94,7 @@ enrichment-orchestrator (deployed)
 ## Step 3: Test Backend (5 min)
 
 ### Get Your Anon Key
+
 ```
 1. Supabase Dashboard → Settings → API
 2. Copy: "anon public" key (starts with "eyJ...")
@@ -93,6 +102,7 @@ enrichment-orchestrator (deployed)
 ```
 
 ### Run Test Script
+
 ```bash
 # In Codespaces terminal:
 export SUPABASE_ANON_KEY="paste_your_anon_key_here"
@@ -102,6 +112,7 @@ export SUPABASE_ANON_KEY="paste_your_anon_key_here"
 ```
 
 ### Expected Output
+
 ```
 🧪 Testing Background Task Architecture
 ========================================
@@ -154,6 +165,7 @@ Test 3: Verifying database records...
 ### If Test Fails
 
 **Scenario A: "Invalid JWT" error**
+
 ```bash
 # Get fresh anon key from Supabase Dashboard
 export SUPABASE_ANON_KEY="new_anon_key"
@@ -161,6 +173,7 @@ export SUPABASE_ANON_KEY="new_anon_key"
 ```
 
 **Scenario B: "Function not found" error**
+
 ```bash
 # Redeploy function
 supabase functions deploy business-discovery-background --no-verify-jwt
@@ -168,6 +181,7 @@ supabase functions deploy business-discovery-background --no-verify-jwt
 ```
 
 **Scenario C: Job stays in "pending"**
+
 ```
 1. Go to: Supabase Dashboard → Edge Functions → Logs
 2. Look for: business-discovery-background logs
@@ -182,6 +196,7 @@ supabase functions deploy business-discovery-background --no-verify-jwt
 ## Step 4: View Results in Dashboard (2 min)
 
 ### Check Job Record
+
 ```
 1. Supabase Dashboard → Database → discovery_jobs
 2. Filter by: id (use jobId from test)
@@ -189,6 +204,7 @@ supabase functions deploy business-discovery-background --no-verify-jwt
 ```
 
 ### Check Campaign Record
+
 ```
 1. Database → campaigns
 2. Filter by: id (use campaignId from test)
@@ -196,6 +212,7 @@ supabase functions deploy business-discovery-background --no-verify-jwt
 ```
 
 ### Check Leads
+
 ```
 1. Database → leads
 2. Filter by: campaign_id (use campaignId from test)
@@ -213,6 +230,7 @@ supabase functions deploy business-discovery-background --no-verify-jwt
 **A. Update Campaign Form** (file: `src/components/CampaignForm.tsx`)
 
 Change API endpoint from:
+
 ```typescript
 // OLD:
 const response = await fetch('.../business-discovery-user-aware', ...)
@@ -222,6 +240,7 @@ const response = await fetch('.../business-discovery-background', ...)
 ```
 
 Response will include `jobId`:
+
 ```typescript
 const { jobId, campaignId } = await response.json();
 navigate(`/campaign/${campaignId}/progress?jobId=${jobId}`);
@@ -230,14 +249,15 @@ navigate(`/campaign/${campaignId}/progress?jobId=${jobId}`);
 **B. Create Progress Page** (file: `src/pages/CampaignProgress.tsx`)
 
 Copy this template:
+
 ```typescript
-import { useJobProgress, JobProgressDisplay } from '../hooks/useJobProgress';
-import { useParams, useSearchParams } from 'react-router-dom';
+import { useJobProgress, JobProgressDisplay } from "../hooks/useJobProgress";
+import { useParams, useSearchParams } from "react-router-dom";
 
 export function CampaignProgress() {
   const { campaignId } = useParams();
   const [searchParams] = useSearchParams();
-  const jobId = searchParams.get('jobId');
+  const jobId = searchParams.get("jobId");
 
   return (
     <div className="campaign-progress-page">
@@ -261,6 +281,7 @@ export function CampaignProgress() {
 ## 🎯 What You Just Built
 
 ### Before (Broken)
+
 ```
 User submits campaign
   ↓
@@ -272,6 +293,7 @@ Dashboard shows wrong data
 ```
 
 ### After (Working)
+
 ```
 User submits campaign
   ↓
@@ -285,6 +307,7 @@ Shows accurate results
 ```
 
 ### Key Improvements
+
 - ✅ No timeouts (unlimited processing time)
 - ✅ Real-time progress updates
 - ✅ Accurate lead data
@@ -298,6 +321,7 @@ Shows accurate results
 ### Real-time Job Monitoring
 
 **Supabase Dashboard → Database → discovery_jobs**
+
 ```sql
 SELECT id, status, progress, current_stage, metrics
 FROM discovery_jobs
@@ -306,6 +330,7 @@ LIMIT 10;
 ```
 
 Shows last 10 jobs with:
+
 - Status: pending, processing, completed, failed
 - Progress: 0-100%
 - Stage: discovering, scoring, enriching, storing
@@ -314,6 +339,7 @@ Shows last 10 jobs with:
 ### Campaign Results
 
 **Database → campaigns**
+
 ```sql
 SELECT business_type, location, results_count, total_cost, created_at
 FROM campaigns
@@ -324,6 +350,7 @@ LIMIT 10;
 ### Edge Function Logs
 
 **Supabase Dashboard → Edge Functions → Logs**
+
 - Filter by: business-discovery-background
 - Shows: All function executions, errors, console.log output
 - Refresh every few seconds during testing
@@ -336,6 +363,7 @@ LIMIT 10;
 
 **Cause**: Anon key mismatch  
 **Fix**:
+
 ```bash
 # Get current anon key from Supabase Dashboard
 export SUPABASE_ANON_KEY="fresh_key_from_dashboard"
@@ -346,6 +374,7 @@ export SUPABASE_ANON_KEY="fresh_key_from_dashboard"
 
 **Cause**: Background task not starting  
 **Fix**:
+
 1. Check Edge Function logs (Dashboard → Edge Functions → Logs)
 2. Look for error message
 3. Usually API key issue:
@@ -356,17 +385,20 @@ export SUPABASE_ANON_KEY="fresh_key_from_dashboard"
 
 **Cause**: Database permissions (RLS policies)  
 **Fix**:
+
 ```sql
 -- Run in SQL Editor:
 SELECT * FROM campaigns WHERE id = 'your_campaign_id';
 SELECT * FROM leads WHERE campaign_id = 'your_campaign_id';
 ```
+
 If returns empty, RLS policies may be blocking. Check user_id and session_user_id match.
 
 ### Issue 4: "Real-time updates not appearing in frontend"
 
 **Cause**: Supabase Real-time not enabled  
 **Fix**:
+
 1. Dashboard → Database → Replication
 2. Enable replication for: discovery_jobs table
 3. Click "Enable"
@@ -391,16 +423,19 @@ If all checked: **🎉 YOU'RE PRODUCTION READY!**
 ## 🚀 Next Steps
 
 ### Immediate
+
 1. Integrate frontend (Step 5 above)
 2. Test with real campaigns (different business types, locations)
 3. Monitor costs and performance
 
 ### This Week
+
 1. Deploy to production (Vercel)
 2. Share with beta users
 3. Collect feedback on progress page UX
 
 ### This Month
+
 1. Add Stripe integration (paid tiers)
 2. Implement advanced filters
 3. Add email notifications for completed campaigns
@@ -421,6 +456,7 @@ If all checked: **🎉 YOU'RE PRODUCTION READY!**
 ## 🎯 You Did It!
 
 **In 15 minutes you:**
+
 - ✅ Created a production-ready job queue system
 - ✅ Deployed background task Edge Function
 - ✅ Implemented real-time progress tracking
@@ -429,7 +465,7 @@ If all checked: **🎉 YOU'RE PRODUCTION READY!**
 
 **Cost**: $0 additional  
 **Maintenance**: Zero  
-**Scalability**: Unlimited  
+**Scalability**: Unlimited
 
 **Your app now handles 1-2 minute campaigns without timeouts!** 🚀
 

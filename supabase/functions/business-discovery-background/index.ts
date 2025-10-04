@@ -70,7 +70,7 @@ async function processDiscoveryJob(
   supabaseServiceKey: string
 ) {
   console.log(`🚀 Background job ${jobId} started`);
-  
+
   const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
   try {
@@ -86,7 +86,9 @@ async function processDiscoveryJob(
       .eq("id", jobId);
 
     // Step 1: Business Discovery (Google Places)
-    console.log(`🔍 Discovering businesses: ${config.businessType} in ${config.location}`);
+    console.log(
+      `🔍 Discovering businesses: ${config.businessType} in ${config.location}`
+    );
     const businesses = await discoverBusinesses(
       config.businessType,
       config.location,
@@ -103,10 +105,16 @@ async function processDiscoveryJob(
       .eq("id", jobId);
 
     // Step 2: Score businesses
-    const scorer = new QualityScorer({ maxCostPerBusiness: config.budgetLimit / config.maxResults });
-    const scoredBusinesses = businesses.map((b: BusinessData) => scorer.scoreBusiness(b));
+    const scorer = new QualityScorer({
+      maxCostPerBusiness: config.budgetLimit / config.maxResults,
+    });
+    const scoredBusinesses = businesses.map((b: BusinessData) =>
+      scorer.scoreBusiness(b)
+    );
     const qualifiedLeads = scoredBusinesses
-      .filter((lead: ScoredLead) => lead.optimizedScore >= config.minConfidenceScore)
+      .filter(
+        (lead: ScoredLead) => lead.optimizedScore >= config.minConfidenceScore
+      )
       .slice(0, config.maxResults);
 
     await supabase
@@ -125,25 +133,25 @@ async function processDiscoveryJob(
 
     for (let i = 0; i < qualifiedLeads.length; i++) {
       const lead = qualifiedLeads[i];
-      
+
       try {
         const enrichmentResult = await enrichLead(lead, config);
         enrichedLeads.push(enrichmentResult.lead);
         totalCost += enrichmentResult.cost;
 
         // Update progress
-        const progress = 50 + Math.floor(((i + 1) / qualifiedLeads.length) * 40);
+        const progress =
+          50 + Math.floor(((i + 1) / qualifiedLeads.length) * 40);
         await supabase
           .from("discovery_jobs")
           .update({
             progress,
-            metrics: { 
+            metrics: {
               leads_enriched: i + 1,
               total_cost: totalCost,
             },
           })
           .eq("id", jobId);
-
       } catch (error) {
         console.error(`❌ Enrichment error for ${lead.businessName}:`, error);
         enrichedLeads.push(lead); // Keep original data
@@ -202,16 +210,21 @@ async function processDiscoveryJob(
         metrics: {
           total_found: enrichedLeads.length,
           total_cost: totalCost,
-          avg_confidence: enrichedLeads.reduce((sum: number, l: ScoredLead) => sum + l.optimizedScore, 0) / enrichedLeads.length,
+          avg_confidence:
+            enrichedLeads.reduce(
+              (sum: number, l: ScoredLead) => sum + l.optimizedScore,
+              0
+            ) / enrichedLeads.length,
         },
       })
       .eq("id", jobId);
 
-    console.log(`✅ Background job ${jobId} completed: ${enrichedLeads.length} leads, $${totalCost}`);
-
+    console.log(
+      `✅ Background job ${jobId} completed: ${enrichedLeads.length} leads, $${totalCost}`
+    );
   } catch (error) {
     console.error(`❌ Background job ${jobId} failed:`, error);
-    
+
     await supabase
       .from("discovery_jobs")
       .update({
@@ -267,13 +280,19 @@ class QualityScorer {
   }
 }
 
-async function discoverBusinesses(businessType: string, location: string, maxResults: number) {
+async function discoverBusinesses(
+  businessType: string,
+  location: string,
+  maxResults: number
+) {
   const apiKey = Deno.env.get("GOOGLE_PLACES_API_KEY");
   if (!apiKey) throw new Error("Google Places API key not configured");
 
   const query = `${businessType} in ${location}`;
-  const searchUrl = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${encodeURIComponent(query)}&key=${apiKey}`;
-  
+  const searchUrl = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${encodeURIComponent(
+    query
+  )}&key=${apiKey}`;
+
   const response = await fetch(searchUrl);
   const data = await response.json();
 
@@ -301,8 +320,10 @@ async function discoverBusinesses(businessType: string, location: string, maxRes
 }
 
 async function enrichLead(lead: ScoredLead, config: JobConfig) {
-  const enrichmentUrl = `${Deno.env.get("SUPABASE_URL")}/functions/v1/enrichment-orchestrator`;
-  
+  const enrichmentUrl = `${Deno.env.get(
+    "SUPABASE_URL"
+  )}/functions/v1/enrichment-orchestrator`;
+
   const response = await fetch(enrichmentUrl, {
     method: "POST",
     headers: {
@@ -327,14 +348,15 @@ async function enrichLead(lead: ScoredLead, config: JobConfig) {
   }
 
   const enrichmentData = await response.json();
-  
+
   return {
     lead: {
       ...lead,
       email: enrichmentData.enrichedData?.emails?.[0]?.email || lead.email,
       enhancementData: {
         ...lead.enhancementData,
-        verificationSources: enrichmentData.processingMetadata?.servicesUsed || [],
+        verificationSources:
+          enrichmentData.processingMetadata?.servicesUsed || [],
       },
     },
     cost: enrichmentData.totalCost || 0,
@@ -358,7 +380,9 @@ serve(async (req) => {
       global: authHeader ? { headers: { Authorization: authHeader } } : {},
     });
 
-    const { data: { user } } = await supabaseClient.auth.getUser();
+    const {
+      data: { user },
+    } = await supabaseClient.auth.getUser();
 
     const requestData: BusinessDiscoveryRequest = await req.json();
     const {
@@ -371,8 +395,12 @@ serve(async (req) => {
     } = requestData;
 
     // Create job ID and campaign ID
-    const jobId = `job_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    const campaignId = `campaign_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const jobId = `job_${Date.now()}_${Math.random()
+      .toString(36)
+      .substr(2, 9)}`;
+    const campaignId = `campaign_${Date.now()}_${Math.random()
+      .toString(36)
+      .substr(2, 9)}`;
 
     const jobConfig = {
       campaignId,
@@ -422,7 +450,6 @@ serve(async (req) => {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       }
     );
-
   } catch (error) {
     console.error("❌ Error:", error);
     return new Response(

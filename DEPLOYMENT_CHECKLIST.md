@@ -58,6 +58,7 @@
 ### Step 2.2: Deploy Function
 
 Copy and paste this command:
+
 ```bash
 supabase functions deploy business-discovery-background --no-verify-jwt
 ```
@@ -68,6 +69,7 @@ supabase functions deploy business-discovery-background --no-verify-jwt
 ### Step 2.3: Verify Deployment
 
 Copy and paste this command:
+
 ```bash
 supabase functions list
 ```
@@ -91,6 +93,7 @@ supabase functions list
 ### Step 3.2: Set Environment Variable
 
 In terminal, paste this (replace with your actual key):
+
 ```bash
 export SUPABASE_ANON_KEY="paste_your_anon_key_here"
 ```
@@ -100,6 +103,7 @@ export SUPABASE_ANON_KEY="paste_your_anon_key_here"
 ### Step 3.3: Run Test Script
 
 Copy and paste this command:
+
 ```bash
 ./scripts/test-background-tasks.sh
 ```
@@ -157,18 +161,21 @@ Look for these messages in output:
 File to edit: `src/components/CampaignForm.tsx` (or wherever you handle campaign submission)
 
 **Find this line** (or similar):
+
 ```typescript
 const response = await fetch(
   'https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/business-discovery-user-aware',
 ```
 
 **Change to**:
+
 ```typescript
 const response = await fetch(
   'https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/business-discovery-background',
 ```
 
 **After getting response, add**:
+
 ```typescript
 const { jobId, campaignId } = await response.json();
 navigate(`/campaign/${campaignId}/progress?jobId=${jobId}`);
@@ -182,14 +189,15 @@ navigate(`/campaign/${campaignId}/progress?jobId=${jobId}`);
 Create new file: `src/pages/CampaignProgress.tsx`
 
 Copy this entire template:
+
 ```typescript
-import { useJobProgress, JobProgressDisplay } from '../hooks/useJobProgress';
-import { useParams, useSearchParams } from 'react-router-dom';
+import { useJobProgress, JobProgressDisplay } from "../hooks/useJobProgress";
+import { useParams, useSearchParams } from "react-router-dom";
 
 export function CampaignProgress() {
   const { campaignId } = useParams();
   const [searchParams] = useSearchParams();
-  const jobId = searchParams.get('jobId');
+  const jobId = searchParams.get("jobId");
 
   return (
     <div className="campaign-progress-page">
@@ -209,6 +217,7 @@ export function CampaignProgress() {
 File to edit: `src/App.tsx` (or your main routing file)
 
 **Find your routes section**, add this line:
+
 ```typescript
 <Route path="/campaign/:campaignId/progress" element={<CampaignProgress />} />
 ```
@@ -226,6 +235,7 @@ File to edit: `src/App.tsx` (or your main routing file)
 ### Step 6.1: Build Frontend
 
 In terminal:
+
 ```bash
 npm run build
 ```
@@ -295,11 +305,13 @@ vercel --prod
 ### Issue: "Invalid JWT" Error
 
 **What you see**:
+
 ```json
 { "error": "Invalid JWT" }
 ```
 
 **Fix**:
+
 1. Get fresh anon key from Supabase Dashboard → Settings → API
 2. Update in terminal: `export SUPABASE_ANON_KEY="new_key"`
 3. Re-run test: `./scripts/test-background-tasks.sh`
@@ -313,6 +325,7 @@ vercel --prod
 **What you see**: Job never progresses past "pending" status
 
 **Fix**:
+
 1. Check Edge Function logs:
    - Supabase Dashboard → Edge Functions → business-discovery-background → Logs
 2. Look for error messages
@@ -329,6 +342,7 @@ vercel --prod
 **What you see**: Campaign completes but leads table is empty
 
 **Fix**:
+
 1. Check RLS policies:
    ```sql
    -- Run in SQL Editor:
@@ -346,6 +360,7 @@ vercel --prod
 **What you see**: Progress page shows "Loading..." forever
 
 **Fix**:
+
 1. Enable Supabase Real-time:
    - Dashboard → Database → Replication
    - Find `discovery_jobs` table
@@ -361,12 +376,12 @@ vercel --prod
 **What you see**: Test script exits with error
 
 **Fix**:
+
 1. Check if `SUPABASE_ANON_KEY` is set:
    ```bash
    echo $SUPABASE_ANON_KEY
    ```
    Should print your key. If empty, set it again.
-   
 2. Check if function is deployed:
    ```bash
    supabase functions list
@@ -382,12 +397,14 @@ vercel --prod
 ### Debugging Commands
 
 **Check Edge Function logs**:
+
 ```bash
 # View recent logs
 supabase functions logs business-discovery-background
 ```
 
 **Check database directly**:
+
 ```sql
 -- In Supabase SQL Editor:
 SELECT * FROM discovery_jobs ORDER BY created_at DESC LIMIT 5;
@@ -396,6 +413,7 @@ SELECT * FROM leads ORDER BY created_at DESC LIMIT 10;
 ```
 
 **Test Edge Function directly**:
+
 ```bash
 curl -X POST 'https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/business-discovery-background' \
   -H "Authorization: Bearer $SUPABASE_ANON_KEY" \
@@ -418,6 +436,7 @@ curl -X POST 'https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/business-dis
 **You know you're done when**:
 
 ### Basic Functionality
+
 - [ ] Test campaign creates job record
 - [ ] Job progresses through all stages
 - [ ] Campaign completes with >0 leads
@@ -425,6 +444,7 @@ curl -X POST 'https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/business-dis
 - [ ] No errors in Edge Function logs
 
 ### User Experience
+
 - [ ] Frontend redirects to progress page
 - [ ] Progress bar updates automatically
 - [ ] Stage labels change appropriately
@@ -433,6 +453,7 @@ curl -X POST 'https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/business-dis
 - [ ] Results page shows accurate data
 
 ### Production Ready
+
 - [ ] Deployed to Vercel
 - [ ] Real users can submit campaigns
 - [ ] Campaigns complete in 1-2 minutes
@@ -448,6 +469,7 @@ curl -X POST 'https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/business-dis
 After deployment, track these:
 
 ### Daily (First Week)
+
 - [ ] Number of campaigns submitted
 - [ ] Number of campaigns completed successfully
 - [ ] Average completion time
@@ -455,12 +477,14 @@ After deployment, track these:
 - [ ] Total cost per campaign
 
 ### Weekly
+
 - [ ] Success rate (completed / total)
 - [ ] Average leads per campaign
 - [ ] Cost per lead
 - [ ] User feedback on progress page
 
 ### Monthly
+
 - [ ] Total campaigns processed
 - [ ] Infrastructure costs (should be $0)
 - [ ] Edge Function usage (vs free tier limit)
@@ -471,18 +495,21 @@ After deployment, track these:
 ## 🚀 Next Steps After Deployment
 
 ### Immediate (This Week)
+
 - [ ] Monitor first 10 real campaigns
 - [ ] Collect user feedback on progress page
 - [ ] Document any issues encountered
 - [ ] Optimize progress update frequency if needed
 
 ### Short-term (This Month)
+
 - [ ] Add error recovery (retry failed jobs)
 - [ ] Implement email notifications for completed campaigns
 - [ ] Create admin dashboard for monitoring all jobs
 - [ ] Add campaign history page
 
 ### Long-term (Next Quarter)
+
 - [ ] Integrate Stripe for paid tiers
 - [ ] Add advanced filters (industry, revenue size)
 - [ ] Implement bulk campaign creation
@@ -493,21 +520,25 @@ After deployment, track these:
 ## 📚 Resources
 
 ### Documentation
+
 - **Quick Start**: `/QUICKSTART_BACKGROUND_TASKS.md`
 - **Full Implementation**: `/BACKGROUND_TASKS_IMPLEMENTATION.md`
 - **Architecture Decision**: `/ARCHITECTURE_DECISION_BACKGROUND_TASKS.md`
 - **Visual Summary**: `/VISUAL_SUMMARY_BACKGROUND_TASKS.md`
 
 ### Scripts
+
 - **Deploy Script**: `/scripts/deploy-background-tasks.sh`
 - **Test Script**: `/scripts/test-background-tasks.sh`
 
 ### Code
+
 - **Database Schema**: `/database/job-queue-schema.sql`
 - **Edge Function**: `/supabase/functions/business-discovery-background/index.ts`
 - **React Hook**: `/src/hooks/useJobProgress.tsx`
 
 ### External
+
 - **Supabase Docs**: https://supabase.com/docs/guides/functions/background-tasks
 - **Edge Runtime**: https://supabase.com/docs/guides/functions/architecture
 - **Real-time**: https://supabase.com/docs/guides/realtime
@@ -527,11 +558,11 @@ After deployment, track these:
 - [ ] Confirmed accurate lead data
 - [ ] Achieved zero timeout errors
 
-**Date completed**: ________________
+**Date completed**: ******\_\_\_\_******
 
-**First successful campaign ID**: ________________
+**First successful campaign ID**: ******\_\_\_\_******
 
-**Number of leads generated**: ________________
+**Number of leads generated**: ******\_\_\_\_******
 
 ---
 

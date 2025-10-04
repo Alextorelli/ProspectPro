@@ -8,20 +8,20 @@
 
 ## 📊 Quick Comparison
 
-| Feature | Background Tasks (Chosen) | External Compute | Vercel Functions |
-|---------|---------------------------|------------------|------------------|
-| **Cost** | $0 (Supabase free tier) | $5-10/month | $20/month (Pro) |
-| **Setup Time** | 10 minutes | 1-2 hours | 30 minutes |
-| **Maintenance** | Zero | Moderate | Low |
-| **Timeout** | Unlimited* | Unlimited | 5 minutes |
-| **Scaling** | Automatic | Manual | Automatic |
-| **Monitoring** | Supabase Dashboard | Separate service | Vercel Dashboard |
-| **Database Access** | Native | Via API | Via API |
-| **Real-time** | Native | Need integration | Need integration |
-| **Deployment** | 1 command | Multiple services | 2 commands |
-| **Complexity** | Simple | Complex | Moderate |
+| Feature             | Background Tasks (Chosen) | External Compute  | Vercel Functions |
+| ------------------- | ------------------------- | ----------------- | ---------------- |
+| **Cost**            | $0 (Supabase free tier)   | $5-10/month       | $20/month (Pro)  |
+| **Setup Time**      | 10 minutes                | 1-2 hours         | 30 minutes       |
+| **Maintenance**     | Zero                      | Moderate          | Low              |
+| **Timeout**         | Unlimited\*               | Unlimited         | 5 minutes        |
+| **Scaling**         | Automatic                 | Manual            | Automatic        |
+| **Monitoring**      | Supabase Dashboard        | Separate service  | Vercel Dashboard |
+| **Database Access** | Native                    | Via API           | Via API          |
+| **Real-time**       | Native                    | Need integration  | Need integration |
+| **Deployment**      | 1 command                 | Multiple services | 2 commands       |
+| **Complexity**      | Simple                    | Complex           | Moderate         |
 
-*Background tasks continue after response, limited by plan but sufficient for our use case
+\*Background tasks continue after response, limited by plan but sufficient for our use case
 
 ---
 
@@ -30,18 +30,21 @@
 ### 1. **Zero Additional Cost**
 
 **Background Tasks**:
+
 - Included in Supabase free tier
 - 500K Edge Function invocations/month FREE
 - Unlimited processing time per invocation
 - Our usage: ~100 campaigns/month = **$0**
 
 **External Compute** (Railway, Render, Fly.io):
+
 - Base cost: $5-10/month
 - Even with zero usage
 - Additional charges for CPU/memory overages
 - Our cost: **$5-10/month minimum**
 
 **Vercel Functions**:
+
 - Hobby tier: 100GB-hours/month (NOT enough for background tasks)
 - Pro tier: $20/month for 1,000GB-hours
 - Background tasks require Pro tier
@@ -50,6 +53,7 @@
 ### 2. **Dramatically Simpler**
 
 **Background Tasks** (3 steps):
+
 ```bash
 1. Deploy database schema (SQL script)
 2. Deploy Edge Function (1 command)
@@ -58,6 +62,7 @@
 ```
 
 **External Compute** (10+ steps):
+
 ```bash
 1. Create Railway/Render account
 2. Create new service
@@ -75,6 +80,7 @@
 ### 3. **Native Integration**
 
 **Background Tasks**:
+
 - ✅ Direct database access (no API overhead)
 - ✅ Same authentication context
 - ✅ Real-time updates built-in
@@ -82,6 +88,7 @@
 - ✅ Unified logs and monitoring
 
 **External Compute**:
+
 - ❌ API calls to Supabase (latency, cost)
 - ❌ Service role key management (security risk)
 - ❌ Separate real-time integration
@@ -91,6 +98,7 @@
 ### 4. **Proven Reliability**
 
 **Background Tasks**:
+
 - Built into Supabase Edge Functions (production-ready)
 - Used by thousands of Supabase apps
 - Global edge network (low latency)
@@ -98,6 +106,7 @@
 - 99.9% uptime SLA
 
 **External Compute**:
+
 - DIY reliability (you own the uptime)
 - Single region deployment (higher latency)
 - Manual retry logic
@@ -120,12 +129,12 @@ serve(async (req) => {
 // Background task approach (NO TIMEOUT)
 serve(async (req) => {
   const jobId = createJobRecord();
-  
+
   // 🔥 This is the key: waitUntil() runs AFTER response is sent
   EdgeRuntime.waitUntil(
-    longRunningTask(jobId)  // ✅ 2 minutes = OK!
+    longRunningTask(jobId) // ✅ 2 minutes = OK!
   );
-  
+
   // Returns immediately (<100ms)
   return Response.json({ jobId, status: "processing" });
 });
@@ -155,6 +164,7 @@ serve(async (req) => {
 ### Scenario: 1,000 campaigns/month
 
 **Background Tasks**:
+
 ```
 Edge Function invocations: 1,000/month
 Supabase free tier: 500,000/month
@@ -164,6 +174,7 @@ Annual cost: $0
 ```
 
 **External Compute** (Railway MICRO):
+
 ```
 Base cost: $5/month
 Database egress: ~$1/month (API calls)
@@ -174,6 +185,7 @@ Annual cost: $72
 ```
 
 **Vercel Functions Pro**:
+
 ```
 Pro plan: $20/month (required for background tasks)
 Function invocations: Included
@@ -196,12 +208,14 @@ Annual cost: $264
 ### Latency (Time to First Response)
 
 **Background Tasks**:
+
 - Database insert: 10ms
 - Job record creation: 5ms
 - Response sent: **<100ms**
 - User sees progress immediately
 
 **External Compute**:
+
 - API call to external service: 50-100ms
 - Queue job in external database: 20ms
 - Response sent: **100-200ms**
@@ -212,12 +226,14 @@ Annual cost: $264
 ### Processing Time (Complete Campaign)
 
 **Background Tasks**:
+
 - Google Places: 500ms per business
 - Enrichment: 200ms per lead
 - Database storage: 50ms
 - **Total: 1-2 minutes** (same for both)
 
 **External Compute**:
+
 - Same processing logic
 - Plus: API overhead for database access (5-10%)
 - **Total: 1.1-2.2 minutes**
@@ -227,11 +243,13 @@ Annual cost: $264
 ### Real-time Updates
 
 **Background Tasks**:
+
 - Direct database updates
 - Supabase Real-time (native)
 - Update latency: **<100ms**
 
 **External Compute**:
+
 - API calls for updates
 - Need webhook or polling
 - Update latency: **500ms - 2s**
@@ -246,7 +264,7 @@ Annual cost: $264
 
 **Weekly**: None  
 **Monthly**: Check logs for errors (5 min)  
-**Yearly**: Review usage, adjust if needed (30 min)  
+**Yearly**: Review usage, adjust if needed (30 min)
 
 **Total annual maintenance**: ~1 hour
 
@@ -254,7 +272,7 @@ Annual cost: $264
 
 **Weekly**: Monitor worker health, check logs (15 min)  
 **Monthly**: Review costs, update dependencies (30 min)  
-**Yearly**: Major version upgrades, security patches (4 hours)  
+**Yearly**: Major version upgrades, security patches (4 hours)
 
 **Total annual maintenance**: ~18 hours
 
@@ -274,11 +292,11 @@ Annual cost: $264
 
 ### External Compute
 
-- ⚠️  Requires service role key (elevated privileges)
-- ⚠️  Exposed webhook endpoints (need authentication)
-- ⚠️  Bypasses RLS (must implement manually)
-- ⚠️  Token management complexity
-- ⚠️  Multiple trust boundaries
+- ⚠️ Requires service role key (elevated privileges)
+- ⚠️ Exposed webhook endpoints (need authentication)
+- ⚠️ Bypasses RLS (must implement manually)
+- ⚠️ Token management complexity
+- ⚠️ Multiple trust boundaries
 
 **Winner**: Background Tasks (fewer attack surfaces)
 
@@ -289,11 +307,13 @@ Annual cost: $264
 ### Background Tasks
 
 **Current Scale** (Free Tier):
+
 - 500K invocations/month
 - = 500,000 campaigns/month
 - More than enough for MVP → Series A
 
 **Growth Path**:
+
 - No changes needed until 500K campaigns/month
 - Then: Pay $2 per 1M additional invocations
 - Linear scaling, predictable costs
@@ -301,11 +321,13 @@ Annual cost: $264
 ### External Compute
 
 **Current Scale** (MICRO):
+
 - 1 CPU, 1GB RAM
 - ~100-200 concurrent jobs
 - Need monitoring for overload
 
 **Growth Path**:
+
 - MICRO → STARTER ($5 → $10)
 - STARTER → PRO ($10 → $20)
 - Manual scaling decisions
@@ -342,16 +364,17 @@ Annual cost: $264
 
 ## 📝 Decision Matrix
 
-| Criterion | Weight | Background Tasks | External Compute | Winner |
-|-----------|--------|------------------|------------------|--------|
-| Cost | 25% | 10/10 ($0) | 6/10 ($5-10/mo) | Background |
-| Setup Time | 15% | 10/10 (10 min) | 4/10 (2 hours) | Background |
-| Maintenance | 20% | 10/10 (minimal) | 5/10 (moderate) | Background |
-| Performance | 20% | 9/10 (fast) | 8/10 (slightly slower) | Background |
-| Reliability | 10% | 10/10 (Supabase SLA) | 7/10 (DIY) | Background |
-| Scalability | 10% | 9/10 (automatic) | 7/10 (manual) | Background |
+| Criterion   | Weight | Background Tasks     | External Compute       | Winner     |
+| ----------- | ------ | -------------------- | ---------------------- | ---------- |
+| Cost        | 25%    | 10/10 ($0)           | 6/10 ($5-10/mo)        | Background |
+| Setup Time  | 15%    | 10/10 (10 min)       | 4/10 (2 hours)         | Background |
+| Maintenance | 20%    | 10/10 (minimal)      | 5/10 (moderate)        | Background |
+| Performance | 20%    | 9/10 (fast)          | 8/10 (slightly slower) | Background |
+| Reliability | 10%    | 10/10 (Supabase SLA) | 7/10 (DIY)             | Background |
+| Scalability | 10%    | 9/10 (automatic)     | 7/10 (manual)          | Background |
 
 **Weighted Score**:
+
 - **Background Tasks**: 9.5/10
 - **External Compute**: 6.3/10
 
@@ -364,6 +387,7 @@ Annual cost: $264
 If we outgrow Background Tasks (unlikely for years), migration is straightforward:
 
 ### Phase 1: Hybrid Approach
+
 ```
 - Keep Edge Functions for <1 min tasks
 - Add external worker for >5 min tasks
@@ -371,6 +395,7 @@ If we outgrow Background Tasks (unlikely for years), migration is straightforwar
 ```
 
 ### Phase 2: Full External (if needed)
+
 ```
 - Move background processor to external service
 - Keep Edge Function as API gateway
@@ -387,6 +412,7 @@ If we outgrow Background Tasks (unlikely for years), migration is straightforwar
 ### **Use Background Tasks (EdgeRuntime.waitUntil())**
 
 **Why**:
+
 1. ✅ **$0 cost** vs $5-264/month
 2. ✅ **10 minutes setup** vs 2+ hours
 3. ✅ **Zero maintenance** vs ongoing monitoring
@@ -395,11 +421,13 @@ If we outgrow Background Tasks (unlikely for years), migration is straightforwar
 6. ✅ **Perfect fit** for our use case
 
 **When to Reconsider**:
+
 - Tasks exceed 5 minutes consistently
 - Need >500K campaigns/month
 - Require ML or specialized processing
 
 **Estimated Time Until Reconsider**:
+
 - Optimistic: 12-18 months (rapid growth)
 - Realistic: 2-3 years
 - Conservative: Never (within limits for B2B SaaS)
@@ -414,6 +442,6 @@ If we outgrow Background Tasks (unlikely for years), migration is straightforwar
 ✅ Fast  
 ✅ Simple  
 ✅ Scalable  
-✅ Production-ready  
+✅ Production-ready
 
 **No external compute needed. Deploy now! 🚀**

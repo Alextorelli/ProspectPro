@@ -295,14 +295,14 @@ Costs tracked correctly ✅
 ```typescript
 serve(async (req) => {
   const { businessType, location } = await req.json();
-  
+
   // This takes 1-2 minutes → TIMEOUT at 25 seconds ❌
   const businesses = await discoverBusinesses(businessType, location);
   const scoredLeads = scoreBusinesses(businesses);
   const enrichedLeads = await enrichLeads(scoredLeads); // ❌ TIMES OUT HERE
-  
+
   await storeCampaign(enrichedLeads);
-  
+
   return Response.json({ leads: enrichedLeads }); // ❌ Never reaches here
 });
 ```
@@ -312,18 +312,18 @@ serve(async (req) => {
 ```typescript
 serve(async (req) => {
   const { businessType, location } = await req.json();
-  
+
   // Create job record (instant)
   const jobId = await createJobRecord(config);
-  
+
   // 🔥 KEY INNOVATION: Start background task
   EdgeRuntime.waitUntil(
     processDiscoveryJob(jobId, config) // ✅ Runs after response sent
   );
-  
+
   // Return immediately (<100ms) ✅
-  return Response.json({ 
-    jobId, 
+  return Response.json({
+    jobId,
     status: "processing",
     realtimeChannel: `discovery_jobs:id=eq.${jobId}`
   });
@@ -334,7 +334,7 @@ async function processDiscoveryJob(jobId, config) {
   const businesses = await discoverBusinesses(...); // ✅ No timeout
   const scoredLeads = scoreBusinesses(...);         // ✅ No timeout
   const enrichedLeads = await enrichLeads(...);     // ✅ No timeout
-  
+
   await storeCampaign(enrichedLeads);               // ✅ No timeout
 }
 ```
@@ -349,13 +349,12 @@ async function processDiscoveryJob(jobId, config) {
 export function CampaignProgress() {
   const { jobId } = useSearchParams();
   const { progress, isLoading } = useJobProgress(jobId);
-  
+
   // progress object updates automatically via Supabase Real-time
   return (
     <div>
       <ProgressBar value={progress.progress} /> {/* 0-100% */}
       <p>{STAGE_LABELS[progress.currentStage]}</p>
-      
       {progress.metrics && (
         <div>
           <p>Businesses found: {progress.metrics.businesses_found}</p>
@@ -364,12 +363,7 @@ export function CampaignProgress() {
           <p>Cost so far: ${progress.metrics.total_cost}</p>
         </div>
       )}
-      
-      {progress.status === 'completed' && (
-        <Button href={`/campaign/${campaignId}/results`}>
-          View Results
-        </Button>
-      )}
+      {progress.status === "completed" && <Button href={`/campaign/${campaignId}/results`}>View Results</Button>}
     </div>
   );
 }
@@ -522,10 +516,10 @@ export function CampaignProgress() {
 
 **Problem**: Edge Functions timing out at 25 seconds  
 **Solution**: Background tasks with `EdgeRuntime.waitUntil()`  
-**Result**: Unlimited processing time, real-time updates, $0 cost  
+**Result**: Unlimited processing time, real-time updates, $0 cost
 
 **Status**: ✅ READY TO DEPLOY  
-**Next Step**: Run `/scripts/deploy-background-tasks.sh`  
+**Next Step**: Run `/scripts/deploy-background-tasks.sh`
 
 ---
 

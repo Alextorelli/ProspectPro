@@ -1,12 +1,12 @@
 // Real-time Job Progress Hook for ProspectPro v4.2
 // Subscribe to Supabase Real-time for live campaign updates
 
-import { useEffect, useState } from 'react';
-import { supabase } from '../lib/supabase';
+import { useEffect, useState } from "react";
+import { supabase } from "../lib/supabase";
 
 interface JobProgress {
   jobId: string;
-  status: 'pending' | 'processing' | 'completed' | 'failed';
+  status: "pending" | "processing" | "completed" | "failed";
   progress: number;
   currentStage: string;
   metrics?: {
@@ -46,13 +46,13 @@ export function useJobProgress(jobId: string | null) {
     // Fetch initial job status
     const fetchInitialStatus = async () => {
       const { data, error } = await supabase
-        .from('discovery_jobs')
-        .select('*')
-        .eq('id', jobId)
+        .from("discovery_jobs")
+        .select("*")
+        .eq("id", jobId)
         .single();
 
       if (error) {
-        console.error('Error fetching job status:', error);
+        console.error("Error fetching job status:", error);
         setIsLoading(false);
         return;
       }
@@ -61,7 +61,7 @@ export function useJobProgress(jobId: string | null) {
         jobId: data.id,
         status: data.status,
         progress: data.progress || 0,
-        currentStage: data.current_stage || 'initializing',
+        currentStage: data.current_stage || "initializing",
         metrics: data.metrics,
         error: data.error,
         completedAt: data.completed_at,
@@ -75,21 +75,25 @@ export function useJobProgress(jobId: string | null) {
     const channel = supabase
       .channel(`discovery_jobs:${jobId}`)
       .on(
-        'postgres_changes',
+        "postgres_changes",
         {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'discovery_jobs',
+          event: "UPDATE",
+          schema: "public",
+          table: "discovery_jobs",
           filter: `id=eq.${jobId}`,
         },
         (payload: RealtimePayload) => {
-          console.log('Real-time update:', payload.new);
-          
+          console.log("Real-time update:", payload.new);
+
           setProgress({
             jobId: payload.new.id,
-            status: payload.new.status as 'pending' | 'processing' | 'completed' | 'failed',
+            status: payload.new.status as
+              | "pending"
+              | "processing"
+              | "completed"
+              | "failed",
             progress: payload.new.progress || 0,
-            currentStage: payload.new.current_stage || 'processing',
+            currentStage: payload.new.current_stage || "processing",
             metrics: payload.new.metrics,
             error: payload.new.error,
             completedAt: payload.new.completed_at,
@@ -109,11 +113,11 @@ export function useJobProgress(jobId: string | null) {
 
 // Stage names for UI display
 export const STAGE_LABELS: Record<string, string> = {
-  initializing: 'Initializing campaign...',
-  discovering_businesses: 'Discovering businesses...',
-  scoring_businesses: 'Scoring and qualifying leads...',
-  enriching_contacts: 'Enriching contact information...',
-  storing_results: 'Storing results...',
+  initializing: "Initializing campaign...",
+  discovering_businesses: "Discovering businesses...",
+  scoring_businesses: "Scoring and qualifying leads...",
+  enriching_contacts: "Enriching contact information...",
+  storing_results: "Storing results...",
 };
 
 // Progress component (example)
@@ -128,22 +132,25 @@ export function JobProgressDisplay({ jobId }: { jobId: string }) {
     return <div>Job not found</div>;
   }
 
-  if (progress.status === 'failed') {
+  if (progress.status === "failed") {
     return (
       <div className="error">
         <h3>Campaign Failed</h3>
-        <p>{progress.error || 'Unknown error occurred'}</p>
+        <p>{progress.error || "Unknown error occurred"}</p>
       </div>
     );
   }
 
-  if (progress.status === 'completed') {
+  if (progress.status === "completed") {
     return (
       <div className="success">
         <h3>Campaign Completed! 🎉</h3>
         <p>Found {progress.metrics?.total_found || 0} qualified leads</p>
-        <p>Total cost: ${progress.metrics?.total_cost?.toFixed(2) || '0.00'}</p>
-        <p>Average confidence: {progress.metrics?.avg_confidence?.toFixed(0) || 0}%</p>
+        <p>Total cost: ${progress.metrics?.total_cost?.toFixed(2) || "0.00"}</p>
+        <p>
+          Average confidence:{" "}
+          {progress.metrics?.avg_confidence?.toFixed(0) || 0}%
+        </p>
       </div>
     );
   }
@@ -152,14 +159,16 @@ export function JobProgressDisplay({ jobId }: { jobId: string }) {
     <div className="progress">
       <h3>Campaign In Progress</h3>
       <div className="progress-bar">
-        <div 
-          className="progress-fill" 
+        <div
+          className="progress-fill"
           style={{ width: `${progress.progress}%` }}
         />
       </div>
       <p>{progress.progress}% complete</p>
-      <p className="stage">{STAGE_LABELS[progress.currentStage] || progress.currentStage}</p>
-      
+      <p className="stage">
+        {STAGE_LABELS[progress.currentStage] || progress.currentStage}
+      </p>
+
       {progress.metrics && (
         <div className="metrics">
           {progress.metrics.businesses_found && (

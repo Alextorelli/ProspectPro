@@ -10,12 +10,14 @@
 ## 🎯 Problem Solved
 
 **BEFORE (Current Issue)**:
+
 - ❌ Edge Functions timeout at 25 seconds
 - ❌ Campaigns return incomplete data (0 leads)
 - ❌ No real-time feedback during processing
 - ❌ Dashboard shows wrong results
 
 **AFTER (Background Tasks)**:
+
 - ✅ Edge Functions return immediately (<100ms)
 - ✅ Processing continues in background (unlimited time)
 - ✅ Real-time progress updates to frontend
@@ -27,6 +29,7 @@
 ## 📐 Architecture Overview
 
 ### Request Flow
+
 ```
 User Submits Campaign
        ↓
@@ -54,26 +57,27 @@ Campaign completes → Show results
 ### Database Schema
 
 **New Table: `discovery_jobs`**
+
 ```sql
 CREATE TABLE discovery_jobs (
   id TEXT PRIMARY KEY,
   campaign_id TEXT REFERENCES campaigns(id),
   user_id UUID REFERENCES auth.users(id),
   session_user_id TEXT,
-  
+
   -- Job status
   status TEXT DEFAULT 'pending',  -- pending, processing, completed, failed
   progress INTEGER DEFAULT 0,     -- 0-100%
   current_stage TEXT,             -- discovering, scoring, enriching, storing
-  
+
   -- Configuration
   config JSONB NOT NULL,          -- {businessType, location, maxResults, etc}
-  
+
   -- Results
   results JSONB DEFAULT '[]'::jsonb,
   metrics JSONB DEFAULT '{}'::jsonb,
   error TEXT,
-  
+
   -- Timestamps
   created_at TIMESTAMPTZ DEFAULT NOW(),
   started_at TIMESTAMPTZ,
@@ -86,20 +90,25 @@ CREATE TABLE discovery_jobs (
 ## 📂 Files Created
 
 ### 1. Database Schema
+
 **File**: `/database/job-queue-schema.sql`
+
 - Job queue table definition
 - RLS policies for user isolation
 - Indexes for performance
 - Cleanup function for old jobs
 
 ### 2. Edge Function
+
 **File**: `/supabase/functions/business-discovery-background/index.ts`
+
 - **Main handler**: Creates job, returns immediately
 - **Background processor**: Runs via `EdgeRuntime.waitUntil()`
 - **Progress tracking**: Updates job record during processing
 - **Complete pipeline**: Discovery → Scoring → Enrichment → Storage
 
 Key Innovation:
+
 ```typescript
 // Function returns immediately
 EdgeRuntime.waitUntil(
@@ -107,17 +116,20 @@ EdgeRuntime.waitUntil(
 );
 
 // User gets instant response
-return { jobId, status: "processing", estimatedTime: "1-2 minutes" }
+return { jobId, status: "processing", estimatedTime: "1-2 minutes" };
 ```
 
 ### 3. Frontend Hook
+
 **File**: `/src/hooks/useJobProgress.tsx`
+
 - React hook for real-time job monitoring
 - Supabase Real-time subscription
 - Progress state management
 - Display component with progress bar
 
 Usage:
+
 ```typescript
 const { progress, isLoading } = useJobProgress(jobId);
 
@@ -127,7 +139,9 @@ const { progress, isLoading } = useJobProgress(jobId);
 ```
 
 ### 4. Deployment Script
+
 **File**: `/scripts/deploy-background-tasks.sh`
+
 - One-command deployment
 - Automated testing
 - Verification checks
@@ -196,12 +210,12 @@ curl -X POST 'https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/business-dis
 
 async function submitCampaign(formData) {
   const response = await fetch(
-    'https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/business-discovery-background',
+    "https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/business-discovery-background",
     {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Authorization': `Bearer ${session.access_token}`,
-        'Content-Type': 'application/json',
+        Authorization: `Bearer ${session.access_token}`,
+        "Content-Type": "application/json",
       },
       body: JSON.stringify({
         businessType: formData.businessType,
@@ -213,7 +227,7 @@ async function submitCampaign(formData) {
   );
 
   const { jobId, campaignId } = await response.json();
-  
+
   // Navigate to progress page
   navigate(`/campaign/${campaignId}/progress?jobId=${jobId}`);
 }
@@ -223,23 +237,21 @@ async function submitCampaign(formData) {
 
 ```typescript
 // src/pages/CampaignProgress.tsx
-import { useJobProgress, JobProgressDisplay } from '../hooks/useJobProgress';
-import { useParams, useSearchParams } from 'react-router-dom';
+import { useJobProgress, JobProgressDisplay } from "../hooks/useJobProgress";
+import { useParams, useSearchParams } from "react-router-dom";
 
 export function CampaignProgress() {
   const { campaignId } = useParams();
   const [searchParams] = useSearchParams();
-  const jobId = searchParams.get('jobId');
+  const jobId = searchParams.get("jobId");
 
   return (
     <div className="campaign-progress-page">
       <h1>Campaign In Progress</h1>
       {jobId && <JobProgressDisplay jobId={jobId} />}
-      
+
       {/* When completed, show results */}
-      <Link to={`/campaign/${campaignId}/results`}>
-        View Results
-      </Link>
+      <Link to={`/campaign/${campaignId}/results`}>View Results</Link>
     </div>
   );
 }
@@ -288,6 +300,7 @@ storing_results           | 90-100%  | Saving to database
 ## 🎯 User Experience Flow
 
 ### Before (Current - Broken)
+
 ```
 User: Submit campaign
 → Wait 25 seconds
@@ -297,6 +310,7 @@ User: Submit campaign
 ```
 
 ### After (Background Tasks)
+
 ```
 User: Submit campaign
 → See "Processing..." page immediately (<100ms)
@@ -315,11 +329,13 @@ User: Submit campaign
 ### Infrastructure Costs
 
 **Supabase Edge Functions** (included in free tier, pay-as-you-grow):
+
 - First 500K requests/month: FREE
 - After: $2 per 1M requests
 - Our cost: ~$0.001 per campaign (negligible)
 
 **Supabase Real-time** (included):
+
 - 200 concurrent connections: FREE
 - After: $10 per 1M messages
 - Our cost: ~$0.0001 per campaign update
@@ -329,11 +345,13 @@ User: Submit campaign
 ### Comparison to Alternatives
 
 **❌ External Worker Service** (Railway, Render, Fly.io):
+
 - Cost: $5-10/month base
 - Maintenance: Deploy, monitor, scale worker
 - Complexity: Separate service, database connections
 
 **✅ Background Tasks (Our Approach)**:
+
 - Cost: $0 additional
 - Maintenance: Zero (native Supabase)
 - Complexity: Single Edge Function deployment
@@ -391,6 +409,7 @@ No changes needed - existing secrets work automatically.
 
 **Cause**: Background task not starting  
 **Solution**:
+
 1. Check Edge Function logs in Supabase Dashboard
 2. Verify SUPABASE_SERVICE_ROLE_KEY is set in function secrets
 3. Check `EdgeRuntime.waitUntil()` is called correctly
@@ -399,6 +418,7 @@ No changes needed - existing secrets work automatically.
 
 **Cause**: Subscription not established  
 **Solution**:
+
 1. Verify Supabase Real-time is enabled (Dashboard → Database → Replication)
 2. Check browser console for subscription errors
 3. Test with `supabase.channel().subscribe()` directly
@@ -407,6 +427,7 @@ No changes needed - existing secrets work automatically.
 
 **Cause**: API call failing in background task  
 **Solution**:
+
 1. Check Edge Function logs for error messages
 2. Verify API keys (Google Places, Hunter.io, NeverBounce)
 3. Check `discovery_jobs.error` field for error details
@@ -415,6 +436,7 @@ No changes needed - existing secrets work automatically.
 
 **Cause**: Database insertion failing  
 **Solution**:
+
 1. Check RLS policies on `campaigns` and `leads` tables
 2. Verify `user_id` or `session_user_id` is set correctly
 3. Check Edge Function logs for database errors
@@ -426,6 +448,7 @@ No changes needed - existing secrets work automatically.
 ### Real-time Monitoring
 
 **Supabase Dashboard**:
+
 - Edge Functions → Logs: See all function executions
 - Database → discovery_jobs: Monitor job progress
 - Database → campaigns: See completed campaigns
@@ -434,6 +457,7 @@ No changes needed - existing secrets work automatically.
 ### Performance Metrics
 
 Track these metrics for optimization:
+
 - **Job completion time**: Target 1-2 minutes
 - **Success rate**: Target >95%
 - **Cost per lead**: Target <$0.50
@@ -444,6 +468,7 @@ Track these metrics for optimization:
 ## 🎯 Next Steps
 
 ### Immediate (After Deployment)
+
 1. Deploy database schema
 2. Deploy Edge Function
 3. Test with 1-2 test campaigns
@@ -451,12 +476,14 @@ Track these metrics for optimization:
 5. Monitor first real campaigns
 
 ### Short-term (Next Week)
+
 1. Add error handling UI for failed jobs
 2. Implement retry logic for failed API calls
 3. Add email notifications for completed campaigns
 4. Create admin dashboard for job monitoring
 
 ### Long-term (Future Enhancements)
+
 1. Stripe integration for paid tiers
 2. Advanced filters (industry, revenue, etc)
 3. Bulk campaign creation
@@ -468,6 +495,7 @@ Track these metrics for optimization:
 ## ✅ Success Criteria
 
 **Deployment Successful When**:
+
 - ✅ Test campaign completes with >0 leads
 - ✅ Real-time progress updates work in frontend
 - ✅ Campaign results match actual data
@@ -476,6 +504,7 @@ Track these metrics for optimization:
 - ✅ No errors in Edge Function logs
 
 **Production Ready When**:
+
 - ✅ 10 successful test campaigns
 - ✅ Average completion time <2 minutes
 - ✅ Success rate >95%
@@ -496,12 +525,14 @@ Track these metrics for optimization:
 ## 🎉 Summary
 
 **What We Built**:
+
 - ✅ Job queue system with progress tracking
 - ✅ Background task Edge Function (no timeout limits)
 - ✅ Real-time progress updates to frontend
 - ✅ Complete campaign processing pipeline
 
 **Benefits**:
+
 - ✅ **No timeouts**: Unlimited processing time
 - ✅ **Real-time feedback**: Users see live progress
 - ✅ **Zero cost**: Stays in Supabase ecosystem
