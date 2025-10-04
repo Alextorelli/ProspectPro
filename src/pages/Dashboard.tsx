@@ -39,15 +39,20 @@ export const Dashboard: React.FC = () => {
         console.log("📊 Fetching campaigns for user:", sessionUserId);
 
         // Query campaigns with user context
-        const { data, error } = await supabase
+        let query = supabase
           .from("campaigns")
-          .select("*")
-          .or(
-            `user_id.eq.${
-              user?.id || "null"
-            },session_user_id.eq.${sessionUserId}`
-          )
-          .order("created_at", { ascending: false });
+          .select("*");
+        
+        // Build query based on authentication state
+        if (user?.id) {
+          // Authenticated user: match user_id OR session_user_id
+          query = query.or(`user_id.eq.${user.id},session_user_id.eq.${sessionUserId}`);
+        } else {
+          // Anonymous user: match session_user_id only
+          query = query.eq("session_user_id", sessionUserId);
+        }
+        
+        const { data, error } = await query.order("created_at", { ascending: false });
 
         if (error) {
           console.error("❌ Error fetching campaigns:", error);
