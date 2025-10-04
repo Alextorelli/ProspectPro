@@ -51,6 +51,9 @@ export interface BusinessLead {
       servicesUsed?: string[];
       servicesSkipped?: string[];
       totalCost?: number;
+      validationCost?: number;
+      enrichmentCost?: number;
+      enrichmentTier?: string;
       enrichmentCostBreakdown?: {
         businessLicenseCost: number;
         companyEnrichmentCost: number;
@@ -61,6 +64,7 @@ export interface BusinessLead {
         complianceCost: number;
       };
     };
+    dataSources?: string[];
   };
 }
 
@@ -76,6 +80,9 @@ export interface CampaignConfig {
   chamber_verification?: boolean;
   trade_association?: boolean;
   professional_license?: boolean;
+  keywords?: string;
+  search_radius?: string;
+  expand_geography?: boolean;
 }
 
 export interface ValidationResult {

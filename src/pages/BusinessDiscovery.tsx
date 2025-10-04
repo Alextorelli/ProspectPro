@@ -456,6 +456,9 @@ export const BusinessDiscovery: React.FC = () => {
       trade_association: true, // Always enabled based on tier
       professional_license: true, // Always enabled based on tier
       selectedTier: selectedTier,
+      keywords: keywords,
+      search_radius: searchRadius,
+      expand_geography: expandGeography,
     };
 
     console.log("🚀 Starting campaign:", config);

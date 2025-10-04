@@ -48,6 +48,19 @@ export const useBusinessDiscovery = (
         // Determine enrichment tier
         const tier = config.selectedTier || "PROFESSIONAL";
         const tierConfig = ENRICHMENT_TIERS[tier];
+        const keywordList = config.keywords
+          ? config.keywords
+              .split(",")
+              .map((value) => value.trim())
+              .filter(Boolean)
+          : undefined;
+
+        const discoveryOptions = {
+          tradeAssociation: config.trade_association ?? false,
+          professionalLicense: config.professional_license ?? false,
+          chamberVerification: config.chamber_verification ?? false,
+          apolloDiscovery: tier === "COMPLIANCE",
+        };
 
         setCurrentStage(
           `Using ${tierConfig.name} tier ($${tierConfig.price}/lead)`
@@ -59,11 +72,18 @@ export const useBusinessDiscovery = (
           "business-discovery-background",
           {
             body: {
-              businessType: config.search_terms || config.business_type,
+              businessType: config.business_type || config.search_terms,
               location: config.location,
+              keywords: keywordList,
+              searchRadius: config.search_radius,
+              expandGeography: config.expand_geography,
               maxResults: config.max_results,
               budgetLimit: config.max_results * tierConfig.price,
               minConfidenceScore: config.min_confidence_score || 50,
+              tierKey: tier,
+              tierName: tierConfig.name,
+              tierPrice: tierConfig.price,
+              options: discoveryOptions,
               sessionUserId:
                 sessionUserId ||
                 `session_${Date.now()}_${Math.random()
