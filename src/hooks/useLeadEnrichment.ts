@@ -1,6 +1,6 @@
 import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
-import { supabase } from "../lib/supabase";
+import { ensureSession, supabase } from "../lib/supabase";
 
 export interface EnrichmentConfig {
   businessName: string;
@@ -92,6 +92,14 @@ export const useLeadEnrichment = () => {
 
       try {
         console.log("🔄 Starting enrichment for:", config.businessName);
+
+        // Ensure we have a valid session before calling Edge Function
+        const hasSession = await ensureSession();
+        if (!hasSession) {
+          throw new Error(
+            "Failed to establish authentication session for enrichment."
+          );
+        }
 
         // Call enrichment orchestrator
         const { data, error } = await supabase.functions.invoke(

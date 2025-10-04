@@ -1,7 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
-import { ENRICHMENT_TIERS, supabase } from "../lib/supabase";
+import { ENRICHMENT_TIERS, ensureSession, supabase } from "../lib/supabase";
 import { useCampaignStore } from "../stores/campaignStore";
 import type { BusinessDiscoveryResponse, CampaignConfig } from "../types";
 
@@ -25,6 +25,14 @@ export const useBusinessDiscovery = () => {
       try {
         console.log("🚀 Starting user-aware business discovery:", config);
         console.log("👤 Session User ID:", sessionUserId);
+
+        // Ensure we have a valid session before calling Edge Function
+        const hasSession = await ensureSession();
+        if (!hasSession) {
+          throw new Error(
+            "Failed to establish authentication session. Please refresh the page."
+          );
+        }
 
         // Determine enrichment tier
         const tier = config.selectedTier || "PROFESSIONAL";

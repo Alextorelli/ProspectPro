@@ -47,9 +47,14 @@ export const Dashboard: React.FC = () => {
           query = query.or(
             `user_id.eq.${user.id},session_user_id.eq.${sessionUserId}`
           );
-        } else {
+        } else if (sessionUserId) {
           // Anonymous user: match session_user_id only
           query = query.eq("session_user_id", sessionUserId);
+        } else {
+          // No user context - show nothing
+          setCampaigns([]);
+          setLoading(false);
+          return;
         }
 
         const { data, error } = await query.order("created_at", {

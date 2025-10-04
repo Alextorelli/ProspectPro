@@ -14,6 +14,45 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   },
 });
 
+// Helper function to get current session token for Edge Function calls
+export const getSessionToken = async (): Promise<string | null> => {
+  const {
+    data: { session },
+    error,
+  } = await supabase.auth.getSession();
+
+  if (error) {
+    console.error("Error getting session:", error);
+    return null;
+  }
+
+  // Return the access token (JWT) from the session
+  return session?.access_token ?? null;
+};
+
+// Helper function to ensure we have a valid session
+export const ensureSession = async (): Promise<boolean> => {
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+
+  // If no session, create anonymous session
+  if (!session) {
+    console.log("No session found, creating anonymous session...");
+    const { data, error } = await supabase.auth.signInAnonymously();
+
+    if (error) {
+      console.error("Failed to create anonymous session:", error);
+      return false;
+    }
+
+    console.log("✅ Anonymous session created:", data.session?.user?.id);
+    return true;
+  }
+
+  return true;
+};
+
 // Edge Functions URL
 export const EDGE_FUNCTIONS_URL =
   import.meta.env.VITE_EDGE_FUNCTIONS_URL || `${supabaseUrl}/functions/v1`;
