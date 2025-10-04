@@ -35,7 +35,9 @@ export const useBusinessDiscovery = () => {
         setProgress(20);
 
         // Get current session for authentication
-        const { data: { session } } = await supabase.auth.getSession();
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
 
         // Build headers with optional authorization
         const headers: Record<string, string> = {};

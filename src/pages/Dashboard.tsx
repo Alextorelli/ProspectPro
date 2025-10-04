@@ -26,7 +26,7 @@ export const Dashboard: React.FC = () => {
     const loadUserCampaigns = async () => {
       try {
         setLoading(true);
-        
+
         let query = supabase
           .from("campaigns")
           .select("*")
@@ -54,7 +54,7 @@ export const Dashboard: React.FC = () => {
   }, [user, sessionUserId]);
 
   const allCampaigns = [
-    ...userCampaigns.map(c => ({
+    ...userCampaigns.map((c) => ({
       campaign_id: c.campaign_id || c.id,
       business_type: c.business_type,
       location: c.location,
@@ -64,14 +64,26 @@ export const Dashboard: React.FC = () => {
       total_cost: c.total_cost || 0,
       created_at: c.created_at,
     })),
-    ...storeCampaigns.filter(sc => 
-      !userCampaigns.some(uc => (uc.campaign_id || uc.id) === sc.campaign_id)
+    ...storeCampaigns.filter(
+      (sc) =>
+        !userCampaigns.some(
+          (uc) => (uc.campaign_id || uc.id) === sc.campaign_id
+        )
     ),
   ];
 
-  const totalCost = allCampaigns.reduce((sum, campaign) => sum + (campaign.total_cost || 0), 0);
-  const totalLeads = allCampaigns.reduce((sum, campaign) => sum + (campaign.leads_found || 0), 0);
-  const qualifiedLeads = allCampaigns.reduce((sum, campaign) => sum + (campaign.leads_qualified || 0), 0);
+  const totalCost = allCampaigns.reduce(
+    (sum, campaign) => sum + (campaign.total_cost || 0),
+    0
+  );
+  const totalLeads = allCampaigns.reduce(
+    (sum, campaign) => sum + (campaign.leads_found || 0),
+    0
+  );
+  const qualifiedLeads = allCampaigns.reduce(
+    (sum, campaign) => sum + (campaign.leads_qualified || 0),
+    0
+  );
 
   const stats = [
     { name: "Total Campaigns", value: allCampaigns.length, icon: "��" },
@@ -104,13 +116,20 @@ export const Dashboard: React.FC = () => {
 
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
         {stats.map((stat) => (
-          <div key={stat.name} className="bg-white overflow-hidden shadow rounded-lg">
+          <div
+            key={stat.name}
+            className="bg-white overflow-hidden shadow rounded-lg"
+          >
             <div className="p-5">
               <div className="flex items-center">
                 <span className="text-2xl">{stat.icon}</span>
                 <div className="ml-5">
-                  <p className="text-sm font-medium text-gray-500">{stat.name}</p>
-                  <p className="text-lg font-medium text-gray-900">{stat.value}</p>
+                  <p className="text-sm font-medium text-gray-500">
+                    {stat.name}
+                  </p>
+                  <p className="text-lg font-medium text-gray-900">
+                    {stat.value}
+                  </p>
                 </div>
               </div>
             </div>
@@ -123,22 +142,38 @@ export const Dashboard: React.FC = () => {
         {recentCampaigns.length === 0 ? (
           <div className="text-center py-8">
             <p>No campaigns yet</p>
-            <button onClick={() => navigate("/discovery")} className="mt-4 px-4 py-2 bg-blue-600 text-white rounded">
+            <button
+              onClick={() => navigate("/discovery")}
+              className="mt-4 px-4 py-2 bg-blue-600 text-white rounded"
+            >
               Start Discovery
             </button>
           </div>
         ) : (
           <div className="space-y-3">
             {recentCampaigns.map((campaign) => (
-              <div key={campaign.campaign_id} onClick={() => navigate(`/campaign?id=${campaign.campaign_id}`)} className="p-4 border rounded hover:bg-gray-50 cursor-pointer">
+              <div
+                key={campaign.campaign_id}
+                onClick={() => navigate(`/campaign?id=${campaign.campaign_id}`)}
+                className="p-4 border rounded hover:bg-gray-50 cursor-pointer"
+              >
                 <div className="flex justify-between">
                   <div>
-                    <span className={`px-2 py-1 rounded text-xs ${campaign.status === "completed" ? "bg-green-100" : "bg-gray-100"}`}>
+                    <span
+                      className={`px-2 py-1 rounded text-xs ${
+                        campaign.status === "completed"
+                          ? "bg-green-100"
+                          : "bg-gray-100"
+                      }`}
+                    >
                       {campaign.status}
                     </span>
-                    <span className="ml-2">{campaign.business_type} in {campaign.location}</span>
+                    <span className="ml-2">
+                      {campaign.business_type} in {campaign.location}
+                    </span>
                     <p className="text-sm text-gray-500 mt-1">
-                      {campaign.leads_found} results • ${campaign.total_cost.toFixed(2)}
+                      {campaign.leads_found} results • $
+                      {campaign.total_cost.toFixed(2)}
                     </p>
                   </div>
                   <div className="text-sm text-gray-500">
