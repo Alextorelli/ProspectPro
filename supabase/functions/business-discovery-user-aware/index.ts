@@ -1,9 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import {
-  EdgeFunctionAuth,
-  corsHeaders,
-  handleCORS,
-} from "../_shared/edge-auth.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { corsHeaders, handleCORS } from "../_shared/edge-auth.ts";
 
 // Business Discovery with User-Campaign Linking
 // October 4, 2025 - Complete authentication and user management
@@ -43,8 +40,23 @@ interface BusinessLead {
 }
 
 // Helper function to get or extract user ID from request
-function getUserContext(req: Request, requestData: BusinessDiscoveryRequest) {
-  // Try to get user from JWT (authenticated users)
+function getUserContext(
+  req: Request,
+  requestData: BusinessDiscoveryRequest,
+  requestAuth?: { userId?: string; isAnonymous?: boolean }
+) {
+  // Prefer user ID from validated JWT token
+  if (requestAuth?.userId) {
+    return {
+      userId: requestAuth.userId,
+      userEmail: requestData.userEmail || null,
+      isAuthenticated: true,
+      isAnonymous: requestAuth.isAnonymous || false,
+      sessionId: requestData.sessionUserId || requestAuth.userId,
+    };
+  }
+
+  // Fallback to manual JWT decoding (for backward compatibility)
   const authHeader = req.headers.get("Authorization");
   let userFromJWT = null;
 
@@ -65,6 +77,7 @@ function getUserContext(req: Request, requestData: BusinessDiscoveryRequest) {
     userId: userFromJWT || requestData.sessionUserId || null,
     userEmail: requestData.userEmail || null,
     isAuthenticated: !!userFromJWT,
+    isAnonymous: false,
     sessionId: requestData.sessionUserId,
   };
 }
@@ -210,19 +223,47 @@ serve(async (req) => {
   try {
     const startTime = Date.now();
 
-    // Initialize Edge Function authentication
-    const edgeAuth = new EdgeFunctionAuth();
-    const authContext = edgeAuth.getAuthContext();
+    // Create Supabase client with user's JWT token for validation
+    const authHeader = req.headers.get("Authorization");
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
 
-    console.log(
-      `🔐 Auth: ${authContext.keyFormat} (${
-        authContext.isValid ? "Valid" : "Invalid"
-      })`
-    );
+    // Create client with user's token to validate authentication
+    const supabaseClient = createClient(supabaseUrl, supabaseAnonKey, {
+      global: authHeader ? { headers: { Authorization: authHeader } } : {},
+      auth: {
+        persistSession: false,
+        autoRefreshToken: false,
+      },
+    });
 
-    if (!authContext.isValid) {
-      throw new Error(`Authentication failed: ${authContext.keyFormat}`);
+    // Try to validate user session (optional - don't fail if no user)
+    const {
+      data: { user },
+      error: authError,
+    } = await supabaseClient.auth.getUser();
+
+    // Log authentication status
+    if (authError) {
+      console.log("⚠️  Auth warning:", authError.message);
     }
+
+    if (user) {
+      console.log(
+        `✅ Authenticated user: ${user.id} (anonymous: ${
+          user.is_anonymous || false
+        })`
+      );
+    } else {
+      console.log("ℹ️  No authenticated user, proceeding with public access");
+    }
+
+    // Use the supabaseClient for database operations (has user context if authenticated)
+    const authContext = {
+      client: supabaseClient,
+      isValid: true,
+      keyFormat: "supabase_client",
+    };
 
     // Parse request
     const requestData: BusinessDiscoveryRequest = await req.json();
@@ -238,8 +279,17 @@ serve(async (req) => {
       `🚀 Business Discovery: ${businessType} in ${location} (${maxResults} results)`
     );
 
-    // Get user context
-    const userContext = getUserContext(req, requestData);
+    // Get user context from authenticated user (if available)
+    const userContext = getUserContext(
+      req,
+      requestData,
+      user
+        ? {
+            userId: user.id,
+            isAnonymous: user.is_anonymous || false,
+          }
+        : undefined
+    );
     console.log(`👤 User Context:`, userContext);
 
     // Initialize components

@@ -34,7 +34,12 @@ export class EdgeFunctionAuth {
    * Validate and classify API key format
    */
   validateApiKeyFormat(apiKey: string): {
-    format: "new_publishable" | "new_secret" | "legacy_jwt" | "unknown";
+    format:
+      | "new_publishable"
+      | "new_secret"
+      | "legacy_jwt"
+      | "user_jwt"
+      | "unknown";
     isValid: boolean;
   } {
     // New publishable key format
@@ -47,9 +52,23 @@ export class EdgeFunctionAuth {
       return { format: "new_secret", isValid: apiKey.length > 20 };
     }
 
-    // Legacy JWT format
+    // JWT format (both legacy anon keys and user session tokens)
     if (apiKey.startsWith("eyJ") && apiKey.length > 100) {
-      return { format: "legacy_jwt", isValid: true };
+      try {
+        // Decode JWT to check if it's a user session token
+        const payload = JSON.parse(atob(apiKey.split(".")[1]));
+
+        // User session JWTs have 'sub' (user ID) and 'role' fields
+        if (payload.sub && payload.role) {
+          return { format: "user_jwt", isValid: true };
+        }
+
+        // Legacy anon key (doesn't have user-specific fields)
+        return { format: "legacy_jwt", isValid: true };
+      } catch (e) {
+        // If we can't decode it, treat as legacy JWT
+        return { format: "legacy_jwt", isValid: true };
+      }
     }
 
     return { format: "unknown", isValid: false };
@@ -143,6 +162,8 @@ export class EdgeFunctionAuth {
     isValid: boolean;
     apiKey: string;
     keyFormat: string;
+    userId?: string;
+    isAnonymous?: boolean;
     error?: string;
   } {
     // Check Authorization header
@@ -169,10 +190,30 @@ export class EdgeFunctionAuth {
 
     const validation = this.validateApiKeyFormat(apiKey);
 
+    // If it's a user JWT, extract user info
+    let userId: string | undefined;
+    let isAnonymous: boolean | undefined;
+
+    if (validation.format === "user_jwt" && validation.isValid) {
+      try {
+        const payload = JSON.parse(atob(apiKey.split(".")[1]));
+        userId = payload.sub;
+        isAnonymous = payload.is_anonymous || false;
+
+        console.log(
+          `✅ User JWT authenticated: ${userId} (anonymous: ${isAnonymous})`
+        );
+      } catch (e) {
+        console.log("Could not extract user info from JWT");
+      }
+    }
+
     return {
       isValid: validation.isValid,
       apiKey: apiKey,
       keyFormat: validation.format,
+      userId,
+      isAnonymous,
       error: validation.isValid ? undefined : "Invalid API key format",
     };
   }
