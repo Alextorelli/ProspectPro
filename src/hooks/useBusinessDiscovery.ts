@@ -1,17 +1,12 @@
-import { createClient } from "@supabase/supabase-js";
 import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
-import { ENRICHMENT_TIERS } from "../lib/supabase";
+import { useAuth } from "../contexts/AuthContext";
+import { ENRICHMENT_TIERS, supabase } from "../lib/supabase";
 import { useCampaignStore } from "../stores/campaignStore";
 import type { BusinessDiscoveryResponse, CampaignConfig } from "../types";
 
-// Supabase configuration with current publishable key
-const supabaseUrl = "https://sriycekxdqnesdsgwiuc.supabase.co";
-const supabaseAnonKey = "sb_publishable_GaGU6ZiyiO6ncO7kU2qAvA_SFuCyYaM";
-
-const supabase = createClient(supabaseUrl, supabaseAnonKey);
-
 export const useBusinessDiscovery = () => {
+  const { user, sessionUserId } = useAuth();
   const { addCampaign, setCurrentCampaign, addLeads, setLoading, setError } =
     useCampaignStore();
   const [progress, setProgress] = useState(0);
@@ -37,7 +32,18 @@ export const useBusinessDiscovery = () => {
         setCurrentStage(
           `Using ${tierConfig.name} tier ($${tierConfig.price}/lead)`
         );
-        setProgress(20); // Call user-aware business discovery with authentication
+        setProgress(20);
+
+        // Get current session for authentication
+        const { data: { session } } = await supabase.auth.getSession();
+
+        // Build headers with optional authorization
+        const headers: Record<string, string> = {};
+        if (session?.access_token) {
+          headers.Authorization = `Bearer ${session.access_token}`;
+        }
+
+        // Call user-aware business discovery with authentication
         const { data, error } = await supabase.functions.invoke(
           "business-discovery-user-aware",
           {
@@ -47,14 +53,10 @@ export const useBusinessDiscovery = () => {
               maxResults: config.max_results,
               budgetLimit: config.max_results * tierConfig.price,
               minConfidenceScore: config.min_confidence_score || 50,
-              sessionUserId: `session_${Date.now()}_${Math.random()
-                .toString(36)
-                .substr(2, 9)}`,
+              sessionUserId: user ? undefined : sessionUserId,
+              userEmail: user?.email,
             },
-            headers: {
-              Authorization: `Bearer ${supabaseAnonKey}`,
-              apikey: supabaseAnonKey,
-            },
+            headers,
           }
         );
 
