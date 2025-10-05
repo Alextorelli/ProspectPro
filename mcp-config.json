@@ -1,13 +1,13 @@
 {
-    "version": "1.0",
-    "description": "ProspectPro v4.2 MCP Server Configuration - User-Aware System",
+    "version": "1.1",
+    "description": "ProspectPro v4.3 MCP Server Configuration - Tier-Aware Background Discovery",
     "servers": {
         "prospectpro-production": {
             "autoStart": true,
             "lazyLoad": true,
-            "maxMemory": "128MB",
+            "maxMemory": "192MB",
             "priority": "high",
-            "description": "Main production server with user-aware monitoring (28 tools)",
+            "description": "Production monitoring for tier-aware background discovery + enrichment (28 tools)",
             "tools": [
                 "monitor_api_performance",
                 "analyze_database_metrics",
@@ -22,9 +22,9 @@
         "prospectpro-development": {
             "autoStart": false,
             "onDemand": true,
-            "maxMemory": "64MB",
-            "priority": "low",
-            "description": "Development tools for user-aware features",
+            "maxMemory": "96MB",
+            "priority": "medium",
+            "description": "Development tools for background discovery, census targeting, and enrichment",
             "activationKeywords": [
                 "develop",
                 "integrate",
@@ -37,9 +37,9 @@
         "prospectpro-troubleshooting": {
             "autoStart": false,
             "onDemand": true,
-            "maxMemory": "64MB",
-            "priority": "low",
-            "description": "Debugging tools for user context and authentication",
+            "maxMemory": "96MB",
+            "priority": "medium",
+            "description": "Debugging tools for background jobs, auth, and enrichment pipelines",
             "activationKeywords": [
                 "debug",
                 "error",
@@ -54,8 +54,8 @@
         }
     },
     "globalSettings": {
-        "maxConcurrentServers": 1,
-        "memoryThreshold": "256MB",
+        "maxConcurrentServers": 2,
+        "memoryThreshold": "384MB",
         "smartLoading": true,
         "contextOptimization": true
     },
@@ -79,16 +79,16 @@
     },
     "costOptimization": {
         "enabled": true,
-        "tokenReduction": 40,
+        "tokenReduction": 38,
         "cacheResponses": true,
         "smartContext": true,
         "quickCommands": {
             "run prod mcp": "cd /workspaces/ProspectPro/mcp-servers && npm run start:production",
-            "deploy vercel": "cd public/dist && vercel --prod",
-            "deploy discovery": "supabase functions deploy business-discovery-user-aware",
+            "deploy discovery background": "supabase functions deploy business-discovery-background",
+            "deploy orchestrator": "supabase functions deploy enrichment-orchestrator",
             "deploy export": "supabase functions deploy campaign-export-user-aware",
-            "check logs": "supabase functions logs business-discovery-user-aware --follow",
-            "test discovery": "curl -X POST \"https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/business-discovery-user-aware\" -H \"Authorization: Bearer JWT_TOKEN\" -H \"Content-Type: application/json\" -d '{\"businessType\":\"test\",\"location\":\"test\",\"sessionUserId\":\"test_123\"}'",
+            "check background logs": "supabase functions logs business-discovery-background --follow",
+            "test background job": "curl -X POST \"https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/business-discovery-background\" -H \"Authorization: Bearer JWT_TOKEN\" -H \"Content-Type: application/json\" -d '{\"businessType\":\"coffee shop\",\"location\":\"Seattle, WA\",\"maxResults\":2,\"tierKey\":\"PROFESSIONAL\"}'",
             "test export": "curl -X POST \"https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/campaign-export-user-aware\" -H \"Authorization: Bearer JWT_TOKEN\" -H \"Content-Type: application/json\" -d '{\"campaignId\":\"test\",\"format\":\"csv\"}'"
         }
     },

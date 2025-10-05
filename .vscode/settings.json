@@ -20,14 +20,14 @@
   "github.copilot.chat.completionPhrasesEnabled": false,
   "github.copilot.chat.dynamicContextTrailingLength": 150,
   "github.copilot.advanced.setAutoCompletionTriggerThreshold": 150,
-  
+
   // === PERFORMANCE OPTIMIZATIONS (50% faster) ===
   "search.searchOnType": false,
   "editor.minimap.enabled": false,
   "typescript.suggest.autoImports": false,
   "editor.suggestOnTriggerCharacters": false,
   "editor.acceptSuggestionOnCommitCharacter": false,
-  
+
   // === EDITOR OPTIMIZATIONS ===
   "editor.formatOnSave": true,
   "editor.defaultFormatter": "esbenp.prettier-vscode",
@@ -51,13 +51,14 @@
   // === INTELLIGENT CONTEXT MANAGEMENT ===
   "ai.contextFiles": [
     "supabase/functions/*/index.ts",
-    "public/supabase-app.js", 
-    "TECHNICAL_SUMMARY_v4.2.md",
+    "public/supabase-app.js",
+    "TECHNICAL_SUMMARY_v4.3.md",
+    "PROSPECTPRO_V4.3_RELEASE_NOTES.md",
     ".vscode/settings.json"
   ],
   "ai.excludeFiles": [
     "archive/**",
-    "docs/**", 
+    "docs/**",
     "mcp-servers/node_modules/**",
     ".deno_lsp/**",
     "*.log"
@@ -82,7 +83,7 @@
       "timeout": 30000
     },
     "prospectpro-development": {
-      "command": "node", 
+      "command": "node",
       "args": ["./mcp-servers/development-server.js"],
       "autoStart": false,
       "lazyLoad": true,
@@ -90,7 +91,7 @@
     },
     "prospectpro-troubleshooting": {
       "command": "node",
-      "args": ["./mcp-servers/supabase-troubleshooting-server.js"], 
+      "args": ["./mcp-servers/supabase-troubleshooting-server.js"],
       "autoStart": false,
       "lazyLoad": true,
       "maxMemory": "128MB"
@@ -100,5 +101,4 @@
   // === TERMINAL OPTIMIZATIONS ===
   "terminal.integrated.enableMultiLinePasteWarning": "never",
   "terminal.integrated.persistentSessionReviveProcess": "never"
-}
 }

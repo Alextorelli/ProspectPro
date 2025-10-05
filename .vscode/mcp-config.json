@@ -3,7 +3,7 @@
         "prospectpro-production": {
             "command": "node",
             "args": [
-                "./mcp-servers/supabase-production-server.js"
+                "./mcp-servers/production-server.js"
             ],
             "cwd": "${workspaceFolder}",
             "env": {}
@@ -11,7 +11,7 @@
         "prospectpro-development": {
             "command": "node",
             "args": [
-                "./mcp-servers/supabase-development-server.js"
+                "./mcp-servers/development-server.js"
             ],
             "cwd": "${workspaceFolder}",
             "env": {}

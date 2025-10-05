@@ -1,12 +1,12 @@
-# ProspectPro Enhanced MCP (Model Context Protocol) Implementation v3.0
+# ProspectPro Enhanced MCP (Model Context Protocol) Implementation v3.1
 
 ## Overview
 
-This directory contains the **enhanced MCP server implementation** that provides AI assistants with comprehensive access to ProspectPro's complete email discovery & verification platform, enrichment APIs, contact validation, and **troubleshooting capabilities**. Version 3.0 includes specialized troubleshooting for email enrichment architecture and verified data with 95% deliverability accuracy.
+This directory contains the **enhanced MCP server implementation** that provides AI assistants with comprehensive access to ProspectPro's complete email discovery & verification platform, enrichment APIs, background discovery jobs, contact validation, and **troubleshooting capabilities**. Version 3.1 adds tooling for the v4.3 background discovery pipeline (Census + Foursquare), tier-aware cost tracking, and asynchronous job diagnostics.
 
 **Architecture**: 3 specialized servers for enrichment production, development, and troubleshooting workflows  
 **Tools**: 42 tools total across all servers (6 troubleshooting + 36 enrichment tools)  
-**Status**: Production-ready with complete email discovery & verification (v4.2)
+**Status**: Production-ready with tier-aware background discovery + enrichment (v4.3)
 
 ## Enhanced MCP Servers v3.0 - Email Discovery & Verification Architecture
 
@@ -176,11 +176,11 @@ In your AI assistant, use these MCP tools in systematic order:
 **Manual Quick Test** (if MCP not available):
 
 ```bash
-# Test Edge Function directly (bypasses frontend completely)
-curl -X POST 'https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/business-discovery' \
+# Test background discovery function directly (bypasses frontend completely)
+curl -X POST 'https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/business-discovery-background' \
   -H 'Authorization: Bearer YOUR_CURRENT_ANON_KEY' \
   -H 'Content-Type: application/json' \
-  -d '{"businessType": "test", "location": "test"}'
+  -d '{"businessType": "coffee shop", "location": "Seattle, WA", "tierKey": "PROFESSIONAL", "maxResults": 2}'
 ```
 
 **Expected Results**: Real business data response = backend working, frontend issue  

@@ -1,4 +1,4 @@
-# ProspectPro v4.2 - Complete Email Discovery & Verification Platform
+# ProspectPro v4.3 - Tier-Aware Background Discovery Platform
 
 **🚀 PRODUCTION READY** - User-Aware Business Discovery with Complete Authentication
 
@@ -18,9 +18,11 @@
 ### 📊 Business Discovery
 
 - **16 Business Categories** with 300+ optimized business types
+- **Asynchronous Background Jobs** with real-time progress + campaign inserts
+- **Multi-Source Discovery** - Google Places, Place Details, and Foursquare with dedupe
+- **Census-Guided Targeting** - Automatic radius + density scoring when `CENSUS_API_KEY` is present
 - **Verified Contact Data** - No fake emails or generated patterns
-- **Real-time Quality Scoring** with confidence percentages
-- **Cost-Efficient Processing** with budget controls and optimization
+- **Tier-Aware Cost Controls** with per-tier pricing + enrichment toggles
 
 ### 📧 Email Verification Pipeline
 
@@ -61,11 +63,12 @@ dashboard_exports (id, campaign_id, user_id, session_user_id, ...)
 
 ### Edge Functions (Production)
 
-- `business-discovery-user-aware` - User context discovery with campaign ownership
-- `campaign-export-user-aware` - User-authorized export with data isolation
-- `enrichment-hunter` - Hunter.io email discovery with caching
+- `business-discovery-background` - Tier-aware asynchronous discovery + enrichment orchestration
+- `business-discovery-user-aware` (legacy) - Synchronous user-aware discovery retained for compatibility
+- `campaign-export-user-aware` - User-authorized export with enrichment metadata
+- `enrichment-hunter` - Hunter.io email discovery with caching and circuit breakers
 - `enrichment-neverbounce` - Email verification with quota management
-- `enrichment-orchestrator` - Multi-service coordination
+- `enrichment-orchestrator` - Multi-service coordination + budget enforcement
 - `test-google-places` - API testing and validation
 
 ## 🧪 Quality Standards
@@ -140,8 +143,9 @@ npm install
 supabase start
 
 # Deploy Edge Functions
-supabase functions deploy business-discovery-user-aware
+supabase functions deploy business-discovery-background
 supabase functions deploy campaign-export-user-aware
+supabase functions deploy enrichment-orchestrator
 
 # Build and deploy frontend
 npm run build
@@ -151,11 +155,11 @@ cd dist && vercel --prod
 ### Testing
 
 ```bash
-# Test Edge Functions directly
-curl -X POST 'https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/business-discovery-user-aware' \
+# Test background discovery function directly
+curl -X POST 'https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/business-discovery-background' \
   -H 'Authorization: Bearer YOUR_JWT_TOKEN' \
   -H 'Content-Type: application/json' \
-  -d '{"businessType": "restaurant", "location": "Seattle, WA", "maxResults": 3}'
+  -d '{"businessType": "restaurant", "location": "Seattle, WA", "maxResults": 3, "tierKey": "PROFESSIONAL", "sessionUserId": "dev-smoke"}'
 
 # Test export functionality
 curl -X POST 'https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/campaign-export-user-aware' \
@@ -166,13 +170,13 @@ curl -X POST 'https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/campaign-exp
 
 ## 🎯 Roadmap
 
-### ✅ Completed (v4.2)
+### ✅ Completed (v4.3)
 
-- User authentication and session management
-- Campaign ownership and data isolation
-- User-aware business discovery
-- Export authorization and tracking
-- Database security with RLS policies
+- Tier-aware background discovery pipeline (Google Places + Foursquare + Census)
+- Asynchronous campaign creation with real-time job metrics
+- Enrichment pipeline cost tracking (validation vs enrichment breakdown)
+- Frontend alignment for tier metadata, keywords, and geography options
+- Export enrichment metadata enhancements
 
 ### 🔄 In Progress
 

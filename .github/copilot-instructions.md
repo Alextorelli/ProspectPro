@@ -1,13 +1,13 @@
-# ProspectPro v4.2 - Complete Email Discovery & Verification Platform
+# ProspectPro v4.3 - Tier-Aware Background Discovery Platform
 
 ## CRITICAL: Current Production State
 
-- **Version**: 4.2.0 (User-Aware Email Discovery & Verification System - PRODUCTION READY)
+- **Version**: 4.3.0 (Tier-Aware Background Discovery & Verification System - PRODUCTION READY)
 - **Deployment**: User-Aware Frontend + Supabase Edge Functions (serverless, auto-scaling)
 - **Environment**: Supabase environment variables + Edge Function secrets + User authentication
 - **Architecture**: Supabase-first serverless with user-aware campaign ownership and complete contact enrichment
 - **Quality Standard**: Zero fake data - verified contacts with 95% email accuracy
-- **Backend**: 100% Supabase Edge Functions (user-aware discovery, enrichment, verification, export)
+- **Backend**: 100% Supabase Edge Functions (asynchronous discovery, enrichment, verification, export)
 - **User Management**: Complete authentication system with anonymous and authenticated user support
 - **Repository**: https://github.com/Alextorelli/ProspectPro (Complete user-aware enrichment codebase)
 
@@ -66,15 +66,16 @@
 - **Supabase**: Database, Edge Functions, real-time, authentication, storage
 - **Static Host**: Frontend files only (Cloud Storage, Vercel, Netlify)
 
-## CRITICAL: EDGE FUNCTIONS STATUS (v4.2)
+## CRITICAL: EDGE FUNCTIONS STATUS (v4.3)
 
-**PRODUCTION EDGE FUNCTIONS (6 ACTIVE - USER-AWARE)**
+**PRODUCTION EDGE FUNCTIONS (7 ACTIVE - BACKGROUND + USER-AWARE)**
 
-- ✅ `business-discovery-user-aware` (v2) - Complete user authentication with session management and database storage
-- ✅ `campaign-export-user-aware` (v2) - User-authorized export with data isolation and access control
-- ✅ `enrichment-hunter` (v1) - Hunter.io email discovery with all 6 API endpoints and 24-hour caching
-- ✅ `enrichment-neverbounce` (v1) - NeverBounce email verification with 1,000 free/month quota management
-- ✅ `enrichment-orchestrator` (v1) - Intelligent multi-service coordination with budget controls
+- ✅ `business-discovery-background` (v1) - Tier-aware asynchronous discovery with Google Places, Foursquare, Census targeting, and enrichment orchestration
+- ✅ `business-discovery-user-aware` (v2, legacy) - Synchronous user-aware discovery retained for backward compatibility
+- ✅ `campaign-export-user-aware` (v2) - User-authorized export with data isolation and full enrichment metadata
+- ✅ `enrichment-hunter` (v1) - Hunter.io email discovery with 24-hour caching and circuit breakers
+- ✅ `enrichment-neverbounce` (v1) - NeverBounce email verification with quota management
+- ✅ `enrichment-orchestrator` (v1) - Intelligent multi-service coordination with per-tier budget controls
 - ✅ `test-google-places` (v1) - API testing function
 - ✅ Real-time database integration with user-aware campaign and lead tracking
 - ✅ Global edge deployment with <100ms cold starts
@@ -189,7 +190,7 @@ const BUSINESS_CATEGORIES = {
 **CLEAN SUPABASE-FIRST STRUCTURE**
 
 - ✅ Core production files: Edge Functions, static frontend, database schema
-- ✅ `/supabase/functions/` - 2 essential Edge Functions only
+- ✅ `/supabase/functions/` - Background discovery, enrichment, export, and diagnostics only
 - ✅ `/public/` - Static frontend with MECE taxonomy integration
 - ✅ `/database/` - Cleaned schema with security fixes applied
 - ❌ NO server.js, Express routes, or Node.js backend files
@@ -232,10 +233,11 @@ const BUSINESS_CATEGORIES = {
 - ✅ Vercel deployment with native Vite framework detection
 - ✅ Custom domain with optimal CDN caching
 - ✅ Zero build warnings (Node.js + PostCSS optimized)
-- ✅ Edge Function `business-discovery-user-aware` returns real business data with user context
-- ✅ Edge Function `campaign-export-user-aware` provides user-authorized exports
+- ✅ Edge Function `business-discovery-background` creates asynchronous campaigns with tier metadata
+- ✅ Edge Function `campaign-export-user-aware` provides user-authorized exports with enrichment metadata
+- ✅ Legacy `business-discovery-user-aware` remains available for backward compatibility
 - ✅ Database tables created with proper RLS policies and user linking
-- ✅ API integrations (Google Places, Foursquare, Hunter.io) configured
+- ✅ API integrations (Google Places, Foursquare, Hunter.io, Census) configured
 - ✅ Smart deployment script handles build and deploy process
 - ✅ MECE taxonomy integration with 16 categories and 300+ business types
 - ✅ User authentication with anonymous session support
@@ -277,11 +279,11 @@ const BUSINESS_CATEGORIES = {
 **DEBUGGING COMMANDS**
 
 ```bash
-# Test user-aware Edge Function directly
-curl -X POST 'https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/business-discovery-user-aware' \
+# Test background discovery Edge Function directly
+curl -X POST 'https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/business-discovery-background' \
   -H 'Authorization: Bearer CURRENT_ANON_KEY' \
   -H 'Content-Type: application/json' \
-  -d '{"businessType": "coffee shop", "location": "Seattle, WA", "maxResults": 2, "sessionUserId": "test_session_123"}'
+   -d '{"businessType": "coffee shop", "location": "Seattle, WA", "maxResults": 2, "tierKey": "PROFESSIONAL", "sessionUserId": "test_session_123"}'
 
 # Test user-aware export function
 curl -X POST 'https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/campaign-export-user-aware' \
@@ -289,7 +291,7 @@ curl -X POST 'https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/campaign-exp
   -H 'Content-Type: application/json' \
   -d '{"campaignId": "CAMPAIGN_ID", "format": "csv", "sessionUserId": "test_session_123"}'
 
-# Check active Edge Functions (should be 6 active)
+# Check active Edge Functions (should be 7 active)
 supabase functions list
 
 # Deploy frontend to custom domain
