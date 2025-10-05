@@ -38,7 +38,7 @@ const ENRICHMENT_TIERS: Record<TierKey, TierSettings> = {
     orchestratorTier: "starter",
     maxCostPerLead: 0.5,
     includes: {
-      verifyEmails: false,
+      verifyEmails: true,
       personEnrichment: false,
       apolloEnrichment: false,
     },
@@ -195,6 +195,9 @@ interface ScoredLead {
       servicesSkipped: string[];
       enrichmentTier: string;
       enrichmentCostBreakdown?: Record<string, number>;
+      emailStatus?: "verified" | "unconfirmed" | "not_found";
+      verifiedEmail?: string;
+      unverifiedEmail?: string;
     };
   };
 }
@@ -272,7 +275,7 @@ class CensusAPIClient {
     location: string
   ): Promise<CensusIntelligence> {
     const naicsCode = this.mapBusinessTypeToNAICS(businessType);
-    const geoData = await this.parseLocation(location);
+    const geoData = this.parseLocation(location);
 
     const censusData = await this.fetchCountyBusinessPatterns({
       naics: naicsCode,
@@ -411,7 +414,7 @@ class CensusAPIClient {
     return "00";
   }
 
-  private async parseLocation(location: string) {
+  private parseLocation(location: string) {
     const stateMatch = location.match(/\b([A-Z]{2})\b/);
     const stateCode = stateMatch ? this.getStateFIPSCode(stateMatch[1]) : "06";
     return {
@@ -732,6 +735,7 @@ class QualityScorer {
           servicesUsed: Array.from(initialSources),
           servicesSkipped: [],
           enrichmentTier: this.tierName,
+          emailStatus: "not_found",
         },
       },
     };
@@ -794,12 +798,67 @@ async function enrichLead(
   }
 
   const enrichmentData = await response.json();
-  const emails = enrichmentData.enrichedData?.emails ?? [];
-  const verifiedEmail = emails.find(
-    (email: { verified?: boolean }) => email.verified
+  type EnrichedEmail = {
+    email: string;
+    verified?: boolean;
+    [key: string]: unknown;
+  };
+
+  const emails = (enrichmentData.enrichedData?.emails ?? []) as EnrichedEmail[];
+
+  const normalizeDomain = (value?: string) =>
+    value ? value.toLowerCase().replace(/^www\./, "") : "";
+
+  const normalizedDomain = normalizeDomain(domain);
+
+  const emailMatchesCorporateDomain = (emailAddress?: string) => {
+    if (!emailAddress || !normalizedDomain) return false;
+    const parts = emailAddress.split("@");
+    if (parts.length !== 2) return false;
+    const emailDomain = normalizeDomain(parts[1]);
+    if (!emailDomain) return false;
+    return (
+      emailDomain === normalizedDomain ||
+      emailDomain.endsWith(`.${normalizedDomain}`)
+    );
+  };
+
+  const corporateEmails = normalizedDomain
+    ? emails.filter((entry: EnrichedEmail) =>
+        emailMatchesCorporateDomain(entry.email)
+      )
+    : emails;
+
+  const verifiedCorporate = corporateEmails.find(
+    (entry: EnrichedEmail) => entry.verified
   );
-  const firstEmail = emails[0];
-  const bestEmail = verifiedEmail?.email || firstEmail?.email || lead.email;
+
+  let verifiedEmailEntry = verifiedCorporate;
+  if (!verifiedEmailEntry && !normalizedDomain) {
+    verifiedEmailEntry = emails.find((entry: EnrichedEmail) => entry.verified);
+  }
+
+  const unverifiedCorporate = corporateEmails.find(
+    (entry: EnrichedEmail) => entry.email && !entry.verified
+  );
+
+  const fallbackCandidate =
+    unverifiedCorporate ||
+    corporateEmails[0] ||
+    emails.find((entry: EnrichedEmail) => entry.email && !entry.verified) ||
+    emails[0];
+
+  let emailStatus: "verified" | "unconfirmed" | "not_found" = "not_found";
+  let verifiedEmailValue = "";
+  let unverifiedEmailValue = "";
+
+  if (verifiedEmailEntry?.email) {
+    emailStatus = "verified";
+    verifiedEmailValue = verifiedEmailEntry.email;
+  } else if (fallbackCandidate?.email) {
+    emailStatus = "unconfirmed";
+    unverifiedEmailValue = fallbackCandidate.email;
+  }
 
   const servicesUsed = new Set<string>(
     lead.enhancementData.verificationSources
@@ -813,7 +872,7 @@ async function enrichLead(
 
   const updatedLead: ScoredLead = {
     ...lead,
-    email: bestEmail || "",
+    email: verifiedEmailValue || "",
     enhancementData: {
       ...lead.enhancementData,
       verificationSources: Array.from(servicesUsed),
@@ -828,6 +887,9 @@ async function enrichLead(
           enrichmentData.processingMetadata?.servicesSkipped ?? [],
         enrichmentTier: config.tier.name,
         enrichmentCostBreakdown: enrichmentData.costBreakdown ?? undefined,
+        emailStatus,
+        verifiedEmail: verifiedEmailValue || undefined,
+        unverifiedEmail: unverifiedEmailValue || undefined,
       },
     },
   };

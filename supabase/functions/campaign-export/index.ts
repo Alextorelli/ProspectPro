@@ -37,9 +37,9 @@ interface Lead {
   created_at: string;
   // Progressive enrichment fields
   enrichment_tier?: string;
-  enrichment_data?: Record<string, unknown>;
+  enrichment_data?: Record<string, unknown> | string;
   vault_secured?: boolean;
-  data_sources?: string[];
+  data_sources?: Array<string | { name: string }>;
   cost_to_acquire?: number;
   // Verification fields (may not exist yet)
   owner_contact?: string;
@@ -83,27 +83,31 @@ class CampaignExporter {
     ];
 
     // Generate CSV rows with progressive enrichment data
-    const rows = leads.map((lead) => [
-      this.cleanField(lead.business_name),
-      this.cleanField(lead.address),
-      this.cleanField(lead.phone),
-      this.cleanField(lead.website),
-      this.cleanVerifiedField(lead.email), // Only verified emails
-      this.cleanField(lead.owner_contact), // Apollo/professional directory contacts
-      this.cleanField(lead.linkedin_profile),
-      lead.confidence_score || 0,
-      this.cleanField(lead.enrichment_tier || "Professional"),
-      lead.vault_secured ? "Yes" : "No",
-      lead.cost_to_acquire ? `$${lead.cost_to_acquire.toFixed(3)}` : "$0.000",
-      this.getEnrichmentDataSources(lead),
-      this.getVerificationStatus(lead),
-      this.cleanField(lead.professional_license),
-      this.getMembershipStatus(lead.chamber_verified),
-      this.cleanField(lead.trade_association),
-      this.getCacheStatus(lead),
-      this.formatDate(lead.last_verified || ""),
-      this.formatDate(lead.created_at),
-    ]);
+    const rows = leads.map((lead) => {
+      const emailDisplay = this.getEmailDisplay(lead);
+
+      return [
+        this.cleanField(lead.business_name),
+        this.cleanField(lead.address),
+        this.cleanField(lead.phone),
+        this.cleanField(lead.website),
+        emailDisplay, // Verified email or status indicator
+        this.cleanField(lead.owner_contact), // Apollo/professional directory contacts
+        this.cleanField(lead.linkedin_profile),
+        lead.confidence_score || 0,
+        this.cleanField(lead.enrichment_tier || "Professional"),
+        lead.vault_secured ? "Yes" : "No",
+        lead.cost_to_acquire ? `$${lead.cost_to_acquire.toFixed(3)}` : "$0.000",
+        this.getEnrichmentDataSources(lead),
+        this.getVerificationStatus(lead),
+        this.cleanField(lead.professional_license),
+        this.getMembershipStatus(lead.chamber_verified),
+        this.cleanField(lead.trade_association),
+        this.getCacheStatus(lead),
+        this.formatDate(lead.last_verified || ""),
+        this.formatDate(lead.created_at),
+      ];
+    });
 
     // Combine headers and rows
     const csvContent = [
@@ -121,6 +125,63 @@ class CampaignExporter {
     ].join("\n");
 
     return csvContent;
+  }
+
+  private parseEnrichmentData(lead: Lead): Record<string, unknown> | null {
+    if (!lead.enrichment_data) return null;
+
+    if (typeof lead.enrichment_data === "string") {
+      try {
+        return JSON.parse(lead.enrichment_data) as Record<string, unknown>;
+      } catch {
+        return null;
+      }
+    }
+
+    if (typeof lead.enrichment_data === "object") {
+      return lead.enrichment_data as Record<string, unknown>;
+    }
+
+    return null;
+  }
+
+  private getEmailDisplay(lead: Lead): string {
+    const verifiedEmail = this.cleanVerifiedField(lead.email);
+    if (verifiedEmail) {
+      return verifiedEmail;
+    }
+
+    const enrichmentData = this.parseEnrichmentData(lead);
+    if (!enrichmentData) {
+      return "";
+    }
+
+    const processingMetadata = (enrichmentData["processingMetadata"] ??
+      {}) as Record<string, unknown>;
+
+    const metadataVerified =
+      typeof processingMetadata["verifiedEmail"] === "string"
+        ? this.cleanVerifiedField(processingMetadata["verifiedEmail"])
+        : "";
+
+    if (metadataVerified) {
+      return metadataVerified;
+    }
+
+    const emailStatus =
+      typeof processingMetadata["emailStatus"] === "string"
+        ? (processingMetadata["emailStatus"] as string)
+        : undefined;
+
+    const hasUnverified =
+      typeof processingMetadata["unverifiedEmail"] === "string" &&
+      (processingMetadata["unverifiedEmail"] as string).length > 0;
+
+    if (emailStatus === "unconfirmed" && hasUnverified) {
+      return "unconfirmed";
+    }
+
+    return "";
   }
 
   private cleanField(value: unknown): string {
@@ -164,18 +225,30 @@ class CampaignExporter {
   }
 
   private getCacheStatus(lead: Lead): string {
-    if (!lead.enrichment_data) return "No";
+    const enrichmentData = this.parseEnrichmentData(lead);
+    if (!enrichmentData) return "No";
 
-    try {
-      const enrichmentData =
-        typeof lead.enrichment_data === "string"
-          ? JSON.parse(lead.enrichment_data)
-          : lead.enrichment_data;
-
-      return enrichmentData?.cache_hit ? "Yes" : "No";
-    } catch {
-      return "No";
+    if (
+      enrichmentData["cache_hit"] === true ||
+      enrichmentData["cacheHit"] === true
+    ) {
+      return "Yes";
     }
+
+    const processingMetadata = enrichmentData["processingMetadata"] as
+      | Record<string, unknown>
+      | undefined;
+
+    if (processingMetadata) {
+      if (
+        processingMetadata["cache_hit"] === true ||
+        processingMetadata["cacheHit"] === true
+      ) {
+        return "Yes";
+      }
+    }
+
+    return "No";
   }
 
   private getDataSource(lead: Lead): string {
