@@ -2,6 +2,10 @@
 // Supports new sb_publishable_ and sb_secret_ API key format
 // October 4, 2025 - Complete Migration to New API Keys
 
+import type {
+  SupabaseClient,
+  SupabaseClientOptions,
+} from "https://esm.sh/@supabase/supabase-js@2.38.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.38.0";
 
 interface AuthContext {
@@ -9,7 +13,7 @@ interface AuthContext {
   apiKey: string;
   keyFormat: "new_publishable" | "new_secret" | "legacy_jwt" | "unknown";
   isValid: boolean;
-  client?: any;
+  client?: SupabaseClient;
 }
 
 export class EdgeFunctionAuth {
@@ -65,7 +69,7 @@ export class EdgeFunctionAuth {
 
         // Legacy anon key (doesn't have user-specific fields)
         return { format: "legacy_jwt", isValid: true };
-      } catch (e) {
+      } catch (_error) {
         // If we can't decode it, treat as legacy JWT
         return { format: "legacy_jwt", isValid: true };
       }
@@ -140,17 +144,18 @@ export class EdgeFunctionAuth {
 
     // For Edge Functions, we typically need service role key for full access
     // But new format publishable keys have limited permissions
-    const options = {
+    const options: SupabaseClientOptions<"public"> = {
       auth: { persistSession: false },
-      global: {
-        headers: validation.format.startsWith("new_")
-          ? {
-              apikey: apiKey,
-              Authorization: `Bearer ${apiKey}`,
-            }
-          : {},
-      },
     };
+
+    if (validation.format.startsWith("new_")) {
+      options.global = {
+        headers: {
+          apikey: apiKey,
+          Authorization: `Bearer ${apiKey}`,
+        },
+      };
+    }
 
     return createClient(this.supabaseUrl, apiKey, options);
   }
@@ -203,7 +208,7 @@ export class EdgeFunctionAuth {
         console.log(
           `✅ User JWT authenticated: ${userId} (anonymous: ${isAnonymous})`
         );
-      } catch (e) {
+      } catch (_error) {
         console.log("Could not extract user info from JWT");
       }
     }
@@ -251,35 +256,35 @@ export class EdgeFunctionAuth {
 
       // Test campaigns table access
       try {
-        const { data, error } = await authContext.client
+        const { error } = await authContext.client
           .from("campaigns")
           .select("id")
           .limit(1);
         testResults.campaigns = !error;
-      } catch (e) {
-        console.log("Campaigns access test failed:", e);
+      } catch (error) {
+        console.log("Campaigns access test failed:", error);
       }
 
       // Test leads table access
       try {
-        const { data, error } = await authContext.client
+        const { error } = await authContext.client
           .from("leads")
           .select("id")
           .limit(1);
         testResults.leads = !error;
-      } catch (e) {
-        console.log("Leads access test failed:", e);
+      } catch (error) {
+        console.log("Leads access test failed:", error);
       }
 
       // Test dashboard_exports table access
       try {
-        const { data, error } = await authContext.client
+        const { error } = await authContext.client
           .from("dashboard_exports")
           .select("id")
           .limit(1);
         testResults.dashboard_exports = !error;
-      } catch (e) {
-        console.log("Dashboard exports access test failed:", e);
+      } catch (error) {
+        console.log("Dashboard exports access test failed:", error);
       }
 
       const hasAnyAccess = Object.values(testResults).some((access) => access);
@@ -304,13 +309,13 @@ export class EdgeFunctionAuth {
  * Convenience function to get authenticated Supabase client
  */
 export function createAuthenticatedClient(): {
-  client: any;
+  client: SupabaseClient;
   authContext: AuthContext;
 } {
   const auth = new EdgeFunctionAuth();
   const authContext = auth.getAuthContext();
 
-  if (!authContext.isValid) {
+  if (!authContext.isValid || !authContext.client) {
     throw new Error(`Invalid authentication: ${authContext.keyFormat}`);
   }
 
