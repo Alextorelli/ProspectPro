@@ -29,83 +29,125 @@ interface Lead {
   phone?: string;
   website?: string;
   email?: string;
-  confidence_score: number;
-  score_breakdown?: Record<string, unknown>;
+  confidence_score?: number;
+  enrichment_tier?: string;
+  validation_status?: string;
+  chamber_verified?: boolean;
+  trade_association?: string;
+  cost_to_acquire?: number;
   validation_cost?: number;
+  cache_hit?: boolean;
+  created_at?: string;
+  updated_at?: string;
+  enrichment_data?: Record<string, unknown>;
+  data_sources?: unknown;
+  data_source?: string;
+  verification_status?: string;
+  apollo_verified?: boolean;
+  license_verified?: boolean;
+  score_breakdown?: Record<string, unknown>;
   cost_efficient?: boolean;
   scoring_recommendation?: string;
-  created_at: string;
-  // Progressive enrichment fields
-  enrichment_tier?: string;
-  enrichment_data?: Record<string, unknown> | string;
   vault_secured?: boolean;
-  data_sources?: Array<string | { name: string }>;
-  cost_to_acquire?: number;
-  // Verification fields (may not exist yet)
   owner_contact?: string;
   linkedin_profile?: string;
   professional_license?: string;
-  chamber_verified?: boolean;
-  trade_association?: string;
   last_verified?: string;
   google_places_verified?: boolean;
-  apollo_verified?: boolean;
-  license_verified?: boolean;
-  verification_status?: string;
-  data_source?: string;
-  [key: string]: unknown; // Allow additional fields
+  [key: string]: unknown;
 }
 
 // CSV Export functionality
 class CampaignExporter {
-  generateCSV(_campaign: Campaign, leads: Lead[]): string {
-    // Define CSV headers with progressive enrichment focus
+  generateCSV(campaign: Campaign, leads: Lead[]): string {
+    // Comprehensive CSV headers for all tiers - unified template
     const headers = [
+      // Base tier columns (always included)
       "Business Name",
       "Address",
       "Phone",
       "Website",
-      "Email (Verified Only)",
-      "Owner/Executive Contact",
-      "LinkedIn Profile",
+      "Generic Company Email",
+      "Industry",
+      "Company Size",
+      "Business Verification Status",
       "Confidence Score",
-      "Enrichment Tier",
-      "Vault Secured",
-      "Cost Per Lead",
-      "Data Sources",
-      "Verification Status",
+
+      // Professional tier columns
+      "Professional Email",
+      "Email Verification Status",
+      "Email Deliverability Score",
+      "Enhanced Company Data",
+
+      // Enterprise tier columns
+      "Executive Contact Name",
+      "Executive Title",
+      "Executive Email",
+      "Executive Phone",
+      "Executive LinkedIn",
+      "Compliance Verification",
       "Professional License",
-      "Chamber Member",
+      "Chamber Member Status",
       "Trade Association",
+
+      // Universal metadata columns
+      "Enrichment Tier",
+      "Total Cost",
+      "Validation Cost",
+      "Enrichment Cost",
+      "Data Sources",
       "Cache Hit",
-      "Last Verified",
+      "Processing Time",
       "Created Date",
+      "Last Updated",
     ];
 
-    // Generate CSV rows with progressive enrichment data
+    // Generate CSV rows with tier-aware data population
     const rows = leads.map((lead) => {
-      const emailDisplay = this.getEmailDisplay(lead);
+      const enrichmentData = this.parseEnrichmentData(lead);
+      const tierUsed = String(
+        lead.enrichment_tier || campaign.tier_used || "Base"
+      );
 
       return [
+        // Base tier data (always populated)
         this.cleanField(lead.business_name),
         this.cleanField(lead.address),
         this.cleanField(lead.phone),
         this.cleanField(lead.website),
-        emailDisplay, // Verified email or status indicator
-        this.cleanField(lead.owner_contact), // Apollo/professional directory contacts
-        this.cleanField(lead.linkedin_profile),
+        this.getGenericEmail(lead, tierUsed),
+        this.getCompanyIndustry(lead, enrichmentData, tierUsed),
+        this.getCompanySize(lead, enrichmentData, tierUsed),
+        this.getBusinessVerificationStatus(lead, tierUsed),
         lead.confidence_score || 0,
-        this.cleanField(lead.enrichment_tier || "Professional"),
-        lead.vault_secured ? "Yes" : "No",
-        lead.cost_to_acquire ? `$${lead.cost_to_acquire.toFixed(3)}` : "$0.000",
-        this.getEnrichmentDataSources(lead),
-        this.getVerificationStatus(lead),
-        this.cleanField(lead.professional_license),
-        this.getMembershipStatus(lead.chamber_verified),
-        this.cleanField(lead.trade_association),
+
+        // Professional tier data
+        this.getProfessionalEmail(lead, enrichmentData, tierUsed),
+        this.getEmailVerificationStatus(lead, enrichmentData, tierUsed),
+        this.getEmailDeliverabilityScore(lead, enrichmentData, tierUsed),
+        this.getEnhancedCompanyData(lead, enrichmentData, tierUsed),
+
+        // Enterprise tier data
+        this.getExecutiveContactName(lead, enrichmentData, tierUsed),
+        this.getExecutiveTitle(lead, enrichmentData, tierUsed),
+        this.getExecutiveEmail(lead, enrichmentData, tierUsed),
+        this.getExecutivePhone(lead, enrichmentData, tierUsed),
+        this.getExecutiveLinkedIn(lead, enrichmentData, tierUsed),
+        this.getComplianceVerification(lead, enrichmentData, tierUsed),
+        this.getProfessionalLicense(lead, enrichmentData, tierUsed),
+        this.getChamberMemberStatus(lead, enrichmentData, tierUsed),
+        this.getTradeAssociation(lead, enrichmentData, tierUsed),
+
+        // Universal metadata
+        tierUsed,
+        this.getTotalCost(lead),
+        this.getValidationCost(lead, enrichmentData),
+        this.getEnrichmentCost(lead, enrichmentData),
+        this.getDataSources(lead, enrichmentData),
         this.getCacheStatus(lead),
-        this.formatDate(lead.last_verified || ""),
-        this.formatDate(lead.created_at),
+        this.getProcessingTime(lead, enrichmentData),
+        this.formatDate(lead.created_at || ""),
+        this.formatDate(String(lead.updated_at || lead.created_at || "")),
       ];
     });
 
@@ -184,6 +226,315 @@ class CampaignExporter {
     return "";
   }
 
+  // Tier-aware data extraction methods
+  private getGenericEmail(lead: Lead, tierUsed: string): string {
+    // Base tier gets generic company email from basic data
+    if (tierUsed === "Base") {
+      return this.cleanVerifiedField(lead.email) || "";
+    }
+    return "N/A"; // Higher tiers use professional email column
+  }
+
+  private getProfessionalEmail(
+    lead: Lead,
+    enrichmentData: Record<string, unknown> | null,
+    tierUsed: string
+  ): string {
+    if (tierUsed === "Base") return "N/A";
+
+    // Professional and Enterprise tiers get verified professional emails
+    const processingMetadata = enrichmentData?.["processingMetadata"] as
+      | Record<string, unknown>
+      | undefined;
+    const verifiedEmail =
+      typeof processingMetadata?.["verifiedEmail"] === "string"
+        ? (processingMetadata["verifiedEmail"] as string)
+        : "";
+
+    if (verifiedEmail) {
+      return this.cleanVerifiedField(verifiedEmail);
+    }
+
+    // Fallback to lead.email if verified
+    return this.cleanVerifiedField(lead.email) || "";
+  }
+
+  private getEmailVerificationStatus(
+    _lead: Lead,
+    enrichmentData: Record<string, unknown> | null,
+    tierUsed: string
+  ): string {
+    if (tierUsed === "Base") return "N/A";
+
+    const processingMetadata = enrichmentData?.["processingMetadata"] as
+      | Record<string, unknown>
+      | undefined;
+    const emailStatus = processingMetadata?.["emailStatus"] as
+      | string
+      | undefined;
+
+    switch (emailStatus) {
+      case "verified":
+        return "Verified";
+      case "unconfirmed":
+        return "Unconfirmed";
+      case "not_found":
+        return "Not Found";
+      default:
+        return "";
+    }
+  }
+
+  private getEmailDeliverabilityScore(
+    _lead: Lead,
+    enrichmentData: Record<string, unknown> | null,
+    tierUsed: string
+  ): string {
+    if (tierUsed === "Base") return "N/A";
+
+    const emails = enrichmentData?.["emails"] as
+      | Array<{ email?: string; confidence?: number; verified?: boolean }>
+      | undefined;
+    if (!emails || emails.length === 0) return "";
+
+    const verifiedEmail = emails.find((e) => e.verified);
+    return verifiedEmail?.confidence ? `${verifiedEmail.confidence}%` : "";
+  }
+
+  private getCompanyIndustry(
+    _lead: Lead,
+    enrichmentData: Record<string, unknown> | null,
+    _tierUsed: string
+  ): string {
+    const companyInfo = enrichmentData?.["companyInfo"] as
+      | Record<string, unknown>
+      | undefined;
+    return typeof companyInfo?.["industry"] === "string"
+      ? (companyInfo["industry"] as string)
+      : "";
+  }
+
+  private getCompanySize(
+    _lead: Lead,
+    enrichmentData: Record<string, unknown> | null,
+    _tierUsed: string
+  ): string {
+    const companyInfo = enrichmentData?.["companyInfo"] as
+      | Record<string, unknown>
+      | undefined;
+    return typeof companyInfo?.["size"] === "string"
+      ? (companyInfo["size"] as string)
+      : "";
+  }
+
+  private getEnhancedCompanyData(
+    _lead: Lead,
+    enrichmentData: Record<string, unknown> | null,
+    tierUsed: string
+  ): string {
+    if (tierUsed === "Base") return "N/A";
+
+    const companyInfo = enrichmentData?.["companyInfo"] as
+      | Record<string, unknown>
+      | undefined;
+    if (!companyInfo) return "";
+
+    const details = [];
+    if (companyInfo["founded"])
+      details.push(`Founded: ${companyInfo["founded"]}`);
+    if (companyInfo["revenue"])
+      details.push(`Revenue: ${companyInfo["revenue"]}`);
+    if (companyInfo["description"])
+      details.push(`Description: ${companyInfo["description"]}`);
+
+    return details.join(" | ");
+  }
+
+  private getBusinessVerificationStatus(lead: Lead, _tierUsed: string): string {
+    // All tiers include business verification
+    return String(lead.validation_status || "Verified");
+  }
+
+  // Enterprise tier methods
+  private getExecutiveContactName(
+    _lead: Lead,
+    enrichmentData: Record<string, unknown> | null,
+    tierUsed: string
+  ): string {
+    if (tierUsed !== "Enterprise") return "N/A";
+
+    const personEnrichment = enrichmentData?.["personEnrichment"] as
+      | Array<{ name?: string }>
+      | undefined;
+    return personEnrichment?.[0]?.name || "";
+  }
+
+  private getExecutiveTitle(
+    _lead: Lead,
+    enrichmentData: Record<string, unknown> | null,
+    tierUsed: string
+  ): string {
+    if (tierUsed !== "Enterprise") return "N/A";
+
+    const personEnrichment = enrichmentData?.["personEnrichment"] as
+      | Array<{ title?: string }>
+      | undefined;
+    return personEnrichment?.[0]?.title || "";
+  }
+
+  private getExecutiveEmail(
+    _lead: Lead,
+    enrichmentData: Record<string, unknown> | null,
+    tierUsed: string
+  ): string {
+    if (tierUsed !== "Enterprise") return "N/A";
+
+    const personEnrichment = enrichmentData?.["personEnrichment"] as
+      | Array<{ email?: string }>
+      | undefined;
+    return personEnrichment?.[0]?.email || "";
+  }
+
+  private getExecutivePhone(
+    _lead: Lead,
+    enrichmentData: Record<string, unknown> | null,
+    tierUsed: string
+  ): string {
+    if (tierUsed !== "Enterprise") return "N/A";
+
+    const personEnrichment = enrichmentData?.["personEnrichment"] as
+      | Array<{ phone?: string }>
+      | undefined;
+    return personEnrichment?.[0]?.phone || "";
+  }
+
+  private getExecutiveLinkedIn(
+    _lead: Lead,
+    enrichmentData: Record<string, unknown> | null,
+    tierUsed: string
+  ): string {
+    if (tierUsed !== "Enterprise") return "N/A";
+
+    const personEnrichment = enrichmentData?.["personEnrichment"] as
+      | Array<{ linkedin?: string }>
+      | undefined;
+    return personEnrichment?.[0]?.linkedin || "";
+  }
+
+  private getComplianceVerification(
+    _lead: Lead,
+    enrichmentData: Record<string, unknown> | null,
+    tierUsed: string
+  ): string {
+    if (tierUsed !== "Enterprise") return "N/A";
+
+    const complianceData = enrichmentData?.["complianceData"] as
+      | Record<string, unknown>
+      | undefined;
+    if (!complianceData) return "";
+
+    const checks = [];
+    if (complianceData["finraCheck"]) checks.push("FINRA");
+    if (complianceData["sanctionsCheck"]) checks.push("Sanctions");
+
+    return checks.join(", ") || "No findings";
+  }
+
+  private getProfessionalLicense(
+    _lead: Lead,
+    enrichmentData: Record<string, unknown> | null,
+    _tierUsed: string
+  ): string {
+    const businessLicense = enrichmentData?.["businessLicense"] as
+      | Record<string, unknown>
+      | undefined;
+    if (!businessLicense) return "";
+
+    return (businessLicense["licenseNumber"] as string) || "";
+  }
+
+  private getChamberMemberStatus(
+    lead: Lead,
+    _enrichmentData: Record<string, unknown> | null,
+    _tierUsed: string
+  ): string {
+    return lead.chamber_verified ? "Member" : "";
+  }
+
+  private getTradeAssociation(
+    lead: Lead,
+    _enrichmentData: Record<string, unknown> | null,
+    _tierUsed: string
+  ): string {
+    return this.cleanField(lead.trade_association);
+  }
+
+  // Cost and metadata methods
+  private getTotalCost(lead: Lead): string {
+    const cost = lead.cost_to_acquire || lead.validation_cost || 0;
+    return `$${cost.toFixed(3)}`;
+  }
+
+  private getValidationCost(
+    _lead: Lead,
+    enrichmentData: Record<string, unknown> | null
+  ): string {
+    const processingMetadata = enrichmentData?.["processingMetadata"] as
+      | Record<string, unknown>
+      | undefined;
+    const validationCost = processingMetadata?.["validationCost"] as
+      | number
+      | undefined;
+    return validationCost ? `$${validationCost.toFixed(3)}` : "$0.000";
+  }
+
+  private getEnrichmentCost(
+    _lead: Lead,
+    enrichmentData: Record<string, unknown> | null
+  ): string {
+    const processingMetadata = enrichmentData?.["processingMetadata"] as
+      | Record<string, unknown>
+      | undefined;
+    const enrichmentCost = processingMetadata?.["enrichmentCost"] as
+      | number
+      | undefined;
+    return enrichmentCost ? `$${enrichmentCost.toFixed(3)}` : "$0.000";
+  }
+
+  private getDataSources(
+    _lead: Lead,
+    enrichmentData: Record<string, unknown> | null
+  ): string {
+    const verificationSources = enrichmentData?.["verificationSources"] as
+      | string[]
+      | undefined;
+    const dataSources = enrichmentData?.["dataSources"] as string[] | undefined;
+
+    const allSources = new Set<string>();
+    verificationSources?.forEach((source) => allSources.add(source));
+    dataSources?.forEach((source) => allSources.add(source));
+
+    return Array.from(allSources).join(", ") || "Google Places";
+  }
+
+  private getCacheStatus(lead: Lead): string {
+    return lead.cache_hit ? "Cache Hit" : "Fresh";
+  }
+
+  private getProcessingTime(
+    _lead: Lead,
+    enrichmentData: Record<string, unknown> | null
+  ): string {
+    const processingMetadata = enrichmentData?.["processingMetadata"] as
+      | Record<string, unknown>
+      | undefined;
+    const processingTime = processingMetadata?.["processingTime"] as
+      | number
+      | undefined;
+    return processingTime ? `${processingTime}ms` : "";
+  }
+
+  // Utility methods
   private cleanField(value: unknown): string {
     if (value === null || value === undefined || value === "") return "";
     return String(value)
@@ -191,24 +542,36 @@ class CampaignExporter {
       .trim();
   }
 
-  // Only return verified emails, leave blank if not verified
   private cleanVerifiedField(email: unknown): string {
     if (!email) return "";
     const emailStr = String(email);
 
     // Check if email contains pattern indicators (fake data)
-    const fakePatterns = ["info@", "contact@", "hello@", "sales@", "admin@"];
-    const isFakePattern = fakePatterns.some((pattern) =>
-      emailStr.startsWith(pattern)
+    const fakePatterns = [
+      "info@",
+      "contact@",
+      "hello@",
+      "sales@",
+      "support@",
+      "admin@",
+      "noreply@",
+      "no-reply@",
+      "mail@",
+    ];
+
+    const isGenericPattern = fakePatterns.some((pattern) =>
+      emailStr.toLowerCase().includes(pattern)
     );
 
-    // Return empty if it's a generated pattern, otherwise return the email
-    return isFakePattern ? "" : emailStr;
+    if (isGenericPattern) {
+      return ""; // Don't include generic pattern emails
+    }
+
+    return this.cleanField(emailStr);
   }
 
   private getEnrichmentDataSources(lead: Lead): string {
-    if (!lead.data_sources || lead.data_sources.length === 0)
-      return "Google Places";
+    if (!lead.data_sources) return "Google Places";
 
     const sources = Array.isArray(lead.data_sources) ? lead.data_sources : [];
     const sourceNames: string[] = [];
@@ -217,38 +580,11 @@ class CampaignExporter {
       if (typeof source === "string") {
         sourceNames.push(source);
       } else if (source && typeof source === "object" && "name" in source) {
-        sourceNames.push(source.name as string);
+        sourceNames.push((source as { name: string }).name);
       }
     });
 
     return sourceNames.length > 0 ? sourceNames.join(", ") : "Google Places";
-  }
-
-  private getCacheStatus(lead: Lead): string {
-    const enrichmentData = this.parseEnrichmentData(lead);
-    if (!enrichmentData) return "No";
-
-    if (
-      enrichmentData["cache_hit"] === true ||
-      enrichmentData["cacheHit"] === true
-    ) {
-      return "Yes";
-    }
-
-    const processingMetadata = enrichmentData["processingMetadata"] as
-      | Record<string, unknown>
-      | undefined;
-
-    if (processingMetadata) {
-      if (
-        processingMetadata["cache_hit"] === true ||
-        processingMetadata["cacheHit"] === true
-      ) {
-        return "Yes";
-      }
-    }
-
-    return "No";
   }
 
   private getDataSource(lead: Lead): string {
@@ -307,8 +643,8 @@ class CampaignExporter {
         return "Trade Association Verified";
     }
 
-    if (lead.confidence_score >= 75) return "High Confidence";
-    if (lead.confidence_score >= 50) return "Medium Confidence";
+    if ((lead.confidence_score || 0) >= 75) return "High Confidence";
+    if ((lead.confidence_score || 0) >= 50) return "Medium Confidence";
     return "Basic Listing";
   }
 

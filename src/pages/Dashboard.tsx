@@ -115,7 +115,7 @@ export const Dashboard: React.FC = () => {
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading campaigns...</p>
+          <p className="mt-4 text-gray-600 dark:text-gray-400">Loading campaigns...</p>
         </div>
       </div>
     );
@@ -123,14 +123,14 @@ export const Dashboard: React.FC = () => {
 
   if (error) {
     return (
-      <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+      <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
         <div className="flex">
-          <div className="text-red-500 text-xl mr-3">⚠️</div>
+          <div className="text-red-500 dark:text-red-400 text-xl mr-3">⚠️</div>
           <div>
-            <h3 className="text-sm font-medium text-red-800">
+            <h3 className="text-sm font-medium text-red-800 dark:text-red-200">
               Error loading campaigns
             </h3>
-            <p className="text-sm text-red-700 mt-1">{error}</p>
+            <p className="text-sm text-red-700 dark:text-red-300 mt-1">{error}</p>
           </div>
         </div>
       </div>
@@ -141,8 +141,8 @@ export const Dashboard: React.FC = () => {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-        <p className="mt-1 text-sm text-gray-500">
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Dashboard</h1>
+        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
           Overview of your lead generation campaigns and results
         </p>
       </div>
@@ -152,7 +152,7 @@ export const Dashboard: React.FC = () => {
         {stats.map((stat) => (
           <div
             key={stat.name}
-            className="bg-white overflow-hidden shadow rounded-lg"
+            className="bg-white dark:bg-gray-700 overflow-hidden shadow rounded-lg border border-gray-200 dark:border-gray-600"
           >
             <div className="p-5">
               <div className="flex items-center">
@@ -161,10 +161,10 @@ export const Dashboard: React.FC = () => {
                 </div>
                 <div className="ml-5 w-0 flex-1">
                   <dl>
-                    <dt className="text-sm font-medium text-gray-500 truncate">
+                    <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">
                       {stat.name}
                     </dt>
-                    <dd className="text-lg font-medium text-gray-900">
+                    <dd className="text-lg font-medium text-gray-900 dark:text-gray-100">
                       {stat.value}
                     </dd>
                   </dl>
@@ -176,24 +176,24 @@ export const Dashboard: React.FC = () => {
       </div>
 
       {/* Recent Campaigns */}
-      <div className="bg-white shadow rounded-lg">
+      <div className="bg-white dark:bg-gray-700 shadow rounded-lg border border-gray-200 dark:border-gray-600">
         <div className="px-4 py-5 sm:p-6">
-          <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
+          <h3 className="text-lg leading-6 font-medium text-gray-900 dark:text-gray-100 mb-4">
             Recent Campaigns
           </h3>
           {recentCampaigns.length === 0 ? (
             <div className="text-center py-8">
               <span className="text-4xl">🔍</span>
-              <h3 className="mt-2 text-sm font-medium text-gray-900">
+              <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-gray-100">
                 No campaigns yet
               </h3>
-              <p className="mt-1 text-sm text-gray-500">
+              <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
                 Get started by creating your first lead discovery campaign.
               </p>
               <div className="mt-6">
                 <a
                   href="/discovery"
-                  className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                  className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-gray-800 focus:ring-blue-500 dark:focus:ring-blue-400 transition-colors"
                 >
                   Start Discovery
                 </a>
@@ -210,7 +210,7 @@ export const Dashboard: React.FC = () => {
                 return (
                   <div
                     key={campaignId}
-                    className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
+                    className="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 cursor-pointer transition-colors"
                     onClick={() => navigate(`/campaign?id=${campaignId}`)}
                   >
                     <div className="flex-1">
@@ -218,27 +218,27 @@ export const Dashboard: React.FC = () => {
                         <span
                           className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                             campaign.status === "completed"
-                              ? "bg-green-100 text-green-800"
+                              ? "bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200"
                               : campaign.status === "running"
-                              ? "bg-blue-100 text-blue-800"
+                              ? "bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200"
                               : campaign.status === "failed"
-                              ? "bg-red-100 text-red-800"
-                              : "bg-gray-100 text-gray-800"
+                              ? "bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200"
+                              : "bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200"
                           }`}
                         >
                           {campaign.status}
                         </span>
-                        <span className="ml-3 text-sm font-weight-medium text-gray-900">
+                        <span className="ml-3 text-sm font-weight-medium text-gray-900 dark:text-gray-100">
                           {campaign.business_type} in {campaign.location}
                         </span>
                       </div>
-                      <div className="mt-1 text-sm text-gray-500">
+                      <div className="mt-1 text-sm text-gray-500 dark:text-gray-400">
                         {leadsCount} results • {qualifiedCount} qualified • $
                         {campaign.total_cost.toFixed(2)} cost
                       </div>
                     </div>
                     <div className="flex items-center space-x-3">
-                      <div className="text-sm text-gray-500">
+                      <div className="text-sm text-gray-500 dark:text-gray-400">
                         {new Date(campaign.created_at).toLocaleDateString()}
                       </div>
                       <button
@@ -246,7 +246,7 @@ export const Dashboard: React.FC = () => {
                           e.stopPropagation();
                           navigate(`/campaign?id=${campaignId}`);
                         }}
-                        className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                        className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 text-sm font-medium transition-colors"
                       >
                         View Details →
                       </button>

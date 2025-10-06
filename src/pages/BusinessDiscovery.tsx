@@ -466,11 +466,10 @@ export const BusinessDiscovery: React.FC = () => {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-sm">
-      <div className="p-6 space-y-6">
-        {/* Business Category */}
+    <div className="bg-white dark:bg-gray-700 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600">
+      <div className="p-6 space-y-6">{/* Business Category */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
             Business Category
           </label>
           <select
@@ -482,7 +481,7 @@ export const BusinessDiscovery: React.FC = () => {
                 setSelectedBusinessType(types[0]);
               }
             }}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
           >
             {businessCategories.map((category) => (
               <option key={category} value={category}>
@@ -494,13 +493,13 @@ export const BusinessDiscovery: React.FC = () => {
 
         {/* Business Type */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
             Business Type
           </label>
           <select
             value={selectedBusinessType}
             onChange={(e) => setSelectedBusinessType(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
           >
             {availableBusinessTypes.map((type) => (
               <option key={type} value={type}>
@@ -512,7 +511,7 @@ export const BusinessDiscovery: React.FC = () => {
 
         {/* Additional Keywords */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
             Additional Keywords (Optional)
           </label>
           <input
@@ -520,16 +519,16 @@ export const BusinessDiscovery: React.FC = () => {
             value={keywords}
             onChange={(e) => setKeywords(e.target.value)}
             placeholder="e.g., luxury, organic, 24-hour (comma-separated)"
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
           />
-          <p className="text-xs text-gray-500 mt-1">
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
             Add comma-separated keywords to refine your search
           </p>
         </div>
 
         {/* Location */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
             Location
           </label>
           <input
@@ -537,18 +536,18 @@ export const BusinessDiscovery: React.FC = () => {
             value={location}
             onChange={(e) => setLocation(e.target.value)}
             placeholder="e.g., San Francisco, CA or New York, NY"
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 bg-blue-50"
+            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-blue-500 focus:border-blue-500 bg-blue-50 dark:bg-blue-900/20 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
           />
 
           <div className="mt-4 space-y-3">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Search Radius:
               </label>
               <select
                 value={searchRadius}
                 onChange={(e) => setSearchRadius(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
               >
                 <option value="5 miles">5 miles</option>
                 <option value="10 miles">10 miles</option>
@@ -564,11 +563,11 @@ export const BusinessDiscovery: React.FC = () => {
                 id="expandGeography"
                 checked={expandGeography}
                 onChange={(e) => setExpandGeography(e.target.checked)}
-                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700"
               />
               <label
                 htmlFor="expandGeography"
-                className="ml-2 text-sm text-gray-700"
+                className="ml-2 text-sm text-gray-700 dark:text-gray-300"
               >
                 Expand geography automatically if initial results are limited
               </label>
@@ -585,7 +584,7 @@ export const BusinessDiscovery: React.FC = () => {
 
         {/* Number of Leads */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
             Number of Leads
           </label>
           <div className="flex items-center space-x-4">
@@ -595,35 +594,35 @@ export const BusinessDiscovery: React.FC = () => {
               max="10"
               value={numberOfLeads}
               onChange={(e) => setNumberOfLeads(parseInt(e.target.value))}
-              className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
+              className="flex-1 h-2 bg-gray-200 dark:bg-gray-600 rounded-lg appearance-none cursor-pointer slider"
               style={{
                 background: `linear-gradient(to right, #f59e0b 0%, #f59e0b ${
                   numberOfLeads * 10
                 }%, #e5e7eb ${numberOfLeads * 10}%, #e5e7eb 100%)`,
               }}
             />
-            <div className="bg-blue-500 text-white px-3 py-1 rounded-full text-sm font-medium min-w-fit">
+            <div className="bg-blue-500 dark:bg-blue-600 text-white px-3 py-1 rounded-full text-sm font-medium min-w-fit">
               {numberOfLeads} leads
             </div>
           </div>
         </div>
 
         {/* Actual Cost Display */}
-        <div className="bg-gradient-to-r from-blue-50 to-green-50 p-4 rounded-lg border border-blue-200">
+        <div className="bg-gradient-to-r from-blue-50 to-green-50 dark:from-blue-900/20 dark:to-green-900/20 p-4 rounded-lg border border-blue-200 dark:border-blue-800">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-sm font-medium text-gray-900 mb-1">
+              <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">
                 Actual Cost ({currentTierConfig.name} Tier)
               </h3>
-              <div className="text-xs text-gray-600">
+              <div className="text-xs text-gray-600 dark:text-gray-400">
                 {numberOfLeads} leads × ${currentTierConfig.price} per lead
               </div>
             </div>
             <div className="text-right">
-              <div className="text-2xl font-bold text-blue-600">
+              <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
                 ${estimatedCost.toFixed(2)}
               </div>
-              <div className="text-xs text-gray-600">Transparent pricing</div>
+              <div className="text-xs text-gray-600 dark:text-gray-400">Transparent pricing</div>
             </div>
           </div>
         </div>
@@ -642,7 +641,7 @@ export const BusinessDiscovery: React.FC = () => {
             type="button"
             onClick={handleSearch}
             disabled={isDiscovering}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 text-white font-medium py-3 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:ring-offset-2 dark:focus:ring-offset-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             {isDiscovering ? (
               <>
@@ -676,11 +675,11 @@ export const BusinessDiscovery: React.FC = () => {
 
         {/* Error Display */}
         {error && (
-          <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-md">
+          <div className="mt-4 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md">
             <div className="flex">
               <div className="flex-shrink-0">
                 <svg
-                  className="h-5 w-5 text-red-400"
+                  className="h-5 w-5 text-red-400 dark:text-red-500"
                   viewBox="0 0 20 20"
                   fill="currentColor"
                 >
@@ -692,10 +691,10 @@ export const BusinessDiscovery: React.FC = () => {
                 </svg>
               </div>
               <div className="ml-3">
-                <h3 className="text-sm font-medium text-red-800">
+                <h3 className="text-sm font-medium text-red-800 dark:text-red-200">
                   Discovery Failed
                 </h3>
-                <div className="mt-2 text-sm text-red-700">
+                <div className="mt-2 text-sm text-red-700 dark:text-red-300">
                   <p>
                     {error instanceof Error ? error.message : String(error)}
                   </p>

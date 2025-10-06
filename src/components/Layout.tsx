@@ -15,7 +15,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
   const location = useLocation();
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-800">
       {/* Yellow Header */}
       <div className="bg-yellow-400 dark:bg-yellow-500 px-6 py-4">
         <div className="flex items-center justify-between max-w-4xl mx-auto">
@@ -32,7 +32,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
       </div>
 
       {/* Tab Navigation */}
-      <div className="bg-white dark:bg-gray-800 border-b dark:border-gray-700">
+      <div className="bg-white dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600">
         <div className="max-w-4xl mx-auto">
           <div className="flex">
             {navigation.map((item) => {

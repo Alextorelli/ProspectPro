@@ -21,13 +21,13 @@ export const ProgressDisplay: React.FC<ProgressDisplayProps> = ({
   if (!isDiscovering && !cacheStats) return null;
 
   return (
-    <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+    <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
       {isDiscovering && (
         <>
           <div className="flex items-center mb-4">
             <div className="flex-shrink-0">
               <svg
-                className="animate-spin h-5 w-5 text-blue-600"
+                className="animate-spin h-5 w-5 text-blue-600 dark:text-blue-400"
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
                 viewBox="0 0 24 24"
@@ -48,19 +48,19 @@ export const ProgressDisplay: React.FC<ProgressDisplayProps> = ({
               </svg>
             </div>
             <div className="ml-3">
-              <h3 className="text-sm font-medium text-blue-800">
+              <h3 className="text-sm font-medium text-blue-800 dark:text-blue-200">
                 Progressive Enrichment in Progress
               </h3>
-              <p className="text-sm text-blue-600">
+              <p className="text-sm text-blue-600 dark:text-blue-300">
                 {currentStage || `${progress}% complete`}
               </p>
             </div>
           </div>
 
           {/* Progress Bar */}
-          <div className="w-full bg-blue-200 rounded-full h-2">
+          <div className="w-full bg-blue-200 dark:bg-blue-800 rounded-full h-2">
             <div
-              className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+              className="bg-blue-600 dark:bg-blue-400 h-2 rounded-full transition-all duration-300"
               style={{ width: `${progress}%` }}
             ></div>
           </div>
@@ -70,33 +70,33 @@ export const ProgressDisplay: React.FC<ProgressDisplayProps> = ({
       {/* Cache Performance Display */}
       {cacheStats && (
         <div className="mt-4">
-          <h4 className="text-sm font-medium text-blue-800 mb-2">
+          <h4 className="text-sm font-medium text-blue-800 dark:text-blue-200 mb-2">
             🚀 Cache Performance (90-Day Intelligent Caching)
           </h4>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            <div className="bg-white p-2 rounded">
-              <div className="text-lg font-bold text-green-600">
+            <div className="bg-white dark:bg-gray-800 p-2 rounded border border-gray-200 dark:border-gray-600">
+              <div className="text-lg font-bold text-green-600 dark:text-green-400">
                 {cacheStats.cache_hit_ratio.toFixed(1)}%
               </div>
-              <div className="text-xs text-gray-600">Hit Ratio</div>
+              <div className="text-xs text-gray-600 dark:text-gray-400">Hit Ratio</div>
             </div>
-            <div className="bg-white p-2 rounded">
-              <div className="text-lg font-bold text-blue-600">
+            <div className="bg-white dark:bg-gray-800 p-2 rounded border border-gray-200 dark:border-gray-600">
+              <div className="text-lg font-bold text-blue-600 dark:text-blue-400">
                 {cacheStats.cache_hits}
               </div>
-              <div className="text-xs text-gray-600">Cache Hits</div>
+              <div className="text-xs text-gray-600 dark:text-gray-400">Cache Hits</div>
             </div>
-            <div className="bg-white p-2 rounded">
-              <div className="text-lg font-bold text-yellow-600">
+            <div className="bg-white dark:bg-gray-800 p-2 rounded border border-gray-200 dark:border-gray-600">
+              <div className="text-lg font-bold text-yellow-600 dark:text-yellow-400">
                 {cacheStats.cache_misses}
               </div>
-              <div className="text-xs text-gray-600">Cache Misses</div>
+              <div className="text-xs text-gray-600 dark:text-gray-400">Cache Misses</div>
             </div>
-            <div className="bg-white p-2 rounded">
-              <div className="text-lg font-bold text-green-600">
+            <div className="bg-white dark:bg-gray-800 p-2 rounded border border-gray-200 dark:border-gray-600">
+              <div className="text-lg font-bold text-green-600 dark:text-green-400">
                 ${cacheStats.cost_savings.toFixed(2)}
               </div>
-              <div className="text-xs text-gray-600">Saved</div>
+              <div className="text-xs text-gray-600 dark:text-gray-400">Saved</div>
             </div>
           </div>
         </div>
