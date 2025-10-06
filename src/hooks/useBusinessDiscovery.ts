@@ -59,7 +59,7 @@ export const useBusinessDiscovery = (
           tradeAssociation: config.trade_association ?? false,
           professionalLicense: config.professional_license ?? false,
           chamberVerification: config.chamber_verification ?? false,
-          apolloDiscovery: tier === "COMPLIANCE",
+          apolloDiscovery: tier === "ENTERPRISE",
         };
 
         setCurrentStage(

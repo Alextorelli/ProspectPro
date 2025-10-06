@@ -75,45 +75,63 @@ export const EDGE_FUNCTIONS = {
   DIAGNOSTICS: `${EDGE_FUNCTIONS_URL}/diag`,
 } as const;
 
-// Progressive Enrichment Tiers (Actual API costs)
+// Progressive Enrichment Tiers - Consolidated to 3 Tiers
 export const ENRICHMENT_TIERS = {
-  STARTER: {
-    name: "Starter",
-    price: 0.034, // Google Places API cost per search
-    stages: ["business-license", "company-enrichment"],
-    description: "Basic business validation and company data",
+  BASE: {
+    name: "Base",
+    price: 0.15, // Essential Business Data
+    stages: ["business-verification", "company-data"],
+    description:
+      "Essential Business Data - Perfect for targeted outreach campaigns",
+    features: [
+      "Business verification",
+      "Company data (name, industry, size)",
+      "Phone & address validation",
+      "Generic company email",
+    ],
+    badge: "Most Popular",
     hasOwnershipData: false,
   },
   PROFESSIONAL: {
     name: "Professional",
-    price: 0.076, // Google Places + Hunter.io ($0.034 + $0.042 average)
-    stages: ["business-license", "company-enrichment", "email-discovery"],
-    description: "Business validation + verified email discovery",
+    price: 0.45, // Enhanced Sales Intelligence
+    stages: [
+      "business-verification",
+      "company-data",
+      "email-discovery",
+      "email-verification",
+    ],
+    description:
+      "Enhanced Sales Intelligence - Verified contacts for higher conversion rates",
+    features: [
+      "Everything in Base",
+      "Professional email discovery & verification",
+      "Email deliverability verification",
+      "Enhanced company enrichment",
+    ],
+    badge: "",
     hasOwnershipData: false,
   },
   ENTERPRISE: {
     name: "Enterprise",
-    price: 0.118, // Google Places + Hunter.io + NeverBounce ($0.034 + $0.042 + $0.042)
+    price: 2.5, // Premium Executive Access
     stages: [
-      "business-license",
-      "company-enrichment",
+      "business-verification",
+      "company-data",
       "email-discovery",
       "email-verification",
+      "executive-enrichment",
+      "compliance-verification",
     ],
-    description: "Complete enrichment + email verification",
-    hasOwnershipData: false,
-  },
-  COMPLIANCE: {
-    name: "Compliance",
-    price: 1.118, // All above + Apollo.io ($0.118 + $1.00)
-    stages: [
-      "business-license",
-      "company-enrichment",
-      "email-discovery",
-      "email-verification",
-      "person-enrichment",
+    description:
+      "Premium Executive Access - Compliance-grade data with C-suite contacts",
+    features: [
+      "Everything in Professional",
+      "Executive contact enrichment",
+      "Full compliance verification",
+      "Advanced data validation",
     ],
-    description: "Full compliance-grade enrichment with executive contacts",
+    badge: "Premium",
     hasOwnershipData: true,
   },
 } as const;

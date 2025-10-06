@@ -2,14 +2,14 @@
 
 ## Executive Snapshot
 
-ProspectPro v4.3 introduces an asynchronous _business-discovery-background_ pipeline that unifies Google Places, Foursquare, and U.S. Census intelligence with tier-aware cost controls. Professional, Enterprise, and Compliance tiers now drive enrichment rules directly in the background job, guaranteeing that every campaign records validation, enrichment, and sourcing metadata for exports and analytics.
+ProspectPro v4.3 introduces an asynchronous _business-discovery-background_ pipeline that unifies Google Places, Foursquare, and U.S. Census intelligence with tier-aware cost controls. Base, Professional, and Enterprise tiers now drive enrichment rules directly in the background job, guaranteeing that every campaign records validation, enrichment, and sourcing metadata for exports and analytics.
 
 ## Key Enhancements
 
 - **Background Discovery Edge Function**: `business-discovery-background` runs as an EdgeRuntime job, writing progress + metrics to `discovery_jobs` while inserting completed campaigns/leads.
 - **Multi-Source Discovery**: Google Places + Place Details + Foursquare search with dedupe and optional geography expansion based on Census density.
 - **Census Intelligence**: County Business Patterns data sets `expected_results`, `confidence_multiplier`, and search radius recommendations when `CENSUS_API_KEY` is present.
-- **Tier-Aware Budgeting**: Starter/Professional/Enterprise/Compliance tiers map to precise `pricePerLead`, `maxCostPerLead`, and enrichment toggles; UI forwards tier payload, keywords, custom radius, and discovery options.
+- **Tier-Aware Budgeting**: Base/Professional/Enterprise tiers map to precise `pricePerLead`, `maxCostPerLead`, and enrichment toggles; UI forwards tier payload, keywords, custom radius, and discovery options.
 - **Enrichment Upgrades**: Hunter/NeverBounce/Apollo (optional) orchestrated via `enrichment-orchestrator` with full cost breakdown (`validationCost`, `enrichmentCost`, service list, cache metadata).
 - **Structured Metrics**: `discovery_jobs.metrics` now tracks sources used, total cost, validation vs enrichment spend, census density, tier info, and per-lead confidence.
 
@@ -46,14 +46,13 @@ Campaign + Leads persisted with tier metadata
 
 ## Tier Reference Table
 
-| Tier         | Price / Lead | Max Cost / Lead | Includes                         |
-| ------------ | ------------ | --------------- | -------------------------------- |
-| Starter      | $0.034       | $0.50           | Validation only                  |
-| Professional | $0.076       | $1.50           | Hunter + NeverBounce             |
-| Enterprise   | $0.118       | $3.50           | Adds person enrichment           |
-| Compliance   | $1.118       | $7.50           | Adds Apollo executive enrichment |
+| Tier         | Price / Lead | Max Cost / Lead | Includes                                              |
+| ------------ | ------------ | --------------- | ----------------------------------------------------- |
+| Base         | $0.15        | $0.50           | Business verification + generic company email        |
+| Professional | $0.45        | $1.50           | Email discovery & verification + company enrichment  |
+| Enterprise   | $2.50        | $7.50           | Executive contacts + compliance verification          |
 
-All tiers run validation via Google Places + NeverBounce; higher tiers toggle enrichment flags passed to the orchestrator.
+Base tier provides essential business data; higher tiers add progressive email discovery, executive contact enrichment, and compliance verification.
 
 ## Database Touchpoints
 
@@ -85,7 +84,7 @@ curl -X POST "https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/business-dis
         "businessType": "coffee shop",
         "location": "Seattle, WA",
         "maxResults": 2,
-        "tierKey": "PROFESSIONAL",
+        "tierKey": "BASE",
         "sessionUserId": "debug-session-001",
         "keywords": ["latte", "wifi"],
         "expandGeography": true

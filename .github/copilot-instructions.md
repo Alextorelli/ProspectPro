@@ -16,7 +16,7 @@
 **ZERO FAKE DATA PHILOSOPHY**
 
 - ✅ Verified Contacts Only: No pattern-generated emails or fake data
-- ✅ Professional Verification: Apollo, licensing boards, chamber directories
+- ✅ Professional Verification: Executive Contact Discovery, licensing boards, chamber directories
 - ✅ Transparent Sources: Clear attribution for all contact data
 - ✅ Quality Baseline: Verification assumed, not advertised
 - ✅ Real Business Intelligence: Authentic professional contacts only
@@ -29,7 +29,7 @@
 - **Google Place Details API**: Complete phone/website verification (100% coverage)
 - **Hunter.io API**: Professional email discovery with confidence scoring ($0.034/search)
 - **NeverBounce API**: Real-time email deliverability verification (95% accuracy, $0.008/verification)
-- **Apollo API**: Executive and owner contact discovery ($1.00 per verified contact, OPTIONAL)
+- **Executive Contact Discovery**: C-suite contacts for Enterprise tier ($1.00 per verified contact)
 - **Professional Licensing**: State licensing boards (CPA, Healthcare, Legal)
 - **Chamber of Commerce**: Membership verification and directory contacts
 - **Trade Associations**: Industry-specific membership validation
@@ -70,12 +70,12 @@
 
 **PRODUCTION EDGE FUNCTIONS (7 ACTIVE - BACKGROUND + USER-AWARE)**
 
-- ✅ `business-discovery-background` (v1) - Tier-aware asynchronous discovery with Google Places, Foursquare, Census targeting, and enrichment orchestration
+- ✅ `business-discovery-background` (v1) - 3-tier asynchronous discovery with Google Places, Foursquare, Census targeting, and enrichment orchestration
 - ✅ `business-discovery-user-aware` (v2, legacy) - Synchronous user-aware discovery retained for backward compatibility
 - ✅ `campaign-export-user-aware` (v2) - User-authorized export with data isolation and full enrichment metadata
 - ✅ `enrichment-hunter` (v1) - Hunter.io email discovery with 24-hour caching and circuit breakers
 - ✅ `enrichment-neverbounce` (v1) - NeverBounce email verification with quota management
-- ✅ `enrichment-orchestrator` (v1) - Intelligent multi-service coordination with per-tier budget controls
+- ✅ `data-enhancement-orchestrator` (v1) - Intelligent multi-service coordination with per-tier budget controls
 - ✅ `test-google-places` (v1) - API testing function
 - ✅ Real-time database integration with user-aware campaign and lead tracking
 - ✅ Global edge deployment with <100ms cold starts

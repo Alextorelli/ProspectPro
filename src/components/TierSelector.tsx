@@ -8,31 +8,23 @@ interface TierSelectorProps {
 }
 
 const tierDataImprovements = {
-  STARTER: [
+  BASE: [
     "Business verification",
-    "Company data",
-    "Phone & website validation",
+    "Company data (name, industry, size)",
+    "Phone & address validation",
+    "Generic company email",
   ],
   PROFESSIONAL: [
-    "Business verification",
-    "Company data",
-    "Phone & website validation",
-    "Professional email discovery",
+    "Everything in Base",
+    "Professional email discovery & verification",
+    "Email deliverability verification",
+    "Enhanced company enrichment",
   ],
   ENTERPRISE: [
-    "Business verification",
-    "Company data",
-    "Phone & website validation",
-    "Professional email discovery",
-    "Email deliverability verification",
-  ],
-  COMPLIANCE: [
-    "Business verification",
-    "Company data",
-    "Phone & website validation",
-    "Professional email discovery",
-    "Email deliverability verification",
+    "Everything in Professional",
     "Executive contact enrichment",
+    "Full compliance verification",
+    "Advanced data validation",
   ],
 };
 
@@ -50,7 +42,7 @@ export const TierSelector: React.FC<TierSelectorProps> = ({
   return (
     <div>
       <label className="block text-sm font-medium text-gray-700 mb-3">
-        Progressive Enrichment Tiers
+        Data Enhancement Tiers
       </label>
 
       {/* Single column, table-style layout */}
@@ -75,6 +67,19 @@ export const TierSelector: React.FC<TierSelectorProps> = ({
                   <h3 className="text-lg font-semibold text-gray-900">
                     {tier.name}
                   </h3>
+                  {tier.badge && (
+                    <span
+                      className={`px-2 py-1 text-xs font-medium rounded-full ${
+                        tier.badge === "Most Popular"
+                          ? "bg-blue-100 text-blue-800"
+                          : tier.badge === "Premium"
+                          ? "bg-purple-100 text-purple-800"
+                          : "bg-gray-100 text-gray-800"
+                      }`}
+                    >
+                      {tier.badge}
+                    </span>
+                  )}
                   <div className="text-sm text-gray-500">
                     {formatUnitCost(tier.price)} per lead
                   </div>

@@ -425,7 +425,7 @@ export const BusinessDiscovery: React.FC = () => {
 
   // Progressive enrichment tier selection
   const [selectedTier, setSelectedTier] =
-    useState<keyof typeof ENRICHMENT_TIERS>("PROFESSIONAL");
+    useState<keyof typeof ENRICHMENT_TIERS>("BASE");
 
   // Navigate to progress page via handleJobCreated callback
   // No longer need useEffect for navigation since we use the callback
@@ -449,7 +449,7 @@ export const BusinessDiscovery: React.FC = () => {
       budget_limit: estimatedCost,
       max_results: numberOfLeads,
       include_email_validation:
-        selectedTier === "ENTERPRISE" || selectedTier === "COMPLIANCE",
+        selectedTier === "PROFESSIONAL" || selectedTier === "ENTERPRISE",
       include_website_validation: true,
       min_confidence_score: 70,
       chamber_verification: true, // Always enabled based on tier

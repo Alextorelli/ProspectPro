@@ -61,8 +61,8 @@ export const Campaign: React.FC = () => {
 
     // Determine if this campaign has ownership data
     const hasOwnershipData =
-      currentCampaign?.tier_used === "Compliance" ||
-      campaignLeads.some((lead) => lead.enrichment_tier === "Compliance");
+      currentCampaign?.tier_used === "Enterprise" ||
+      campaignLeads.some((lead) => lead.enrichment_tier === "Enterprise");
 
     // Base CSV headers
     const baseHeaders = [
@@ -78,7 +78,7 @@ export const Campaign: React.FC = () => {
       "Enrichment Tier",
     ];
 
-    // Add ownership columns for Compliance tier
+    // Add ownership columns for Enterprise tier
     const headers = hasOwnershipData
       ? [
           ...baseHeaders,

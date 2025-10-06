@@ -1,5 +1,6 @@
 import React, { ReactNode } from "react";
 import { Link, useLocation } from "react-router-dom";
+import { ThemeToggle } from "./ThemeToggle";
 
 interface LayoutProps {
   children: ReactNode;
@@ -14,21 +15,22 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
   const location = useLocation();
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Yellow Header */}
-      <div className="bg-yellow-400 px-6 py-4">
-        <div className="flex items-center justify-center">
+      <div className="bg-yellow-400 dark:bg-yellow-500 px-6 py-4">
+        <div className="flex items-center justify-between max-w-4xl mx-auto">
           <div className="flex items-center space-x-2">
             <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">
               <span className="text-white text-sm">✓</span>
             </div>
-            <h1 className="text-2xl font-bold text-gray-900">PROSPECTPRO</h1>
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">PROSPECTPRO</h1>
           </div>
+          <ThemeToggle />
         </div>
       </div>
 
       {/* Tab Navigation */}
-      <div className="bg-white border-b">
+      <div className="bg-white dark:bg-gray-800 border-b dark:border-gray-700">
         <div className="max-w-4xl mx-auto">
           <div className="flex">
             {navigation.map((item) => {
@@ -37,10 +39,10 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
                 <Link
                   key={item.name}
                   to={item.href}
-                  className={`flex items-center space-x-2 px-6 py-4 border-b-2 text-sm font-medium ${
+                  className={`flex items-center space-x-2 px-6 py-4 border-b-2 text-sm font-medium transition-colors ${
                     isActive
-                      ? "border-blue-500 text-blue-600 bg-blue-50"
-                      : "border-transparent text-gray-500 hover:text-gray-700"
+                      ? "border-blue-500 text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20"
+                      : "border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
                   }`}
                 >
                   <span>{item.icon}</span>

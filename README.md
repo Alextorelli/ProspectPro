@@ -22,13 +22,36 @@
 - **Multi-Source Discovery** - Google Places, Place Details, and Foursquare with dedupe
 - **Census-Guided Targeting** - Automatic radius + density scoring when `CENSUS_API_KEY` is present
 - **Verified Contact Data** - No fake emails or generated patterns
-- **Tier-Aware Cost Controls** with per-tier pricing + enrichment toggles
+- **3-Tier Data Enhancement** with progressive pricing and transparent feature controls
+
+## 🎯 Tier Structure
+
+### Base Tier ($0.15/lead) - "Essential Business Data"
+**Perfect for targeted outreach campaigns**
+- ✅ Business verification
+- ✅ Company data (name, industry, size)
+- ✅ Phone & address validation
+- ✅ Generic company email
+
+### Professional Tier ($0.45/lead) - "Enhanced Sales Intelligence"  
+**Verified contacts for higher conversion rates**
+- ✅ Everything in Base
+- ✅ Professional email discovery & verification
+- ✅ Email deliverability verification
+- ✅ Enhanced company enrichment
+
+### Enterprise Tier ($2.50/lead) - "Premium Executive Access"
+**Compliance-grade data with C-suite contacts**
+- ✅ Everything in Professional
+- ✅ Executive contact enrichment
+- ✅ Full compliance verification
+- ✅ Advanced data validation
 
 ### 📧 Email Verification Pipeline
 
 - **Hunter.io Integration** - Professional email discovery ($0.034/search)
 - **NeverBounce Verification** - Real-time deliverability (95% accuracy)
-- **Apollo Contact Discovery** - Executive and owner contacts (optional)
+- **Executive Contact Discovery** - C-suite contacts for Enterprise tier
 - **Multi-source Verification** - Professional licensing and directories
 
 ### 📤 Export & Management

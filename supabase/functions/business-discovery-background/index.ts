@@ -13,7 +13,7 @@ declare const EdgeRuntime: {
   waitUntil(promise: Promise<unknown>): void;
 };
 
-type TierKey = "STARTER" | "PROFESSIONAL" | "ENTERPRISE" | "COMPLIANCE";
+type TierKey = "BASE" | "PROFESSIONAL" | "ENTERPRISE";
 
 type DataSource = "google_places" | "google_place_details" | "foursquare";
 
@@ -31,14 +31,14 @@ interface TierSettings {
 }
 
 const ENRICHMENT_TIERS: Record<TierKey, TierSettings> = {
-  STARTER: {
-    key: "STARTER",
-    name: "Starter",
-    pricePerLead: 0.034,
+  BASE: {
+    key: "BASE",
+    name: "Base",
+    pricePerLead: 0.15,
     orchestratorTier: "starter",
     maxCostPerLead: 0.5,
     includes: {
-      verifyEmails: true,
+      verifyEmails: false, // Generic company email only
       personEnrichment: false,
       apolloEnrichment: false,
     },
@@ -46,11 +46,11 @@ const ENRICHMENT_TIERS: Record<TierKey, TierSettings> = {
   PROFESSIONAL: {
     key: "PROFESSIONAL",
     name: "Professional",
-    pricePerLead: 0.076,
+    pricePerLead: 0.45,
     orchestratorTier: "professional",
     maxCostPerLead: 1.5,
     includes: {
-      verifyEmails: true,
+      verifyEmails: true, // Professional email discovery & verification
       personEnrichment: false,
       apolloEnrichment: false,
     },
@@ -58,25 +58,13 @@ const ENRICHMENT_TIERS: Record<TierKey, TierSettings> = {
   ENTERPRISE: {
     key: "ENTERPRISE",
     name: "Enterprise",
-    pricePerLead: 0.118,
+    pricePerLead: 2.5,
     orchestratorTier: "enterprise",
-    maxCostPerLead: 3.5,
-    includes: {
-      verifyEmails: true,
-      personEnrichment: true,
-      apolloEnrichment: false,
-    },
-  },
-  COMPLIANCE: {
-    key: "COMPLIANCE",
-    name: "Compliance",
-    pricePerLead: 1.118,
-    orchestratorTier: "compliance",
     maxCostPerLead: 7.5,
     includes: {
       verifyEmails: true,
-      personEnrichment: true,
-      apolloEnrichment: true,
+      personEnrichment: true, // Executive contact enrichment
+      apolloEnrichment: true, // Full compliance verification
     },
   },
 };
@@ -252,7 +240,7 @@ function getTierSettings(
     if (match) return match;
   }
 
-  return ENRICHMENT_TIERS.PROFESSIONAL;
+  return ENRICHMENT_TIERS.BASE; // Changed from PROFESSIONAL to BASE as default
 }
 
 // --------------------
