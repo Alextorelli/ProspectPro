@@ -23,7 +23,9 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
             <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">
               <span className="text-white text-sm">✓</span>
             </div>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">PROSPECTPRO</h1>
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+              PROSPECTPRO
+            </h1>
           </div>
           <ThemeToggle />
         </div>

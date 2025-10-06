@@ -46,11 +46,11 @@ Campaign + Leads persisted with tier metadata
 
 ## Tier Reference Table
 
-| Tier         | Price / Lead | Max Cost / Lead | Includes                                              |
-| ------------ | ------------ | --------------- | ----------------------------------------------------- |
-| Base         | $0.15        | $0.50           | Business verification + generic company email        |
-| Professional | $0.45        | $1.50           | Email discovery & verification + company enrichment  |
-| Enterprise   | $2.50        | $7.50           | Executive contacts + compliance verification          |
+| Tier         | Price / Lead | Max Cost / Lead | Includes                                            |
+| ------------ | ------------ | --------------- | --------------------------------------------------- |
+| Base         | $0.15        | $0.50           | Business verification + generic company email       |
+| Professional | $0.45        | $1.50           | Email discovery & verification + company enrichment |
+| Enterprise   | $2.50        | $7.50           | Executive contacts + compliance verification        |
 
 Base tier provides essential business data; higher tiers add progressive email discovery, executive contact enrichment, and compliance verification.
 

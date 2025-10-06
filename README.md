@@ -27,21 +27,27 @@
 ## 🎯 Tier Structure
 
 ### Base Tier ($0.15/lead) - "Essential Business Data"
+
 **Perfect for targeted outreach campaigns**
+
 - ✅ Business verification
 - ✅ Company data (name, industry, size)
 - ✅ Phone & address validation
 - ✅ Generic company email
 
-### Professional Tier ($0.45/lead) - "Enhanced Sales Intelligence"  
+### Professional Tier ($0.45/lead) - "Enhanced Sales Intelligence"
+
 **Verified contacts for higher conversion rates**
+
 - ✅ Everything in Base
 - ✅ Professional email discovery & verification
 - ✅ Email deliverability verification
 - ✅ Enhanced company enrichment
 
 ### Enterprise Tier ($2.50/lead) - "Premium Executive Access"
+
 **Compliance-grade data with C-suite contacts**
+
 - ✅ Everything in Professional
 - ✅ Executive contact enrichment
 - ✅ Full compliance verification
