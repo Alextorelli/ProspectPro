@@ -1,5 +1,6 @@
 import React, { ReactNode } from "react";
 import { Link, useLocation } from "react-router-dom";
+import { LogoIcon } from "./LogoIcon";
 import { ThemeToggle } from "./ThemeToggle";
 
 interface LayoutProps {
@@ -20,9 +21,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
       <div className="bg-yellow-400 dark:bg-yellow-500 px-6 py-4">
         <div className="flex items-center justify-between max-w-4xl mx-auto">
           <div className="flex items-center space-x-2">
-            <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">
-              <span className="text-white text-sm">✓</span>
-            </div>
+            <LogoIcon size={24} className="flex-shrink-0" />
             <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
               PROSPECTPRO
             </h1>
