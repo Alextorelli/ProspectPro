@@ -2785,3 +2785,5 @@ Server ready.
 {"type":"measure","name":"lsp.diagnostic","count":54,"duration":0.02},
 {"type":"mark","name":"lsp.diagnostic"},
 {"type":"measure","name":"lsp.diagnostic","count":55,"duration":0.018},
+{"type":"mark","name":"lsp.inlay_hint","count":21,"args":{"textDocument":{"uri":"file:///workspaces/ProspectPro/src/components/Layout.tsx"},"range":{"start":{"line":0,"character":0},"end":{"line":62,"character":0}}}},
+{"type":"mark","name":"lsp.hover","count":3,"args":{"textDocument":{"uri":"file:///workspaces/ProspectPro/src/components/Layout.tsx"},"position":{"line":23,"character":32}}},
