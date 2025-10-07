@@ -14,6 +14,15 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+const isAnonymousUser = (user: User | null | undefined) => {
+  if (!user) return false;
+  if (user.app_metadata?.provider === "anonymous") return true;
+  return (
+    user.identities?.some((identity) => identity.provider === "anonymous") ??
+    false
+  );
+};
+
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
@@ -67,14 +76,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
             anonData.session?.user?.id
           );
           setSession(anonData.session);
-          setUser(anonData.session?.user ?? null);
+          setUser(null);
           setSessionUserId(
             anonData.session?.user?.id ?? getOrCreateSessionId()
           );
         } else {
           // Existing session found
           setSession(session);
-          setUser(session.user);
+          setUser(isAnonymousUser(session.user) ? null : session.user);
           setSessionUserId(session.user.id);
         }
 
@@ -95,7 +104,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       console.log("Auth state changed:", event, session?.user?.id);
 
       setSession(session);
-      setUser(session?.user ?? null);
+      setUser(
+        session?.user && !isAnonymousUser(session.user) ? session.user : null
+      );
 
       // Update session user ID
       if (session?.user) {
@@ -108,7 +119,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
           console.log("User signed out, creating new anonymous session...");
           const { data: anonData } = await supabase.auth.signInAnonymously();
           setSession(anonData.session);
-          setUser(anonData.session?.user ?? null);
+          setUser(null);
           setSessionUserId(
             anonData.session?.user?.id ?? getOrCreateSessionId()
           );
