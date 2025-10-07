@@ -65,7 +65,7 @@ export const useBusinessDiscovery = (
     estimatedTime?: number;
   }) => void
 ) => {
-  const { sessionUserId } = useAuth();
+  const { sessionUserId, user } = useAuth();
   const { setLoading, setError, clearLeads, setCurrentCampaign } =
     useCampaignStore();
   const [progress, setProgress] = useState(0);
@@ -121,6 +121,18 @@ export const useBusinessDiscovery = (
 
         const accessToken = await getSessionToken();
 
+        const resolvedSessionId =
+          sessionUserId ||
+          `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+        const billingContext = {
+          tier,
+          tierName: tierConfig.name,
+          unitPrice: tierConfig.price,
+          estimatedBudget: config.max_results * tierConfig.price,
+          currency: "USD",
+        };
+
         // Call background task business discovery with authentication
         const { data, error } = await supabase.functions.invoke(
           "business-discovery-background",
@@ -138,11 +150,9 @@ export const useBusinessDiscovery = (
               tierName: tierConfig.name,
               tierPrice: tierConfig.price,
               options: discoveryOptions,
-              sessionUserId:
-                sessionUserId ||
-                `session_${Date.now()}_${Math.random()
-                  .toString(36)
-                  .substr(2, 9)}`,
+              sessionUserId: resolvedSessionId,
+              userId: user?.id ?? null,
+              billingContext,
             },
             headers: accessToken
               ? { Authorization: `Bearer ${accessToken}` }

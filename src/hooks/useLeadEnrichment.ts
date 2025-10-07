@@ -1,5 +1,6 @@
 import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
+import { useAuth } from "../contexts/AuthContext";
 import { ensureSession, supabase } from "../lib/supabase";
 
 export interface EnrichmentConfig {
@@ -80,6 +81,7 @@ export interface EnrichmentResult {
 }
 
 export const useLeadEnrichment = () => {
+  const { sessionUserId, user } = useAuth();
   const [progress, setProgress] = useState(0);
   const [currentStage, setCurrentStage] = useState<string>("");
   const [enrichedCount, setEnrichedCount] = useState(0);
@@ -100,6 +102,16 @@ export const useLeadEnrichment = () => {
             "Failed to establish authentication session for enrichment."
           );
         }
+
+        const resolvedSessionId =
+          sessionUserId ||
+          `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+        const billingContext = {
+          tier: config.tier ?? "professional",
+          maxCostPerBusiness: config.maxCostPerBusiness ?? 0.5,
+          currency: "USD",
+        };
 
         // Call enrichment orchestrator
         const { data, error } = await supabase.functions.invoke(
@@ -129,6 +141,9 @@ export const useLeadEnrichment = () => {
               maxCostPerBusiness: config.maxCostPerBusiness ?? 0.5,
               minConfidenceScore: config.minConfidenceScore ?? 50,
               tier: config.tier ?? "professional",
+              sessionUserId: resolvedSessionId,
+              userId: user?.id ?? null,
+              billingContext,
             },
           }
         );
