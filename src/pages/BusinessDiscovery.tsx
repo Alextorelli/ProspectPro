@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   GeographicLocation,
@@ -10,6 +10,8 @@ import { TierSelector } from "../components/TierSelector";
 import { BUSINESS_TYPES_BY_CATEGORY } from "../constants/businessTaxonomy";
 import { useBusinessDiscovery } from "../hooks/useBusinessDiscovery";
 import { ENRICHMENT_TIERS } from "../lib/supabase";
+import { useCampaignStore } from "../stores/campaignStore";
+import { exportLeadsToCsv } from "../utils/exportLeadsToCsv";
 
 const DEFAULT_CATEGORY = "Home & Property Services";
 const DEFAULT_LOCATION: GeographicLocation = {
@@ -22,7 +24,30 @@ const DEFAULT_RADIUS = 10;
 const STEPS = [
   { id: 1, title: "Targeting", description: "Audience & geography" },
   { id: 2, title: "Campaign setup", description: "Tier & quantity" },
+  { id: 3, title: "Results", description: "Leads & export" },
 ];
+
+const getConfidenceColor = (score: number) => {
+  if (score >= 90) return "bg-green-100 text-green-800";
+  if (score >= 80) return "bg-blue-100 text-blue-800";
+  if (score >= 70) return "bg-yellow-100 text-yellow-800";
+  return "bg-red-100 text-red-800";
+};
+
+const getValidationStatusColor = (status?: string) => {
+  switch (status) {
+    case "validated":
+      return "bg-green-100 text-green-800";
+    case "validating":
+      return "bg-blue-100 text-blue-800";
+    case "pending":
+      return "bg-yellow-100 text-yellow-800";
+    case "failed":
+      return "bg-red-100 text-red-800";
+    default:
+      return "bg-gray-100 text-gray-800";
+  }
+};
 
 export const BusinessDiscovery: React.FC = () => {
   const navigate = useNavigate();
@@ -62,10 +87,50 @@ export const BusinessDiscovery: React.FC = () => {
   const [numberOfLeads, setNumberOfLeads] = useState(3);
   const [selectedTier, setSelectedTier] =
     useState<keyof typeof ENRICHMENT_TIERS>("BASE");
-  const [activeStep, setActiveStep] = useState<1 | 2>(1);
+  const [activeStep, setActiveStep] = useState<1 | 2 | 3>(1);
 
   const currentTierConfig = ENRICHMENT_TIERS[selectedTier];
   const estimatedCost = numberOfLeads * currentTierConfig.price;
+
+  const { leads, currentCampaign } = useCampaignStore();
+
+  const campaignLeads = useMemo(() => {
+    if (currentCampaign) {
+      return leads.filter(
+        (lead) => lead.campaign_id === currentCampaign.campaign_id
+      );
+    }
+    return leads;
+  }, [leads, currentCampaign]);
+
+  const qualifiedLeadCount = useMemo(
+    () => campaignLeads.filter((lead) => lead.confidence_score >= 70).length,
+    [campaignLeads]
+  );
+
+  const hasResults = campaignLeads.length > 0;
+
+  useEffect(() => {
+    if (hasResults && activeStep === 2 && !isDiscovering) {
+      setActiveStep(3);
+    }
+  }, [hasResults, activeStep, isDiscovering]);
+
+  const handleExportResults = () => {
+    if (!campaignLeads.length) return;
+
+    exportLeadsToCsv(campaignLeads, {
+      fileName: `campaign-${
+        currentCampaign?.campaign_id || Date.now()
+      }-results.csv`,
+    });
+  };
+
+  const handleViewCampaign = () => {
+    if (!currentCampaign) return;
+
+    navigate(`/campaign?id=${currentCampaign.campaign_id}`);
+  };
 
   const keywordsList = keywords
     .split(",")
@@ -179,18 +244,24 @@ export const BusinessDiscovery: React.FC = () => {
           {STEPS.map((step) => {
             const isActive = activeStep === step.id;
             const isCompleted = activeStep > step.id;
-            const canNavigate = step.id === 1 || isTargetingValid;
+            const canNavigate =
+              step.id === 1 ||
+              (step.id === 2 && isTargetingValid) ||
+              step.id === 3;
+            const isDisabled = step.id === 2 && !isTargetingValid;
+            const disableButton = !canNavigate || isDisabled;
+
             return (
               <button
                 key={step.id}
                 type="button"
-                disabled={!canNavigate}
-                onClick={() => setActiveStep(step.id as 1 | 2)}
+                disabled={disableButton}
+                onClick={() => setActiveStep(step.id as 1 | 2 | 3)}
                 className={`flex items-center gap-3 rounded-md px-4 py-2 transition-colors ${
                   isActive
                     ? "bg-blue-600 text-white shadow"
                     : "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200"
-                } ${!canNavigate ? "cursor-not-allowed opacity-60" : ""}`}
+                } ${disableButton ? "cursor-not-allowed opacity-60" : ""}`}
               >
                 <span
                   className={`flex h-8 w-8 items-center justify-center rounded-full border-2 text-sm font-semibold ${
@@ -432,6 +503,212 @@ export const BusinessDiscovery: React.FC = () => {
                 "Run Campaign"
               )}
             </button>
+          </div>
+        </section>
+
+        <section
+          className={`space-y-6 ${activeStep === 3 ? "" : "hidden"}`}
+          aria-hidden={activeStep !== 3}
+        >
+          <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                Campaign Results
+              </h2>
+              <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
+                {hasResults
+                  ? `${campaignLeads.length} leads captured • ${qualifiedLeadCount} qualified`
+                  : isDiscovering
+                  ? "We're still enriching this campaign. Hang tight while ProspectPro verifies contacts."
+                  : "Results will appear here once a campaign finishes. You can keep working in the meantime."}
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-3">
+              {currentCampaign && (
+                <button
+                  type="button"
+                  onClick={handleViewCampaign}
+                  className="inline-flex items-center gap-2 rounded-md border border-gray-300 dark:border-gray-600 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700"
+                >
+                  View full campaign
+                </button>
+              )}
+              {hasResults && (
+                <button
+                  type="button"
+                  onClick={handleExportResults}
+                  className="inline-flex items-center gap-2 rounded-md bg-green-600 hover:bg-green-700 text-white px-4 py-2 text-sm font-medium shadow-sm"
+                >
+                  📊 Export CSV
+                </button>
+              )}
+            </div>
+          </header>
+
+          {currentCampaign && (
+            <div className="bg-gray-50 dark:bg-gray-800/60 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+              <div className="flex flex-wrap items-start justify-between gap-4">
+                <div>
+                  <div className="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                    Campaign ID
+                  </div>
+                  <div className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                    {currentCampaign.campaign_id}
+                  </div>
+                  <div className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                    Status • {currentCampaign.status}
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+                  <div className="text-center">
+                    <div className="text-lg font-bold text-gray-900 dark:text-gray-100">
+                      {currentCampaign.leads_found ?? campaignLeads.length}
+                    </div>
+                    <div className="text-xs text-gray-600 dark:text-gray-400">
+                      Total Leads
+                    </div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-lg font-bold text-blue-600 dark:text-blue-400">
+                      {currentCampaign.leads_qualified ?? qualifiedLeadCount}
+                    </div>
+                    <div className="text-xs text-gray-600 dark:text-gray-400">
+                      Qualified
+                    </div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-lg font-bold text-green-600 dark:text-green-400">
+                      {currentCampaign.leads_validated ?? 0}
+                    </div>
+                    <div className="text-xs text-gray-600 dark:text-gray-400">
+                      Validated
+                    </div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-lg font-bold text-purple-600 dark:text-purple-400">
+                      {currentCampaign.tier_used || selectedTier}
+                    </div>
+                    <div className="text-xs text-gray-600 dark:text-gray-400">
+                      Tier
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden shadow-sm">
+            {!hasResults ? (
+              <div className="flex flex-col items-center justify-center py-16 text-center">
+                <span className="text-4xl mb-2">🔍</span>
+                <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100">
+                  {isDiscovering
+                    ? "ProspectPro is working on your campaign"
+                    : "No leads yet"}
+                </h3>
+                <p className="mt-2 max-w-md text-sm text-gray-600 dark:text-gray-300">
+                  {isDiscovering
+                    ? "Please keep this tab open. We'll move results here automatically once enrichment finishes."
+                    : "Launch or complete a campaign to populate results with verified leads."}
+                </p>
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                  <thead className="bg-gray-50 dark:bg-gray-900/40">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-600 dark:text-gray-300">
+                        Business
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-600 dark:text-gray-300">
+                        Contact
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-600 dark:text-gray-300">
+                        Confidence
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-600 dark:text-gray-300">
+                        Enrichment
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-600 dark:text-gray-300">
+                        Status
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-600 dark:text-gray-300">
+                        Cost
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                    {campaignLeads.map((lead) => (
+                      <tr
+                        key={lead.id}
+                        className="hover:bg-gray-50 dark:hover:bg-gray-900/30"
+                      >
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                            {lead.business_name}
+                          </div>
+                          <div className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                            {lead.address}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-gray-900 dark:text-gray-100 space-y-1">
+                            {lead.phone && <div>📞 {lead.phone}</div>}
+                            {lead.website && (
+                              <div>
+                                🌐{" "}
+                                <a
+                                  href={lead.website}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-blue-600 dark:text-blue-400 hover:underline"
+                                >
+                                  {lead.website.replace(/^https?:\/\//, "")}
+                                </a>
+                              </div>
+                            )}
+                            {lead.email && <div>📧 {lead.email}</div>}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span
+                            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getConfidenceColor(
+                              lead.confidence_score
+                            )}`}
+                          >
+                            {lead.confidence_score}%
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex flex-col space-y-1">
+                            <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-900/40 dark:text-purple-300">
+                              {lead.enrichment_tier || currentTierConfig.name}
+                            </span>
+                            {lead.vault_secured && (
+                              <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300">
+                                🔐 Vault Secured
+                              </span>
+                            )}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span
+                            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getValidationStatusColor(
+                              lead.validation_status
+                            )}`}
+                          >
+                            {lead.validation_status || "pending"}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-200">
+                          ${lead.cost_to_acquire.toFixed(2)}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
         </section>
 

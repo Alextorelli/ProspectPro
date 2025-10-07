@@ -1,38 +1,23 @@
 import React from "react";
 import { useCampaignStore } from "../stores/campaignStore";
+import { exportLeadsToCsv } from "../utils/exportLeadsToCsv";
 
 export const Results: React.FC = () => {
   const { leads, currentCampaign } = useCampaignStore();
 
   const handleExport = (format: "csv" | "json") => {
-    const dataToExport = leads.filter((lead) => lead.confidence_score >= 70);
+    if (!leads.length) {
+      return;
+    }
 
     if (format === "csv") {
-      const csvContent = [
-        "Business Name,Address,Phone,Website,Email,Confidence Score,Enrichment Tier,Vault Secured,Data Sources,Validation Status",
-        ...dataToExport.map(
-          (lead) =>
-            `"${lead.business_name}","${lead.address || ""}","${
-              lead.phone || ""
-            }","${lead.website || ""}","${lead.email || ""}",${
-              lead.confidence_score
-            },"${lead.enrichment_tier || "Standard"}",${
-              lead.vault_secured ? "Yes" : "No"
-            },"${lead.data_sources.join("; ")}",${lead.validation_status}`
-        ),
-      ].join("\n");
-
-      const blob = new Blob([csvContent], { type: "text/csv" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `prospects-vault-secured-${
-        new Date().toISOString().split("T")[0]
-      }.csv`;
-      a.click();
-      URL.revokeObjectURL(url);
+      exportLeadsToCsv(leads, {
+        fileName: `prospects-vault-secured-${
+          new Date().toISOString().split("T")[0]
+        }.csv`,
+      });
     } else {
-      const blob = new Blob([JSON.stringify(dataToExport, null, 2)], {
+      const blob = new Blob([JSON.stringify(leads, null, 2)], {
         type: "application/json",
       });
       const url = URL.createObjectURL(blob);

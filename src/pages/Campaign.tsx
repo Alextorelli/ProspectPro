@@ -5,6 +5,7 @@ import { ProgressDisplay } from "../components/ProgressDisplay";
 import { useBusinessDiscovery } from "../hooks/useBusinessDiscovery";
 import { useCampaignStore } from "../stores/campaignStore";
 import type { BusinessLead } from "../types";
+import { exportLeadsToCsv } from "../utils/exportLeadsToCsv";
 
 export const Campaign: React.FC = () => {
   const navigate = useNavigate();
@@ -21,119 +22,31 @@ export const Campaign: React.FC = () => {
     ? leads.filter((lead) => lead.campaign_id === currentCampaign.campaign_id)
     : [];
 
-  // Load specific campaign from URL parameter
   useEffect(() => {
-    if (campaignId && !currentCampaign) {
-      const campaign = campaigns.find((c) => c.campaign_id === campaignId);
-      if (campaign) {
-        setCurrentCampaign(campaign);
-        setShowResults(true);
+    if (!currentCampaign && campaignId) {
+      const matchedCampaign = campaigns.find(
+        (campaign) => campaign.campaign_id === campaignId
+      );
+      if (matchedCampaign) {
+        setCurrentCampaign(matchedCampaign);
       }
     }
   }, [campaignId, campaigns, currentCampaign, setCurrentCampaign]);
 
-  // Show results when campaign completes
   useEffect(() => {
-    if (
-      currentCampaign &&
-      currentCampaign.status === "completed" &&
-      campaignLeads.length > 0
-    ) {
+    if (campaignLeads.length > 0) {
       setShowResults(true);
     }
-  }, [currentCampaign, campaignLeads]);
-
-  // If no campaign is running or found, redirect to discovery
-  useEffect(() => {
-    if (!isDiscovering && !currentCampaign && !campaignId) {
-      navigate("/discovery");
-    } else if (
-      campaignId &&
-      !campaigns.find((c) => c.campaign_id === campaignId)
-    ) {
-      // Campaign ID provided but not found
-      navigate("/discovery");
-    }
-  }, [isDiscovering, currentCampaign, campaignId, campaigns, navigate]);
+  }, [campaignLeads.length]);
 
   const exportToCsv = () => {
     if (!campaignLeads.length) return;
 
-    // Determine if this campaign has ownership data
-    const hasOwnershipData =
-      currentCampaign?.tier_used === "Enterprise" ||
-      campaignLeads.some((lead) => lead.enrichment_tier === "Enterprise");
-
-    // Base CSV headers
-    const baseHeaders = [
-      "Business Name",
-      "Address",
-      "Phone",
-      "Website",
-      "Email",
-      "Confidence Score",
-      "Validation Status",
-      "Cost to Acquire",
-      "Data Sources",
-      "Enrichment Tier",
-    ];
-
-    // Add ownership columns for Enterprise tier
-    const headers = hasOwnershipData
-      ? [
-          ...baseHeaders,
-          "Owner Name",
-          "Owner Email",
-          "Owner Phone",
-          "Owner Confidence Score",
-        ]
-      : baseHeaders;
-
-    // Convert leads to CSV format with conditional ownership data
-    const csvContent = [
-      headers.join(","),
-      ...campaignLeads.map((lead: BusinessLead) => {
-        const baseRow = [
-          `"${lead.business_name || ""}"`,
-          `"${lead.address || ""}"`,
-          `"${lead.phone || ""}"`,
-          `"${lead.website || ""}"`,
-          `"${lead.email || ""}"`,
-          lead.confidence_score || 0,
-          `"${lead.validation_status || ""}"`,
-          `$${(lead.cost_to_acquire || 0).toFixed(3)}`,
-          `"${(lead.data_sources || []).join("; ")}"`,
-          `"${lead.enrichment_tier || ""}"`,
-        ];
-
-        // Add ownership data if available
-        if (hasOwnershipData) {
-          const ownerData = (lead as any).owner_data || {};
-          baseRow.push(
-            `"${ownerData.name || ""}"`,
-            `"${ownerData.email || ""}"`,
-            `"${ownerData.phone || ""}"`,
-            ownerData.confidence_score || 0
-          );
-        }
-
-        return baseRow.join(",");
-      }),
-    ].join("\n");
-
-    // Download CSV file
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-    const link = document.createElement("a");
-    const url = URL.createObjectURL(blob);
-    link.setAttribute("href", url);
-    link.setAttribute(
-      "download",
-      `campaign-${currentCampaign?.campaign_id || Date.now()}-results.csv`
-    );
-    link.style.visibility = "hidden";
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    exportLeadsToCsv(campaignLeads, {
+      fileName: `campaign-${
+        currentCampaign?.campaign_id || Date.now()
+      }-results.csv`,
+    });
   };
 
   return (

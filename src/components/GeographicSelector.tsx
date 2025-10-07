@@ -1,9 +1,15 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 export interface GeographicLocation {
   lat: number;
   lng: number;
   address: string;
+}
+
+declare global {
+  interface Window {
+    google?: any;
+  }
 }
 
 interface GeographicSelectorProps {
@@ -17,11 +23,23 @@ export const GeographicSelector: React.FC<GeographicSelectorProps> = ({
   initialLocation = { lat: 40.7128, lng: -74.006, address: "New York, NY" },
   initialRadius = 10,
 }) => {
+  const googleMapsApiKey =
+    import.meta.env.VITE_GOOGLE_MAPS_API_KEY ||
+    import.meta.env.VITE_GOOGLE_PLACES_API_KEY;
+
+  type MapStatus = "idle" | "loading" | "ready" | "error";
+
   const [location, setLocation] = useState<GeographicLocation>(initialLocation);
   const [radius, setRadius] = useState<number>(initialRadius);
   const [address, setAddress] = useState<string>(initialLocation.address);
   const [isGeocoding, setIsGeocoding] = useState(false);
-  const [mapType, setMapType] = useState<"simple" | "full">("simple");
+  const [mapStatus, setMapStatus] = useState<MapStatus>(
+    googleMapsApiKey ? "loading" : "idle"
+  );
+  const mapContainerRef = useRef<HTMLDivElement | null>(null);
+  const mapRef = useRef<any>(null);
+  const markerRef = useRef<any>(null);
+  const circleRef = useRef<any>(null);
 
   const handleAddressChange = (value: string) => {
     setAddress(value);
@@ -32,14 +50,44 @@ export const GeographicSelector: React.FC<GeographicSelectorProps> = ({
     });
   };
 
-  // Geocoding function using a free service
+  const geocodeViaGoogle = async (
+    addressInput: string
+  ): Promise<GeographicLocation | null> => {
+    if (!window.google?.maps?.Geocoder) return null;
+
+    return new Promise((resolve) => {
+      const geocoder = new window.google.maps.Geocoder();
+      geocoder.geocode(
+        { address: addressInput },
+        (results: any, status: any) => {
+          if (status === "OK" && results?.[0]) {
+            const geometry = results[0].geometry.location;
+            resolve({
+              lat: geometry.lat(),
+              lng: geometry.lng(),
+              address: results[0].formatted_address,
+            });
+          } else {
+            resolve(null);
+          }
+        }
+      );
+    });
+  };
+
+  // Geocoding function with Google Maps fallback to OpenStreetMap
   const geocodeAddress = async (
     addressInput: string
   ): Promise<GeographicLocation | null> => {
     try {
       setIsGeocoding(true);
 
-      // Using OpenStreetMap Nominatim API (free, no API key required)
+      // Try Google Geocoder first if available
+      const googleResult = await geocodeViaGoogle(addressInput);
+      if (googleResult) {
+        return googleResult;
+      }
+
       const response = await fetch(
         `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
           addressInput
@@ -152,54 +200,98 @@ export const GeographicSelector: React.FC<GeographicSelectorProps> = ({
             {location.address}
           </div>
         </div>
-
-        {/* Upgrade notice */}
-        <div className="absolute top-2 right-2">
-          <button
-            onClick={() => setMapType("full")}
-            className="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200"
-          >
-            📍 Full Map
-          </button>
-        </div>
       </div>
     );
   };
 
-  // Placeholder for full interactive map (would require Google Maps or Mapbox API)
-  const FullMapView: React.FC = () => {
-    return (
-      <div
-        className="relative bg-gray-100 rounded-lg border border-gray-300"
-        style={{ height: "400px" }}
-      >
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="text-center">
-            <div className="text-6xl mb-4">🗺️</div>
-            <h3 className="text-lg font-medium text-gray-800 mb-2">
-              Interactive Map
-            </h3>
-            <p className="text-sm text-gray-600 mb-4 max-w-md">
-              Full interactive map integration requires Google Maps or Mapbox
-              API.
-              <br />
-              Add API keys to enable:
-            </p>
-            <div className="space-y-2 text-xs text-gray-500">
-              <div>• GOOGLE_MAPS_API_KEY</div>
-              <div>• or MAPBOX_API_KEY</div>
-            </div>
-            <button
-              onClick={() => setMapType("simple")}
-              className="mt-4 px-3 py-1 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 text-sm"
-            >
-              Back to Simple View
-            </button>
-          </div>
-        </div>
-      </div>
+  const loadGoogleMapsScript = () => {
+    if (!googleMapsApiKey) return;
+
+    if (window.google?.maps) {
+      setMapStatus("ready");
+      return;
+    }
+
+    const existingScript = document.querySelector<HTMLScriptElement>(
+      'script[data-google-maps="true"]'
     );
+
+    if (existingScript) {
+      existingScript.addEventListener("load", () => setMapStatus("ready"));
+      existingScript.addEventListener("error", () => setMapStatus("error"));
+      return;
+    }
+
+    const script = document.createElement("script");
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${googleMapsApiKey}&libraries=places`;
+    script.async = true;
+    script.defer = true;
+    script.dataset.googleMaps = "true";
+    script.onload = () => setMapStatus("ready");
+    script.onerror = () => setMapStatus("error");
+    document.head.appendChild(script);
   };
+
+  useEffect(() => {
+    if (googleMapsApiKey) {
+      loadGoogleMapsScript();
+    }
+  }, [googleMapsApiKey]);
+
+  const getZoomFromRadius = (radiusInMiles: number) => {
+    if (radiusInMiles <= 1) return 14;
+    if (radiusInMiles <= 5) return 12;
+    if (radiusInMiles <= 10) return 11;
+    if (radiusInMiles <= 25) return 10;
+    if (radiusInMiles <= 50) return 8;
+    return 7;
+  };
+
+  useEffect(() => {
+    if (mapStatus !== "ready" || !mapContainerRef.current) {
+      return;
+    }
+
+    const maps = window.google?.maps;
+    if (!maps) {
+      setMapStatus("error");
+      return;
+    }
+
+    const center = { lat: location.lat, lng: location.lng };
+
+    if (!mapRef.current) {
+      mapRef.current = new maps.Map(mapContainerRef.current, {
+        center,
+        zoom: getZoomFromRadius(radius),
+        disableDefaultUI: true,
+        zoomControl: true,
+      });
+
+      markerRef.current = new maps.Marker({
+        position: center,
+        map: mapRef.current,
+        animation: maps.Animation.DROP,
+      });
+
+      circleRef.current = new maps.Circle({
+        map: mapRef.current,
+        center,
+        radius: radius * 1609.34,
+        strokeColor: "#2563EB",
+        strokeOpacity: 0.8,
+        strokeWeight: 2,
+        fillColor: "#60A5FA",
+        fillOpacity: 0.2,
+      });
+    } else {
+      mapRef.current.setCenter(center);
+      mapRef.current.setZoom(getZoomFromRadius(radius));
+      markerRef.current?.setPosition(center);
+      circleRef.current?.setCenter(center);
+      circleRef.current?.setRadius(radius * 1609.34);
+    }
+  }, [mapStatus, location, radius]);
 
   return (
     <div className="space-y-4">
@@ -270,18 +362,43 @@ export const GeographicSelector: React.FC<GeographicSelectorProps> = ({
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
           Geographic Coverage
         </label>
-        {mapType === "simple" ? <SimpleMapView /> : <FullMapView />}
-      </div>
+        <div className="relative">
+          <div
+            ref={mapContainerRef}
+            className={`h-80 w-full rounded-lg border border-gray-300 dark:border-gray-600 overflow-hidden ${
+              mapStatus === "ready" ? "block" : "hidden"
+            }`}
+          />
 
-      {/* Coverage Summary */}
-      <div className="p-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md">
-        <div className="text-sm text-gray-700 dark:text-gray-300">
-          <strong>Search Area:</strong> {radius}-mile radius around{" "}
-          {location.address}
-        </div>
-        <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-          Approximate coverage: ~{Math.round(Math.PI * radius * radius)} square
-          miles
+          {mapStatus !== "ready" && (
+            <div className="relative">
+              <SimpleMapView />
+
+              {googleMapsApiKey && mapStatus === "loading" && (
+                <div className="absolute inset-0 flex items-center justify-center bg-white/80 dark:bg-gray-900/70">
+                  <div className="flex items-center space-x-3 text-sm text-gray-700 dark:text-gray-200">
+                    <span className="inline-flex h-4 w-4 border-2 border-blue-400 border-t-transparent rounded-full animate-spin"></span>
+                    <span>Loading interactive map…</span>
+                  </div>
+                </div>
+              )}
+
+              {googleMapsApiKey && mapStatus === "error" && (
+                <div className="absolute inset-0 flex items-center justify-center px-4 text-center">
+                  <div className="text-sm font-medium text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg px-3 py-2">
+                    Unable to load Google Maps. Please verify your API key in
+                    the environment configuration.
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {!googleMapsApiKey && (
+            <div className="absolute top-2 right-2 px-3 py-1 bg-gray-900/70 text-white text-xs rounded shadow">
+              Add a Google Maps API key for interactive coverage
+            </div>
+          )}
         </div>
       </div>
     </div>
