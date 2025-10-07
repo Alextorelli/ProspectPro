@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="ProspectPro favicon">
+	<defs>
+		<linearGradient id="pp-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+			<stop offset="0%" stop-color="#24C4F4" />
+			<stop offset="55%" stop-color="#A23CFF" />
+			<stop offset="100%" stop-color="#FF0A2B" />
+		</linearGradient>
+		<linearGradient id="pp-gradient-2" x1="0%" y1="0%" x2="100%" y2="100%">
+			<stop offset="0%" stop-color="#24C4F4" />
+			<stop offset="100%" stop-color="#FF0A2B" />
+		</linearGradient>
+	</defs>
+
+	<!-- Magnifying glass circle -->
+	<circle cx="216" cy="216" r="180" fill="none" stroke="url(#pp-gradient)" stroke-width="30" />
+
+	<!-- Inner trend line -->
+	<polyline points="100,278 194,210 256,290 360,210" fill="none" stroke="url(#pp-gradient)" stroke-width="24" stroke-linecap="round" stroke-linejoin="round" />
+
+	<!-- Arrow extension -->
+	<line x1="360" y1="210" x2="470" y2="122" stroke="url(#pp-gradient-2)" stroke-width="24" stroke-linecap="round" />
+	<polyline points="470,122 440,120 460,90" fill="none" stroke="#FF0A2B" stroke-width="24" stroke-linecap="round" stroke-linejoin="round" />
+
+	<!-- Handle -->
+	<rect x="292" y="332" width="180" height="70" rx="35" transform="rotate(45 292 332)" fill="none" stroke="url(#pp-gradient)" stroke-width="28" />
+</svg>
