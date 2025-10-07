@@ -2,6 +2,7 @@ import { Route, Routes } from "react-router-dom";
 import { Layout } from "./components/Layout";
 import { AuthProvider } from "./contexts/AuthContext";
 import { AdminPanel } from "./pages/AdminPanel";
+import { AuthCallback } from "./pages/AuthCallback";
 import { BusinessDiscovery } from "./pages/BusinessDiscovery";
 import { Campaign } from "./pages/Campaign";
 import { CampaignProgress } from "./pages/CampaignProgress";
@@ -23,6 +24,7 @@ function App() {
           />
           <Route path="/results" element={<Results />} />
           <Route path="/admin" element={<AdminPanel />} />
+          <Route path="/auth/callback" element={<AuthCallback />} />
         </Routes>
       </Layout>
     </AuthProvider>

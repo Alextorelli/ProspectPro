@@ -1209,9 +1209,38 @@ serve(async (req) => {
     const jobId = `job_${Date.now()}_${Math.random()
       .toString(36)
       .slice(2, 11)}`;
-    const campaignId = `campaign_${Date.now()}_${Math.random()
-      .toString(36)
-      .slice(2, 11)}`;
+
+    // Generate structured campaign ID using database function
+    let campaignId: string;
+    try {
+      const { data: generatedName, error: nameError } = await supabase.rpc(
+        "generate_campaign_name",
+        {
+          business_type: businessType,
+          location: location,
+          user_id: authUser?.id || null,
+        }
+      );
+
+      if (nameError) {
+        console.warn(
+          "Campaign name generation failed, using fallback:",
+          nameError
+        );
+        campaignId = `campaign_${Date.now()}_${Math.random()
+          .toString(36)
+          .slice(2, 11)}`;
+      } else {
+        campaignId =
+          generatedName ||
+          `campaign_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`;
+      }
+    } catch (error) {
+      console.warn("Campaign name generation error, using fallback:", error);
+      campaignId = `campaign_${Date.now()}_${Math.random()
+        .toString(36)
+        .slice(2, 11)}`;
+    }
 
     const jobConfig: JobConfig = {
       campaignId,

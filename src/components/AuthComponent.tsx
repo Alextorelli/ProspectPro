@@ -6,6 +6,17 @@ interface AuthComponentProps {
   onAuthChange?: (user: User | null) => void;
 }
 
+// HCaptcha component integration (if available)
+declare global {
+  interface Window {
+    hcaptcha?: {
+      render: (container: string, options: any) => string;
+      execute: (widgetId: string) => Promise<{ response: string }>;
+      reset: (widgetId: string) => void;
+    };
+  }
+}
+
 export const AuthComponent: React.FC<AuthComponentProps> = ({
   onAuthChange,
 }) => {
@@ -14,7 +25,12 @@ export const AuthComponent: React.FC<AuthComponentProps> = ({
   const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [fullName, setFullName] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+  const [showEmailForm, setShowEmailForm] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
 
   useEffect(() => {
     // Get initial session
@@ -54,12 +70,16 @@ export const AuthComponent: React.FC<AuthComponentProps> = ({
         {
           id: user.id,
           email: user.email,
-          full_name: user.user_metadata?.full_name || "",
+          full_name: user.user_metadata?.full_name || fullName || "",
           avatar_url: user.user_metadata?.avatar_url || "",
+          subscription_tier: "free",
+          total_spent: 0,
+          monthly_budget: 100.0,
         },
       ]);
 
-      if (error) {
+      if (error && error.code !== "23505") {
+        // Ignore duplicate key errors
         console.error("Error creating user profile:", error);
       }
     } catch (err) {
@@ -67,24 +87,61 @@ export const AuthComponent: React.FC<AuthComponentProps> = ({
     }
   };
 
+  const validatePassword = (password: string): string | null => {
+    if (password.length < 8) return "Password must be at least 8 characters";
+    if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(password)) {
+      return "Password must contain uppercase, lowercase, and number";
+    }
+    return null;
+  };
+
   const handleEmailAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    setSuccess(null);
     setLoading(true);
 
     try {
       if (isSignUp) {
-        const { error } = await supabase.auth.signUp({
+        // Validate signup data
+        if (password !== confirmPassword) {
+          throw new Error("Passwords do not match");
+        }
+
+        const passwordError = validatePassword(password);
+        if (passwordError) {
+          throw new Error(passwordError);
+        }
+
+        const signUpData: any = {
           email,
           password,
           options: {
             emailRedirectTo: `${window.location.origin}/auth/callback`,
+            data: {
+              full_name: fullName,
+            },
           },
-        });
+        };
+
+        // Add CAPTCHA token if available
+        if (captchaToken) {
+          signUpData.options.captchaToken = captchaToken;
+        }
+
+        const { error } = await supabase.auth.signUp(signUpData);
 
         if (error) throw error;
 
-        setError("Check your email for the confirmation link!");
+        setSuccess(
+          "Account created! Please check your email for the confirmation link. You may need to check your spam folder."
+        );
+        // Reset form
+        setEmail("");
+        setPassword("");
+        setConfirmPassword("");
+        setFullName("");
+        setCaptchaToken(null);
       } else {
         const { error } = await supabase.auth.signInWithPassword({
           email,
@@ -94,7 +151,7 @@ export const AuthComponent: React.FC<AuthComponentProps> = ({
         if (error) throw error;
       }
     } catch (err: any) {
-      setError(err.message);
+      setError(err.message || "An error occurred during authentication");
     } finally {
       setLoading(false);
     }
@@ -102,6 +159,7 @@ export const AuthComponent: React.FC<AuthComponentProps> = ({
 
   const handleGoogleAuth = async () => {
     setError(null);
+    setSuccess(null);
     setLoading(true);
 
     try {
@@ -109,6 +167,10 @@ export const AuthComponent: React.FC<AuthComponentProps> = ({
         provider: "google",
         options: {
           redirectTo: `${window.location.origin}/auth/callback`,
+          queryParams: {
+            access_type: "offline",
+            prompt: "consent",
+          },
         },
       });
 
@@ -121,6 +183,8 @@ export const AuthComponent: React.FC<AuthComponentProps> = ({
 
   const handleSignOut = async () => {
     setLoading(true);
+    setError(null);
+
     const { error } = await supabase.auth.signOut();
     if (error) {
       setError(error.message);
@@ -128,11 +192,23 @@ export const AuthComponent: React.FC<AuthComponentProps> = ({
     setLoading(false);
   };
 
+  const resetForm = () => {
+    setEmail("");
+    setPassword("");
+    setConfirmPassword("");
+    setFullName("");
+    setError(null);
+    setSuccess(null);
+    setCaptchaToken(null);
+  };
+
   if (loading) {
     return (
       <div className="flex items-center space-x-2">
         <div className="w-4 h-4 border-2 border-gray-300 border-t-blue-600 rounded-full animate-spin"></div>
-        <span className="text-sm text-gray-600">Loading...</span>
+        <span className="text-sm text-gray-600 dark:text-gray-400">
+          Loading...
+        </span>
       </div>
     );
   }
@@ -145,12 +221,12 @@ export const AuthComponent: React.FC<AuthComponentProps> = ({
             <img
               src={user.user_metadata.avatar_url}
               alt="Avatar"
-              className="w-8 h-8 rounded-full"
+              className="w-8 h-8 rounded-full border-2 border-gray-200 dark:border-gray-600"
             />
           )}
           <div className="flex flex-col">
             <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
-              {user.user_metadata?.full_name || user.email}
+              {user.user_metadata?.full_name || "User"}
             </span>
             <span className="text-xs text-gray-500 dark:text-gray-400">
               {user.email}
@@ -159,7 +235,7 @@ export const AuthComponent: React.FC<AuthComponentProps> = ({
         </div>
         <button
           onClick={handleSignOut}
-          className="text-sm text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
+          className="text-sm text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 transition-colors"
           disabled={loading}
         >
           Sign Out
@@ -174,7 +250,7 @@ export const AuthComponent: React.FC<AuthComponentProps> = ({
       <button
         onClick={handleGoogleAuth}
         disabled={loading}
-        className="flex items-center space-x-2 px-4 py-2 bg-white border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+        className="flex items-center space-x-2 px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 transition-colors"
       >
         <svg className="w-4 h-4" viewBox="0 0 24 24">
           <path
@@ -194,49 +270,109 @@ export const AuthComponent: React.FC<AuthComponentProps> = ({
             d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
           />
         </svg>
-        <span>Google</span>
+        <span>Sign in with Google</span>
       </button>
 
       {/* Email/Password Toggle */}
       <div className="relative">
         <button
-          onClick={() => setIsSignUp(!isSignUp)}
-          className="text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+          onClick={() => {
+            setShowEmailForm(!showEmailForm);
+            if (!showEmailForm) resetForm();
+          }}
+          className="text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 transition-colors"
         >
-          {isSignUp ? "Have an account? Sign In" : "New user? Sign Up"}
+          {showEmailForm ? "Cancel" : "Use Email"}
         </button>
       </div>
 
-      {/* Email/Password Form - Compact */}
-      <form onSubmit={handleEmailAuth} className="flex items-center space-x-2">
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="w-32 px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
-          required
-        />
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className="w-24 px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
-          required
-        />
-        <button
-          type="submit"
-          disabled={loading}
-          className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
-        >
-          {isSignUp ? "Sign Up" : "Sign In"}
-        </button>
-      </form>
+      {/* Email/Password Form - Expandable */}
+      {showEmailForm && (
+        <div className="absolute top-full right-0 mt-2 p-4 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md shadow-lg z-50 min-w-80">
+          <div className="mb-3">
+            <button
+              onClick={() => {
+                setIsSignUp(!isSignUp);
+                resetForm();
+              }}
+              className="text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 transition-colors"
+            >
+              {isSignUp
+                ? "Already have an account? Sign In"
+                : "New user? Create Account"}
+            </button>
+          </div>
 
-      {error && (
-        <div className="absolute top-full left-0 mt-2 p-2 bg-red-100 border border-red-300 rounded text-sm text-red-700 max-w-xs">
-          {error}
+          <form onSubmit={handleEmailAuth} className="space-y-3">
+            {isSignUp && (
+              <input
+                type="text"
+                placeholder="Full Name"
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                required
+              />
+            )}
+
+            <input
+              type="email"
+              placeholder="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              required
+            />
+
+            <input
+              type="password"
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              required
+            />
+
+            {isSignUp && (
+              <input
+                type="password"
+                placeholder="Confirm Password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                required
+              />
+            )}
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full px-4 py-2 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 transition-colors"
+            >
+              {loading ? (
+                <div className="flex items-center justify-center space-x-2">
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  <span>
+                    {isSignUp ? "Creating Account..." : "Signing In..."}
+                  </span>
+                </div>
+              ) : (
+                <span>{isSignUp ? "Create Account" : "Sign In"}</span>
+              )}
+            </button>
+          </form>
+
+          {error && (
+            <div className="mt-3 p-2 bg-red-100 dark:bg-red-900/50 border border-red-300 dark:border-red-700 rounded text-sm text-red-700 dark:text-red-300">
+              {error}
+            </div>
+          )}
+
+          {success && (
+            <div className="mt-3 p-2 bg-green-100 dark:bg-green-900/50 border border-green-300 dark:border-green-700 rounded text-sm text-green-700 dark:text-green-300">
+              {success}
+            </div>
+          )}
         </div>
       )}
     </div>

@@ -258,7 +258,8 @@ export const PaymentMethods: React.FC<PaymentMethodsProps> = ({ user }) => {
         <div className="text-xs text-gray-500">
           <p>🔒 Your card information is secured by Stripe</p>
           <p>
-            ⚠️ Note: Stripe integration pending - add STRIPE_PUBLISHABLE_KEY
+            ✅ Stripe Live Mode:
+            pk_live_51SCVzyP9TtDDsSx5C5IaC4XuPT2sh6CCLctSFKuqh1DdMZ24a6tCY8RvALvbeEAgttZboEGPAnMRmGxPWitwbVoP00ykBovk4f
           </p>
         </div>
       </form>
