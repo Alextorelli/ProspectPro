@@ -28,24 +28,27 @@ const STEPS = [
 ];
 
 const getConfidenceColor = (score: number) => {
-  if (score >= 90) return "bg-green-100 text-green-800";
-  if (score >= 80) return "bg-blue-100 text-blue-800";
-  if (score >= 70) return "bg-yellow-100 text-yellow-800";
-  return "bg-red-100 text-red-800";
+  if (score >= 90)
+    return "border border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-400 dark:bg-transparent dark:text-emerald-300";
+  if (score >= 80)
+    return "border border-sky-200 bg-sky-50 text-sky-700 dark:border-sky-400 dark:bg-transparent dark:text-sky-300";
+  if (score >= 70)
+    return "border border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-400 dark:bg-transparent dark:text-amber-300";
+  return "border border-rose-200 bg-rose-50 text-rose-700 dark:border-rose-400 dark:bg-transparent dark:text-rose-300";
 };
 
 const getValidationStatusColor = (status?: string) => {
   switch (status) {
     case "validated":
-      return "bg-green-100 text-green-800";
+      return "border border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-400 dark:bg-transparent dark:text-emerald-300";
     case "validating":
-      return "bg-blue-100 text-blue-800";
+      return "border border-sky-200 bg-sky-50 text-sky-700 dark:border-sky-400 dark:bg-transparent dark:text-sky-300";
     case "pending":
-      return "bg-yellow-100 text-yellow-800";
+      return "border border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-400 dark:bg-transparent dark:text-amber-300";
     case "failed":
-      return "bg-red-100 text-red-800";
+      return "border border-rose-200 bg-rose-50 text-rose-700 dark:border-rose-400 dark:bg-transparent dark:text-rose-300";
     default:
-      return "bg-gray-100 text-gray-800";
+      return "border border-gray-200 bg-gray-50 text-gray-700 dark:border-slate-500 dark:bg-transparent dark:text-slate-300";
   }
 };
 
@@ -91,6 +94,7 @@ export const BusinessDiscovery: React.FC = () => {
 
   const currentTierConfig = ENRICHMENT_TIERS[selectedTier];
   const estimatedCost = numberOfLeads * currentTierConfig.price;
+  const sliderPercent = ((numberOfLeads - 1) / 9) * 100;
 
   const { leads, currentCampaign } = useCampaignStore();
 
@@ -238,9 +242,9 @@ export const BusinessDiscovery: React.FC = () => {
   ];
 
   return (
-    <div className="bg-white dark:bg-gray-700 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600">
-      <div className="border-b border-gray-200 dark:border-gray-600 px-6 py-4">
-        <div className="flex items-center gap-6">
+    <div className="rounded-lg border border-gray-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900">
+      <div className="border-b border-gray-200 px-6 py-4 dark:border-slate-700">
+        <div className="flex flex-wrap items-center gap-4">
           {STEPS.map((step) => {
             const isActive = activeStep === step.id;
             const isCompleted = activeStep > step.id;
@@ -257,28 +261,29 @@ export const BusinessDiscovery: React.FC = () => {
                 type="button"
                 disabled={disableButton}
                 onClick={() => setActiveStep(step.id as 1 | 2 | 3)}
-                className={`flex items-center gap-3 rounded-md px-4 py-2 transition-colors ${
+                className={`flex items-center gap-3 rounded-md border px-4 py-2 text-left transition-colors ${
                   isActive
-                    ? "bg-blue-600 text-white shadow"
-                    : "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200"
+                    ? "border-blue-600 bg-blue-50 text-blue-700 dark:border-sky-400 dark:bg-transparent dark:text-sky-300"
+                    : isCompleted
+                    ? "border-blue-200 bg-white text-blue-600 dark:border-slate-600 dark:bg-transparent dark:text-sky-300"
+                    : "border-transparent bg-white text-gray-600 hover:border-blue-200 hover:text-blue-700 dark:border-transparent dark:bg-transparent dark:text-slate-300 dark:hover:border-sky-400"
                 } ${disableButton ? "cursor-not-allowed opacity-60" : ""}`}
               >
                 <span
                   className={`flex h-8 w-8 items-center justify-center rounded-full border-2 text-sm font-semibold ${
                     isActive
-                      ? "border-white bg-white text-blue-600"
+                      ? "border-blue-600 bg-blue-600 text-white dark:border-sky-400 dark:bg-sky-400 dark:text-slate-900"
                       : isCompleted
-                      ? "border-blue-500 bg-blue-500 text-white"
-                      : "border-blue-500 text-blue-500"
+                      ? "border-blue-300 bg-blue-100 text-blue-700 dark:border-sky-400 dark:bg-transparent dark:text-sky-300"
+                      : "border-gray-300 bg-white text-gray-500 dark:border-slate-600 dark:bg-transparent dark:text-slate-400"
                   }`}
+                  aria-hidden="true"
                 >
                   {step.id}
                 </span>
-                <span className="text-left">
-                  <span className="block text-sm font-semibold">
-                    {step.title}
-                  </span>
-                  <span className="block text-xs text-gray-600 dark:text-gray-400">
+                <span className="flex flex-col">
+                  <span className="text-sm font-semibold">{step.title}</span>
+                  <span className="text-xs text-gray-500 dark:text-slate-400">
                     {step.description}
                   </span>
                 </span>
@@ -385,17 +390,17 @@ export const BusinessDiscovery: React.FC = () => {
             </button>
           </header>
 
-          <div className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md p-4">
-            <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-100 mb-3">
+          <div className="rounded-md border border-gray-200 bg-gray-50 p-4 dark:border-slate-700 dark:bg-slate-900/80">
+            <h3 className="mb-3 text-sm font-semibold text-gray-800 dark:text-slate-200">
               Campaign summary
             </h3>
             <dl className="grid gap-3 sm:grid-cols-2">
               {summaryItems.map((item) => (
                 <div key={item.label} className="flex flex-col">
-                  <dt className="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                  <dt className="text-xs uppercase tracking-wide text-gray-500 dark:text-slate-400">
                     {item.label}
                   </dt>
-                  <dd className="text-sm text-gray-800 dark:text-gray-100">
+                  <dd className="text-sm text-gray-800 dark:text-slate-100">
                     {item.value}
                   </dd>
                 </div>
@@ -410,46 +415,83 @@ export const BusinessDiscovery: React.FC = () => {
           />
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-slate-200">
               Number of Leads
             </label>
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center gap-4">
               <input
                 type="range"
                 min="1"
                 max="10"
                 value={numberOfLeads}
                 onChange={(e) => setNumberOfLeads(parseInt(e.target.value, 10))}
-                className="flex-1 h-2 bg-gray-200 dark:bg-gray-600 rounded-lg appearance-none cursor-pointer"
+                className="h-2 flex-1 cursor-pointer appearance-none rounded-full bg-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 style={{
-                  background: `linear-gradient(to right, #2563eb 0%, #2563eb ${
-                    numberOfLeads * 10
-                  }%, #e5e7eb ${numberOfLeads * 10}%, #e5e7eb 100%)`,
+                  background: `linear-gradient(90deg, #2563eb 0%, #2563eb ${sliderPercent}%, #d1d5db ${sliderPercent}%, #d1d5db 100%)`,
+                  accentColor: "#2563eb",
                 }}
               />
-              <div className="bg-blue-500 dark:bg-blue-600 text-white px-3 py-1 rounded-full text-sm font-medium min-w-fit">
+              <div className="min-w-fit rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-sm font-medium text-blue-700 dark:border-sky-400 dark:bg-slate-900 dark:text-sky-300">
                 {numberOfLeads} leads
               </div>
             </div>
           </div>
 
-          <div className="bg-gradient-to-r from-blue-50 to-green-50 dark:from-blue-900/20 dark:to-green-900/20 p-4 rounded-lg border border-blue-200 dark:border-blue-800">
-            <div className="flex items-center justify-between">
+          <div className="rounded-lg border-2 border-yellow-400 bg-white p-4 shadow-sm dark:border-amber-400 dark:bg-slate-900">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">
-                  Estimated cost ({currentTierConfig.name} tier)
-                </h3>
-                <div className="text-xs text-gray-600 dark:text-gray-400">
-                  {numberOfLeads} leads × ${currentTierConfig.price} per lead
+                <p className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-slate-300">
+                  Estimated cost
+                </p>
+                <div className="mt-1 flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                  <span className="text-3xl font-bold text-blue-700 dark:text-sky-300">
+                    ${estimatedCost.toFixed(2)}
+                  </span>
+                  <span className="text-sm text-gray-600 dark:text-slate-400">
+                    {numberOfLeads} leads × $
+                    {currentTierConfig.price.toFixed(2)} (
+                    {currentTierConfig.name})
+                  </span>
                 </div>
               </div>
-              <div className="text-right">
-                <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
-                  ${estimatedCost.toFixed(2)}
-                </div>
-                <div className="text-xs text-gray-600 dark:text-gray-400">
-                  Transparent pricing
-                </div>
+              <div className="flex items-center gap-3">
+                <span className="rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-xs font-medium text-blue-700 dark:border-sky-400 dark:bg-slate-900 dark:text-sky-300">
+                  Tier: {currentTierConfig.name}
+                </span>
+                <button
+                  type="button"
+                  onClick={handleSearch}
+                  disabled={isDiscovering}
+                  className="inline-flex items-center justify-center rounded-md bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-sky-500 dark:hover:bg-sky-600"
+                >
+                  {isDiscovering ? (
+                    <>
+                      <svg
+                        className="-ml-1 mr-2 h-4 w-4 animate-spin text-white"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        ></circle>
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                        ></path>
+                      </svg>
+                      Running…
+                    </>
+                  ) : (
+                    "Run Campaign"
+                  )}
+                </button>
               </div>
             </div>
           </div>
@@ -460,50 +502,6 @@ export const BusinessDiscovery: React.FC = () => {
             currentStage={currentStage}
             cacheStats={cacheStats}
           />
-
-          <div className="flex items-center justify-between pt-2">
-            <button
-              type="button"
-              onClick={handleBackToTargeting}
-              className="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-gray-100"
-            >
-              ← Adjust targeting
-            </button>
-            <button
-              type="button"
-              onClick={handleSearch}
-              disabled={isDiscovering}
-              className="px-5 py-3 bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 text-white font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:ring-offset-2 dark:focus:ring-offset-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              {isDiscovering ? (
-                <>
-                  <svg
-                    className="animate-spin -ml-1 mr-3 h-5 w-5 text-white inline"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                  >
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                    ></circle>
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                    ></path>
-                  </svg>
-                  Running Campaign ({progress}%)
-                </>
-              ) : (
-                "Run Campaign"
-              )}
-            </button>
-          </div>
         </section>
 
         <section
@@ -528,7 +526,7 @@ export const BusinessDiscovery: React.FC = () => {
                 <button
                   type="button"
                   onClick={handleViewCampaign}
-                  className="inline-flex items-center gap-2 rounded-md border border-gray-300 dark:border-gray-600 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700"
+                  className="inline-flex items-center gap-2 rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 dark:border-slate-600 dark:bg-transparent dark:text-slate-200 dark:hover:border-sky-400"
                 >
                   View full campaign
                 </button>
@@ -537,7 +535,7 @@ export const BusinessDiscovery: React.FC = () => {
                 <button
                   type="button"
                   onClick={handleExportResults}
-                  className="inline-flex items-center gap-2 rounded-md bg-green-600 hover:bg-green-700 text-white px-4 py-2 text-sm font-medium shadow-sm"
+                  className="inline-flex items-center gap-2 rounded-md border border-emerald-400 px-4 py-2 text-sm font-semibold text-emerald-700 transition-colors hover:bg-emerald-50 dark:border-emerald-400 dark:text-emerald-300 dark:hover:bg-transparent"
                 >
                   📊 Export CSV
                 </button>
@@ -546,49 +544,49 @@ export const BusinessDiscovery: React.FC = () => {
           </header>
 
           {currentCampaign && (
-            <div className="bg-gray-50 dark:bg-gray-800/60 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+            <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 dark:border-slate-700 dark:bg-slate-900/70">
               <div className="flex flex-wrap items-start justify-between gap-4">
                 <div>
-                  <div className="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                  <div className="text-xs uppercase tracking-wide text-gray-500 dark:text-slate-400">
                     Campaign ID
                   </div>
-                  <div className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                  <div className="text-sm font-semibold text-gray-900 dark:text-slate-100">
                     {currentCampaign.campaign_id}
                   </div>
-                  <div className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                  <div className="mt-2 text-xs text-gray-500 dark:text-slate-400">
                     Status • {currentCampaign.status}
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
                   <div className="text-center">
-                    <div className="text-lg font-bold text-gray-900 dark:text-gray-100">
+                    <div className="text-lg font-bold text-gray-900 dark:text-slate-100">
                       {currentCampaign.leads_found ?? campaignLeads.length}
                     </div>
-                    <div className="text-xs text-gray-600 dark:text-gray-400">
+                    <div className="text-xs text-gray-600 dark:text-slate-400">
                       Total Leads
                     </div>
                   </div>
                   <div className="text-center">
-                    <div className="text-lg font-bold text-blue-600 dark:text-blue-400">
+                    <div className="text-lg font-bold text-blue-600 dark:text-sky-300">
                       {currentCampaign.leads_qualified ?? qualifiedLeadCount}
                     </div>
-                    <div className="text-xs text-gray-600 dark:text-gray-400">
+                    <div className="text-xs text-gray-600 dark:text-slate-400">
                       Qualified
                     </div>
                   </div>
                   <div className="text-center">
-                    <div className="text-lg font-bold text-green-600 dark:text-green-400">
+                    <div className="text-lg font-bold text-green-600 dark:text-emerald-300">
                       {currentCampaign.leads_validated ?? 0}
                     </div>
-                    <div className="text-xs text-gray-600 dark:text-gray-400">
+                    <div className="text-xs text-gray-600 dark:text-slate-400">
                       Validated
                     </div>
                   </div>
                   <div className="text-center">
-                    <div className="text-lg font-bold text-purple-600 dark:text-purple-400">
+                    <div className="text-lg font-bold text-purple-600 dark:text-violet-300">
                       {currentCampaign.tier_used || selectedTier}
                     </div>
-                    <div className="text-xs text-gray-600 dark:text-gray-400">
+                    <div className="text-xs text-gray-600 dark:text-slate-400">
                       Tier
                     </div>
                   </div>

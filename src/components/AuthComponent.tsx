@@ -1,5 +1,6 @@
 import { User } from "@supabase/supabase-js";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import { useAuth } from "../contexts/AuthContext";
 import { supabase } from "../lib/supabase";
 
 interface AuthComponentProps {
@@ -20,8 +21,12 @@ declare global {
 export const AuthComponent: React.FC<AuthComponentProps> = ({
   onAuthChange,
 }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+  const {
+    user: authUser,
+    loading: authLoading,
+    signOut: contextSignOut,
+  } = useAuth();
+  const [localLoading, setLocalLoading] = useState(false);
   const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -32,37 +37,25 @@ export const AuthComponent: React.FC<AuthComponentProps> = ({
   const [showEmailForm, setShowEmailForm] = useState(false);
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
 
+  const combinedLoading = authLoading || localLoading;
+
   useEffect(() => {
-    // Get initial session
-    const getSession = async () => {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-      setUser(session?.user ?? null);
-      setLoading(false);
-    };
+    if (onAuthChange) {
+      onAuthChange(authUser ?? null);
+    }
+  }, [authUser, onAuthChange]);
 
-    getSession();
+  const hasEnsuredProfileRef = useRef(false);
 
-    // Listen for auth changes
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event, session) => {
-      setUser(session?.user ?? null);
-      setLoading(false);
-
-      if (onAuthChange) {
-        onAuthChange(session?.user ?? null);
-      }
-
-      // Create user profile if new user
-      if (event === "SIGNED_IN" && session?.user) {
-        await createUserProfile(session.user);
-      }
-    });
-
-    return () => subscription.unsubscribe();
-  }, [onAuthChange]);
+  useEffect(() => {
+    if (authUser && !hasEnsuredProfileRef.current) {
+      hasEnsuredProfileRef.current = true;
+      void createUserProfile(authUser);
+    }
+    if (!authUser) {
+      hasEnsuredProfileRef.current = false;
+    }
+  }, [authUser]);
 
   const createUserProfile = async (user: User) => {
     try {
@@ -99,7 +92,7 @@ export const AuthComponent: React.FC<AuthComponentProps> = ({
     e.preventDefault();
     setError(null);
     setSuccess(null);
-    setLoading(true);
+    setLocalLoading(true);
 
     try {
       if (isSignUp) {
@@ -153,14 +146,14 @@ export const AuthComponent: React.FC<AuthComponentProps> = ({
     } catch (err: any) {
       setError(err.message || "An error occurred during authentication");
     } finally {
-      setLoading(false);
+      setLocalLoading(false);
     }
   };
 
   const handleGoogleAuth = async () => {
     setError(null);
     setSuccess(null);
-    setLoading(true);
+    setLocalLoading(true);
 
     try {
       const { error } = await supabase.auth.signInWithOAuth({
@@ -177,20 +170,23 @@ export const AuthComponent: React.FC<AuthComponentProps> = ({
       if (error) throw error;
     } catch (err: any) {
       setError(err.message);
-      setLoading(false);
+    } finally {
+      setLocalLoading(false);
     }
   };
 
-  const handleSignOut = async () => {
-    setLoading(true);
+  const handleSignOut = useCallback(async () => {
+    setLocalLoading(true);
     setError(null);
-
-    const { error } = await supabase.auth.signOut();
-    if (error) {
-      setError(error.message);
+    try {
+      await contextSignOut();
+      resetForm();
+    } catch (err: any) {
+      setError(err.message ?? "Unable to sign out");
+    } finally {
+      setLocalLoading(false);
     }
-    setLoading(false);
-  };
+  }, [contextSignOut]);
 
   const resetForm = () => {
     setEmail("");
@@ -200,43 +196,40 @@ export const AuthComponent: React.FC<AuthComponentProps> = ({
     setError(null);
     setSuccess(null);
     setCaptchaToken(null);
+    setShowEmailForm(false);
   };
 
-  if (loading) {
+  if (combinedLoading) {
     return (
       <div className="flex items-center space-x-2">
-        <div className="w-4 h-4 border-2 border-gray-300 border-t-blue-600 rounded-full animate-spin"></div>
-        <span className="text-sm text-gray-600 dark:text-gray-400">
-          Loading...
-        </span>
+        <div className="h-4 w-4 animate-spin rounded-full border-2 border-gray-500 border-t-blue-600"></div>
+        <span className="text-sm font-medium text-gray-800">Loading…</span>
       </div>
     );
   }
 
-  if (user) {
+  if (authUser) {
     return (
-      <div className="flex items-center space-x-4">
+      <div className="flex items-center space-x-4 text-sm">
         <div className="flex items-center space-x-3">
-          {user.user_metadata?.avatar_url && (
+          {authUser.user_metadata?.avatar_url && (
             <img
-              src={user.user_metadata.avatar_url}
+              src={authUser.user_metadata.avatar_url}
               alt="Avatar"
-              className="w-8 h-8 rounded-full border-2 border-gray-200 dark:border-gray-600"
+              className="h-10 w-10 rounded-full border-2 border-white object-cover shadow-sm"
             />
           )}
           <div className="flex flex-col">
-            <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
-              {user.user_metadata?.full_name || "User"}
+            <span className="font-semibold text-gray-900">
+              {authUser.user_metadata?.full_name || "User"}
             </span>
-            <span className="text-xs text-gray-500 dark:text-gray-400">
-              {user.email}
-            </span>
+            <span className="text-xs text-gray-700">{authUser.email}</span>
           </div>
         </div>
         <button
           onClick={handleSignOut}
-          className="text-sm text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 transition-colors"
-          disabled={loading}
+          className="rounded-md border border-transparent px-3 py-1 text-sm font-medium text-blue-700 transition-colors hover:border-blue-600 hover:bg-blue-50"
+          disabled={combinedLoading}
         >
           Sign Out
         </button>
@@ -249,8 +242,8 @@ export const AuthComponent: React.FC<AuthComponentProps> = ({
       {/* Quick Google Sign In */}
       <button
         onClick={handleGoogleAuth}
-        disabled={loading}
-        className="flex items-center space-x-2 px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 transition-colors"
+        disabled={combinedLoading}
+        className="flex items-center space-x-2 rounded-md border border-gray-400 bg-white px-4 py-2 text-sm font-medium text-gray-800 shadow-sm transition-colors hover:bg-gray-50 disabled:opacity-50"
       >
         <svg className="w-4 h-4" viewBox="0 0 24 24">
           <path
@@ -280,7 +273,7 @@ export const AuthComponent: React.FC<AuthComponentProps> = ({
             setShowEmailForm(!showEmailForm);
             if (!showEmailForm) resetForm();
           }}
-          className="text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 transition-colors"
+          className="text-sm font-medium text-blue-700 transition-colors hover:text-blue-800"
         >
           {showEmailForm ? "Cancel" : "Use Email"}
         </button>
@@ -288,14 +281,14 @@ export const AuthComponent: React.FC<AuthComponentProps> = ({
 
       {/* Email/Password Form - Expandable */}
       {showEmailForm && (
-        <div className="absolute top-full right-0 mt-2 p-4 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md shadow-lg z-50 min-w-80">
+        <div className="absolute right-0 top-full z-50 mt-2 min-w-80 rounded-md border border-gray-300 bg-white p-4 shadow-lg">
           <div className="mb-3">
             <button
               onClick={() => {
                 setIsSignUp(!isSignUp);
                 resetForm();
               }}
-              className="text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 transition-colors"
+              className="text-sm font-medium text-blue-700 transition-colors hover:text-blue-800"
             >
               {isSignUp
                 ? "Already have an account? Sign In"
@@ -310,7 +303,7 @@ export const AuthComponent: React.FC<AuthComponentProps> = ({
                 placeholder="Full Name"
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
-                className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full rounded border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 required
               />
             )}
@@ -320,7 +313,7 @@ export const AuthComponent: React.FC<AuthComponentProps> = ({
               placeholder="Email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full rounded border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
             />
 
@@ -329,7 +322,7 @@ export const AuthComponent: React.FC<AuthComponentProps> = ({
               placeholder="Password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full rounded border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
             />
 
@@ -339,19 +332,19 @@ export const AuthComponent: React.FC<AuthComponentProps> = ({
                 placeholder="Confirm Password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full rounded border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 required
               />
             )}
 
             <button
               type="submit"
-              disabled={loading}
-              className="w-full px-4 py-2 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 transition-colors"
+              disabled={combinedLoading}
+              className="w-full rounded bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:opacity-50"
             >
-              {loading ? (
+              {combinedLoading ? (
                 <div className="flex items-center justify-center space-x-2">
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
                   <span>
                     {isSignUp ? "Creating Account..." : "Signing In..."}
                   </span>
@@ -363,13 +356,13 @@ export const AuthComponent: React.FC<AuthComponentProps> = ({
           </form>
 
           {error && (
-            <div className="mt-3 p-2 bg-red-100 dark:bg-red-900/50 border border-red-300 dark:border-red-700 rounded text-sm text-red-700 dark:text-red-300">
+            <div className="mt-3 rounded border border-red-300 bg-red-50 p-2 text-sm text-red-600">
               {error}
             </div>
           )}
 
           {success && (
-            <div className="mt-3 p-2 bg-green-100 dark:bg-green-900/50 border border-green-300 dark:border-green-700 rounded text-sm text-green-700 dark:text-green-300">
+            <div className="mt-3 rounded border border-green-300 bg-green-50 p-2 text-sm text-green-700">
               {success}
             </div>
           )}

@@ -10,53 +10,60 @@ interface LayoutProps {
 const navigation = [
   { name: "Discovery", href: "/", icon: "🔍" },
   { name: "Dashboard", href: "/dashboard", icon: "📊" },
+  { name: "Account", href: "/account", icon: "👤" },
 ];
 
 export const Layout: React.FC<LayoutProps> = ({ children }) => {
   const location = useLocation();
 
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-gray-800">
-      {/* ProspectPro Header */}
-      <div className="px-6 py-4" style={{ backgroundColor: "#f9ed69" }}>
-        <div className="flex items-center justify-between max-w-4xl mx-auto">
-          <div className="flex items-center">
-            <img src="/header logo.png" alt="ProspectPro" className="h-8" />
-          </div>
-          <div className="flex items-center space-x-4">
+    <div className="min-h-screen bg-gray-100 text-gray-900 transition-colors dark:bg-slate-900 dark:text-slate-100">
+      <header className="border-b border-yellow-400 bg-[#f9ed69] text-gray-900 dark:border-yellow-500 dark:bg-[#f9ed69] dark:text-gray-900">
+        <div className="mx-auto flex h-16 max-w-5xl items-center justify-between px-6">
+          <Link
+            to="/"
+            className="flex h-full items-center"
+            aria-label="ProspectPro home"
+          >
+            <img
+              src="/header logo.png"
+              alt="ProspectPro"
+              className="h-full w-auto object-contain"
+            />
+          </Link>
+          <div className="flex items-center space-x-3">
             <AuthComponent />
+            <div className="h-10 w-px bg-gray-300" aria-hidden="true" />
             <ThemeToggle />
           </div>
         </div>
-      </div>
+      </header>
 
-      {/* Tab Navigation */}
-      <div className="bg-white dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600">
-        <div className="max-w-4xl mx-auto">
-          <div className="flex">
-            {navigation.map((item) => {
-              const isActive = location.pathname === item.href;
-              return (
-                <Link
-                  key={item.name}
-                  to={item.href}
-                  className={`flex items-center space-x-2 px-6 py-4 border-b-2 text-sm font-medium transition-colors ${
-                    isActive
-                      ? "border-blue-500 text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20"
-                      : "border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
-                  }`}
-                >
-                  <span>{item.icon}</span>
-                  <span>{item.name}</span>
-                </Link>
-              );
-            })}
-          </div>
+      <nav className="border-b border-gray-200 bg-white text-sm font-medium transition-colors dark:border-slate-700 dark:bg-slate-900">
+        <div className="mx-auto flex max-w-5xl items-center px-6">
+          {navigation.map((item) => {
+            const isActive = location.pathname === item.href;
+            return (
+              <Link
+                key={item.name}
+                to={item.href}
+                className={`flex items-center space-x-2 border-b-2 px-4 py-3 transition-colors ${
+                  isActive
+                    ? "border-blue-600 text-blue-700 dark:border-sky-400 dark:text-sky-300"
+                    : "border-transparent text-gray-600 hover:text-gray-900 dark:text-slate-400 dark:hover:text-slate-50"
+                }`}
+              >
+                <span aria-hidden="true">{item.icon}</span>
+                <span>{item.name}</span>
+              </Link>
+            );
+          })}
         </div>
-      </div>
+      </nav>
 
-      {/* Main Content */}
-      <main className="max-w-4xl mx-auto p-6">{children}</main>
+      <main className="mx-auto max-w-5xl px-6 pb-12 pt-8 sm:pb-16 sm:pt-10">
+        {children}
+      </main>
     </div>
   );
 };
