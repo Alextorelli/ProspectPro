@@ -1,10 +1,11 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { ProgressDisplay } from "../components/ProgressDisplay";
+import { useAuth } from "../contexts/AuthContext";
 import { useJobProgress } from "../hooks/useJobProgress";
 import { supabase } from "../lib/supabase";
 import { useCampaignStore } from "../stores/campaignStore";
-import type { BusinessLead, CampaignResult } from "../types";
+import { transformCampaignData } from "../utils/campaignTransforms";
 
 export const CampaignProgress: React.FC = () => {
   const { campaignId } = useParams<{ campaignId: string }>();
@@ -25,6 +26,8 @@ export const CampaignProgress: React.FC = () => {
   const addLeads = useCampaignStore((state) => state.addLeads);
   const setLoading = useCampaignStore((state) => state.setLoading);
   const setError = useCampaignStore((state) => state.setError);
+  const { user, sessionUserId } = useAuth();
+  const authUserId = user?.id ?? null;
 
   const [isFetchingResults, setIsFetchingResults] = useState(false);
   const [resultFetchError, setResultFetchError] = useState<string | null>(null);
@@ -58,57 +61,17 @@ export const CampaignProgress: React.FC = () => {
       return;
     }
 
+    if (!authUserId && !sessionUserId) {
+      setResultFetchError(
+        "Missing session context. Refresh the page and try again."
+      );
+      return;
+    }
+
+    hasFetchedResultsRef.current = true;
     setIsFetchingResults(true);
     setResultFetchError(null);
     setLoading(true);
-
-    const metricsAny = metrics as Record<string, any> | undefined;
-
-    const normalizeStatus = (
-      value: string | null | undefined
-    ): CampaignResult["status"] => {
-      switch (value) {
-        case "running":
-        case "completed":
-        case "failed":
-        case "cancelled":
-          return value;
-        default:
-          return "completed";
-      }
-    };
-
-    const normalizeValidationStatus = (
-      value: string | null | undefined
-    ): BusinessLead["validation_status"] => {
-      switch (value) {
-        case "pending":
-        case "validating":
-        case "validated":
-        case "failed":
-          return value;
-        default:
-          return "validated";
-      }
-    };
-
-    const deriveDataSources = (enrichmentData: any): string[] => {
-      if (!enrichmentData) {
-        return [];
-      }
-
-      const fromServices = Array.isArray(
-        enrichmentData?.processingMetadata?.servicesUsed
-      )
-        ? enrichmentData.processingMetadata.servicesUsed
-        : [];
-
-      const fromSources = Array.isArray(enrichmentData?.verificationSources)
-        ? enrichmentData.verificationSources
-        : [];
-
-      return [...fromServices, ...fromSources].filter(Boolean);
-    };
 
     const wait = (ms: number) =>
       new Promise<void>((resolve) => {
@@ -121,25 +84,49 @@ export const CampaignProgress: React.FC = () => {
       let leadsRecords: any[] = [];
 
       for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt += 1) {
-        const { data: campaignData, error: campaignError } = await supabase
+        let campaignQuery = supabase
           .from("campaigns")
           .select(
             "id,business_type,location,status,total_cost,results_count,created_at,updated_at"
           )
-          .eq("id", campaignId)
-          .maybeSingle();
+          .eq("id", campaignId);
+
+        if (authUserId && sessionUserId) {
+          campaignQuery = campaignQuery.or(
+            `user_id.eq.${authUserId},session_user_id.eq.${sessionUserId}`
+          );
+        } else if (authUserId) {
+          campaignQuery = campaignQuery.eq("user_id", authUserId);
+        } else if (sessionUserId) {
+          campaignQuery = campaignQuery.eq("session_user_id", sessionUserId);
+        }
+
+        const { data: campaignData, error: campaignError } =
+          await campaignQuery.maybeSingle();
 
         if (campaignError) {
           throw campaignError;
         }
 
-        const { data: leadsData, error: leadsError } = await supabase
+        let leadsQuery = supabase
           .from("leads")
           .select(
             "id,campaign_id,business_name,address,phone,website,email,confidence_score,validation_cost,enrichment_data,created_at"
           )
           .eq("campaign_id", campaignId)
           .order("confidence_score", { ascending: false });
+
+        if (authUserId && sessionUserId) {
+          leadsQuery = leadsQuery.or(
+            `user_id.eq.${authUserId},session_user_id.eq.${sessionUserId}`
+          );
+        } else if (authUserId) {
+          leadsQuery = leadsQuery.eq("user_id", authUserId);
+        } else if (sessionUserId) {
+          leadsQuery = leadsQuery.eq("session_user_id", sessionUserId);
+        }
+
+        const { data: leadsData, error: leadsError } = await leadsQuery;
 
         if (leadsError) {
           throw leadsError;
@@ -164,79 +151,11 @@ export const CampaignProgress: React.FC = () => {
         );
       }
 
-      const totalFound =
-        typeof campaignRecord.results_count === "number"
-          ? campaignRecord.results_count
-          : Number(campaignRecord.results_count ?? leadsRecords.length);
-
-      const mappedLeads: BusinessLead[] = leadsRecords.map((lead) => {
-        const enrichmentData = lead.enrichment_data ?? undefined;
-        const rawCost =
-          lead.validation_cost ??
-          enrichmentData?.processingMetadata?.totalCost ??
-          0;
-        const costToAcquire = Number(rawCost) || 0;
-        const tierFromData =
-          enrichmentData?.processingMetadata?.enrichmentTier ||
-          enrichmentData?.enrichmentTier;
-
-        return {
-          id: String(lead.id),
-          campaign_id: lead.campaign_id ?? campaignRecord.id,
-          business_name: lead.business_name ?? "Unknown Business",
-          address: lead.address ?? "",
-          phone: lead.phone ?? "",
-          website: lead.website ?? "",
-          email: lead.email ?? "",
-          confidence_score: Number(lead.confidence_score ?? 0),
-          validation_status: normalizeValidationStatus(
-            enrichmentData?.validationStatus
-          ),
-          created_at: lead.created_at ?? new Date().toISOString(),
-          cost_to_acquire: costToAcquire,
-          data_sources: (() => {
-            const sources = deriveDataSources(enrichmentData);
-            return sources.length > 0 ? sources : ["google_places"];
-          })(),
-          enrichment_tier:
-            tierFromData ??
-            (metricsAny?.tier as string | undefined) ??
-            (metricsAny?.tier_name as string | undefined) ??
-            undefined,
-          vault_secured: true,
-          enrichment_data: enrichmentData,
-        };
-      });
-
-      const leadsQualified = mappedLeads.filter(
-        (lead) => lead.confidence_score >= 70
-      ).length;
-      const leadsValidated = mappedLeads.filter(
-        (lead) => lead.validation_status === "validated"
-      ).length;
-
-      const tierFromMetrics =
-        (metricsAny?.tier as string | undefined) ||
-        (metricsAny?.tier_name as string | undefined);
-
-      const campaignResult: CampaignResult = {
-        campaign_id: campaignRecord.id,
-        business_type: campaignRecord.business_type ?? undefined,
-        location: campaignRecord.location ?? undefined,
-        status: normalizeStatus(campaignRecord.status),
-        progress: 100,
-        total_cost: Number(
-          campaignRecord.total_cost ?? metrics?.total_cost ?? 0
-        ),
-        leads_found: Number.isNaN(totalFound) ? mappedLeads.length : totalFound,
-        leads_qualified: leadsQualified,
-        leads_validated: leadsValidated,
-        created_at: campaignRecord.created_at ?? new Date().toISOString(),
-        completed_at: campaignRecord.updated_at ?? undefined,
-        tier_used: tierFromMetrics ?? undefined,
-        vault_secured: true,
-        cache_performance: undefined,
-      };
+      const { campaignResult, leads: mappedLeads } = transformCampaignData(
+        campaignRecord,
+        leadsRecords,
+        { metrics: (metrics ?? null) as Record<string, any> | null }
+      );
 
       const campaignExists = campaigns.some(
         (item) => item.campaign_id === campaignResult.campaign_id
@@ -278,11 +197,13 @@ export const CampaignProgress: React.FC = () => {
   }, [
     addCampaign,
     addLeads,
+    authUserId,
     campaignId,
     campaigns,
     clearLeads,
     metrics,
     navigate,
+    sessionUserId,
     setCurrentCampaign,
     setError,
     setLoading,
@@ -294,20 +215,29 @@ export const CampaignProgress: React.FC = () => {
       return;
     }
 
+    if (!authUserId && !sessionUserId) {
+      return;
+    }
+
     if (hasFetchedResultsRef.current) {
       return;
     }
 
-    hasFetchedResultsRef.current = true;
     fetchResults();
-  }, [campaignId, fetchResults, isComplete, jobId]);
+  }, [authUserId, campaignId, fetchResults, isComplete, jobId, sessionUserId]);
 
   const handleRetryFetch = () => {
     if (!campaignId) {
       return;
     }
 
-    hasFetchedResultsRef.current = true;
+    if (!authUserId && !sessionUserId) {
+      setResultFetchError(
+        "Missing session context. Refresh the page to re-establish your session."
+      );
+      return;
+    }
+
     fetchResults();
   };
 
