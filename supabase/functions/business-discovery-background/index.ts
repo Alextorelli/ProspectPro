@@ -1,11 +1,11 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { corsHeaders, handleCORS } from "../_shared/edge-auth.ts";
 import {
   createUsageLogger,
   UsageLogContext,
   UsageLogger,
 } from "../_shared/api-usage.ts";
+import { corsHeaders, handleCORS } from "../_shared/edge-auth.ts";
 
 // Background Task Business Discovery with Tiered Enrichment + Multi-Source Discovery
 // ProspectPro v4.3 - October 2025
@@ -686,7 +686,8 @@ async function searchFoursquare(
     return [];
   }
 
-  const queryString = [businessType, ...keywords].join(" ").trim() || businessType;
+  const queryString =
+    [businessType, ...keywords].join(" ").trim() || businessType;
   const limit = Math.min(Math.max(maxResults, 5), 30);
   const params = new URLSearchParams({
     query: queryString,
@@ -1415,9 +1416,29 @@ serve(async (req) => {
   if (corsResponse) return corsResponse;
 
   try {
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
-    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const supabaseUrl = Deno.env.get("SUPABASE_URL");
+    const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY");
+    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+
+    if (!supabaseUrl || !supabaseAnonKey || !supabaseServiceKey) {
+      console.error("Missing Supabase environment variables", {
+        hasUrl: Boolean(supabaseUrl),
+        hasAnonKey: Boolean(supabaseAnonKey),
+        hasServiceKey: Boolean(supabaseServiceKey),
+      });
+
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error:
+            "Edge function misconfigured: missing Supabase credentials. Verify SUPABASE_URL, SUPABASE_ANON_KEY, and SUPABASE_SERVICE_ROLE_KEY secrets.",
+        }),
+        {
+          status: 500,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    }
 
     const authHeader = req.headers.get("Authorization");
     const globalHeaders: Record<string, string> = authHeader
@@ -1459,14 +1480,12 @@ serve(async (req) => {
     // Generate structured campaign ID using database function
     let campaignId: string;
     try {
-      const { data: generatedName, error: nameError } = await supabaseClient.rpc(
-        "generate_campaign_name",
-        {
+      const { data: generatedName, error: nameError } =
+        await supabaseClient.rpc("generate_campaign_name", {
           business_type: businessType,
           location: location,
           user_id: user?.id || null,
-        }
-      );
+        });
 
       if (nameError) {
         console.warn(

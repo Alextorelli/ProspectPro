@@ -20,6 +20,7 @@
   "workspace": {
     "packageJson": {
       "dependencies": [
+        "npm:@googlemaps/js-api-loader@^2.0.1",
         "npm:@supabase/supabase-js@^2.39.0",
         "npm:@tanstack/react-query@^5.17.0",
         "npm:@types/react-dom@^18.2.17",

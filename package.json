@@ -4,7 +4,8 @@
   "type": "module",
   "description": "ProspectPro - Verified Business Intelligence Platform with Zero Fake Data Policy",
   "scripts": {
-    "dev": "supabase functions serve --no-verify-jwt --debug",
+    "dev": "vite",
+    "dev:supabase": "supabase functions serve --no-verify-jwt --debug",
     "deploy:critical": "supabase functions deploy business-discovery-optimized && supabase functions deploy enrichment-orchestrator",
     "deploy:all": "supabase functions deploy business-discovery-optimized && supabase functions deploy enrichment-orchestrator && supabase functions deploy campaign-export && supabase functions deploy enrichment-hunter",
     "test:edge": "curl -X POST 'http://localhost:54321/functions/v1/business-discovery-optimized' -H 'Content-Type: application/json' -d '{\"businessType\":\"test\",\"location\":\"test\"}'",
@@ -61,16 +62,17 @@
   "author": "Alex Torelli",
   "license": "MIT",
   "dependencies": {
+    "@googlemaps/js-api-loader": "^2.0.1",
     "@supabase/supabase-js": "^2.39.0",
     "@tanstack/react-query": "^5.17.0",
+    "clsx": "^2.0.0",
+    "lucide-react": "^0.294.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.20.1",
-    "zustand": "^4.4.7",
     "recharts": "^2.8.0",
-    "lucide-react": "^0.294.0",
-    "clsx": "^2.0.0",
-    "tailwind-merge": "^2.2.0"
+    "tailwind-merge": "^2.2.0",
+    "zustand": "^4.4.7"
   },
   "devDependencies": {
     "@types/react": "^18.2.43",

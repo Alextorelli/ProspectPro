@@ -1,5 +1,6 @@
 import { User } from "@supabase/supabase-js";
 import React, { useCallback, useEffect, useRef, useState } from "react";
+import { Link } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { supabase } from "../lib/supabase";
 
@@ -36,6 +37,8 @@ export const AuthComponent: React.FC<AuthComponentProps> = ({
   const [success, setSuccess] = useState<string | null>(null);
   const [showEmailForm, setShowEmailForm] = useState(false);
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const menuContainerRef = useRef<HTMLDivElement | null>(null);
 
   const combinedLoading = authLoading || localLoading;
 
@@ -54,8 +57,36 @@ export const AuthComponent: React.FC<AuthComponentProps> = ({
     }
     if (!authUser) {
       hasEnsuredProfileRef.current = false;
+      setIsMenuOpen(false);
     }
   }, [authUser]);
+
+  useEffect(() => {
+    if (!isMenuOpen) return;
+
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        menuContainerRef.current &&
+        !menuContainerRef.current.contains(event.target as Node)
+      ) {
+        setIsMenuOpen(false);
+      }
+    };
+
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setIsMenuOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleEscape);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleEscape);
+    };
+  }, [isMenuOpen]);
 
   const createUserProfile = async (user: User) => {
     try {
@@ -181,6 +212,7 @@ export const AuthComponent: React.FC<AuthComponentProps> = ({
     try {
       await contextSignOut();
       resetForm();
+      setIsMenuOpen(false);
     } catch (err: any) {
       setError(err.message ?? "Unable to sign out");
     } finally {
@@ -209,30 +241,115 @@ export const AuthComponent: React.FC<AuthComponentProps> = ({
   }
 
   if (authUser) {
+    const displayName = authUser.user_metadata?.full_name || "ProspectPro user";
+    const emailLabel = authUser.email || "Authenticated";
+    const initials = displayName
+      .split(" ")
+      .map((segment: string) => segment.charAt(0))
+      .join("")
+      .slice(0, 2)
+      .toUpperCase();
+
     return (
-      <div className="flex items-center space-x-4 text-sm">
-        <div className="flex items-center space-x-3">
-          {authUser.user_metadata?.avatar_url && (
-            <img
-              src={authUser.user_metadata.avatar_url}
-              alt="Avatar"
-              className="h-10 w-10 rounded-full border-2 border-white object-cover shadow-sm"
-            />
-          )}
-          <div className="flex flex-col">
-            <span className="font-semibold text-gray-900">
-              {authUser.user_metadata?.full_name || "User"}
-            </span>
-            <span className="text-xs text-gray-700">{authUser.email}</span>
-          </div>
-        </div>
+      <div className="relative" ref={menuContainerRef}>
         <button
-          onClick={handleSignOut}
-          className="rounded-md border border-transparent px-3 py-1 text-sm font-medium text-blue-700 transition-colors hover:border-blue-600 hover:bg-blue-50"
-          disabled={combinedLoading}
+          type="button"
+          onClick={() => setIsMenuOpen((prev) => !prev)}
+          className="inline-flex items-center gap-3 rounded-full border border-transparent bg-white/80 px-3 py-1.5 text-left text-sm font-medium text-gray-900 shadow-sm transition-colors hover:border-blue-600 hover:bg-white dark:bg-slate-900/70 dark:text-slate-100"
+          aria-haspopup="menu"
+          aria-expanded={isMenuOpen}
         >
-          Sign Out
+          <span className="relative flex h-9 w-9 items-center justify-center overflow-hidden rounded-full border border-blue-200 bg-blue-100 text-base font-semibold text-blue-700 shadow-sm dark:border-sky-500/60 dark:bg-sky-500/10 dark:text-sky-200">
+            {authUser.user_metadata?.avatar_url ? (
+              <img
+                src={authUser.user_metadata.avatar_url}
+                alt={displayName}
+                className="absolute inset-0 h-full w-full object-cover"
+              />
+            ) : (
+              initials || "PP"
+            )}
+          </span>
+          <span className="flex flex-col items-start">
+            <span className="text-sm font-semibold leading-tight">
+              {displayName}
+            </span>
+            <span className="text-xs text-gray-600 leading-tight dark:text-slate-300">
+              {emailLabel}
+            </span>
+          </span>
+          <svg
+            className={`h-4 w-4 text-gray-500 transition-transform dark:text-slate-300 ${
+              isMenuOpen ? "rotate-180" : ""
+            }`}
+            viewBox="0 0 20 20"
+            fill="currentColor"
+            aria-hidden="true"
+          >
+            <path
+              fillRule="evenodd"
+              d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 011.08 1.04l-4.25 4.25a.75.75 0 01-1.08 0L5.21 8.27a.75.75 0 01.02-1.06z"
+              clipRule="evenodd"
+            />
+          </svg>
         </button>
+
+        {isMenuOpen && (
+          <div
+            className="absolute right-0 z-50 mt-2 w-64 rounded-lg border border-gray-200 bg-white p-3 text-sm shadow-xl dark:border-slate-700 dark:bg-slate-900"
+            role="menu"
+            aria-label="Account menu"
+          >
+            <div className="mb-3 rounded-md border border-gray-100 bg-gray-50 px-3 py-2 dark:border-slate-700 dark:bg-slate-800">
+              <p className="text-xs uppercase tracking-wide text-gray-500 dark:text-slate-400">
+                Signed in as
+              </p>
+              <p className="truncate text-sm font-semibold text-gray-900 dark:text-slate-100">
+                {displayName}
+              </p>
+              <p className="truncate text-xs text-gray-600 dark:text-slate-300">
+                {emailLabel}
+              </p>
+            </div>
+
+            <div className="flex flex-col gap-1" role="none">
+              <Link
+                to="/account"
+                className="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-blue-50 hover:text-blue-700 dark:text-slate-200 dark:hover:bg-slate-800"
+                role="menuitem"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                <span aria-hidden="true" role="img">
+                  ⚙️
+                </span>
+                Account settings
+              </Link>
+              <Link
+                to="/dashboard"
+                className="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-blue-50 hover:text-blue-700 dark:text-slate-200 dark:hover:bg-slate-800"
+                role="menuitem"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                <span aria-hidden="true" role="img">
+                  📊
+                </span>
+                Dashboard overview
+              </Link>
+              <button
+                type="button"
+                onClick={handleSignOut}
+                disabled={combinedLoading}
+                className="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-semibold text-red-600 transition-colors hover:bg-red-50 disabled:opacity-60 dark:text-rose-400 dark:hover:bg-rose-500/10"
+                role="menuitem"
+              >
+                <span aria-hidden="true" role="img">
+                  🚪
+                </span>
+                Sign out
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     );
   }

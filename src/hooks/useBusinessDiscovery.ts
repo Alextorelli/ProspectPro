@@ -1,9 +1,61 @@
 import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
-import { ENRICHMENT_TIERS, ensureSession, supabase } from "../lib/supabase";
+import {
+  ENRICHMENT_TIERS,
+  ensureSession,
+  getSessionToken,
+  supabase,
+} from "../lib/supabase";
 import { useCampaignStore } from "../stores/campaignStore";
 import type { BusinessDiscoveryResponse, CampaignConfig } from "../types";
+
+interface SupabaseFunctionError {
+  message?: string;
+  name?: string;
+  context?: {
+    status?: number;
+    response?: unknown;
+  };
+}
+
+const extractFunctionErrorMessage = (error: unknown): string => {
+  if (!error || typeof error !== "object") {
+    return "Discovery failed due to an unknown error.";
+  }
+
+  const functionsError = error as SupabaseFunctionError;
+  const defaultMessage =
+    functionsError.message || "Edge function returned an error response.";
+
+  const contextResponse = functionsError.context?.response;
+  if (!contextResponse) {
+    return defaultMessage;
+  }
+
+  try {
+    if (typeof contextResponse === "string") {
+      const parsed = JSON.parse(contextResponse);
+      if (parsed?.error) return String(parsed.error);
+      if (parsed?.message) return String(parsed.message);
+      return contextResponse;
+    }
+
+    if (
+      typeof contextResponse === "object" &&
+      contextResponse !== null &&
+      "error" in contextResponse
+    ) {
+      const { error: ctxError } = contextResponse as { error?: unknown };
+      if (ctxError) return String(ctxError);
+    }
+  } catch (parseError) {
+    console.warn("Unable to parse edge function error response:", parseError);
+    return defaultMessage;
+  }
+
+  return defaultMessage;
+};
 
 export const useBusinessDiscovery = (
   onJobCreated?: (jobData: {
@@ -67,6 +119,8 @@ export const useBusinessDiscovery = (
         );
         setProgress(20);
 
+        const accessToken = await getSessionToken();
+
         // Call background task business discovery with authentication
         const { data, error } = await supabase.functions.invoke(
           "business-discovery-background",
@@ -90,16 +144,23 @@ export const useBusinessDiscovery = (
                   .toString(36)
                   .substr(2, 9)}`,
             },
+            headers: accessToken
+              ? { Authorization: `Bearer ${accessToken}` }
+              : undefined,
           }
         );
 
         if (error) {
           console.error("❌ Background discovery error:", error);
-          throw new Error(`Discovery failed: ${error.message}`);
+          throw new Error(extractFunctionErrorMessage(error));
         }
 
         if (!data || !data.success) {
-          throw new Error("No data returned from background discovery");
+          const fallbackMessage =
+            typeof data?.error === "string"
+              ? data.error
+              : "No data returned from background discovery";
+          throw new Error(fallbackMessage);
         }
 
         console.log("✅ Background discovery response:", data);

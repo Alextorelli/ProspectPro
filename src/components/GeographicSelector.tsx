@@ -1,3 +1,4 @@
+import { importLibrary, setOptions } from "@googlemaps/js-api-loader";
 import React, { useEffect, useRef, useState } from "react";
 
 export interface GeographicLocation {
@@ -40,6 +41,8 @@ export const GeographicSelector: React.FC<GeographicSelectorProps> = ({
   const mapRef = useRef<any>(null);
   const markerRef = useRef<any>(null);
   const circleRef = useRef<any>(null);
+  const mapsApiRef = useRef<any>(window.google?.maps ?? null);
+  const loaderPromiseRef = useRef<Promise<void> | null>(null);
 
   const handleAddressChange = (value: string) => {
     setAddress(value);
@@ -53,10 +56,11 @@ export const GeographicSelector: React.FC<GeographicSelectorProps> = ({
   const geocodeViaGoogle = async (
     addressInput: string
   ): Promise<GeographicLocation | null> => {
-    if (!window.google?.maps?.Geocoder) return null;
+    const maps = mapsApiRef.current;
+    if (!maps?.Geocoder) return null;
 
     return new Promise((resolve) => {
-      const geocoder = new window.google.maps.Geocoder();
+      const geocoder = new maps.Geocoder();
       geocoder.geocode(
         { address: addressInput },
         (results: any, status: any) => {
@@ -204,38 +208,41 @@ export const GeographicSelector: React.FC<GeographicSelectorProps> = ({
     );
   };
 
-  const loadGoogleMapsScript = () => {
-    if (!googleMapsApiKey) return;
-
-    if (window.google?.maps) {
-      setMapStatus("ready");
-      return;
-    }
-
-    const existingScript = document.querySelector<HTMLScriptElement>(
-      'script[data-google-maps="true"]'
-    );
-
-    if (existingScript) {
-      existingScript.addEventListener("load", () => setMapStatus("ready"));
-      existingScript.addEventListener("error", () => setMapStatus("error"));
-      return;
-    }
-
-    const script = document.createElement("script");
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${googleMapsApiKey}&libraries=places`;
-    script.async = true;
-    script.defer = true;
-    script.dataset.googleMaps = "true";
-    script.onload = () => setMapStatus("ready");
-    script.onerror = () => setMapStatus("error");
-    document.head.appendChild(script);
-  };
-
   useEffect(() => {
-    if (googleMapsApiKey) {
-      loadGoogleMapsScript();
+    if (!googleMapsApiKey) {
+      mapsApiRef.current = null;
+      loaderPromiseRef.current = null;
+      setMapStatus("idle");
+      return;
     }
+
+    setMapStatus("loading");
+
+    if (!loaderPromiseRef.current) {
+      loaderPromiseRef.current = (async () => {
+        setOptions({ key: googleMapsApiKey, libraries: ["places"] });
+        await importLibrary("maps");
+        await importLibrary("geocoding");
+        await importLibrary("places");
+      })();
+    }
+
+    loaderPromiseRef.current
+      .then(() => {
+        mapsApiRef.current = window.google?.maps ?? null;
+        if (mapsApiRef.current) {
+          setMapStatus("ready");
+        } else {
+          console.error("Google Maps API did not initialize as expected.");
+          setMapStatus("error");
+          loaderPromiseRef.current = null;
+        }
+      })
+      .catch((error) => {
+        console.error("Google Maps load error:", error);
+        loaderPromiseRef.current = null;
+        setMapStatus("error");
+      });
   }, [googleMapsApiKey]);
 
   const getZoomFromRadius = (radiusInMiles: number) => {
@@ -252,7 +259,7 @@ export const GeographicSelector: React.FC<GeographicSelectorProps> = ({
       return;
     }
 
-    const maps = window.google?.maps;
+    const maps = mapsApiRef.current;
     if (!maps) {
       setMapStatus("error");
       return;

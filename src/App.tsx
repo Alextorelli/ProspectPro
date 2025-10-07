@@ -1,6 +1,7 @@
 import { Route, Routes } from "react-router-dom";
 import { Layout } from "./components/Layout";
 import { AuthProvider } from "./contexts/AuthContext";
+import { AccountPage } from "./pages/AccountPage";
 import { AdminPanel } from "./pages/AdminPanel";
 import { AuthCallback } from "./pages/AuthCallback";
 import { BusinessDiscovery } from "./pages/BusinessDiscovery";
@@ -23,6 +24,7 @@ function App() {
             element={<CampaignProgress />}
           />
           <Route path="/results" element={<Results />} />
+          <Route path="/account" element={<AccountPage />} />
           <Route path="/admin" element={<AdminPanel />} />
           <Route path="/auth/callback" element={<AuthCallback />} />
         </Routes>
