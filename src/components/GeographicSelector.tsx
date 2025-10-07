@@ -62,7 +62,7 @@ export const GeographicSelector: React.FC<GeographicSelectorProps> = ({
 
     const result = await geocodeAddress(address);
     if (result) {
-  setLocation(result);
+      setLocation(result);
       onLocationChange(result, radius);
     } else {
       alert("Address not found. Please try a different address.");

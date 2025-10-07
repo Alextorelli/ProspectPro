@@ -11,7 +11,6 @@ interface MultiSelectBusinessTypesProps {
   onBusinessTypesChange: (types: string[]) => void;
 }
 
-
 export const MultiSelectBusinessTypes: React.FC<
   MultiSelectBusinessTypesProps
 > = ({
@@ -49,7 +48,7 @@ export const MultiSelectBusinessTypes: React.FC<
       // Category was added, no need to remove business types
     } else {
       // Category was removed, remove its business types
-  const removedCategoryTypes = BUSINESS_TYPES_BY_CATEGORY[category] || [];
+      const removedCategoryTypes = BUSINESS_TYPES_BY_CATEGORY[category] || [];
       const newBusinessTypes = selectedBusinessTypes.filter(
         (type) => !removedCategoryTypes.includes(type)
       );
@@ -66,13 +65,13 @@ export const MultiSelectBusinessTypes: React.FC<
   };
 
   const selectAllInCategory = (category: string) => {
-  const categoryTypes = BUSINESS_TYPES_BY_CATEGORY[category] || [];
+    const categoryTypes = BUSINESS_TYPES_BY_CATEGORY[category] || [];
     const newTypes = [...new Set([...selectedBusinessTypes, ...categoryTypes])];
     onBusinessTypesChange(newTypes);
   };
 
   const clearCategory = (category: string) => {
-  const categoryTypes = BUSINESS_TYPES_BY_CATEGORY[category] || [];
+    const categoryTypes = BUSINESS_TYPES_BY_CATEGORY[category] || [];
     const newTypes = selectedBusinessTypes.filter(
       (type) => !categoryTypes.includes(type)
     );

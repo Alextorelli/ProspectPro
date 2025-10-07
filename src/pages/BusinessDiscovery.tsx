@@ -1,15 +1,15 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { MultiSelectBusinessTypes } from "../components/MultiSelectBusinessTypes";
 import {
-  GeographicSelector,
   GeographicLocation,
+  GeographicSelector,
 } from "../components/GeographicSelector";
+import { MultiSelectBusinessTypes } from "../components/MultiSelectBusinessTypes";
 import { ProgressDisplay } from "../components/ProgressDisplay";
 import { TierSelector } from "../components/TierSelector";
+import { BUSINESS_TYPES_BY_CATEGORY } from "../constants/businessTaxonomy";
 import { useBusinessDiscovery } from "../hooks/useBusinessDiscovery";
 import { ENRICHMENT_TIERS } from "../lib/supabase";
-import { BUSINESS_TYPES_BY_CATEGORY } from "../constants/businessTaxonomy";
 
 const DEFAULT_CATEGORY = "Home & Property Services";
 const DEFAULT_LOCATION: GeographicLocation = {
@@ -41,7 +41,8 @@ export const BusinessDiscovery: React.FC = () => {
     error,
   } = useBusinessDiscovery(handleJobCreated);
 
-  const defaultBusinessTypes = BUSINESS_TYPES_BY_CATEGORY[DEFAULT_CATEGORY] || [];
+  const defaultBusinessTypes =
+    BUSINESS_TYPES_BY_CATEGORY[DEFAULT_CATEGORY] || [];
   const [selectedCategories, setSelectedCategories] = useState<string[]>([
     DEFAULT_CATEGORY,
   ]);
@@ -49,9 +50,8 @@ export const BusinessDiscovery: React.FC = () => {
     defaultBusinessTypes.length > 0 ? [defaultBusinessTypes[0]] : []
   );
   const [keywords, setKeywords] = useState("");
-  const [location, setLocation] = useState<GeographicLocation>(
-    DEFAULT_LOCATION
-  );
+  const [location, setLocation] =
+    useState<GeographicLocation>(DEFAULT_LOCATION);
   const [searchRadius, setSearchRadius] = useState<number>(DEFAULT_RADIUS);
   const [expandGeography, setExpandGeography] = useState(false);
   const [numberOfLeads, setNumberOfLeads] = useState(3);
@@ -210,7 +210,9 @@ export const BusinessDiscovery: React.FC = () => {
               <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
                 ${estimatedCost.toFixed(2)}
               </div>
-              <div className="text-xs text-gray-600 dark:text-gray-400">Transparent pricing</div>
+              <div className="text-xs text-gray-600 dark:text-gray-400">
+                Transparent pricing
+              </div>
             </div>
           </div>
         </div>
@@ -280,7 +282,9 @@ export const BusinessDiscovery: React.FC = () => {
                   Discovery Failed
                 </h3>
                 <div className="mt-2 text-sm text-red-700 dark:text-red-300">
-                  <p>{error instanceof Error ? error.message : String(error)}</p>
+                  <p>
+                    {error instanceof Error ? error.message : String(error)}
+                  </p>
                 </div>
               </div>
             </div>
