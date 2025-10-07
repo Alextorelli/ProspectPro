@@ -1,7 +1,7 @@
 import React, { ReactNode } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { ThemeToggle } from "./ThemeToggle";
 import { AuthComponent } from "./AuthComponent";
+import { ThemeToggle } from "./ThemeToggle";
 
 interface LayoutProps {
   children: ReactNode;
