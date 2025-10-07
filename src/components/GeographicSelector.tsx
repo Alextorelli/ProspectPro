@@ -23,6 +23,15 @@ export const GeographicSelector: React.FC<GeographicSelectorProps> = ({
   const [isGeocoding, setIsGeocoding] = useState(false);
   const [mapType, setMapType] = useState<"simple" | "full">("simple");
 
+  const handleAddressChange = (value: string) => {
+    setAddress(value);
+    setLocation((prev) => {
+      const updated = { ...prev, address: value };
+      onLocationChange(updated, radius);
+      return updated;
+    });
+  };
+
   // Geocoding function using a free service
   const geocodeAddress = async (
     addressInput: string
@@ -62,6 +71,7 @@ export const GeographicSelector: React.FC<GeographicSelectorProps> = ({
 
     const result = await geocodeAddress(address);
     if (result) {
+      setAddress(result.address);
       setLocation(result);
       onLocationChange(result, radius);
     } else {
@@ -141,10 +151,6 @@ export const GeographicSelector: React.FC<GeographicSelectorProps> = ({
           <div className="text-xs font-medium text-gray-800 truncate">
             {location.address}
           </div>
-          <div className="text-xs text-gray-600">
-            Radius: {radius} miles • Lat: {location.lat.toFixed(4)}, Lng:{" "}
-            {location.lng.toFixed(4)}
-          </div>
         </div>
 
         {/* Upgrade notice */}
@@ -206,10 +212,11 @@ export const GeographicSelector: React.FC<GeographicSelectorProps> = ({
           <input
             type="text"
             value={address}
-            onChange={(e) => setAddress(e.target.value)}
+            onChange={(e) => handleAddressChange(e.target.value)}
             placeholder="Enter city, state, or address"
             className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
             onKeyPress={(e) => e.key === "Enter" && handleAddressSearch()}
+            onBlur={handleAddressSearch}
           />
           <button
             onClick={handleAddressSearch}
@@ -241,22 +248,20 @@ export const GeographicSelector: React.FC<GeographicSelectorProps> = ({
             </button>
           ))}
         </div>
+      </div>
 
-        {/* Custom radius slider */}
-        <div className="mt-3">
-          <input
-            type="range"
-            min="1"
-            max="100"
-            value={radius}
-            onChange={(e) => handleRadiusChange(parseInt(e.target.value))}
-            className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
-          />
-          <div className="flex justify-between text-xs text-gray-500 mt-1">
-            <span>1 mile</span>
-            <span className="font-medium">{radius} miles</span>
-            <span>100 miles</span>
-          </div>
+      {/* Coverage Callout */}
+      <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-md flex items-center justify-between">
+        <div>
+          <p className="text-xs uppercase tracking-wide text-blue-600 dark:text-blue-300 font-semibold">
+            Approximate Coverage
+          </p>
+          <p className="text-lg font-semibold text-blue-800 dark:text-blue-100">
+            ~{Math.round(Math.PI * radius * radius)} square miles
+          </p>
+        </div>
+        <div className="text-sm text-blue-700 dark:text-blue-200">
+          Radius: {radius} miles
         </div>
       </div>
 
