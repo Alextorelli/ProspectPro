@@ -1,6 +1,7 @@
 import React, { ReactNode } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { ThemeToggle } from "./ThemeToggle";
+import { AuthComponent } from "./AuthComponent";
 
 interface LayoutProps {
   children: ReactNode;
@@ -22,7 +23,10 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
           <div className="flex items-center">
             <img src="/header logo.png" alt="ProspectPro" className="h-8" />
           </div>
-          <ThemeToggle />
+          <div className="flex items-center space-x-4">
+            <AuthComponent />
+            <ThemeToggle />
+          </div>
         </div>
       </div>
 
