@@ -1,398 +1,27 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { MultiSelectBusinessTypes } from "../components/MultiSelectBusinessTypes";
+import {
+  GeographicSelector,
+  GeographicLocation,
+} from "../components/GeographicSelector";
 import { ProgressDisplay } from "../components/ProgressDisplay";
 import { TierSelector } from "../components/TierSelector";
 import { useBusinessDiscovery } from "../hooks/useBusinessDiscovery";
 import { ENRICHMENT_TIERS } from "../lib/supabase";
+import { BUSINESS_TYPES_BY_CATEGORY } from "../constants/businessTaxonomy";
 
-const businessCategories = [
-  "Automotive Services",
-  "Education & Training",
-  "Entertainment & Recreation",
-  "Financial Services",
-  "Food & Dining",
-  "Government & Public Services",
-  "Healthcare & Medical",
-  "Home & Property Services",
-  "Hospitality & Lodging",
-  "Personal Care & Beauty",
-  "Professional Services",
-  "Religious & Community",
-  "Retail & Shopping",
-  "Technology & IT Services",
-  "Transportation & Transit",
-];
-
-const businessTypesByCategory: Record<string, string[]> = {
-  "Automotive Services": [
-    "Auto Body Shop",
-    "Auto Detailing",
-    "Auto Parts Store",
-    "Automotive Glass Service",
-    "Car Dealer",
-    "Car Rental",
-    "Car Repair",
-    "Car Wash",
-    "Electric Vehicle Charging Station",
-    "Gas Station",
-    "Motorcycle Dealer",
-    "Oil Change Service",
-    "Rv Dealer",
-    "Smog Check Station",
-    "Tire Shop",
-    "Towing Service",
-    "Transmission Shop",
-    "Truck Dealer",
-  ],
-  "Education & Training": [
-    "Art School",
-    "Charter School",
-    "College",
-    "Community College",
-    "Cooking School",
-    "Dance Studio",
-    "Daycare",
-    "Driving School",
-    "Kindergarten",
-    "Language School",
-    "Library",
-    "Music School",
-    "Preschool",
-    "Primary School",
-    "Private School",
-    "Public School",
-    "School",
-    "Secondary School",
-    "Summer Camp Organizer",
-    "Technical School",
-    "Training Center",
-    "Tutoring Center",
-    "University",
-    "Vocational School",
-  ],
-  "Entertainment & Recreation": [
-    "Amusement Park",
-    "Aquarium",
-    "Arcade",
-    "Arena",
-    "Art Gallery",
-    "Banquet Hall",
-    "Beach",
-    "Botanical Garden",
-    "Bowling Alley",
-    "Casino",
-    "Comedy Club",
-    "Concert Hall",
-    "Convention Center",
-    "Escape Room",
-    "Event Venue",
-    "Fitness Center",
-    "Golf Course",
-    "Gym",
-    "Karaoke Venue",
-    "Marina",
-    "Mini Golf",
-    "Movie Theater",
-    "Museum",
-    "Night Club",
-    "Paintball",
-    "Park",
-    "Rock Climbing Gym",
-    "Ski Resort",
-    "Sports Complex",
-    "Stadium",
-    "Swimming Pool",
-    "Tennis Court",
-    "Theater",
-    "Tourist Attraction",
-    "Trampoline Park",
-    "Wedding Venue",
-    "Yoga Studio",
-    "Zoo",
-  ],
-  "Financial Services": [
-    "Atm",
-    "Bank",
-    "Check Cashing Service",
-    "Credit Union",
-    "Cryptocurrency Exchange",
-    "Financial Planner",
-    "Investment Firm",
-    "Money Transfer Service",
-    "Mortgage Broker",
-    "Payday Lender",
-    "Stock Broker",
-  ],
-  "Food & Dining": [
-    "Bakery",
-    "Bar",
-    "Barbecue Restaurant",
-    "Brewery",
-    "Brunch Restaurant",
-    "Buffet",
-    "Burger Joint",
-    "Cafe",
-    "Catering Service",
-    "Chinese Restaurant",
-    "Cocktail Bar",
-    "Coffee Shop",
-    "Deli",
-    "Dessert Shop",
-    "Distillery",
-    "Donut Shop",
-    "Fast Food Restaurant",
-    "Food Court",
-    "Food Stand",
-    "Food Truck",
-    "Ice Cream Shop",
-    "Indian Restaurant",
-    "Italian Restaurant",
-    "Japanese Restaurant",
-    "Juice Bar",
-    "Meal Delivery",
-    "Meal Takeaway",
-    "Mexican Restaurant",
-    "Pizza Restaurant",
-    "Pub",
-    "Restaurant",
-    "Sandwich Shop",
-    "Seafood Restaurant",
-    "Smoothie Shop",
-    "Steakhouse",
-    "Sushi Restaurant",
-    "Taco Place",
-    "Tea House",
-    "Wine Bar",
-    "Winery",
-  ],
-  "Government & Public Services": [
-    "City Hall",
-    "Consulate",
-    "Courthouse",
-    "County Office",
-    "Dmv",
-    "Embassy",
-    "Fire Station",
-    "Government Office",
-    "Municipal Building",
-    "Passport Office",
-    "Police Station",
-    "Post Office",
-    "Public Library",
-    "Public School",
-    "Public Works",
-    "Social Services Office",
-    "Tax Office",
-    "Voter Registration Office",
-  ],
-  "Healthcare & Medical": [
-    "Acupuncture Clinic",
-    "Chiropractor",
-    "Dental Clinic",
-    "Dentist",
-    "Doctor",
-    "Drugstore",
-    "Health Insurance Office",
-    "Hospital",
-    "Medical Center",
-    "Medical Equipment Supplier",
-    "Medical Lab",
-    "Mental Health Clinic",
-    "Occupational Therapist",
-    "Optical Clinic",
-    "Optometrist",
-    "Orthodontist",
-    "Pharmacy",
-    "Physical Therapy",
-    "Physiotherapist",
-    "Psychiatrist",
-    "Psychologist",
-    "Skin Care Clinic",
-    "Speech Therapist",
-    "Urgent Care",
-    "Veterinary Care",
-    "Wellness Center",
-  ],
-  "Home & Property Services": [
-    "Appliance Repair",
-    "Carpet Cleaning",
-    "Cleaning Service",
-    "Dry Cleaning",
-    "Electrician",
-    "Fence Contractor",
-    "Flooring Contractor",
-    "Gardener",
-    "General Contractor",
-    "Gutter Service",
-    "Handyman",
-    "Home Inspector",
-    "Hvac Contractor",
-    "Landscaping",
-    "Laundry",
-    "Locksmith",
-    "Moving Company",
-    "Painter",
-    "Pest Control",
-    "Plumber",
-    "Pool Service",
-    "Property Management",
-    "Roofing Contractor",
-    "Storage",
-    "Window Cleaning",
-  ],
-  "Hospitality & Lodging": [
-    "Bed And Breakfast",
-    "Boutique Hotel",
-    "Campground",
-    "Extended Stay Hotel",
-    "Guest House",
-    "Hostel",
-    "Hotel",
-    "Inn",
-    "Lodge",
-    "Motel",
-    "Resort",
-    "Rv Park",
-    "Vacation Rental",
-  ],
-  "Personal Care & Beauty": [
-    "Barber Shop",
-    "Beauty Salon",
-    "Beautician",
-    "Body Art Service",
-    "Cosmetics Store",
-    "Day Spa",
-    "Eyebrow Threading",
-    "Facial Spa",
-    "Hair Care",
-    "Hair Salon",
-    "Makeup Artist",
-    "Massage",
-    "Nail Salon",
-    "Piercing Shop",
-    "Sauna",
-    "Spa",
-    "Tanning Studio",
-    "Tattoo Parlor",
-    "Waxing Salon",
-  ],
-  "Professional Services": [
-    "Accounting",
-    "Advertising Agency",
-    "Architecture Firm",
-    "Attorney",
-    "Business Center",
-    "Consultant",
-    "Corporate Office",
-    "Employment Agency",
-    "Engineering Office",
-    "Financial Advisor",
-    "Insurance Agency",
-    "Lawyer",
-    "Marketing Agency",
-    "Notary",
-    "Real Estate Agency",
-    "Recruiter",
-    "Tax Preparation",
-  ],
-  "Religious & Community": [
-    "Cemetery",
-    "Church",
-    "Civic Organization",
-    "Community Center",
-    "Crematorium",
-    "Funeral Home",
-    "Meditation Center",
-    "Mosque",
-    "Non-Profit Organization",
-    "Place Of Worship",
-    "Religious Center",
-    "Social Club",
-    "Spiritual Center",
-    "Synagogue",
-    "Temple",
-  ],
-  "Retail & Shopping": [
-    "Antique Shop",
-    "Art Supply Store",
-    "Bicycle Store",
-    "Book Store",
-    "Boutique",
-    "Clothing Store",
-    "Convenience Store",
-    "Craft Store",
-    "Department Store",
-    "Discount Store",
-    "Dollar Store",
-    "Electronics Store",
-    "Florist",
-    "Furniture Store",
-    "Garden Center",
-    "Gift Shop",
-    "Grocery Store",
-    "Hardware Store",
-    "Hobby Shop",
-    "Home Goods Store",
-    "Jewelry Store",
-    "Liquor Store",
-    "Music Store",
-    "Office Supply Store",
-    "Optical Store",
-    "Outlet Store",
-    "Party Supply Store",
-    "Pet Store",
-    "Second Hand Store",
-    "Shoe Store",
-    "Shopping Mall",
-    "Sporting Goods Store",
-    "Supermarket",
-    "Thrift Store",
-    "Tobacco Shop",
-    "Toy Store",
-    "Vape Shop",
-  ],
-  "Technology & IT Services": [
-    "App Development",
-    "Cell Phone Store",
-    "Co-Working Space",
-    "Computer Repair",
-    "Cybersecurity Firm",
-    "Data Center",
-    "Internet Cafe",
-    "It Services",
-    "Managed Services Provider",
-    "Software Company",
-    "Tech Support",
-    "Telecommunications Service Provider",
-    "Web Design",
-  ],
-  "Transportation & Transit": [
-    "Airport",
-    "Bike Rental",
-    "Bus Station",
-    "Bus Tour Agency",
-    "Car Sharing",
-    "Cruise Agency",
-    "Ferry Terminal",
-    "Limousine Service",
-    "Parking Garage",
-    "Parking Lot",
-    "Rest Area",
-    "Ride Share Location",
-    "Scooter Rental",
-    "Shuttle Service",
-    "Subway Station",
-    "Taxi Stand",
-    "Train Station",
-    "Travel Agency",
-    "Truck Stop",
-  ],
+const DEFAULT_CATEGORY = "Home & Property Services";
+const DEFAULT_LOCATION: GeographicLocation = {
+  lat: 40.7128,
+  lng: -74.006,
+  address: "New York, NY",
 };
+const DEFAULT_RADIUS = 10;
 
 export const BusinessDiscovery: React.FC = () => {
   const navigate = useNavigate();
 
-  // Handle job creation callback for navigation to progress page
   const handleJobCreated = (jobData: {
     jobId: string;
     campaignId: string;
@@ -412,53 +41,71 @@ export const BusinessDiscovery: React.FC = () => {
     error,
   } = useBusinessDiscovery(handleJobCreated);
 
-  const [selectedCategory, setSelectedCategory] = useState(
-    "Home & Property Services"
+  const defaultBusinessTypes = BUSINESS_TYPES_BY_CATEGORY[DEFAULT_CATEGORY] || [];
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([
+    DEFAULT_CATEGORY,
+  ]);
+  const [selectedBusinessTypes, setSelectedBusinessTypes] = useState<string[]>(
+    defaultBusinessTypes.length > 0 ? [defaultBusinessTypes[0]] : []
   );
-  const [selectedBusinessType, setSelectedBusinessType] =
-    useState("Electrician");
   const [keywords, setKeywords] = useState("");
-  const [location, setLocation] = useState("New York, NY");
-  const [searchRadius, setSearchRadius] = useState("10 miles");
+  const [location, setLocation] = useState<GeographicLocation>(
+    DEFAULT_LOCATION
+  );
+  const [searchRadius, setSearchRadius] = useState<number>(DEFAULT_RADIUS);
   const [expandGeography, setExpandGeography] = useState(false);
   const [numberOfLeads, setNumberOfLeads] = useState(3);
-
-  // Progressive enrichment tier selection
   const [selectedTier, setSelectedTier] =
     useState<keyof typeof ENRICHMENT_TIERS>("BASE");
-
-  // Navigate to progress page via handleJobCreated callback
-  // No longer need useEffect for navigation since we use the callback
-
-  const availableBusinessTypes =
-    businessTypesByCategory[selectedCategory] || [];
 
   const currentTierConfig = ENRICHMENT_TIERS[selectedTier];
   const estimatedCost = numberOfLeads * currentTierConfig.price;
 
+  const handleGeographicChange = (
+    updatedLocation: GeographicLocation,
+    radius: number
+  ) => {
+    setLocation(updatedLocation);
+    setSearchRadius(radius);
+  };
+
   const handleSearch = () => {
-    if (!location.trim()) {
-      alert("Please enter a location");
+    if (selectedBusinessTypes.length === 0) {
+      alert("Please select at least one business type");
       return;
     }
 
+    if (!location.address.trim()) {
+      alert("Please choose a valid location");
+      return;
+    }
+
+    const businessTypesString = selectedBusinessTypes.join(", ");
+    const keywordsString = keywords
+      .split(",")
+      .map((keyword) => keyword.trim())
+      .filter((keyword) => keyword.length > 0)
+      .join(", ");
+
     const config = {
-      search_terms: `${selectedBusinessType} ${keywords}`.trim(),
-      location: location.trim(),
-      business_type: selectedBusinessType,
+      search_terms: `${businessTypesString}${
+        keywordsString ? ` ${keywordsString}` : ""
+      }`.trim(),
+      location: location.address.trim(),
+      business_type: businessTypesString,
       budget_limit: estimatedCost,
       max_results: numberOfLeads,
       include_email_validation:
         selectedTier === "PROFESSIONAL" || selectedTier === "ENTERPRISE",
       include_website_validation: true,
       min_confidence_score: 70,
-      chamber_verification: true, // Always enabled based on tier
-      trade_association: true, // Always enabled based on tier
-      professional_license: true, // Always enabled based on tier
-      selectedTier: selectedTier,
-      keywords: keywords,
-      search_radius: searchRadius,
+      chamber_verification: true,
+      trade_association: true,
+      professional_license: true,
+      keywords: keywordsString,
+      search_radius: `${searchRadius} miles`,
       expand_geography: expandGeography,
+      selectedTier,
     };
 
     console.log("🚀 Starting campaign:", config);
@@ -467,49 +114,14 @@ export const BusinessDiscovery: React.FC = () => {
 
   return (
     <div className="bg-white dark:bg-gray-700 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600">
-      <div className="p-6 space-y-6">{/* Business Category */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Business Category
-          </label>
-          <select
-            value={selectedCategory}
-            onChange={(e) => {
-              setSelectedCategory(e.target.value);
-              const types = businessTypesByCategory[e.target.value];
-              if (types && types.length > 0) {
-                setSelectedBusinessType(types[0]);
-              }
-            }}
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-          >
-            {businessCategories.map((category) => (
-              <option key={category} value={category}>
-                {category}
-              </option>
-            ))}
-          </select>
-        </div>
+      <div className="p-6 space-y-6">
+        <MultiSelectBusinessTypes
+          selectedCategories={selectedCategories}
+          selectedBusinessTypes={selectedBusinessTypes}
+          onCategoriesChange={setSelectedCategories}
+          onBusinessTypesChange={setSelectedBusinessTypes}
+        />
 
-        {/* Business Type */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Business Type
-          </label>
-          <select
-            value={selectedBusinessType}
-            onChange={(e) => setSelectedBusinessType(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-          >
-            {availableBusinessTypes.map((type) => (
-              <option key={type} value={type}>
-                {type}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {/* Additional Keywords */}
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
             Additional Keywords (Optional)
@@ -526,63 +138,40 @@ export const BusinessDiscovery: React.FC = () => {
           </p>
         </div>
 
-        {/* Location */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Location
-          </label>
-          <input
-            type="text"
-            value={location}
-            onChange={(e) => setLocation(e.target.value)}
-            placeholder="e.g., San Francisco, CA or New York, NY"
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-blue-500 focus:border-blue-500 bg-blue-50 dark:bg-blue-900/20 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
+        <div className="space-y-4">
+          <GeographicSelector
+            onLocationChange={handleGeographicChange}
+            initialLocation={DEFAULT_LOCATION}
+            initialRadius={DEFAULT_RADIUS}
           />
 
-          <div className="mt-4 space-y-3">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Search Radius:
-              </label>
-              <select
-                value={searchRadius}
-                onChange={(e) => setSearchRadius(e.target.value)}
-                className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-              >
-                <option value="5 miles">5 miles</option>
-                <option value="10 miles">10 miles</option>
-                <option value="25 miles">25 miles</option>
-                <option value="50 miles">50 miles</option>
-                <option value="100 miles">100 miles</option>
-              </select>
-            </div>
+          <div className="flex items-center">
+            <input
+              type="checkbox"
+              id="expandGeography"
+              checked={expandGeography}
+              onChange={(e) => setExpandGeography(e.target.checked)}
+              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700"
+            />
+            <label
+              htmlFor="expandGeography"
+              className="ml-2 text-sm text-gray-700 dark:text-gray-300"
+            >
+              Expand geography automatically if initial results are limited
+            </label>
+          </div>
 
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                id="expandGeography"
-                checked={expandGeography}
-                onChange={(e) => setExpandGeography(e.target.checked)}
-                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700"
-              />
-              <label
-                htmlFor="expandGeography"
-                className="ml-2 text-sm text-gray-700 dark:text-gray-300"
-              >
-                Expand geography automatically if initial results are limited
-              </label>
-            </div>
+          <div className="p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-md text-sm text-blue-800 dark:text-blue-200">
+            Targeting {location.address} with a {searchRadius}-mile radius.
           </div>
         </div>
 
-        {/* Progressive Enrichment Tier Selection */}
         <TierSelector
           selectedTier={selectedTier}
           onTierChange={setSelectedTier}
           numberOfLeads={numberOfLeads}
         />
 
-        {/* Number of Leads */}
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
             Number of Leads
@@ -593,10 +182,10 @@ export const BusinessDiscovery: React.FC = () => {
               min="1"
               max="10"
               value={numberOfLeads}
-              onChange={(e) => setNumberOfLeads(parseInt(e.target.value))}
-              className="flex-1 h-2 bg-gray-200 dark:bg-gray-600 rounded-lg appearance-none cursor-pointer slider"
+              onChange={(e) => setNumberOfLeads(parseInt(e.target.value, 10))}
+              className="flex-1 h-2 bg-gray-200 dark:bg-gray-600 rounded-lg appearance-none cursor-pointer"
               style={{
-                background: `linear-gradient(to right, #f59e0b 0%, #f59e0b ${
+                background: `linear-gradient(to right, #2563eb 0%, #2563eb ${
                   numberOfLeads * 10
                 }%, #e5e7eb ${numberOfLeads * 10}%, #e5e7eb 100%)`,
               }}
@@ -607,7 +196,6 @@ export const BusinessDiscovery: React.FC = () => {
           </div>
         </div>
 
-        {/* Actual Cost Display */}
         <div className="bg-gradient-to-r from-blue-50 to-green-50 dark:from-blue-900/20 dark:to-green-900/20 p-4 rounded-lg border border-blue-200 dark:border-blue-800">
           <div className="flex items-center justify-between">
             <div>
@@ -627,7 +215,6 @@ export const BusinessDiscovery: React.FC = () => {
           </div>
         </div>
 
-        {/* Progress Display */}
         <ProgressDisplay
           isDiscovering={isDiscovering}
           progress={progress}
@@ -635,7 +222,6 @@ export const BusinessDiscovery: React.FC = () => {
           cacheStats={cacheStats}
         />
 
-        {/* Start Discovery Button */}
         <div className="pt-4">
           <button
             type="button"
@@ -673,7 +259,6 @@ export const BusinessDiscovery: React.FC = () => {
           </button>
         </div>
 
-        {/* Error Display */}
         {error && (
           <div className="mt-4 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md">
             <div className="flex">
@@ -695,9 +280,7 @@ export const BusinessDiscovery: React.FC = () => {
                   Discovery Failed
                 </h3>
                 <div className="mt-2 text-sm text-red-700 dark:text-red-300">
-                  <p>
-                    {error instanceof Error ? error.message : String(error)}
-                  </p>
+                  <p>{error instanceof Error ? error.message : String(error)}</p>
                 </div>
               </div>
             </div>

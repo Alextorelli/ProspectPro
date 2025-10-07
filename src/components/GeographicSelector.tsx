@@ -1,14 +1,14 @@
 import React, { useState } from "react";
 
-interface Location {
+export interface GeographicLocation {
   lat: number;
   lng: number;
   address: string;
 }
 
 interface GeographicSelectorProps {
-  onLocationChange: (location: Location, radius: number) => void;
-  initialLocation?: Location;
+  onLocationChange: (location: GeographicLocation, radius: number) => void;
+  initialLocation?: GeographicLocation;
   initialRadius?: number;
 }
 
@@ -17,7 +17,7 @@ export const GeographicSelector: React.FC<GeographicSelectorProps> = ({
   initialLocation = { lat: 40.7128, lng: -74.006, address: "New York, NY" },
   initialRadius = 10,
 }) => {
-  const [location, setLocation] = useState<Location>(initialLocation);
+  const [location, setLocation] = useState<GeographicLocation>(initialLocation);
   const [radius, setRadius] = useState<number>(initialRadius);
   const [address, setAddress] = useState<string>(initialLocation.address);
   const [isGeocoding, setIsGeocoding] = useState(false);
@@ -26,7 +26,7 @@ export const GeographicSelector: React.FC<GeographicSelectorProps> = ({
   // Geocoding function using a free service
   const geocodeAddress = async (
     addressInput: string
-  ): Promise<Location | null> => {
+  ): Promise<GeographicLocation | null> => {
     try {
       setIsGeocoding(true);
 
@@ -62,7 +62,7 @@ export const GeographicSelector: React.FC<GeographicSelectorProps> = ({
 
     const result = await geocodeAddress(address);
     if (result) {
-      setLocation(result);
+  setLocation(result);
       onLocationChange(result, radius);
     } else {
       alert("Address not found. Please try a different address.");
