@@ -20,7 +20,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
       <div className="px-6 py-4" style={{ backgroundColor: "#f9ed69" }}>
         <div className="flex items-center justify-between max-w-4xl mx-auto">
           <div className="flex items-center">
-            <img src="/229328477.png" alt="ProspectPro" className="h-8" />
+            <img src="/header logo.png" alt="ProspectPro" className="h-8" />
           </div>
           <ThemeToggle />
         </div>
