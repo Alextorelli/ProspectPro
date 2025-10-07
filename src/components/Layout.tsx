@@ -1,5 +1,6 @@
-import React, { ReactNode } from "react";
+import React, { ReactNode, useMemo } from "react";
 import { Link, useLocation } from "react-router-dom";
+import { useAuth } from "../contexts/AuthContext";
 import { AuthComponent } from "./AuthComponent";
 import { ThemeToggle } from "./ThemeToggle";
 
@@ -7,14 +8,21 @@ interface LayoutProps {
   children: ReactNode;
 }
 
-const navigation = [
-  { name: "Discovery", href: "/", icon: "🔍" },
-  { name: "Dashboard", href: "/dashboard", icon: "📊" },
-  { name: "Account", href: "/account", icon: "👤" },
-];
-
 export const Layout: React.FC<LayoutProps> = ({ children }) => {
   const location = useLocation();
+  const { user, sessionUserId } = useAuth();
+
+  const navigation = useMemo(
+    () => [
+      { name: "New Campaign", href: "/", disabled: false },
+      {
+        name: "My Campaigns",
+        href: "/dashboard",
+        disabled: !user,
+      },
+    ],
+    [user, sessionUserId]
+  );
 
   return (
     <div className="min-h-screen bg-gray-100 text-gray-900 transition-colors dark:bg-slate-900 dark:text-slate-100">
@@ -38,23 +46,34 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
           </div>
         </div>
       </header>
-
       <nav className="border-b border-gray-200 bg-white text-sm font-medium transition-colors dark:border-slate-700 dark:bg-slate-900">
         <div className="mx-auto flex max-w-5xl items-center px-6">
           {navigation.map((item) => {
-            const isActive = location.pathname === item.href;
+            const isActive = !item.disabled && location.pathname === item.href;
+
+            if (item.disabled) {
+              return (
+                <span
+                  key={item.name}
+                  className="flex items-center border-b-2 border-transparent px-4 py-3 text-gray-400"
+                  aria-disabled="true"
+                >
+                  {item.name}
+                </span>
+              );
+            }
+
             return (
               <Link
                 key={item.name}
                 to={item.href}
-                className={`flex items-center space-x-2 border-b-2 px-4 py-3 transition-colors ${
+                className={`flex items-center border-b-2 px-4 py-3 transition-colors ${
                   isActive
                     ? "border-blue-600 text-blue-700 dark:border-sky-400 dark:text-sky-300"
                     : "border-transparent text-gray-600 hover:text-gray-900 dark:text-slate-400 dark:hover:text-slate-50"
                 }`}
               >
-                <span aria-hidden="true">{item.icon}</span>
-                <span>{item.name}</span>
+                {item.name}
               </Link>
             );
           })}

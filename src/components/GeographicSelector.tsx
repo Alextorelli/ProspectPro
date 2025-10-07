@@ -148,61 +148,46 @@ export const GeographicSelector: React.FC<GeographicSelectorProps> = ({
   // Simple map visualization using CSS
   const SimpleMapView: React.FC = () => {
     const getRadiusSize = (radiusInMiles: number) => {
-      // Scale radius for visual representation (max 200px)
-      return Math.min(radiusInMiles * 4, 200);
+      return Math.min(radiusInMiles * 3.6, 160);
     };
 
     return (
-      <div
-        className="relative bg-gradient-to-br from-green-100 to-blue-100 rounded-lg overflow-hidden border border-gray-300"
-        style={{ height: "300px" }}
-      >
-        {/* Map Background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-green-50 to-blue-50 opacity-50"></div>
+      <div className="relative h-full w-full overflow-hidden bg-gradient-to-br from-green-100 via-blue-50 to-blue-100">
+        <div className="absolute inset-0 bg-gradient-to-br from-green-50 via-white to-blue-100 opacity-60" />
 
-        {/* Grid lines for map effect */}
         <div className="absolute inset-0 opacity-20">
-          {[...Array(6)].map((_, i) => (
+          {[...Array(6)].map((_, index) => (
             <div
-              key={`h-${i}`}
-              className="absolute border-t border-gray-400"
-              style={{ top: `${i * 20}%`, width: "100%" }}
+              key={`h-${index}`}
+              className="absolute border-t border-gray-400/70"
+              style={{ top: `${index * 20}%`, width: "100%" }}
             />
           ))}
-          {[...Array(8)].map((_, i) => (
+          {[...Array(8)].map((_, index) => (
             <div
-              key={`v-${i}`}
-              className="absolute border-l border-gray-400"
-              style={{ left: `${i * 12.5}%`, height: "100%" }}
+              key={`v-${index}`}
+              className="absolute border-l border-gray-400/70"
+              style={{ left: `${index * 12.5}%`, height: "100%" }}
             />
           ))}
         </div>
 
-        {/* Center point */}
-        <div
-          className="absolute transform -translate-x-1/2 -translate-y-1/2 z-10"
-          style={{ top: "50%", left: "50%" }}
-        >
-          {/* Radius circle */}
+        <div className="absolute left-1/2 top-1/2 z-10 -translate-x-1/2 -translate-y-1/2">
           <div
-            className="absolute border-2 border-blue-500 border-dashed rounded-full bg-blue-200 bg-opacity-30 transform -translate-x-1/2 -translate-y-1/2"
+            className="absolute -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-blue-500 border-dashed bg-blue-200/40"
             style={{
               width: `${getRadiusSize(radius)}px`,
               height: `${getRadiusSize(radius)}px`,
             }}
           />
 
-          {/* Location pin */}
-          <div className="relative bg-red-500 rounded-full w-4 h-4 border-2 border-white shadow-lg">
-            <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-2 border-r-2 border-t-4 border-transparent border-t-red-500"></div>
+          <div className="relative h-4 w-4 rounded-full border-2 border-white bg-red-500 shadow-lg">
+            <div className="absolute left-1/2 top-full -ml-[2px] border-l-[2px] border-r-[2px] border-t-[6px] border-l-transparent border-r-transparent border-t-red-500" />
           </div>
         </div>
 
-        {/* Location info overlay */}
-        <div className="absolute bottom-2 left-2 right-2 bg-white bg-opacity-90 rounded p-2">
-          <div className="text-xs font-medium text-gray-800 truncate">
-            {location.address}
-          </div>
+        <div className="absolute bottom-3 left-3 right-3 rounded-md bg-white/90 px-3 py-2 text-xs font-medium text-gray-800 shadow-sm">
+          {location.address}
         </div>
       </div>
     );
@@ -366,46 +351,55 @@ export const GeographicSelector: React.FC<GeographicSelectorProps> = ({
 
       {/* Map Visualization */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          Geographic Coverage
-        </label>
-        <div className="relative">
-          <div
-            ref={mapContainerRef}
-            className={`h-80 w-full rounded-lg border border-gray-300 dark:border-gray-600 overflow-hidden ${
-              mapStatus === "ready" ? "block" : "hidden"
-            }`}
-          />
+        <div className="mb-2 flex items-center justify-between">
+          <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+            Geographic Coverage
+          </label>
+          <span className="text-xs text-gray-500 dark:text-slate-400">
+            Preview adjusts as you refine the radius
+          </span>
+        </div>
+        <div className="relative overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900/60">
+          <div className="relative aspect-[4/3] w-full max-h-[340px]">
+            <div
+              ref={mapContainerRef}
+              className={`absolute inset-0 h-full w-full transition-opacity duration-300 ${
+                mapStatus === "ready"
+                  ? "opacity-100"
+                  : "pointer-events-none opacity-0"
+              }`}
+            />
 
-          {mapStatus !== "ready" && (
-            <div className="relative">
-              <SimpleMapView />
+            {mapStatus !== "ready" && (
+              <div className="absolute inset-0">
+                <SimpleMapView />
 
-              {googleMapsApiKey && mapStatus === "loading" && (
-                <div className="absolute inset-0 flex items-center justify-center bg-white/80 dark:bg-gray-900/70">
-                  <div className="flex items-center space-x-3 text-sm text-gray-700 dark:text-gray-200">
-                    <span className="inline-flex h-4 w-4 border-2 border-blue-400 border-t-transparent rounded-full animate-spin"></span>
-                    <span>Loading interactive map…</span>
+                {googleMapsApiKey && mapStatus === "loading" && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-white/80 dark:bg-slate-900/80">
+                    <div className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-slate-200">
+                      <span className="inline-flex h-4 w-4 animate-spin rounded-full border-2 border-blue-400 border-t-transparent" />
+                      <span>Loading interactive map…</span>
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
 
-              {googleMapsApiKey && mapStatus === "error" && (
-                <div className="absolute inset-0 flex items-center justify-center px-4 text-center">
-                  <div className="text-sm font-medium text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg px-3 py-2">
-                    Unable to load Google Maps. Please verify your API key in
-                    the environment configuration.
+                {googleMapsApiKey && mapStatus === "error" && (
+                  <div className="absolute inset-0 flex items-center justify-center px-4 text-center">
+                    <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm font-medium text-red-600 dark:border-red-800 dark:bg-red-900/30 dark:text-red-300">
+                      Unable to load Google Maps. Please verify your API key in
+                      the environment configuration.
+                    </div>
                   </div>
-                </div>
-              )}
-            </div>
-          )}
+                )}
+              </div>
+            )}
 
-          {!googleMapsApiKey && (
-            <div className="absolute top-2 right-2 px-3 py-1 bg-gray-900/70 text-white text-xs rounded shadow">
-              Add a Google Maps API key for interactive coverage
-            </div>
-          )}
+            {!googleMapsApiKey && (
+              <div className="absolute left-3 top-3 rounded-full bg-gray-900/70 px-3 py-1 text-xs font-semibold text-white shadow">
+                Add a Google Maps API key for live coverage
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>

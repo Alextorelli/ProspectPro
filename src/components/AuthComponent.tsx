@@ -36,11 +36,26 @@ export const AuthComponent: React.FC<AuthComponentProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [showEmailForm, setShowEmailForm] = useState(false);
-  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuContainerRef = useRef<HTMLDivElement | null>(null);
+  const hasEnsuredProfileRef = useRef(false);
+  const captchaWidgetIdRef = useRef<string | null>(null);
 
   const combinedLoading = authLoading || localLoading;
+
+  const resetForm = useCallback(() => {
+    setIsSignUp(false);
+    setEmail("");
+    setPassword("");
+    setConfirmPassword("");
+    setFullName("");
+    setError(null);
+    setSuccess(null);
+
+    if (window.hcaptcha && captchaWidgetIdRef.current) {
+      window.hcaptcha.reset(captchaWidgetIdRef.current);
+    }
+  }, []);
 
   useEffect(() => {
     if (onAuthChange) {
@@ -48,21 +63,24 @@ export const AuthComponent: React.FC<AuthComponentProps> = ({
     }
   }, [authUser, onAuthChange]);
 
-  const hasEnsuredProfileRef = useRef(false);
-
   useEffect(() => {
     if (authUser && !hasEnsuredProfileRef.current) {
       hasEnsuredProfileRef.current = true;
       void createUserProfile(authUser);
     }
+
     if (!authUser) {
       hasEnsuredProfileRef.current = false;
       setIsMenuOpen(false);
+      setShowEmailForm(false);
+      resetForm();
     }
-  }, [authUser]);
+  }, [authUser, resetForm]);
 
   useEffect(() => {
-    if (!isMenuOpen) return;
+    if (!isMenuOpen) {
+      return;
+    }
 
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -70,12 +88,16 @@ export const AuthComponent: React.FC<AuthComponentProps> = ({
         !menuContainerRef.current.contains(event.target as Node)
       ) {
         setIsMenuOpen(false);
+        setShowEmailForm(false);
+        resetForm();
       }
     };
 
     const handleEscape = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         setIsMenuOpen(false);
+        setShowEmailForm(false);
+        resetForm();
       }
     };
 
@@ -86,7 +108,48 @@ export const AuthComponent: React.FC<AuthComponentProps> = ({
       document.removeEventListener("mousedown", handleClickOutside);
       document.removeEventListener("keydown", handleEscape);
     };
-  }, [isMenuOpen]);
+  }, [isMenuOpen, resetForm]);
+
+  const initializeCaptcha = useCallback(() => {
+    if (!showEmailForm || !isSignUp) {
+      return;
+    }
+
+    if (!window.hcaptcha || captchaWidgetIdRef.current) {
+      return;
+    }
+
+    try {
+      const widgetId = window.hcaptcha.render("auth-hcaptcha-container", {
+        sitekey: import.meta.env.VITE_HCAPTCHA_SITE_KEY,
+        size: "invisible",
+        callback: () => undefined,
+      });
+      captchaWidgetIdRef.current = widgetId;
+    } catch (err) {
+      console.warn("Unable to initialize hCaptcha", err);
+    }
+  }, [isSignUp, showEmailForm]);
+
+  const executeCaptcha = useCallback(async () => {
+    if (!window.hcaptcha || !captchaWidgetIdRef.current) {
+      return null;
+    }
+
+    try {
+      const result = await window.hcaptcha.execute(captchaWidgetIdRef.current);
+      return result.response;
+    } catch (err) {
+      console.warn("Unable to complete hCaptcha", err);
+      return null;
+    }
+  }, []);
+
+  useEffect(() => {
+    if (showEmailForm && isSignUp) {
+      initializeCaptcha();
+    }
+  }, [showEmailForm, isSignUp, initializeCaptcha]);
 
   const createUserProfile = async (user: User) => {
     try {
@@ -103,7 +166,6 @@ export const AuthComponent: React.FC<AuthComponentProps> = ({
       ]);
 
       if (error && error.code !== "23505") {
-        // Ignore duplicate key errors
         console.error("Error creating user profile:", error);
       }
     } catch (err) {
@@ -112,14 +174,26 @@ export const AuthComponent: React.FC<AuthComponentProps> = ({
   };
 
   const validatePassword = (password: string): string | null => {
-    if (password.length < 8) return "Password must be at least 8 characters";
+    if (password.length < 8) {
+      return "Password must be at least 8 characters";
+    }
     if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(password)) {
       return "Password must contain uppercase, lowercase, and number";
     }
     return null;
   };
 
-  const handleEmailAuth = async (e: React.FormEvent) => {
+  const getRedirectTo = () => {
+    if (typeof window !== "undefined" && window.location?.origin) {
+      return (
+        import.meta.env.VITE_AUTH_REDIRECT_URL ?? `${window.location.origin}/`
+      );
+    }
+
+    return import.meta.env.VITE_AUTH_REDIRECT_URL ?? "/";
+  };
+
+  const handleEmailAuth = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError(null);
     setSuccess(null);
@@ -127,55 +201,67 @@ export const AuthComponent: React.FC<AuthComponentProps> = ({
 
     try {
       if (isSignUp) {
-        // Validate signup data
         if (password !== confirmPassword) {
-          throw new Error("Passwords do not match");
+          setError("Passwords do not match");
+          setLocalLoading(false);
+          return;
         }
 
-        const passwordError = validatePassword(password);
-        if (passwordError) {
-          throw new Error(passwordError);
+        const passwordValidationError = validatePassword(password);
+        if (passwordValidationError) {
+          setError(passwordValidationError);
+          setLocalLoading(false);
+          return;
         }
 
-        const signUpData: any = {
+        if (window.hcaptcha) {
+          const token = await executeCaptcha();
+          if (!token) {
+            setError("Captcha verification failed. Please try again.");
+            setLocalLoading(false);
+            return;
+          }
+        }
+
+        const { error: signUpError } = await supabase.auth.signUp({
           email,
           password,
           options: {
-            emailRedirectTo: `${window.location.origin}/auth/callback`,
+            emailRedirectTo: getRedirectTo(),
             data: {
-              full_name: fullName,
+              full_name: fullName.trim(),
             },
           },
-        };
+        });
 
-        // Add CAPTCHA token if available
-        if (captchaToken) {
-          signUpData.options.captchaToken = captchaToken;
+        if (signUpError) {
+          throw signUpError;
         }
 
-        const { error } = await supabase.auth.signUp(signUpData);
-
-        if (error) throw error;
-
         setSuccess(
-          "Account created! Please check your email for the confirmation link. You may need to check your spam folder."
+          "Check your email to confirm your account. Once confirmed, sign in to continue."
         );
-        // Reset form
-        setEmail("");
-        setPassword("");
-        setConfirmPassword("");
-        setFullName("");
-        setCaptchaToken(null);
+        resetForm();
+        setShowEmailForm(false);
+        setIsMenuOpen(false);
       } else {
-        const { error } = await supabase.auth.signInWithPassword({
+        const { error: signInError } = await supabase.auth.signInWithPassword({
           email,
           password,
         });
 
-        if (error) throw error;
+        if (signInError) {
+          throw signInError;
+        }
+
+        resetForm();
+        setShowEmailForm(false);
+        setIsMenuOpen(false);
       }
-    } catch (err: any) {
-      setError(err.message || "An error occurred during authentication");
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : "Authentication failed.";
+      setError(message);
     } finally {
       setLocalLoading(false);
     }
@@ -187,10 +273,10 @@ export const AuthComponent: React.FC<AuthComponentProps> = ({
     setLocalLoading(true);
 
     try {
-      const { error } = await supabase.auth.signInWithOAuth({
+      const { error: oauthError } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
+          redirectTo: getRedirectTo(),
           queryParams: {
             access_type: "offline",
             prompt: "consent",
@@ -198,40 +284,36 @@ export const AuthComponent: React.FC<AuthComponentProps> = ({
         },
       });
 
-      if (error) throw error;
-    } catch (err: any) {
-      setError(err.message);
+      if (oauthError) {
+        throw oauthError;
+      }
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : "Google sign-in failed.";
+      setError(message);
     } finally {
       setLocalLoading(false);
     }
   };
 
-  const handleSignOut = useCallback(async () => {
+  const handleSignOut = async () => {
     setLocalLoading(true);
     setError(null);
+
     try {
       await contextSignOut();
       resetForm();
       setIsMenuOpen(false);
-    } catch (err: any) {
-      setError(err.message ?? "Unable to sign out");
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : "Unable to sign out right now.";
+      setError(message);
     } finally {
       setLocalLoading(false);
     }
-  }, [contextSignOut]);
-
-  const resetForm = () => {
-    setEmail("");
-    setPassword("");
-    setConfirmPassword("");
-    setFullName("");
-    setError(null);
-    setSuccess(null);
-    setCaptchaToken(null);
-    setShowEmailForm(false);
   };
 
-  if (combinedLoading) {
+  if (combinedLoading && !authUser) {
     return (
       <div className="flex items-center space-x-2">
         <div className="h-4 w-4 animate-spin rounded-full border-2 border-gray-500 border-t-blue-600"></div>
@@ -315,36 +397,19 @@ export const AuthComponent: React.FC<AuthComponentProps> = ({
             <div className="flex flex-col gap-1" role="none">
               <Link
                 to="/account"
-                className="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-blue-50 hover:text-blue-700 dark:text-slate-200 dark:hover:bg-slate-800"
+                className="rounded-md px-3 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-blue-50 hover:text-blue-700 dark:text-slate-200 dark:hover:bg-slate-800"
                 role="menuitem"
                 onClick={() => setIsMenuOpen(false)}
               >
-                <span aria-hidden="true" role="img">
-                  ⚙️
-                </span>
                 Account settings
-              </Link>
-              <Link
-                to="/dashboard"
-                className="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-blue-50 hover:text-blue-700 dark:text-slate-200 dark:hover:bg-slate-800"
-                role="menuitem"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                <span aria-hidden="true" role="img">
-                  📊
-                </span>
-                Dashboard overview
               </Link>
               <button
                 type="button"
                 onClick={handleSignOut}
                 disabled={combinedLoading}
-                className="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-semibold text-red-600 transition-colors hover:bg-red-50 disabled:opacity-60 dark:text-rose-400 dark:hover:bg-rose-500/10"
+                className="rounded-md px-3 py-2 text-sm font-semibold text-red-600 transition-colors hover:bg-red-50 disabled:opacity-60 dark:text-rose-400 dark:hover:bg-rose-500/10"
                 role="menuitem"
               >
-                <span aria-hidden="true" role="img">
-                  🚪
-                </span>
                 Sign out
               </button>
             </div>
@@ -355,134 +420,194 @@ export const AuthComponent: React.FC<AuthComponentProps> = ({
   }
 
   return (
-    <div className="flex items-center space-x-4">
-      {/* Quick Google Sign In */}
+    <div className="relative" ref={menuContainerRef}>
       <button
-        onClick={handleGoogleAuth}
-        disabled={combinedLoading}
-        className="flex items-center space-x-2 rounded-md border border-gray-400 bg-white px-4 py-2 text-sm font-medium text-gray-800 shadow-sm transition-colors hover:bg-gray-50 disabled:opacity-50"
+        type="button"
+        onClick={() =>
+          setIsMenuOpen((prev) => {
+            const next = !prev;
+            if (!next) {
+              setShowEmailForm(false);
+              resetForm();
+            }
+            return next;
+          })
+        }
+        className="inline-flex items-center gap-2 rounded-full border border-blue-200 bg-white/80 px-4 py-1.5 text-sm font-semibold text-blue-700 shadow-sm transition-colors hover:border-blue-400 hover:bg-white dark:border-sky-500/40 dark:bg-slate-900/70 dark:text-sky-200"
+        aria-haspopup="menu"
+        aria-expanded={isMenuOpen}
       >
-        <svg className="w-4 h-4" viewBox="0 0 24 24">
+        <span>Sign in / Sign up</span>
+        <svg
+          className={`h-4 w-4 text-blue-500 transition-transform dark:text-sky-300 ${
+            isMenuOpen ? "rotate-180" : ""
+          }`}
+          viewBox="0 0 20 20"
+          fill="currentColor"
+          aria-hidden="true"
+        >
           <path
-            fill="#4285f4"
-            d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-          />
-          <path
-            fill="#34a853"
-            d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-          />
-          <path
-            fill="#fbbc05"
-            d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-          />
-          <path
-            fill="#ea4335"
-            d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+            fillRule="evenodd"
+            d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 011.08 1.04l-4.25 4.25a.75.75 0 01-1.08 0L5.21 8.27a.75.75 0 01.02-1.06z"
+            clipRule="evenodd"
           />
         </svg>
-        <span>Sign in with Google</span>
       </button>
 
-      {/* Email/Password Toggle */}
-      <div className="relative">
-        <button
-          onClick={() => {
-            setShowEmailForm(!showEmailForm);
-            if (!showEmailForm) resetForm();
-          }}
-          className="text-sm font-medium text-blue-700 transition-colors hover:text-blue-800"
+      {isMenuOpen && (
+        <div
+          className="absolute right-0 z-50 mt-2 w-80 rounded-lg border border-gray-200 bg-white p-4 text-sm shadow-xl dark:border-slate-700 dark:bg-slate-900"
+          role="menu"
+          aria-label="Authentication menu"
         >
-          {showEmailForm ? "Cancel" : "Use Email"}
-        </button>
-      </div>
-
-      {/* Email/Password Form - Expandable */}
-      {showEmailForm && (
-        <div className="absolute right-0 top-full z-50 mt-2 min-w-80 rounded-md border border-gray-300 bg-white p-4 shadow-lg">
-          <div className="mb-3">
+          <div className="space-y-4" role="none">
             <button
-              onClick={() => {
-                setIsSignUp(!isSignUp);
-                resetForm();
-              }}
-              className="text-sm font-medium text-blue-700 transition-colors hover:text-blue-800"
-            >
-              {isSignUp
-                ? "Already have an account? Sign In"
-                : "New user? Create Account"}
-            </button>
-          </div>
-
-          <form onSubmit={handleEmailAuth} className="space-y-3">
-            {isSignUp && (
-              <input
-                type="text"
-                placeholder="Full Name"
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                className="w-full rounded border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                required
-              />
-            )}
-
-            <input
-              type="email"
-              placeholder="Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full rounded border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
-            />
-
-            <input
-              type="password"
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full rounded border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
-            />
-
-            {isSignUp && (
-              <input
-                type="password"
-                placeholder="Confirm Password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                className="w-full rounded border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                required
-              />
-            )}
-
-            <button
-              type="submit"
+              type="button"
+              onClick={handleGoogleAuth}
               disabled={combinedLoading}
-              className="w-full rounded bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:opacity-50"
+              className="flex w-full items-center justify-center gap-2 rounded-md border border-gray-300 bg-white px-4 py-2 font-medium text-gray-800 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700"
+              role="menuitem"
             >
-              {combinedLoading ? (
-                <div className="flex items-center justify-center space-x-2">
-                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
-                  <span>
-                    {isSignUp ? "Creating Account..." : "Signing In..."}
-                  </span>
-                </div>
-              ) : (
-                <span>{isSignUp ? "Create Account" : "Sign In"}</span>
-              )}
+              <svg className="h-4 w-4" viewBox="0 0 24 24">
+                <path
+                  fill="#4285f4"
+                  d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                />
+                <path
+                  fill="#34a853"
+                  d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                />
+                <path
+                  fill="#fbbc05"
+                  d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+                />
+                <path
+                  fill="#ea4335"
+                  d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                />
+              </svg>
+              <span>Continue with Google</span>
             </button>
-          </form>
 
-          {error && (
-            <div className="mt-3 rounded border border-red-300 bg-red-50 p-2 text-sm text-red-600">
-              {error}
+            <div className="flex items-center gap-3 text-xs uppercase tracking-wide text-gray-400 dark:text-slate-500">
+              <span className="h-px flex-1 bg-gray-200 dark:bg-slate-700" />
+              <span>or</span>
+              <span className="h-px flex-1 bg-gray-200 dark:bg-slate-700" />
             </div>
-          )}
 
-          {success && (
-            <div className="mt-3 rounded border border-green-300 bg-green-50 p-2 text-sm text-green-700">
-              {success}
-            </div>
-          )}
+            <button
+              type="button"
+              onClick={() => {
+                const next = !showEmailForm;
+                setShowEmailForm(next);
+                setError(null);
+                setSuccess(null);
+
+                if (!next) {
+                  resetForm();
+                }
+              }}
+              className="w-full rounded-md border border-transparent bg-blue-50 px-4 py-2 text-sm font-semibold text-blue-700 transition-colors hover:bg-blue-100 dark:bg-sky-500/10 dark:text-sky-200 dark:hover:bg-sky-500/20"
+              role="menuitem"
+            >
+              {showEmailForm ? "Hide email options" : "Continue with email"}
+            </button>
+
+            {showEmailForm && (
+              <div className="rounded-md border border-gray-200 bg-gray-50 p-4 dark:border-slate-700 dark:bg-slate-800">
+                <div className="mb-3 flex items-center justify-between">
+                  <p className="text-sm font-semibold text-gray-700 dark:text-slate-200">
+                    {isSignUp ? "Create an account" : "Sign in with email"}
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsSignUp((prev) => !prev);
+                      setError(null);
+                      setSuccess(null);
+                    }}
+                    className="text-xs font-medium text-blue-600 transition-colors hover:text-blue-700 dark:text-sky-300 dark:hover:text-sky-200"
+                  >
+                    {isSignUp
+                      ? "Have an account? Sign in"
+                      : "New user? Create account"}
+                  </button>
+                </div>
+
+                <form onSubmit={handleEmailAuth} className="space-y-3">
+                  {isSignUp && (
+                    <input
+                      type="text"
+                      placeholder="Full name"
+                      value={fullName}
+                      onChange={(event) => setFullName(event.target.value)}
+                      className="w-full rounded border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
+                      required
+                    />
+                  )}
+
+                  <input
+                    type="email"
+                    placeholder="Email"
+                    value={email}
+                    onChange={(event) => setEmail(event.target.value)}
+                    className="w-full rounded border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
+                    required
+                  />
+
+                  <input
+                    type="password"
+                    placeholder="Password"
+                    value={password}
+                    onChange={(event) => setPassword(event.target.value)}
+                    className="w-full rounded border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
+                    required
+                  />
+
+                  {isSignUp && (
+                    <input
+                      type="password"
+                      placeholder="Confirm password"
+                      value={confirmPassword}
+                      onChange={(event) =>
+                        setConfirmPassword(event.target.value)
+                      }
+                      className="w-full rounded border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
+                      required
+                    />
+                  )}
+
+                  <button
+                    type="submit"
+                    disabled={combinedLoading}
+                    className="w-full rounded bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-sky-500 dark:hover:bg-sky-600"
+                  >
+                    {combinedLoading ? (
+                      <span>Processing…</span>
+                    ) : isSignUp ? (
+                      "Create account"
+                    ) : (
+                      "Sign in"
+                    )}
+                  </button>
+                </form>
+
+                {error && (
+                  <div className="mt-3 rounded border border-red-200 bg-red-50 p-2 text-xs text-red-600 dark:border-rose-500/40 dark:bg-rose-500/10 dark:text-rose-200">
+                    {error}
+                  </div>
+                )}
+
+                {success && (
+                  <div className="mt-3 rounded border border-green-200 bg-green-50 p-2 text-xs text-green-700 dark:border-emerald-500/40 dark:bg-emerald-500/10 dark:text-emerald-200">
+                    {success}
+                  </div>
+                )}
+
+                <div id="auth-hcaptcha-container" className="hidden" />
+              </div>
+            )}
+          </div>
         </div>
       )}
     </div>
