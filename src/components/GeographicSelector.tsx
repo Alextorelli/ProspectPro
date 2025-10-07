@@ -193,6 +193,34 @@ export const GeographicSelector: React.FC<GeographicSelectorProps> = ({
     );
   };
 
+  const mapStatusStyles: Record<
+    MapStatus,
+    { label: string; className: string }
+  > = {
+    idle: {
+      label: "Static preview",
+      className:
+        "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300",
+    },
+    loading: {
+      label: "Loading maps",
+      className:
+        "bg-amber-100 text-amber-700 dark:bg-amber-500/10 dark:text-amber-200",
+    },
+    ready: {
+      label: "Live map",
+      className:
+        "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-200",
+    },
+    error: {
+      label: "Fallback preview",
+      className:
+        "bg-rose-100 text-rose-700 dark:bg-rose-500/10 dark:text-rose-200",
+    },
+  };
+
+  const currentMapStatus = mapStatusStyles[mapStatus];
+
   useEffect(() => {
     if (!googleMapsApiKey) {
       mapsApiRef.current = null;
@@ -286,81 +314,137 @@ export const GeographicSelector: React.FC<GeographicSelectorProps> = ({
   }, [mapStatus, location, radius]);
 
   return (
-    <div className="space-y-4">
-      {/* Address Input */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          Location
-        </label>
-        <div className="flex space-x-2">
-          <input
-            type="text"
-            value={address}
-            onChange={(e) => handleAddressChange(e.target.value)}
-            placeholder="Enter city, state, or address"
-            className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-            onKeyPress={(e) => e.key === "Enter" && handleAddressSearch()}
-            onBlur={handleAddressSearch}
-          />
-          <button
-            onClick={handleAddressSearch}
-            disabled={isGeocoding}
-            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 text-sm"
+    <div className="grid gap-6 lg:grid-cols-[minmax(0,380px),1fr]">
+      <div className="flex flex-col gap-4">
+        <section className="rounded-2xl border border-slate-200 bg-white/90 p-5 shadow-sm backdrop-blur dark:border-slate-700 dark:bg-slate-900/60">
+          <div className="space-y-5">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                Primary Location
+              </p>
+              <label className="mt-1 block text-base font-semibold text-slate-900 dark:text-slate-100">
+                Where should we focus discovery?
+              </label>
+              <div className="mt-3 flex flex-col gap-3 sm:flex-row">
+                <div className="flex flex-1 items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 shadow-sm transition focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500 dark:border-slate-600 dark:bg-slate-900">
+                  <svg
+                    className="h-5 w-5 text-blue-500 dark:text-sky-300"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                    aria-hidden="true"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M10 2a6 6 0 00-6 6c0 4.08 4.2 9.07 5.36 10.47a.84.84 0 001.28 0C11.8 17.07 16 12.08 16 8a6 6 0 00-6-6zm0 8.5a2.5 2.5 0 110-5 2.5 2.5 0 010 5z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                  <input
+                    type="text"
+                    value={address}
+                    onChange={(e) => handleAddressChange(e.target.value)}
+                    placeholder="Enter city, state, or address"
+                    className="flex-1 border-none bg-transparent text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:ring-0 dark:text-slate-100 dark:placeholder:text-slate-500"
+                    onKeyPress={(e) =>
+                      e.key === "Enter" && handleAddressSearch()
+                    }
+                    onBlur={handleAddressSearch}
+                    aria-label="Location search input"
+                  />
+                </div>
+                <button
+                  type="button"
+                  onClick={handleAddressSearch}
+                  disabled={isGeocoding}
+                  className="inline-flex items-center justify-center rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-sky-500 dark:hover:bg-sky-600"
+                >
+                  {isGeocoding ? "Searching…" : "Search"}
+                </button>
+              </div>
+              <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
+                Use a city, full address, or landmark. We’ll automatically match
+                nearby businesses.
+              </p>
+            </div>
+
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                Search Radius
+              </p>
+              <label className="mt-1 block text-base font-semibold text-slate-900 dark:text-slate-100">
+                How wide should we scan?
+              </label>
+              <div
+                className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3"
+                role="radiogroup"
+                aria-label="Search radius in miles"
+              >
+                {radiusOptions.map((option) => {
+                  const isSelected = radius === option.value;
+                  return (
+                    <button
+                      key={option.value}
+                      type="button"
+                      role="radio"
+                      aria-checked={isSelected}
+                      onClick={() => handleRadiusChange(option.value)}
+                      className={`flex items-center justify-center rounded-lg border px-3 py-2 text-sm font-medium transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-slate-900 ${
+                        isSelected
+                          ? "border-blue-600 bg-blue-600 text-white shadow-sm dark:border-sky-400 dark:bg-sky-500"
+                          : "border-slate-200 bg-white text-slate-600 hover:border-blue-400 hover:text-blue-600 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-200 dark:hover:border-sky-400"
+                      }`}
+                    >
+                      {option.label}
+                    </button>
+                  );
+                })}
+              </div>
+              <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
+                Tip: 10–25 miles captures metro areas, 50+ miles is ideal for
+                statewide searches.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <section className="relative overflow-hidden rounded-2xl border border-blue-100 bg-gradient-to-br from-blue-50 via-white to-blue-100 p-5 shadow-sm dark:border-sky-500/30 dark:from-slate-900 dark:via-slate-900/70 dark:to-slate-900">
+          <div className="relative z-10 flex flex-col gap-2">
+            <p className="text-xs font-semibold uppercase tracking-wide text-blue-600 dark:text-sky-300">
+              Approximate Coverage
+            </p>
+            <p className="text-2xl font-semibold text-blue-900 dark:text-slate-100">
+              ~{Math.round(Math.PI * radius * radius)} square miles
+            </p>
+            <p className="text-sm text-blue-700 dark:text-sky-200">
+              Radius: {radius} miles · {location.address}
+            </p>
+          </div>
+          <div className="pointer-events-none absolute -right-16 -top-16 h-32 w-32 rounded-full border border-blue-200/70 bg-blue-200/40 dark:border-sky-500/40 dark:bg-sky-500/10" />
+          <div className="pointer-events-none absolute -bottom-20 -left-10 h-28 w-28 rounded-full border border-blue-100/60 bg-blue-100/30 dark:border-sky-500/20 dark:bg-sky-500/10" />
+        </section>
+      </div>
+
+      <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-900/60">
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+              Geographic Coverage
+            </p>
+            <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
+              Visualize your target radius
+            </h3>
+            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+              The preview updates instantly as you adjust the radius or address.
+            </p>
+          </div>
+          <span
+            className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-semibold ${currentMapStatus.className}`}
           >
-            {isGeocoding ? "..." : "Search"}
-          </button>
-        </div>
-      </div>
-
-      {/* Radius Selection */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          Search Radius
-        </label>
-        <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
-          {radiusOptions.map((option) => (
-            <button
-              key={option.value}
-              onClick={() => handleRadiusChange(option.value)}
-              className={`px-3 py-2 text-sm rounded-md border ${
-                radius === option.value
-                  ? "bg-blue-600 text-white border-blue-600"
-                  : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
-              }`}
-            >
-              {option.label}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Coverage Callout */}
-      <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-md flex items-center justify-between">
-        <div>
-          <p className="text-xs uppercase tracking-wide text-blue-600 dark:text-blue-300 font-semibold">
-            Approximate Coverage
-          </p>
-          <p className="text-lg font-semibold text-blue-800 dark:text-blue-100">
-            ~{Math.round(Math.PI * radius * radius)} square miles
-          </p>
-        </div>
-        <div className="text-sm text-blue-700 dark:text-blue-200">
-          Radius: {radius} miles
-        </div>
-      </div>
-
-      {/* Map Visualization */}
-      <div>
-        <div className="mb-2 flex items-center justify-between">
-          <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-            Geographic Coverage
-          </label>
-          <span className="text-xs text-gray-500 dark:text-slate-400">
-            Preview adjusts as you refine the radius
+            {currentMapStatus.label}
           </span>
         </div>
-        <div className="relative overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900/60">
-          <div className="relative aspect-[4/3] w-full max-h-[340px]">
+        <div className="relative overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900/80">
+          <div className="relative aspect-[4/3] w-full max-h-[360px]">
             <div
               ref={mapContainerRef}
               className={`absolute inset-0 h-full w-full transition-opacity duration-300 ${
@@ -376,7 +460,7 @@ export const GeographicSelector: React.FC<GeographicSelectorProps> = ({
 
                 {googleMapsApiKey && mapStatus === "loading" && (
                   <div className="absolute inset-0 flex items-center justify-center bg-white/80 dark:bg-slate-900/80">
-                    <div className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-slate-200">
+                    <div className="flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-slate-200">
                       <span className="inline-flex h-4 w-4 animate-spin rounded-full border-2 border-blue-400 border-t-transparent" />
                       <span>Loading interactive map…</span>
                     </div>
@@ -401,7 +485,7 @@ export const GeographicSelector: React.FC<GeographicSelectorProps> = ({
             )}
           </div>
         </div>
-      </div>
+      </section>
     </div>
   );
 };

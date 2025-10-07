@@ -184,13 +184,46 @@ export const AuthComponent: React.FC<AuthComponentProps> = ({
   };
 
   const getRedirectTo = () => {
-    if (typeof window !== "undefined" && window.location?.origin) {
-      return (
-        import.meta.env.VITE_AUTH_REDIRECT_URL ?? `${window.location.origin}/`
-      );
+    const defaultCallbackPath = "/auth/callback";
+
+    const ensureCallbackPath = (rawUrl: string | undefined | null) => {
+      if (!rawUrl) return null;
+
+      const trimmed = rawUrl.trim();
+      if (!trimmed) return null;
+
+      try {
+        const parsed = new URL(trimmed);
+
+        if (
+          parsed.pathname === "/" ||
+          parsed.pathname === "" ||
+          parsed.pathname === "//"
+        ) {
+          parsed.pathname = defaultCallbackPath;
+        }
+
+        return parsed.toString();
+      } catch {
+        const sanitized = trimmed.replace(/\/+$/, "");
+        return `${sanitized}${defaultCallbackPath}`;
+      }
+    };
+
+    const configuredRedirect = ensureCallbackPath(
+      import.meta.env.VITE_AUTH_REDIRECT_URL
+    );
+
+    if (configuredRedirect) {
+      return configuredRedirect;
     }
 
-    return import.meta.env.VITE_AUTH_REDIRECT_URL ?? "/";
+    if (typeof window !== "undefined" && window.location?.origin) {
+      const origin = window.location.origin.replace(/\/+$/, "");
+      return `${origin}${defaultCallbackPath}`;
+    }
+
+    return defaultCallbackPath;
   };
 
   const handleEmailAuth = async (e: React.FormEvent<HTMLFormElement>) => {
