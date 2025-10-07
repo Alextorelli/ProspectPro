@@ -1,4 +1,10 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import {
+  createUsageLogger,
+  UsageLogContext,
+  UsageLogParams,
+  UsageLogger,
+} from "../_shared/api-usage.ts";
 
 /**
  * ProspectPro v4.3 - Advanced Enrichment Orchestrator Edge Function
@@ -40,6 +46,11 @@ interface EnrichmentRequest {
   website?: string;
   industry?: string;
   state?: string;
+  campaignId?: string;
+  jobId?: string;
+  sessionUserId?: string;
+  userId?: string;
+  tierKey?: string;
 
   // Progressive enrichment options
   includeBusinessLicense?: boolean;
@@ -142,21 +153,67 @@ interface EnrichmentResponse {
   };
 }
 
+type PeopleDataLabsPersonResult = {
+  name?: string;
+  title?: string;
+  email?: string;
+  phone?: string;
+  linkedin?: string;
+  likelihood?: number;
+};
+
 class EnrichmentOrchestrator {
   private supabaseUrl: string;
   private supabaseKey: string;
   private maxCostPerBusiness: number;
+  private usageLogger?: UsageLogger;
+  private usageContext: UsageLogContext;
 
   constructor(
     supabaseUrl: string,
     supabaseKey: string,
-    maxCostPerBusiness = 2.0
+    maxCostPerBusiness = 2.0,
+    usageLogger?: UsageLogger,
+    usageContext: UsageLogContext = {}
   ) {
     this.supabaseUrl = supabaseUrl;
     this.supabaseKey = supabaseKey;
     this.maxCostPerBusiness = maxCostPerBusiness;
+    this.usageLogger = usageLogger;
+    this.usageContext = usageContext;
   }
 
+  private async logUsage(entry: UsageLogParams) {
+    if (!this.usageLogger) return;
+    await this.usageLogger.log({ ...this.usageContext, ...entry });
+  }
+
+  private estimatePeopleDataLabsCost(action: string): number {
+    switch (action) {
+      case "enrichCompany":
+        return 0.10;
+      case "enrichPerson":
+      case "enrichContact":
+        return 0.25;
+      case "search":
+        return 0.05;
+      default:
+        return 0.05;
+    }
+  }
+
+  private estimateHunterCost(action: string): number {
+    switch (action) {
+      case "domain-search":
+        return 0.012;
+      case "email-finder":
+        return 0.02;
+      case "email-verifier":
+        return 0.003;
+      default:
+        return 0.01;
+    }
+  }
   /**
    * Orchestrate all enrichment services for a single business
    */
@@ -429,16 +486,22 @@ class EnrichmentOrchestrator {
               jobTitle: "CEO OR Owner OR President OR Director",
               minLikelihood: 7,
             });
-            if (personResult.success && personResult.data?.results) {
-              response.enrichedData.personEnrichment =
-                personResult.data.results.map((person: any) => ({
-                  name: person.name,
-                  title: person.title,
+            if (
+              personResult.success &&
+              Array.isArray(personResult.data?.results)
+            ) {
+              const pdlResults =
+                personResult.data.results as PeopleDataLabsPersonResult[];
+              response.enrichedData.personEnrichment = pdlResults.map(
+                (person) => ({
+                  name: person.name ?? "Unknown",
+                  title: person.title ?? "",
                   email: person.email,
                   phone: person.phone,
                   linkedin: person.linkedin,
-                  confidence: person.likelihood,
-                }));
+                  confidence: person.likelihood ?? 0,
+                })
+              );
 
               response.costBreakdown.personEnrichmentCost =
                 personResult.cost || personEnrichmentCost;
@@ -447,9 +510,9 @@ class EnrichmentOrchestrator {
                 "peopledatalabs_person"
               );
 
-              console.log(
-                `✅ Found ${response.enrichedData.personEnrichment.length} executive contacts`
-              );
+              const executiveCount =
+                response.enrichedData.personEnrichment?.length ?? 0;
+              console.log(`✅ Found ${executiveCount} executive contacts`);
             }
           } catch (error) {
             console.error("Person enrichment error:", error);
@@ -585,76 +648,288 @@ class EnrichmentOrchestrator {
    * Call Business License Lookup Edge Function
    */
   private async callBusinessLicense(params: Record<string, unknown>) {
-    const response = await fetch(
-      `${this.supabaseUrl}/functions/v1/enrichment-business-license`,
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${this.supabaseKey}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(params),
-      }
-    );
+    const startedAt = performance.now();
+    let response: Response | null = null;
+    try {
+      response = await fetch(
+        `${this.supabaseUrl}/functions/v1/enrichment-business-license`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${this.supabaseKey}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(params),
+        }
+      );
 
-    return await response.json();
+      const payload = await response.json();
+
+      await this.logUsage({
+        sourceName: "business_license_lookup",
+        endpoint: String(params.action ?? "lookup"),
+        httpMethod: "POST",
+        requestParams: {
+          action: params.action,
+          companyName: params.companyName,
+          state: params.state,
+        },
+        queryType: "enrichment",
+        responseCode: response.status,
+        responseTimeMs: Math.round(performance.now() - startedAt),
+        success: response.ok && payload?.success !== false,
+        resultsReturned:
+          Array.isArray(payload?.data) ? payload.data.length : payload?.data ? 1 : 0,
+        estimatedCost: 0.03,
+        actualCost:
+          typeof payload?.cost === "number" ? payload.cost : response.ok ? 0.03 : 0,
+      });
+
+      return payload;
+    } catch (error) {
+      await this.logUsage({
+        sourceName: "business_license_lookup",
+        endpoint: String(params.action ?? "lookup"),
+        httpMethod: "POST",
+        requestParams: {
+          action: params.action,
+          companyName: params.companyName,
+          state: params.state,
+        },
+        queryType: "enrichment",
+        responseCode: response?.status ?? null,
+        responseTimeMs: Math.round(performance.now() - startedAt),
+        success: false,
+        errorMessage: error instanceof Error ? error.message : String(error),
+        estimatedCost: 0.03,
+        actualCost: 0,
+      });
+      throw error;
+    }
   }
 
   /**
    * Call PeopleDataLabs Edge Function
    */
   private async callPeopleDataLabs(params: Record<string, unknown>) {
-    const response = await fetch(
-      `${this.supabaseUrl}/functions/v1/enrichment-pdl`,
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${this.supabaseKey}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(params),
-      }
-    );
+    const startedAt = performance.now();
+    let response: Response | null = null;
+    const action = String(params.action ?? "request");
+    const estimatedCost = this.estimatePeopleDataLabsCost(action);
 
-    return await response.json();
+    try {
+      response = await fetch(
+        `${this.supabaseUrl}/functions/v1/enrichment-pdl`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${this.supabaseKey}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(params),
+        }
+      );
+
+      const payload = await response.json();
+      const results = Array.isArray(payload?.data?.results)
+        ? payload.data.results.length
+        : payload?.data
+        ? 1
+        : 0;
+
+      await this.logUsage({
+        sourceName: "peopledatalabs",
+        endpoint: action,
+        httpMethod: "POST",
+        requestParams: {
+          action,
+          companyName: params.companyName,
+          website: params.website,
+          domain: params.domain,
+          jobTitle: params.jobTitle,
+        },
+        queryType: "enrichment",
+        responseCode: response.status,
+        responseTimeMs: Math.round(performance.now() - startedAt),
+        resultsReturned: results,
+        usefulResults: results,
+        success: response.ok && payload?.success !== false,
+        estimatedCost,
+        actualCost:
+          typeof payload?.cost === "number" ? payload.cost : response.ok ? estimatedCost : 0,
+      });
+
+      return payload;
+    } catch (error) {
+      await this.logUsage({
+        sourceName: "peopledatalabs",
+        endpoint: action,
+        httpMethod: "POST",
+        requestParams: {
+          action,
+          companyName: params.companyName,
+          website: params.website,
+          domain: params.domain,
+          jobTitle: params.jobTitle,
+        },
+        queryType: "enrichment",
+        responseCode: response?.status ?? null,
+        responseTimeMs: Math.round(performance.now() - startedAt),
+        success: false,
+        errorMessage: error instanceof Error ? error.message : String(error),
+        estimatedCost,
+        actualCost: 0,
+      });
+      throw error;
+    }
   }
 
   /**
    * Call Hunter.io Edge Function
    */
   private async callHunterIO(params: Record<string, unknown>) {
-    const response = await fetch(
-      `${this.supabaseUrl}/functions/v1/enrichment-hunter`,
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${this.supabaseKey}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(params),
-      }
-    );
+    const startedAt = performance.now();
+    let response: Response | null = null;
+    const action = String(params.action ?? "request");
+    const estimatedCost = this.estimateHunterCost(action);
 
-    return await response.json();
+    try {
+      response = await fetch(
+        `${this.supabaseUrl}/functions/v1/enrichment-hunter`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${this.supabaseKey}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(params),
+        }
+      );
+
+      const payload = await response.json();
+      const emails = Array.isArray(payload?.data?.emails)
+        ? payload.data.emails.length
+        : payload?.data
+        ? 1
+        : 0;
+
+      await this.logUsage({
+        sourceName: "hunter_io",
+        endpoint: action,
+        httpMethod: "POST",
+        requestParams: {
+          action,
+          domain: params.domain,
+          companyName: params.companyName,
+          limit: params.limit,
+        },
+        queryType: "enrichment",
+        responseCode: response.status,
+        responseTimeMs: Math.round(performance.now() - startedAt),
+        resultsReturned: emails,
+        usefulResults: emails,
+        success: response.ok && payload?.success !== false,
+        estimatedCost,
+        actualCost:
+          typeof payload?.cost === "number" ? payload.cost : response.ok ? estimatedCost : 0,
+      });
+
+      return payload;
+    } catch (error) {
+      await this.logUsage({
+        sourceName: "hunter_io",
+        endpoint: action,
+        httpMethod: "POST",
+        requestParams: {
+          action,
+          domain: params.domain,
+          companyName: params.companyName,
+          limit: params.limit,
+        },
+        queryType: "enrichment",
+        responseCode: response?.status ?? null,
+        responseTimeMs: Math.round(performance.now() - startedAt),
+        success: false,
+        errorMessage: error instanceof Error ? error.message : String(error),
+        estimatedCost,
+        actualCost: 0,
+      });
+      throw error;
+    }
   }
 
   /**
    * Call NeverBounce Edge Function
    */
   private async callNeverBounce(params: Record<string, unknown>) {
-    const response = await fetch(
-      `${this.supabaseUrl}/functions/v1/enrichment-neverbounce`,
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${this.supabaseKey}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(params),
-      }
-    );
+    const startedAt = performance.now();
+    let response: Response | null = null;
+    const emailCount = Array.isArray(params.emails)
+      ? params.emails.length
+      : params.email
+      ? 1
+      : 0;
+    const estimatedCost = emailCount * 0.008;
 
-    return await response.json();
+    try {
+      response = await fetch(
+        `${this.supabaseUrl}/functions/v1/enrichment-neverbounce`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${this.supabaseKey}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(params),
+        }
+      );
+
+      const payload = await response.json();
+      const verified = Array.isArray(payload?.data?.results)
+        ? payload.data.results.length
+        : payload?.data
+        ? 1
+        : 0;
+
+      await this.logUsage({
+        sourceName: "neverbounce",
+        endpoint: String(params.action ?? "verify"),
+        httpMethod: "POST",
+        requestParams: {
+          action: params.action,
+          emailCount,
+        },
+        queryType: "enrichment",
+        responseCode: response.status,
+        responseTimeMs: Math.round(performance.now() - startedAt),
+        resultsReturned: verified,
+        usefulResults: verified,
+        success: response.ok && payload?.success !== false,
+        estimatedCost,
+        actualCost:
+          typeof payload?.cost === "number" ? payload.cost : response.ok ? estimatedCost : 0,
+      });
+
+      return payload;
+    } catch (error) {
+      await this.logUsage({
+        sourceName: "neverbounce",
+        endpoint: String(params.action ?? "verify"),
+        httpMethod: "POST",
+        requestParams: {
+          action: params.action,
+          emailCount,
+        },
+        queryType: "enrichment",
+        responseCode: response?.status ?? null,
+        responseTimeMs: Math.round(performance.now() - startedAt),
+        success: false,
+        errorMessage: error instanceof Error ? error.message : String(error),
+        estimatedCost,
+        actualCost: 0,
+      });
+      throw error;
+    }
   }
 
   /**
@@ -754,11 +1029,24 @@ serve(async (req) => {
       })`
     );
 
+    const usageContext: UsageLogContext = {
+      campaignId: requestData.campaignId ?? null,
+      sessionId: requestData.sessionUserId ?? null,
+      jobId: requestData.jobId ?? null,
+      tierKey: requestData.tierKey ?? null,
+      businessQuery: requestData.businessName ?? null,
+      locationQuery: requestData.state ?? null,
+    };
+
+    const usageLogger = createUsageLogger(supabaseUrl, supabaseKey, usageContext);
+
     // Initialize orchestrator
     const orchestrator = new EnrichmentOrchestrator(
       supabaseUrl,
       supabaseKey,
-      requestData.maxCostPerBusiness || 2.0
+      requestData.maxCostPerBusiness || 2.0,
+      usageLogger,
+      usageContext
     );
 
     // Enrich business

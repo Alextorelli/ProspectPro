@@ -1,6 +1,11 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { corsHeaders, handleCORS } from "../_shared/edge-auth.ts";
+import {
+  createUsageLogger,
+  UsageLogContext,
+  UsageLogger,
+} from "../_shared/api-usage.ts";
 
 // Background Task Business Discovery with Tiered Enrichment + Multi-Source Discovery
 // ProspectPro v4.3 - October 2025
@@ -103,6 +108,7 @@ interface JobConfig {
   minConfidenceScore: number;
   userId?: string;
   sessionUserId?: string;
+  jobId?: string;
   tier: TierSettings;
   options: {
     tradeAssociation: boolean;
@@ -213,6 +219,10 @@ const DEFAULT_OPTIONS = {
   chamberVerification: false,
   apolloDiscovery: false,
 };
+
+const GOOGLE_TEXT_SEARCH_COST = 0.032;
+const GOOGLE_DETAILS_COST = 0.017;
+const FOURSQUARE_SEARCH_COST = 0;
 
 function parseKeywords(input?: string[] | string): string[] {
   if (!input) return [];
@@ -500,7 +510,9 @@ async function searchGooglePlaces(
   businessType: string,
   location: string,
   keywords: string[],
-  maxResults: number
+  maxResults: number,
+  usageLogger?: UsageLogger,
+  usageContext?: UsageLogContext
 ): Promise<DiscoveredBusiness[]> {
   const apiKey = Deno.env.get("GOOGLE_PLACES_API_KEY");
   if (!apiKey) throw new Error("Google Places API key not configured");
@@ -511,14 +523,74 @@ async function searchGooglePlaces(
     query
   )}&key=${apiKey}`;
 
-  const response = await fetch(searchUrl);
-  const data = await response.json();
+  const requestParams = {
+    query,
+    businessType,
+    location,
+    keywordCount: keywords.length,
+    maxResults,
+  };
+
+  let textResponse: Response | null = null;
+  let data: Record<string, unknown> = {};
+  const searchStarted = performance.now();
+
+  try {
+    textResponse = await fetch(searchUrl);
+    data = await textResponse.json();
+  } catch (error) {
+    await usageLogger?.log({
+      sourceName: "google_places",
+      endpoint: "textsearch",
+      httpMethod: "GET",
+      requestParams,
+      queryType: "discovery",
+      responseCode: textResponse?.status ?? null,
+      responseTimeMs: Math.round(performance.now() - searchStarted),
+      success: false,
+      errorMessage: error instanceof Error ? error.message : String(error),
+    });
+    throw error;
+  }
+
+  const searchElapsed = Math.round(performance.now() - searchStarted);
 
   if (data.status !== "OK") {
+    await usageLogger?.log({
+      sourceName: "google_places",
+      endpoint: "textsearch",
+      httpMethod: "GET",
+      requestParams,
+      queryType: "discovery",
+      responseCode: textResponse.status,
+      responseTimeMs: searchElapsed,
+      success: false,
+      errorMessage:
+        (data.error_message as string | undefined) || (data.status as string),
+      estimatedCost: GOOGLE_TEXT_SEARCH_COST,
+      actualCost: 0,
+    });
     throw new Error(`Google Places API failed: ${data.status}`);
   }
 
   const results = (data.results as BusinessData[]).slice(0, maxResults * 2);
+
+  await usageLogger?.log({
+    sourceName: "google_places",
+    endpoint: "textsearch",
+    httpMethod: "GET",
+    requestParams,
+    queryType: "discovery",
+    responseCode: textResponse.status,
+    responseTimeMs: searchElapsed,
+    resultsReturned: results.length,
+    usefulResults: results.length,
+    success: true,
+    estimatedCost: GOOGLE_TEXT_SEARCH_COST,
+    actualCost: GOOGLE_TEXT_SEARCH_COST,
+    ...usageContext,
+  });
+
   const enriched: DiscoveredBusiness[] = [];
 
   for (const business of results) {
@@ -528,8 +600,42 @@ async function searchGooglePlaces(
     }
 
     const detailsUrl = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${business.place_id}&fields=formatted_phone_number,website&key=${apiKey}`;
-    const detailsResponse = await fetch(detailsUrl);
-    const detailsData = await detailsResponse.json();
+    const detailStart = performance.now();
+
+    let detailsResponse: Response | null = null;
+    let detailsData: {
+      result?: {
+        formatted_phone_number?: string;
+        website?: string;
+      };
+      [key: string]: unknown;
+    } = {};
+
+    try {
+      detailsResponse = await fetch(detailsUrl);
+      detailsData = await detailsResponse.json();
+    } catch (error) {
+      await usageLogger?.log({
+        sourceName: "google_places",
+        endpoint: "details",
+        httpMethod: "GET",
+        requestParams: {
+          placeId: business.place_id,
+        },
+        queryType: "discovery",
+        responseCode: detailsResponse?.status ?? null,
+        responseTimeMs: Math.round(performance.now() - detailStart),
+        success: false,
+        errorMessage: error instanceof Error ? error.message : String(error),
+        estimatedCost: GOOGLE_DETAILS_COST,
+        actualCost: 0,
+      });
+      throw error;
+    }
+
+    const detailElapsed = Math.round(performance.now() - detailStart);
+
+    const dataEnriched = Boolean(detailsData.result);
 
     enriched.push({
       ...business,
@@ -538,8 +644,26 @@ async function searchGooglePlaces(
         business.formatted_phone_number ??
         "",
       website: detailsData.result?.website ?? business.website ?? "",
-      source: detailsData.result ? "google_place_details" : "google_places",
-      data_enriched: Boolean(detailsData.result),
+      source: dataEnriched ? "google_place_details" : "google_places",
+      data_enriched: dataEnriched,
+    });
+
+    await usageLogger?.log({
+      sourceName: "google_places",
+      endpoint: "details",
+      httpMethod: "GET",
+      requestParams: {
+        placeId: business.place_id,
+        hasWebsite: Boolean(detailsData.result?.website),
+      },
+      queryType: "discovery",
+      responseCode: detailsResponse.status,
+      responseTimeMs: detailElapsed,
+      resultsReturned: dataEnriched ? 1 : 0,
+      usefulResults: dataEnriched ? 1 : 0,
+      success: detailsResponse.ok && dataEnriched,
+      estimatedCost: GOOGLE_DETAILS_COST,
+      actualCost: detailsResponse.ok && dataEnriched ? GOOGLE_DETAILS_COST : 0,
     });
 
     // Basic rate limiting to stay under quota
@@ -553,22 +677,36 @@ async function searchFoursquare(
   businessType: string,
   location: string,
   keywords: string[],
-  maxResults: number
+  maxResults: number,
+  usageLogger?: UsageLogger,
+  usageContext?: UsageLogContext
 ): Promise<DiscoveredBusiness[]> {
   const apiKey = Deno.env.get("FOURSQUARE_API_KEY");
   if (!apiKey) {
     return [];
   }
 
+  const queryString = [businessType, ...keywords].join(" ").trim() || businessType;
+  const limit = Math.min(Math.max(maxResults, 5), 30);
   const params = new URLSearchParams({
-    query: [businessType, ...keywords].join(" ").trim() || businessType,
+    query: queryString,
     near: location,
-    limit: Math.min(Math.max(maxResults, 5), 30).toString(),
+    limit: limit.toString(),
     fields: "fsq_id,name,location,contact,website,categories,rating,stats",
   });
 
+  const requestParams = {
+    query: queryString,
+    location,
+    limit,
+    keywordCount: keywords.length,
+  };
+
+  let response: Response | null = null;
+  const startedAt = performance.now();
+
   try {
-    const response = await fetch(
+    response = await fetch(
       `https://api.foursquare.com/v3/places/search?${params}`,
       {
         headers: {
@@ -577,29 +715,91 @@ async function searchFoursquare(
         },
       }
     );
-
-    if (!response.ok) {
-      throw new Error(`Foursquare API error: ${response.status}`);
-    }
-
-    const data = await response.json();
-    if (!Array.isArray(data.results)) return [];
-
-    return (data.results as FoursquarePlace[]).map((place) => ({
-      source: "foursquare" as DataSource,
-      place_id: place.fsq_id,
-      name: place.name,
-      formatted_address: formatFoursquareAddress(place.location),
-      formatted_phone_number: place.contact?.phone ?? "",
-      website: place.website ?? "",
-      rating: place.rating ?? 0,
-      user_ratings_total: place.stats?.total_tips ?? 0,
-      foursquare_data: place as unknown as Record<string, unknown>,
-    }));
   } catch (error) {
-    console.warn("Foursquare discovery failed:", error);
-    return [];
+    await usageLogger?.log({
+      sourceName: "foursquare",
+      endpoint: "places.search",
+      httpMethod: "GET",
+      requestParams,
+      queryType: "discovery",
+      responseCode: response?.status ?? null,
+      responseTimeMs: Math.round(performance.now() - startedAt),
+      success: false,
+      errorMessage: error instanceof Error ? error.message : String(error),
+      estimatedCost: FOURSQUARE_SEARCH_COST,
+      actualCost: 0,
+    });
+    throw error;
   }
+
+  const elapsed = Math.round(performance.now() - startedAt);
+
+  if (!response.ok) {
+    await usageLogger?.log({
+      sourceName: "foursquare",
+      endpoint: "places.search",
+      httpMethod: "GET",
+      requestParams,
+      queryType: "discovery",
+      responseCode: response.status,
+      responseTimeMs: elapsed,
+      success: false,
+      errorMessage: `HTTP ${response.status}`,
+      estimatedCost: FOURSQUARE_SEARCH_COST,
+      actualCost: 0,
+    });
+    throw new Error(`Foursquare API error: ${response.status}`);
+  }
+
+  let payload: { results?: FoursquarePlace[] } = {};
+  try {
+    payload = await response.json();
+  } catch (error) {
+    await usageLogger?.log({
+      sourceName: "foursquare",
+      endpoint: "places.search",
+      httpMethod: "GET",
+      requestParams,
+      queryType: "discovery",
+      responseCode: response.status,
+      responseTimeMs: elapsed,
+      success: false,
+      errorMessage: error instanceof Error ? error.message : String(error),
+      estimatedCost: FOURSQUARE_SEARCH_COST,
+      actualCost: 0,
+    });
+    throw error;
+  }
+
+  const results = Array.isArray(payload.results) ? payload.results : [];
+
+  await usageLogger?.log({
+    sourceName: "foursquare",
+    endpoint: "places.search",
+    httpMethod: "GET",
+    requestParams,
+    queryType: "discovery",
+    responseCode: response.status,
+    responseTimeMs: elapsed,
+    resultsReturned: results.length,
+    usefulResults: results.length,
+    success: true,
+    estimatedCost: FOURSQUARE_SEARCH_COST,
+    actualCost: FOURSQUARE_SEARCH_COST,
+    ...usageContext,
+  });
+
+  return results.map((place) => ({
+    source: "foursquare" as DataSource,
+    place_id: place.fsq_id,
+    name: place.name,
+    formatted_address: formatFoursquareAddress(place.location),
+    formatted_phone_number: place.contact?.phone ?? "",
+    website: place.website ?? "",
+    rating: place.rating ?? 0,
+    user_ratings_total: place.stats?.total_tips ?? 0,
+    foursquare_data: place as unknown as Record<string, unknown>,
+  }));
 }
 
 function formatFoursquareAddress(
@@ -770,6 +970,11 @@ async function enrichLead(
     maxCostPerBusiness,
     minConfidenceScore: config.minConfidenceScore,
     tier: config.tier.orchestratorTier,
+    campaignId: config.campaignId,
+    jobId: config.jobId,
+    sessionUserId: config.sessionUserId,
+    userId: config.userId,
+    tierKey: config.tier.key,
   };
 
   const response = await fetch(url, {
@@ -895,13 +1100,22 @@ async function enrichLead(
 
 async function discoverBusinesses(
   config: JobConfig,
-  census: CensusIntelligence | null
+  census: CensusIntelligence | null,
+  usageLogger?: UsageLogger,
+  usageContext?: UsageLogContext
 ): Promise<DiscoveredBusiness[]> {
   const googleResults = await searchGooglePlaces(
     config.businessType,
     config.location,
     config.keywords,
-    config.maxResults
+    config.maxResults,
+    usageLogger,
+    {
+      ...usageContext,
+      businessQuery: config.businessType,
+      locationQuery: config.location,
+      tierKey: config.tier.key,
+    }
   );
 
   const results: DiscoveredBusiness[] = [...googleResults];
@@ -916,7 +1130,14 @@ async function discoverBusinesses(
       Math.max(
         config.maxResults - googleResults.length,
         Math.ceil(config.maxResults / 2)
-      )
+      ),
+      usageLogger,
+      {
+        ...usageContext,
+        businessQuery: config.businessType,
+        locationQuery: config.location,
+        tierKey: config.tier.key,
+      }
     );
     results.push(...foursquareResults);
   }
@@ -932,7 +1153,14 @@ async function discoverBusinesses(
       config.businessType,
       census.geographic_data.raw_location,
       config.keywords,
-      Math.min(census.optimization.expected_results, config.maxResults * 2)
+      Math.min(census.optimization.expected_results, config.maxResults * 2),
+      usageLogger,
+      {
+        ...usageContext,
+        businessQuery: config.businessType,
+        locationQuery: census.geographic_data.raw_location,
+        tierKey: config.tier.key,
+      }
     );
     deduped.push(...expandedResults);
   }
@@ -949,6 +1177,15 @@ async function processDiscoveryJob(
   console.log(`🚀 Background job ${jobId} started`);
 
   const supabase = createClient(supabaseUrl, supabaseServiceKey);
+  const usageLogger = createUsageLogger(supabaseUrl, supabaseServiceKey, {
+    campaignId: config.campaignId,
+    sessionId: config.sessionUserId ?? config.userId ?? null,
+    jobId,
+    tierKey: config.tier.key,
+    businessQuery: config.businessType,
+    locationQuery: config.location,
+  });
+  config.jobId = jobId;
 
   try {
     await supabase
@@ -968,7 +1205,16 @@ async function processDiscoveryJob(
 
     const discoveredBusinesses = await discoverBusinesses(
       config,
-      censusIntelligence
+      censusIntelligence,
+      usageLogger,
+      {
+        campaignId: config.campaignId,
+        sessionId: config.sessionUserId ?? config.userId ?? null,
+        jobId,
+        tierKey: config.tier.key,
+        businessQuery: config.businessType,
+        locationQuery: config.location,
+      }
     );
     const sourcesUsed = Array.from(
       new Set(discoveredBusinesses.map((business) => business.source))
@@ -1213,12 +1459,12 @@ serve(async (req) => {
     // Generate structured campaign ID using database function
     let campaignId: string;
     try {
-      const { data: generatedName, error: nameError } = await supabase.rpc(
+      const { data: generatedName, error: nameError } = await supabaseClient.rpc(
         "generate_campaign_name",
         {
           business_type: businessType,
           location: location,
-          user_id: authUser?.id || null,
+          user_id: user?.id || null,
         }
       );
 
