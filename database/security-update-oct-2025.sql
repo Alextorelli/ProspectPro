@@ -327,17 +327,19 @@ BEGIN
 END;
 $$;
 
--- =============================================================================
--- PART 6: Comments and Documentation
--- =============================================================================
 
-COMMENT ON VIEW public.enrichment_cache_analytics IS 'Cache analytics view with security_invoker (no SECURITY DEFINER)';
-COMMENT ON VIEW public.cache_performance_summary IS 'Cache performance summary with security_invoker (no SECURITY DEFINER)';
-COMMENT ON VIEW public.campaign_analytics IS 'Campaign analytics view with security_invoker (no SECURITY DEFINER)';
+-- Enable leaked password protection (prevents compromised password reuse)
+-- Reference: https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection
+DO $$
+BEGIN
+  PERFORM auth.enable_leaked_password_protection();
+  RAISE NOTICE '✅ Leaked password protection enabled (idempotent)';
+EXCEPTION
+  WHEN undefined_function THEN
+    RAISE WARNING '⚠️ auth.enable_leaked_password_protection() not available in this Supabase version';
+END;
+$$;
 
-COMMENT ON FUNCTION public.generate_cache_key IS 'Generate cache key with explicit search_path = public';
-COMMENT ON FUNCTION public.get_cached_response IS 'Get cached response with explicit search_path = public';
-COMMENT ON FUNCTION public.store_cached_response IS 'Store cached response with explicit search_path = public';
 COMMENT ON FUNCTION public.cleanup_expired_cache IS 'Cleanup expired cache with explicit search_path = public';
 COMMENT ON FUNCTION public.validate_api_key_format IS 'Validate new Supabase API key format (publishable/secret)';
 COMMENT ON FUNCTION public.validate_security_configuration IS 'Comprehensive security configuration validation';

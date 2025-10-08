@@ -104,6 +104,7 @@ CREATE OR REPLACE FUNCTION public.generate_campaign_name(
 )
 RETURNS TEXT
 LANGUAGE plpgsql
+SET search_path = public, pg_temp
 AS $$
 DECLARE
   business_code TEXT;
@@ -141,6 +142,7 @@ $$;
 CREATE OR REPLACE FUNCTION public.auto_generate_campaign_name()
 RETURNS TRIGGER
 LANGUAGE plpgsql
+SET search_path = public, pg_temp
 AS $$
 BEGIN
   -- Only generate if not already set
@@ -185,6 +187,7 @@ CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public, pg_temp
 AS $$
 BEGIN
   INSERT INTO public.user_profiles (id, email, full_name, avatar_url)
@@ -222,6 +225,7 @@ CREATE OR REPLACE FUNCTION public.update_user_spending(
 )
 RETURNS VOID
 LANGUAGE plpgsql
+SET search_path = public, pg_temp
 AS $$
 BEGIN
   UPDATE public.user_profiles

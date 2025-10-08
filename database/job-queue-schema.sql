@@ -39,6 +39,7 @@ CREATE INDEX IF NOT EXISTS idx_jobs_created ON discovery_jobs(created_at DESC);
 ALTER TABLE discovery_jobs ENABLE ROW LEVEL SECURITY;
 
 -- Users can only see their own jobs
+DROP POLICY IF EXISTS jobs_select_own ON discovery_jobs;
 CREATE POLICY jobs_select_own ON discovery_jobs
   FOR SELECT
   USING (
@@ -47,6 +48,7 @@ CREATE POLICY jobs_select_own ON discovery_jobs
   );
 
 -- Users can only insert their own jobs
+DROP POLICY IF EXISTS jobs_insert_own ON discovery_jobs;
 CREATE POLICY jobs_insert_own ON discovery_jobs
   FOR INSERT
   WITH CHECK (
@@ -55,13 +57,17 @@ CREATE POLICY jobs_insert_own ON discovery_jobs
   );
 
 -- Update trigger to maintain updated_at
+DROP TRIGGER IF EXISTS trigger_update_discovery_jobs_updated_at ON discovery_jobs;
 CREATE OR REPLACE FUNCTION update_discovery_jobs_updated_at()
-RETURNS TRIGGER AS $$
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SET search_path = public, pg_temp
+AS $$
 BEGIN
   NEW.updated_at = NOW();
   RETURN NEW;
 END;
-$$ LANGUAGE plpgsql;
+$$;
 
 CREATE TRIGGER trigger_update_discovery_jobs_updated_at
   BEFORE UPDATE ON discovery_jobs
@@ -70,7 +76,11 @@ CREATE TRIGGER trigger_update_discovery_jobs_updated_at
 
 -- Function to clean up old completed jobs (optional, run periodically)
 CREATE OR REPLACE FUNCTION cleanup_old_jobs(retention_days INTEGER DEFAULT 30)
-RETURNS INTEGER AS $$
+RETURNS INTEGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, pg_temp
+AS $$
 DECLARE
   deleted_count INTEGER;
 BEGIN
@@ -81,7 +91,7 @@ BEGIN
   GET DIAGNOSTICS deleted_count = ROW_COUNT;
   RETURN deleted_count;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$;
 
 COMMENT ON TABLE discovery_jobs IS 'Background job queue for business discovery campaigns';
 COMMENT ON COLUMN discovery_jobs.config IS 'JSON config: {businessType, location, tier, maxResults, etc}';
