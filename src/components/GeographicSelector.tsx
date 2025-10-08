@@ -37,11 +37,19 @@ export const GeographicSelector: React.FC<GeographicSelectorProps> = ({
   const [mapStatus, setMapStatus] = useState<MapStatus>(
     googleMapsApiKey ? "loading" : "idle"
   );
+  type MapsModules = {
+    Map: typeof google.maps.Map;
+    Marker: typeof google.maps.Marker;
+    Circle: typeof google.maps.Circle;
+    Geocoder: typeof google.maps.Geocoder;
+  };
+
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<any>(null);
   const markerRef = useRef<any>(null);
   const circleRef = useRef<any>(null);
   const mapsApiRef = useRef<any>(window.google?.maps ?? null);
+  const mapsModulesRef = useRef<MapsModules | null>(null);
   const loaderPromiseRef = useRef<Promise<void> | null>(null);
 
   const handleAddressChange = (value: string) => {
@@ -56,11 +64,11 @@ export const GeographicSelector: React.FC<GeographicSelectorProps> = ({
   const geocodeViaGoogle = async (
     addressInput: string
   ): Promise<GeographicLocation | null> => {
-    const maps = mapsApiRef.current;
-    if (!maps?.Geocoder) return null;
+    const modules = mapsModulesRef.current;
+    if (!modules?.Geocoder) return null;
 
     return new Promise((resolve) => {
-      const geocoder = new maps.Geocoder();
+      const geocoder = new modules.Geocoder();
       geocoder.geocode(
         { address: addressInput },
         (results: any, status: any) => {
@@ -224,6 +232,7 @@ export const GeographicSelector: React.FC<GeographicSelectorProps> = ({
   useEffect(() => {
     if (!googleMapsApiKey) {
       mapsApiRef.current = null;
+      mapsModulesRef.current = null;
       loaderPromiseRef.current = null;
       setMapStatus("idle");
       return;
@@ -231,31 +240,48 @@ export const GeographicSelector: React.FC<GeographicSelectorProps> = ({
 
     setMapStatus("loading");
 
-    if (!loaderPromiseRef.current) {
-      loaderPromiseRef.current = (async () => {
-        setOptions({ key: googleMapsApiKey, libraries: ["places"] });
-        await importLibrary("maps");
-        await importLibrary("geocoding");
-        await importLibrary("places");
-      })();
-    }
+    let didCancel = false;
 
-    loaderPromiseRef.current
-      .then(() => {
-        mapsApiRef.current = window.google?.maps ?? null;
-        if (mapsApiRef.current) {
-          setMapStatus("ready");
-        } else {
-          console.error("Google Maps API did not initialize as expected.");
-          setMapStatus("error");
-          loaderPromiseRef.current = null;
+    const loadLibraries = async () => {
+      try {
+        setOptions({ key: googleMapsApiKey });
+
+        const [{ Map, Circle }, { Marker }, { Geocoder }] = await Promise.all([
+          importLibrary("maps"),
+          importLibrary("marker"),
+          importLibrary("geocoding"),
+        ]);
+
+        if (didCancel) {
+          return;
         }
-      })
-      .catch((error) => {
+
+        mapsApiRef.current = window.google?.maps ?? null;
+        mapsModulesRef.current = {
+          Map,
+          Circle,
+          Marker,
+          Geocoder,
+        };
+        setMapStatus("ready");
+      } catch (error) {
+        if (didCancel) {
+          return;
+        }
+
         console.error("Google Maps load error:", error);
+        mapsApiRef.current = null;
+        mapsModulesRef.current = null;
         loaderPromiseRef.current = null;
         setMapStatus("error");
-      });
+      }
+    };
+
+    loaderPromiseRef.current = loadLibraries();
+
+    return () => {
+      didCancel = true;
+    };
   }, [googleMapsApiKey]);
 
   const getZoomFromRadius = (radiusInMiles: number) => {
@@ -273,7 +299,9 @@ export const GeographicSelector: React.FC<GeographicSelectorProps> = ({
     }
 
     const maps = mapsApiRef.current;
-    if (!maps) {
+    const modules = mapsModulesRef.current;
+
+    if (!maps || !modules) {
       setMapStatus("error");
       return;
     }
@@ -281,20 +309,20 @@ export const GeographicSelector: React.FC<GeographicSelectorProps> = ({
     const center = { lat: location.lat, lng: location.lng };
 
     if (!mapRef.current) {
-      mapRef.current = new maps.Map(mapContainerRef.current, {
+      mapRef.current = new modules.Map(mapContainerRef.current, {
         center,
         zoom: getZoomFromRadius(radius),
         disableDefaultUI: true,
         zoomControl: true,
       });
 
-      markerRef.current = new maps.Marker({
+      markerRef.current = new modules.Marker({
         position: center,
         map: mapRef.current,
         animation: maps.Animation.DROP,
       });
 
-      circleRef.current = new maps.Circle({
+      circleRef.current = new modules.Circle({
         map: mapRef.current,
         center,
         radius: radius * 1609.34,
