@@ -1,4 +1,6 @@
-# ✅ API Key Issue RESOLVED
+# ✅ API Key Issue RESOLVED _(Legacy Notes)_
+
+> **Important (October 8, 2025):** The instructions below describe the legacy JWT approach that is no longer used in production. ProspectPro now relies exclusively on Supabase publishable keys (`sb_publishable_*`) delivered via environment variables. Keep this file for historical context only.
 
 ## The Root Cause
 
@@ -36,7 +38,7 @@ You need to **re-enable legacy JWT keys** in Supabase Dashboard:
 
 ```bash
 # Database access (already updated - WORKING)
-VITE_SUPABASE_ANON_KEY=sb_publishable_GaGU6ZiyiO6ncO7kU2qAvA_SFuCyYaM
+VITE_SUPABASE_ANON_KEY=sb_publishable_your_key_here
 
 # Edge Functions access (NEEDS JWT TOKEN)
 VITE_EDGE_FUNCTION_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...NEW_JWT_HERE
@@ -97,8 +99,8 @@ After fixing:
 ```bash
 # Test database access (should work now)
 curl 'https://sriycekxdqnesdsgwiuc.supabase.co/rest/v1/campaigns?select=id&limit=1' \
-  -H "apikey: sb_publishable_GaGU6ZiyiO6ncO7kU2qAvA_SFuCyYaM" \
-  -H "Authorization: Bearer sb_publishable_GaGU6ZiyiO6ncO7kU2qAvA_SFuCyYaM"
+  -H "apikey: sb_publishable_your_key_here" \
+  -H "Authorization: Bearer sb_publishable_your_key_here"
 
 # Test Edge Function (needs JWT token)
 curl -X POST 'https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/business-discovery-user-aware' \

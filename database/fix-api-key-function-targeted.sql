@@ -58,7 +58,7 @@ WHERE n.nspname = 'public'
 ORDER BY p.proname;
 
 -- Test the function to ensure it works
-SELECT public.validate_api_key_format('sb_publishable_GaGU6ZiyiO6ncO7kU2qAvA_SFuCyYaM') AS test_result;
+SELECT public.validate_api_key_format('sb_publishable_your_key_here') AS test_result;
 
 -- Final status check
 SELECT public.validate_security_configuration() AS final_security_status;

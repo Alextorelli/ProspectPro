@@ -22,6 +22,7 @@ resolve_env() {
 
 SUPABASE_URL=$(resolve_env VITE_SUPABASE_URL NEXT_PUBLIC_SUPABASE_URL SUPABASE_URL)
 ANON_KEY=$(resolve_env VITE_SUPABASE_ANON_KEY NEXT_PUBLIC_SUPABASE_ANON_KEY SUPABASE_ANON_KEY)
+USER_TOKEN=$(resolve_env SUPABASE_USER_TOKEN SUPABASE_ACCESS_TOKEN)
 
 if [ -z "$SUPABASE_URL" ]; then
   SUPABASE_URL="https://sriycekxdqnesdsgwiuc.supabase.co"
@@ -103,23 +104,74 @@ else
 fi
 
 echo ""
-echo "3️⃣  Testing Edge Function API Key Configuration..."
+echo "3️⃣  Testing Edge Function with User Authentication..."
 echo "----------------------------------------"
 
-# Check for Google Places API key (won't reveal the key, just test if configured)
-echo "Note: This test creates a minimal job to check if API keys are configured"
+# Check if user is logged in via Supabase CLI
+echo "Checking Supabase CLI login status..."
+if supabase projects list >/dev/null 2>&1; then
+  echo "✅ Supabase CLI authenticated"
+  
+  # Try to use an existing user session token
+  if [ -n "$USER_TOKEN" ]; then
+    echo "Using provided user session token"
+  else
+    echo "No user session token provided; falling back to publishable key"
+  fi
 
-TEST_RESPONSE=$(curl -s -X POST "$BASE_URL/business-discovery-background" \
-  -H "Authorization: Bearer $ANON_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "businessType": "coffee shop",
-    "location": "Seattle, WA",
-    "maxResults": 1,
-    "sessionUserId": "diagnostic_test"
-  }')
-
-echo "$TEST_RESPONSE" | jq '.' 2>/dev/null || echo "$TEST_RESPONSE"
+  AUTH_TOKEN="${USER_TOKEN:-$ANON_KEY}"
+  if [ -n "$USER_TOKEN" ]; then
+    echo "Using provided user access token for authentication"
+  else
+    echo "Using anon key (may require user session for background discovery)"
+  fi
+  
+  echo "Testing Edge Function with authentication..."
+  TEST_RESPONSE=$(curl -s -X POST "$BASE_URL/business-discovery-background" \
+    -H "Authorization: Bearer $AUTH_TOKEN" \
+    -H "Content-Type: application/json" \
+    -d '{
+      "businessType": "coffee shop",
+      "location": "Seattle, WA",
+      "maxResults": 1,
+      "sessionUserId": "diagnostic_test_cli"
+    }')
+  
+  echo "$TEST_RESPONSE" | jq '.' 2>/dev/null || echo "$TEST_RESPONSE"
+  
+  # If we get Invalid JWT, provide guidance for getting a real user session
+  if echo "$TEST_RESPONSE" | grep -q "Invalid JWT"; then
+    echo ""
+    echo "ℹ️  Edge Function requires authenticated user session."
+    echo "   To get a user access token:"
+    echo "   1. Sign up/in to your app in browser"
+    echo "   2. Open browser DevTools → Application → Local Storage"
+    echo "   3. Find 'sb-<project-id>-auth-token' key"
+    echo "   4. Copy the 'access_token' value"
+    echo "   5. Export it: export SUPABASE_USER_TOKEN=\"<access_token>\""
+    echo "   6. Re-run this script"
+    echo ""
+  fi
+  
+else
+  echo "❌ Supabase CLI not authenticated"
+  echo "   Run: supabase login"
+  echo ""
+  
+  # Fall back to anon key testing
+  echo "Testing with anon key only..."
+  TEST_RESPONSE=$(curl -s -X POST "$BASE_URL/business-discovery-background" \
+    -H "Authorization: Bearer $ANON_KEY" \
+    -H "Content-Type: application/json" \
+    -d '{
+      "businessType": "coffee shop",
+      "location": "Seattle, WA",
+      "maxResults": 1,
+      "sessionUserId": "diagnostic_test"
+    }')
+  
+  echo "$TEST_RESPONSE" | jq '.' 2>/dev/null || echo "$TEST_RESPONSE"
+fi
 
 # Check for specific error messages
 if echo "$TEST_RESPONSE" | grep -q "API key not configured\|Missing Supabase"; then
@@ -131,11 +183,21 @@ if echo "$TEST_RESPONSE" | grep -q "API key not configured\|Missing Supabase"; t
   echo "   - FOURSQUARE_API_KEY (optional)"
   echo "   - CENSUS_API_KEY (optional)"
   exit 1
-elif echo "$TEST_RESPONSE" | grep -q "Authentication required"; then
+elif echo "$TEST_RESPONSE" | grep -q "Authentication required\|Invalid JWT"; then
   echo ""
   echo "❌ Authentication Issue!"
-  echo "   The Edge Function requires authentication but the request failed"
-  echo "   Check: Supabase Auth settings and anon key validity"
+  echo "   The Edge Function requires a valid user session token."
+  echo "   This is expected for user-aware background discovery."
+  echo ""
+  echo "   To test with a real user session:"
+  echo "   1. Sign in to your app at: https://prospect-fyhedobh1-appsmithery.vercel.app"
+  echo "   2. Open DevTools → Application → Local Storage"
+  echo "   3. Find key: sb-sriycekxdqnesdsgwiuc-auth-token"
+  echo "   4. Copy the 'access_token' value from the JSON"
+  echo "   5. Export: export SUPABASE_USER_TOKEN=\"<access_token>\""
+  echo "   6. Re-run this script"
+  echo ""
+  echo "   Alternatively, test the frontend directly instead of this CLI script."
   exit 1
 elif echo "$TEST_RESPONSE" | grep -q "jobId"; then
   echo ""

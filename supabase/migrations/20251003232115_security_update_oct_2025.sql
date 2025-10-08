@@ -157,8 +157,8 @@ BEGIN
   
   -- Test API key validation with actual keys
   SELECT 
-    public.validate_api_key_format('sb_publishable_GaGU6ZiyiO6ncO7kU2qAvA_SFuCyYaM') as current_publishable_valid,
-    public.validate_api_key_format('sb_secret_bY8n_a7-hP0Lxd9dPT_efg_3WzpnXN_') as current_secret_valid,
+    public.validate_api_key_format('sb_publishable_your_key_here') as current_publishable_valid,
+    public.validate_api_key_format('sb_secret_your_key_here') as current_secret_valid,
     public.validate_api_key_format('invalid_key') as invalid_test,
     public.validate_api_key_format('eyJold.legacy.key') as legacy_test
   INTO api_test_result;

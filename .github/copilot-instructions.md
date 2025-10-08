@@ -48,6 +48,7 @@
 - ❌ NO server.js, Express.js, or Node.js containers
 - ❌ NO Cloud Run containers or complex deployment pipelines
 - ✅ Supabase Environment Variables: Native Edge Function configuration
+- ✅ Environment Key Policy: Use publishable keys (prefix `sb_publishable_`) for the frontend and keep all secrets in Vercel/Supabase vaults. Docs should only show placeholders like `sb_publishable_your_key_here`.
 
 **CI/CD DEPLOYMENT PROCESS**
 
@@ -313,6 +314,7 @@ curl -I https://prospect-fyhedobh1-appsmithery.vercel.app
 - [ ] Custom domain prospect-fyhedobh1-appsmithery.vercel.app accessible and properly linked
 - [ ] Cache headers set to `public, max-age=0, s-maxage=0, must-revalidate`
 - [ ] User authentication system working (signup/signin/session management)
+- [ ] No raw Supabase keys committed; placeholders only (`sb_publishable_your_key_here`, `sb_secret_your_key_here`)
 
 ## IMMEDIATE CONTEXT (No Re-explanation Needed)
 

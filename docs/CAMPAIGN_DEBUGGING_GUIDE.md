@@ -12,15 +12,11 @@ Response: { success: true, totalFound: 2 }
 
 **Status**: ✅ Edge Function is OPERATIONAL
 
-### **Built Application** - CORRECT KEY
+### **Built Application** - PUBLISHABLE KEY REQUIRED
 
-The production build contains the correct JWT anon key from `.env.production`:
+The production build must use the Supabase **publishable key** (prefix `sb_publishable_`) provided in Vercel → Environment Variables.
 
-```
-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNyaXljZWt4ZHFuZXNkc2d3aXVjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc5NjU3ODksImV4cCI6MjA3MzU0MTc4OX0.Rx_1Hjz2eayKie0RpPB28i7_683ZwhVJ_5Eu_rzTWpI
-```
-
-**Status**: ✅ Correct authentication key in build
+**Status**: ✅ Publishable key verified in build artifacts
 
 ---
 
@@ -206,8 +202,7 @@ const response = await fetch(
   {
     method: "POST",
     headers: {
-      Authorization:
-        "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNyaXljZWt4ZHFuZXNkc2d3aXVjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc5NjU3ODksImV4cCI6MjA3MzU0MTc4OX0.Rx_1Hjz2eayKie0RpPB28i7_683ZwhVJ_5Eu_rzTWpI",
+      Authorization: "Bearer <SUPABASE_ACCESS_TOKEN>",
       "Content-Type": "application/json",
     },
     body: JSON.stringify({

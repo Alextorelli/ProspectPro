@@ -100,7 +100,7 @@ Edge Function Receives Valid JWT
 
 ```typescript
 // Used publishable key (sb_publishable_...) as Bearer token
-Authorization: Bearer sb_publishable_GaGU6ZiyiO6ncO7kU2qAvA_SFuCyYaM
+Authorization: Bearer sb_publishable_your_key_here
 // ❌ Edge Functions rejected this (not a JWT)
 ```
 

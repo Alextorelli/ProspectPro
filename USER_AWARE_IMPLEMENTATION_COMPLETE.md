@@ -164,7 +164,7 @@ link_anonymous_campaigns_to_user()
 
 ```javascript
 // New API keys in use:
-SUPABASE_ANON_KEY = "sb_publishable_GaGU6ZiyiO6ncO7kU2qAvA_SFuCyYaM";
+SUPABASE_ANON_KEY = "sb_publishable_your_key_here";
 EDGE_FUNCTION_JWT = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...";
 ```
 

@@ -8,9 +8,13 @@ echo "===================================================================="
 echo ""
 
 # Configuration
-SUPABASE_URL="https://sriycekxdqnesdsgwiuc.supabase.co"
-ORCHESTRATOR_URL="${SUPABASE_URL}/functions/v1/enrichment-orchestrator"
-SERVICE_ROLE_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNyaXljZWt4ZHFuZXNkc2d3aXVjIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1Nzk2NTc4OSwiZXhwIjoyMDczNTQxNzg5fQ.V2wlvxGC1_SshWudFw27ZWmQjuxj0UtXANXrZmt4OjY"
+SUPABASE_URL="${SUPABASE_URL:-https://sriycekxdqnesdsgwiuc.supabase.co}"
+ORCHESTRATOR_URL="${SUPABASE_URL%/}/functions/v1/enrichment-orchestrator"
+if [[ -z "${SUPABASE_SERVICE_ROLE_KEY:-}" ]]; then
+  echo "❌ SUPABASE_SERVICE_ROLE_KEY not set. Export your service role key before running this script."
+  exit 1
+fi
+SERVICE_ROLE_KEY="$SUPABASE_SERVICE_ROLE_KEY"
 
 total_tests=0
 passed_tests=0

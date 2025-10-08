@@ -310,7 +310,7 @@ SQL script created (`/database/optimize-rls-policies.sql`):
 
 ```
 URL: https://sriycekxdqnesdsgwiuc.supabase.co
-Publishable Key: sb_publishable_GaGU6ZiyiO6ncO7kU2qAvA_SFuCyYaM
+Publishable Key: sb_publishable_your_key_here
 API Key Format: New sb_* format (not JWT)
 Edge Functions: /functions/v1/
 ```
@@ -329,7 +329,7 @@ Output Directory: dist
 
 ```bash
 VITE_SUPABASE_URL=https://sriycekxdqnesdsgwiuc.supabase.co
-VITE_SUPABASE_ANON_KEY=sb_publishable_GaGU6ZiyiO6ncO7kU2qAvA_SFuCyYaM
+VITE_SUPABASE_ANON_KEY=sb_publishable_your_key_here
 VITE_EDGE_FUNCTIONS_URL=https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1
 ```
 

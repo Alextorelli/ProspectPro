@@ -3,9 +3,15 @@
 
 echo "🔑 Updating Edge Functions with new API keys..."
 
-# Set the new keys
-NEW_PUBLISHABLE_KEY="sb_publishable_GaGU6ZiyiO6ncO7kU2qAvA_SFuCyYaM"
-NEW_SECRET_KEY="sb_secret_bY8n_a7-hP0Lxd9dPT_efg_3WzpnXN_"
+# Resolve keys from environment or arguments
+NEW_PUBLISHABLE_KEY="${SUPABASE_PUBLISHABLE_KEY:-${1:-}}"
+NEW_SECRET_KEY="${SUPABASE_SERVICE_ROLE_KEY:-${2:-}}"
+
+if [[ -z "$NEW_PUBLISHABLE_KEY" || -z "$NEW_SECRET_KEY" ]]; then
+  echo "❌ Missing keys. Provide SUPABASE_PUBLISHABLE_KEY and SUPABASE_SERVICE_ROLE_KEY env vars or pass them as arguments." >&2
+  echo "   Usage: SUPABASE_PUBLISHABLE_KEY=sb_publishable_xxx SUPABASE_SERVICE_ROLE_KEY=sb_secret_xxx $0" >&2
+  exit 1
+fi
 
 # Update environment variables for Edge Functions
 supabase secrets set SUPABASE_ANON_KEY="${NEW_PUBLISHABLE_KEY}"
@@ -17,7 +23,7 @@ echo "📋 Testing Edge Function..."
 
 # Test the Edge Function with new keys
 curl -s -X POST 'https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/business-discovery-user-aware' \
-  -H "Authorization: Bearer ${NEW_PUBLISHABLE_KEY}" \
+  -H "Authorization: Bearer ${TEST_SESSION_TOKEN:-JWT_TOKEN}" \
   -H 'Content-Type: application/json' \
   -d '{
     "businessType": "coffee shop",

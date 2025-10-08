@@ -148,8 +148,8 @@ SELECT validate_security_configuration() as security_status;
 
 -- Test API key validation
 SELECT 
-  validate_api_key_format('sb_publishable_GaGU6ZiyiO6ncO7kU2qAvA_SFuCyYaM') as current_publishable_valid,
-  validate_api_key_format('sb_secret_bY8n_a7-hP0Lxd9dPT_efg_3WzpnXN_') as current_secret_valid,
+  validate_api_key_format('sb_publishable_your_key_here') as current_publishable_valid,
+  validate_api_key_format('sb_secret_your_key_here') as current_secret_valid,
   validate_api_key_format('invalid_key') as invalid_test;
 
 \echo '✅ Security update complete - new API key format supported'

@@ -1,12 +1,10 @@
 # 🚀 ProspectPro Supabase-First Deployment Complete!
 
+> **Important (October 8, 2025):** This deployment report references legacy JWT usage. For current deployments, rely on publishable keys (`sb_publishable_*`) sourced from environment variables.
+
 ## ✅ **DEPLOYMENT STATUS**
 
 ### **Edge Functions Deployed:**
-
-- ✅ `business-discovery` - Main business discovery with Google Places API
-- ✅ `campaign-export` - CSV export functionality
-- ✅ Functions are ACTIVE and ready to use
 
 ### **Next Steps:**
 
@@ -17,7 +15,6 @@ Go to: https://supabase.com/dashboard/project/sriycekxdqnesdsgwiuc/sql-editor
 Run this SQL to set up the tables:
 
 ```sql
--- Campaigns table
 CREATE TABLE IF NOT EXISTS campaigns (
   id TEXT PRIMARY KEY,
   business_type TEXT NOT NULL,
@@ -33,7 +30,6 @@ CREATE TABLE IF NOT EXISTS campaigns (
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Leads table
 CREATE TABLE IF NOT EXISTS leads (
   id BIGSERIAL PRIMARY KEY,
   campaign_id TEXT NOT NULL REFERENCES campaigns(id) ON DELETE CASCADE,
@@ -51,17 +47,14 @@ CREATE TABLE IF NOT EXISTS leads (
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Enable RLS
 ALTER TABLE campaigns ENABLE ROW LEVEL SECURITY;
 ALTER TABLE leads ENABLE ROW LEVEL SECURITY;
 
--- RLS Policies for public access
 CREATE POLICY "Public read campaigns" ON campaigns FOR SELECT USING (true);
 CREATE POLICY "Public insert campaigns" ON campaigns FOR INSERT WITH CHECK (true);
 CREATE POLICY "Public read leads" ON leads FOR SELECT USING (true);
 CREATE POLICY "Public insert leads" ON leads FOR INSERT WITH CHECK (true);
 
--- Indexes
 CREATE INDEX IF NOT EXISTS idx_campaigns_created_at ON campaigns(created_at);
 CREATE INDEX IF NOT EXISTS idx_leads_campaign_id ON leads(campaign_id);
 CREATE INDEX IF NOT EXISTS idx_leads_confidence_score ON leads(confidence_score);
@@ -107,15 +100,12 @@ curl -X GET 'https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/campaign-expo
 
 Your frontend files are ready:
 
-- ✅ `/public/index-supabase.html` - Supabase-first frontend
-- ✅ `/public/supabase-app.js` - Frontend JavaScript with Supabase client
-
 Update the Supabase configuration in `supabase-app.js`:
 
 ```javascript
 this.supabase = createClient(
   "https://sriycekxdqnesdsgwiuc.supabase.co",
-  "sb_secret_bY8n_a7-hP0Lxd9dPT_efg_3WzpnXN_" // Get from Supabase dashboard
+  "sb_secret_your_key_here" // Get from Supabase dashboard
 );
 ```
 
@@ -141,8 +131,5 @@ this.supabase = createClient(
 Your ProspectPro is now running on modern serverless architecture! 🚀
 
 ## **Function URLs:**
-
-- Business Discovery: `https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/business-discovery`
-- Campaign Export: `https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/campaign-export/{campaignId}`
 
 Next: Set up the database schema and environment variables in your Supabase dashboard!

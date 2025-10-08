@@ -324,7 +324,7 @@ ORDER BY tablename, cmd;
 ```bash
 curl -X POST \
   'https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/business-discovery-user-aware' \
-  -H 'Authorization: Bearer sb_publishable_GaGU6ZiyiO6ncO7kU2qAvA_SFuCyYaM' \
+  -H 'Authorization: Bearer sb_publishable_your_key_here' \
   -H 'Content-Type: application/json' \
   -d '{
     "businessType": "coffee shop",

@@ -106,8 +106,8 @@ ORDER BY p.proname;
 DO $$
 BEGIN
   RAISE NOTICE 'Publishable Key Valid: %', 
-    public.validate_api_key_format('sb_publishable_GaGU6ZiyiO6ncO7kU2qAvA_SFuCyYaM');
+    public.validate_api_key_format('sb_publishable_your_key_here');
   RAISE NOTICE 'Secret Key Valid: %', 
-    public.validate_api_key_format('sb_secret_bY8n_a7-hP0Lxd9dPT_efg_3WzpnXN_');
+    public.validate_api_key_format('sb_secret_your_key_here');
   RAISE NOTICE 'Both functions should now have proper search_path settings';
 END $$;

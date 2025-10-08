@@ -1,4 +1,6 @@
-# 🔧 Edge Function Authentication Fix
+# 🔒 Edge Function Auth Fix _(Legacy Reference)_
+
+> **Important (October 8, 2025):** ProspectPro uses publishable keys for frontend access. The legacy JWT workflow described below is archived for reference and should not be followed for current deployments.
 
 ## The Real Problem (Clarified by Supabase AI)
 
@@ -22,7 +24,7 @@
 
 ```bash
 # What we're doing (WRONG):
-Authorization: Bearer sb_publishable_GaGU6ZiyiO6ncO7kU2qAvA_SFuCyYaM
+Authorization: Bearer sb_publishable_your_key_here
 # Edge Functions reject this because it's not a JWT
 
 # What we need (RIGHT):
@@ -96,12 +98,12 @@ curl -X POST 'https://...functions/v1/business-discovery-user-aware' \
 
 ## What About the Keys We Have?
 
-| Key Type                                         | Purpose        | Works For                     |
-| ------------------------------------------------ | -------------- | ----------------------------- |
-| `sb_publishable_GaGU6ZiyiO6ncO7kU2qAvA_SFuCyYaM` | Database API   | ✅ PostgREST queries          |
-| `sb_secret_bY8n_a7-hP0Lxd9dPT_efg_3WzpnXN_`      | Admin Database | ✅ Service role DB access     |
-| `eyJ...` (JWT anon key - MISSING)                | Edge Functions | ❌ Need to get from dashboard |
-| User session JWT (dynamic)                       | Edge Functions | ✅ Best practice              |
+| Key Type                          | Purpose        | Works For                     |
+| --------------------------------- | -------------- | ----------------------------- |
+| `sb_publishable_your_key_here`    | Database API   | ✅ PostgREST queries          |
+| `sb_secret_your_key_here`         | Admin Database | ✅ Service role DB access     |
+| `eyJ...` (JWT anon key - MISSING) | Edge Functions | ❌ Need to get from dashboard |
+| User session JWT (dynamic)        | Edge Functions | ✅ Best practice              |
 
 ## Next Steps
 

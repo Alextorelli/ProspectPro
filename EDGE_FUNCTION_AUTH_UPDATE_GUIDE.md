@@ -42,13 +42,13 @@
 
 ```typescript
 // Frontend: New format (already working)
-const FRONTEND_API_KEY = "sb_publishable_GaGU6ZiyiO6ncO7kU2qAvA_SFuCyYaM";
+const FRONTEND_API_KEY = "sb_publishable_your_key_here";
 
 // Edge Functions: Legacy JWT (until platform supports new format)
 const EDGE_FUNCTION_JWT = "eyJ..."; // Enable legacy key for this
 
 // Database: Secret key (already working)
-const DATABASE_SECRET = "sb_secret_bY8n_a7-hP0Lxd9dPT_efg_3WzpnXN_";
+const DATABASE_SECRET = "sb_secret_your_key_here";
 ```
 
 ### 📋 **WHAT WE'VE IMPLEMENTED**
@@ -83,7 +83,7 @@ export class EdgeFunctionAuth {
 ```bash
 # Database access with new keys works perfectly
 curl -X GET 'https://sriycekxdqnesdsgwiuc.supabase.co/rest/v1/campaigns?select=*&limit=5' \
-  -H 'Authorization: Bearer sb_publishable_GaGU6ZiyiO6ncO7kU2qAvA_SFuCyYaM'
+  -H 'Authorization: Bearer sb_publishable_your_key_here'
 # Returns: Campaign data successfully
 ```
 
@@ -92,7 +92,7 @@ curl -X GET 'https://sriycekxdqnesdsgwiuc.supabase.co/rest/v1/campaigns?select=*
 ```bash
 # Edge Functions with new keys return JWT error
 curl -X POST 'https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/test-new-auth' \
-  -H 'Authorization: Bearer sb_publishable_GaGU6ZiyiO6ncO7kU2qAvA_SFuCyYaM'
+  -H 'Authorization: Bearer sb_publishable_your_key_here'
 # Returns: {"code":401,"message":"Invalid JWT"}
 ```
 

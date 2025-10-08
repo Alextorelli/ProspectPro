@@ -216,7 +216,7 @@ In Supabase Dashboard:
 
 ```bash
 curl -X POST 'https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/business-discovery-user-aware' \
-  -H 'Authorization: Bearer sb_publishable_GaGU6ZiyiO6ncO7kU2qAvA_SFuCyYaM' \
+  -H 'Authorization: Bearer sb_publishable_your_key_here' \
   -H 'Content-Type: application/json' \
   -d '{
     "businessType": "coffee shop",
@@ -255,14 +255,14 @@ ORDER BY tablename;
 ### **Supabase Configuration**
 
 - **URL**: `https://sriycekxdqnesdsgwiuc.supabase.co`
-- **Publishable Key**: `sb_publishable_GaGU6ZiyiO6ncO7kU2qAvA_SFuCyYaM`
+- **Publishable Key**: `sb_publishable_your_key_here`
 - **API Key Format**: New `sb_*` format (not JWT)
 
 ### **Environment Variables** (Already Configured)
 
 ```bash
 VITE_SUPABASE_URL=https://sriycekxdqnesdsgwiuc.supabase.co
-VITE_SUPABASE_ANON_KEY=sb_publishable_GaGU6ZiyiO6ncO7kU2qAvA_SFuCyYaM
+VITE_SUPABASE_ANON_KEY=sb_publishable_your_key_here
 VITE_EDGE_FUNCTIONS_URL=https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1
 ```
 

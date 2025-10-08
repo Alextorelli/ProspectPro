@@ -6,7 +6,7 @@
 
 1. **New API Keys Updated**: ✅
 
-   - Publishable Key: `sb_publishable_GaGU6ZiyiO6ncO7kU2qAvA_SFuCyYaM`
+   - Publishable Key: `sb_publishable_your_key_here`
    - Secret Key: `sb\_### 🔍 **ADDITIONAL WARNINGS MONITORING**
 
 **Current Status**: Core security ✅ + Linter warnings identified 🚨
@@ -81,7 +81,7 @@ WHERE n.nspname = 'public'
 ORDER BY p.proname;
 
 -- Test the function to ensure it works
-SELECT public.validate_api_key_format('sb_publishable_GaGU6ZiyiO6ncO7kU2qAvA_SFuCyYaM') AS test_result;
+SELECT public.validate_api_key_format('sb_publishable_your_key_here') AS test_result;
 
 -- Final security status check
 SELECT public.validate_security_configuration() AS final_security_status;
@@ -252,8 +252,8 @@ After running the SQL, execute this verification query:
 SELECT public.validate_security_configuration() as security_status;
 
 SELECT
-  public.validate_api_key_format('sb_publishable_GaGU6ZiyiO6ncO7kU2qAvA_SFuCyYaM') as publishable_valid,
-  public.validate_api_key_format('sb_secret_bY8n_a7-hP0Lxd9dPT_efg_3WzpnXN_') as secret_valid;
+  public.validate_api_key_format('sb_publishable_your_key_here') as publishable_valid,
+  public.validate_api_key_format('sb_secret_your_key_here') as secret_valid;
 
 SELECT COUNT(*) as campaign_count FROM public.campaigns;
 ```
@@ -303,8 +303,8 @@ curl -X POST 'https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/test-busines
 
 **Hybrid Authentication Strategy** (RECOMMENDED):
 
-- ✅ **Database**: New secret key (`sb_secret_bY8n_a7-hP0Lxd9dPT_efg_3WzpnXN_`)
-- ✅ **Frontend**: New publishable key (`sb_publishable_GaGU6ZiyiO6ncO7kU2qAvA_SFuCyYaM`)
+- ✅ **Database**: New secret key (`sb_secret_your_key_here`)
+- ✅ **Frontend**: New publishable key (`sb_publishable_your_key_here`)
 - ⚠️ **Edge Functions**: Legacy JWT token (temporary until platform support)
 
 ### **🎯 CURRENT IMPLEMENTATION STATUS**
@@ -349,7 +349,7 @@ Update your React app's environment variables:
 
 ```env
 VITE_SUPABASE_URL=https://sriycekxdqnesdsgwiuc.supabase.co
-VITE_SUPABASE_ANON_KEY=sb_publishable_GaGU6ZiyiO6ncO7kU2qAvA_SFuCyYaM
+VITE_SUPABASE_ANON_KEY=sb_publishable_your_key_here
 VITE_EDGE_FUNCTIONS_URL=https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1
 ```
 

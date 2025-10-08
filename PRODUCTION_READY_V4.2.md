@@ -152,7 +152,7 @@ curl 'https://prospect-8fvlz5h1i-appsmithery.vercel.app'
 ```bash
 # Create anonymous session
 SESSION_TOKEN=$(curl -s -X POST 'https://sriycekxdqnesdsgwiuc.supabase.co/auth/v1/signup' \
-  -H "apikey: sb_publishable_GaGU6ZiyiO6ncO7kU2qAvA_SFuCyYaM" \
+  -H "apikey: sb_publishable_your_key_here" \
   -H 'Content-Type: application/json' \
   -d '{"data": {}}' | jq -r '.access_token')
 
@@ -174,7 +174,7 @@ curl -X POST 'https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/business-dis
 
 ```bash
 VITE_SUPABASE_URL=https://sriycekxdqnesdsgwiuc.supabase.co
-VITE_SUPABASE_ANON_KEY=sb_publishable_GaGU6ZiyiO6ncO7kU2qAvA_SFuCyYaM
+VITE_SUPABASE_ANON_KEY=sb_publishable_your_key_here
 VITE_EDGE_FUNCTIONS_URL=https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1
 ```
 
