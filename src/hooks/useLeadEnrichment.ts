@@ -98,9 +98,7 @@ export const useLeadEnrichment = () => {
         // Ensure we have a valid session before calling Edge Function
         const hasSession = await ensureSession();
         if (!hasSession || !user?.id) {
-          throw new Error(
-            "Please sign in to run lead enrichment."
-          );
+          throw new Error("Please sign in to run lead enrichment.");
         }
 
         const billingContext = {

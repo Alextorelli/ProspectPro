@@ -1557,8 +1557,8 @@ serve(async (req) => {
       .insert({
         id: jobId,
         campaign_id: campaignId,
-  user_id: user.id,
-  session_user_id: user.id,
+        user_id: user.id,
+        session_user_id: user.id,
         status: "pending",
         config: {
           ...jobConfig,

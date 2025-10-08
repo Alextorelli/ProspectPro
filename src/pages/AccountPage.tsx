@@ -26,7 +26,8 @@ export const AccountPage: React.FC = () => {
             Sign in to manage your account
           </h1>
           <p className="mt-2 text-sm text-gray-600 dark:text-slate-400">
-            Access your billing, usage analytics, and profile settings after signing in.
+            Access your billing, usage analytics, and profile settings after
+            signing in.
           </p>
         </div>
       </div>

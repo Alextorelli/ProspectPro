@@ -62,9 +62,7 @@ export const CampaignProgress: React.FC = () => {
     }
 
     if (!authUserId) {
-      setResultFetchError(
-        "Sign in again to view campaign results."
-      );
+      setResultFetchError("Sign in again to view campaign results.");
       return;
     }
 
@@ -213,9 +211,7 @@ export const CampaignProgress: React.FC = () => {
     }
 
     if (!authUserId) {
-      setResultFetchError(
-        "Sign in again to re-establish your session."
-      );
+      setResultFetchError("Sign in again to re-establish your session.");
       return;
     }
 

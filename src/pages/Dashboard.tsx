@@ -108,7 +108,9 @@ export const Dashboard: React.FC = () => {
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600 dark:text-gray-400">Loading campaigns...</p>
+          <p className="mt-4 text-gray-600 dark:text-gray-400">
+            Loading campaigns...
+          </p>
         </div>
       </div>
     );
@@ -121,7 +123,8 @@ export const Dashboard: React.FC = () => {
           Sign in to view your campaigns
         </h2>
         <p className="text-sm text-gray-600 dark:text-gray-300">
-          Create an account or sign in to access saved campaigns and lead history.
+          Create an account or sign in to access saved campaigns and lead
+          history.
         </p>
       </div>
     );
@@ -136,7 +139,9 @@ export const Dashboard: React.FC = () => {
             <h3 className="text-sm font-medium text-red-800 dark:text-red-200">
               Error loading campaigns
             </h3>
-            <p className="text-sm text-red-700 dark:text-red-300 mt-1">{error}</p>
+            <p className="text-sm text-red-700 dark:text-red-300 mt-1">
+              {error}
+            </p>
           </div>
         </div>
       </div>
@@ -147,7 +152,9 @@ export const Dashboard: React.FC = () => {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Dashboard</h1>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+          Dashboard
+        </h1>
         <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
           Overview of your lead generation campaigns and results
         </p>

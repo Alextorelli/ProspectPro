@@ -1,203 +1,164 @@
-# ProspectPro v4.2 Documentation Index
+# ProspectPro v4.3 Documentation Index
 
-**🚀 Complete User-Aware Business Discovery Platform**
+**🚀 Tier-Aware Background Discovery & Verification Platform**
 
 ---
 
 ## 📋 Documentation Overview
 
-This documentation covers the complete ProspectPro v4.2 system with user-aware architecture, authentication, and campaign ownership. All documents are updated for the latest production deployment (October 4, 2025).
+ProspectPro v4.3 introduces the tier-aware background discovery pipeline with zero-fake-data enforcement. This index points to the live references that back the production system.
 
 ---
 
-## 🏗️ Architecture & Technical
+## 🏗️ Core Architecture
 
-### Core Technical Documents
-
-- **[Technical Summary v4.2](TECHNICAL_SUMMARY_v4.2_USER_AWARE.md)** - Complete system overview with user-aware architecture
-- **[Copilot Instructions](.github/copilot-instructions.md)** - Development context and troubleshooting guide
-- **[README](README.md)** - Platform overview, features, and getting started
-
-### Implementation Details
-
-- **[User-Aware Implementation Complete](USER_AWARE_IMPLEMENTATION_COMPLETE.md)** - Implementation summary and status
-- **[Production Deployment Success](PRODUCTION_DEPLOYMENT_SUCCESS_v4.2.md)** - Complete deployment verification
-- **[Latest Deployment](LATEST_DEPLOYMENT.md)** - Current production status and testing results
+- **[Copilot Instructions](.github/copilot-instructions.md)** – Authoritative production guide (deployment, troubleshooting, SLAs)
+- **[README](README.md)** – Platform overview and quickstart
+- **[ARCHITECTURE_DECISION_BACKGROUND_TASKS.md](ARCHITECTURE_DECISION_BACKGROUND_TASKS.md)** – Rationale for asynchronous discovery orchestration
+- **[BACKGROUND_TASKS_IMPLEMENTATION.md](BACKGROUND_TASKS_IMPLEMENTATION.md)** – Implementation notes for `business-discovery-background`
 
 ---
 
-## 🔐 User System & Authentication
+## 🖥️ Frontend Implementation
 
-### User Management
-
-- **Database Schema:** `database/user-campaign-production-update.sql`
-- **Authentication Flow:** JWT tokens + session management
-- **Data Isolation:** RLS policies with user_id and session_user_id
-- **Campaign Ownership:** User-linked campaigns with anonymous session support
-
-### Frontend Implementation
-
-- **User Interface:** `public/index-user-aware.html`
-- **Authentication Logic:** `public/supabase-app-user-aware.js`
-- **Production URL:** https://prospect-fyhedobh1-appsmithery.vercel.app
+- **Entry Point:** `index.html`
+- **Application Code:** `src/` (React + Vite)
+  - `src/pages/BusinessDiscovery.tsx` – Campaign creation & monitoring
+  - `src/pages/Dashboard.tsx` – Lead review with verified enrichment metadata
+  - `src/hooks/useLeadEnrichment.ts` – Tier-aware enrichment hooks
+- **Build Command:** `npm run build` (outputs to `/dist` for Vercel deploy)
 
 ---
 
-## 🚀 Backend & Edge Functions
+## ☁️ Supabase Edge Functions
 
-### Production Edge Functions (6 Active)
+### Active Production Functions (v4.3)
 
-1. **business-discovery-user-aware** (v2) - User context discovery with campaign ownership
-2. **campaign-export-user-aware** (v2) - User-authorized export with data isolation
-3. **enrichment-hunter** (v1) - Hunter.io email discovery with caching
-4. **enrichment-neverbounce** (v1) - Email verification with quota management
-5. **enrichment-orchestrator** (v1) - Multi-service coordination
-6. **test-google-places** (v1) - API testing and validation
+1. `business-discovery-background` – Asynchronous discovery with tier controls _(primary path)_
+2. `campaign-export-user-aware` – User-authorized CSV export with RLS isolation
+3. `campaign-export` – Service-role export handler for internal automation
+4. `enrichment-hunter` – Hunter.io discovery with confidence scoring & caching
+5. `enrichment-neverbounce` – NeverBounce verification (95% deliverability floor)
+6. `enrichment-orchestrator` – Multi-service enrichment coordination & budgeting
+7. `test-google-places` – API verification harness
 
-### Function Documentation
+> ℹ️ Legacy synchronous endpoints (`business-discovery-user-aware`, `public/index-user-aware.html`, `supabase-app-user-aware.js`) were retired in v4.3. See `scripts/deploy-user-aware-system.sh` for the deprecation notice.
 
-- **Source Code:** `/supabase/functions/`
-- **Shared Auth:** `/supabase/functions/_shared/edge-auth.ts`
-- **Deployment:** `supabase functions deploy [function-name]`
+### Key Sources
 
----
-
-## 🗄️ Database & Schema
-
-### User-Aware Data Model
-
-```sql
--- Campaigns with user ownership
-campaigns (id, business_type, location, user_id, session_user_id, ...)
-
--- Leads with user context
-leads (id, campaign_id, business_name, email, user_id, session_user_id, ...)
-
--- User-authorized exports
-dashboard_exports (id, campaign_id, user_id, session_user_id, ...)
-```
-
-### Security Implementation
-
-- **RLS Policies:** User isolation and access control
-- **Helper Functions:** Campaign management and user linking
-- **Schema Files:** `/database/` directory
+- Edge function implementations: `/supabase/functions/`
+- Shared auth utilities: `/supabase/functions/_shared/`
+- Deployment command: `supabase functions deploy <function-name>`
 
 ---
 
-## 🧪 Testing & Deployment
+## 🗄️ Database & Security
 
-### Production Testing Results
-
-- **Business Discovery:** ✅ User context integration working
-- **Campaign Export:** ✅ User authorization working
-- **Authentication:** ✅ JWT user extraction operational
-- **Database Storage:** ✅ User-aware data persistence working
-
-### Deployment Scripts
-
-- **User-Aware Deployment:** `scripts/deploy-user-aware-system.sh`
-- **Frontend Build:** `npm run build` → `/dist` directory
-- **Backend Deploy:** `supabase functions deploy`
+- **Schema Files:** `/database/`
+  - `supabase-first-schema.sql` – Canonical schema
+  - `rls-setup.sql` – Row Level Security enforcement
+  - `user-campaign-production-update.sql` – Authenticated ownership columns
+- **Core Tables:** `campaigns`, `leads`, `dashboard_exports`
+- **Security Model:** JWT-authenticated access with user_id + session_user_id; anonymous fallback removed from production
 
 ---
 
-## 📊 Business Features
+## 🔐 Authentication & Session Handling
 
-### Discovery Capabilities
-
-- **Business Categories:** 16 categories with 300+ optimized types
-- **Email Verification:** Hunter.io + NeverBounce integration
-- **Quality Scoring:** Confidence-based lead qualification
-- **Cost Optimization:** Budget controls and intelligent API usage
-
-### User Experience
-
-- **Anonymous Access:** Instant discovery without signup
-- **Session Management:** Campaign tracking during browser session
-- **User Authentication:** Complete signup/signin system
-- **Campaign History:** User-specific campaign management and export
+- Supabase Auth with JWT tokens (
+  - Frontend enforces sign-in before campaign creation
+  - Session context passed through background discovery payloads
+- Shared auth utilities: `/supabase/functions/_shared/edge-auth.ts`
+- Refer to `AUTHENTICATION_COMPLETE.md` for the end-to-end auth hardening log
 
 ---
 
-## 🔧 Development & Configuration
+## 🧪 Testing & Validation
 
-### Development Setup
+- **Unit / Integration:** `npm run test`
+- **ESLint:** `npm run lint` (configured via `.eslintrc.cjs` & `.eslintignore`)
+- **Edge Function Smoke Tests:**
+  - `supabase functions serve business-discovery-background`
+  - `scripts/test-background-tasks.sh`
+- **Manual curl probes:** see `.github/copilot-instructions.md` → “Debugging Commands”
+
+---
+
+## 🚀 Deployment Workflow
+
+1. Install dependencies: `npm install`
+2. Build frontend: `npm run build`
+3. Deploy static assets: from `/dist` run `vercel --prod`
+4. Deploy edge functions: `supabase functions deploy <name>`
+5. Verify using curl or the Supabase dashboard logs
+
+Supporting scripts:
+
+- `scripts/deploy-background-tasks.sh` – Batch deploy of background discovery stack
+- `scripts/test-background-tasks.sh` – Validates discovery + export loop
+- `scripts/repository-cleanup.sh` – Ensures Supabase-first project hygiene
+
+---
+
+## 🌐 Production Environment Snapshot
+
+- **Frontend:** https://prospect-fyhedobh1-appsmithery.vercel.app (Vercel static hosting)
+- **Supabase Project:** `sriycekxdqnesdsgwiuc`
+- **Edge Function URL Base:** `https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/`
+- **Anon Key Management:** Supabase dashboard → Settings → API (sync with `/src/lib/supabase.ts`)
+
+---
+
+## 📈 Business Intelligence Features
+
+- MECE taxonomy (`src/constants/businessTaxonomy.ts`) with 16 categories / 300+ business types
+- Verified contact enrichment via Hunter.io + NeverBounce + licensing data
+- Tier-aware budgets & scoring: see `supabase/functions/enrichment-orchestrator/`
+- Export metadata retained in `leads.enrichment_data` JSONB field
+
+---
+
+## 🛠️ Troubleshooting Quicklinks
+
+- **Anon key mismatch:** `NEED_ANON_KEY.md`, `FINAL_JWT_ANON_KEY_SOLUTION.md`
+- **Edge function auth issues:** `EDGE_FUNCTION_AUTH_UPDATE_GUIDE.md`
+- **Deployment checklist:** `DEPLOYMENT_CHECKLIST.md`
+- **Environment sync:** `populate-secrets.sh`, `pull-env-from-secrets.js`
+- **MCP troubleshooting server:** `mcp-servers/` directory (see `README` inside)
+
+---
+
+## 🎯 Quick Command Reference
 
 ```bash
-# Clone and setup
-git clone https://github.com/Alextorelli/ProspectPro.git
-npm install
-
-# Start local development
-supabase start
-supabase functions serve
-
-# Deploy to production
-npm run build
-cd dist && vercel --prod
-```
-
-### Configuration Files
-
-- **MCP Server:** `mcp-config.json` - AI tooling configuration
-- **Package:** `package.json` - Dependencies and scripts
-- **Supabase:** Local development configuration
-
----
-
-## 🌐 Production Environment
-
-### Live Platform Access
-
-- **Frontend:** https://prospect-fyhedobh1-appsmithery.vercel.app
-- **Database:** ProspectPro-Production (sriycekxdqnesdsgwiuc.supabase.co)
-- **Functions:** https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/
-
-### Environment Status
-
-- **Frontend:** ✅ Deployed to Vercel with user authentication
-- **Backend:** ✅ 6 Edge Functions deployed and operational
-- **Database:** ✅ User-aware schema with RLS policies applied
-- **Authentication:** ✅ JWT + session management working
-
----
-
-## 📋 Implementation History
-
-### Major Milestones
-
-- **v4.0** - Initial Supabase-first architecture
-- **v4.1** - Enhanced email verification pipeline
-- **v4.2** - User-aware system with complete authentication
-
-### Recent Updates (October 4, 2025)
-
-- ✅ User-campaign linking implemented
-- ✅ Authentication system deployed
-- ✅ Data isolation with RLS policies
-- ✅ User-authorized export system
-- ✅ Session management for anonymous users
-
----
-
-## 🎯 Quick Reference
-
-### Essential Commands
-
-```bash
-# Test user-aware discovery
-curl -X POST 'https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/business-discovery-user-aware' \
-  -H 'Authorization: Bearer JWT_TOKEN' \
+# Background discovery smoke test
+curl -X POST \
+  'https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/business-discovery-background' \
+  -H 'Authorization: Bearer <ANON_OR_SERVICE_ROLE_TOKEN>' \
   -H 'Content-Type: application/json' \
-  -d '{"businessType": "restaurant", "location": "Seattle, WA", "sessionUserId": "test_123"}'
+  -d '{"businessType":"coffee shop","location":"Seattle, WA","maxResults":2,"tierKey":"PROFESSIONAL","sessionUserId":"test_session_123"}'
 
-# Deploy frontend
-cd public/dist && vercel --prod
+# Export campaign results
+curl -X POST \
+  'https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/campaign-export-user-aware' \
+  -H 'Authorization: Bearer <ANON_OR_SERVICE_ROLE_TOKEN>' \
+  -H 'Content-Type: application/json' \
+  -d '{"campaignId":"<CAMPAIGN_ID>","format":"csv","sessionUserId":"test_session_123"}'
 
-# Deploy backend
-supabase functions deploy business-discovery-user-aware
+# Lint & build guard rails
+npm run lint
+npm run build
 ```
+
+---
+
+## 🗓️ Release Timeline
+
+- **v4.1** – Verification-first enrichment pipeline
+- **v4.2** – Authenticated user-aware discovery (deprecated backend retained only for exports)
+- **v4.3** – Tier-aware background discovery, lint tooling alignment, legacy asset removal
+
+For historical artifacts see `/archive/`.
 
 ### Key URLs
 

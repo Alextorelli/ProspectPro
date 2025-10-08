@@ -8,11 +8,11 @@ import { MultiSelectBusinessTypes } from "../components/MultiSelectBusinessTypes
 import { ProgressDisplay } from "../components/ProgressDisplay";
 import { TierSelector } from "../components/TierSelector";
 import { BUSINESS_TYPES_BY_CATEGORY } from "../constants/businessTaxonomy";
+import { useAuth } from "../contexts/AuthContext";
 import { useBusinessDiscovery } from "../hooks/useBusinessDiscovery";
 import { ENRICHMENT_TIERS } from "../lib/supabase";
 import { useCampaignStore } from "../stores/campaignStore";
 import { exportLeadsToCsv } from "../utils/exportLeadsToCsv";
-import { useAuth } from "../contexts/AuthContext";
 
 const DEFAULT_CATEGORY = "Home & Property Services";
 const DEFAULT_LOCATION: GeographicLocation = {
@@ -266,7 +266,8 @@ export const BusinessDiscovery: React.FC = () => {
           Sign in required
         </h1>
         <p className="mt-3 text-sm text-gray-600 dark:text-gray-300">
-          Create an account or sign in to launch new campaigns and access verified leads.
+          Create an account or sign in to launch new campaigns and access
+          verified leads.
         </p>
       </div>
     );
