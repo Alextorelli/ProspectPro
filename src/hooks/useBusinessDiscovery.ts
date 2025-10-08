@@ -65,7 +65,7 @@ export const useBusinessDiscovery = (
     estimatedTime?: number;
   }) => void
 ) => {
-  const { sessionUserId, user } = useAuth();
+  const { user } = useAuth();
   const { setLoading, setError, clearLeads, setCurrentCampaign } =
     useCampaignStore();
   const [progress, setProgress] = useState(0);
@@ -87,11 +87,10 @@ export const useBusinessDiscovery = (
 
       try {
         console.log("🚀 Starting user-aware business discovery:", config);
-        console.log("👤 Session User ID:", sessionUserId);
 
         // Ensure we have a valid session before calling Edge Function
         const hasSession = await ensureSession();
-        if (!hasSession) {
+        if (!hasSession || !user?.id) {
           throw new Error("Please sign in to run a discovery campaign.");
         }
 
@@ -119,10 +118,6 @@ export const useBusinessDiscovery = (
 
         const accessToken = await getSessionToken();
 
-        const resolvedSessionId =
-          sessionUserId ||
-          `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-
         const billingContext = {
           tier,
           tierName: tierConfig.name,
@@ -148,8 +143,8 @@ export const useBusinessDiscovery = (
               tierName: tierConfig.name,
               tierPrice: tierConfig.price,
               options: discoveryOptions,
-              sessionUserId: resolvedSessionId,
-              userId: user?.id ?? null,
+              sessionUserId: user.id,
+              userId: user.id,
               billingContext,
             },
             headers: accessToken

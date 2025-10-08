@@ -12,6 +12,7 @@ import { useBusinessDiscovery } from "../hooks/useBusinessDiscovery";
 import { ENRICHMENT_TIERS } from "../lib/supabase";
 import { useCampaignStore } from "../stores/campaignStore";
 import { exportLeadsToCsv } from "../utils/exportLeadsToCsv";
+import { useAuth } from "../contexts/AuthContext";
 
 const DEFAULT_CATEGORY = "Home & Property Services";
 const DEFAULT_LOCATION: GeographicLocation = {
@@ -54,6 +55,7 @@ const getValidationStatusColor = (status?: string) => {
 
 export const BusinessDiscovery: React.FC = () => {
   const navigate = useNavigate();
+  const { user, loading: authLoading } = useAuth();
 
   const handleJobCreated = (jobData: {
     jobId: string;
@@ -168,6 +170,11 @@ export const BusinessDiscovery: React.FC = () => {
   };
 
   const handleSearch = () => {
+    if (!user) {
+      alert("Please sign in to run a discovery campaign.");
+      return;
+    }
+
     if (!isTargetingValid) {
       setActiveStep(1);
       alert("Please complete targeting details before running the campaign.");
@@ -240,6 +247,30 @@ export const BusinessDiscovery: React.FC = () => {
       value: `~${approxCoverage} square miles`,
     },
   ];
+
+  if (authLoading) {
+    return (
+      <div className="rounded-lg border border-gray-200 bg-white p-6 text-center shadow-sm dark:border-slate-700 dark:bg-slate-900">
+        <div className="flex items-center justify-center space-x-3 text-gray-600 dark:text-slate-300">
+          <div className="h-6 w-6 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" />
+          <span>Loading your workspace…</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="rounded-lg border border-gray-200 bg-white p-8 text-center shadow-sm dark:border-slate-700 dark:bg-slate-900">
+        <h1 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
+          Sign in required
+        </h1>
+        <p className="mt-3 text-sm text-gray-600 dark:text-gray-300">
+          Create an account or sign in to launch new campaigns and access verified leads.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="rounded-lg border border-gray-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900">

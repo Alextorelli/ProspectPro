@@ -26,7 +26,7 @@ export const CampaignProgress: React.FC = () => {
   const addLeads = useCampaignStore((state) => state.addLeads);
   const setLoading = useCampaignStore((state) => state.setLoading);
   const setError = useCampaignStore((state) => state.setError);
-  const { user, sessionUserId } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const authUserId = user?.id ?? null;
 
   const [isFetchingResults, setIsFetchingResults] = useState(false);
@@ -61,9 +61,9 @@ export const CampaignProgress: React.FC = () => {
       return;
     }
 
-    if (!authUserId && !sessionUserId) {
+    if (!authUserId) {
       setResultFetchError(
-        "Missing session context. Refresh the page and try again."
+        "Sign in again to view campaign results."
       );
       return;
     }
@@ -84,22 +84,13 @@ export const CampaignProgress: React.FC = () => {
       let leadsRecords: any[] = [];
 
       for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt += 1) {
-        let campaignQuery = supabase
+        const campaignQuery = supabase
           .from("campaigns")
           .select(
             "id,business_type,location,status,total_cost,results_count,created_at,updated_at"
           )
-          .eq("id", campaignId);
-
-        if (authUserId && sessionUserId) {
-          campaignQuery = campaignQuery.or(
-            `user_id.eq.${authUserId},session_user_id.eq.${sessionUserId}`
-          );
-        } else if (authUserId) {
-          campaignQuery = campaignQuery.eq("user_id", authUserId);
-        } else if (sessionUserId) {
-          campaignQuery = campaignQuery.eq("session_user_id", sessionUserId);
-        }
+          .eq("id", campaignId)
+          .eq("user_id", authUserId);
 
         const { data: campaignData, error: campaignError } =
           await campaignQuery.maybeSingle();
@@ -108,23 +99,14 @@ export const CampaignProgress: React.FC = () => {
           throw campaignError;
         }
 
-        let leadsQuery = supabase
+        const leadsQuery = supabase
           .from("leads")
           .select(
             "id,campaign_id,business_name,address,phone,website,email,confidence_score,validation_cost,enrichment_data,created_at"
           )
           .eq("campaign_id", campaignId)
+          .eq("user_id", authUserId)
           .order("confidence_score", { ascending: false });
-
-        if (authUserId && sessionUserId) {
-          leadsQuery = leadsQuery.or(
-            `user_id.eq.${authUserId},session_user_id.eq.${sessionUserId}`
-          );
-        } else if (authUserId) {
-          leadsQuery = leadsQuery.eq("user_id", authUserId);
-        } else if (sessionUserId) {
-          leadsQuery = leadsQuery.eq("session_user_id", sessionUserId);
-        }
 
         const { data: leadsData, error: leadsError } = await leadsQuery;
 
@@ -203,7 +185,6 @@ export const CampaignProgress: React.FC = () => {
     clearLeads,
     metrics,
     navigate,
-    sessionUserId,
     setCurrentCampaign,
     setError,
     setLoading,
@@ -215,7 +196,7 @@ export const CampaignProgress: React.FC = () => {
       return;
     }
 
-    if (!authUserId && !sessionUserId) {
+    if (!authUserId) {
       return;
     }
 
@@ -224,22 +205,50 @@ export const CampaignProgress: React.FC = () => {
     }
 
     fetchResults();
-  }, [authUserId, campaignId, fetchResults, isComplete, jobId, sessionUserId]);
+  }, [authUserId, campaignId, fetchResults, isComplete, jobId]);
 
   const handleRetryFetch = () => {
     if (!campaignId) {
       return;
     }
 
-    if (!authUserId && !sessionUserId) {
+    if (!authUserId) {
       setResultFetchError(
-        "Missing session context. Refresh the page to re-establish your session."
+        "Sign in again to re-establish your session."
       );
       return;
     }
 
     fetchResults();
   };
+
+  if (authLoading) {
+    return (
+      <div className="container mx-auto px-4 py-12">
+        <div className="flex items-center justify-center">
+          <div className="flex items-center space-x-3 text-gray-600">
+            <div className="h-6 w-6 animate-spin rounded-full border-2 border-blue-600 border-t-transparent"></div>
+            <span>Loading campaign...</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!authUserId) {
+    return (
+      <div className="container mx-auto px-4 py-12">
+        <div className="max-w-xl mx-auto rounded-lg border border-gray-200 bg-white p-8 text-center shadow-sm dark:border-gray-700 dark:bg-gray-800">
+          <h1 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
+            Sign in required
+          </h1>
+          <p className="mt-3 text-sm text-gray-600 dark:text-gray-300">
+            Please sign in to review campaign progress and download results.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   if (!jobId || !campaignId) {
     return (

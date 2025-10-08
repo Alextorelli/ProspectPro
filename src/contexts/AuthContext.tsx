@@ -22,22 +22,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const [sessionUserId, setSessionUserId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Generate or retrieve session ID for anonymous users
-  const getOrCreateSessionId = () => {
-    if (typeof window === "undefined") {
-      return null;
-    }
-
-    let sessionId = window.localStorage.getItem("prospect_session_id");
-    if (!sessionId) {
-      sessionId = `session_${Date.now()}_${Math.random()
-        .toString(36)
-        .substr(2, 9)}`;
-      window.localStorage.setItem("prospect_session_id", sessionId);
-    }
-    return sessionId;
-  };
-
   useEffect(() => {
     // Initialize auth session (create anonymous session if needed)
     const initializeAuth = async () => {
@@ -56,19 +40,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
           setSession(session);
           setUser(session.user);
           setSessionUserId(session.user.id);
-          if (typeof window !== "undefined") {
-            window.localStorage.removeItem("prospect_session_id");
-          }
         } else {
           setSession(null);
           setUser(null);
-          setSessionUserId(getOrCreateSessionId());
+          setSessionUserId(null);
         }
 
         setLoading(false);
       } catch (error) {
         console.error("Auth initialization error:", error);
-        setSessionUserId(getOrCreateSessionId());
+        setSession(null);
+        setUser(null);
+        setSessionUserId(null);
         setLoading(false);
       }
     };
@@ -85,13 +68,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         setSession(session);
         setUser(session.user);
         setSessionUserId(session.user.id);
-        if (typeof window !== "undefined") {
-          window.localStorage.removeItem("prospect_session_id");
-        }
       } else {
         setSession(null);
         setUser(null);
-        setSessionUserId(getOrCreateSessionId());
+        setSessionUserId(null);
       }
     });
 
@@ -119,7 +99,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     if (error) throw error;
     setSession(null);
     setUser(null);
-    setSessionUserId(getOrCreateSessionId());
+    setSessionUserId(null);
   };
 
   const value = {

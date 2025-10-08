@@ -18,7 +18,7 @@ interface Campaign {
 }
 
 export const Dashboard: React.FC = () => {
-  const { sessionUserId, user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const { campaigns: localCampaigns, leads: localLeads } = useCampaignStore();
   const navigate = useNavigate();
 
@@ -29,33 +29,26 @@ export const Dashboard: React.FC = () => {
   // Fetch user-aware campaigns from database
   useEffect(() => {
     const fetchCampaigns = async () => {
-      if (!sessionUserId) {
-        console.log("⏳ Waiting for session initialization...");
+      if (authLoading) {
+        return;
+      }
+
+      if (!user?.id) {
+        setCampaigns([]);
+        setLoading(false);
+        setError(null);
         return;
       }
 
       try {
         setLoading(true);
-        console.log("📊 Fetching campaigns for user:", sessionUserId);
+        console.log("📊 Fetching campaigns for user:", user.id);
 
-        // Query campaigns with user context
-        let query = supabase.from("campaigns").select("*");
-
-        // Build query based on authentication state
-        if (user?.id) {
-          // Authenticated user: match user_id OR session_user_id
-          query = query.or(
-            `user_id.eq.${user.id},session_user_id.eq.${sessionUserId}`
-          );
-        } else if (sessionUserId) {
-          // Anonymous user: match session_user_id only
-          query = query.eq("session_user_id", sessionUserId);
-        } else {
-          // No user context - show nothing
-          setCampaigns([]);
-          setLoading(false);
-          return;
-        }
+        // Query campaigns scoped to the authenticated user
+        const query = supabase
+          .from("campaigns")
+          .select("*")
+          .eq("user_id", user.id);
 
         const { data, error } = await query.order("created_at", {
           ascending: false,
@@ -80,7 +73,7 @@ export const Dashboard: React.FC = () => {
     };
 
     fetchCampaigns();
-  }, [sessionUserId, user?.id]);
+  }, [authLoading, user?.id]);
 
   // Calculate stats from database campaigns
   const totalCost = campaigns.reduce(
@@ -110,13 +103,26 @@ export const Dashboard: React.FC = () => {
   const recentCampaigns =
     campaigns.length > 0 ? campaigns.slice(0, 5) : localCampaigns.slice(0, 5);
 
-  if (loading) {
+  if (loading || authLoading) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
           <p className="mt-4 text-gray-600 dark:text-gray-400">Loading campaigns...</p>
         </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-8 text-center">
+        <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
+          Sign in to view your campaigns
+        </h2>
+        <p className="text-sm text-gray-600 dark:text-gray-300">
+          Create an account or sign in to access saved campaigns and lead history.
+        </p>
       </div>
     );
   }

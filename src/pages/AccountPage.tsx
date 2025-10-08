@@ -18,6 +18,21 @@ export const AccountPage: React.FC = () => {
     );
   }
 
+  if (!user) {
+    return (
+      <div className="flex items-center justify-center min-h-64">
+        <div className="rounded-lg border border-gray-200 bg-white p-8 text-center shadow-sm dark:border-slate-700 dark:bg-slate-900">
+          <h1 className="text-xl font-semibold text-gray-900 dark:text-slate-100">
+            Sign in to manage your account
+          </h1>
+          <p className="mt-2 text-sm text-gray-600 dark:text-slate-400">
+            Access your billing, usage analytics, and profile settings after signing in.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   const displayName = user?.user_metadata?.full_name || "ProspectPro User";
   const email = user?.email || "Not provided";
   const avatarUrl = user?.user_metadata?.avatar_url;

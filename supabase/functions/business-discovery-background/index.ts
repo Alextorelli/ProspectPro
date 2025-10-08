@@ -1452,6 +1452,19 @@ serve(async (req) => {
       data: { user },
     } = await supabaseClient.auth.getUser();
 
+    if (!user?.id) {
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: "Authentication required to start discovery campaigns.",
+        }),
+        {
+          status: 401,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    }
+
     const requestData: BusinessDiscoveryRequest = await req.json();
     const {
       businessType,
@@ -1467,6 +1480,19 @@ serve(async (req) => {
       tierName,
       options = {},
     } = requestData;
+
+    if (sessionUserId && sessionUserId !== user.id) {
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: "Session mismatch detected. Please re-authenticate.",
+        }),
+        {
+          status: 403,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    }
 
     const tierSettings = getTierSettings(tierKey, tierName);
     const enforcedBudget =
@@ -1517,8 +1543,8 @@ serve(async (req) => {
       maxResults,
       budgetLimit: enforcedBudget,
       minConfidenceScore,
-      userId: user?.id,
-      sessionUserId: sessionUserId || user?.id,
+      userId: user.id,
+      sessionUserId: user.id,
       tier: tierSettings,
       options: {
         ...DEFAULT_OPTIONS,
@@ -1531,8 +1557,8 @@ serve(async (req) => {
       .insert({
         id: jobId,
         campaign_id: campaignId,
-        user_id: user?.id,
-        session_user_id: sessionUserId || user?.id,
+  user_id: user.id,
+  session_user_id: user.id,
         status: "pending",
         config: {
           ...jobConfig,

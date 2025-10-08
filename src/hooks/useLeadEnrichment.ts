@@ -81,7 +81,7 @@ export interface EnrichmentResult {
 }
 
 export const useLeadEnrichment = () => {
-  const { sessionUserId, user } = useAuth();
+  const { user } = useAuth();
   const [progress, setProgress] = useState(0);
   const [currentStage, setCurrentStage] = useState<string>("");
   const [enrichedCount, setEnrichedCount] = useState(0);
@@ -97,15 +97,11 @@ export const useLeadEnrichment = () => {
 
         // Ensure we have a valid session before calling Edge Function
         const hasSession = await ensureSession();
-        if (!hasSession) {
+        if (!hasSession || !user?.id) {
           throw new Error(
-            "Failed to establish authentication session for enrichment."
+            "Please sign in to run lead enrichment."
           );
         }
-
-        const resolvedSessionId =
-          sessionUserId ||
-          `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
         const billingContext = {
           tier: config.tier ?? "professional",
@@ -141,8 +137,8 @@ export const useLeadEnrichment = () => {
               maxCostPerBusiness: config.maxCostPerBusiness ?? 0.5,
               minConfidenceScore: config.minConfidenceScore ?? 50,
               tier: config.tier ?? "professional",
-              sessionUserId: resolvedSessionId,
-              userId: user?.id ?? null,
+              sessionUserId: user.id,
+              userId: user.id,
               billingContext,
             },
           }

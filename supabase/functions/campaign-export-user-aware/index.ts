@@ -13,7 +13,6 @@ interface ExportRequest {
   format?: "csv" | "json" | "xlsx";
   includeEnrichmentData?: boolean;
   userEmail?: string;
-  sessionUserId?: string;
 }
 
 interface ExportLead {
@@ -49,10 +48,9 @@ function getUserContext(req: Request, requestData: ExportRequest) {
   }
 
   return {
-    userId: userFromJWT || requestData.sessionUserId || null,
+    userId: userFromJWT,
     userEmail: requestData.userEmail || null,
     isAuthenticated: !!userFromJWT,
-    sessionId: requestData.sessionUserId,
   };
 }
 
@@ -184,6 +182,19 @@ serve(async (req) => {
     const userContext = getUserContext(req, requestData);
     console.log(`👤 Export User Context:`, userContext);
 
+    if (!userContext.userId) {
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: "Authentication required to export campaign data.",
+        }),
+        {
+          status: 401,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    }
+
     // Get campaign and leads data
     const { campaign, leads } = await getCampaignData(
       authContext.client,
@@ -224,7 +235,7 @@ serve(async (req) => {
       export_status: "completed",
       completed_at: new Date().toISOString(),
       // Add user_id if available
-      ...(userContext.userId && { user_id: userContext.userId }),
+      user_id: userContext.userId,
     };
 
     const { error: exportError } = await authContext.client
@@ -306,7 +317,7 @@ serve(async (req) => {
       userContext: {
         isAuthenticated: userContext.isAuthenticated,
         hasAccess: true,
-        ownership: userContext.userId ? "user_owned" : "session_based",
+        ownership: "user_owned",
       },
       metadata: {
         timestamp: new Date().toISOString(),

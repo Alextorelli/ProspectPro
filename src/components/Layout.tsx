@@ -10,7 +10,7 @@ interface LayoutProps {
 
 export const Layout: React.FC<LayoutProps> = ({ children }) => {
   const location = useLocation();
-  const { user, sessionUserId } = useAuth();
+  const { user } = useAuth();
 
   const navigation = useMemo(
     () => [
@@ -21,7 +21,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
         disabled: !user,
       },
     ],
-    [user, sessionUserId]
+    [user]
   );
 
   return (
