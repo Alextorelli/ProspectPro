@@ -92,9 +92,7 @@ export const useBusinessDiscovery = (
         // Ensure we have a valid session before calling Edge Function
         const hasSession = await ensureSession();
         if (!hasSession) {
-          throw new Error(
-            "Failed to establish authentication session. Please refresh the page."
-          );
+          throw new Error("Please sign in to run a discovery campaign.");
         }
 
         // Determine enrichment tier

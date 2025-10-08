@@ -32,14 +32,17 @@ export const getSessionToken = async (): Promise<string | null> => {
 
 // Helper function to ensure we have a valid session
 export const ensureSession = async (): Promise<boolean> => {
-  const { error } = await supabase.auth.getSession();
+  const {
+    data: { session },
+    error,
+  } = await supabase.auth.getSession();
 
   if (error) {
     console.error("Failed to read session:", error);
     return false;
   }
 
-  return true;
+  return Boolean(session?.access_token);
 };
 
 // Edge Functions URL
