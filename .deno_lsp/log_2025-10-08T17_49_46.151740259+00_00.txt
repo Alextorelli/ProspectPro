@@ -1438,3 +1438,6 @@ TS server started.
 {"type":"measure","name":"lsp.diagnostic","count":111,"duration":0.001},
 {"type":"mark","name":"lsp.diagnostic"},
 {"type":"measure","name":"lsp.diagnostic","count":112,"duration":0.001},
+{"type":"mark","name":"lsp.goto_definition","count":10,"args":{"textDocument":{"uri":"file:///workspaces/ProspectPro/src/hooks/useBusinessDiscovery.ts"},"position":{"line":61,"character":4}}},
+{"type":"mark","name":"lsp.goto_definition","count":11,"args":{"textDocument":{"uri":"file:///workspaces/ProspectPro/src/hooks/useBusinessDiscovery.ts"},"position":{"line":62,"character":4}}},
+{"type":"mark","name":"lsp.goto_definition","count":12,"args":{"textDocument":{"uri":"file:///workspaces/ProspectPro/src/hooks/useBusinessDiscovery.ts"},"position":{"line":21,"character":6}}},
