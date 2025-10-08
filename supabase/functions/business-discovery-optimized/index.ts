@@ -1,10 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { 
-  EdgeFunctionAuth, 
-  createAuthenticatedClient, 
-  corsHeaders, 
-  handleCORS 
-} from "../_shared/edge-auth.ts";
+import { EdgeFunctionAuth, corsHeaders } from "../_shared/edge-auth.ts";
 
 // Import optimization modules (converted to Deno-compatible imports)
 // Note: These would need to be transpiled or rewritten for Deno, but showing the structure
@@ -178,31 +173,6 @@ class CensusAPIClient {
     };
   }
 }
-
-// CORS headers for frontend calls
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type",
-};
-
-serve(async (req) => {
-  // Handle CORS preflight
-  const corsResponse = handleCORS(req);
-  if (corsResponse) return corsResponse;
-
-  try {
-    const startTime = Date.now();
-
-    // Initialize Edge Function authentication
-    const edgeAuth = new EdgeFunctionAuth();
-    const authContext = edgeAuth.getAuthContext();
-    
-    console.log(`🔐 Edge Function Authentication: ${authContext.keyFormat} (${authContext.isValid ? 'Valid' : 'Invalid'})`);
-    
-    if (!authContext.isValid) {
-      throw new Error(`Authentication failed: ${authContext.keyFormat}`);
-    }
 
 interface BusinessDiscoveryRequest {
   businessType: string;
@@ -1206,6 +1176,19 @@ serve(async (req) => {
   }
 
   try {
+    const edgeAuth = new EdgeFunctionAuth();
+    const authContext = edgeAuth.getAuthContext();
+
+    console.log(
+      `🔐 Edge Function Authentication: ${authContext.keyFormat} (${
+        authContext.isValid ? "Valid" : "Invalid"
+      })`
+    );
+
+    if (!authContext.isValid) {
+      throw new Error(`Authentication failed: ${authContext.keyFormat}`);
+    }
+
     const startTime = Date.now();
 
     // Parse request
@@ -1515,8 +1498,10 @@ serve(async (req) => {
         }));
 
         await authContext.client.from("leads").insert(leadsToStore);
-        
-        console.log(`💾 Stored campaign and ${leadsToStore.length} leads using ${authContext.keyFormat} authentication`);
+
+        console.log(
+          `💾 Stored campaign and ${leadsToStore.length} leads using ${authContext.keyFormat} authentication`
+        );
       } catch (error) {
         console.error("Database storage error with new auth:", error);
       }
