@@ -34,7 +34,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
             aria-label="ProspectPro home"
           >
             <img
-              src="/prospectpro-header-logo.svg"
+              src="/logo-full.svg"
               alt="ProspectPro"
               className="h-16 w-auto"
             />

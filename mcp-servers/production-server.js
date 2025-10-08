@@ -1923,13 +1923,13 @@ class ProductionMCPServer {
     const transport = new StdioServerTransport();
     await this.server.connect(transport);
     console.error(
-      "🚀 ProspectPro Production MCP Server v2.0 - Enhanced & Consolidated"
+      "🚀 ProspectPro Production MCP Server v4.1 - Post-Cleanup Enhanced"
     );
     console.error(
-      "   📊 Production Monitoring | 🗄️  Database Analytics | 🔧 System Diagnostics"
+      "   📊 Tier-Aware Monitoring | 🗄️  Database Analytics | 🔧 System Diagnostics"
     );
     console.error(
-      "   🔌 API Testing | 📁 Filesystem Analysis | 🛡️  Security Validation"
+      "   🔌 API Testing | 📁 Filesystem Analysis | 🛡️  Zero Fake Data Enforcement"
     );
   }
 }

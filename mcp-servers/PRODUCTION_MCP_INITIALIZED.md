@@ -4,7 +4,7 @@
 
 - **Port**: Running via stdio transport
 - **Process ID**: 3a3d1917-1648-44de-bb79-095c15528637
-- **Version**: 2.0.0 Enhanced & Consolidated
+- **Version**: 4.1.0 Post-Cleanup Enhanced
 - **Total Tools**: 28 production-ready tools
 
 ## Available Tool Categories:
@@ -50,7 +50,7 @@
 - `analyze_project_structure` - Analyze ProspectPro project structure
 - `find_code_patterns` - Find specific code patterns across codebase
 - `analyze_api_clients` - Analyze API client implementations
-- `check_fake_data_violations` - Check for any fake data violations
+- `check_fake_data_violations` - Enforce zero fake data policy with strict detection
 
 ## MCP Integration Status:
 
