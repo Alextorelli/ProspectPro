@@ -32,22 +32,11 @@ export const getSessionToken = async (): Promise<string | null> => {
 
 // Helper function to ensure we have a valid session
 export const ensureSession = async (): Promise<boolean> => {
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
+  const { error } = await supabase.auth.getSession();
 
-  // If no session, create anonymous session
-  if (!session) {
-    console.log("No session found, creating anonymous session...");
-    const { data, error } = await supabase.auth.signInAnonymously();
-
-    if (error) {
-      console.error("Failed to create anonymous session:", error);
-      return false;
-    }
-
-    console.log("✅ Anonymous session created:", data.session?.user?.id);
-    return true;
+  if (error) {
+    console.error("Failed to read session:", error);
+    return false;
   }
 
   return true;

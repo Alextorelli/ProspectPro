@@ -14,15 +14,6 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const isAnonymousUser = (user: User | null | undefined) => {
-  if (!user) return false;
-  if (user.app_metadata?.provider === "anonymous") return true;
-  return (
-    user.identities?.some((identity) => identity.provider === "anonymous") ??
-    false
-  );
-};
-
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
@@ -33,12 +24,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   // Generate or retrieve session ID for anonymous users
   const getOrCreateSessionId = () => {
-    let sessionId = localStorage.getItem("prospect_session_id");
+    if (typeof window === "undefined") {
+      return null;
+    }
+
+    let sessionId = window.localStorage.getItem("prospect_session_id");
     if (!sessionId) {
       sessionId = `session_${Date.now()}_${Math.random()
         .toString(36)
         .substr(2, 9)}`;
-      localStorage.setItem("prospect_session_id", sessionId);
+      window.localStorage.setItem("prospect_session_id", sessionId);
     }
     return sessionId;
   };
@@ -57,34 +52,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
           console.error("Session error:", sessionError);
         }
 
-        // If no session exists, create an anonymous session
-        if (!session) {
-          console.log("No session found, creating anonymous session...");
-          const { data: anonData, error: anonError } =
-            await supabase.auth.signInAnonymously();
-
-          if (anonError) {
-            console.error("Anonymous sign-in error:", anonError);
-            // Fall back to session ID if anonymous auth fails
-            setSessionUserId(getOrCreateSessionId());
-            setLoading(false);
-            return;
-          }
-
-          console.log(
-            "✅ Anonymous session created:",
-            anonData.session?.user?.id
-          );
-          setSession(anonData.session);
-          setUser(null);
-          setSessionUserId(
-            anonData.session?.user?.id ?? getOrCreateSessionId()
-          );
-        } else {
-          // Existing session found
+        if (session?.user) {
           setSession(session);
-          setUser(isAnonymousUser(session.user) ? null : session.user);
+          setUser(session.user);
           setSessionUserId(session.user.id);
+          if (typeof window !== "undefined") {
+            window.localStorage.removeItem("prospect_session_id");
+          }
+        } else {
+          setSession(null);
+          setUser(null);
+          setSessionUserId(getOrCreateSessionId());
         }
 
         setLoading(false);
@@ -103,29 +81,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log("Auth state changed:", event, session?.user?.id);
 
-      setSession(session);
-      setUser(
-        session?.user && !isAnonymousUser(session.user) ? session.user : null
-      );
-
-      // Update session user ID
       if (session?.user) {
+        setSession(session);
+        setUser(session.user);
         setSessionUserId(session.user.id);
-        // Clear anonymous session ID
-        localStorage.removeItem("prospect_session_id");
-      } else {
-        // If signed out, create new anonymous session
-        if (event === "SIGNED_OUT") {
-          console.log("User signed out, creating new anonymous session...");
-          const { data: anonData } = await supabase.auth.signInAnonymously();
-          setSession(anonData.session);
-          setUser(null);
-          setSessionUserId(
-            anonData.session?.user?.id ?? getOrCreateSessionId()
-          );
-        } else {
-          setSessionUserId(getOrCreateSessionId());
+        if (typeof window !== "undefined") {
+          window.localStorage.removeItem("prospect_session_id");
         }
+      } else {
+        setSession(null);
+        setUser(null);
+        setSessionUserId(getOrCreateSessionId());
       }
     });
 
@@ -151,7 +117,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const signOut = async () => {
     const { error } = await supabase.auth.signOut();
     if (error) throw error;
-    // Generate new anonymous session ID
+    setSession(null);
+    setUser(null);
     setSessionUserId(getOrCreateSessionId());
   };
 
