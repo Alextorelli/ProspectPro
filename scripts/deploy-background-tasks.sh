@@ -8,6 +8,50 @@ echo "🚀 ProspectPro v4.2 - Background Task Architecture Deployment"
 echo "============================================================="
 echo ""
 
+resolve_env() {
+  for var in "$@"; do
+    local value="${!var}"
+    if [ -n "$value" ]; then
+      echo "$value"
+      return 0
+    fi
+  done
+  echo ""
+}
+
+resolve_from_file() {
+  local key="$1"
+  shift
+  for file in "$@"; do
+    if [ -f "$file" ]; then
+      local value=$(grep "^$key=" "$file" | tail -n1 | cut -d '=' -f2-)
+      if [ -n "$value" ]; then
+        echo "$value"
+        return 0
+      fi
+    fi
+  done
+  echo ""
+}
+
+SUPABASE_URL=$(resolve_env VITE_SUPABASE_URL NEXT_PUBLIC_SUPABASE_URL SUPABASE_URL)
+if [ -z "$SUPABASE_URL" ]; then
+  SUPABASE_URL=$(resolve_from_file VITE_SUPABASE_URL .env.local .env)
+fi
+if [ -z "$SUPABASE_URL" ]; then
+  SUPABASE_URL="https://sriycekxdqnesdsgwiuc.supabase.co"
+  echo "ℹ️  Supabase URL not specified. Using default: $SUPABASE_URL"
+fi
+
+ANON_KEY=$(resolve_env VITE_SUPABASE_ANON_KEY NEXT_PUBLIC_SUPABASE_ANON_KEY SUPABASE_ANON_KEY)
+if [ -z "$ANON_KEY" ]; then
+  ANON_KEY=$(resolve_from_file VITE_SUPABASE_ANON_KEY .env.local .env)
+fi
+if [ -z "$ANON_KEY" ]; then
+  echo "❌ Supabase anon key not set. Configure VITE_SUPABASE_ANON_KEY or NEXT_PUBLIC_SUPABASE_ANON_KEY"
+  exit 1
+fi
+
 # Step 1: Database Schema
 echo "📊 Step 1: Creating job queue database schema..."
 echo "Run this SQL in Supabase Dashboard → SQL Editor:"
@@ -25,8 +69,8 @@ echo "✅ Edge Function deployed"
 # Step 3: Verify deployment
 echo ""
 echo "🧪 Step 3: Testing Edge Function..."
-CAMPAIGN_RESPONSE=$(curl -s -X POST 'https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/business-discovery-background' \
-  -H "Authorization: Bearer $(grep SUPABASE_ANON_KEY .env | cut -d '=' -f2)" \
+CAMPAIGN_RESPONSE=$(curl -s -X POST "${SUPABASE_URL%/}/functions/v1/business-discovery-background" \
+  -H "Authorization: Bearer $ANON_KEY" \
   -H 'Content-Type: application/json' \
   -d '{
     "businessType": "coffee shop",

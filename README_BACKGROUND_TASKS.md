@@ -245,7 +245,7 @@ supabase functions deploy business-discovery-background --no-verify-jwt
 ### 3. Test (3 min)
 
 ```bash
-export SUPABASE_ANON_KEY="your_key"
+export NEXT_PUBLIC_SUPABASE_ANON_KEY="your_publishable_key"
 ./scripts/test-background-tasks.sh
 ```
 
@@ -388,7 +388,7 @@ You know it's working when:
 
 ### "Test script fails"
 
-→ Check SUPABASE_ANON_KEY is set
+→ Check NEXT_PUBLIC_SUPABASE_ANON_KEY (or VITE_SUPABASE_ANON_KEY) is set
 
 **Full troubleshooting**: See `DEPLOYMENT_CHECKLIST.md`
 

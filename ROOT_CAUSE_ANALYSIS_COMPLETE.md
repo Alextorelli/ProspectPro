@@ -61,7 +61,7 @@ sb_secret_...       (replaces service role key)
 **Files Affected**:
 
 1. `/scripts/inject-api-keys.sh` (line 43) - frontend build script
-2. `.env` - missing VITE_SUPABASE_ANON_KEY
+2. `.env` - missing NEXT_PUBLIC_SUPABASE_ANON_KEY (or VITE_SUPABASE_ANON_KEY)
 3. GitHub Actions secrets (deployment)
 4. Test scripts (diagnose-campaign-failure.sh, test-background-tasks.sh)
 
@@ -83,10 +83,10 @@ cd /workspaces/ProspectPro
 nano scripts/inject-api-keys.sh
 # Replace line 43:
 # OLD: VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-# NEW: VITE_SUPABASE_ANON_KEY=sb_publishable_YOUR_KEY_HERE
+# NEW: NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_YOUR_KEY_HERE
 
 # Update .env
-echo "VITE_SUPABASE_ANON_KEY=sb_publishable_YOUR_KEY_HERE" >> .env
+echo "NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_YOUR_KEY_HERE" >> .env
 ```
 
 ### Step 3: Rebuild and Deploy (3 minutes)
@@ -104,11 +104,11 @@ vercel --prod
 
 ```bash
 # Test database access
-export SUPABASE_ANON_KEY='sb_publishable_YOUR_NEW_KEY'
+export NEXT_PUBLIC_SUPABASE_ANON_KEY='sb_publishable_YOUR_NEW_KEY'
 
 curl "https://sriycekxdqnesdsgwiuc.supabase.co/rest/v1/discovery_jobs?limit=1" \
-  -H "apikey: $SUPABASE_ANON_KEY" \
-  -H "Authorization: Bearer $SUPABASE_ANON_KEY"
+  -H "apikey: $NEXT_PUBLIC_SUPABASE_ANON_KEY" \
+  -H "Authorization: Bearer $NEXT_PUBLIC_SUPABASE_ANON_KEY"
 
 # Should return JSON with job data
 ```
@@ -305,8 +305,8 @@ cd dist && vercel --prod
 
 # Test database access
 curl "https://sriycekxdqnesdsgwiuc.supabase.co/rest/v1/discovery_jobs?limit=1" \
-  -H "apikey: YOUR_NEW_KEY" \
-  -H "Authorization: Bearer YOUR_NEW_KEY"
+  -H "apikey: $NEXT_PUBLIC_SUPABASE_ANON_KEY" \
+  -H "Authorization: Bearer $NEXT_PUBLIC_SUPABASE_ANON_KEY"
 
 # Check Edge Function logs (in Supabase Dashboard)
 # https://supabase.com/dashboard/project/sriycekxdqnesdsgwiuc/functions/business-discovery-background/logs

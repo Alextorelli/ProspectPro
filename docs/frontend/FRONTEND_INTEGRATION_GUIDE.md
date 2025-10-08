@@ -51,9 +51,13 @@ https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/
 ### Required Environment Variables
 
 ```env
-# Supabase Configuration
+# Supabase configuration (set at least one matching prefix pair)
 VITE_SUPABASE_URL=https://sriycekxdqnesdsgwiuc.supabase.co
-VITE_SUPABASE_ANON_KEY=your_supabase_anon_key_here
+VITE_SUPABASE_ANON_KEY=your_supabase_publishable_key
+
+# Vercel/Next.js compatible fallbacks (optional)
+NEXT_PUBLIC_SUPABASE_URL=https://sriycekxdqnesdsgwiuc.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_publishable_key
 
 # Edge Functions URL (auto-configured)
 VITE_EDGE_FUNCTIONS_URL=https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1
@@ -63,6 +67,8 @@ VITE_GOOGLE_PLACES_API_KEY=your_key_here
 VITE_HUNTER_IO_API_KEY=your_key_here
 VITE_ZEROBOUNCE_API_KEY=your_key_here
 ```
+
+> ℹ️ The frontend automatically resolves `VITE_`, `NEXT_PUBLIC_`, or `SUPABASE_` prefixed values at runtime. Prefer using the Supabase **publishable** key (never the service role key).
 
 ## 🎨 Key Features
 

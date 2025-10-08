@@ -44,10 +44,12 @@ export GOOGLE_PLACES_API_KEY='your_google_places_api_key'
 export FOURSQUARE_CLIENT_ID='your_client_id'
 export FOURSQUARE_CLIENT_SECRET='your_client_secret'
 
-# Supabase deployment
-export SUPABASE_URL='https://your-project.supabase.co'
+# Supabase deployment (frontend publishable key)
+export NEXT_PUBLIC_SUPABASE_URL='https://your-project.supabase.co'
+export NEXT_PUBLIC_SUPABASE_ANON_KEY='your_publishable_key'
+
+# Supabase Edge Functions (server-side access)
 export SUPABASE_SERVICE_ROLE_KEY='your_service_role_key'
-export SUPABASE_ANON_KEY='your_anon_key'
 ```
 
 ### Optional Environment Variables (Enhanced Features)
@@ -76,6 +78,8 @@ GOOGLE_PLACES_API_KEY=your_key_here
 FOURSQUARE_CLIENT_ID=your_key_here
 FOURSQUARE_CLIENT_SECRET=your_key_here
 SUPABASE_SERVICE_ROLE_KEY=your_key_here
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_your_key
 
 # Optional enhanced features:
 ZEROBOUNCE_API_KEY=your_key_here
@@ -105,7 +109,7 @@ npx supabase functions deploy lead-validation-edge
 ```bash
 # Test enhanced business discovery
 curl -X POST 'https://your-project.supabase.co/functions/v1/enhanced-business-discovery' \
-  --header 'Authorization: Bearer your-anon-key' \
+  --header 'Authorization: Bearer your-publishable-key' \
   --header 'Content-Type: application/json' \
   --data '{
     "query": "restaurants",

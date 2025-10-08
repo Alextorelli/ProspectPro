@@ -8,16 +8,35 @@ echo "🔍 ProspectPro Campaign Failure Diagnostic"
 echo "=========================================="
 echo ""
 
-# Check if we have environment variables
-if [ -z "$SUPABASE_ANON_KEY" ]; then
-  echo "⚠️  SUPABASE_ANON_KEY not set. Get it from Supabase Dashboard → Settings → API"
-  echo "   Run: export SUPABASE_ANON_KEY='your_key_here'"
+# Resolve environment variables with fallbacks
+resolve_env() {
+  for var in "$@"; do
+    local value="${!var}"
+    if [ -n "$value" ]; then
+      echo "$value"
+      return 0
+    fi
+  done
   echo ""
+}
+
+SUPABASE_URL=$(resolve_env VITE_SUPABASE_URL NEXT_PUBLIC_SUPABASE_URL SUPABASE_URL)
+ANON_KEY=$(resolve_env VITE_SUPABASE_ANON_KEY NEXT_PUBLIC_SUPABASE_ANON_KEY SUPABASE_ANON_KEY)
+
+if [ -z "$SUPABASE_URL" ]; then
+  SUPABASE_URL="https://sriycekxdqnesdsgwiuc.supabase.co"
+  echo "ℹ️  Supabase URL not set in environment. Using default: $SUPABASE_URL"
 fi
 
-SUPABASE_URL="https://sriycekxdqnesdsgwiuc.supabase.co"
-BASE_URL="$SUPABASE_URL/functions/v1"
-ANON_KEY="${SUPABASE_ANON_KEY}"
+if [ -z "$ANON_KEY" ]; then
+  echo "❌ Supabase anon key not set. Export one of:"
+  echo "   - VITE_SUPABASE_ANON_KEY"
+  echo "   - NEXT_PUBLIC_SUPABASE_ANON_KEY"
+  echo "   - SUPABASE_ANON_KEY"
+  exit 1
+fi
+
+BASE_URL="${SUPABASE_URL%/}/functions/v1"
 
 echo "1️⃣  Testing Edge Function Deployment..."
 echo "----------------------------------------"

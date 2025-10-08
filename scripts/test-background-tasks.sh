@@ -8,11 +8,29 @@ echo "🧪 Testing Background Task Architecture"
 echo "========================================"
 echo ""
 
-# Check if SUPABASE_ANON_KEY is set
+# Resolve environment variables with fallbacks
+resolve_env() {
+  for var in "$@"; do
+    local value="${!var}"
+    if [ -n "$value" ]; then
+      echo "$value"
+      return 0
+    fi
+  done
+  echo ""
+}
+
+SUPABASE_URL=$(resolve_env VITE_SUPABASE_URL NEXT_PUBLIC_SUPABASE_URL SUPABASE_URL)
+SUPABASE_ANON_KEY=$(resolve_env VITE_SUPABASE_ANON_KEY NEXT_PUBLIC_SUPABASE_ANON_KEY SUPABASE_ANON_KEY)
+
+if [ -z "$SUPABASE_URL" ]; then
+  SUPABASE_URL="https://sriycekxdqnesdsgwiuc.supabase.co"
+  echo "ℹ️  Supabase URL not set. Using default: $SUPABASE_URL"
+fi
+
 if [ -z "$SUPABASE_ANON_KEY" ]; then
-  echo "❌ SUPABASE_ANON_KEY not set"
-  echo "Get your anon key from: Supabase Dashboard → Settings → API"
-  echo "Then run: export SUPABASE_ANON_KEY='your_key_here'"
+  echo "❌ Supabase anon key not set"
+  echo "Set one of: VITE_SUPABASE_ANON_KEY, NEXT_PUBLIC_SUPABASE_ANON_KEY, or SUPABASE_ANON_KEY"
   exit 1
 fi
 
@@ -21,7 +39,7 @@ echo ""
 
 # Test 1: Edge Function Health Check
 echo "Test 1: Checking Edge Function deployment..."
-FUNCTION_URL="https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/business-discovery-background"
+FUNCTION_URL="${SUPABASE_URL%/}/functions/v1/business-discovery-background"
 
 # Create test campaign
 echo "Creating test campaign (coffee shops in Portland)..."
@@ -72,7 +90,7 @@ for i in {1..6}; do
   
   # Query job status from database via Supabase REST API
   JOB_STATUS=$(curl -s -X GET \
-    "https://sriycekxdqnesdsgwiuc.supabase.co/rest/v1/discovery_jobs?id=eq.$JOB_ID&select=status,progress,current_stage,metrics" \
+    "$SUPABASE_URL/rest/v1/discovery_jobs?id=eq.$JOB_ID&select=status,progress,current_stage,metrics" \
     -H "apikey: $SUPABASE_ANON_KEY" \
     -H "Authorization: Bearer $SUPABASE_ANON_KEY")
   
@@ -113,7 +131,7 @@ echo "Test 3: Verifying database records..."
 
 # Check campaign record
 CAMPAIGN=$(curl -s -X GET \
-  "https://sriycekxdqnesdsgwiuc.supabase.co/rest/v1/campaigns?id=eq.$CAMPAIGN_ID&select=*" \
+  "$SUPABASE_URL/rest/v1/campaigns?id=eq.$CAMPAIGN_ID&select=*" \
   -H "apikey: $SUPABASE_ANON_KEY" \
   -H "Authorization: Bearer $SUPABASE_ANON_KEY")
 
@@ -131,7 +149,7 @@ fi
 
 # Check leads
 LEADS=$(curl -s -X GET \
-  "https://sriycekxdqnesdsgwiuc.supabase.co/rest/v1/leads?campaign_id=eq.$CAMPAIGN_ID&select=business_name,email,confidence_score" \
+  "$SUPABASE_URL/rest/v1/leads?campaign_id=eq.$CAMPAIGN_ID&select=business_name,email,confidence_score" \
   -H "apikey: $SUPABASE_ANON_KEY" \
   -H "Authorization: Bearer $SUPABASE_ANON_KEY")
 

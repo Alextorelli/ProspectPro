@@ -93,11 +93,11 @@ enrichment-orchestrator (deployed)
 
 ## Step 3: Test Backend (5 min)
 
-### Get Your Anon Key
+### Get Your Publishable Key
 
 ```
 1. Supabase Dashboard → Settings → API
-2. Copy: "anon public" key (starts with "eyJ...")
+2. Copy: "publishable" key (starts with "sb_publishable_")
 3. Keep it handy for next step
 ```
 
@@ -105,7 +105,7 @@ enrichment-orchestrator (deployed)
 
 ```bash
 # In Codespaces terminal:
-export SUPABASE_ANON_KEY="paste_your_anon_key_here"
+export NEXT_PUBLIC_SUPABASE_ANON_KEY="paste_your_publishable_key_here"
 
 # Run test:
 ./scripts/test-background-tasks.sh
@@ -167,8 +167,8 @@ Test 3: Verifying database records...
 **Scenario A: "Invalid JWT" error**
 
 ```bash
-# Get fresh anon key from Supabase Dashboard
-export SUPABASE_ANON_KEY="new_anon_key"
+# Get fresh publishable key from Supabase Dashboard
+export NEXT_PUBLIC_SUPABASE_ANON_KEY="new_publishable_key"
 ./scripts/test-background-tasks.sh
 ```
 
@@ -361,12 +361,12 @@ LIMIT 10;
 
 ### Issue 1: "Function returns 401 Invalid JWT"
 
-**Cause**: Anon key mismatch  
+**Cause**: Publishable key mismatch  
 **Fix**:
 
 ```bash
-# Get current anon key from Supabase Dashboard
-export SUPABASE_ANON_KEY="fresh_key_from_dashboard"
+# Get current publishable key from Supabase Dashboard
+export NEXT_PUBLIC_SUPABASE_ANON_KEY="fresh_key_from_dashboard"
 ./scripts/test-background-tasks.sh
 ```
 

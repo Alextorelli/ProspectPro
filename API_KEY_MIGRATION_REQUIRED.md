@@ -38,7 +38,7 @@ eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNyaXljZWt
 
 ```bash
 # Update .env file
-echo "VITE_SUPABASE_ANON_KEY=sb_publishable_YOUR_NEW_KEY_HERE" >> .env
+echo "NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_YOUR_NEW_KEY_HERE" >> .env
 
 # Update inject-api-keys.sh script
 nano scripts/inject-api-keys.sh
@@ -62,11 +62,11 @@ After applying either fix:
 
 ```bash
 # Test database access with new key
-export SUPABASE_ANON_KEY='your_new_key_here'
+export NEXT_PUBLIC_SUPABASE_ANON_KEY='your_new_key_here'
 
 curl "https://sriycekxdqnesdsgwiuc.supabase.co/rest/v1/discovery_jobs?limit=1" \
-  -H "apikey: $SUPABASE_ANON_KEY" \
-  -H "Authorization: Bearer $SUPABASE_ANON_KEY"
+  -H "apikey: $NEXT_PUBLIC_SUPABASE_ANON_KEY" \
+  -H "Authorization: Bearer $NEXT_PUBLIC_SUPABASE_ANON_KEY"
 
 # Should return job data instead of "Legacy API keys are disabled" error
 ```
@@ -89,7 +89,7 @@ curl "https://sriycekxdqnesdsgwiuc.supabase.co/rest/v1/discovery_jobs?limit=1" \
 
 1. **IMMEDIATE**: Re-enable legacy keys OR get new publishable key from dashboard
 2. **Update Frontend**: Replace anon key in `/scripts/inject-api-keys.sh` line 43
-3. **Update Environment**: Add `VITE_SUPABASE_ANON_KEY` to `.env`
+3. **Update Environment**: Add `NEXT_PUBLIC_SUPABASE_ANON_KEY` (or `VITE_SUPABASE_ANON_KEY`) to `.env`
 4. **Rebuild & Deploy**: `npm run build && cd dist && vercel --prod`
 5. **Test Campaign**: Create a test campaign and verify it completes
 6. **Implement Vault API Keys**: Add vault retrieval to background function (next priority)
@@ -106,18 +106,18 @@ curl "https://sriycekxdqnesdsgwiuc.supabase.co/rest/v1/discovery_jobs?limit=1" \
 
 The diagnostic created a real discovery job:
 
-```json
-{
-  "success": true,
-  "message": "Discovery job created and processing in background",
-  "jobId": "job_1759946565981_ez2kpbc7t",
-  "campaignId": "campaign_1759946565982_9jpw0jilg",
-  "status": "processing",
-  "estimatedTime": "1-2 minutes",
-  "realtimeChannel": "discovery_jobs:id=eq.job_1759946565981_ez2kpbc7t"
-}
-```
+````bash
+# Update frontend config
+cd /workspaces/ProspectPro
+nano scripts/inject-api-keys.sh  # Update line 43
 
+# Rebuild and deploy
+npm run build
+cd dist && vercel --prod
+
+# Test with new key
+export NEXT_PUBLIC_SUPABASE_ANON_KEY='sb_publishable_YOUR_NEW_KEY'
+./scripts/diagnose-campaign-failure.sh
 This proves:
 
 - ✅ Edge Function is deployed and working
@@ -144,9 +144,9 @@ npm run build
 cd dist && vercel --prod
 
 # Test with new key
-export SUPABASE_ANON_KEY='sb_publishable_YOUR_NEW_KEY'
+export NEXT_PUBLIC_SUPABASE_ANON_KEY='sb_publishable_YOUR_NEW_KEY'
 ./scripts/diagnose-campaign-failure.sh
-```
+````
 
 ## Contact & Support
 

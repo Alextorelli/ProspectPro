@@ -209,7 +209,7 @@ scripts/test-background-tasks.sh        - Automated testing
 **File**: `scripts/test-background-tasks.sh`  
 **What**: Automated backend testing  
 **When**: Phase 3 of deployment, or when troubleshooting  
-**How**: `export SUPABASE_ANON_KEY="..." && ./scripts/test-background-tasks.sh`
+**How**: `export NEXT_PUBLIC_SUPABASE_ANON_KEY="..." && ./scripts/test-background-tasks.sh`
 
 ---
 

@@ -84,18 +84,18 @@ supabase functions list
 
 ## 🧪 Phase 3: Backend Testing (5 minutes)
 
-### Step 3.1: Get Anon Key
+### Step 3.1: Get Publishable Key
 
 - [ ] Open Supabase Dashboard → Settings → API
 - [ ] Find "Project API keys" section
-- [ ] Copy the "anon public" key (starts with "eyJ...")
+- [ ] Copy the **publishable** key (starts with `sb_publishable_`)
 
 ### Step 3.2: Set Environment Variable
 
 In terminal, paste this (replace with your actual key):
 
 ```bash
-export SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNyaXljZWt4ZHFuZXNkc2d3aXVjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc5NjU3ODksImV4cCI6MjA3MzU0MTc4OX0.Rx_1Hjz2eayKie0RpPB28i7_683ZwhVJ_5Eu_rzTWpI
+export NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_XXXXXXXXXXXXXXXXXXXXXXXX
 ```
 
 - [ ] Press Enter
@@ -312,8 +312,8 @@ vercel --prod
 
 **Fix**:
 
-1. Get fresh anon key from Supabase Dashboard → Settings → API
-2. Update in terminal: `export SUPABASE_ANON_KEY="new_key"`
+1. Get fresh publishable key from Supabase Dashboard → Settings → API
+2. Update in terminal: `export NEXT_PUBLIC_SUPABASE_ANON_KEY="new_key"`
 3. Re-run test: `./scripts/test-background-tasks.sh`
 
 - [ ] Fixed
@@ -454,9 +454,9 @@ CREATE TRIGGER trigger_update_discovery_jobs_updated_at
 
 **Fix**:
 
-1. Check if `SUPABASE_ANON_KEY` is set:
+1. Check if `NEXT_PUBLIC_SUPABASE_ANON_KEY` (or `VITE_SUPABASE_ANON_KEY`) is set:
    ```bash
-   echo $SUPABASE_ANON_KEY
+   echo $NEXT_PUBLIC_SUPABASE_ANON_KEY
    ```
    Should print your key. If empty, set it again.
 2. Check if function is deployed:
@@ -493,7 +493,7 @@ SELECT * FROM leads ORDER BY created_at DESC LIMIT 10;
 
 ```bash
 curl -X POST 'https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/business-discovery-background' \
-  -H "Authorization: Bearer $SUPABASE_ANON_KEY" \
+  -H "Authorization: Bearer $NEXT_PUBLIC_SUPABASE_ANON_KEY" \
   -H 'Content-Type: application/json' \
   -d '{"businessType": "coffee shop", "location": "Seattle", "maxResults": 2, "sessionUserId": "test"}'
 ```
