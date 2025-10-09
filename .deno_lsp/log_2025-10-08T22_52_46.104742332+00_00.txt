@@ -149,3 +149,5 @@ Server ready.
 {"type":"measure","name":"lsp.did_close","count":4,"duration":0.032},
 {"type":"mark","name":"lsp.did_close","count":5,"args":{"textDocument":{"uri":"file:///workspaces/ProspectPro/archive/deployment-logs/package.json"}}},
 {"type":"measure","name":"lsp.did_close","count":5,"duration":0.035},
+{"type":"mark","name":"lsp.did_change_watched_files","count":1,"args":{"changes":[{"uri":"file:///workspaces/ProspectPro/dist/vercel.json","type":1}]}},
+{"type":"measure","name":"lsp.did_change_watched_files","count":1,"duration":0.017},
