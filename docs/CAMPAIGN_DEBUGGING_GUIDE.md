@@ -1,5 +1,36 @@
 # Campaign Discovery Debugging Guide
 
+## 🔁 Streamlined Production Debugging Loop (2025-10-09)
+
+1. **Lock in the environment context**
+
+- Record the active Vercel deployment (`vercel inspect prospectpro.appsmithery.co`) and Supabase project ref before each run.
+- Reuse a single test payload (business type, location, tier) so comparisons stay consistent.
+
+2. **Launch a baseline campaign from the live UI**
+
+- Submit a fresh campaign in production (preferably via private window) and capture the returned campaign ID from the network tab.
+
+3. **Review native telemetry immediately**
+
+- **Vercel Logs**: Open the latest production deployment → Logs, filter by timestamp/request ID while the campaign runs.
+- **Supabase Dashboard**: Check Edge Function logs (`business-discovery-background`) and Database → Logs for the captured campaign ID.
+
+4. **Replay only what’s failing**
+
+- Rerun the problematic edge function from the Supabase UI “Run” panel or a direct `curl`, using the captured payload.
+- Use Supabase SQL Editor for read-only diagnostics against the specific campaign—no new local scripts.
+- Reproduce frontend errors straight in the browser DevTools; export HAR if needed.
+
+5. **Fix iteratively and redeploy via standard workflows**
+
+- Address the highest-severity issue surfaced, redeploy through existing CI/CD, and repeat steps 2–4 to verify.
+
+6. **Log each iteration succinctly**
+
+- Append findings to the existing `logs/deployment-validation/<timestamp>/notes.md` or a dated note under `/docs/debugging/`.
+- Save useful Vercel/Supabase log filters for reuse in subsequent loops.
+
 ## ✅ **VERIFIED WORKING**
 
 ### **Edge Function Test** - SUCCESS

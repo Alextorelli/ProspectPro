@@ -131,14 +131,35 @@ class ProductionMCPServer {
         process.env.SUPABASE_SECRET_KEY
       );
 
-      // Test connection
-      const { data, error } = await this.supabase
-        .from("enhanced_leads")
-        .select("count")
-        .limit(1);
+      // Test connection (prefer cleaned leads table, fall back to legacy view)
+      const tablesToCheck = ["leads", "enhanced_leads"];
+      let connectionVerified = false;
 
-      if (error && !error.message.includes("does not exist")) {
-        throw new Error(`Supabase connection failed: ${error.message}`);
+      for (const table of tablesToCheck) {
+        const { error } = await this.supabase
+          .from(table)
+          .select("count")
+          .limit(1);
+
+        if (!error) {
+          connectionVerified = true;
+          break;
+        }
+
+        const message = error.message || "";
+        const isMissingTable =
+          message.includes("does not exist") ||
+          message.includes("schema cache");
+
+        if (!isMissingTable) {
+          throw new Error(`Supabase connection failed: ${message}`);
+        }
+      }
+
+      if (!connectionVerified) {
+        console.warn(
+          "⚠️  Supabase connection verified, but no leads tables found (leads/enhanced_leads)"
+        );
       }
     }
   }
@@ -204,16 +225,33 @@ class ProductionMCPServer {
         );
 
         try {
-          const { error } = await supabase
-            .from("enhanced_leads")
-            .select("count")
-            .limit(1);
+          let status = "unhealthy";
+          const tablesToCheck = ["leads", "enhanced_leads"];
+
+          for (const table of tablesToCheck) {
+            const { error } = await supabase
+              .from(table)
+              .select("count")
+              .limit(1);
+
+            if (!error) {
+              status = "healthy";
+              break;
+            }
+
+            const message = error.message || "";
+            const isMissingTable =
+              message.includes("does not exist") ||
+              message.includes("schema cache");
+
+            if (!isMissingTable) {
+              throw new Error(message);
+            }
+          }
+
           results.checks.push({
             name: "Supabase Database",
-            status:
-              error && !error.message.includes("does not exist")
-                ? "unhealthy"
-                : "healthy",
+            status,
             details: { connection: "successful" },
           });
         } catch (dbError) {
