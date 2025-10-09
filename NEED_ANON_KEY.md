@@ -1,3 +1,11 @@
+# Need Anon Key
+
+> **Legacy Notice (October 9, 2025):** ProspectPro v4.3 now enforces Supabase session JWTs for all Edge Functions. This guide is retained for historical reference when troubleshooting publishable key issues. For the current authentication pattern see `EDGE_FUNCTION_AUTH_UPDATE_GUIDE.md` and `PRODUCTION_READY_V4.3.md`.
+
+# The Issue
+
+Your JWT signing keys show you're using **ES256** (modern elliptic curve signing). But Edge Functions still need an **anon/public API key** for validation.
+
 # 🎯 CRITICAL: Get the Anon/Public API Key
 
 ## The Issue

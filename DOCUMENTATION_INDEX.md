@@ -34,15 +34,15 @@ ProspectPro v4.3 introduces the tier-aware background discovery pipeline with ze
 
 ### Active Production Functions (v4.3)
 
-1. `business-discovery-background` – Asynchronous discovery with tier controls _(primary path)_
-2. `campaign-export-user-aware` – User-authorized CSV export with RLS isolation
-3. `campaign-export` – Service-role export handler for internal automation
-4. `enrichment-hunter` – Hunter.io discovery with confidence scoring & caching
-5. `enrichment-neverbounce` – NeverBounce verification (95% deliverability floor)
-6. `enrichment-orchestrator` – Multi-service enrichment coordination & budgeting
-7. `test-google-places` – API verification harness
+- **Discovery**
+  1. `business-discovery-background` – Asynchronous discovery with tier controls _(primary path)_
+  2. `business-discovery-optimized` – Session-aware synchronous path for premium campaign validation
+  3. `business-discovery-user-aware` – Legacy synchronous endpoint maintained for historical clients
+- **Enrichment + Coordination** 4. `enrichment-hunter` – Hunter.io discovery with confidence scoring & caching 5. `enrichment-neverbounce` – NeverBounce verification (95% deliverability floor) 6. `enrichment-orchestrator` – Multi-service enrichment coordination & budgeting 7. `enrichment-business-license` / `enrichment-pdl` – Licensing + PDL enrichment modules (Enterprise/Compliance)
+- **Export** 8. `campaign-export-user-aware` – User-authorized CSV export with RLS isolation 9. `campaign-export` – Service-role export handler for internal automation
+- **Diagnostics** 10. `test-new-auth` – Supabase session diagnostics for the shared helper 11. `test-official-auth` – Mirrors Supabase reference implementation end-to-end 12. `test-business-discovery` – Session-scoped discovery smoke test 13. `test-google-places` – API verification harness
 
-> ℹ️ Legacy synchronous endpoints (`business-discovery-user-aware`, `public/index-user-aware.html`, `supabase-app-user-aware.js`) were retired in v4.3. See `scripts/deploy-user-aware-system.sh` for the deprecation notice.
+> ℹ️ Session JWTs are mandatory for every authenticated Edge Function call. Refer to `EDGE_FUNCTION_AUTH_UPDATE_GUIDE.md` and `scripts/test-auth-patterns.sh` for validation workflows.
 
 ### Key Sources
 
@@ -105,7 +105,9 @@ Supporting scripts:
 - **Frontend:** https://prospect-fyhedobh1-appsmithery.vercel.app (Vercel static hosting)
 - **Supabase Project:** `sriycekxdqnesdsgwiuc`
 - **Edge Function URL Base:** `https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/`
-- **Anon Key Management:** Supabase dashboard → Settings → API (sync with `/src/lib/supabase.ts`)
+- **Publishable Key Management:** Supabase dashboard → Settings → API (sync with `/src/lib/supabase.ts`)
+- **Session Tokens:** Frontend/services must forward `Authorization: Bearer <SUPABASE_SESSION_JWT>`
+- **Session Tokens:** Frontend + services must forward Supabase session JWTs (`Authorization: Bearer <token>`) per `EDGE_FUNCTION_AUTH_UPDATE_GUIDE.md`
 
 ---
 
@@ -120,7 +122,7 @@ Supporting scripts:
 
 ## 🛠️ Troubleshooting Quicklinks
 
-- **Anon key mismatch:** `NEED_ANON_KEY.md`, `FINAL_JWT_ANON_KEY_SOLUTION.md`
+- **Publishable key or session mismatch:** See `NEED_ANON_KEY.md` (legacy) and `EDGE_FUNCTION_AUTH_UPDATE_GUIDE.md`
 - **Edge function auth issues:** `EDGE_FUNCTION_AUTH_UPDATE_GUIDE.md`
 - **Deployment checklist:** `DEPLOYMENT_CHECKLIST.md`
 - **Environment sync:** `populate-secrets.sh`, `pull-env-from-secrets.js`
@@ -131,19 +133,22 @@ Supporting scripts:
 ## 🎯 Quick Command Reference
 
 ```bash
-# Background discovery smoke test
+# Background discovery smoke test (session JWT required)
 curl -X POST \
   'https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/business-discovery-background' \
-  -H 'Authorization: Bearer <ANON_OR_SERVICE_ROLE_TOKEN>' \
+  -H 'Authorization: Bearer <SUPABASE_SESSION_JWT>' \
   -H 'Content-Type: application/json' \
   -d '{"businessType":"coffee shop","location":"Seattle, WA","maxResults":2,"tierKey":"PROFESSIONAL","sessionUserId":"test_session_123"}'
 
 # Export campaign results
 curl -X POST \
   'https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/campaign-export-user-aware' \
-  -H 'Authorization: Bearer <ANON_OR_SERVICE_ROLE_TOKEN>' \
+  -H 'Authorization: Bearer <SUPABASE_SESSION_JWT>' \
   -H 'Content-Type: application/json' \
   -d '{"campaignId":"<CAMPAIGN_ID>","format":"csv","sessionUserId":"test_session_123"}'
+
+# Auth diagnostics (compare helper vs official pattern)
+./scripts/test-auth-patterns.sh <SUPABASE_SESSION_JWT>
 
 # Lint & build guard rails
 npm run lint
@@ -168,5 +173,5 @@ For historical artifacts see `/archive/`.
 
 ---
 
-**ProspectPro v4.2** - Complete Email Discovery & Verification Platform  
-_User-Aware Architecture - Documentation Updated October 4, 2025_ 🚀
+**ProspectPro v4.3** – Tier-Aware Background Discovery & Session-Enforced Edge Functions  
+_Documentation updated October 9, 2025_ 🚀

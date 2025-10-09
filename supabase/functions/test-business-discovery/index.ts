@@ -1,12 +1,20 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import {
-  EdgeFunctionAuth,
+  authenticateRequest,
   corsHeaders,
   handleCORS,
 } from "../_shared/edge-auth.ts";
 
 // Simplified Business Discovery with New Authentication
 // Test version for new API key format
+
+interface StorageResult {
+  success: boolean;
+  campaignStored?: boolean;
+  leadsStored?: number;
+  error?: string;
+  leadsError?: string;
+}
 
 serve(async (req) => {
   // Handle CORS preflight
@@ -16,19 +24,14 @@ serve(async (req) => {
   try {
     console.log(`🚀 Business Discovery with New Authentication`);
 
-    // Initialize Edge Function authentication
-    const edgeAuth = new EdgeFunctionAuth();
-    const authContext = edgeAuth.getAuthContext();
-
+    const authContext = await authenticateRequest(req);
     console.log(
-      `🔐 Auth: ${authContext.keyFormat} (${
-        authContext.isValid ? "Valid" : "Invalid"
+      `🔐 Authenticated Supabase session for ${authContext.userId} (${
+        authContext.isAnonymous ? "anonymous" : "authenticated"
       })`
     );
-
-    if (!authContext.isValid) {
-      throw new Error(`Authentication failed: ${authContext.keyFormat}`);
-    }
+    const supabaseClient = authContext.supabaseClient;
+    const sessionUserId = authContext.sessionId;
 
     // Parse request
     const requestData = await req.json();
@@ -91,8 +94,8 @@ serve(async (req) => {
     const campaignId = `test_campaign_${Date.now()}`;
 
     // Test database storage with new authentication
-    let dbStorageResult = null;
-    if (authContext.client) {
+    let dbStorageResult: StorageResult | null = null;
+    if (supabaseClient) {
       try {
         const campaignData = {
           id: campaignId,
@@ -103,15 +106,18 @@ serve(async (req) => {
           total_cost: 0.04,
           processing_time_ms: 500,
           status: "completed",
+          user_id: authContext.userId,
+          session_user_id: sessionUserId,
         };
 
-        const { data: campaignInsert, error: campaignError } =
-          await authContext.client.from("campaigns").insert(campaignData);
+        const { error: campaignError } = await supabaseClient
+          .from("campaigns")
+          .insert(campaignData);
 
         if (campaignError) {
           dbStorageResult = { success: false, error: campaignError.message };
         } else {
-          dbStorageResult = { success: true, campaign_stored: true };
+          dbStorageResult = { success: true, campaignStored: true };
 
           // Try to store leads
           const leadsData = mockBusinesses.map((lead) => ({
@@ -123,15 +129,20 @@ serve(async (req) => {
             email: lead.email,
             confidence_score: lead.optimizedScore,
             enrichment_data: lead.enhancementData,
+            user_id: authContext.userId,
+            session_user_id: sessionUserId,
           }));
 
-          const { data: leadsInsert, error: leadsError } =
-            await authContext.client.from("leads").insert(leadsData);
+          const { error: leadsError } = await supabaseClient
+            .from("leads")
+            .insert(leadsData);
 
           if (leadsError) {
-            dbStorageResult.leads_error = leadsError.message;
-          } else {
-            dbStorageResult.leads_stored = leadsData.length;
+            if (dbStorageResult) {
+              dbStorageResult.leadsError = leadsError.message;
+            }
+          } else if (dbStorageResult) {
+            dbStorageResult.leadsStored = leadsData.length;
           }
         }
 
@@ -149,8 +160,9 @@ serve(async (req) => {
       campaignId,
       discoveryEngine: "Test Discovery with New Authentication v1.0",
       authentication: {
-        keyFormat: authContext.keyFormat,
-        isValid: authContext.isValid,
+        userId: authContext.userId,
+        sessionId: sessionUserId,
+        isAnonymous: authContext.isAnonymous,
       },
       requirements: {
         targetLeads: maxResults,

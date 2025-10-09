@@ -1,5 +1,7 @@
 # 🔍 Edge Function JWT Authentication Issue
 
+> **Legacy Notice (October 9, 2025):** ProspectPro v4.3 resolves this by using Supabase session JWTs with `auth.getUser`. Keep this document for background, and see `EDGE_FUNCTION_AUTH_UPDATE_GUIDE.md` for the maintained workflow.
+
 ## Current Status
 
 **Anonymous Session**: ✅ Working  

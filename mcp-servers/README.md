@@ -2,7 +2,7 @@
 
 ## Overview
 
-This directory contains the **enhanced MCP server implementation** that provides AI assistants with comprehensive access to ProspectPro's complete email discovery & verification platform, enrichment APIs, background discovery jobs, contact validation, and **troubleshooting capabilities**. Version 3.1 adds tooling for the v4.3 background discovery pipeline (Census + Foursquare), tier-aware cost tracking, and asynchronous job diagnostics.
+This directory contains the **enhanced MCP server implementation** that provides AI assistants with comprehensive access to ProspectPro's complete email discovery & verification platform, enrichment APIs, background discovery jobs, contact validation, and **troubleshooting capabilities**. Version 3.1 adds tooling for the v4.3 background discovery pipeline (Census + Foursquare), Supabase session enforcement (auth.getUser), tier-aware cost tracking, and asynchronous job diagnostics.
 
 **Architecture**: 3 specialized servers for enrichment production, development, and troubleshooting workflows  
 **Tools**: 42 tools total across all servers (6 troubleshooting + 36 enrichment tools)  
@@ -50,7 +50,7 @@ This directory contains the **enhanced MCP server implementation** that provides
 #### Email Verification Diagnosis
 
 - `validate_database_permissions` - Check enrichment_data JSONB permissions and RLS policies
-- `diagnose_anon_key_mismatch` - Compare frontend vs Supabase authentication for enrichment APIs
+- `diagnose_anon_key_mismatch` - Compare frontend publishable key vs Supabase settings and confirm session token retrieval
 - `run_rls_diagnostics` - Generate email enrichment diagnostic queries
 
 #### Enrichment Deployment Validation
@@ -168,7 +168,7 @@ npm run start:troubleshooting
 In your AI assistant, use these MCP tools in systematic order:
 
 1. `test_edge_function` - Verify backend works independently of frontend
-2. `diagnose_anon_key_mismatch` - Check for authentication sync issues (90% of problems)
+2. `diagnose_anon_key_mismatch` - Check for publishable key sync + session token availability (90% of problems)
 3. `validate_database_permissions` - Verify RLS policies are configured correctly
 4. `check_vercel_deployment` - Validate frontend deployment status
 5. `generate_debugging_commands` - Get custom debugging scripts for your config
@@ -176,11 +176,27 @@ In your AI assistant, use these MCP tools in systematic order:
 **Manual Quick Test** (if MCP not available):
 
 ```bash
-# Test background discovery function directly (bypasses frontend completely)
+# Test background discovery function directly (requires Supabase session JWT)
 curl -X POST 'https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/business-discovery-background' \
-  -H 'Authorization: Bearer YOUR_CURRENT_ANON_KEY' \
+  -H 'Authorization: Bearer SUPABASE_SESSION_JWT' \
   -H 'Content-Type: application/json' \
-  -d '{"businessType": "coffee shop", "location": "Seattle, WA", "tierKey": "PROFESSIONAL", "maxResults": 2}'
+  -d '{"businessType": "coffee shop", "location": "Seattle, WA", "tierKey": "PROFESSIONAL", "maxResults": 2, "sessionUserId": "mcp-diagnostics"}'
+```
+
+Follow up with the dedicated auth diagnostics:
+
+```bash
+curl -X POST 'https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/test-new-auth' \
+  -H 'Authorization: Bearer SUPABASE_SESSION_JWT' \
+  -H 'Content-Type: application/json' \
+  -d '{"diagnostics":true}'
+
+curl -X POST 'https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/test-official-auth' \
+  -H 'Authorization: Bearer SUPABASE_SESSION_JWT' \
+  -H 'Content-Type: application/json' \
+  -d '{}'
+
+./scripts/test-auth-patterns.sh SUPABASE_SESSION_JWT
 ```
 
 **Expected Results**: Real business data response = backend working, frontend issue  

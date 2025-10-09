@@ -69,18 +69,30 @@
 
 ## CRITICAL: EDGE FUNCTIONS STATUS (v4.3)
 
-**PRODUCTION EDGE FUNCTIONS (7 ACTIVE - BACKGROUND + USER-AWARE)**
+**PRODUCTION EDGE FUNCTIONS (AUTH-ENFORCED v4.3)**
 
-- ✅ `business-discovery-background` (v1) - 3-tier asynchronous discovery with Google Places, Foursquare, Census targeting, and enrichment orchestration
-- ✅ `business-discovery-user-aware` (v2, legacy) - Synchronous user-aware discovery retained for backward compatibility
-- ✅ `campaign-export-user-aware` (v2) - User-authorized export with data isolation and full enrichment metadata
-- ✅ `enrichment-hunter` (v1) - Hunter.io email discovery with 24-hour caching and circuit breakers
-- ✅ `enrichment-neverbounce` (v1) - NeverBounce email verification with quota management
-- ✅ `data-enhancement-orchestrator` (v1) - Intelligent multi-service coordination with per-tier budget controls
-- ✅ `test-google-places` (v1) - API testing function
+- **Discovery**
+  - ✅ `business-discovery-background` – Tier-aware asynchronous discovery with Google Places, Foursquare, Census targeting, and enrichment orchestration
+  - ✅ `business-discovery-optimized` – Session-aware synchronous discovery retained for scoped validations and premium campaigns
+  - ✅ `business-discovery-user-aware` (legacy) – Kept for compatibility with historical clients still invoking the synchronous flow
+- **Enrichment & Coordination**
+  - ✅ `enrichment-hunter` – Hunter.io email discovery with 24-hour caching and circuit breakers
+  - ✅ `enrichment-neverbounce` – NeverBounce email verification with quota management
+  - ✅ `enrichment-orchestrator` – Intelligent multi-service coordination with per-tier budget controls
+  - ✅ `enrichment-business-license` / `enrichment-pdl` – Licensing + PDL enrichment modules for Enterprise/Compliance tiers
+- **Export**
+  - ✅ `campaign-export-user-aware` – User-authorized export with data isolation and full enrichment metadata
+  - ✅ `campaign-export` – Internal automation export path (service-role only)
+- **Diagnostics**
+
+  - ✅ `test-new-auth` – Supabase session diagnostics for the shared auth helper
+  - ✅ `test-official-auth` – Mirrors Supabase’s reference implementation end-to-end
+  - ✅ `test-business-discovery` – Session-scoped discovery smoke test
+  - ✅ `test-google-places` – Google Places API testing function
+
 - ✅ Real-time database integration with user-aware campaign and lead tracking
 - ✅ Global edge deployment with <100ms cold starts
-- ✅ User authentication via JWT tokens and new API key format
+- ✅ User authentication enforced via Supabase session JWTs (no anon/service-role shortcuts)
 - ✅ Functions URL: https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/
 
 **USER-AWARE DATABASE ARCHITECTURE**
@@ -236,6 +248,7 @@ const BUSINESS_CATEGORIES = {
 - ✅ Zero build warnings (Node.js + PostCSS optimized)
 - ✅ Edge Function `business-discovery-background` creates asynchronous campaigns with tier metadata
 - ✅ Edge Function `campaign-export-user-aware` provides user-authorized exports with enrichment metadata
+- ✅ Shared `authenticateRequest` helper uses Supabase's `auth.getUser` validation (session JWTs only)
 - ✅ Legacy `business-discovery-user-aware` remains available for backward compatibility
 - ✅ Database tables created with proper RLS policies and user linking
 - ✅ API integrations (Google Places, Foursquare, Hunter.io, Census) configured
@@ -255,10 +268,9 @@ const BUSINESS_CATEGORIES = {
 
 2. **"Invalid JWT" / 401 Errors**
 
-   - **Root Cause**: Anon key mismatch between frontend and Supabase
-   - **Solution**: Get current anon key from Supabase dashboard → Settings → API
-   - **Update**: Replace anon key in React app's Supabase configuration
-   - **Redeploy**: `npm run build && cd dist && vercel --prod`
+   - **Root Cause**: Missing/expired Supabase session token or stale publishable key configuration
+   - **Solution**: Refresh the session (`supabase.auth.getSession()` or prompt re-auth) and ensure the publishable key matches Supabase dashboard → Settings → API
+   - **Update**: Redeploy frontend after updating publishable key or auth handling; verify callers forward `Authorization: Bearer <SUPABASE_SESSION_JWT>`
 
 3. **"API request failed: 404" Errors**
 
@@ -270,7 +282,7 @@ const BUSINESS_CATEGORIES = {
 
    - **Check**: Supabase dashboard → Edge Functions → Logs
    - **Verify**: API keys in Edge Function secrets are configured
-   - **Test**: Direct curl to Edge Function with anon Bearer token
+   - **Test**: Direct curl to Edge Function with a Supabase **session** JWT in the Authorization header
 
 5. **Frontend Not Loading**
    - **Check**: Vercel deployment status and error logs
@@ -280,19 +292,34 @@ const BUSINESS_CATEGORIES = {
 **DEBUGGING COMMANDS**
 
 ```bash
-# Test background discovery Edge Function directly
+# Test background discovery Edge Function directly (session token required)
 curl -X POST 'https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/business-discovery-background' \
-  -H 'Authorization: Bearer CURRENT_ANON_KEY' \
-  -H 'Content-Type: application/json' \
+   -H 'Authorization: Bearer SUPABASE_SESSION_JWT' \
+   -H 'Content-Type: application/json' \
    -d '{"businessType": "coffee shop", "location": "Seattle, WA", "maxResults": 2, "tierKey": "PROFESSIONAL", "sessionUserId": "test_session_123"}'
 
 # Test user-aware export function
 curl -X POST 'https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/campaign-export-user-aware' \
-  -H 'Authorization: Bearer CURRENT_ANON_KEY' \
-  -H 'Content-Type: application/json' \
-  -d '{"campaignId": "CAMPAIGN_ID", "format": "csv", "sessionUserId": "test_session_123"}'
+   -H 'Authorization: Bearer SUPABASE_SESSION_JWT' \
+   -H 'Content-Type: application/json' \
+   -d '{"campaignId": "CAMPAIGN_ID", "format": "csv", "sessionUserId": "test_session_123"}'
 
-# Check active Edge Functions (should be 7 active)
+# Run auth diagnostics (includes RLS + session details)
+curl -X POST 'https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/test-new-auth' \
+   -H 'Authorization: Bearer SUPABASE_SESSION_JWT' \
+   -H 'Content-Type: application/json' \
+   -d '{"diagnostics": true}'
+
+# Validate Supabase reference helper behavior
+curl -X POST 'https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/test-official-auth' \
+   -H 'Authorization: Bearer SUPABASE_SESSION_JWT' \
+   -H 'Content-Type: application/json' \
+   -d '{}'
+
+# Batch-compare auth patterns locally
+./scripts/test-auth-patterns.sh SUPABASE_SESSION_JWT
+
+# Check active Edge Functions
 supabase functions list
 
 # Deploy frontend to custom domain
@@ -307,7 +334,8 @@ curl -I https://prospect-fyhedobh1-appsmithery.vercel.app
 
 **ENVIRONMENT VERIFICATION CHECKLIST**
 
-- [ ] Anon key in frontend matches Supabase dashboard
+- [ ] Frontend publishable key (`sb_publishable_*`) matches Supabase dashboard
+- [ ] Frontend/services forward Supabase session JWTs on authenticated requests
 - [ ] RLS policies created for campaigns, leads, dashboard_exports tables with user_id and session_user_id columns
 - [ ] Edge Function secrets contain: GOOGLE_PLACES_API_KEY, HUNTER_IO_API_KEY, NEVERBOUNCE_API_KEY, FOURSQUARE_API_KEY
 - [ ] Database tables exist with user columns: campaigns, leads, dashboard_exports, campaign_analytics view
@@ -495,15 +523,15 @@ gsutil rsync -r ./dist/ gs://prospectpro-static-frontend/
 
 1. **Frontend shows "Discovery Failed: API request failed: 404"**
 
-   - Check anon key in `/public/supabase-app.js` matches Supabase dashboard
+   - Confirm publishable key (`sb_publishable_*`) in `/public/supabase-app.js` matches Supabase dashboard
    - Verify RLS policies exist: run `/database/rls-setup.sql`
    - Test Edge Function directly with curl command above
    - Redeploy frontend after fixes: `cd public && vercel --prod`
 
 2. **"Invalid JWT" in Edge Function logs**
 
-   - Get fresh anon key from Supabase dashboard → Settings → API
-   - Update anon key in frontend and redeploy
+   - Fetch a fresh session token via `supabase.auth.getSession()` or prompt re-auth
+   - Ensure frontend/service callers forward `Authorization: Bearer <SUPABASE_SESSION_JWT>`
    - Verify database permissions with test query
 
 3. **Edge Functions not responding**
@@ -521,7 +549,7 @@ gsutil rsync -r ./dist/ gs://prospectpro-static-frontend/
 
 1. **Test Edge Function directly** (bypasses frontend issues)
 2. **Check database permissions** (RLS policies)
-3. **Verify anon key synchronization** (frontend vs Supabase)
+3. **Verify publishable key synchronization** (frontend vs Supabase) and session token retrieval
 4. **Test Vercel deployment** (public access)
 5. **Check browser console** for frontend errors
 
@@ -530,7 +558,7 @@ gsutil rsync -r ./dist/ gs://prospectpro-static-frontend/
 - **Edge Function URL**: https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/business-discovery
 - **Current Vercel URL**: https://prospect-bk0sh7f6l-alex-torellis-projects.vercel.app
 - **Database Schema**: `/database/rls-setup.sql` (verified working)
-- **Frontend Config**: `/public/supabase-app.js` with current anon key
+- **Frontend Config**: `/public/supabase-app.js` (publishable key only; session tokens retrieved per request)
 
 **ENHANCED MCP TROUBLESHOOTING**
 
@@ -545,7 +573,7 @@ npm run start:troubleshooting
 # test_edge_function - Test Supabase Edge Function connectivity and authentication
 # validate_database_permissions - Check database RLS policies and permissions
 # check_vercel_deployment - Validate Vercel deployment status and configuration
-# diagnose_anon_key_mismatch - Compare anon keys between frontend and Supabase
+# diagnose_anon_key_mismatch - Compare publishable keys between frontend and Supabase
 # run_rls_diagnostics - Generate and execute RLS diagnostic queries
 # generate_debugging_commands - Create debugging commands for current configuration
 ```

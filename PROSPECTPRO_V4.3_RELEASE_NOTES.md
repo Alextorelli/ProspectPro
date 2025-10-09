@@ -8,6 +8,7 @@
 - **Tier-Aware Enrichment** – Starter/Professional/Enterprise/Compliance tiers encode price-per-lead, max cost, and enrichment options (Hunter/NeverBounce/Apollo) directly in the job payload.
 - **Enhanced Enrichment Metadata** – Leads now store `verificationSources`, `emails`, `processingMetadata`, and `dataSources` for export + analytics; jobs track validation vs enrichment spend.
 - **Frontend Alignment** – `useBusinessDiscovery` and UI now forward keywords, radius, geography, tier metadata, and discovery option toggles required by the background job.
+- **Supabase-Native Authentication** – Shared `authenticateRequest` now calls `supabaseClient.auth.getUser` and every Edge Function requires a real session JWT (diagnostics via `test-new-auth` + `test-official-auth`).
 
 ## 🧠 Architecture Updates
 
@@ -23,11 +24,11 @@
 1. Ensure Supabase Edge secrets include `CENSUS_API_KEY`, `FOURSQUARE_API_KEY`, and refreshed `SUPABASE_SERVICE_ROLE_KEY`.
 2. Deploy updated function: `supabase functions deploy business-discovery-background`.
 3. Redeploy enrichment orchestrator if local changes were made: `supabase functions deploy enrichment-orchestrator`.
-4. Trigger a smoke test:
+4. Trigger a smoke test (Supabase session JWT required):
    ```bash
-   curl -X POST "https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/business-discovery-background" \
-     -H "Authorization: Bearer <JWT_ANON_KEY>" \
-     -H "Content-Type": "application/json" \
+    curl -X POST "https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/business-discovery-background" \
+       -H "Authorization: Bearer <SUPABASE_SESSION_JWT>" \
+       -H "Content-Type: application/json" \
      -d '{
            "businessType": "dental clinic",
            "location": "Austin, TX",
@@ -38,7 +39,8 @@
            "expandGeography": true
          }'
    ```
-5. Monitor progress via `discovery_jobs` real-time channel (`discovery_jobs:id=eq.<jobId>`) and confirm completed campaign + leads records.
+5. Validate session + RLS context via `curl https://.../test-new-auth` or `./scripts/test-auth-patterns.sh <SUPABASE_SESSION_JWT>`.
+6. Monitor progress via `discovery_jobs` real-time channel (`discovery_jobs:id=eq.<jobId>`) and confirm completed campaign + leads records.
 
 ## 📊 Data Quality & Cost Notes
 

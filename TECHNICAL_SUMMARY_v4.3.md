@@ -15,16 +15,24 @@ ProspectPro v4.3 introduces an asynchronous _business-discovery-background_ pipe
 
 ## Production Edge Functions (October 2025)
 
-| Function                        | Purpose                                                |
-| ------------------------------- | ------------------------------------------------------ |
-| `business-discovery-background` | Asynchronous discovery + enrichment orchestration      |
-| `campaign-export-user-aware`    | User-authorized CSV export with cost + source metadata |
-| `enrichment-orchestrator`       | Hunter/NeverBounce/Apollo coordination + budgeting     |
-| `enrichment-hunter`             | Hunter.io API proxy with caching + circuit breakers    |
-| `enrichment-neverbounce`        | NeverBounce verification proxy                         |
-| `test-google-places`            | Diagnostics for Google Places billing & quotas         |
+| Function                        | Purpose                                                               |
+| ------------------------------- | --------------------------------------------------------------------- |
+| `business-discovery-background` | Asynchronous discovery + enrichment orchestration with tier budgeting |
+| `business-discovery-optimized`  | Session-aware synchronous discovery retained for scoped validations   |
+| `business-discovery-user-aware` | Legacy synchronous discovery endpoint for historical clients          |
+| `campaign-export-user-aware`    | User-authorized CSV export with cost + source metadata                |
+| `campaign-export`               | Service-role export path for internal automations                     |
+| `enrichment-orchestrator`       | Hunter/NeverBounce/Apollo coordination + budgeting                    |
+| `enrichment-hunter`             | Hunter.io API proxy with caching + circuit breakers                   |
+| `enrichment-neverbounce`        | NeverBounce verification proxy                                        |
+| `enrichment-business-license`   | Licensing enrichment for Enterprise/Compliance tiers                  |
+| `enrichment-pdl`                | People Data Labs enrichment module                                    |
+| `test-new-auth`                 | Supabase session diagnostics for `authenticateRequest`                |
+| `test-official-auth`            | Mirrors Supabase reference implementation to confirm parity           |
+| `test-business-discovery`       | Session-scoped discovery smoke test                                   |
+| `test-google-places`            | Diagnostics for Google Places billing & quotas                        |
 
-> Historical functions (`business-discovery-user-aware`, `business-discovery-optimized`, etc.) remain in repo for reference but all production workloads now run through `business-discovery-background`.
+> All authenticated Edge Functions require a Supabase session JWT (`Authorization: Bearer <token>`). Use `scripts/test-auth-patterns.sh` to compare helper vs reference flows after each deploy.
 
 ## Data Pipeline Overview
 
@@ -63,9 +71,10 @@ Base tier provides essential business data; higher tiers add progressive email d
 ## Operational Notes
 
 - **Secrets**: Ensure `CENSUS_API_KEY`, `FOURSQUARE_API_KEY`, `GOOGLE_PLACES_API_KEY`, `HUNTER_IO_API_KEY`, `NEVERBOUNCE_API_KEY`, and Supabase keys are populated in Edge Function secrets.
+- **Session Tokens**: Frontend and automations must forward Supabase session JWTs; run `scripts/test-auth-patterns.sh <SUPABASE_SESSION_JWT>` after each deploy.
 - **Testing**: Run `supabase functions serve business-discovery-background --env-file .env.edge` for local dry runs; verify job status via `discovery_jobs` table.
 - **Exports**: `campaign-export-user-aware` now emits tier pricing, total validation/enrichment spend, and sources used for every lead.
-- **MCP Integration**: Production MCP server exposes new diagnostics (`test_background_job`, `analyze_discovery_metrics`) for the background workflow.
+- **MCP Integration**: Production MCP server exposes new diagnostics (`test_background_job`, `analyze_discovery_metrics`, `validate_session_enforcement`) for the background workflow.
 
 ## Quick Command Cheatsheet
 
@@ -76,9 +85,9 @@ supabase functions deploy business-discovery-background
 # Tail background discovery logs
 supabase functions logs business-discovery-background --follow
 
-# Trigger a minimal background job
+# Trigger a minimal background job (session JWT required)
 curl -X POST "https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/business-discovery-background" \
-  -H "Authorization: Bearer <JWT_ANON_KEY>" \
+      -H "Authorization: Bearer <SUPABASE_SESSION_JWT>" \
   -H "Content-Type: application/json" \
   -d '{
         "businessType": "coffee shop",

@@ -5,6 +5,29 @@ All notable changes to ProspectPro will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.3.0] - 2025-10-09 - Supabase Session Enforcement & Tier-Aware Background Discovery
+
+### Added
+
+- **Supabase-Native Authentication:** Shared `authenticateRequest` now uses `supabaseClient.auth.getUser`, enforcing real session JWTs for every Edge Function invocation.
+- **Diagnostic Edge Functions:** Added `test-new-auth`, `test-official-auth`, and `test-business-discovery` for post-deploy validation of session scope, RLS access, and discovery flows.
+- **Auth Validation Script:** `scripts/test-auth-patterns.sh` compares the shared helper vs Supabase reference implementation using live session tokens.
+
+### Changed
+
+- **Discovery Stack:** Updated `business-discovery-optimized`, `enrichment-hunter`, `campaign-export-user-aware`, and related functions to consume the new auth context (userId, email, sessionId, token claims).
+- **Documentation & Instructions:** Refreshed README, deployment guides, MCP configuration, and Copilot instructions to reference session JWT requirements and new diagnostics.
+- **MCP Configuration:** Quick commands and tooling now surface session-enforced smoke tests and Supabase-specific troubleshooting flows.
+
+### Removed
+
+- **Custom JWKS Verifier:** All manual JWKS handling and ES256 key rotation logic replaced with Supabase-managed validation.
+
+### Notes
+
+- Redeploy all discovery, enrichment, export, and diagnostic edge functions after pulling this release.
+- Ensure frontend and automation callers forward `Authorization: Bearer <SUPABASE_SESSION_JWT>` for every request.
+
 ## [4.0.0] - 2024-12-19 - Supabase-First Serverless Architecture
 
 ### 🚀 **MAJOR ARCHITECTURAL TRANSFORMATION**

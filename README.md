@@ -90,15 +90,25 @@ leads (id, campaign_id, business_name, email, user_id, session_user_id, ...)
 dashboard_exports (id, campaign_id, user_id, session_user_id, ...)
 ```
 
-### Edge Functions (Production)
+### Edge Functions (Production, Supabase Session Required)
 
-- `business-discovery-background` - Tier-aware asynchronous discovery + enrichment orchestration
-- `business-discovery-user-aware` (legacy) - Synchronous user-aware discovery retained for compatibility
-- `campaign-export-user-aware` - User-authorized export with enrichment metadata
-- `enrichment-hunter` - Hunter.io email discovery with caching and circuit breakers
-- `enrichment-neverbounce` - Email verification with quota management
-- `enrichment-orchestrator` - Multi-service coordination + budget enforcement
-- `test-google-places` - API testing and validation
+- **Discovery**
+  - `business-discovery-background` – Tier-aware asynchronous discovery + enrichment orchestration
+  - `business-discovery-optimized` – Session-aware synchronous path for scoped validation
+  - `business-discovery-user-aware` (legacy) – Retained for historical integrations
+- **Enrichment & Coordination**
+  - `enrichment-hunter` – Hunter.io email discovery with caching and circuit breakers
+  - `enrichment-neverbounce` – Email verification with quota management
+  - `enrichment-orchestrator` – Multi-service coordination + budget enforcement
+  - `enrichment-business-license` / `enrichment-pdl` – Licensing + data compliance enrichment
+- **Export**
+  - `campaign-export-user-aware` – User-authorized export with enrichment metadata
+  - `campaign-export` – Internal automation export path (service-role only)
+- **Diagnostics**
+  - `test-new-auth` – Session diagnostics for the shared auth helper
+  - `test-official-auth` – Mirrors Supabase’s reference pattern end-to-end
+  - `test-business-discovery` – Session-scoped discovery smoke test
+  - `test-google-places` – API testing and validation
 
 ## 🧪 Quality Standards
 
@@ -186,15 +196,21 @@ cd dist && vercel --prod
 ```bash
 # Test background discovery function directly
 curl -X POST 'https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/business-discovery-background' \
-  -H 'Authorization: Bearer YOUR_JWT_TOKEN' \
+  -H 'Authorization: Bearer SUPABASE_SESSION_JWT' \
   -H 'Content-Type: application/json' \
   -d '{"businessType": "restaurant", "location": "Seattle, WA", "maxResults": 3, "tierKey": "PROFESSIONAL", "sessionUserId": "dev-smoke"}'
 
 # Test export functionality
 curl -X POST 'https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/campaign-export-user-aware' \
-  -H 'Authorization: Bearer YOUR_JWT_TOKEN' \
+  -H 'Authorization: Bearer SUPABASE_SESSION_JWT' \
   -H 'Content-Type: application/json' \
   -d '{"campaignId": "campaign_123", "format": "csv"}'
+
+# Run Supabase-auth diagnostics
+curl -X POST 'https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/test-new-auth' \
+  -H 'Authorization: Bearer SUPABASE_SESSION_JWT' \
+  -H 'Content-Type: application/json' \
+  -d '{"diagnostics": true}'
 ```
 
 ## 🎯 Roadmap
@@ -241,4 +257,4 @@ MIT License - see [LICENSE](LICENSE) file for details.
 
 ---
 
-**ProspectPro v4.2** - Complete Email Discovery & Verification Platform with User-Aware Architecture
+**ProspectPro v4.3** – Tier-Aware Background Discovery with Supabase Session Enforcement

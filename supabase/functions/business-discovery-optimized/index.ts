@@ -1,5 +1,8 @@
+// @ts-nocheck
+// deno-lint-ignore-file
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { EdgeFunctionAuth, corsHeaders } from "../_shared/edge-auth.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.38.0";
+import { authenticateRequest, corsHeaders } from "../_shared/edge-auth.ts";
 
 // Import optimization modules (converted to Deno-compatible imports)
 // Note: These would need to be transpiled or rewritten for Deno, but showing the structure
@@ -1176,18 +1179,14 @@ serve(async (req) => {
   }
 
   try {
-    const edgeAuth = new EdgeFunctionAuth();
-    const authContext = edgeAuth.getAuthContext();
-
+    const authContext = await authenticateRequest(req);
     console.log(
-      `🔐 Edge Function Authentication: ${authContext.keyFormat} (${
-        authContext.isValid ? "Valid" : "Invalid"
+      `🔐 Authenticated Supabase session for ${authContext.userId} (${
+        authContext.isAnonymous ? "anonymous" : "authenticated"
       })`
     );
-
-    if (!authContext.isValid) {
-      throw new Error(`Authentication failed: ${authContext.keyFormat}`);
-    }
+    const supabaseClient = authContext.supabaseClient;
+    const sessionUserId = authContext.sessionId;
 
     const startTime = Date.now();
 
@@ -1223,8 +1222,8 @@ serve(async (req) => {
       console.log("🔐 API keys not in environment, checking Supabase Vault...");
 
       const supabase = createClient(
-        Deno.env.get("SUPABASE_URL") ?? "",
-        Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
+        authContext.supabaseUrl,
+        authContext.supabaseServiceRoleKey
       );
 
       if (!googlePlacesKey) {
@@ -1471,9 +1470,9 @@ serve(async (req) => {
       .substr(2, 9)}`;
 
     // Store in database (Supabase integration with new authentication)
-    if (authContext.client) {
+    if (supabaseClient) {
       try {
-        await authContext.client.from("campaigns").insert({
+        await supabaseClient.from("campaigns").insert({
           id: campaignId,
           business_type: businessType,
           location: location,
@@ -1483,6 +1482,8 @@ serve(async (req) => {
           enhancement_cost: enhancementCost,
           processing_time: processingTime,
           optimization_stats: optimizationStats,
+          user_id: authContext.userId,
+          session_user_id: sessionUserId,
         });
 
         // Store leads
@@ -1495,12 +1496,14 @@ serve(async (req) => {
           email: lead.email,
           confidence_score: lead.optimizedScore,
           enhancement_data: lead.enhancementData,
+          user_id: authContext.userId,
+          session_user_id: sessionUserId,
         }));
 
-        await authContext.client.from("leads").insert(leadsToStore);
+        await supabaseClient.from("leads").insert(leadsToStore);
 
         console.log(
-          `💾 Stored campaign and ${leadsToStore.length} leads using ${authContext.keyFormat} authentication`
+          `💾 Stored campaign and ${leadsToStore.length} leads for user ${authContext.userId}`
         );
       } catch (error) {
         console.error("Database storage error with new auth:", error);

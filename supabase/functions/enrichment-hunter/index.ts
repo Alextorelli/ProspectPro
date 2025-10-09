@@ -1,6 +1,7 @@
+// deno-lint-ignore-file
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import {
-  EdgeFunctionAuth,
+  authenticateRequest,
   corsHeaders,
   handleCORS,
 } from "../_shared/edge-auth.ts";
@@ -24,12 +25,6 @@ import { API_SECRETS, createVaultClient } from "../_shared/vault-client.ts";
  * - Confidence scoring
  * - Smart email prioritization
  */
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type",
-};
 
 interface HunterRequest {
   action:
@@ -73,16 +68,30 @@ interface HunterResponse {
   error?: string;
 }
 
+type CircuitBreakerEndpoint =
+  | "emailCount"
+  | "domainSearch"
+  | "emailFinder"
+  | "emailVerifier"
+  | "enrichment";
+
+interface CircuitBreakerState {
+  failures: number;
+  lastFailure: number;
+  threshold: number;
+}
+
 class HunterAPIClient {
   private apiKey: string;
   private baseURL = "https://api.hunter.io/v2";
-  private circuitBreaker = {
-    emailCount: { failures: 0, lastFailure: 0, threshold: 3 },
-    domainSearch: { failures: 0, lastFailure: 0, threshold: 3 },
-    emailFinder: { failures: 0, lastFailure: 0, threshold: 3 },
-    emailVerifier: { failures: 0, lastFailure: 0, threshold: 3 },
-    enrichment: { failures: 0, lastFailure: 0, threshold: 3 },
-  };
+  private circuitBreaker: Record<CircuitBreakerEndpoint, CircuitBreakerState> =
+    {
+      emailCount: { failures: 0, lastFailure: 0, threshold: 3 },
+      domainSearch: { failures: 0, lastFailure: 0, threshold: 3 },
+      emailFinder: { failures: 0, lastFailure: 0, threshold: 3 },
+      emailVerifier: { failures: 0, lastFailure: 0, threshold: 3 },
+      enrichment: { failures: 0, lastFailure: 0, threshold: 3 },
+    };
   private cache = new Map();
   private cacheTTL = 24 * 60 * 60 * 1000; // 24 hours
 
@@ -486,7 +495,7 @@ class HunterAPIClient {
   }
 
   // Circuit breaker management
-  private isCircuitOpen(endpoint: string): boolean {
+  private isCircuitOpen(endpoint: CircuitBreakerEndpoint): boolean {
     const breaker = this.circuitBreaker[endpoint];
     if (!breaker) return false;
 
@@ -499,7 +508,7 @@ class HunterAPIClient {
     return breaker.failures >= breaker.threshold;
   }
 
-  private recordFailure(endpoint: string): void {
+  private recordFailure(endpoint: CircuitBreakerEndpoint): void {
     const breaker = this.circuitBreaker[endpoint];
     if (breaker) {
       breaker.failures++;
@@ -507,7 +516,7 @@ class HunterAPIClient {
     }
   }
 
-  private resetCircuitBreaker(endpoint: string): void {
+  private resetCircuitBreaker(endpoint: CircuitBreakerEndpoint): void {
     const breaker = this.circuitBreaker[endpoint];
     if (breaker) {
       breaker.failures = 0;
@@ -523,21 +532,12 @@ serve(async (req) => {
   try {
     console.log(`🔍 Hunter.io Email Enrichment Edge Function`);
 
-    // Initialize Edge Function authentication
-    const edgeAuth = new EdgeFunctionAuth();
-    const authContext = edgeAuth.getAuthContext();
-
+    const authContext = await authenticateRequest(req);
     console.log(
-      `🔐 Authentication: ${authContext.keyFormat} (${
-        authContext.isValid ? "Valid" : "Invalid"
+      `🔐 Authenticated Supabase session for ${authContext.userId} (${
+        authContext.isAnonymous ? "anonymous" : "authenticated"
       })`
     );
-
-    if (!authContext.isValid) {
-      console.warn(
-        "⚠️ No valid authentication, proceeding with vault access only"
-      );
-    }
 
     // Get Hunter.io API key from vault
     const vaultClient = createVaultClient();

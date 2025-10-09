@@ -1,13 +1,13 @@
 {
     "version": "1.1",
-    "description": "ProspectPro v4.3 MCP Server Configuration - Tier-Aware Background Discovery",
+    "description": "ProspectPro v4.3 MCP Server Configuration - Tier-Aware Background Discovery & Supabase Session Enforcement",
     "servers": {
         "prospectpro-production": {
             "autoStart": true,
             "lazyLoad": true,
             "maxMemory": "192MB",
             "priority": "high",
-            "description": "Production monitoring for tier-aware background discovery + enrichment (28 tools)",
+            "description": "Production monitoring for tier-aware background discovery, enrichment, and session-enforced auth (28 tools)",
             "tools": [
                 "monitor_api_performance",
                 "analyze_database_metrics",
@@ -24,7 +24,7 @@
             "onDemand": true,
             "maxMemory": "96MB",
             "priority": "medium",
-            "description": "Development tools for background discovery, census targeting, and enrichment",
+            "description": "Development tools for background discovery, census targeting, enrichment, and session token workflows",
             "activationKeywords": [
                 "develop",
                 "integrate",
@@ -39,7 +39,7 @@
             "onDemand": true,
             "maxMemory": "96MB",
             "priority": "medium",
-            "description": "Debugging tools for background jobs, auth, and enrichment pipelines",
+            "description": "Debugging tools for background jobs, Supabase auth sessions, and enrichment pipelines",
             "activationKeywords": [
                 "debug",
                 "error",
@@ -87,9 +87,12 @@
             "deploy discovery background": "supabase functions deploy business-discovery-background",
             "deploy orchestrator": "supabase functions deploy enrichment-orchestrator",
             "deploy export": "supabase functions deploy campaign-export-user-aware",
+            "deploy auth diagnostics": "supabase functions deploy test-new-auth && supabase functions deploy test-official-auth",
             "check background logs": "supabase functions logs business-discovery-background --follow",
-            "test background job": "curl -X POST \"https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/business-discovery-background\" -H \"Authorization: Bearer JWT_TOKEN\" -H \"Content-Type: application/json\" -d '{\"businessType\":\"coffee shop\",\"location\":\"Seattle, WA\",\"maxResults\":2,\"tierKey\":\"PROFESSIONAL\"}'",
-            "test export": "curl -X POST \"https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/campaign-export-user-aware\" -H \"Authorization: Bearer JWT_TOKEN\" -H \"Content-Type: application/json\" -d '{\"campaignId\":\"test\",\"format\":\"csv\"}'"
+            "test background job": "curl -X POST \"https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/business-discovery-background\" -H \"Authorization: Bearer SUPABASE_SESSION_JWT\" -H \"Content-Type: application/json\" -d '{\"businessType\":\"coffee shop\",\"location\":\"Seattle, WA\",\"maxResults\":2,\"tierKey\":\"PROFESSIONAL\",\"sessionUserId\":\"mcp-smoke\"}'",
+            "test export": "curl -X POST \"https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/campaign-export-user-aware\" -H \"Authorization: Bearer SUPABASE_SESSION_JWT\" -H \"Content-Type: application/json\" -d '{\"campaignId\":\"test\",\"format\":\"csv\",\"sessionUserId\":\"mcp-smoke\"}'",
+            "test auth helper": "curl -X POST \"https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/test-new-auth\" -H \"Authorization: Bearer SUPABASE_SESSION_JWT\" -H \"Content-Type: application/json\" -d '{\"diagnostics\":true}'",
+            "compare auth patterns": "./scripts/test-auth-patterns.sh SUPABASE_SESSION_JWT"
         }
     },
     "userAwareFeatures": {

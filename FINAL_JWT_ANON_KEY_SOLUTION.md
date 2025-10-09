@@ -1,5 +1,7 @@
 # ✅ FINAL SOLUTION: JWT Anon Key Required
 
+> **Legacy Notice (October 9, 2025):** ProspectPro v4.3 relies on Supabase session JWTs provided by clients; this artifact remains for historical context when auditing publishable key configuration. See `EDGE_FUNCTION_AUTH_UPDATE_GUIDE.md` for the supported pattern.
+
 ## The Root Cause (Confirmed)
 
 Supabase Edge Functions reject JWTs at the **platform level** before our code runs. This validation requires the correct `SUPABASE_ANON_KEY` to be configured.

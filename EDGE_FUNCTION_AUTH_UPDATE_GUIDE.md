@@ -1,167 +1,116 @@
 # 🔐 Edge Function Authentication Update - Complete Guide
 
-## October 4, 2025 - New API Key Format Implementation
+## October 9, 2025 — Supabase-Native Session Enforcement
 
-### 🎯 **STATUS: EDGE FUNCTIONS UPDATED, INFRASTRUCTURE LIMITATION IDENTIFIED**
+### 🎯 **STATUS: EDGE FUNCTIONS REQUIRE REAL SUPABASE SESSIONS**
 
-✅ **COMPLETED:**
+✅ **COMPLETED THIS ROUND:**
 
-- Updated Edge Function authentication handler (`/supabase/functions/_shared/edge-auth.ts`)
-- Modified business discovery and Hunter.io functions to use new auth
-- Created test functions to validate new authentication
-- Deployed test functions successfully
+- Replaced the custom JWKS verifier with Supabase's supported `auth.getUser` flow
+- Updated every production Edge Function to consume the new `authenticateRequest`
+- Preserved automatic user + session binding when writing campaigns, leads, and exports
+- Added an official reference function (`test-official-auth`) that exercises the supported pattern end-to-end
+- Refreshed developer tooling and docs to reflect the simplified contract (session token only)
 
-🚨 **INFRASTRUCTURE LIMITATION:**
+🚨 **AUTH REQUIREMENT:**
 
-- Supabase Edge Functions infrastructure still requires **JWT tokens** at the platform level
-- New `sb_publishable_*` and `sb_secret_*` keys are **not yet supported** by Edge Functions runtime
-- Functions return `{"code":401,"message":"Invalid JWT"}` regardless of internal auth handling
+- Authenticated Edge Functions **must** receive a Supabase session JWT (user sign-in token)
+- Publishable or service-role keys **cannot** substitute for end-user Authorization headers
+- Frontend and service callers are responsible for forwarding `Authorization: Bearer <supabase_session_jwt>` on every request
 
-### 🔧 **IMMEDIATE SOLUTIONS**
+---
 
-#### **Option 1: Enable Legacy Keys (RECOMMENDED)**
+### 🔧 **CALLER CHECKLIST**
 
-**Fastest path to restore functionality:**
+1. Fetch the active session token in the client:
 
-1. **Go to Supabase Dashboard**: https://supabase.com/dashboard/project/sriycekxdqnesdsgwiuc
-2. **Navigate to**: Settings → API → API Keys
-3. **Find "Legacy Keys" section**
-4. **Click "Enable Legacy Keys"**
-5. **Use the generated JWT token** for Edge Functions
-
-**Benefits:**
-
-- ✅ Immediate Edge Function functionality
-- ✅ No code changes required
-- ✅ Maintains new API key format for database/frontend
-- ✅ Gradual transition possible
-
-#### **Option 2: Mixed Authentication Strategy**
-
-**Use both formats strategically:**
-
-```typescript
-// Frontend: New format (already working)
-const FRONTEND_API_KEY = "sb_publishable_your_key_here";
-
-// Edge Functions: Legacy JWT (until platform supports new format)
-const EDGE_FUNCTION_JWT = "eyJ..."; // Enable legacy key for this
-
-// Database: Secret key (already working)
-const DATABASE_SECRET = "sb_secret_your_key_here";
+```ts
+const session = await supabase.auth.getSession();
+const accessToken = session.data.session?.access_token;
 ```
 
-### 📋 **WHAT WE'VE IMPLEMENTED**
+2. Attach the token when invoking an Edge Function:
 
-#### **Updated Authentication Handler**
+```ts
+const response = await fetch(edgeFunctionUrl, {
+  method: "POST",
+  headers: {
+    Authorization: `Bearer ${accessToken}`,
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify(payload),
+});
+```
 
-```typescript
+3. For service automations, mint a short-lived service-role JWT via the Supabase Admin API and forward it exactly the same way.
+
+Keep tokens fresh by subscribing to `onAuthStateChange` and updating any cached headers when Supabase rotates the session.
+
+---
+
+### 🧱 **IMPLEMENTATION SNAPSHOT**
+
+```ts
 // /supabase/functions/_shared/edge-auth.ts
-export class EdgeFunctionAuth {
-  validateApiKeyFormat(apiKey: string): {
-    format: "new_publishable" | "new_secret" | "legacy_jwt" | "unknown";
-    isValid: boolean;
-  };
+export async function authenticateRequest(req: Request) {
+  // 1. Create a Supabase client with the caller's Authorization header
+  // 2. Call supabaseClient.auth.getUser(token) to validate the session
+  // 3. Return the hydrated client and user context (id, email, anonymous flag, session id, token claims)
+}
 
-  getAuthContext(): AuthContext;
-  testDatabaseConnection(): Promise<DatabaseTestResult>;
-  validateRequestAuth(request: Request): RequestAuthResult;
+export const corsHeaders = {
+  /* shared CORS headers */
+};
+export function handleCORS(request: Request) {
+  /* OPTIONS preflight helper */
 }
 ```
 
-#### **Updated Edge Functions**
+Every production Edge Function (`business-discovery-optimized`, `enrichment-hunter`, `campaign-export-user-aware`, the test harnesses, and background diagnostics) now consumes the simplified context:
 
-- ✅ `test-new-auth` - Authentication testing function
-- ✅ `test-business-discovery` - Simplified business discovery with new auth
-- ⏳ `business-discovery-optimized` - Needs syntax fixes
-- ⏳ `enrichment-hunter` - Ready for deployment
+- `authContext.userId` → Postgres `user_id` columns
+- `authContext.sessionId` → Postgres `session_user_id` columns (falls back to `null` when not present)
+- `authContext.isAnonymous` / `authContext.email` → logging and analytics
+- `authContext.supabaseClient` → automatically scoped client with RLS enforced
 
-### 🧪 **TESTING RESULTS**
+---
 
-**Database Authentication**: ✅ **WORKING**
+### 🧪 **HOW TO TEST IT**
 
-```bash
-# Database access with new keys works perfectly
-curl -X GET 'https://sriycekxdqnesdsgwiuc.supabase.co/rest/v1/campaigns?select=*&limit=5' \
-  -H 'Authorization: Bearer sb_publishable_your_key_here'
-# Returns: Campaign data successfully
-```
+| Scenario                    | Command                                                                                                                                                          | Expected Result                                                 |
+| --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
+| Edge Function diagnostics   | `curl -X POST https://.../functions/v1/test-new-auth -H "Authorization: Bearer <SESSION>" -d '{"diagnostics":true}'`                                             | JSON payload confirming database access & environment readiness |
+| Official pattern smoke test | `curl -X POST https://.../functions/v1/test-official-auth -H "Authorization: Bearer <SESSION>" -d '{}'`                                                          | Confirms RLS queries succeed with supplied session              |
+| Business discovery test     | `curl -X POST https://.../functions/v1/test-business-discovery -H "Authorization: Bearer <SESSION>" -d '{"businessType":"coffee shop","location":"Austin, TX"}'` | Inserts mocked campaign/leads tied to caller's user id          |
 
-**Edge Function Authentication**: ❌ **BLOCKED BY INFRASTRUCTURE**
+> Replace `<SESSION>` with an actual Supabase session JWT fetched via Supabase CLI, Admin API, or the frontend.
 
-```bash
-# Edge Functions with new keys return JWT error
-curl -X POST 'https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/test-new-auth' \
-  -H 'Authorization: Bearer sb_publishable_your_key_here'
-# Returns: {"code":401,"message":"Invalid JWT"}
-```
+---
 
-### 🚀 **NEXT STEPS**
+### 🚀 **NEXT STEPS FOR CALLERS**
 
-#### **Immediate Action Plan (15 minutes):**
+1. **Propagate session JWTs** throughout the frontend and automation scripts (reference checklist above).
+2. **Monitor session expiry** — refresh tokens during long-running workflows to avoid mid-flight 401s.
+3. **Rotate service-role tokens** on a schedule if background jobs call these functions without a user session.
 
-1. **Enable Legacy Keys in Supabase Dashboard**
+---
 
-   - Go to Settings → API → Legacy Keys → Enable
-   - Copy the generated JWT token
-   - Update Edge Function environment variable
+### 📊 **SECURITY & OBSERVABILITY**
 
-2. **Test Edge Functions with Legacy JWT**
+- ✅ RLS enforcement automatically scopes queries to the authenticated user.
+- ✅ `user_id` and `session_user_id` continue to populate on all writes.
+- ✅ No project secrets or JWKS endpoints are required inside Edge Functions.
+- 📈 `test-new-auth` returns environment + data-access diagnostics to validate new deployments quickly.
+- ⚠️ Anonymous sessions still authenticate, but output is limited—promote users for full data access.
 
-   ```bash
-   curl -X POST 'https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/test-business-discovery' \
-     -H 'Authorization: Bearer YOUR_LEGACY_JWT_TOKEN'
-   ```
+---
 
-3. **Update Environment Variables**
-   ```bash
-   # Add to Supabase Edge Function secrets
-   EDGE_FUNCTION_AUTH_TOKEN=your_legacy_jwt_token
-   ```
+### ✅ **VERIFICATION CHECKLIST (POST-MIGRATION)**
 
-#### **Long-term Migration Plan:**
+- [ ] Frontend is forwarding real session tokens
+- [ ] Edge Functions succeed via `test-official-auth`
+- [ ] Discovery/enrichment/export runs store `user_id` and `session_user_id`
+- [ ] No references to JWKS or legacy JWT helpers remain in the codebase
+- [ ] Documentation and automation scripts updated to reflect the simplified contract
 
-1. **Monitor Supabase Updates**: Watch for Edge Function support of new API key format
-2. **Hybrid Authentication**: Keep new keys for frontend/database, legacy for Edge Functions
-3. **Gradual Migration**: Update functions one by one as platform support improves
-4. **Complete Transition**: Remove legacy keys once full platform support available
-
-### 📊 **SECURITY ANALYSIS**
-
-**Current Security Posture:**
-
-- ✅ **Database**: Secured with new API key format + RLS policies
-- ✅ **Frontend**: Using new publishable key format
-- ⚠️ **Edge Functions**: Temporarily using legacy JWT (infrastructure limitation)
-- ✅ **Linter Compliance**: 100% (search_path warnings resolved)
-
-**Risk Assessment**: **LOW**
-
-- Legacy JWT only used for Edge Function authentication
-- Database access remains secured with new format
-- RLS policies provide defense in depth
-- Temporary solution until platform support available
-
-### 🎯 **RECOMMENDATION**
-
-**Enable Legacy Keys** for immediate Edge Function functionality while maintaining the new API key format for all other services. This provides:
-
-1. **Immediate Resolution**: Edge Functions work today
-2. **Security Maintained**: New format still used for database/frontend
-3. **Future Ready**: Easy migration when platform supports new format
-4. **Zero Downtime**: No service interruption
-
-**Expected Timeline**: Legacy key enablement takes 2 minutes, Edge Functions restored immediately.
-
-### ✅ **VERIFICATION CHECKLIST**
-
-After enabling legacy keys:
-
-- [ ] Legacy JWT token obtained from Supabase dashboard
-- [ ] Edge Function environment updated with legacy token
-- [ ] Test Edge Functions work with legacy authentication
-- [ ] Database operations continue with new API format
-- [ ] Frontend operations continue with new publishable key
-- [ ] All security policies remain active and effective
-
-**Status**: Ready for legacy key enablement to complete the migration.
+**Status:** Migration to the Supabase-supported authentication pattern is complete. Continue using session JWTs for every authenticated invocation.

@@ -1,6 +1,8 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import type { SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2.38.0";
+import type { AuthenticatedRequestContext } from "../_shared/edge-auth.ts";
 import {
-  EdgeFunctionAuth,
+  authenticateRequest,
   corsHeaders,
   handleCORS,
 } from "../_shared/edge-auth.ts";
@@ -30,27 +32,59 @@ interface ExportLead {
   processingStrategy: string;
 }
 
-// Helper function to get user context from request
-function getUserContext(req: Request, requestData: ExportRequest) {
-  const authHeader = req.headers.get("Authorization");
-  let userFromJWT = null;
+interface ExportUserContext {
+  userId: string;
+  sessionId: string | null;
+  userEmail: string | null;
+  isAnonymous: boolean;
+  isAuthenticated: boolean;
+}
 
-  if (authHeader?.startsWith("Bearer ")) {
-    const token = authHeader.substring(7);
-    try {
-      if (token.startsWith("eyJ")) {
-        const payload = JSON.parse(atob(token.split(".")[1]));
-        userFromJWT = payload.sub;
-      }
-    } catch (error) {
-      console.log("Could not decode JWT for user info:", error);
-    }
-  }
+interface CampaignRow {
+  id: string;
+  business_type: string;
+  location: string;
+  target_count: number;
+  results_count: number;
+  total_cost: number;
+  created_at: string;
+  [key: string]: unknown;
+}
+
+interface LeadRow {
+  campaign_id: string;
+  business_name: string;
+  address: string;
+  phone: string;
+  website: string;
+  email: string;
+  confidence_score: number;
+  enrichment_data?: {
+    verificationSources?: string[];
+    apolloVerified?: boolean;
+    chamberVerified?: boolean;
+    licenseVerified?: boolean;
+    processingMetadata?: {
+      totalCost?: number;
+      processingStrategy?: string;
+    };
+  };
+  [key: string]: unknown;
+}
+
+// Helper function to get user context from authenticated request
+function getUserContext(
+  authContext: AuthenticatedRequestContext,
+  requestData: ExportRequest
+): ExportUserContext {
+  const resolvedEmail = requestData.userEmail ?? authContext.email;
 
   return {
-    userId: userFromJWT,
-    userEmail: requestData.userEmail || null,
-    isAuthenticated: !!userFromJWT,
+    userId: authContext.userId,
+    sessionId: authContext.sessionId,
+    userEmail: resolvedEmail,
+    isAnonymous: authContext.isAnonymous,
+    isAuthenticated: true,
   };
 }
 
@@ -110,26 +144,27 @@ function formatAsCSV(
 
 // Get campaign data with user authorization
 async function getCampaignData(
-  supabaseClient: any,
-  campaignId: string,
-  userContext: any
-) {
+  supabaseClient: SupabaseClient,
+  campaignId: string
+): Promise<{ campaign: CampaignRow; leads: LeadRow[] }> {
   try {
     // Get campaign with user authorization - RLS policies will handle access control
-    const { data: campaign, error: campaignError } = await supabaseClient
+    const { data: campaignData, error: campaignError } = await supabaseClient
       .from("campaigns")
       .select("*")
       .eq("id", campaignId)
       .single();
 
-    if (campaignError) {
+    if (campaignError || !campaignData) {
       throw new Error(
-        `Campaign not found or access denied: ${campaignError.message}`
+        `Campaign not found or access denied: ${
+          campaignError?.message ?? "unknown error"
+        }`
       );
     }
 
     // Get leads for the campaign
-    const { data: leads, error: leadsError } = await supabaseClient
+    const { data: leadsData, error: leadsError } = await supabaseClient
       .from("leads")
       .select("*")
       .eq("campaign_id", campaignId);
@@ -137,6 +172,9 @@ async function getCampaignData(
     if (leadsError) {
       throw new Error(`Could not fetch leads: ${leadsError.message}`);
     }
+
+    const campaign = campaignData as CampaignRow;
+    const leads = (leadsData ?? []) as LeadRow[];
 
     return { campaign, leads };
   } catch (error) {
@@ -152,19 +190,15 @@ serve(async (req) => {
   try {
     console.log(`📤 Campaign Export with User Authentication`);
 
-    // Initialize Edge Function authentication
-    const edgeAuth = new EdgeFunctionAuth();
-    const authContext = edgeAuth.getAuthContext();
-
+    const authContext = await authenticateRequest(req);
     console.log(
-      `🔐 Auth: ${authContext.keyFormat} (${
-        authContext.isValid ? "Valid" : "Invalid"
+      `🔐 Authenticated Supabase session for ${authContext.userId} (${
+        authContext.isAnonymous ? "anonymous" : "authenticated"
       })`
     );
 
-    if (!authContext.isValid) {
-      throw new Error(`Authentication failed: ${authContext.keyFormat}`);
-    }
+    const supabaseClient = authContext.supabaseClient;
+    const sessionUserId = authContext.sessionId;
 
     // Parse request
     const requestData: ExportRequest = await req.json();
@@ -179,7 +213,7 @@ serve(async (req) => {
     }
 
     // Get user context
-    const userContext = getUserContext(req, requestData);
+    const userContext = getUserContext(authContext, requestData);
     console.log(`👤 Export User Context:`, userContext);
 
     if (!userContext.userId) {
@@ -197,9 +231,8 @@ serve(async (req) => {
 
     // Get campaign and leads data
     const { campaign, leads } = await getCampaignData(
-      authContext.client,
-      campaignId,
-      userContext
+      supabaseClient,
+      campaignId
     );
 
     console.log(
@@ -208,7 +241,7 @@ serve(async (req) => {
     console.log(`📋 Lead count: ${leads.length}`);
 
     // Transform leads for export
-    const exportLeads: ExportLead[] = leads.map((lead) => ({
+    const exportLeads: ExportLead[] = leads.map((lead: LeadRow) => ({
       businessName: lead.business_name,
       address: lead.address,
       phone: lead.phone,
@@ -236,9 +269,10 @@ serve(async (req) => {
       completed_at: new Date().toISOString(),
       // Add user_id if available
       user_id: userContext.userId,
+      session_user_id: sessionUserId,
     };
 
-    const { error: exportError } = await authContext.client
+    const { error: exportError } = await supabaseClient
       .from("dashboard_exports")
       .insert(exportRecord);
 

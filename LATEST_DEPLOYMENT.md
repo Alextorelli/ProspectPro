@@ -1,212 +1,153 @@
-# ProspectPro v4.2 - Latest Production Deployment
+# ProspectPro v4.3 - Latest Production Deployment
 
-**🚀 PRODUCTION READY** - User-Aware System Implementation Complete
+**🚀 PRODUCTION READY** – Tier-aware background discovery with Supabase session enforcement
 
 ## ✅ Deployment Status
 
-**Date:** October 4, 2025  
-**Status:** ✅ FULLY OPERATIONAL  
-**Architecture:** User-aware business discovery with complete authentication
+**Date:** October 9, 2025  
+**Status:** ✅ Fully operational  
+**Architecture:** Supabase-native session auth paired with asynchronous background discovery and enrichment
 
 ### Production URLs
 
 - **Frontend:** https://prospect-fyhedobh1-appsmithery.vercel.app
-- **Backend:** https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/
-- **Database:** ProspectPro-Production (sriycekxdqnesdsgwiuc.supabase.co)
+- **Edge Function Base:** https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/
+- **Supabase Project:** sriycekxdqnesdsgwiuc (Production)
 
-## 🔧 Latest Changes
+## � Key Updates
 
-### User-Aware System Implementation
+### Supabase-Native Authentication
 
-- ✅ **Database Schema:** User-campaign linking with RLS policies applied
-- ✅ **Edge Functions:** User context integration with session management
-- ✅ **Frontend:** Complete authentication system with user dashboard
-- ✅ **Export System:** User-authorized exports with data isolation
+- Shared `authenticateRequest` now calls `supabaseClient.auth.getUser` using the caller’s Authorization header.
+- Every authenticated invocation requires a Supabase session JWT; publishable/service-role keys alone are rejected.
+- Diagnostics stack (`test-new-auth`, `test-official-auth`, `scripts/test-auth-patterns.sh`) validates session claims, RLS scope, and helper parity after each deploy.
 
-### Technical Updates
+### Background Discovery & Enrichment
 
-- ✅ **Authentication:** JWT user extraction and session handling
-- ✅ **Data Model:** user_id and session_user_id columns added to all tables
-- ✅ **Security:** Row Level Security policies for complete user isolation
-- ✅ **API Integration:** New sb\_\* API key format with proper validation
+- `business-discovery-background` orchestrates Google Places, Place Details, Foursquare, and Census intelligence with tier-aware budgeting.
+- `business-discovery-optimized` retains synchronous discovery for scoped validations and premium campaign checks.
+- Enrichment modules (`enrichment-hunter`, `enrichment-neverbounce`, `enrichment-orchestrator`, `enrichment-business-license`, `enrichment-pdl`) deliver verified contact data, compliance enrichment, and transparent cost tracking.
 
-## 🧪 Production Testing Results
+### Exports & Analytics
 
-### Business Discovery Test ✅
+- `campaign-export-user-aware` exports tier pricing, validation vs enrichment cost, and `verificationSources` metadata.
+- Campaign and lead writes persist `user_id`, `session_user_id`, census density scores, and enrichment cost breakdowns for analytics dashboards.
 
-```json
-{
-  "success": true,
-  "campaignId": "campaign_1759540441858_10a6ehgqh",
-  "userManagement": {
-    "isAuthenticated": false,
-    "sessionId": "test_session_final_1759540441",
-    "campaignOwnership": "user_owned"
-  },
-  "database_storage": {
-    "success": true,
-    "campaign_stored": true,
-    "leads_stored": 3
-  }
-}
-```
+## 🧪 Production Validation
 
-### Campaign Export Test ✅
+| Check                     | Command                                        | Result                                                              |
+| ------------------------- | ---------------------------------------------- | ------------------------------------------------------------------- |
+| Authentication helper     | `curl https://…/test-new-auth`                 | Returns session user metadata, RLS scope, and environment readiness |
+| Official reference parity | `curl https://…/test-official-auth`            | Confirms Supabase helper matches reference implementation           |
+| Discovery smoke test      | `curl https://…/business-discovery-background` | Inserts campaign + leads tied to caller `user_id`                   |
+| Export smoke test         | `curl https://…/campaign-export-user-aware`    | Generates CSV with enrichment metadata scoped to caller             |
 
-```json
-{
-  "success": true,
-  "exportId": "export_1759540455413",
-  "userContext": {
-    "isAuthenticated": false,
-    "hasAccess": true,
-    "ownership": "user_owned"
-  },
-  "export": {
-    "format": "csv",
-    "size": 679,
-    "includeEnrichmentData": true
-  }
-}
-```
+> Replace `https://…` with the production base URL and include `Authorization: Bearer <SUPABASE_SESSION_JWT>` for every request.
 
-## 📋 Current Edge Functions
+## 📋 Active Edge Functions (Auth Enforced)
 
-### Production Functions (6 Active)
+- **Discovery:** `business-discovery-background`, `business-discovery-optimized`, `business-discovery-user-aware` (legacy)
+- **Enrichment & Coordination:** `enrichment-hunter`, `enrichment-neverbounce`, `enrichment-orchestrator`, `enrichment-business-license`, `enrichment-pdl`
+- **Export:** `campaign-export-user-aware`, `campaign-export` (internal automation)
+- **Diagnostics:** `test-new-auth`, `test-official-auth`, `test-business-discovery`, `test-google-places`
 
-1. **business-discovery-user-aware** (v2) - 73.91kB
+## 🔐 Session Requirements
 
-   - User context discovery with campaign ownership
-   - Session management and database storage
-   - JWT user extraction and validation
+1. Retrieve the current session token:
+   ```ts
+   const { data } = await supabase.auth.getSession();
+   const accessToken = data.session?.access_token;
+   ```
+2. Forward the token on every request:
+   ```ts
+   await fetch(`${supabaseUrl}/functions/v1/business-discovery-background`, {
+     method: "POST",
+     headers: {
+       Authorization: `Bearer ${accessToken}`,
+       "Content-Type": "application/json",
+     },
+     body: JSON.stringify(payload),
+   });
+   ```
+3. For automation, mint a short-lived service-role JWT via the Supabase Admin API and send it exactly the same way.
 
-2. **campaign-export-user-aware** (v2) - 73.24kB
-
-   - User-authorized export with data isolation
-   - CSV/JSON format support with enrichment data
-   - Access control and user context validation
-
-3. **enrichment-hunter** (v1) - Hunter.io email discovery
-4. **enrichment-neverbounce** (v1) - Email verification
-5. **enrichment-orchestrator** (v1) - Multi-service coordination
-6. **test-google-places** (v1) - API testing
-
-## 🗄️ Database Schema Status
-
-### User-Aware Tables ✅
-
-```sql
--- Campaigns with user ownership
-campaigns (id, business_type, location, user_id, session_user_id, ...)
-
--- Leads with user context
-leads (id, campaign_id, business_name, email, user_id, session_user_id, ...)
-
--- User-authorized exports
-dashboard_exports (id, campaign_id, user_id, session_user_id, ...)
-```
-
-### RLS Policies Applied ✅
-
-- User isolation policies for all tables
-- Anonymous session support via session_user_id
-- Helper functions for campaign management and user linking
-
-## 🌐 Frontend Features
-
-### Authentication System ✅
-
-- **Anonymous Users:** Automatic session ID generation
-- **Sign Up/Sign In:** Complete email/password authentication
-- **User Dashboard:** Campaign history and ownership display
-- **Session Management:** Seamless anonymous-to-authenticated upgrade
-
-### User Experience ✅
-
-- **Instant Access:** No signup required to start discovering
-- **Campaign Tracking:** User-specific campaign history and management
-- **Export Authorization:** User context validation for all downloads
-- **Data Privacy:** Complete isolation between users
-
-## 🚀 Deployment Process
-
-### Current Workflow ✅
+## 🚀 Deployment Workflow (v4.3)
 
 ```bash
-# Backend deployment
-supabase functions deploy business-discovery-user-aware
+# Deploy discovery + enrichment + export stack
+supabase functions deploy business-discovery-background
+supabase functions deploy business-discovery-optimized
 supabase functions deploy campaign-export-user-aware
+supabase functions deploy enrichment-hunter
+supabase functions deploy enrichment-neverbounce
+supabase functions deploy enrichment-orchestrator
+supabase functions deploy enrichment-business-license
+supabase functions deploy enrichment-pdl
 
-# Frontend deployment
+# Deploy diagnostic helpers
+supabase functions deploy test-new-auth
+supabase functions deploy test-official-auth
+supabase functions deploy test-business-discovery
+supabase functions deploy test-google-places
+
+# Build + deploy frontend
 npm run build
 cd dist && vercel --prod
-
-# Database schema (applied via SQL editor)
-# /database/user-campaign-production-update.sql
 ```
 
-### Environment Configuration ✅
+## 🧪 Smoke Tests
 
-- **API Keys:** New sb\_\* format configured in Supabase secrets
-- **JWT Tokens:** ES256 encryption with proper Key ID validation
-- **Database:** RLS policies and user columns fully configured
-- **Frontend:** User authentication system integrated
+```bash
+# Background discovery (session JWT required)
+curl -X POST \
+  'https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/business-discovery-background' \
+  -H 'Authorization: Bearer <SUPABASE_SESSION_JWT>' \
+  -H 'Content-Type: application/json' \
+  -d '{"businessType":"coffee shop","location":"Seattle, WA","tierKey":"PROFESSIONAL","maxResults":2,"sessionUserId":"prod-validation"}'
 
-## 📊 Performance Metrics
+# Auth diagnostics
+curl -X POST \
+  'https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/test-new-auth' \
+  -H 'Authorization: Bearer <SUPABASE_SESSION_JWT>' \
+  -H 'Content-Type: application/json' \
+  -d '{"diagnostics":true}'
 
-### System Performance ✅
+# Compare helper vs reference pattern
+./scripts/test-auth-patterns.sh <SUPABASE_SESSION_JWT>
 
-- **Response Time:** <100ms Edge Function execution
-- **Database Storage:** User context properly saved
-- **Export Speed:** CSV generation and download working
-- **Authentication:** JWT user extraction operational
+# Export validation
+curl -X POST \
+  'https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/campaign-export-user-aware' \
+  -H 'Authorization: Bearer <SUPABASE_SESSION_JWT>' \
+  -H 'Content-Type: application/json' \
+  -d '{"campaignId":"<CAMPAIGN_ID>","format":"csv","sessionUserId":"prod-validation"}'
+```
 
-### Data Quality ✅
+## 🗄️ Database & RLS Snapshot
 
-- **Business Discovery:** Real business data with user context
-- **Campaign Ownership:** Proper user linking and isolation
-- **Export Authorization:** User validation working correctly
-- **Session Management:** Anonymous user workflow preserved
+- `campaigns`, `leads`, and `dashboard_exports` populate `user_id` + `session_user_id` for session-aware analytics.
+- `discovery_jobs.metrics` tracks tier, sources, validation cost, enrichment cost, census density, and confidence multipliers.
+- RLS policies restrict access to matching `auth.uid()` or anonymous session IDs; diagnostics confirm enforcement.
 
-## 🎯 User Workflows
+## 📝 Next Steps & Monitoring
 
-### Anonymous User Flow ✅
+- Supabase dashboard → Edge Functions → Logs to monitor new deployments.
+- Tail discovery jobs: `supabase functions logs business-discovery-background --follow`.
+- Verify campaign + lead inserts via Supabase SQL editor (read-only session context).
+- Keep frontend session handling aligned with `@supabase/supabase-js@2.38` and refresh tokens on auth state changes.
 
-1. Access app → Auto session ID → Discover businesses → Export results
-2. Session preserved during browser session
-3. Clear upgrade prompts to create permanent account
+## ✅ Verification Checklist
 
-### Authenticated User Flow ✅
-
-1. Sign up/in → Access campaign history → New discoveries → User-owned data
-2. Permanent campaign storage and complete privacy
-3. Enhanced features and user dashboard
-
-## 🔒 Security Status
-
-### Authentication Security ✅
-
-- **JWT Validation:** Proper user context extraction
-- **API Key Security:** New format with validation
-- **Session Security:** Anonymous users properly isolated
-- **User Context:** Required for all data operations
-
-### Data Privacy ✅
-
-- **User Isolation:** Database-level access control via RLS
-- **Export Authorization:** User context required for all exports
-- **Campaign Ownership:** Proper user linking and data isolation
-- **Session Management:** Anonymous data preserved securely
+- [ ] All listed functions deployed with latest commit hashes.
+- [ ] Frontend built from `/dist` and deployed to Vercel.
+- [ ] `test-new-auth` and `test-official-auth` return 200 with the current session JWT.
+- [ ] Discovery smoke test inserts campaign + leads tied to caller `user_id`.
+- [ ] Export smoke test returns CSV with enrichment metadata.
+- [ ] `scripts/test-auth-patterns.sh` shows parity between helper and reference flows.
+- [ ] Supabase secrets include Google, Foursquare, Census, Hunter.io, and NeverBounce keys.
+- [ ] No hard-coded anon/service-role tokens committed; placeholders only (`sb_publishable_your_key_here`).
 
 ---
 
-**ProspectPro v4.2 is now fully operational as a user-aware business discovery platform with complete authentication, campaign ownership, and data isolation.**
-
-**Ready for production use with:**
-
-- ✅ Complete user authentication system
-- ✅ Campaign ownership and data privacy
-- ✅ User-authorized exports and analytics
-- ✅ Seamless anonymous-to-authenticated workflow
-
-_Latest deployment: October 4, 2025 - User-Aware System Complete_ 🚀
+**ProspectPro v4.3** – Production deployment locked with tier-aware background discovery, Supabase session enforcement, and end-to-end diagnostics.  
+_Latest deployment: October 9, 2025 — Ready for production campaign validation._ 🚀

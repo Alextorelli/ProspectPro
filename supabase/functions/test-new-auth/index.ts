@@ -1,92 +1,83 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import type { SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2.38.0";
+import type { AuthenticatedRequestContext } from "../_shared/edge-auth.ts";
 import {
-  EdgeFunctionAuth,
+  authenticateRequest,
   corsHeaders,
   handleCORS,
 } from "../_shared/edge-auth.ts";
 
-// Test Edge Function - New API Key Authentication
-// October 4, 2025 - Verify new sb_publishable_*/sb_secret_* format
+// Test Edge Function - Supabase Session Authentication Diagnostics
+
+interface DatabaseDiagnostics {
+  success: boolean;
+  access: Record<string, boolean>;
+  error?: string;
+}
+
+interface QueryDiagnostics {
+  success: boolean;
+  rowCount?: number;
+  error?: string;
+  sampleCampaignIds?: string[];
+}
+
+interface RequestAuthDiagnostics {
+  authorizationHeaderPresent: boolean;
+  userId: string;
+  sessionId: string | null;
+  email: string | null;
+  isAnonymous: boolean;
+}
+
+type EnvironmentDiagnostics = Record<string, boolean>;
 
 serve(async (req) => {
-  // Handle CORS preflight
   const corsResponse = handleCORS(req);
   if (corsResponse) return corsResponse;
 
   try {
-    console.log(`🧪 Testing new API key authentication...`);
+    console.log("🧪 Running Supabase session authentication diagnostics...");
 
-    // Initialize Edge Function authentication
-    const edgeAuth = new EdgeFunctionAuth();
-    const authContext = edgeAuth.getAuthContext();
+    const authContext = await authenticateRequest(req);
+    const supabaseClient = authContext.supabaseClient;
 
-    console.log(
-      `🔐 Auth Context: ${authContext.keyFormat} (${
-        authContext.isValid ? "Valid" : "Invalid"
-      })`
-    );
+    const requestDiagnostics = buildRequestDiagnostics(authContext, req);
+    const databaseDiagnostics = await runDatabaseDiagnostics(supabaseClient);
+    const queryDiagnostics = await fetchSampleCampaigns(supabaseClient);
 
-    // Test database connectivity
-    const dbTest = await edgeAuth.testDatabaseConnection();
-    console.log(`💾 Database Test:`, dbTest);
-
-    // Test request authentication
-    const requestAuthTest = edgeAuth.validateRequestAuth(req);
-    console.log(`📨 Request Auth Test:`, requestAuthTest);
-
-    // Try a simple database query if we have a valid client
-    let queryResult = null;
-    if (authContext.client) {
-      try {
-        const { data, error } = await authContext.client
-          .from("campaigns")
-          .select("id, business_type, location, status")
-          .limit(3);
-
-        queryResult = {
-          success: !error,
-          rowCount: data?.length || 0,
-          error: error?.message,
-        };
-      } catch (e) {
-        queryResult = {
-          success: false,
-          error: e instanceof Error ? e.message : "Query failed",
-        };
-      }
-    }
-
-    // Test environment variables
-    const envTest = {
-      SUPABASE_URL: !!Deno.env.get("SUPABASE_URL"),
-      SUPABASE_ANON_KEY: !!Deno.env.get("SUPABASE_ANON_KEY"),
-      VITE_SUPABASE_ANON_KEY: !!Deno.env.get("VITE_SUPABASE_ANON_KEY"),
-      SUPABASE_SERVICE_ROLE_KEY: !!Deno.env.get("SUPABASE_SERVICE_ROLE_KEY"),
-      SUPABASE_SECRET_KEY: !!Deno.env.get("SUPABASE_SECRET_KEY"),
+    const environmentDiagnostics: EnvironmentDiagnostics = {
+      SUPABASE_URL: Boolean(Deno.env.get("SUPABASE_URL")),
+      SUPABASE_ANON_KEY: Boolean(Deno.env.get("SUPABASE_ANON_KEY")),
+      VITE_SUPABASE_ANON_KEY: Boolean(Deno.env.get("VITE_SUPABASE_ANON_KEY")),
+      SUPABASE_SERVICE_ROLE_KEY: Boolean(
+        Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")
+      ),
+      SUPABASE_SECRET_KEY: Boolean(Deno.env.get("SUPABASE_SECRET_KEY")),
     };
 
     const response = {
       success: true,
       timestamp: new Date().toISOString(),
       authentication: {
-        context: {
-          keyFormat: authContext.keyFormat,
-          isValid: authContext.isValid,
-          hasClient: !!authContext.client,
-        },
-        databaseTest: dbTest,
-        requestAuth: requestAuthTest,
-        queryTest: queryResult,
+        request: requestDiagnostics,
+        databaseTest: databaseDiagnostics,
+        queryTest: queryDiagnostics,
       },
-      environment: envTest,
-      recommendations: generateRecommendations(authContext, dbTest, envTest),
+      environment: environmentDiagnostics,
+      recommendations: generateRecommendations(
+        authContext,
+        databaseDiagnostics,
+        environmentDiagnostics,
+        queryDiagnostics
+      ),
     };
 
     return new Response(JSON.stringify(response, null, 2), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error) {
-    console.error("❌ Authentication test error:", error);
+    console.error("❌ Authentication diagnostics failed:", error);
 
     return new Response(
       JSON.stringify({
@@ -102,75 +93,127 @@ serve(async (req) => {
   }
 });
 
-function generateRecommendations(
-  authContext: any,
-  dbTest: any,
-  envTest: any
-): string[] {
-  const recommendations = [];
+function buildRequestDiagnostics(
+  authContext: AuthenticatedRequestContext,
+  req: Request
+): RequestAuthDiagnostics {
+  return {
+    authorizationHeaderPresent: req.headers.has("Authorization"),
+    userId: authContext.userId,
+    sessionId: authContext.sessionId,
+    email: authContext.email,
+    isAnonymous: authContext.isAnonymous,
+  };
+}
 
-  if (!authContext.isValid) {
-    recommendations.push(
-      "❌ No valid authentication found - check environment variables"
-    );
-  }
+async function runDatabaseDiagnostics(
+  supabaseClient: SupabaseClient
+): Promise<DatabaseDiagnostics> {
+  const tables = ["campaigns", "leads", "dashboard_exports"] as const;
+  const access: Record<string, boolean> = {};
+  const errors: string[] = [];
 
-  if (authContext.keyFormat === "legacy_jwt") {
-    recommendations.push(
-      "⚠️ Using legacy JWT authentication - consider updating to new format"
-    );
-  }
-
-  if (authContext.keyFormat === "new_publishable") {
-    recommendations.push(
-      "✅ Using new publishable key format - optimal for frontend"
-    );
-  }
-
-  if (authContext.keyFormat === "new_secret") {
-    recommendations.push(
-      "✅ Using new secret key format - optimal for backend operations"
-    );
-  }
-
-  if (!dbTest.success) {
-    recommendations.push(
-      "❌ Database connectivity failed - check RLS policies and key permissions"
-    );
-  }
-
-  if (dbTest.hasAccess) {
-    const accessCount = Object.values(dbTest.hasAccess).filter(Boolean).length;
-    if (accessCount === 3) {
-      recommendations.push("✅ Full database access to all core tables");
-    } else if (accessCount > 0) {
-      recommendations.push(
-        `⚠️ Partial database access (${accessCount}/3 tables)`
+  for (const table of tables) {
+    try {
+      const { error } = await supabaseClient.from(table).select("id").limit(1);
+      access[table] = !error;
+      if (error) {
+        errors.push(`${table}: ${error.message}`);
+      }
+    } catch (error) {
+      access[table] = false;
+      errors.push(
+        `${table}: ${error instanceof Error ? error.message : "Unknown error"}`
       );
-    } else {
-      recommendations.push("❌ No database table access - check RLS policies");
     }
   }
 
-  if (!envTest.SUPABASE_URL) {
-    recommendations.push("❌ SUPABASE_URL environment variable missing");
+  return {
+    success: Object.values(access).some(Boolean),
+    access,
+    error: errors.length ? errors.join("; ") : undefined,
+  };
+}
+
+async function fetchSampleCampaigns(
+  supabaseClient: SupabaseClient
+): Promise<QueryDiagnostics> {
+  try {
+    const { data, error } = await supabaseClient
+      .from("campaigns")
+      .select("id")
+      .limit(3);
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+
+    const rows = data ?? [];
+    return {
+      success: true,
+      rowCount: rows.length,
+      sampleCampaignIds: rows.map((row) => String(row.id)),
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Query failed",
+    };
+  }
+}
+
+function generateRecommendations(
+  authContext: AuthenticatedRequestContext,
+  dbDiagnostics: DatabaseDiagnostics,
+  envDiagnostics: EnvironmentDiagnostics,
+  queryDiagnostics: QueryDiagnostics
+): string[] {
+  const recommendations: string[] = [];
+
+  if (!envDiagnostics.SUPABASE_URL || !envDiagnostics.SUPABASE_ANON_KEY) {
+    recommendations.push(
+      "❌ Missing Supabase URL or anon key - update environment configuration"
+    );
   }
 
-  const keyCount = [
-    envTest.SUPABASE_ANON_KEY,
-    envTest.VITE_SUPABASE_ANON_KEY,
-    envTest.SUPABASE_SERVICE_ROLE_KEY,
-    envTest.SUPABASE_SECRET_KEY,
-  ].filter(Boolean).length;
-
-  if (keyCount === 0) {
-    recommendations.push("❌ No API keys found in environment");
-  } else if (keyCount === 1) {
+  if (!envDiagnostics.SUPABASE_SERVICE_ROLE_KEY) {
     recommendations.push(
-      "⚠️ Only one API key configured - consider adding backup keys"
+      "⚠️ Service role key missing - vault access and server-side operations may fail"
+    );
+  }
+
+  if (dbDiagnostics.success === false) {
+    recommendations.push(
+      dbDiagnostics.error
+        ? `❌ Database diagnostics failed: ${dbDiagnostics.error}`
+        : "❌ Database diagnostics failed - check RLS policies"
     );
   } else {
-    recommendations.push(`✅ Multiple API keys configured (${keyCount} keys)`);
+    const accessibleTables = Object.entries(dbDiagnostics.access)
+      .filter(([, hasAccess]) => hasAccess)
+      .map(([table]) => table)
+      .join(", ");
+    recommendations.push(
+      `✅ Database access confirmed for: ${accessibleTables}`
+    );
+  }
+
+  if (!queryDiagnostics.success) {
+    recommendations.push(
+      queryDiagnostics.error
+        ? `⚠️ Sample campaign query failed: ${queryDiagnostics.error}`
+        : "⚠️ Unable to read campaigns - verify user permissions"
+    );
+  }
+
+  if (authContext.isAnonymous) {
+    recommendations.push(
+      "ℹ️ Anonymous session detected - upgrade to authenticated user for full access"
+    );
+  }
+
+  if (recommendations.length === 0) {
+    recommendations.push("✅ Supabase authentication flow looks healthy");
   }
 
   return recommendations;
