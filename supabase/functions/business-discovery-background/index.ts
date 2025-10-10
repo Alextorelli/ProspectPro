@@ -824,30 +824,114 @@ function formatFoursquareAddress(
   return parts.join(", ");
 }
 
+type BusinessFingerprintSource = {
+  name?: string | null;
+  businessName?: string | null;
+  business_name?: string | null;
+  formatted_address?: string | null;
+  address?: string | null;
+  formatted_phone_number?: string | null;
+  phone?: string | null;
+  website?: string | null;
+  place_id?: string | null;
+  source?: DataSource;
+};
+
+function normalizeString(value?: string | null): string {
+  return value ? value.toLowerCase().replace(/\s+/g, " ").trim() : "";
+}
+
+function normalizePhone(value?: string | null): string {
+  return value ? value.replace(/\D+/g, "") : "";
+}
+
+function normalizeWebsite(value?: string | null): string {
+  if (!value) return "";
+  const normalized = value.toLowerCase().trim();
+  const withoutProtocol = normalized.replace(/^https?:\/\//, "");
+  const withoutWww = withoutProtocol.replace(/^www\./, "");
+  return withoutWww.split("/")[0];
+}
+
+function createBusinessFingerprint(
+  source: BusinessFingerprintSource
+): string {
+  const name = normalizeString(
+    source.business_name ?? source.businessName ?? source.name ?? ""
+  );
+  const address = normalizeString(
+    source.address ?? source.formatted_address ?? ""
+  );
+  const phone = normalizePhone(
+    source.phone ?? source.formatted_phone_number ?? ""
+  );
+  const website = normalizeWebsite(source.website ?? "");
+
+  if (name && address) {
+    return `${name}::${address}`;
+  }
+
+  if (name && phone) {
+    return `${name}::${phone}`;
+  }
+
+  if (website) {
+    return `domain::${website}`;
+  }
+
+  if (phone) {
+    return `phone::${phone}`;
+  }
+
+  if (name) {
+    return `name::${name}`;
+  }
+
+  return "";
+}
+
 function dedupeBusinesses(
   businesses: DiscoveredBusiness[]
 ): DiscoveredBusiness[] {
   const map = new Map<string, DiscoveredBusiness>();
+  let fallbackIndex = 0;
+
   for (const business of businesses) {
-    const key = `${(
-      business.name ||
-      business.businessName ||
-      ""
-    ).toLowerCase()}_${(
-      business.formatted_address ||
-      business.address ||
-      ""
-    ).toLowerCase()}`;
+    const fingerprint = createBusinessFingerprint(business);
+    const key = fingerprint
+      ? fingerprint
+      : business.place_id
+      ? `place::${business.place_id}`
+      : `fallback::${fallbackIndex++}`;
+
     if (!map.has(key)) {
       map.set(key, business);
-    } else {
-      const existing = map.get(key)!;
-      if (
-        existing.source === "google_places" &&
-        business.source === "google_place_details"
-      ) {
-        map.set(key, business);
-      }
+      continue;
+    }
+
+    const existing = map.get(key)!;
+    const existingHasWebsite = Boolean(existing.website);
+    const candidateHasWebsite = Boolean(business.website);
+    const existingHasPhone = Boolean(
+      existing.formatted_phone_number || existing.phone
+    );
+    const candidateHasPhone = Boolean(
+      business.formatted_phone_number || business.phone
+    );
+
+    const candidateIsDetailsUpgrade =
+      existing.source === "google_places" &&
+      business.source === "google_place_details";
+
+    const candidateHasMoreData =
+      candidateHasWebsite && !existingHasWebsite
+        ? true
+        : candidateHasPhone && !existingHasPhone
+        ? true
+        : false;
+
+    if (candidateIsDetailsUpgrade || candidateHasMoreData) {
+      map.set(key, business);
     }
   }
   return Array.from(map.values());
@@ -1188,6 +1272,61 @@ async function processDiscoveryJob(
   });
   config.jobId = jobId;
 
+  const historicalFingerprints = new Set<string>();
+
+  try {
+    const { data: priorCampaigns, error: priorCampaignsError } = await supabase
+      .from("campaigns")
+      .select("id")
+      .eq("user_id", config.userId)
+      .eq("business_type", config.businessType)
+      .eq("location", config.location)
+      .neq("id", config.campaignId)
+      .limit(200);
+
+    if (priorCampaignsError) {
+      console.warn(
+        "Unable to load historical campaigns for duplicate suppression:",
+        priorCampaignsError.message
+      );
+    } else {
+      const campaignIds = (priorCampaigns ?? [])
+        .map((entry) => entry.id)
+        .filter((value): value is string => Boolean(value));
+
+      if (campaignIds.length > 0) {
+        const { data: priorLeads, error: priorLeadsError } = await supabase
+          .from("leads")
+          .select("business_name,address,phone,website")
+          .in("campaign_id", campaignIds)
+          .limit(1000);
+
+        if (priorLeadsError) {
+          console.warn(
+            "Unable to load previously delivered leads for duplicate suppression:",
+            priorLeadsError.message
+          );
+        } else {
+          const priorLeadRows = (priorLeads ?? []) as Array<{
+            business_name?: string | null;
+            address?: string | null;
+            phone?: string | null;
+            website?: string | null;
+          }>;
+
+          for (const lead of priorLeadRows) {
+            const fingerprint = createBusinessFingerprint(lead);
+            if (fingerprint) {
+              historicalFingerprints.add(fingerprint);
+            }
+          }
+        }
+      }
+    }
+  } catch (historyError) {
+    console.warn("Historical lead lookup failed:", historyError);
+  }
+
   try {
     await supabase
       .from("discovery_jobs")
@@ -1204,7 +1343,28 @@ async function processDiscoveryJob(
       config.location
     );
 
-    const discoveredBusinesses = await discoverBusinesses(
+    let historicalFilteredCount = 0;
+
+    const applyHistoricalFilter = (
+      businesses: DiscoveredBusiness[]
+    ): DiscoveredBusiness[] => {
+      if (historicalFingerprints.size === 0) {
+        return businesses;
+      }
+
+      const filteredResults: DiscoveredBusiness[] = [];
+      for (const business of businesses) {
+        const fingerprint = createBusinessFingerprint(business);
+        if (fingerprint && historicalFingerprints.has(fingerprint)) {
+          historicalFilteredCount += 1;
+          continue;
+        }
+        filteredResults.push(business);
+      }
+      return filteredResults;
+    };
+
+    let discoveredBusinesses: DiscoveredBusiness[] = await discoverBusinesses(
       config,
       censusIntelligence,
       usageLogger,
@@ -1217,6 +1377,48 @@ async function processDiscoveryJob(
         locationQuery: config.location,
       }
     );
+    let totalRawDiscovered = discoveredBusinesses.length;
+
+    discoveredBusinesses = applyHistoricalFilter(discoveredBusinesses);
+
+    if (
+      discoveredBusinesses.length === 0 &&
+      totalRawDiscovered > 0 &&
+      !config.expandGeography
+    ) {
+      console.log(
+        `ℹ️ No novel businesses found for ${config.businessType} in ${config.location}. Expanding geography to locate fresh results.`
+      );
+
+      const expandedConfig: JobConfig = {
+        ...config,
+        expandGeography: true,
+      };
+
+      const expandedResults = await discoverBusinesses(
+        expandedConfig,
+        censusIntelligence,
+        usageLogger,
+        {
+          campaignId: config.campaignId,
+          sessionId: config.sessionUserId ?? config.userId ?? null,
+          jobId,
+          tierKey: config.tier.key,
+          businessQuery: expandedConfig.businessType,
+          locationQuery: expandedConfig.location,
+        }
+      );
+
+      totalRawDiscovered += expandedResults.length;
+      discoveredBusinesses = applyHistoricalFilter(expandedResults);
+    }
+
+    if (historicalFilteredCount > 0) {
+      console.log(
+        `ℹ️ Suppressed ${historicalFilteredCount} previously delivered businesses for user ${config.userId}`
+      );
+    }
+
     const sourcesUsed = Array.from(
       new Set(discoveredBusinesses.map((business) => business.source))
     );
@@ -1228,6 +1430,8 @@ async function processDiscoveryJob(
         progress: 30,
         metrics: {
           businesses_found: discoveredBusinesses.length,
+          raw_candidates: totalRawDiscovered,
+          previously_delivered_filtered: historicalFilteredCount,
           sources_used: sourcesUsed,
           census_density_score: censusIntelligence?.density_score ?? null,
         },
@@ -1256,6 +1460,8 @@ async function processDiscoveryJob(
         metrics: {
           businesses_found: discoveredBusinesses.length,
           qualified_leads: qualifiedLeads.length,
+          raw_candidates: totalRawDiscovered,
+          previously_delivered_filtered: historicalFilteredCount,
           sources_used: sourcesUsed,
           census_density_score: censusIntelligence?.density_score ?? null,
         },
@@ -1298,6 +1504,8 @@ async function processDiscoveryJob(
             total_cost: Number(totalCost.toFixed(3)),
             validation_cost_total: Number(totalValidationCost.toFixed(3)),
             enrichment_cost_total: Number(totalEnrichmentCost.toFixed(3)),
+            raw_candidates: totalRawDiscovered,
+            previously_delivered_filtered: historicalFilteredCount,
             sources_used: sourcesUsed,
             census_density_score: censusIntelligence?.density_score ?? null,
           },
@@ -1382,6 +1590,8 @@ async function processDiscoveryJob(
           tier_key: config.tier.key,
           tier_name: config.tier.name,
           tier_price: config.tier.pricePerLead,
+          raw_candidates: totalRawDiscovered,
+          previously_delivered_filtered: historicalFilteredCount,
           sources_used: sourcesUsed,
           census_density_score: censusIntelligence?.density_score ?? null,
         },
