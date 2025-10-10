@@ -1,5 +1,4 @@
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
 import type { BusinessLead, CampaignResult, CampaignStore } from "../types";
 
 interface CampaignActions {
@@ -9,7 +8,9 @@ interface CampaignActions {
     updates: Partial<CampaignResult>
   ) => void;
   setCurrentCampaign: (campaign: CampaignResult | null) => void;
+  setCurrentCampaignId: (campaignId: string | null) => void;
   addLeads: (leads: BusinessLead[]) => void;
+  setCampaignLeads: (campaignId: string, leads: BusinessLead[]) => void;
   updateLead: (leadId: string, updates: Partial<BusinessLead>) => void;
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
@@ -21,6 +22,7 @@ interface CampaignActions {
 const initialState: CampaignStore = {
   campaigns: [],
   currentCampaign: null,
+  currentCampaignId: null,
   leads: [],
   isLoading: false,
   error: null,
@@ -60,61 +62,84 @@ const dedupeCampaigns = (campaigns: CampaignResult[]): CampaignResult[] => {
 };
 
 export const useCampaignStore = create<CampaignStore & CampaignActions>()(
-  persist(
-    (set) => ({
-      ...initialState,
+  (set) => ({
+    ...initialState,
 
-      addCampaign: (campaign) =>
-        set((state) => ({
-          campaigns: dedupeCampaigns([campaign, ...state.campaigns]),
-        })),
+    addCampaign: (campaign) =>
+      set((state) => ({
+        campaigns: dedupeCampaigns([campaign, ...state.campaigns]),
+      })),
 
-      updateCampaign: (campaignId, updates) =>
-        set((state) => ({
-          campaigns: dedupeCampaigns(
-            state.campaigns.map((c) =>
-              c.campaign_id === campaignId ? { ...c, ...updates } : c
-            )
-          ),
-          currentCampaign:
-            state.currentCampaign?.campaign_id === campaignId
-              ? { ...state.currentCampaign, ...updates }
-              : state.currentCampaign,
-        })),
+    updateCampaign: (campaignId, updates) =>
+      set((state) => ({
+        campaigns: dedupeCampaigns(
+          state.campaigns.map((c) =>
+            c.campaign_id === campaignId ? { ...c, ...updates } : c
+          )
+        ),
+        currentCampaign:
+          state.currentCampaign?.campaign_id === campaignId
+            ? { ...state.currentCampaign, ...updates }
+            : state.currentCampaign,
+      })),
 
-      setCurrentCampaign: (campaign) => set({ currentCampaign: campaign }),
-
-      addLeads: (leads) =>
-        set((state) => ({
-          leads: [...state.leads, ...leads],
-        })),
-
-      updateLead: (leadId, updates) =>
-        set((state) => ({
-          leads: state.leads.map((l) =>
-            l.id === leadId ? { ...l, ...updates } : l
-          ),
-        })),
-
-      setLoading: (loading) => set({ isLoading: loading }),
-
-      setError: (error) => set({ error }),
-
-      clearLeads: () => set({ leads: [] }),
-
-      reset: () => set(initialState),
-
-      ensureUniqueCampaignHistory: () =>
-        set((state) => ({
-          campaigns: dedupeCampaigns(state.campaigns),
-        })),
-    }),
-    {
-      name: "campaign-store",
-      partialize: (state) => ({
-        campaigns: state.campaigns,
-        leads: state.leads,
+    setCurrentCampaign: (campaign) =>
+      set({
+        currentCampaign: campaign,
+        currentCampaignId: campaign?.campaign_id ?? null,
       }),
-    }
-  )
+
+    setCurrentCampaignId: (campaignId) =>
+      set({ currentCampaignId: campaignId }),
+
+    addLeads: (leads) =>
+      set((state) => {
+        const merged = new Map<string, BusinessLead>();
+        for (const lead of state.leads) {
+          merged.set(lead.id, lead);
+        }
+        for (const lead of leads) {
+          merged.set(lead.id, lead);
+        }
+        return { leads: Array.from(merged.values()) };
+      }),
+
+    setCampaignLeads: (campaignId, leads) =>
+      set((state) => {
+        const merged = new Map<string, BusinessLead>();
+
+        for (const lead of state.leads) {
+          if (lead.campaign_id === campaignId) {
+            continue;
+          }
+          merged.set(lead.id, lead);
+        }
+
+        for (const lead of leads) {
+          merged.set(lead.id, lead);
+        }
+
+        return { leads: Array.from(merged.values()) };
+      }),
+
+    updateLead: (leadId, updates) =>
+      set((state) => ({
+        leads: state.leads.map((l) =>
+          l.id === leadId ? { ...l, ...updates } : l
+        ),
+      })),
+
+    setLoading: (loading) => set({ isLoading: loading }),
+
+    setError: (error) => set({ error }),
+
+    clearLeads: () => set({ leads: [] }),
+
+    reset: () => set(initialState),
+
+    ensureUniqueCampaignHistory: () =>
+      set((state) => ({
+        campaigns: dedupeCampaigns(state.campaigns),
+      })),
+  })
 );

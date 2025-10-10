@@ -175,6 +175,7 @@ export interface BusinessDiscoveryResponse {
 export interface CampaignStore {
   campaigns: CampaignResult[];
   currentCampaign: CampaignResult | null;
+  currentCampaignId: string | null;
   leads: BusinessLead[];
   isLoading: boolean;
   error: string | null;

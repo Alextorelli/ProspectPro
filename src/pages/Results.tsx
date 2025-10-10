@@ -1,71 +1,166 @@
-import React from "react";
+import React, { useEffect, useMemo, useState } from "react";
+import { useLocation } from "react-router-dom";
+import { useCampaignResults } from "../hooks/useCampaignResults";
 import { useCampaignStore } from "../stores/campaignStore";
 import { exportLeadsToCsv } from "../utils/exportLeadsToCsv";
 
+const PAGE_SIZE = 25;
+
+const getConfidenceColor = (score: number) => {
+  if (score >= 90) return "bg-green-100 text-green-800";
+  if (score >= 80) return "bg-blue-100 text-blue-800";
+  if (score >= 70) return "bg-yellow-100 text-yellow-800";
+  return "bg-red-100 text-red-800";
+};
+
+const getValidationStatusColor = (status: string) => {
+  switch (status) {
+    case "validated":
+      return "bg-green-100 text-green-800";
+    case "validating":
+      return "bg-blue-100 text-blue-800";
+    case "pending":
+      return "bg-yellow-100 text-yellow-800";
+    case "failed":
+      return "bg-red-100 text-red-800";
+    default:
+      return "bg-gray-100 text-gray-800";
+  }
+};
+
 export const Results: React.FC = () => {
-  const { leads, currentCampaign } = useCampaignStore();
+  const location = useLocation();
+  const navState = (location.state ?? null) as { campaignId?: string } | null;
+  const stateCampaignId = navState?.campaignId;
+
+  const {
+    currentCampaign,
+    currentCampaignId,
+    setCurrentCampaign,
+    setCampaignLeads,
+  } = useCampaignStore((state) => ({
+    currentCampaign: state.currentCampaign,
+    currentCampaignId: state.currentCampaignId,
+    setCurrentCampaign: state.setCurrentCampaign,
+    setCampaignLeads: state.setCampaignLeads,
+  }));
+
+  const [page, setPage] = useState(0);
+  const campaignId = stateCampaignId ?? currentCampaignId;
+
+  useEffect(() => {
+    setPage(0);
+  }, [campaignId]);
+
+  const {
+    campaign,
+    leads,
+    totalLeads,
+    totalPages,
+    isLoading,
+    isError,
+    error,
+    refetch,
+  } = useCampaignResults(campaignId, { page, pageSize: PAGE_SIZE });
+
+  useEffect(() => {
+    if (campaign) {
+      setCurrentCampaign(campaign);
+    }
+  }, [campaign, setCurrentCampaign]);
+
+  useEffect(() => {
+    if (!campaignId) {
+      return;
+    }
+    setCampaignLeads(campaignId, leads);
+  }, [campaignId, leads, setCampaignLeads]);
+
+  const displayCampaign = campaign ?? currentCampaign;
+  const displayLeads = leads;
+  const qualifiedCount = useMemo(
+    () => displayLeads.filter((lead) => lead.confidence_score >= 70).length,
+    [displayLeads]
+  );
 
   const handleExport = (format: "csv" | "json") => {
-    if (!leads.length) {
+    if (displayLeads.length === 0) {
       return;
     }
 
     if (format === "csv") {
-      exportLeadsToCsv(leads, {
+      exportLeadsToCsv(displayLeads, {
         fileName: `prospects-vault-secured-${
           new Date().toISOString().split("T")[0]
         }.csv`,
       });
+      return;
+    }
+
+    const blob = new Blob([JSON.stringify(displayLeads, null, 2)], {
+      type: "application/json",
+    });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = `prospects-vault-secured-${
+      new Date().toISOString().split("T")[0]
+    }.json`;
+    anchor.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const handlePageChange = (direction: "next" | "prev") => {
+    if (direction === "next") {
+      setPage((prev) => Math.min(prev + 1, Math.max(totalPages - 1, 0)));
     } else {
-      const blob = new Blob([JSON.stringify(leads, null, 2)], {
-        type: "application/json",
-      });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `prospects-vault-secured-${
-        new Date().toISOString().split("T")[0]
-      }.json`;
-      a.click();
-      URL.revokeObjectURL(url);
+      setPage((prev) => Math.max(prev - 1, 0));
     }
   };
 
-  const getConfidenceColor = (score: number) => {
-    if (score >= 90) return "bg-green-100 text-green-800";
-    if (score >= 80) return "bg-blue-100 text-blue-800";
-    if (score >= 70) return "bg-yellow-100 text-yellow-800";
-    return "bg-red-100 text-red-800";
-  };
+  if (!campaignId) {
+    return (
+      <div className="bg-white shadow rounded-lg p-12 text-center">
+        <h1 className="text-2xl font-bold text-gray-900 mb-2">
+          No campaign selected
+        </h1>
+        <p className="text-gray-600">
+          Launch a discovery campaign or open a recent campaign from the
+          dashboard to review results.
+        </p>
+      </div>
+    );
+  }
 
-  const getValidationStatusColor = (status: string) => {
-    switch (status) {
-      case "validated":
-        return "bg-green-100 text-green-800";
-      case "validating":
-        return "bg-blue-100 text-blue-800";
-      case "pending":
-        return "bg-yellow-100 text-yellow-800";
-      case "failed":
-        return "bg-red-100 text-red-800";
-      default:
-        return "bg-gray-100 text-gray-800";
-    }
-  };
+  if (isError) {
+    return (
+      <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-red-700">
+        <h2 className="text-lg font-semibold mb-2">Unable to load results</h2>
+        <p className="text-sm mb-4">
+          {error instanceof Error ? error.message : "Unknown error"}
+        </p>
+        <button
+          onClick={() => refetch()}
+          className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
+        >
+          Retry
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex justify-between items-center">
+      <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Results</h1>
           <p className="mt-1 text-sm text-gray-500">
-            {leads.length} leads found •{" "}
-            {leads.filter((l) => l.confidence_score >= 70).length} qualified
+            {isLoading ? "Loading leads..." : `${totalLeads} leads found`} •{" "}
+            {qualifiedCount} qualified on this page
           </p>
         </div>
 
-        {leads.length > 0 && (
+        {displayLeads.length > 0 && (
           <div className="flex space-x-3">
             <button
               onClick={() => handleExport("csv")}
@@ -83,14 +178,13 @@ export const Results: React.FC = () => {
         )}
       </div>
 
-      {/* Campaign Summary */}
-      {currentCampaign && (
+      {displayCampaign && (
         <div className="bg-white shadow rounded-lg p-6">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-medium text-gray-900">
               Progressive Enrichment Results
             </h3>
-            {currentCampaign.vault_secured && (
+            {displayCampaign.vault_secured && (
               <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                 🔐 Vault Secured
               </span>
@@ -100,38 +194,37 @@ export const Results: React.FC = () => {
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-5">
             <div className="text-center">
               <div className="text-2xl font-bold text-gray-900">
-                {currentCampaign.leads_found}
+                {displayCampaign.leads_found}
               </div>
               <div className="text-sm text-gray-500">Total Found</div>
             </div>
             <div className="text-center">
               <div className="text-2xl font-bold text-blue-600">
-                {currentCampaign.leads_qualified}
+                {displayCampaign.leads_qualified}
               </div>
               <div className="text-sm text-gray-500">Qualified</div>
             </div>
             <div className="text-center">
               <div className="text-2xl font-bold text-green-600">
-                {currentCampaign.leads_validated}
+                {displayCampaign.leads_validated}
               </div>
               <div className="text-sm text-gray-500">Validated</div>
             </div>
             <div className="text-center">
               <div className="text-2xl font-bold text-purple-600">
-                {currentCampaign.tier_used || "Professional"}
+                {displayCampaign.tier_used || "Professional"}
               </div>
               <div className="text-sm text-gray-500">Tier Used</div>
             </div>
             <div className="text-center">
               <div className="text-2xl font-bold text-gray-900">
-                ${currentCampaign.total_cost.toFixed(2)}
+                ${displayCampaign.total_cost.toFixed(2)}
               </div>
               <div className="text-sm text-gray-500">Total Cost</div>
             </div>
           </div>
 
-          {/* Cache Performance Display */}
-          {currentCampaign.cache_performance && (
+          {displayCampaign.cache_performance && (
             <div className="mt-6 pt-6 border-t border-gray-200">
               <h4 className="text-sm font-medium text-gray-900 mb-3">
                 🚀 90-Day Intelligent Cache Performance
@@ -139,7 +232,7 @@ export const Results: React.FC = () => {
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="bg-green-50 p-3 rounded-lg text-center">
                   <div className="text-lg font-bold text-green-600">
-                    {currentCampaign.cache_performance.cache_hit_ratio.toFixed(
+                    {displayCampaign.cache_performance.cache_hit_ratio.toFixed(
                       1
                     )}
                     %
@@ -148,19 +241,19 @@ export const Results: React.FC = () => {
                 </div>
                 <div className="bg-blue-50 p-3 rounded-lg text-center">
                   <div className="text-lg font-bold text-blue-600">
-                    {currentCampaign.cache_performance.cache_hits}
+                    {displayCampaign.cache_performance.cache_hits}
                   </div>
                   <div className="text-xs text-gray-600">Cache Hits</div>
                 </div>
                 <div className="bg-yellow-50 p-3 rounded-lg text-center">
                   <div className="text-lg font-bold text-yellow-600">
-                    {currentCampaign.cache_performance.cache_misses}
+                    {displayCampaign.cache_performance.cache_misses}
                   </div>
                   <div className="text-xs text-gray-600">Cache Misses</div>
                 </div>
                 <div className="bg-green-50 p-3 rounded-lg text-center">
                   <div className="text-lg font-bold text-green-600">
-                    ${currentCampaign.cache_performance.cost_savings.toFixed(2)}
+                    ${displayCampaign.cache_performance.cost_savings.toFixed(2)}
                   </div>
                   <div className="text-xs text-gray-600">Cost Savings</div>
                 </div>
@@ -170,16 +263,18 @@ export const Results: React.FC = () => {
         </div>
       )}
 
-      {/* Results Table */}
       <div className="bg-white shadow rounded-lg overflow-hidden">
-        {leads.length === 0 ? (
+        {isLoading && displayLeads.length === 0 ? (
+          <div className="text-center py-12 text-gray-500">Loading leads…</div>
+        ) : displayLeads.length === 0 ? (
           <div className="text-center py-12">
             <span className="text-4xl">🔍</span>
             <h3 className="mt-2 text-sm font-medium text-gray-900">
-              No results yet
+              No results on this page
             </h3>
             <p className="mt-1 text-sm text-gray-500">
-              Start a discovery campaign to find business leads.
+              Adjust your filters or run a new discovery campaign to see fresh
+              results.
             </p>
           </div>
         ) : (
@@ -208,7 +303,7 @@ export const Results: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {leads.map((lead) => (
+                {displayLeads.map((lead) => (
                   <tr key={lead.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
@@ -278,6 +373,30 @@ export const Results: React.FC = () => {
                 ))}
               </tbody>
             </table>
+          </div>
+        )}
+
+        {totalPages > 1 && (
+          <div className="flex items-center justify-between px-6 py-4 border-t border-gray-200 bg-gray-50">
+            <div className="text-sm text-gray-600">
+              Page {page + 1} of {totalPages}
+            </div>
+            <div className="space-x-3">
+              <button
+                onClick={() => handlePageChange("prev")}
+                disabled={page === 0}
+                className="px-4 py-2 text-sm bg-white border border-gray-300 rounded-md disabled:opacity-40"
+              >
+                ← Previous
+              </button>
+              <button
+                onClick={() => handlePageChange("next")}
+                disabled={page + 1 >= totalPages}
+                className="px-4 py-2 text-sm bg-white border border-gray-300 rounded-md disabled:opacity-40"
+              >
+                Next →
+              </button>
+            </div>
           </div>
         )}
       </div>

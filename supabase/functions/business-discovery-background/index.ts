@@ -96,6 +96,29 @@ interface BusinessDiscoveryRequest {
   userEmail?: string;
 }
 
+interface RequestSnapshot {
+  requestedAt: string;
+  requestHash: string;
+  payload: {
+    businessType: string;
+    location: string;
+    keywords: string[];
+    searchRadius?: string;
+    expandGeography: boolean;
+    maxResults: number;
+    budgetLimit: number;
+    minConfidenceScore: number;
+    tierKey: TierKey;
+    tierName: string;
+    options: {
+      tradeAssociation: boolean;
+      professionalLicense: boolean;
+      chamberVerification: boolean;
+      apolloDiscovery: boolean;
+    };
+  };
+}
+
 interface JobConfig {
   campaignId: string;
   businessType: string;
@@ -116,6 +139,7 @@ interface JobConfig {
     chamberVerification: boolean;
     apolloDiscovery: boolean;
   };
+  requestSnapshot: RequestSnapshot;
 }
 
 interface BusinessData {
@@ -233,6 +257,34 @@ function parseKeywords(input?: string[] | string): string[] {
     .split(",")
     .map((value) => value.trim())
     .filter(Boolean);
+}
+
+async function createStableHash(payload: unknown): Promise<string> {
+  try {
+    if (!payload) {
+      return `${Date.now().toString(36)}${Math.random()
+        .toString(36)
+        .slice(2, 11)}`;
+    }
+
+    if (typeof crypto === "undefined" || !crypto?.subtle) {
+      return `${Date.now().toString(36)}${Math.random()
+        .toString(36)
+        .slice(2, 11)}`;
+    }
+
+    const encoder = new TextEncoder();
+    const encoded = encoder.encode(JSON.stringify(payload));
+    const buffer = await crypto.subtle.digest("SHA-256", encoded);
+    return Array.from(new Uint8Array(buffer))
+      .map((byte) => byte.toString(16).padStart(2, "0"))
+      .join("");
+  } catch (error) {
+    console.warn("Hash generation failed", error);
+    return `${Date.now().toString(36)}${Math.random()
+      .toString(36)
+      .slice(2, 11)}`;
+  }
 }
 
 function getTierSettings(
@@ -1270,59 +1322,84 @@ async function processDiscoveryJob(
   });
   config.jobId = jobId;
 
+  try {
+    const { error: snapshotError } = await supabase
+      .from("campaign_request_snapshots")
+      .insert({
+        campaign_id: config.campaignId,
+        user_id: config.userId,
+        session_user_id: config.sessionUserId,
+        request_hash: config.requestSnapshot.requestHash,
+        request_payload: config.requestSnapshot.payload,
+      });
+
+    if (snapshotError) {
+      console.warn(
+        "Campaign request snapshot insert warning:",
+        snapshotError.message
+      );
+    }
+  } catch (snapshotException) {
+    console.warn("Campaign request snapshot insert failed:", snapshotException);
+  }
+
   const historicalFingerprints = new Set<string>();
 
   try {
-    const { data: priorCampaigns, error: priorCampaignsError } = await supabase
-      .from("campaigns")
-      .select("id")
-      .eq("user_id", config.userId)
-      .eq("business_type", config.businessType)
-      .eq("location", config.location)
-      .neq("id", config.campaignId)
-      .limit(200);
+    if (config.userId) {
+      const { data: priorFingerprints, error: fingerprintsError } =
+        await supabase
+          .from("lead_fingerprints")
+          .select("fingerprint")
+          .eq("user_id", config.userId)
+          .order("created_at", { ascending: false })
+          .limit(5000);
 
-    if (priorCampaignsError) {
-      console.warn(
-        "Unable to load historical campaigns for duplicate suppression:",
-        priorCampaignsError.message
-      );
-    } else {
-      const campaignIds = (priorCampaigns ?? [])
-        .map((entry) => entry.id)
-        .filter((value): value is string => Boolean(value));
+      if (fingerprintsError) {
+        console.warn(
+          "Unable to load fingerprint ledger for duplicate suppression:",
+          fingerprintsError.message
+        );
+      } else {
+        for (const row of priorFingerprints ?? []) {
+          if (row?.fingerprint) {
+            historicalFingerprints.add(row.fingerprint);
+          }
+        }
+      }
+    }
 
-      if (campaignIds.length > 0) {
-        const { data: priorLeads, error: priorLeadsError } = await supabase
-          .from("leads")
-          .select("business_name,address,phone,website")
-          .in("campaign_id", campaignIds)
-          .limit(1000);
+    if (historicalFingerprints.size === 0 && config.userId) {
+      const { data: legacyLeads, error: legacyLeadsError } = await supabase
+        .from("leads")
+        .select("business_name,address,phone,website")
+        .eq("user_id", config.userId)
+        .order("created_at", { ascending: false })
+        .limit(1000);
 
-        if (priorLeadsError) {
-          console.warn(
-            "Unable to load previously delivered leads for duplicate suppression:",
-            priorLeadsError.message
-          );
-        } else {
-          const priorLeadRows = (priorLeads ?? []) as Array<{
-            business_name?: string | null;
-            address?: string | null;
-            phone?: string | null;
-            website?: string | null;
-          }>;
+      if (legacyLeadsError) {
+        console.warn(
+          "Legacy lead lookup failed for duplicate suppression:",
+          legacyLeadsError.message
+        );
+      } else {
+        const legacyRows = (legacyLeads ?? []) as Array<{
+          business_name?: string | null;
+          address?: string | null;
+          phone?: string | null;
+          website?: string | null;
+        }>;
 
-          for (const lead of priorLeadRows) {
-            const fingerprint = createBusinessFingerprint(lead);
-            if (fingerprint) {
-              historicalFingerprints.add(fingerprint);
-            }
+        for (const lead of legacyRows) {
+          const fingerprint = createBusinessFingerprint(lead);
+          if (fingerprint) {
+            historicalFingerprints.add(fingerprint);
           }
         }
       }
     }
   } catch (historyError) {
-    console.warn("Historical lead lookup failed:", historyError);
+    console.warn("Historical fingerprint lookup failed:", historyError);
   }
 
   try {
@@ -1559,10 +1636,72 @@ async function processDiscoveryJob(
       session_user_id: config.sessionUserId,
     }));
 
+    let insertedLeads: Array<{
+      id: number;
+      business_name?: string | null;
+      address?: string | null;
+      phone?: string | null;
+      website?: string | null;
+    }> | null = null;
+
     if (leadsPayload.length > 0) {
-      const leadInsert = await supabase.from("leads").insert(leadsPayload);
+      const leadInsert = await supabase
+        .from("leads")
+        .insert(leadsPayload)
+        .select("id,business_name,address,phone,website");
       if (leadInsert.error) {
         console.error("Lead insert error:", leadInsert.error.message);
+      } else {
+        insertedLeads = leadInsert.data ?? [];
+      }
+    }
+
+    if (insertedLeads && insertedLeads.length > 0) {
+      type FingerprintRow = {
+        fingerprint: string;
+        user_id: string | null;
+        session_user_id: string | null;
+        campaign_id: string;
+        lead_id: number;
+        business_name: string;
+      };
+
+      const fingerprintRows = insertedLeads
+        .map((row, index): FingerprintRow | null => {
+          const lead = enrichedLeads[index];
+          const fingerprint = createBusinessFingerprint({
+            business_name: row.business_name ?? lead?.businessName ?? "",
+            address: row.address ?? lead?.address ?? "",
+            phone: row.phone ?? lead?.phone ?? "",
+            website: row.website ?? lead?.website ?? "",
+          });
+
+          if (!fingerprint) {
+            return null;
+          }
+
+          return {
+            fingerprint,
+            user_id: config.userId ?? null,
+            session_user_id: config.sessionUserId ?? null,
+            campaign_id: config.campaignId,
+            lead_id: row.id,
+            business_name: row.business_name ?? lead?.businessName ?? "",
+          };
+        })
+        .filter((row): row is FingerprintRow => Boolean(row));
+
+      if (fingerprintRows.length > 0) {
+        const { error: fingerprintInsertError } = await supabase
+          .from("lead_fingerprints")
+          .upsert(fingerprintRows, { onConflict: "fingerprint,user_id" });
+
+        if (fingerprintInsertError) {
+          console.warn(
+            "Lead fingerprint insert warning:",
+            fingerprintInsertError.message
+          );
+        }
       }
     }
 
@@ -1738,9 +1877,13 @@ serve(async (req) => {
       budgetLimit ?? maxResults * tierSettings.pricePerLead;
     const keywordList = parseKeywords(keywords);
 
-    const jobId = `job_${Date.now()}_${Math.random()
-      .toString(36)
-      .slice(2, 11)}`;
+    const jobRandomSource =
+      typeof crypto !== "undefined" && "randomUUID" in crypto
+        ? crypto.randomUUID()
+        : `${Date.now().toString(36)}${Math.random()
+            .toString(36)
+            .slice(2, 11)}`;
+    const jobId = `job_${jobRandomSource.replace(/[^A-Za-z0-9]+/g, "")}`;
 
     const buildUniqueCampaignId = (baseName: string) => {
       const normalizedBase = baseName
@@ -1800,6 +1943,37 @@ serve(async (req) => {
       );
     }
 
+    const resolvedOptions = {
+      ...DEFAULT_OPTIONS,
+      ...options,
+    };
+
+    const snapshotPayload = {
+      businessType,
+      location,
+      keywords: keywordList,
+      searchRadius,
+      expandGeography,
+      maxResults,
+      budgetLimit: enforcedBudget,
+      minConfidenceScore,
+      tierKey: tierSettings.key,
+      tierName: tierSettings.name,
+      options: resolvedOptions,
+    };
+    const requestedAt = new Date().toISOString();
+    const requestHash = await createStableHash({
+      userId: user.id,
+      sessionUserId: sessionUserId ?? user.id,
+      snapshotPayload,
+    });
+
+    const requestSnapshot: RequestSnapshot = {
+      requestedAt,
+      requestHash,
+      payload: snapshotPayload,
+    };
+
     const jobConfig: JobConfig = {
       campaignId,
       businessType,
@@ -1813,10 +1987,8 @@ serve(async (req) => {
       userId: user.id,
       sessionUserId: user.id,
       tier: tierSettings,
-      options: {
-        ...DEFAULT_OPTIONS,
-        ...options,
-      },
+      options: resolvedOptions,
+      requestSnapshot,
     };
 
     const { error: jobError } = await supabaseClient
@@ -1845,20 +2017,24 @@ serve(async (req) => {
       processDiscoveryJob(jobId, jobConfig, supabaseUrl, supabaseServiceKey)
     );
 
-    return new Response(
-      JSON.stringify({
-        success: true,
-        message: "Discovery job created and processing in background",
-        jobId,
-        campaignId,
-        status: "processing",
-        estimatedTime: "1-2 minutes",
-        realtimeChannel: `discovery_jobs:id=eq.${jobId}`,
-      }),
-      {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      }
-    );
+    const responsePayload = {
+      success: true,
+      message: "Discovery job created and processing in background",
+      jobId,
+      campaignId,
+      status: "processing",
+      estimatedTime: "1-2 minutes",
+      realtimeChannel: `discovery_jobs:id=eq.${jobId}`,
+    };
+
+    return new Response(JSON.stringify(responsePayload), {
+      headers: {
+        ...corsHeaders,
+        "Content-Type": "application/json",
+        "Cache-Control": "private, max-age=30, must-revalidate",
+        ETag: `W/"${jobId}"`,
+      },
+    });
   } catch (error) {
     console.error("❌ Error:", error);
     return new Response(

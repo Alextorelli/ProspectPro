@@ -25,8 +25,7 @@ export const CampaignProgress: React.FC = () => {
   const ensureUniqueCampaignHistory = useCampaignStore(
     (state) => state.ensureUniqueCampaignHistory
   );
-  const clearLeads = useCampaignStore((state) => state.clearLeads);
-  const addLeads = useCampaignStore((state) => state.addLeads);
+  const setCampaignLeads = useCampaignStore((state) => state.setCampaignLeads);
   const setLoading = useCampaignStore((state) => state.setLoading);
   const setError = useCampaignStore((state) => state.setError);
   const { user, loading: authLoading } = useAuth();
@@ -152,8 +151,7 @@ export const CampaignProgress: React.FC = () => {
 
       ensureUniqueCampaignHistory();
 
-      clearLeads();
-      addLeads(mappedLeads);
+      setCampaignLeads(campaignResult.campaign_id, mappedLeads);
       setCurrentCampaign(campaignResult);
 
       if (isMountedRef.current) {
@@ -181,15 +179,14 @@ export const CampaignProgress: React.FC = () => {
     }
   }, [
     addCampaign,
-    addLeads,
     authUserId,
     campaignId,
     campaigns,
-    clearLeads,
     ensureUniqueCampaignHistory,
     metrics,
     navigate,
     setCurrentCampaign,
+    setCampaignLeads,
     setError,
     setLoading,
     updateCampaign,

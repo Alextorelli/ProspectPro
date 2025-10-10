@@ -20,8 +20,13 @@ export const useBusinessDiscovery = (
   }) => void
 ) => {
   const { user } = useAuth();
-  const { setLoading, setError, clearLeads, setCurrentCampaign } =
-    useCampaignStore();
+  const {
+    setLoading,
+    setError,
+    clearLeads,
+    setCurrentCampaign,
+    setCurrentCampaignId,
+  } = useCampaignStore();
   const [progress, setProgress] = useState(0);
   const [currentStage, setCurrentStage] = useState<string>("");
   const [cacheStats] = useState<any>(null);
@@ -38,6 +43,7 @@ export const useBusinessDiscovery = (
       // Reset any existing campaign context before starting a new discovery
       clearLeads();
       setCurrentCampaign(null);
+      setCurrentCampaignId(null);
 
       try {
         console.log("🚀 Starting user-aware business discovery:", config);
@@ -198,6 +204,8 @@ export const useBusinessDiscovery = (
         if (onJobCreated) {
           onJobCreated(jobData);
         }
+
+        setCurrentCampaignId(data.campaign_id);
       }
     },
     onError: (error: any) => {

@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { EnrichmentButton } from "../components/EnrichmentButton";
 import { ProgressDisplay } from "../components/ProgressDisplay";
 import { useBusinessDiscovery } from "../hooks/useBusinessDiscovery";
+import { useCampaignResults } from "../hooks/useCampaignResults";
 import { useCampaignStore } from "../stores/campaignStore";
 import type { BusinessLead } from "../types";
 import { exportLeadsToCsv } from "../utils/exportLeadsToCsv";
@@ -11,11 +12,37 @@ export const Campaign: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const campaignId = searchParams.get("id");
-  const { currentCampaign, campaigns, leads, setCurrentCampaign } =
-    useCampaignStore();
+  const {
+    currentCampaign,
+    campaigns,
+    leads,
+    setCurrentCampaign,
+    setCampaignLeads,
+  } = useCampaignStore();
   const { isDiscovering, progress, currentStage, cacheStats, error } =
     useBusinessDiscovery();
   const [showResults, setShowResults] = useState(false);
+
+  const { campaign: hydratedCampaign, leads: remoteLeads } = useCampaignResults(
+    campaignId,
+    {
+      page: 0,
+      pageSize: 500,
+      enabled: Boolean(campaignId),
+    }
+  );
+
+  useEffect(() => {
+    if (hydratedCampaign) {
+      setCurrentCampaign(hydratedCampaign);
+    }
+  }, [hydratedCampaign, setCurrentCampaign]);
+
+  useEffect(() => {
+    if (campaignId && remoteLeads.length > 0) {
+      setCampaignLeads(campaignId, remoteLeads);
+    }
+  }, [campaignId, remoteLeads, setCampaignLeads]);
 
   // Filter leads for current campaign
   const campaignLeads = currentCampaign
@@ -34,10 +61,10 @@ export const Campaign: React.FC = () => {
   }, [campaignId, campaigns, currentCampaign, setCurrentCampaign]);
 
   useEffect(() => {
-    if (campaignLeads.length > 0) {
+    if (campaignLeads.length > 0 || remoteLeads.length > 0) {
       setShowResults(true);
     }
-  }, [campaignLeads.length]);
+  }, [campaignLeads.length, remoteLeads.length]);
 
   const exportToCsv = () => {
     if (!campaignLeads.length) return;
