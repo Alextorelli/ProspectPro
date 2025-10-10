@@ -98,10 +98,14 @@ export const BusinessDiscovery: React.FC = () => {
   const estimatedCost = numberOfLeads * currentTierConfig.price;
   const sliderPercent = ((numberOfLeads - 1) / 9) * 100;
 
-  const { leads, currentCampaign } = useCampaignStore();
+  const { leads, currentCampaign } = useCampaignStore((state) => ({
+    leads: state.leads,
+    currentCampaign: state.currentCampaign,
+  }));
   const setCurrentCampaignInStore = useCampaignStore(
     (state) => state.setCurrentCampaign
   );
+  const clearLeadsInStore = useCampaignStore((state) => state.clearLeads);
 
   const campaignLeads = useMemo(() => {
     if (!currentCampaign) {
@@ -169,6 +173,7 @@ export const BusinessDiscovery: React.FC = () => {
       return;
     }
     setCurrentCampaignInStore(null);
+    clearLeadsInStore();
     setActiveStep(2);
   };
 
