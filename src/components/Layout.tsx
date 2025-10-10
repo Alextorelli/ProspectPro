@@ -1,6 +1,7 @@
 import React, { ReactNode, useMemo } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
+import { useCampaignStore } from "../stores/campaignStore";
 import { AuthComponent } from "./AuthComponent";
 import { ThemeToggle } from "./ThemeToggle";
 
@@ -11,18 +12,60 @@ interface LayoutProps {
 export const Layout: React.FC<LayoutProps> = ({ children }) => {
   const location = useLocation();
   const { user } = useAuth();
+  const { currentCampaign, campaigns } = useCampaignStore((state) => ({
+    currentCampaign: state.currentCampaign,
+    campaigns: state.campaigns,
+  }));
 
-  const navigation = useMemo(
-    () => [
-      { name: "New Campaign", href: "/", disabled: false },
+  const runningCampaignId = useMemo(() => {
+    if (currentCampaign?.status === "running") {
+      return currentCampaign.campaign_id;
+    }
+
+    const runningCampaign = campaigns.find(
+      (campaign) => campaign.status === "running"
+    );
+
+    return runningCampaign?.campaign_id ?? null;
+  }, [campaigns, currentCampaign]);
+
+  type NavigationItem = {
+    name: string;
+    href: string;
+    disabled?: boolean;
+    isActive?: (pathname: string) => boolean;
+  };
+
+  const navigation: NavigationItem[] = useMemo(() => {
+    const items: NavigationItem[] = [
+      {
+        name: "Start Discovery",
+        href: "/discovery",
+        isActive: (pathname) => pathname === "/" || pathname === "/discovery",
+      },
       {
         name: "My Campaigns",
         href: "/dashboard",
         disabled: !user,
       },
-    ],
-    [user]
-  );
+    ];
+
+    if (runningCampaignId) {
+      items.push({
+        name: "Live Progress",
+        href: `/campaign/${runningCampaignId}/progress`,
+        isActive: (pathname) =>
+          pathname.startsWith(`/campaign/${runningCampaignId}/progress`),
+      });
+    }
+
+    items.push({
+      name: "Results",
+      href: "/results",
+    });
+
+    return items;
+  }, [runningCampaignId, user]);
 
   return (
     <div className="min-h-screen bg-gray-100 text-gray-900 transition-colors dark:bg-slate-900 dark:text-slate-100">
@@ -49,7 +92,11 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
       <nav className="border-b border-gray-200 bg-white text-sm font-medium transition-colors dark:border-slate-700 dark:bg-slate-900">
         <div className="mx-auto flex max-w-5xl items-center px-6">
           {navigation.map((item) => {
-            const isActive = !item.disabled && location.pathname === item.href;
+            const isActive =
+              !item.disabled &&
+              (item.isActive
+                ? item.isActive(location.pathname)
+                : location.pathname === item.href);
 
             if (item.disabled) {
               return (
