@@ -1649,6 +1649,9 @@ serve(async (req) => {
     }
 
     const authHeader = req.headers.get("Authorization");
+    const sessionHeader =
+      req.headers.get("x-prospect-session") ??
+      req.headers.get("X-Prospect-Session");
     const globalHeaders: Record<string, string> = authHeader
       ? { Authorization: authHeader }
       : {};
@@ -1656,15 +1659,43 @@ serve(async (req) => {
       global: { headers: globalHeaders },
     });
 
+    const accessToken = sessionHeader?.startsWith("Bearer ")
+      ? sessionHeader.slice("Bearer ".length).trim()
+      : sessionHeader && sessionHeader.length > 0
+      ? sessionHeader
+      : authHeader?.startsWith("Bearer ")
+      ? authHeader.slice("Bearer ".length).trim()
+      : null;
+
     const {
       data: { user },
-    } = await supabaseClient.auth.getUser();
+      error: authError,
+    } = accessToken
+      ? await supabaseClient.auth.getUser(accessToken)
+      : await supabaseClient.auth.getUser();
+
+    if (authError) {
+      console.error("Auth session validation failed", {
+        message: authError.message,
+        status: authError.status,
+        authHeaderPreview: authHeader
+          ? `${authHeader.slice(0, 12)}...${authHeader.slice(-12)}`
+          : null,
+        sessionHeaderPreview: sessionHeader
+          ? `${sessionHeader.slice(0, 12)}...${sessionHeader.slice(-12)}`
+          : null,
+      });
+    }
 
     if (!user?.id) {
+      const debugHint = authError
+        ? `Auth error: ${authError.message}`
+        : "Missing user in session";
       return new Response(
         JSON.stringify({
           success: false,
           error: "Authentication required to start discovery campaigns.",
+          debug: debugHint,
         }),
         {
           status: 401,

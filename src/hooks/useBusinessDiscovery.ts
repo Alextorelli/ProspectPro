@@ -2,60 +2,14 @@ import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import {
+  EDGE_FUNCTIONS_URL,
   ENRICHMENT_TIERS,
+  SUPABASE_ANON_TOKEN,
   ensureSession,
   getSessionToken,
-  supabase,
 } from "../lib/supabase";
 import { useCampaignStore } from "../stores/campaignStore";
 import type { BusinessDiscoveryResponse, CampaignConfig } from "../types";
-
-interface SupabaseFunctionError {
-  message?: string;
-  name?: string;
-  context?: {
-    status?: number;
-    response?: unknown;
-  };
-}
-
-const extractFunctionErrorMessage = (error: unknown): string => {
-  if (!error || typeof error !== "object") {
-    return "Discovery failed due to an unknown error.";
-  }
-
-  const functionsError = error as SupabaseFunctionError;
-  const defaultMessage =
-    functionsError.message || "Edge function returned an error response.";
-
-  const contextResponse = functionsError.context?.response;
-  if (!contextResponse) {
-    return defaultMessage;
-  }
-
-  try {
-    if (typeof contextResponse === "string") {
-      const parsed = JSON.parse(contextResponse);
-      if (parsed?.error) return String(parsed.error);
-      if (parsed?.message) return String(parsed.message);
-      return contextResponse;
-    }
-
-    if (
-      typeof contextResponse === "object" &&
-      contextResponse !== null &&
-      "error" in contextResponse
-    ) {
-      const { error: ctxError } = contextResponse as { error?: unknown };
-      if (ctxError) return String(ctxError);
-    }
-  } catch (parseError) {
-    console.warn("Unable to parse edge function error response:", parseError);
-    return defaultMessage;
-  }
-
-  return defaultMessage;
-};
 
 export const useBusinessDiscovery = (
   onJobCreated?: (jobData: {
@@ -127,55 +81,77 @@ export const useBusinessDiscovery = (
         };
 
         // Call background task business discovery with authentication
-        const { data, error } = await supabase.functions.invoke(
-          "business-discovery-background",
+        const requestBody = {
+          businessType: config.business_type || config.search_terms,
+          location: config.location,
+          keywords: keywordList,
+          searchRadius: config.search_radius,
+          expandGeography: config.expand_geography,
+          maxResults: config.max_results,
+          budgetLimit: config.max_results * tierConfig.price,
+          minConfidenceScore: config.min_confidence_score || 50,
+          tierKey: tier,
+          tierName: tierConfig.name,
+          tierPrice: tierConfig.price,
+          options: discoveryOptions,
+          sessionUserId: user.id,
+          userId: user.id,
+          billingContext,
+        };
+
+        if (!accessToken) {
+          throw new Error(
+            "Unable to read session token. Please sign in again."
+          );
+        }
+
+        const headers: Record<string, string> = {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+          apikey: SUPABASE_ANON_TOKEN,
+          "X-Prospect-Session": accessToken,
+        };
+
+        const response = await fetch(
+          `${EDGE_FUNCTIONS_URL}/business-discovery-background`,
           {
-            body: {
-              businessType: config.business_type || config.search_terms,
-              location: config.location,
-              keywords: keywordList,
-              searchRadius: config.search_radius,
-              expandGeography: config.expand_geography,
-              maxResults: config.max_results,
-              budgetLimit: config.max_results * tierConfig.price,
-              minConfidenceScore: config.min_confidence_score || 50,
-              tierKey: tier,
-              tierName: tierConfig.name,
-              tierPrice: tierConfig.price,
-              options: discoveryOptions,
-              sessionUserId: user.id,
-              userId: user.id,
-              billingContext,
-            },
-            headers: accessToken
-              ? { Authorization: `Bearer ${accessToken}` }
-              : undefined,
+            method: "POST",
+            headers,
+            body: JSON.stringify(requestBody),
           }
         );
 
-        if (error) {
-          console.error("❌ Background discovery error:", error);
-          throw new Error(extractFunctionErrorMessage(error));
+        const rawResponse = await response.json().catch(() => ({}));
+
+        if (!response.ok) {
+          console.error("❌ Background discovery error:", rawResponse);
+          const message =
+            typeof rawResponse?.error === "string"
+              ? rawResponse.error
+              : typeof rawResponse?.message === "string"
+              ? rawResponse.message
+              : `Edge function request failed: ${response.status}`;
+          throw new Error(message);
         }
 
-        if (!data || !data.success) {
+        if (!rawResponse?.success) {
           const fallbackMessage =
-            typeof data?.error === "string"
-              ? data.error
+            typeof rawResponse?.error === "string"
+              ? rawResponse.error
               : "No data returned from background discovery";
           throw new Error(fallbackMessage);
         }
 
-        console.log("✅ Background discovery response:", data);
+        console.log("✅ Background discovery response:", rawResponse);
 
         // For background tasks, we get jobId and campaignId immediately
         // The actual processing happens in the background
         const transformedData: BusinessDiscoveryResponse = {
-          campaign_id: data.campaignId,
-          job_id: data.jobId, // New: job ID for tracking progress
-          status: data.status, // New: processing status
-          estimated_time: data.estimatedTime, // New: estimated completion time
-          realtime_channel: data.realtimeChannel, // New: for real-time updates
+          campaign_id: rawResponse.campaignId,
+          job_id: rawResponse.jobId, // New: job ID for tracking progress
+          status: rawResponse.status, // New: processing status
+          estimated_time: rawResponse.estimatedTime, // New: estimated completion time
+          realtime_channel: rawResponse.realtimeChannel, // New: for real-time updates
           total_found: 0, // Will be updated via real-time
           qualified_count: 0, // Will be updated via real-time
           total_cost: 0, // Will be updated via real-time

@@ -21,6 +21,8 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   },
 });
 
+export const SUPABASE_ANON_TOKEN = supabaseAnonKey;
+
 // Helper function to get current session token for Edge Function calls
 export const getSessionToken = async (): Promise<string | null> => {
   const {
