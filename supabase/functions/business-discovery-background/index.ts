@@ -1717,9 +1717,13 @@ serve(async (req) => {
         .replace(/_+/g, "_")
         .replace(/^_+|_+$/g, "")
         .toUpperCase();
+      const cryptoObj =
+        typeof globalThis !== "undefined" && "crypto" in globalThis
+          ? (globalThis as { crypto?: Crypto }).crypto
+          : undefined;
       const randomSource =
-        typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
-          ? crypto.randomUUID()
+        cryptoObj && typeof cryptoObj.randomUUID === "function"
+          ? cryptoObj.randomUUID()
           : `${Math.random().toString(36).slice(2)}${Math.random()
               .toString(36)
               .slice(2)}`;
