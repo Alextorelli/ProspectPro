@@ -2,8 +2,8 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import {
   createUsageLogger,
   UsageLogContext,
-  UsageLogParams,
   UsageLogger,
+  UsageLogParams,
 } from "../_shared/api-usage.ts";
 
 /**
@@ -12,13 +12,9 @@ import {
  *
  * Progressive Enrichment Waterfall:
  * 1. Free Validation (Google Places, basic checks) - $0.00
- * 2. Business License Lookup (professional validation) - $0.03
- * 3. Company Enrichment (PeopleDataLabs) - $0.05-$0.10
- * 4. Hunter.io Email Discovery (domain search, email finder) - $0.034
- * 5. NeverBounce Email Verification (validate discovered emails) - $0.008
- * 6. Person Enrichment (PeopleDataLabs executives) - $0.20-$0.28
- * 7. Apollo Enrichment (optional, premium contacts) - $1.00
- * 8. Compliance Verification (FINRA, specialized) - $0.40-$1.25
+ * 2. Hunter.io Email Discovery (domain search, email finder) - $0.034
+ * 3. NeverBounce Email Verification (validate discovered emails) - $0.008
+ * 4. Apollo Enrichment (optional, premium contacts) - $1.00
  *
  * Cost Optimization: 81% cheaper than Apollo ($0.19 vs $1.00 average)
  * Industry Routing: Financial services → FINRA (99.6% savings)
@@ -153,15 +149,6 @@ interface EnrichmentResponse {
   };
 }
 
-type PeopleDataLabsPersonResult = {
-  name?: string;
-  title?: string;
-  email?: string;
-  phone?: string;
-  linkedin?: string;
-  likelihood?: number;
-};
-
 class EnrichmentOrchestrator {
   private supabaseUrl: string;
   private supabaseKey: string;
@@ -186,20 +173,6 @@ class EnrichmentOrchestrator {
   private async logUsage(entry: UsageLogParams) {
     if (!this.usageLogger) return;
     await this.usageLogger.log({ ...this.usageContext, ...entry });
-  }
-
-  private estimatePeopleDataLabsCost(action: string): number {
-    switch (action) {
-      case "enrichCompany":
-        return 0.10;
-      case "enrichPerson":
-      case "enrichContact":
-        return 0.25;
-      case "search":
-        return 0.05;
-      default:
-        return 0.05;
-    }
   }
 
   private estimateHunterCost(action: string): number {
@@ -257,113 +230,6 @@ class EnrichmentOrchestrator {
       // Apply tier-based defaults
       const tierDefaults = this.getTierDefaults(request.tier || "professional");
       const enrichmentConfig = { ...tierDefaults, ...request };
-
-      // Progressive Enrichment Waterfall - Stage 1: Business License Validation ($0.03)
-      if (
-        enrichmentConfig.includeBusinessLicense &&
-        request.businessName &&
-        request.state
-      ) {
-        try {
-          console.log(
-            `🏛️ Stage 1: Business License Lookup for ${request.businessName} in ${request.state}`
-          );
-
-          const licenseResult = await this.callBusinessLicense({
-            action: "searchCompany",
-            companyName: request.businessName,
-            state: request.state,
-          });
-
-          if (licenseResult.success && licenseResult.data) {
-            response.enrichedData.businessLicense = {
-              isValid: licenseResult.data.isValid || false,
-              licenseNumber: licenseResult.data.licenseNumber,
-              status: licenseResult.data.status,
-              source: "business_license_lookup",
-            };
-
-            response.costBreakdown.businessLicenseCost =
-              licenseResult.cost || 0.03;
-            currentCost += response.costBreakdown.businessLicenseCost;
-            response.processingMetadata.servicesUsed.push("business_license");
-
-            console.log(
-              `✅ Business license validated: ${
-                licenseResult.data.isValid ? "Valid" : "Not found"
-              }`
-            );
-          }
-        } catch (error) {
-          console.error("Business License Lookup error:", error);
-          response.processingMetadata.errors.push({
-            service: "business_license",
-            error: error instanceof Error ? error.message : "Unknown error",
-          });
-        }
-      }
-
-      // Progressive Enrichment Waterfall - Stage 2: Company Enrichment ($0.05-$0.10)
-      if (
-        enrichmentConfig.includeCompanyEnrichment &&
-        (request.businessName || request.website)
-      ) {
-        const companyEnrichmentCost = 0.1;
-
-        if (currentCost + companyEnrichmentCost <= this.maxCostPerBusiness) {
-          try {
-            console.log(`🏢 Stage 2: Company Enrichment via PeopleDataLabs`);
-
-            const companyParams: Record<string, unknown> = {
-              action: "enrichCompany",
-            };
-
-            if (request.website) {
-              companyParams.website = request.website;
-            } else if (request.businessName) {
-              companyParams.companyName = request.businessName;
-            }
-
-            const companyResult = await this.callPeopleDataLabs(companyParams);
-
-            if (companyResult.success && companyResult.data) {
-              response.enrichedData.companyInfo = {
-                name: companyResult.data.name,
-                industry: companyResult.data.industry,
-                size: companyResult.data.size,
-                founded: companyResult.data.founded,
-                revenue: companyResult.data.revenue,
-                description: companyResult.data.description,
-                source: "peopledatalabs",
-              };
-
-              response.costBreakdown.companyEnrichmentCost =
-                companyResult.cost || companyEnrichmentCost;
-              currentCost += response.costBreakdown.companyEnrichmentCost;
-              response.processingMetadata.servicesUsed.push(
-                "peopledatalabs_company"
-              );
-
-              console.log(
-                `✅ Company enriched: ${
-                  companyResult.data.name || "Data retrieved"
-                }`
-              );
-            }
-          } catch (error) {
-            console.error("Company enrichment error:", error);
-            response.processingMetadata.errors.push({
-              service: "peopledatalabs_company",
-              error: error instanceof Error ? error.message : "Unknown error",
-            });
-          }
-        } else {
-          console.warn(`⚠️ Skipping company enrichment - would exceed budget`);
-          response.processingMetadata.servicesSkipped.push(
-            "peopledatalabs_company (budget)"
-          );
-        }
-      }
 
       // Progressive Enrichment Waterfall - Stage 3: Email Discovery ($0.034)
       if (enrichmentConfig.discoverEmails && request.domain) {
@@ -472,70 +338,13 @@ class EnrichmentOrchestrator {
         }
       }
 
-      // Progressive Enrichment Waterfall - Stage 5: Person Enrichment ($0.20-$0.28)
-      if (enrichmentConfig.includePersonEnrichment && request.businessName) {
-        const personEnrichmentCost = 0.28;
-
-        if (currentCost + personEnrichmentCost <= this.maxCostPerBusiness) {
-          try {
-            console.log(`� Stage 5: Person Enrichment for executives`);
-
-            const personResult = await this.callPeopleDataLabs({
-              action: "searchPerson",
-              companyName: request.businessName,
-              jobTitle: "CEO OR Owner OR President OR Director",
-              minLikelihood: 7,
-            });
-            if (
-              personResult.success &&
-              Array.isArray(personResult.data?.results)
-            ) {
-              const pdlResults =
-                personResult.data.results as PeopleDataLabsPersonResult[];
-              response.enrichedData.personEnrichment = pdlResults.map(
-                (person) => ({
-                  name: person.name ?? "Unknown",
-                  title: person.title ?? "",
-                  email: person.email,
-                  phone: person.phone,
-                  linkedin: person.linkedin,
-                  confidence: person.likelihood ?? 0,
-                })
-              );
-
-              response.costBreakdown.personEnrichmentCost =
-                personResult.cost || personEnrichmentCost;
-              currentCost += response.costBreakdown.personEnrichmentCost;
-              response.processingMetadata.servicesUsed.push(
-                "peopledatalabs_person"
-              );
-
-              const executiveCount =
-                response.enrichedData.personEnrichment?.length ?? 0;
-              console.log(`✅ Found ${executiveCount} executive contacts`);
-            }
-          } catch (error) {
-            console.error("Person enrichment error:", error);
-            response.processingMetadata.errors.push({
-              service: "peopledatalabs_person",
-              error: error instanceof Error ? error.message : "Unknown error",
-            });
-          }
-        } else {
-          console.warn(`⚠️ Skipping person enrichment - would exceed budget`);
-          response.processingMetadata.servicesSkipped.push(
-            "peopledatalabs_person (budget)"
-          );
-        }
-      }
-
-      // Progressive Enrichment Waterfall - Stage 6: Apollo Premium ($1.00)
+      // Progressive Enrichment Waterfall - Stage 3: Apollo Premium ($1.00)
       if (enrichmentConfig.apolloEnrichment && request.domain) {
         const apolloCost = 1.0;
 
         if (currentCost + apolloCost <= this.maxCostPerBusiness) {
           try {
-            console.log(`� Stage 6: Premium Apollo Enrichment`);
+            console.log(`🚀 Stage 3: Premium Apollo Enrichment`);
 
             // Placeholder for Apollo implementation
             await new Promise((resolve) => setTimeout(resolve, 100));
@@ -645,146 +454,6 @@ class EnrichmentOrchestrator {
   }
 
   /**
-   * Call Business License Lookup Edge Function
-   */
-  private async callBusinessLicense(params: Record<string, unknown>) {
-    const startedAt = performance.now();
-    let response: Response | null = null;
-    try {
-      response = await fetch(
-        `${this.supabaseUrl}/functions/v1/enrichment-business-license`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${this.supabaseKey}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(params),
-        }
-      );
-
-      const payload = await response.json();
-
-      await this.logUsage({
-        sourceName: "business_license_lookup",
-        endpoint: String(params.action ?? "lookup"),
-        httpMethod: "POST",
-        requestParams: {
-          action: params.action,
-          companyName: params.companyName,
-          state: params.state,
-        },
-        queryType: "enrichment",
-        responseCode: response.status,
-        responseTimeMs: Math.round(performance.now() - startedAt),
-        success: response.ok && payload?.success !== false,
-        resultsReturned:
-          Array.isArray(payload?.data) ? payload.data.length : payload?.data ? 1 : 0,
-        estimatedCost: 0.03,
-        actualCost:
-          typeof payload?.cost === "number" ? payload.cost : response.ok ? 0.03 : 0,
-      });
-
-      return payload;
-    } catch (error) {
-      await this.logUsage({
-        sourceName: "business_license_lookup",
-        endpoint: String(params.action ?? "lookup"),
-        httpMethod: "POST",
-        requestParams: {
-          action: params.action,
-          companyName: params.companyName,
-          state: params.state,
-        },
-        queryType: "enrichment",
-        responseCode: response?.status ?? null,
-        responseTimeMs: Math.round(performance.now() - startedAt),
-        success: false,
-        errorMessage: error instanceof Error ? error.message : String(error),
-        estimatedCost: 0.03,
-        actualCost: 0,
-      });
-      throw error;
-    }
-  }
-
-  /**
-   * Call PeopleDataLabs Edge Function
-   */
-  private async callPeopleDataLabs(params: Record<string, unknown>) {
-    const startedAt = performance.now();
-    let response: Response | null = null;
-    const action = String(params.action ?? "request");
-    const estimatedCost = this.estimatePeopleDataLabsCost(action);
-
-    try {
-      response = await fetch(
-        `${this.supabaseUrl}/functions/v1/enrichment-pdl`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${this.supabaseKey}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(params),
-        }
-      );
-
-      const payload = await response.json();
-      const results = Array.isArray(payload?.data?.results)
-        ? payload.data.results.length
-        : payload?.data
-        ? 1
-        : 0;
-
-      await this.logUsage({
-        sourceName: "peopledatalabs",
-        endpoint: action,
-        httpMethod: "POST",
-        requestParams: {
-          action,
-          companyName: params.companyName,
-          website: params.website,
-          domain: params.domain,
-          jobTitle: params.jobTitle,
-        },
-        queryType: "enrichment",
-        responseCode: response.status,
-        responseTimeMs: Math.round(performance.now() - startedAt),
-        resultsReturned: results,
-        usefulResults: results,
-        success: response.ok && payload?.success !== false,
-        estimatedCost,
-        actualCost:
-          typeof payload?.cost === "number" ? payload.cost : response.ok ? estimatedCost : 0,
-      });
-
-      return payload;
-    } catch (error) {
-      await this.logUsage({
-        sourceName: "peopledatalabs",
-        endpoint: action,
-        httpMethod: "POST",
-        requestParams: {
-          action,
-          companyName: params.companyName,
-          website: params.website,
-          domain: params.domain,
-          jobTitle: params.jobTitle,
-        },
-        queryType: "enrichment",
-        responseCode: response?.status ?? null,
-        responseTimeMs: Math.round(performance.now() - startedAt),
-        success: false,
-        errorMessage: error instanceof Error ? error.message : String(error),
-        estimatedCost,
-        actualCost: 0,
-      });
-      throw error;
-    }
-  }
-
-  /**
    * Call Hunter.io Edge Function
    */
   private async callHunterIO(params: Record<string, unknown>) {
@@ -831,7 +500,11 @@ class EnrichmentOrchestrator {
         success: response.ok && payload?.success !== false,
         estimatedCost,
         actualCost:
-          typeof payload?.cost === "number" ? payload.cost : response.ok ? estimatedCost : 0,
+          typeof payload?.cost === "number"
+            ? payload.cost
+            : response.ok
+            ? estimatedCost
+            : 0,
       });
 
       return payload;
@@ -907,7 +580,11 @@ class EnrichmentOrchestrator {
         success: response.ok && payload?.success !== false,
         estimatedCost,
         actualCost:
-          typeof payload?.cost === "number" ? payload.cost : response.ok ? estimatedCost : 0,
+          typeof payload?.cost === "number"
+            ? payload.cost
+            : response.ok
+            ? estimatedCost
+            : 0,
       });
 
       return payload;
@@ -938,13 +615,6 @@ class EnrichmentOrchestrator {
   private calculateConfidenceScore(response: EnrichmentResponse): number {
     let score = 40; // Base score
 
-    // Business license validation bonus
-    if (response.enrichedData.businessLicense?.isValid) {
-      score += 20;
-    } else if (response.enrichedData.businessLicense) {
-      score += 5; // Attempted validation
-    }
-
     // Company enrichment bonus
     if (response.enrichedData.companyInfo) {
       score += 15;
@@ -970,20 +640,6 @@ class EnrichmentOrchestrator {
       );
       if (verifiedEmails.length > 0) {
         score += 15;
-      }
-    }
-
-    // Person enrichment bonus
-    if (
-      response.enrichedData.personEnrichment &&
-      response.enrichedData.personEnrichment.length > 0
-    ) {
-      score += 10;
-      // High confidence person data
-      const highConfidencePersons =
-        response.enrichedData.personEnrichment.filter((p) => p.confidence > 8);
-      if (highConfidencePersons.length > 0) {
-        score += 10;
       }
     }
 
@@ -1038,7 +694,11 @@ serve(async (req) => {
       locationQuery: requestData.state ?? null,
     };
 
-    const usageLogger = createUsageLogger(supabaseUrl, supabaseKey, usageContext);
+    const usageLogger = createUsageLogger(
+      supabaseUrl,
+      supabaseKey,
+      usageContext
+    );
 
     // Initialize orchestrator
     const orchestrator = new EnrichmentOrchestrator(
