@@ -63,7 +63,10 @@ BEGIN
     'hex'
   );
 END;
-$$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql
+IMMUTABLE
+SECURITY INVOKER
+SET search_path = public, pg_temp;
 
 -- Function to get cached response
 CREATE OR REPLACE FUNCTION get_cached_response(
@@ -122,7 +125,9 @@ BEGIN
   
   RETURN v_response;
 END;
-$$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql
+SECURITY INVOKER
+SET search_path = public, pg_temp;
 
 -- Function to store cached response
 CREATE OR REPLACE FUNCTION store_cached_response(
@@ -174,7 +179,9 @@ BEGIN
   
   RETURN v_cache_key;
 END;
-$$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql
+SECURITY INVOKER
+SET search_path = public, pg_temp;
 
 -- Function to clean expired cache entries
 CREATE OR REPLACE FUNCTION cleanup_expired_cache() RETURNS INTEGER AS $$
@@ -186,7 +193,9 @@ BEGIN
   
   RETURN v_deleted_count;
 END;
-$$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql
+SECURITY INVOKER
+SET search_path = public, pg_temp;
 
 -- Create a scheduled job to clean expired cache (if pg_cron is available)
 -- SELECT cron.schedule('cleanup-enrichment-cache', '0 2 * * *', 'SELECT cleanup_expired_cache()');
@@ -196,14 +205,17 @@ ALTER TABLE enrichment_cache ENABLE ROW LEVEL SECURITY;
 ALTER TABLE enrichment_cache_stats ENABLE ROW LEVEL SECURITY;
 
 -- Service role can access all cache data
+DROP POLICY IF EXISTS "Service role can manage enrichment cache" ON enrichment_cache;
 CREATE POLICY "Service role can manage enrichment cache" ON enrichment_cache
 FOR ALL TO service_role USING (true);
 
+DROP POLICY IF EXISTS "Service role can manage cache stats" ON enrichment_cache_stats;
 CREATE POLICY "Service role can manage cache stats" ON enrichment_cache_stats
 FOR ALL TO service_role USING (true);
 
 -- Cache Analytics View
-CREATE OR REPLACE VIEW enrichment_cache_analytics AS
+CREATE OR REPLACE VIEW enrichment_cache_analytics
+WITH (security_invoker = true) AS
 SELECT 
   request_type,
   COUNT(*) as total_entries,
@@ -220,7 +232,8 @@ GROUP BY request_type
 ORDER BY total_hits DESC;
 
 -- Cache Performance Summary
-CREATE OR REPLACE VIEW cache_performance_summary AS
+CREATE OR REPLACE VIEW cache_performance_summary
+WITH (security_invoker = true) AS
 SELECT 
   date,
   SUM(total_requests) as daily_requests,
