@@ -112,6 +112,7 @@ DECLARE
   date_string TEXT;
   time_string TEXT;
   user_code TEXT;
+  random_component TEXT;
   campaign_name TEXT;
 BEGIN
   -- Generate business type code (first 4 letters, uppercase)
@@ -122,7 +123,7 @@ BEGIN
   
   -- Generate date and time strings
   date_string := TO_CHAR(NOW(), 'YYYYMMDD');
-  time_string := TO_CHAR(NOW(), 'HH24MISS');
+  time_string := TO_CHAR(CLOCK_TIMESTAMP(), 'HH24MISSUS');
   
   -- Generate user code (last 6 chars of user_id or random for anonymous)
   IF user_id IS NOT NULL THEN
@@ -130,9 +131,12 @@ BEGIN
   ELSE
     user_code := SUBSTRING(MD5(RANDOM()::TEXT) FROM 1 FOR 6);
   END IF;
+
+  -- Add extra entropy to avoid collisions on rapid submissions
+  random_component := SUBSTRING(MD5((RANDOM() || NOW())::TEXT) FROM 1 FOR 6);
   
   -- Combine into final campaign name
-  campaign_name := business_code || '_' || location_code || '_' || date_string || '_' || time_string || '_' || user_code;
+  campaign_name := business_code || '_' || location_code || '_' || date_string || '_' || time_string || '_' || user_code || '_' || random_component;
   
   RETURN campaign_name;
 END;

@@ -61,26 +61,28 @@ BEGIN
         location_code := UPPER(LEFT(REGEXP_REPLACE(location, ''[^a-zA-Z]'', '''', ''g''), 4));
         date_string := TO_CHAR(NOW(), ''YYYYMMDD'');
         time_string := TO_CHAR(NOW(), ''HH24MISS'');
-        
-        IF user_id IS NOT NULL THEN
-          user_code := RIGHT(user_id::TEXT, 6);
-        ELSE
-          user_code := SUBSTRING(MD5(RANDOM()::TEXT) FROM 1 FOR 6);
-        END IF;
-        
-        campaign_name := business_code || ''_'' || location_code || ''_'' || date_string || ''_'' || time_string || ''_'' || user_code;
-        
-        RETURN campaign_name;
-      END;
-      $func$;
-    ';
-  END IF;
-END;
-$$;
-
-DO $$
-BEGIN
-  IF EXISTS (SELECT 1 FROM pg_proc WHERE proname = 'auto_generate_campaign_name') THEN
+        DECLARE
+          business_code TEXT;
+          location_code TEXT;
+          date_string TEXT;
+          time_string TEXT;
+          user_code TEXT;
+          random_component TEXT;
+          campaign_name TEXT;
+        BEGIN
+          business_code := UPPER(LEFT(REGEXP_REPLACE(business_type, '[^a-zA-Z]', '', 'g'), 4));
+          location_code := UPPER(LEFT(REGEXP_REPLACE(location, '[^a-zA-Z]', '', 'g'), 4));
+          date_string := TO_CHAR(NOW(), 'YYYYMMDD');
+          time_string := TO_CHAR(CLOCK_TIMESTAMP(), 'HH24MISSUS');
+          IF user_id IS NOT NULL THEN
+            user_code := RIGHT(user_id::TEXT, 6);
+          ELSE
+            user_code := SUBSTRING(MD5(RANDOM()::TEXT) FROM 1 FOR 6);
+          END IF;
+          random_component := SUBSTRING(MD5((RANDOM() || NOW())::TEXT) FROM 1 FOR 6);
+          campaign_name := business_code || '_' || location_code || '_' || date_string || '_' || time_string || '_' || user_code || '_' || random_component;
+          RETURN campaign_name;
+        END;
     EXECUTE '
       CREATE OR REPLACE FUNCTION public.auto_generate_campaign_name()
       RETURNS TRIGGER

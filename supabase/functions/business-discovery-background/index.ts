@@ -1711,6 +1711,29 @@ serve(async (req) => {
       .toString(36)
       .slice(2, 11)}`;
 
+    const buildUniqueCampaignId = (baseName: string) => {
+      const normalizedBase = baseName
+        .replace(/[^A-Za-z0-9_]+/g, "_")
+        .replace(/_+/g, "_")
+        .replace(/^_+|_+$/g, "")
+        .toUpperCase();
+      const randomSource =
+        typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
+          ? crypto.randomUUID()
+          : `${Math.random().toString(36).slice(2)}${Math.random()
+              .toString(36)
+              .slice(2)}`;
+      const sanitizedRandom = randomSource.replace(/[^A-Za-z0-9]+/g, "");
+      const randomSuffix = sanitizedRandom
+        .padEnd(8, "0")
+        .slice(0, 8)
+        .toUpperCase();
+      const timestampSuffix = Date.now().toString(36).toUpperCase();
+      const trimmedBase = normalizedBase.slice(0, 40);
+      const safeBase = trimmedBase.length > 0 ? trimmedBase : "CAMPAIGN";
+      return `${safeBase}_${timestampSuffix}_${randomSuffix}`;
+    };
+
     // Generate structured campaign ID using database function
     let campaignId: string;
     try {
@@ -1726,19 +1749,20 @@ serve(async (req) => {
           "Campaign name generation failed, using fallback:",
           nameError
         );
-        campaignId = `campaign_${Date.now()}_${Math.random()
-          .toString(36)
-          .slice(2, 11)}`;
+        campaignId = buildUniqueCampaignId(
+          `campaign_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`
+        );
       } else {
-        campaignId =
+        campaignId = buildUniqueCampaignId(
           generatedName ||
-          `campaign_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`;
+            `campaign_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`
+        );
       }
     } catch (error) {
       console.warn("Campaign name generation error, using fallback:", error);
-      campaignId = `campaign_${Date.now()}_${Math.random()
-        .toString(36)
-        .slice(2, 11)}`;
+      campaignId = buildUniqueCampaignId(
+        `campaign_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`
+      );
     }
 
     const jobConfig: JobConfig = {
