@@ -853,9 +853,7 @@ function normalizeWebsite(value?: string | null): string {
   return withoutWww.split("/")[0];
 }
 
-function createBusinessFingerprint(
-  source: BusinessFingerprintSource
-): string {
+function createBusinessFingerprint(source: BusinessFingerprintSource): string {
   const name = normalizeString(
     source.business_name ?? source.businessName ?? source.name ?? ""
   );
