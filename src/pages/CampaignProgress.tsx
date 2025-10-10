@@ -22,6 +22,9 @@ export const CampaignProgress: React.FC = () => {
   const setCurrentCampaign = useCampaignStore(
     (state) => state.setCurrentCampaign
   );
+  const ensureUniqueCampaignHistory = useCampaignStore(
+    (state) => state.ensureUniqueCampaignHistory
+  );
   const clearLeads = useCampaignStore((state) => state.clearLeads);
   const addLeads = useCampaignStore((state) => state.addLeads);
   const setLoading = useCampaignStore((state) => state.setLoading);
@@ -147,6 +150,8 @@ export const CampaignProgress: React.FC = () => {
         addCampaign(campaignResult);
       }
 
+      ensureUniqueCampaignHistory();
+
       clearLeads();
       addLeads(mappedLeads);
       setCurrentCampaign(campaignResult);
@@ -181,6 +186,7 @@ export const CampaignProgress: React.FC = () => {
     campaignId,
     campaigns,
     clearLeads,
+    ensureUniqueCampaignHistory,
     metrics,
     navigate,
     setCurrentCampaign,

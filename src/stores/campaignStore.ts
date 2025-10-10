@@ -15,6 +15,7 @@ interface CampaignActions {
   setError: (error: string | null) => void;
   clearLeads: () => void;
   reset: () => void;
+  ensureUniqueCampaignHistory: () => void;
 }
 
 const initialState: CampaignStore = {
@@ -25,6 +26,39 @@ const initialState: CampaignStore = {
   error: null,
 };
 
+const getCampaignKey = (campaign: CampaignResult): string | null => {
+  if (campaign.campaign_id) {
+    return campaign.campaign_id;
+  }
+
+  const fallbackId = (campaign as { id?: string | number }).id;
+  return fallbackId != null ? String(fallbackId) : null;
+};
+
+// Keeps newest campaign entry while removing duplicates by campaign identifier.
+const dedupeCampaigns = (campaigns: CampaignResult[]): CampaignResult[] => {
+  const seen = new Set<string>();
+  const uniqueCampaigns: CampaignResult[] = [];
+
+  for (const campaign of campaigns) {
+    const key = getCampaignKey(campaign);
+
+    if (key === null) {
+      uniqueCampaigns.push(campaign);
+      continue;
+    }
+
+    if (seen.has(key)) {
+      continue;
+    }
+
+    seen.add(key);
+    uniqueCampaigns.push(campaign);
+  }
+
+  return uniqueCampaigns;
+};
+
 export const useCampaignStore = create<CampaignStore & CampaignActions>()(
   persist(
     (set) => ({
@@ -32,13 +66,15 @@ export const useCampaignStore = create<CampaignStore & CampaignActions>()(
 
       addCampaign: (campaign) =>
         set((state) => ({
-          campaigns: [campaign, ...state.campaigns],
+          campaigns: dedupeCampaigns([campaign, ...state.campaigns]),
         })),
 
       updateCampaign: (campaignId, updates) =>
         set((state) => ({
-          campaigns: state.campaigns.map((c) =>
-            c.campaign_id === campaignId ? { ...c, ...updates } : c
+          campaigns: dedupeCampaigns(
+            state.campaigns.map((c) =>
+              c.campaign_id === campaignId ? { ...c, ...updates } : c
+            )
           ),
           currentCampaign:
             state.currentCampaign?.campaign_id === campaignId
@@ -67,6 +103,11 @@ export const useCampaignStore = create<CampaignStore & CampaignActions>()(
       clearLeads: () => set({ leads: [] }),
 
       reset: () => set(initialState),
+
+      ensureUniqueCampaignHistory: () =>
+        set((state) => ({
+          campaigns: dedupeCampaigns(state.campaigns),
+        })),
     }),
     {
       name: "campaign-store",
