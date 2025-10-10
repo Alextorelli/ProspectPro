@@ -330,3 +330,8 @@ Server ready.
 {"type":"measure","name":"lsp.did_close","count":9,"duration":0.029},
 {"type":"mark","name":"lsp.did_save"},
 {"type":"measure","name":"lsp.did_save","count":9,"duration":0.03},
+{"type":"mark","name":"lsp.did_open","count":73,"args":{"textDocument":{"uri":"file:///workspaces/ProspectPro/tsconfig.json","languageId":"jsonc","version":1,"text":"{\n  \"compilerOptions\": {\n    \"target\": \"ES2020\",\n    \"useDefineForClassFields\": true,\n    \"lib\": [\"ES2020\", \"DOM\", \"DOM.Iterable\"],\n    \"module\": \"ESNext\",\n    \"skipLibCheck\": true,\n\n    /* Bundler mode */\n    \"moduleResolution\": \"bundler\",\n    \"allowImportingTsExtensions\": true,\n    \"resolveJsonModule\": true,\n    \"isolatedModules\": true,\n    \"noEmit\": true,\n    \"jsx\": \"react-jsx\",\n\n    /* Linting */\n    \"strict\": true,\n    \"noUnusedLocals\": true,\n    \"noUnusedParameters\": true,\n    \"noFallthroughCasesInSwitch\": true,\n\n    /* Path mapping */\n    \"baseUrl\": \".\",\n    \"paths\": {\n      \"@/*\": [\"./src/*\"]\n    }\n  },\n  \"include\": [\"src\"],\n  \"references\": [{ \"path\": \"./tsconfig.node.json\" }]\n}\n"}}},
+{"type":"measure","name":"lsp.did_open","count":73,"duration":0.052},
+{"type":"mark","name":"lsp.inlay_hint","count":6,"args":{"textDocument":{"uri":"file:///workspaces/ProspectPro/docs/PRODUCTION_VALIDATION_STRATEGY.md"},"range":{"start":{"line":0,"character":0},"end":{"line":103,"character":0}}}},
+{"type":"mark","name":"lsp.did_close","count":10,"args":{"textDocument":{"uri":"file:///workspaces/ProspectPro/tsconfig.json"}}},
+{"type":"measure","name":"lsp.did_close","count":10,"duration":0.031},
