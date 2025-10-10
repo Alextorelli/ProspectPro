@@ -99,14 +99,18 @@ export const BusinessDiscovery: React.FC = () => {
   const sliderPercent = ((numberOfLeads - 1) / 9) * 100;
 
   const { leads, currentCampaign } = useCampaignStore();
+  const setCurrentCampaignInStore = useCampaignStore(
+    (state) => state.setCurrentCampaign
+  );
 
   const campaignLeads = useMemo(() => {
-    if (currentCampaign) {
-      return leads.filter(
-        (lead) => lead.campaign_id === currentCampaign.campaign_id
-      );
+    if (!currentCampaign) {
+      return [];
     }
-    return leads;
+
+    return leads.filter(
+      (lead) => lead.campaign_id === currentCampaign.campaign_id
+    );
   }, [leads, currentCampaign]);
 
   const qualifiedLeadCount = useMemo(
@@ -114,13 +118,15 @@ export const BusinessDiscovery: React.FC = () => {
     [campaignLeads]
   );
 
-  const hasResults = campaignLeads.length > 0;
+  const hasResultsForCurrentCampaign = currentCampaign
+    ? campaignLeads.length > 0
+    : false;
 
   useEffect(() => {
-    if (hasResults && activeStep === 2 && !isDiscovering) {
+    if (hasResultsForCurrentCampaign && activeStep === 2 && !isDiscovering) {
       setActiveStep(3);
     }
-  }, [hasResults, activeStep, isDiscovering]);
+  }, [hasResultsForCurrentCampaign, activeStep, isDiscovering]);
 
   const handleExportResults = () => {
     if (!campaignLeads.length) return;
@@ -162,6 +168,7 @@ export const BusinessDiscovery: React.FC = () => {
       alert("Please select at least one business type and provide a location.");
       return;
     }
+    setCurrentCampaignInStore(null);
     setActiveStep(2);
   };
 
@@ -546,7 +553,7 @@ export const BusinessDiscovery: React.FC = () => {
                 Campaign Results
               </h2>
               <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
-                {hasResults
+                {hasResultsForCurrentCampaign
                   ? `${campaignLeads.length} leads captured • ${qualifiedLeadCount} qualified`
                   : isDiscovering
                   ? "We're still enriching this campaign. Hang tight while ProspectPro verifies contacts."
@@ -563,7 +570,7 @@ export const BusinessDiscovery: React.FC = () => {
                   View full campaign
                 </button>
               )}
-              {hasResults && (
+              {hasResultsForCurrentCampaign && (
                 <button
                   type="button"
                   onClick={handleExportResults}
@@ -628,7 +635,7 @@ export const BusinessDiscovery: React.FC = () => {
           )}
 
           <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden shadow-sm">
-            {!hasResults ? (
+            {!hasResultsForCurrentCampaign ? (
               <div className="flex flex-col items-center justify-center py-16 text-center">
                 <span className="text-4xl mb-2">🔍</span>
                 <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100">
