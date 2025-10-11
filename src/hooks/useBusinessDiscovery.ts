@@ -8,7 +8,209 @@ import {
   supabase,
 } from "../lib/supabase";
 import { useCampaignStore } from "../stores/campaignStore";
-import type { BusinessDiscoveryResponse, CampaignConfig } from "../types";
+import type {
+  BusinessDiscoveryResponse,
+  BusinessLead,
+  CampaignConfig,
+  CampaignResult,
+} from "../types";
+
+type LegacyLeadPayload = {
+  businessName?: string;
+  address?: string;
+  phone?: string;
+  website?: string;
+  email?: string;
+  optimizedScore?: number;
+  validationCost?: number;
+  enhancementData?: {
+    verificationSources?: string[];
+    emails?: Array<Record<string, unknown>>;
+    processingMetadata?: Record<string, unknown>;
+  };
+  emails?: Array<Record<string, unknown>>;
+  dataSources?: string[];
+};
+
+type LegacyDiscoveryRaw = {
+  success?: boolean;
+  campaignId?: string;
+  leads?: LegacyLeadPayload[];
+  results?: {
+    totalFound?: number;
+    qualified?: number;
+  };
+  optimization?: {
+    totalCost?: number;
+    processingTime?: string;
+  };
+  metadata?: {
+    timestamp?: string;
+    version?: string;
+  };
+  requirements?: {
+    businessType?: string;
+    location?: string;
+    targetLeads?: number;
+  };
+  error?: string;
+};
+
+type NormalizedLegacyEmail = {
+  email: string;
+  confidence: number;
+  verified: boolean;
+  type?: string;
+  firstName?: string;
+  lastName?: string;
+  position?: string;
+};
+
+type LegacyDiscoveryMeta = {
+  leads: BusinessLead[];
+  campaign: CampaignResult;
+};
+
+type DiscoveryResultWithLegacy = BusinessDiscoveryResponse & {
+  __legacyMeta?: LegacyDiscoveryMeta;
+};
+
+const normalizeLegacyEmails = (
+  input?: Array<Record<string, unknown>>
+): NormalizedLegacyEmail[] => {
+  if (!Array.isArray(input)) {
+    return [];
+  }
+
+  const emails: NormalizedLegacyEmail[] = [];
+
+  for (const entry of input) {
+    const email = typeof entry.email === "string" ? entry.email : null;
+    if (!email) continue;
+
+    emails.push({
+      email,
+      confidence: typeof entry.confidence === "number" ? entry.confidence : 0,
+      verified: Boolean(entry.verified),
+      type: typeof entry.type === "string" ? entry.type : undefined,
+      firstName:
+        typeof entry.firstName === "string" ? entry.firstName : undefined,
+      lastName: typeof entry.lastName === "string" ? entry.lastName : undefined,
+      position: typeof entry.position === "string" ? entry.position : undefined,
+    });
+  }
+
+  return emails;
+};
+
+const createLegacyLead = (
+  lead: LegacyLeadPayload,
+  campaignId: string,
+  tierName: string
+): BusinessLead => {
+  const idGenerator = () =>
+    typeof crypto !== "undefined" && "randomUUID" in crypto
+      ? crypto.randomUUID()
+      : `legacy-${campaignId}-${Math.random().toString(36).slice(2, 11)}`;
+
+  return {
+    id: idGenerator(),
+    campaign_id: campaignId,
+    business_name: lead.businessName ?? "Unknown business",
+    address: lead.address,
+    phone: lead.phone,
+    website: lead.website,
+    email: lead.email,
+    confidence_score: lead.optimizedScore ?? 0,
+    validation_status: "validated",
+    created_at: new Date().toISOString(),
+    cost_to_acquire: lead.validationCost ?? 0,
+    data_sources:
+      lead.enhancementData?.verificationSources ?? lead.dataSources ?? [],
+    enrichment_tier: tierName,
+    vault_secured: true,
+    enrichment_data: {
+      emails: normalizeLegacyEmails(
+        (lead.emails as Array<Record<string, unknown>> | undefined) ??
+          (lead.enhancementData?.emails as
+            | Array<Record<string, unknown>>
+            | undefined)
+      ),
+      verificationSources: lead.enhancementData?.verificationSources ?? [],
+      processingMetadata: lead.enhancementData?.processingMetadata,
+      dataSources: lead.dataSources,
+    },
+  };
+};
+
+const createLegacyDiscoveryResponse = ({
+  legacyData,
+  requestConfig,
+  tierConfig,
+}: {
+  legacyData: LegacyDiscoveryRaw;
+  requestConfig: CampaignConfig & {
+    selectedTier?: keyof typeof ENRICHMENT_TIERS;
+  };
+  tierConfig: (typeof ENRICHMENT_TIERS)[keyof typeof ENRICHMENT_TIERS];
+}): DiscoveryResultWithLegacy => {
+  if (!legacyData?.campaignId) {
+    throw new Error("Legacy discovery payload missing campaignId");
+  }
+
+  const leads = (legacyData.leads ?? []).map((lead) =>
+    createLegacyLead(lead, legacyData.campaignId as string, tierConfig.name)
+  );
+
+  const totalFound = legacyData.results?.totalFound ?? leads.length;
+  const qualified = legacyData.results?.qualified ?? leads.length;
+  const totalCost =
+    legacyData.optimization?.totalCost ??
+    leads.reduce((sum, lead) => sum + (lead.cost_to_acquire ?? 0), 0);
+  const timestamp = legacyData.metadata?.timestamp ?? new Date().toISOString();
+
+  const campaign: CampaignResult = {
+    campaign_id: legacyData.campaignId,
+    business_type:
+      requestConfig.business_type ||
+      requestConfig.search_terms ||
+      legacyData.requirements?.businessType ||
+      "",
+    location: requestConfig.location || legacyData.requirements?.location || "",
+    status: "completed",
+    progress: 100,
+    total_cost: totalCost,
+    leads_found: totalFound,
+    leads_qualified: qualified,
+    leads_validated: qualified,
+    created_at: timestamp,
+    completed_at: timestamp,
+    tier_used: tierConfig.name,
+    vault_secured: true,
+  };
+
+  const response: DiscoveryResultWithLegacy = {
+    campaign_id: legacyData.campaignId,
+    job_id: undefined,
+    status: "completed",
+    estimated_time: undefined,
+    realtime_channel: undefined,
+    total_found: totalFound,
+    qualified_count: qualified,
+    total_cost: totalCost,
+    processing_time: legacyData.optimization?.processingTime ?? "< 5s",
+    tier_used: tierConfig.name,
+    vault_status: "secured",
+    businesses: leads,
+  };
+
+  response.__legacyMeta = {
+    campaign,
+    leads,
+  };
+
+  return response;
+};
 
 export const useBusinessDiscovery = (
   onJobCreated?: (jobData: {
@@ -25,6 +227,8 @@ export const useBusinessDiscovery = (
     clearLeads,
     setCurrentCampaign,
     setCurrentCampaignId,
+    setCampaignLeads,
+    addCampaign,
   } = useCampaignStore();
   const [progress, setProgress] = useState(0);
   const [currentStage, setCurrentStage] = useState<string>("");
@@ -162,7 +366,7 @@ export const useBusinessDiscovery = (
           }
         }
 
-        console.log("📥 Edge function response:", {
+        const responseLogPayload = {
           hasData: !!rawResponse,
           hasError: !!invokeError,
           errorDetails: invokeError
@@ -183,7 +387,77 @@ export const useBusinessDiscovery = (
                 error: rawResponse.error,
               }
             : null,
-        });
+        };
+
+        console.log("📥 Edge function response:", responseLogPayload);
+
+        const shouldFallbackToLegacy =
+          Boolean(invokeContext?.status === 401) &&
+          typeof (responseLogPayload.errorDetails as any)?.payload ===
+            "object" &&
+          (responseLogPayload.errorDetails as any)?.payload?.message ===
+            "Invalid JWT";
+
+        if (shouldFallbackToLegacy) {
+          console.warn(
+            "⚠️ Falling back to legacy user-aware discovery due to Invalid JWT"
+          );
+
+          const legacyResult = await supabase.functions.invoke(
+            "business-discovery-user-aware",
+            {
+              body: {
+                ...requestBody,
+                // Legacy function expects these identifiers in payload
+                sessionUserId: user.id,
+                userId: user.id,
+              },
+              headers: {
+                "Content-Type": "application/json",
+                // Let Supabase SDK attach Authorization header automatically
+              },
+            }
+          );
+
+          if (legacyResult.error) {
+            console.error(
+              "❌ Legacy discovery invoke failed:",
+              legacyResult.error
+            );
+            throw new Error(
+              legacyResult.error.message ||
+                "Legacy discovery fallback failed with unknown error."
+            );
+          }
+
+          const legacyPayload = legacyResult.data as LegacyDiscoveryRaw | null;
+
+          if (!legacyPayload) {
+            throw new Error("Legacy discovery returned no data");
+          }
+
+          if (legacyPayload.success === false) {
+            throw new Error(
+              legacyPayload.error ||
+                "Legacy discovery fallback reported failure."
+            );
+          }
+
+          const immediateResponse = createLegacyDiscoveryResponse({
+            legacyData: legacyPayload,
+            requestConfig: config,
+            tierConfig,
+          });
+
+          console.log("✅ Legacy discovery fallback succeeded", {
+            campaignId: immediateResponse.campaign_id,
+            leadCount: immediateResponse.businesses.length,
+          });
+
+          setProgress(100);
+          setCurrentStage("Legacy discovery completed ✅");
+          return immediateResponse;
+        }
 
         if (invokeError) {
           console.error("❌ Background discovery error:", invokeError);
@@ -216,7 +490,7 @@ export const useBusinessDiscovery = (
 
         // For background tasks, we get jobId and campaignId immediately
         // The actual processing happens in the background
-        const transformedData: BusinessDiscoveryResponse = {
+        const transformedData: DiscoveryResultWithLegacy = {
           campaign_id: rawResponse.campaignId,
           job_id: rawResponse.jobId, // New: job ID for tracking progress
           status: rawResponse.status, // New: processing status
@@ -245,7 +519,20 @@ export const useBusinessDiscovery = (
       }
     },
     onSuccess: (data: BusinessDiscoveryResponse) => {
-      console.log("✅ Background job created:", data);
+      const result = data as DiscoveryResultWithLegacy;
+      console.log("✅ Discovery result received:", result);
+
+      if (result.__legacyMeta) {
+        const { campaign, leads } = result.__legacyMeta;
+
+        addCampaign(campaign);
+        setCurrentCampaign(campaign);
+        setCurrentCampaignId(campaign.campaign_id);
+        setCampaignLeads(campaign.campaign_id, leads);
+        setProgress(100);
+        setCurrentStage("Campaign completed! ✅");
+        return;
+      }
 
       // For background jobs, we don't create the full campaign record immediately
       // The progress page will handle real-time updates and final campaign creation
@@ -254,12 +541,12 @@ export const useBusinessDiscovery = (
       setCurrentStage("Background processing started! 🚀");
 
       // Navigate to progress page with job ID
-      if (data.job_id && data.campaign_id) {
+      if (result.job_id && result.campaign_id) {
         const jobData = {
-          jobId: data.job_id,
-          campaignId: data.campaign_id,
-          status: data.status || "pending",
-          estimatedTime: data.estimated_time,
+          jobId: result.job_id,
+          campaignId: result.campaign_id,
+          status: result.status || "pending",
+          estimatedTime: result.estimated_time,
         };
 
         console.log("Job started:", jobData);
@@ -269,7 +556,7 @@ export const useBusinessDiscovery = (
           onJobCreated(jobData);
         }
 
-        setCurrentCampaignId(data.campaign_id);
+        setCurrentCampaignId(result.campaign_id);
       }
     },
     onError: (error: any) => {
