@@ -16,6 +16,16 @@ interface JobProgress {
     total_cost?: number;
     total_found?: number;
     avg_confidence?: number;
+    validation_cost_total?: number;
+    enrichment_cost_total?: number;
+    raw_candidates?: number;
+    previously_delivered_filtered?: number;
+    sources_used?: string[];
+    census_density_score?: number | null;
+    exhausted?: boolean;
+    tier_key?: string;
+    tier_name?: string;
+    tier_price?: number;
   };
   error?: string;
   completedAt?: string;
@@ -30,7 +40,7 @@ type DiscoveryJobRow = {
   status: string;
   progress: number | null;
   current_stage: string | null;
-  metrics: Record<string, number> | null;
+  metrics: Record<string, unknown> | null;
   error?: string | null;
   completed_at?: string | null;
 };
@@ -196,6 +206,8 @@ export const STAGE_LABELS: Record<string, string> = {
   scoring_businesses: "Scoring and qualifying leads...",
   enriching_contacts: "Enriching contact information...",
   storing_results: "Storing results...",
+  exhausted_results: "All unique results already delivered for this search.",
+  completed: "Campaign complete!",
 };
 
 export function JobProgressDisplay({ jobId }: { jobId: string }) {

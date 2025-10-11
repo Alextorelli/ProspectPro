@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { ProgressDisplay } from "../components/ProgressDisplay";
 import { useAuth } from "../contexts/AuthContext";
-import { useJobProgress } from "../hooks/useJobProgress";
+import { STAGE_LABELS, useJobProgress } from "../hooks/useJobProgress";
 import { supabase } from "../lib/supabase";
 import { useCampaignStore } from "../stores/campaignStore";
 import { transformCampaignData } from "../utils/campaignTransforms";
@@ -49,10 +49,16 @@ export const CampaignProgress: React.FC = () => {
   const metrics = jobProgress?.metrics;
   const isComplete = status === "completed";
   const error = jobProgress?.error;
+  const isExhausted = Boolean(metrics?.exhausted);
+
+  const resolvedStage =
+    currentStage && STAGE_LABELS[currentStage]
+      ? STAGE_LABELS[currentStage]
+      : currentStage;
 
   const displayStage = isFetchingResults
     ? "Preparing final results..."
-    : currentStage;
+    : resolvedStage;
   const displayProgress = isFetchingResults
     ? Math.min(100, Math.max(progress, 96))
     : progress;
@@ -119,7 +125,9 @@ export const CampaignProgress: React.FC = () => {
 
         if (
           campaignRecord &&
-          (leadsRecords.length > 0 || attempt === MAX_ATTEMPTS - 1)
+          (leadsRecords.length > 0 ||
+            metrics?.exhausted ||
+            attempt === MAX_ATTEMPTS - 1)
         ) {
           break;
         }
@@ -305,6 +313,19 @@ export const CampaignProgress: React.FC = () => {
         </div>
       )}
 
+      {isComplete && isExhausted && !resultFetchError && (
+        <div className="mb-6 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
+          <div className="font-semibold">
+            All verified leads already delivered
+          </div>
+          <p className="mt-1">
+            We already shared every unique business that matches this search for
+            your account. Try broadening the location, adjusting keywords, or
+            selecting a different tier to open up new sources.
+          </p>
+        </div>
+      )}
+
       {resultFetchError && (
         <div className="mb-6 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
           <div className="font-semibold">Unable to load campaign results</div>
@@ -390,6 +411,14 @@ export const CampaignProgress: React.FC = () => {
               <div className="w-2 h-2 bg-green-400 rounded-full mr-2"></div>
               <span className="text-green-600 font-medium">
                 ✅ Discovery completed! Redirecting to results...
+              </span>
+            </div>
+          )}
+          {isComplete && isExhausted && (
+            <div className="flex items-center text-sm">
+              <div className="w-2 h-2 bg-amber-400 rounded-full mr-2"></div>
+              <span className="text-amber-600 font-medium">
+                No new verified businesses remain for this exact search.
               </span>
             </div>
           )}

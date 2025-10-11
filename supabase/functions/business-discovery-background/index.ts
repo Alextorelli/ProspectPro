@@ -1527,21 +1527,32 @@ async function processDiscoveryJob(
       .filter((lead) => lead.optimizedScore >= config.minConfidenceScore)
       .slice(0, config.maxResults);
 
+    const isExhausted = qualifiedLeads.length === 0;
+
+    const sharedMetrics = {
+      businesses_found: discoveredBusinesses.length,
+      qualified_leads: qualifiedLeads.length,
+      raw_candidates: totalRawDiscovered,
+      previously_delivered_filtered: historicalFilteredCount,
+      sources_used: sourcesUsed,
+      census_density_score: censusIntelligence?.density_score ?? null,
+      exhausted: isExhausted,
+    };
+
     await supabase
       .from("discovery_jobs")
       .update({
-        current_stage: "enriching_contacts",
-        progress: 50,
-        metrics: {
-          businesses_found: discoveredBusinesses.length,
-          qualified_leads: qualifiedLeads.length,
-          raw_candidates: totalRawDiscovered,
-          previously_delivered_filtered: historicalFilteredCount,
-          sources_used: sourcesUsed,
-          census_density_score: censusIntelligence?.density_score ?? null,
-        },
+        current_stage: isExhausted ? "exhausted_results" : "enriching_contacts",
+        progress: isExhausted ? 80 : 50,
+        metrics: sharedMetrics,
       })
       .eq("id", jobId);
+
+    if (isExhausted) {
+      console.log(
+        `ℹ️ Exhausted unique results for ${config.businessType} in ${config.location} for user ${config.userId}`
+      );
+    }
 
     const enrichedLeads: ScoredLead[] = [];
     let totalCost = 0;
@@ -1573,28 +1584,25 @@ async function processDiscoveryJob(
         .update({
           progress,
           metrics: {
-            businesses_found: discoveredBusinesses.length,
-            qualified_leads: qualifiedLeads.length,
+            ...sharedMetrics,
             leads_enriched: index + 1,
             total_cost: Number(totalCost.toFixed(3)),
             validation_cost_total: Number(totalValidationCost.toFixed(3)),
             enrichment_cost_total: Number(totalEnrichmentCost.toFixed(3)),
-            raw_candidates: totalRawDiscovered,
-            previously_delivered_filtered: historicalFilteredCount,
-            sources_used: sourcesUsed,
-            census_density_score: censusIntelligence?.density_score ?? null,
           },
         })
         .eq("id", jobId);
     }
 
-    await supabase
-      .from("discovery_jobs")
-      .update({
-        current_stage: "storing_results",
-        progress: 90,
-      })
-      .eq("id", jobId);
+    if (!isExhausted) {
+      await supabase
+        .from("discovery_jobs")
+        .update({
+          current_stage: "storing_results",
+          progress: 90,
+        })
+        .eq("id", jobId);
+    }
 
     const campaignInsert = await supabase
       .from("campaigns")
@@ -1710,28 +1718,28 @@ async function processDiscoveryJob(
         enrichedLeads.length
       : 0;
 
+    const finalMetrics = {
+      ...sharedMetrics,
+      total_found: enrichedLeads.length,
+      total_cost: Number(totalCost.toFixed(3)),
+      validation_cost_total: Number(totalValidationCost.toFixed(3)),
+      enrichment_cost_total: Number(totalEnrichmentCost.toFixed(3)),
+      avg_confidence: Number(averageConfidence.toFixed(1)),
+      tier_key: config.tier.key,
+      tier_name: config.tier.name,
+      tier_price: config.tier.pricePerLead,
+      leads_enriched: enrichedLeads.length,
+    };
+
     await supabase
       .from("discovery_jobs")
       .update({
         status: "completed",
+        current_stage: isExhausted ? "exhausted_results" : "completed",
         progress: 100,
         completed_at: new Date().toISOString(),
         results: enrichedLeads,
-        metrics: {
-          total_found: enrichedLeads.length,
-          qualified_leads: qualifiedLeads.length,
-          total_cost: Number(totalCost.toFixed(3)),
-          validation_cost_total: Number(totalValidationCost.toFixed(3)),
-          enrichment_cost_total: Number(totalEnrichmentCost.toFixed(3)),
-          avg_confidence: Number(averageConfidence.toFixed(1)),
-          tier_key: config.tier.key,
-          tier_name: config.tier.name,
-          tier_price: config.tier.pricePerLead,
-          raw_candidates: totalRawDiscovered,
-          previously_delivered_filtered: historicalFilteredCount,
-          sources_used: sourcesUsed,
-          census_density_score: censusIntelligence?.density_score ?? null,
-        },
+        metrics: finalMetrics,
       })
       .eq("id", jobId);
 
