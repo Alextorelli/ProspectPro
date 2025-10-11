@@ -32,6 +32,8 @@ const jwksCache: JwksCache = {
 
 const cryptoKeyCache = new Map<string, CryptoKey>();
 
+type KidJsonWebKey = JsonWebKey & { kid?: string };
+
 export interface AuthenticatedRequestContext {
   supabaseUrl: string;
   supabaseAnonKey: string;
@@ -46,15 +48,35 @@ export interface AuthenticatedRequestContext {
   tokenClaims: JwtPayload;
 }
 
-function getEnvFallback(names: string[], label: string): string {
+interface AuthDiagnostics {
+  envSources: Record<string, string>;
+  tokenPreview: string | null;
+}
+
+function maskSecret(value: string): string {
+  if (value.length <= 8) {
+    return "****";
+  }
+  return `${value.slice(0, 4)}…${value.slice(-4)}`;
+}
+
+function getEnvFallback(
+  names: string[],
+  label: string,
+  diagnostics?: AuthDiagnostics
+): string {
   for (const name of names) {
     const value = Deno.env.get(name);
     if (value) {
+      if (diagnostics) {
+        diagnostics.envSources[label] = name;
+      }
       if (name !== names[0]) {
         console.log(
           `ℹ️ Using fallback environment variable ${name} for ${label}`
         );
       }
+      console.log(`🔐 ${label} resolved from ${name} (${maskSecret(value)})`);
       return value;
     }
   }
@@ -120,7 +142,7 @@ async function getCryptoKeyForKid(
     return cached;
   }
 
-  const keys = await fetchJwks(jwksUrl);
+  const keys = (await fetchJwks(jwksUrl)) as KidJsonWebKey[];
   const jwk = keys.find((key) => key.kid === kid);
 
   if (!jwk) {
@@ -167,8 +189,8 @@ async function verifyAndDecodeJwt(
   const verified = await crypto.subtle.verify(
     { name: "ECDSA", hash: { name: "SHA-256" } },
     cryptoKey,
-    signature,
-    data
+    signature as unknown as BufferSource,
+    data as unknown as BufferSource
   );
 
   if (!verified) {
@@ -198,99 +220,128 @@ function extractBearerToken(rawValue: string | null): string | null {
 export async function authenticateRequest(
   req: Request
 ): Promise<AuthenticatedRequestContext> {
-  const supabaseUrl = getEnvFallback(
-    ["SUPABASE_URL", "EDGE_SUPABASE_URL"],
-    "SUPABASE_URL"
-  );
-  const supabaseAnonKey = getEnvFallback(
-    ["EDGE_SUPABASE_ANON_KEY", "EDGE_ANON_KEY", "SUPABASE_ANON_KEY"],
-    "SUPABASE_ANON_KEY"
-  );
-  const supabaseServiceRoleKey = getEnvFallback(
-    [
-      "EDGE_SUPABASE_SERVICE_ROLE_KEY",
-      "EDGE_SERVICE_ROLE_KEY",
-      "SUPABASE_SERVICE_ROLE_KEY",
-    ],
-    "SUPABASE_SERVICE_ROLE_KEY"
-  );
+  const diagnostics: AuthDiagnostics = { envSources: {}, tokenPreview: null };
+  let debugStage = "resolve_env";
 
-  const authHeader = extractBearerToken(req.headers.get("Authorization"));
-  const sessionHeader = extractBearerToken(
-    req.headers.get("x-prospect-session")
-  );
-
-  const accessToken = authHeader ?? sessionHeader;
-  if (!accessToken) {
-    throw new Error("Missing bearer token on request");
-  }
-
-  const jwksUrl = `${supabaseUrl.replace(
-    /\/$/,
-    ""
-  )}/auth/v1/.well-known/jwks.json`;
-  const { payload: tokenClaims } = await verifyAndDecodeJwt(
-    accessToken,
-    jwksUrl
-  );
-
-  const userId = typeof tokenClaims.sub === "string" ? tokenClaims.sub : null;
-  if (!userId) {
-    throw new Error("JWT payload missing subject claim");
-  }
-
-  const adminClient = createClient(supabaseUrl, supabaseServiceRoleKey, {
-    auth: { persistSession: false },
-  });
-
-  const { data: adminData, error: adminError } =
-    await adminClient.auth.admin.getUserById(userId);
-
-  if (adminError || !adminData?.user) {
-    throw new Error(
-      `Authentication failed: ${adminError?.message ?? "No user found"}`
+  try {
+    const supabaseUrl = getEnvFallback(
+      ["SUPABASE_URL", "EDGE_SUPABASE_URL"],
+      "SUPABASE_URL",
+      diagnostics
     );
-  }
+    const supabaseAnonKey = getEnvFallback(
+      ["EDGE_SUPABASE_ANON_KEY", "EDGE_ANON_KEY", "SUPABASE_ANON_KEY"],
+      "SUPABASE_ANON_KEY",
+      diagnostics
+    );
+    const supabaseServiceRoleKey = getEnvFallback(
+      [
+        "EDGE_SUPABASE_SERVICE_ROLE_KEY",
+        "EDGE_SERVICE_ROLE_KEY",
+        "SUPABASE_SERVICE_ROLE_KEY",
+      ],
+      "SUPABASE_SERVICE_ROLE_KEY",
+      diagnostics
+    );
 
-  const user = adminData.user;
+    debugStage = "extract_token";
+    const authHeader = extractBearerToken(req.headers.get("Authorization"));
+    const sessionHeader = extractBearerToken(
+      req.headers.get("x-prospect-session")
+    );
 
-  const supabaseClient = createClient(supabaseUrl, supabaseAnonKey, {
-    auth: { persistSession: false },
-    global: {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
+    const accessToken = authHeader ?? sessionHeader;
+    if (!accessToken) {
+      throw new Error("Missing bearer token on request");
+    }
+
+    diagnostics.tokenPreview = `${accessToken.slice(0, 8)}…${accessToken.slice(
+      -6
+    )}`;
+
+    debugStage = "verify_jwt";
+    const jwksUrl = `${supabaseUrl.replace(
+      /\/$/,
+      ""
+    )}/auth/v1/.well-known/jwks.json`;
+    const { payload: tokenClaims } = await verifyAndDecodeJwt(
+      accessToken,
+      jwksUrl
+    );
+
+    const userId = typeof tokenClaims.sub === "string" ? tokenClaims.sub : null;
+    if (!userId) {
+      throw new Error("JWT payload missing subject claim");
+    }
+
+    debugStage = "load_user";
+    const adminClient = createClient(supabaseUrl, supabaseServiceRoleKey, {
+      auth: { persistSession: false },
+    });
+
+    const { data: adminData, error: adminError } =
+      await adminClient.auth.admin.getUserById(userId);
+
+    if (adminError || !adminData?.user) {
+      throw new Error(
+        `Authentication failed: ${adminError?.message ?? "No user found"}`
+      );
+    }
+
+    const user = adminData.user;
+
+    debugStage = "create_client";
+    const supabaseClient = createClient(supabaseUrl, supabaseAnonKey, {
+      auth: { persistSession: false },
+      global: {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
       },
-    },
-  });
+    });
 
-  const sessionId =
-    typeof tokenClaims.session_id === "string"
-      ? (tokenClaims.session_id as string)
-      : null;
-  const isAnonymous =
-    typeof user.is_anonymous === "boolean"
-      ? user.is_anonymous
-      : Boolean(tokenClaims.is_anonymous);
-  const email =
-    typeof user.email === "string"
-      ? user.email
-      : typeof tokenClaims.email === "string"
-      ? (tokenClaims.email as string)
-      : null;
+    debugStage = "finalize";
+    const sessionId =
+      typeof tokenClaims.session_id === "string"
+        ? (tokenClaims.session_id as string)
+        : null;
+    const isAnonymous =
+      typeof user.is_anonymous === "boolean"
+        ? user.is_anonymous
+        : Boolean(tokenClaims.is_anonymous);
+    const email =
+      typeof user.email === "string"
+        ? user.email
+        : typeof tokenClaims.email === "string"
+        ? (tokenClaims.email as string)
+        : null;
 
-  return {
-    supabaseUrl,
-    supabaseAnonKey,
-    supabaseServiceRoleKey,
-    supabaseClient,
-    accessToken,
-    user,
-    userId: user.id,
-    email,
-    isAnonymous,
-    sessionId,
-    tokenClaims,
-  };
+    return {
+      supabaseUrl,
+      supabaseAnonKey,
+      supabaseServiceRoleKey,
+      supabaseClient,
+      accessToken,
+      user,
+      userId: user.id,
+      email,
+      isAnonymous,
+      sessionId,
+      tokenClaims,
+    };
+  } catch (error) {
+    console.error("❌ authenticateRequest failure", {
+      stage: debugStage,
+      envSources: diagnostics.envSources,
+      tokenPreview: diagnostics.tokenPreview,
+      error: error instanceof Error ? error.message : String(error),
+    });
+
+    if (error instanceof Error) {
+      throw new Error(`Auth failure (${debugStage}): ${error.message}`);
+    }
+    throw new Error(`Auth failure (${debugStage})`);
+  }
 }
 
 export const corsHeaders = {

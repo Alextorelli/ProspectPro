@@ -1,6 +1,10 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { corsHeaders, handleCORS } from "../_shared/edge-auth.ts";
+import type { AuthenticatedRequestContext } from "../_shared/edge-auth.ts";
+import {
+  authenticateRequest,
+  corsHeaders,
+  handleCORS,
+} from "../_shared/edge-auth.ts";
 
 // Business Discovery with User-Campaign Linking
 // October 4, 2025 - Complete authentication and user management
@@ -37,6 +41,77 @@ interface BusinessLead {
       processingStrategy: string;
     };
   };
+}
+
+interface RawBusiness {
+  name?: string;
+  businessName?: string;
+  formatted_address?: string;
+  address?: string;
+  formatted_phone_number?: string;
+  phone?: string;
+  website?: string;
+  email?: string;
+  place_id?: string;
+  [key: string]: unknown;
+}
+
+interface EnrichmentEmail {
+  email?: string;
+  verified?: boolean;
+}
+
+type BaseEnhancementData = BusinessLead["enhancementData"];
+type BaseProcessingMetadata = BaseEnhancementData["processingMetadata"];
+
+interface EnhancedProcessingMetadata extends BaseProcessingMetadata {
+  enrichmentCostBreakdown?: unknown;
+  servicesUsed?: string[];
+  servicesSkipped?: string[];
+}
+
+type EnrichedEnhancementData = BaseEnhancementData & {
+  hunterVerified?: boolean;
+  neverBounceVerified?: boolean;
+  processingMetadata: EnhancedProcessingMetadata;
+};
+
+type EnrichedLead = BusinessLead & {
+  emails?: EnrichmentEmail[];
+  businessLicense?: { isValid?: boolean } | null;
+  enhancementData: EnrichedEnhancementData;
+};
+
+interface OrchestratorSuccessPayload {
+  success: true;
+  totalCost: number;
+  confidenceScore?: number;
+  enrichedData?: {
+    emails?: EnrichmentEmail[];
+    businessLicense?: { isValid?: boolean } | null;
+  };
+  processingMetadata: {
+    servicesUsed: string[];
+    servicesSkipped?: string[];
+  };
+  costBreakdown?: unknown;
+}
+
+interface OrchestratorFailurePayload {
+  success: false;
+  error?: string;
+}
+
+type OrchestratorResponse =
+  | OrchestratorSuccessPayload
+  | OrchestratorFailurePayload;
+
+interface DatabaseStorageResult {
+  success: boolean;
+  error: string | null;
+  campaign_stored: boolean;
+  leads_error: string | null;
+  leads_stored: number;
 }
 
 // Helper function to get or extract user ID from request
@@ -90,7 +165,7 @@ class UserAwareQualityScorer {
     this.maxCostPerBusiness = options.maxCostPerBusiness || 2.0;
   }
 
-  scoreBusiness(business: any): BusinessLead {
+  scoreBusiness(business: RawBusiness): BusinessLead {
     const businessName = business.name || business.businessName || "";
     const address = business.formatted_address || business.address || "";
     const phone = business.formatted_phone_number || business.phone || "";
@@ -138,7 +213,7 @@ async function discoverBusinesses(
   businessType: string,
   location: string,
   maxResults: number
-): Promise<any[]> {
+): Promise<RawBusiness[]> {
   const apiKey = Deno.env.get("GOOGLE_PLACES_API_KEY");
 
   if (!apiKey) {
@@ -167,18 +242,20 @@ async function discoverBusinesses(
     throw new Error(`Google Places API failed: ${searchData.status}`);
   }
 
-  const results = searchData.results.slice(0, maxResults);
+  const results = Array.isArray(searchData.results)
+    ? (searchData.results as RawBusiness[]).slice(0, maxResults)
+    : [];
   console.log(
     `📊 Found ${results.length} businesses, enriching with Place Details...`
   );
 
   // Step 2: Enrich each business with Place Details API for complete contact info
-  const enrichedBusinesses = [];
+  const enrichedBusinesses: RawBusiness[] = [];
   for (const business of results) {
     try {
       const placeId = business.place_id;
       if (!placeId) {
-        enrichedBusinesses.push(business);
+        enrichedBusinesses.push({ ...business });
         continue;
       }
 
@@ -200,11 +277,11 @@ async function discoverBusinesses(
         });
       } else {
         // Keep original data if Place Details fails
-        enrichedBusinesses.push(business);
+        enrichedBusinesses.push({ ...business });
       }
     } catch (error) {
       console.error(`⚠️ Place Details error for ${business.name}:`, error);
-      enrichedBusinesses.push(business); // Keep partial data
+      enrichedBusinesses.push({ ...business }); // Keep partial data
     }
   }
 
@@ -223,47 +300,28 @@ serve(async (req) => {
   try {
     const startTime = Date.now();
 
-    // Create Supabase client with user's JWT token for validation
-    const authHeader = req.headers.get("Authorization");
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
-
-    // Create client with user's token to validate authentication
-    const supabaseClient = createClient(supabaseUrl, supabaseAnonKey, {
-      global: authHeader ? { headers: { Authorization: authHeader } } : {},
-      auth: {
-        persistSession: false,
-        autoRefreshToken: false,
-      },
-    });
-
-    // Try to validate user session (optional - don't fail if no user)
-    const {
-      data: { user },
-      error: authError,
-    } = await supabaseClient.auth.getUser();
-
-    // Log authentication status
-    if (authError) {
-      console.log("⚠️  Auth warning:", authError.message);
-    }
-
-    if (user) {
-      console.log(
-        `✅ Authenticated user: ${user.id} (anonymous: ${
-          user.is_anonymous || false
-        })`
+    let authContext: AuthenticatedRequestContext;
+    try {
+      authContext = await authenticateRequest(req);
+    } catch (authError) {
+      console.error("❌ User-aware discovery authentication failed", authError);
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error:
+            authError instanceof Error
+              ? authError.message
+              : "Authentication failed",
+        }),
+        {
+          status: 401,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
       );
-    } else {
-      console.log("ℹ️  No authenticated user, proceeding with public access");
     }
 
-    // Use the supabaseClient for database operations (has user context if authenticated)
-    const authContext = {
-      client: supabaseClient,
-      isValid: true,
-      keyFormat: "supabase_client",
-    };
+    const supabaseClient = authContext.supabaseClient;
+    const user = authContext.user;
 
     // Parse request
     const requestData: BusinessDiscoveryRequest = await req.json();
@@ -280,16 +338,10 @@ serve(async (req) => {
     );
 
     // Get user context from authenticated user (if available)
-    const userContext = getUserContext(
-      req,
-      requestData,
-      user
-        ? {
-            userId: user.id,
-            isAnonymous: user.is_anonymous || false,
-          }
-        : undefined
-    );
+    const userContext = getUserContext(req, requestData, {
+      userId: user.id,
+      isAnonymous: authContext.isAnonymous,
+    });
     console.log(`👤 User Context:`, userContext);
 
     // Initialize components
@@ -306,7 +358,7 @@ serve(async (req) => {
     console.log(`📊 Found ${rawBusinesses.length} businesses`);
 
     // Step 2: Score and filter businesses
-    const scoredBusinesses = rawBusinesses.map((business: any) =>
+    const scoredBusinesses = rawBusinesses.map((business: RawBusiness) =>
       qualityScorer.scoreBusiness(business)
     );
     const qualifiedLeads = scoredBusinesses
@@ -322,7 +374,7 @@ serve(async (req) => {
       `🔄 Starting progressive enrichment for ${qualifiedLeads.length} leads...`
     );
 
-    const enrichedLeads = [];
+    const enrichedLeads: EnrichedLead[] = [];
     let enrichmentTotalCost = 0;
 
     for (const lead of qualifiedLeads) {
@@ -364,7 +416,8 @@ serve(async (req) => {
         });
 
         if (enrichmentResponse.ok) {
-          const enrichmentData = await enrichmentResponse.json();
+          const enrichmentData =
+            (await enrichmentResponse.json()) as OrchestratorResponse;
           console.log(
             `✅ Enrichment response for ${lead.businessName}:`,
             JSON.stringify(enrichmentData).substring(0, 200)
@@ -389,9 +442,10 @@ serve(async (req) => {
                   ...lead.enhancementData.verificationSources,
                   ...enrichmentData.processingMetadata.servicesUsed,
                 ],
-                hunterVerified: enrichmentData.enrichedData?.emails?.length > 0,
+                hunterVerified:
+                  (enrichmentData.enrichedData?.emails?.length ?? 0) > 0,
                 neverBounceVerified: enrichmentData.enrichedData?.emails?.some(
-                  (e: any) => e.verified
+                  (email: EnrichmentEmail) => email.verified
                 ),
                 licenseVerified:
                   enrichmentData.enrichedData?.businessLicense?.isValid ||
@@ -444,7 +498,7 @@ serve(async (req) => {
     const totalCost =
       enrichmentTotalCost +
       qualifiedLeads.reduce(
-        (sum: number, lead: BusinessLead) => sum + lead.validationCost,
+        (sum: number, lead: EnrichedLead) => sum + lead.validationCost,
         0
       );
 
@@ -454,8 +508,8 @@ serve(async (req) => {
       .substr(2, 9)}`;
 
     // Store in database with user context and enriched data
-    let dbStorageResult = null;
-    if (authContext.client) {
+    let dbStorageResult: DatabaseStorageResult | null = null;
+    if (supabaseClient) {
       try {
         // Prepare campaign data with user context
         const campaignData = {
@@ -477,22 +531,29 @@ serve(async (req) => {
             }),
         };
 
-        const { error: campaignError } = await authContext.client
+        const { error: campaignError } = await supabaseClient
           .from("campaigns")
           .insert(campaignData);
 
         if (campaignError) {
-          dbStorageResult = { success: false, error: campaignError.message };
+          dbStorageResult = {
+            success: false,
+            error: campaignError.message,
+            campaign_stored: false,
+            leads_error: campaignError.message,
+            leads_stored: 0,
+          };
         } else {
           dbStorageResult = {
             success: true,
+            error: null,
             campaign_stored: true,
             leads_error: null,
             leads_stored: 0,
           };
 
           // Store enriched leads with user context
-          const leadsData = enrichedLeads.map((lead: any) => ({
+          const leadsData = enrichedLeads.map((lead: EnrichedLead) => ({
             campaign_id: campaignId,
             business_name: lead.businessName,
             address: lead.address,
@@ -512,13 +573,15 @@ serve(async (req) => {
               }),
           }));
 
-          const { error: leadsError } = await authContext.client
+          const { error: leadsError } = await supabaseClient
             .from("leads")
             .insert(leadsData);
 
           if (leadsError) {
-            dbStorageResult.leads_error = leadsError.message;
-          } else {
+            if (dbStorageResult) {
+              dbStorageResult.leads_error = leadsError.message;
+            }
+          } else if (dbStorageResult) {
             dbStorageResult.leads_stored = leadsData.length;
           }
         }
@@ -541,12 +604,13 @@ serve(async (req) => {
       discoveryEngine:
         "ProspectPro Business Discovery v4.2 - User-Aware with Progressive Enrichment",
       authentication: {
-        keyFormat: authContext.keyFormat,
-        isValid: authContext.isValid,
-        userContext: {
-          isAuthenticated: userContext.isAuthenticated,
-          hasUserId: !!userContext.userId,
-          hasEmail: !!userContext.userEmail,
+        userId: user.id,
+        email: authContext.email,
+        isAnonymous: authContext.isAnonymous,
+        sessionId: authContext.sessionId,
+        tokenClaims: {
+          hasSub: typeof authContext.tokenClaims.sub === "string",
+          hasEmail: typeof authContext.tokenClaims.email === "string",
         },
       },
       requirements: {
@@ -563,16 +627,21 @@ serve(async (req) => {
           (enrichedLeads.length / rawBusinesses.length) *
           100
         ).toFixed(1)}%`,
-        averageConfidence: Math.round(
-          enrichedLeads.reduce(
-            (sum: number, lead: any) => sum + lead.optimizedScore,
-            0
-          ) / enrichedLeads.length
-        ),
-        emailsDiscovered: enrichedLeads.filter((lead: any) => lead.email)
-          .length,
+        averageConfidence:
+          enrichedLeads.length > 0
+            ? Math.round(
+                enrichedLeads.reduce(
+                  (sum: number, lead: EnrichedLead) =>
+                    sum + lead.optimizedScore,
+                  0
+                ) / enrichedLeads.length
+              )
+            : 0,
+        emailsDiscovered: enrichedLeads.filter((lead: EnrichedLead) =>
+          Boolean(lead.email)
+        ).length,
         licensesVerified: enrichedLeads.filter(
-          (lead: any) => lead.businessLicense?.isValid
+          (lead: EnrichedLead) => lead.businessLicense?.isValid
         ).length,
       },
       userManagement: {
