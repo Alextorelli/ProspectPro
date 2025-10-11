@@ -141,9 +141,8 @@ export const useBusinessDiscovery = (
           await supabase.functions.invoke("business-discovery-background", {
             body: requestBody,
             headers: {
-              Authorization: `Bearer ${accessToken}`,
               "Content-Type": "application/json",
-              "x-prospect-session": accessToken,
+              "x-prospect-session": `Bearer ${accessToken}`,
             },
           });
 
