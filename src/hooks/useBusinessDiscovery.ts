@@ -5,10 +5,12 @@ import {
   ENRICHMENT_TIERS,
   ensureSession,
   getSessionToken,
+  invokeWithSession,
   supabase,
 } from "../lib/supabase";
 import { useCampaignStore } from "../stores/campaignStore";
 import type {
+  BackgroundDiscoveryInvokeResponse,
   BusinessDiscoveryResponse,
   BusinessLead,
   CampaignConfig,
@@ -342,13 +344,13 @@ export const useBusinessDiscovery = (
         });
 
         const { data: rawResponse, error: invokeError } =
-          await supabase.functions.invoke("business-discovery-background", {
-            body: requestBody,
-            headers: {
-              "Content-Type": "application/json",
-              "x-prospect-session": `Bearer ${accessToken}`,
-            },
-          });
+          await invokeWithSession<BackgroundDiscoveryInvokeResponse>(
+            "business-discovery-background",
+            requestBody,
+            {
+              token: accessToken,
+            }
+          );
 
         const invokeContext = (invokeError as any)?.context;
         let errorPayload: unknown = null;
@@ -403,34 +405,29 @@ export const useBusinessDiscovery = (
             "⚠️ Falling back to legacy user-aware discovery due to Invalid JWT"
           );
 
-          const legacyResult = await supabase.functions.invoke(
-            "business-discovery-user-aware",
-            {
-              body: {
-                ...requestBody,
-                // Legacy function expects these identifiers in payload
-                sessionUserId: user.id,
-                userId: user.id,
-              },
-              headers: {
-                "Content-Type": "application/json",
-                // Let Supabase SDK attach Authorization header automatically
-              },
-            }
-          );
+          const legacyRequestBody = {
+            ...requestBody,
+            // Legacy function expects these identifiers in payload
+            sessionUserId: user.id,
+            userId: user.id,
+          };
 
-          if (legacyResult.error) {
-            console.error(
-              "❌ Legacy discovery invoke failed:",
-              legacyResult.error
+          const { data: legacyPayload, error: legacyError } =
+            await invokeWithSession<LegacyDiscoveryRaw>(
+              "business-discovery-user-aware",
+              legacyRequestBody,
+              {
+                token: accessToken,
+              }
             );
+
+          if (legacyError) {
+            console.error("❌ Legacy discovery invoke failed:", legacyError);
             throw new Error(
-              legacyResult.error.message ||
+              legacyError.message ||
                 "Legacy discovery fallback failed with unknown error."
             );
           }
-
-          const legacyPayload = legacyResult.data as LegacyDiscoveryRaw | null;
 
           if (!legacyPayload) {
             throw new Error("Legacy discovery returned no data");
@@ -478,13 +475,30 @@ export const useBusinessDiscovery = (
           );
         }
 
-        if (!rawResponse?.success) {
+        if (!rawResponse) {
+          throw new Error("No data returned from background discovery");
+        }
+
+        if (!rawResponse.success) {
           const fallbackMessage =
-            typeof rawResponse?.error === "string"
+            typeof rawResponse.error === "string"
               ? rawResponse.error
-              : "No data returned from background discovery";
+              : "Background discovery did not confirm success.";
           throw new Error(fallbackMessage);
         }
+
+        if (!rawResponse.campaignId || !rawResponse.jobId) {
+          throw new Error(
+            "Background discovery response missing job metadata."
+          );
+        }
+
+        const normalizedEstimatedTime =
+          typeof rawResponse.estimatedTime === "number"
+            ? rawResponse.estimatedTime
+            : undefined;
+
+        const normalizedStatus = rawResponse.status ?? "processing";
 
         console.log("✅ Background discovery response:", rawResponse);
 
@@ -493,8 +507,8 @@ export const useBusinessDiscovery = (
         const transformedData: DiscoveryResultWithLegacy = {
           campaign_id: rawResponse.campaignId,
           job_id: rawResponse.jobId, // New: job ID for tracking progress
-          status: rawResponse.status, // New: processing status
-          estimated_time: rawResponse.estimatedTime, // New: estimated completion time
+          status: normalizedStatus, // New: processing status
+          estimated_time: normalizedEstimatedTime, // New: estimated completion time
           realtime_channel: rawResponse.realtimeChannel, // New: for real-time updates
           total_found: 0, // Will be updated via real-time
           qualified_count: 0, // Will be updated via real-time

@@ -4,13 +4,6 @@ import type {
 } from "https://esm.sh/@supabase/supabase-js@2.38.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.38.0";
 
-const JWKS_CACHE_TTL_MS = 5 * 60 * 1000;
-
-type JwtHeader = {
-  kid?: string;
-  alg?: string;
-};
-
 type JwtPayload = Record<string, unknown> & {
   sub?: string;
   email?: string;
@@ -19,20 +12,6 @@ type JwtPayload = Record<string, unknown> & {
   session_id?: string;
   is_anonymous?: boolean;
 };
-
-interface JwksCache {
-  fetchedAt: number;
-  keys: JsonWebKey[];
-}
-
-const jwksCache: JwksCache = {
-  fetchedAt: 0,
-  keys: [],
-};
-
-const cryptoKeyCache = new Map<string, CryptoKey>();
-
-type KidJsonWebKey = JsonWebKey & { kid?: string };
 
 export interface AuthenticatedRequestContext {
   supabaseUrl: string;
@@ -107,106 +86,65 @@ function parseJwtSegment<T = Record<string, unknown>>(segment: string): T {
   return JSON.parse(decoded) as T;
 }
 
-async function fetchJwks(jwksUrl: string): Promise<JsonWebKey[]> {
-  const now = Date.now();
-  if (jwksCache.keys.length && now - jwksCache.fetchedAt < JWKS_CACHE_TTL_MS) {
-    return jwksCache.keys;
-  }
-
-  const response = await fetch(jwksUrl, {
-    headers: { Accept: "application/json" },
-  });
-
-  if (!response.ok) {
-    throw new Error(
-      `Failed to fetch JWKS: ${response.status} ${response.statusText}`
-    );
-  }
-
-  const { keys } = (await response.json()) as { keys: JsonWebKey[] };
-  if (!Array.isArray(keys) || keys.length === 0) {
-    throw new Error("JWKS response did not contain any keys");
-  }
-
-  jwksCache.keys = keys;
-  jwksCache.fetchedAt = now;
-  return keys;
+interface SupabaseEnv {
+  url: string;
+  anonKey: string;
+  serviceRoleKey: string;
 }
 
-async function getCryptoKeyForKid(
-  kid: string,
-  jwksUrl: string
-): Promise<CryptoKey> {
-  const cached = cryptoKeyCache.get(kid);
-  if (cached) {
-    return cached;
-  }
-
-  const keys = (await fetchJwks(jwksUrl)) as KidJsonWebKey[];
-  const jwk = keys.find((key) => key.kid === kid);
-
-  if (!jwk) {
-    throw new Error(`Unable to locate signing key for kid: ${kid}`);
-  }
-
-  const cryptoKey = await crypto.subtle.importKey(
-    "jwk",
-    jwk,
-    { name: "ECDSA", namedCurve: "P-256" },
-    true,
-    ["verify"]
+function resolveSupabaseEnv(diagnostics: AuthDiagnostics): SupabaseEnv {
+  const url = getEnvFallback(
+    ["SUPABASE_URL", "EDGE_SUPABASE_URL"],
+    "SUPABASE_URL",
+    diagnostics
+  );
+  const anonKey = getEnvFallback(
+    ["EDGE_SUPABASE_ANON_KEY", "EDGE_ANON_KEY", "SUPABASE_ANON_KEY"],
+    "SUPABASE_ANON_KEY",
+    diagnostics
+  );
+  const serviceRoleKey = getEnvFallback(
+    [
+      "EDGE_SUPABASE_SERVICE_ROLE_KEY",
+      "EDGE_SERVICE_ROLE_KEY",
+      "SUPABASE_SERVICE_ROLE_KEY",
+    ],
+    "SUPABASE_SERVICE_ROLE_KEY",
+    diagnostics
   );
 
-  cryptoKeyCache.set(kid, cryptoKey);
-  return cryptoKey;
+  return { url, anonKey, serviceRoleKey };
 }
 
-async function verifyAndDecodeJwt(
-  token: string,
-  jwksUrl: string
-): Promise<{ header: JwtHeader; payload: JwtPayload }> {
-  const parts = token.split(".");
-  if (parts.length !== 3) {
-    throw new Error("Invalid JWT structure");
-  }
-
-  const [headerPart, payloadPart, signaturePart] = parts;
-  const header = parseJwtSegment<JwtHeader>(headerPart);
-  const payload = parseJwtSegment<JwtPayload>(payloadPart);
-
-  if (!header.kid) {
-    throw new Error("JWT missing key identifier (kid)");
-  }
-
-  if (header.alg && header.alg !== "ES256") {
-    throw new Error(`Unsupported JWT algorithm: ${header.alg}`);
-  }
-
-  const cryptoKey = await getCryptoKeyForKid(header.kid, jwksUrl);
-  const signature = base64UrlToUint8Array(signaturePart);
-  const data = new TextEncoder().encode(`${headerPart}.${payloadPart}`);
-
-  const verified = await crypto.subtle.verify(
-    { name: "ECDSA", hash: { name: "SHA-256" } },
-    cryptoKey,
-    signature as unknown as BufferSource,
-    data as unknown as BufferSource
+function extractAccessToken(
+  req: Request,
+  diagnostics: AuthDiagnostics
+): string {
+  const authHeader = extractBearerToken(req.headers.get("Authorization"));
+  const sessionHeader = extractBearerToken(
+    req.headers.get("x-prospect-session")
   );
 
-  if (!verified) {
-    throw new Error("Invalid JWT signature");
+  const token = authHeader ?? sessionHeader;
+  if (!token) {
+    throw new Error("Missing bearer token on request");
   }
 
-  const nowInSeconds = Math.floor(Date.now() / 1000);
-  if (typeof payload.exp === "number" && payload.exp < nowInSeconds) {
-    throw new Error("JWT has expired");
-  }
+  diagnostics.tokenPreview = `${token.slice(0, 8)}…${token.slice(-6)}`;
+  return token;
+}
 
-  if (typeof payload.nbf === "number" && payload.nbf > nowInSeconds) {
-    throw new Error("JWT not yet valid");
+function decodeJwtPayload(token: string): JwtPayload {
+  try {
+    const segments = token.split(".");
+    if (segments.length !== 3) {
+      return {};
+    }
+    return parseJwtSegment<JwtPayload>(segments[1]);
+  } catch (error) {
+    console.warn("Unable to decode JWT payload", error);
+    return {};
   }
-
-  return { header, payload };
 }
 
 function extractBearerToken(rawValue: string | null): string | null {
@@ -224,71 +162,19 @@ export async function authenticateRequest(
   let debugStage = "resolve_env";
 
   try {
-    const supabaseUrl = getEnvFallback(
-      ["SUPABASE_URL", "EDGE_SUPABASE_URL"],
-      "SUPABASE_URL",
-      diagnostics
-    );
-    const supabaseAnonKey = getEnvFallback(
-      ["EDGE_SUPABASE_ANON_KEY", "EDGE_ANON_KEY", "SUPABASE_ANON_KEY"],
-      "SUPABASE_ANON_KEY",
-      diagnostics
-    );
-    const supabaseServiceRoleKey = getEnvFallback(
-      [
-        "EDGE_SUPABASE_SERVICE_ROLE_KEY",
-        "EDGE_SERVICE_ROLE_KEY",
-        "SUPABASE_SERVICE_ROLE_KEY",
-      ],
-      "SUPABASE_SERVICE_ROLE_KEY",
-      diagnostics
-    );
+    const {
+      url: supabaseUrl,
+      anonKey: supabaseAnonKey,
+      serviceRoleKey,
+    } = resolveSupabaseEnv(diagnostics);
 
     debugStage = "extract_token";
-    const authHeader = extractBearerToken(req.headers.get("Authorization"));
-    const sessionHeader = extractBearerToken(
-      req.headers.get("x-prospect-session")
-    );
-
-    const accessToken = authHeader ?? sessionHeader;
-    if (!accessToken) {
-      throw new Error("Missing bearer token on request");
-    }
-
-    diagnostics.tokenPreview = `${accessToken.slice(0, 8)}…${accessToken.slice(
-      -6
-    )}`;
-
-    debugStage = "verify_jwt";
-    const jwksUrl = `${supabaseUrl.replace(
-      /\/$/,
-      ""
-    )}/auth/v1/.well-known/jwks.json`;
-    const { payload: tokenClaims } = await verifyAndDecodeJwt(
-      accessToken,
-      jwksUrl
-    );
-
-    const userId = typeof tokenClaims.sub === "string" ? tokenClaims.sub : null;
-    if (!userId) {
-      throw new Error("JWT payload missing subject claim");
-    }
-
-    debugStage = "load_user";
-    const adminClient = createClient(supabaseUrl, supabaseServiceRoleKey, {
-      auth: { persistSession: false },
+    console.log("🔐 Edge auth headers", {
+      hasAuthorization: Boolean(req.headers.get("Authorization")),
+      hasProspectSession: Boolean(req.headers.get("x-prospect-session")),
     });
 
-    const { data: adminData, error: adminError } =
-      await adminClient.auth.admin.getUserById(userId);
-
-    if (adminError || !adminData?.user) {
-      throw new Error(
-        `Authentication failed: ${adminError?.message ?? "No user found"}`
-      );
-    }
-
-    const user = adminData.user;
+    const accessToken = extractAccessToken(req, diagnostics);
 
     debugStage = "create_client";
     const supabaseClient = createClient(supabaseUrl, supabaseAnonKey, {
@@ -299,6 +185,19 @@ export async function authenticateRequest(
         },
       },
     });
+
+    debugStage = "load_user";
+    const { data: authData, error: authError } =
+      await supabaseClient.auth.getUser();
+
+    if (authError || !authData?.user) {
+      throw new Error(
+        `Authentication failed: ${authError?.message ?? "No user found"}`
+      );
+    }
+
+    const user = authData.user;
+    const tokenClaims = decodeJwtPayload(accessToken);
 
     debugStage = "finalize";
     const sessionId =
@@ -319,7 +218,7 @@ export async function authenticateRequest(
     return {
       supabaseUrl,
       supabaseAnonKey,
-      supabaseServiceRoleKey,
+      supabaseServiceRoleKey: serviceRoleKey,
       supabaseClient,
       accessToken,
       user,

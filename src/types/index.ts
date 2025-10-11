@@ -174,6 +174,17 @@ export interface BusinessDiscoveryResponse {
   current_stage?: string;
 }
 
+export interface BackgroundDiscoveryInvokeResponse {
+  success: boolean;
+  message?: string;
+  jobId?: string;
+  campaignId?: string;
+  status?: string;
+  estimatedTime?: string | number;
+  realtimeChannel?: string;
+  error?: string;
+}
+
 // Store Types
 export interface CampaignStore {
   campaigns: CampaignResult[];

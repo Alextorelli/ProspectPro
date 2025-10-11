@@ -160,3 +160,27 @@ export const ENRICHMENT_TIERS = {
     hasOwnershipData: true,
   },
 } as const;
+
+export async function invokeWithSession<T = unknown>(
+  functionName: string,
+  body: Record<string, unknown> | undefined,
+  options: {
+    token?: string | null;
+    headers?: Record<string, string>;
+  } = {}
+) {
+  const token = options.token ?? (await getSessionToken());
+  if (!token) {
+    throw new Error("Unable to determine Supabase session. Please sign in.");
+  }
+
+  return supabase.functions.invoke<T>(functionName, {
+    body,
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "x-prospect-session": `Bearer ${token}`,
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+}

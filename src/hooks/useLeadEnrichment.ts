@@ -1,7 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
-import { ensureSession, supabase } from "../lib/supabase";
+import { ensureSession, invokeWithSession } from "../lib/supabase";
 
 export interface EnrichmentConfig {
   businessName: string;
@@ -108,37 +108,34 @@ export const useLeadEnrichment = () => {
         };
 
         // Call enrichment orchestrator
-        const { data, error } = await supabase.functions.invoke(
+        const { data, error } = await invokeWithSession<EnrichmentResult>(
           "enrichment-orchestrator",
           {
-            body: {
-              businessName: config.businessName,
-              domain: config.domain
-                ?.replace(/^https?:\/\//, "")
-                .replace(/\/$/, ""),
-              address: config.address,
-              phone: config.phone,
-              website: config.website,
-              industry: config.industry,
-              state: config.state,
+            businessName: config.businessName,
+            domain: config.domain
+              ?.replace(/^https?:\/\//, "")
+              .replace(/\/$/, ""),
+            address: config.address,
+            phone: config.phone,
+            website: config.website,
+            industry: config.industry,
+            state: config.state,
 
-              // Progressive enrichment configuration (professional tier)
-              includeBusinessLicense: config.includeBusinessLicense ?? true,
-              discoverEmails: config.discoverEmails ?? true,
-              verifyEmails: config.verifyEmails ?? true,
-              includeCompanyEnrichment:
-                config.includeCompanyEnrichment ?? false,
-              includePersonEnrichment: config.includePersonEnrichment ?? false,
-              apolloEnrichment: config.apolloEnrichment ?? false,
+            // Progressive enrichment configuration (professional tier)
+            includeBusinessLicense: config.includeBusinessLicense ?? true,
+            discoverEmails: config.discoverEmails ?? true,
+            verifyEmails: config.verifyEmails ?? true,
+            includeCompanyEnrichment: config.includeCompanyEnrichment ?? false,
+            includePersonEnrichment: config.includePersonEnrichment ?? false,
+            apolloEnrichment: config.apolloEnrichment ?? false,
 
-              // Budget controls
-              maxCostPerBusiness: config.maxCostPerBusiness ?? 0.5,
-              minConfidenceScore: config.minConfidenceScore ?? 50,
-              tier: config.tier ?? "professional",
-              sessionUserId: user.id,
-              userId: user.id,
-              billingContext,
-            },
+            // Budget controls
+            maxCostPerBusiness: config.maxCostPerBusiness ?? 0.5,
+            minConfidenceScore: config.minConfidenceScore ?? 50,
+            tier: config.tier ?? "professional",
+            sessionUserId: user.id,
+            userId: user.id,
+            billingContext,
           }
         );
 
