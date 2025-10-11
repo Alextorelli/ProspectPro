@@ -364,22 +364,6 @@ When Alex asks about:
 - **"Campaign ownership"** → User-aware RLS policies with user_id and session_user_id
 - **"Data isolation"** → Database-level access control via RLS policies
 
-## IMMEDIATE CONTEXT (No Re-explanation Needed)
-
-When Alex asks about:
-
-- **"Deployment"** → Google Cloud Build automatic triggers (native integration)
-- **"Environment setup"** → Supabase Vault + Cloud Build substitution variables
-- **"Webhook configuration"** → 3 production endpoints already implemented (campaign-lifecycle, cost-alert, lead-enrichment)
-- **"API integration"** → All clients in `/modules/api-clients/` (Google Places, Hunter.io, NeverBounce, Foursquare)
-- **"Database issues"** → Supabase with comprehensive schema in `/database/`
-- **"Container problems"** → Multi-stage Dockerfile + Cloud Build optimization
-- **"Cost optimization"** → Enhanced Quality Scorer v3.0 with cost-efficient validation pipeline
-- **"Quality scoring"** → `/modules/validators/enhanced-quality-scorer.js` (35-45% qualification rates)
-- **"Build issues"** → Check Cloud Build logs in Google Cloud Console
-- **"Webhook setup"** → Follow `/docs/CLOUD_NATIVE_WEBHOOK_SETUP.md`
-- **"Testing"** → Use `npm run test` or check testing branch
-
 ## ALEX'S TECHNICAL PROFILE
 
 - **Background**: No coding experience but highly technical
@@ -437,18 +421,24 @@ Static Frontend → Supabase Edge Functions → Supabase Database
 ### Current Working Commands (USE THESE)
 
 ```bash
-# Edge Function deployment
-supabase functions deploy business-discovery
-supabase functions deploy campaign-export
+# Deploy production edge functions
+supabase functions deploy business-discovery-background
+supabase functions deploy business-discovery-optimized
+supabase functions deploy business-discovery-user-aware
+supabase functions deploy campaign-export-user-aware
+supabase functions deploy enrichment-orchestrator
 
-# Local development
-cd public && python3 -m http.server 8080
+# Frontend build & deploy
+npm run build
+vercel --prod
 
-# Static deployment
-npm run build:static
-gsutil rsync -r ./dist/ gs://prospectpro-static-frontend/
+# Stream background-discovery logs
+supabase logs functions \
+   --project-ref sriycekxdqnesdsgwiuc \
+   --slug business-discovery-background \
+   --tail
 
-# Database setup: Run SQL in Supabase dashboard
+# Database setup: run SQL directly in the Supabase dashboard
 ```
 
 ### API Integration Stack (WORKING)

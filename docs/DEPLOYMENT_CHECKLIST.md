@@ -1,143 +1,91 @@
-# 🚀 ProspectPro Cloud-Native Deployment Checklist
+# 🚀 ProspectPro Supabase/Vercel Deployment Checklist
 
-## 📋 **DEPLOYMENT FINALIZATION CHECKLIST**
+## 📋 Deployment Finalization Checklist
 
-### **Phase 1: Cloud Build Trigger Setup**
+### Phase 1: Preflight Verification
 
-- [ ] **Go to Google Cloud Console → Cloud Build → Triggers**
-- [ ] **Create New Trigger** with these settings:
-  - Name: `prospectpro-main-deploy`
-  - Event: Push to branch
-  - Repository: `Alextorelli/ProspectPro`
-  - Branch: `^main$`
-  - Configuration: Cloud Build configuration file (`cloudbuild.yaml`)
+- [ ] Confirm Supabase project `sriycekxdqnesdsgwiuc` has current Edge Function secrets (`GOOGLE_PLACES_API_KEY`, `HUNTER_IO_API_KEY`, `NEVERBOUNCE_API_KEY`, `FOURSQUARE_API_KEY`).
+- [ ] Confirm Vercel project `appsmithery/prospect-pro` points at the main branch and uses the static build output.
+- [ ] Pull latest `main`, ensure working tree is clean, and run `npm install` if dependencies changed.
+- [ ] Verify the frontend `.env` or config references `sb_publishable_your_key_here` style placeholders only.
 
-### **Phase 2: Configure Substitution Variables**
+### Phase 2: Deploy Supabase Edge Functions
 
-- [ ] **Add these substitution variables in the trigger:**
-  ```
-  _SUPABASE_URL = https://your-project.supabase.co
-  _SUPABASE_SECRET_KEY = your-supabase-service-role-key
-  _WEBHOOK_AUTH_TOKEN = your-secure-webhook-token (generate a strong token)
-  ```
-
-### **Phase 3: Verify Service Account Permissions**
-
-- [ ] **Ensure Cloud Build service account has:**
-  - Cloud Run Admin
-  - Artifact Registry Writer
-  - Service Account User
-
-### **Phase 4: Initial Deployment**
-
-- [ ] **Trigger deployment via git push:**
-  ```bash
-  git add .
-  git commit -m "trigger initial cloud deployment"
-  git push origin main
-  ```
-
-### **Phase 5: Monitor Deployment**
-
-- [ ] **Check build progress**: https://console.cloud.google.com/cloud-build/builds
-- [ ] **Verify Cloud Run service**: https://console.cloud.google.com/run
-- [ ] **⚠️ Important**: Health check may fail during build but deployment can still succeed
-- [ ] **Get your actual Cloud Run URL** from Cloud Run console (not the hardcoded one)
-
-### **Phase 5.5: Get Your Service URL**
-
-- [ ] **Go to Cloud Run Console**: https://console.cloud.google.com/run
-- [ ] **Find your `prospectpro` service**
-- [ ] **Copy the actual service URL** (format: `https://prospectpro-xxxxx-uc.a.run.app`)
-
-### **Phase 6: Configure Webhooks (Post-Deployment)**
-
-- [ ] **Update database configuration** (run in Supabase SQL Editor):
-  ```sql
-  -- Replace [YOUR_CLOUD_RUN_URL] with actual URL
-  ALTER DATABASE SET app.campaign_lifecycle_webhook_url = 'https://[YOUR_CLOUD_RUN_URL]/api/webhooks/campaign-lifecycle';
-  ALTER DATABASE SET app.cost_alert_webhook_url = 'https://[YOUR_CLOUD_RUN_URL]/api/webhooks/cost-alert';
-  ALTER DATABASE SET app.lead_enrichment_webhook_url = 'https://[YOUR_CLOUD_RUN_URL]/api/webhooks/lead-enrichment';
-  ALTER DATABASE SET app.webhook_token = '[YOUR_WEBHOOK_AUTH_TOKEN]';
-  ```
-
-### **Phase 7: Validation & Testing**
-
-- [ ] **Test health endpoints:**
+- [ ] Authenticate with Supabase CLI: `supabase login` (one-time on new machine).
+- [ ] Run `supabase functions list` to verify CLI connectivity.
+- [ ] Deploy production functions:
 
   ```bash
-  curl https://[YOUR_CLOUD_RUN_URL]/health
-  curl https://[YOUR_CLOUD_RUN_URL]/diag
-  curl https://[YOUR_CLOUD_RUN_URL]/ready
+  supabase functions deploy business-discovery-background
+  supabase functions deploy business-discovery-optimized
+  supabase functions deploy business-discovery-user-aware
+  supabase functions deploy enrichment-orchestrator
+  supabase functions deploy enrichment-neverbounce
+  supabase functions deploy enrichment-hunter
+  supabase functions deploy campaign-export-user-aware
   ```
 
-- [ ] **Test webhook endpoints:**
+- [ ] Confirm the Supabase dashboard lists the new deploy time for each function.
+
+### Phase 3: Build and Ship Frontend (Vercel)
+
+- [ ] Build production bundle locally: `npm run build` (outputs to `/dist`).
+- [ ] Preview the static build if desired: `npm run preview`.
+- [ ] Deploy to Vercel from the build directory:
 
   ```bash
-  curl https://[YOUR_CLOUD_RUN_URL]/api/webhooks/campaign-lifecycle/health
-  curl https://[YOUR_CLOUD_RUN_URL]/api/webhooks/cost-alert/health
-  curl https://[YOUR_CLOUD_RUN_URL]/api/webhooks/lead-enrichment/health
+  cd dist
+  vercel --prod
+  cd ..
   ```
 
-- [ ] **Test main API:**
+- [ ] Note the deployment URL; confirm the custom domain `prospect-fyhedobh1-appsmithery.vercel.app` points to the new build.
+
+### Phase 4: Post-Deployment Validation
+
+- [ ] Hit the production origin with a warm-up request: `curl -I https://prospect-fyhedobh1-appsmithery.vercel.app`.
+- [ ] Validate the Supabase session flow in the browser (login, discovery start, export download).
+- [ ] Tail function logs for regressions while triggering discovery:
+
   ```bash
-  curl -X POST https://[YOUR_CLOUD_RUN_URL]/api/business/discover-businesses \
-    -H "Content-Type: application/json" \
-    -d '{"businessType":"restaurant","location":"Austin, TX","maxResults":1}'
+  supabase logs functions \
+    --project-ref sriycekxdqnesdsgwiuc \
+    --slug business-discovery-background \
+    --tail
   ```
 
-## 🎯 **Success Criteria**
+- [ ] Trigger a background discovery via UI and confirm campaign + leads rows appear in Supabase tables.
+- [ ] Run the export flow and verify `dashboard_exports` records update with `completed` status.
 
-### **✅ Deployment Successful When:**
+### Phase 5: Acceptance Criteria
 
-- [ ] Cloud Build completes without errors
-- [ ] Cloud Run service is running and accessible
-- [ ] Health endpoints return 200 status
-- [ ] Database connection is established (`/ready` endpoint)
-- [ ] Webhook endpoints are accessible
-- [ ] Main API returns valid business discovery results
+- [ ] All functions deploy without CLI errors.
+- [ ] Vercel deploy finishes with status `READY` and no runtime errors in the activity log.
+- [ ] Campaign creation, lead enrichment, and CSV export succeed end-to-end using a real Supabase session token.
+- [ ] Supabase log tail shows only expected info-level entries (no auth or quota errors).
+- [ ] Browser console reports no unhandled exceptions during discovery/export.
 
-### **✅ Webhooks Working When:**
+## 📞 Troubleshooting Cheatsheet
 
-- [ ] Database triggers execute without errors
-- [ ] Webhook logs show successful HTTP 200 responses
-- [ ] Real-time campaign updates are processed
-- [ ] Cost alerts are triggered and handled
-- [ ] Lead enrichment automation is functioning
+- **Supabase deploy fails** → Re-run `supabase login`, ensure you are on the correct organization/project, and confirm local CLI version via `supabase --version`.
+- **Vercel deploy issues** → Run `vercel logs <deployment-url>` and confirm build output was from `/dist`.
+- **Auth errors** → Re-authenticate from the UI, verify publishable key matches Supabase dashboard, and check Edge Function logs for `auth.getUser` failures.
+- **Data missing** → Inspect Supabase tables (`campaigns`, `leads`, `dashboard_exports`) and ensure RLS policies are in effect; use the Supabase SQL editor for targeted queries.
 
-## 📞 **Troubleshooting Guide**
+## 🔗 Quick Reference Links
 
-### **Build Failures:**
+- Supabase Dashboard: https://supabase.com/dashboard
+- Supabase Functions URL: https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/
+- Vercel Project: https://vercel.com/appsmithery/prospect-pro
+- Production Frontend: https://prospect-fyhedobh1-appsmithery.vercel.app
+- GitHub Repository: https://github.com/Alextorelli/ProspectPro
 
-- Check Cloud Build logs for specific error messages
-- Verify substitution variables are correctly set
-- Ensure service account permissions are configured
+## 📚 Documentation References
 
-### **Runtime Errors:**
-
-- Check Cloud Run logs for application errors
-- Verify environment variables are injected correctly
-- Test database connectivity via `/diag` endpoint
-
-### **Webhook Issues:**
-
-- Verify webhook URLs are correctly configured in database
-- Check webhook authentication token matches
-- Monitor webhook execution logs in database
-
-## 🔗 **Quick Reference Links**
-
-- **Cloud Build Console**: https://console.cloud.google.com/cloud-build/builds
-- **Cloud Run Console**: https://console.cloud.google.com/run
-- **Supabase Dashboard**: https://supabase.com/dashboard
-- **GitHub Repository**: https://github.com/Alextorelli/ProspectPro
-
-## 📚 **Documentation References**
-
-- [`docs/CLOUD_BUILD_SETUP.md`](CLOUD_BUILD_SETUP.md) - Detailed setup guide
-- [`docs/CLOUD_NATIVE_WEBHOOK_SETUP.md`](CLOUD_NATIVE_WEBHOOK_SETUP.md) - Webhook configuration
-- [`docs/SUPABASE_ARCHITECTURE_VALIDATION.md`](SUPABASE_ARCHITECTURE_VALIDATION.md) - Architecture validation
+- [`docs/SUPABASE_ARCHITECTURE_VALIDATION.md`](SUPABASE_ARCHITECTURE_VALIDATION.md) — Validate the Supabase-first architecture decisions.
+- [`docs/SUPABASE_PRODUCTION_OPTIMIZATION_GUIDE.md`](SUPABASE_PRODUCTION_OPTIMIZATION_GUIDE.md) — Cost and performance checklist.
+- [`docs/EDGE_FUNCTION_AUTH_UPDATE_GUIDE.md`](EDGE_FUNCTION_AUTH_UPDATE_GUIDE.md) — Authentication and session handling reference.
 
 ---
 
-**Remember**: Your cloud-native architecture is production-ready. This checklist ensures proper configuration and validates the deployment is working correctly.
+Refer back to this checklist before every release cycle to keep production aligned with the Supabase-first deployment model.

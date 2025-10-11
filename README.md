@@ -186,6 +186,12 @@ supabase functions deploy business-discovery-background
 supabase functions deploy campaign-export-user-aware
 supabase functions deploy enrichment-orchestrator
 
+# Stream background discovery logs
+supabase logs functions \
+  --project-ref sriycekxdqnesdsgwiuc \
+  --slug business-discovery-background \
+  --tail
+
 # Build and deploy frontend
 npm run build
 cd dist && vercel --prod

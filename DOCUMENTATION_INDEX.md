@@ -34,15 +34,12 @@ ProspectPro v4.3 introduces the tier-aware background discovery pipeline with ze
 
 ### Active Production Functions (v4.3)
 
-- **Discovery**
-  1. `business-discovery-background` – Asynchronous discovery with tier controls _(primary path)_
-  2. `business-discovery-optimized` – Session-aware synchronous path for premium campaign validation
-  3. `business-discovery-user-aware` – Legacy synchronous endpoint maintained for historical clients
-- **Enrichment + Coordination** 4. `enrichment-hunter` – Hunter.io discovery with confidence scoring & caching 5. `enrichment-neverbounce` – NeverBounce verification (95% deliverability floor) 6. `enrichment-orchestrator` – Multi-service enrichment coordination & budgeting 7. `enrichment-business-license` / `enrichment-pdl` – Licensing + PDL enrichment modules (Enterprise/Compliance)
-- **Export** 8. `campaign-export-user-aware` – User-authorized CSV export with RLS isolation 9. `campaign-export` – Service-role export handler for internal automation
-- **Diagnostics** 10. `test-new-auth` – Supabase session diagnostics for the shared helper 11. `test-official-auth` – Mirrors Supabase reference implementation end-to-end 12. `test-business-discovery` – Session-scoped discovery smoke test 13. `test-google-places` – API verification harness
+- Discovery: `business-discovery-background` (primary), `business-discovery-optimized`, `business-discovery-user-aware`.
+- Enrichment: `enrichment-hunter`, `enrichment-neverbounce`, `enrichment-orchestrator`, `enrichment-business-license`, `enrichment-pdl`.
+- Export: `campaign-export-user-aware`, `campaign-export` (service-role only).
+- Diagnostics: `test-new-auth`, `test-official-auth`, `test-business-discovery`, `test-google-places`.
 
-> ℹ️ Session JWTs are mandatory for every authenticated Edge Function call. Refer to `EDGE_FUNCTION_AUTH_UPDATE_GUIDE.md` and `scripts/test-auth-patterns.sh` for validation workflows.
+> ℹ️ Session JWTs are mandatory for every authenticated Edge Function call. Use `EDGE_FUNCTION_AUTH_UPDATE_GUIDE.md` plus `scripts/test-auth-patterns.sh` to validate flows.
 
 ### Key Sources
 
@@ -86,17 +83,11 @@ ProspectPro v4.3 introduces the tier-aware background discovery pipeline with ze
 
 ## 🚀 Deployment Workflow
 
-1. Install dependencies: `npm install`
-2. Build frontend: `npm run build`
-3. Deploy static assets: from `/dist` run `vercel --prod`
-4. Deploy edge functions: `supabase functions deploy <name>`
-5. Verify using curl or the Supabase dashboard logs
-
-Supporting scripts:
-
-- `scripts/deploy-background-tasks.sh` – Batch deploy of background discovery stack
-- `scripts/test-background-tasks.sh` – Validates discovery + export loop
-- `scripts/repository-cleanup.sh` – Ensures Supabase-first project hygiene
+- Install dependencies: `npm install`.
+- Deploy functions: `supabase functions deploy <name>` for every active slug listed above.
+- Build frontend: `npm run build` (outputs `/dist`).
+- Ship frontend: from `/dist` run `vercel --prod`.
+- Verify: curl the production URL, tail Supabase logs, confirm campaigns + leads populate in Supabase tables.
 
 ---
 
@@ -122,12 +113,12 @@ Supporting scripts:
 
 ## 🛠️ Troubleshooting Quicklinks
 
-- **Publishable key or session mismatch:** See `NEED_ANON_KEY.md` (legacy) and `EDGE_FUNCTION_AUTH_UPDATE_GUIDE.md`
-- **Blank screen after campaign results:** Deploy the v4.3.1 build so the null-safe campaign store is active, then confirm the browser console is free of React 185 stacks.
-- **Edge function auth issues:** `EDGE_FUNCTION_AUTH_UPDATE_GUIDE.md`
-- **Deployment checklist:** `DEPLOYMENT_CHECKLIST.md`
-- **Environment sync:** `populate-secrets.sh`, `pull-env-from-secrets.js`
-- **MCP troubleshooting server:** `mcp-servers/` directory (see `README` inside)
+- Publishable key or session mismatch: `EDGE_FUNCTION_AUTH_UPDATE_GUIDE.md`, `NEED_ANON_KEY.md` (historical reference only).
+- Blank screen after campaign results: redeploy the v4.3.1 build, confirm React console warnings are cleared.
+- Edge function auth issues: `EDGE_FUNCTION_AUTH_UPDATE_GUIDE.md`, run `supabase logs functions --project-ref sriycekxdqnesdsgwiuc --slug <name> --tail`.
+- Deployment checklist: `DEPLOYMENT_CHECKLIST.md`.
+- Environment sync: `scripts/populate-secrets.sh`, `scripts/pull-env-from-secrets.js`.
+- MCP troubleshooting server: `mcp-servers/` (see local README).
 
 ---
 

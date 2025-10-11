@@ -208,3 +208,10 @@ modules/api-clients/companies-house-uk-client.js/.deno_lsp/
 *.buildlog
 cloudbuild-*.log
 .vercel
+
+# Generated caches & runtime noise
+/.deno_lsp/
+/logs/
+/tmp/
+/tmp2/
+/todo_tmp

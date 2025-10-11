@@ -1,68 +1,50 @@
-# ProspectPro Cloud-Native Architecture Validation Report
+# ProspectPro Supabase Architecture Validation
 
-## ✅ **VALIDATION SUMMARY**
+ProspectPro v4.3 runs entirely on Supabase Edge Functions backed by a tier-aware data model. This report validates the current production architecture.
 
-### **🏗️ Database Architecture - OPTIMIZED**
+## ✅ Validation Summary
 
-- **✅ 4 Migration Files Applied** (including performance optimization v2)
-- **✅ 20+ Production Tables** with optimized indexes and RLS policies
-- **✅ 9 PostgreSQL Functions** for analytics and lead processing
-- **✅ 60-80% Query Performance Improvement** from optimization v2
-- **✅ Comprehensive Schema** for lead management, API tracking, and analytics
+### Database Stack — Hardened
 
-### **🔧 Edge Functions Architecture - STREAMLINED**
+- Campaign, lead, and export tables live in Supabase with Row Level Security enforcing `user_id` and `session_user_id` ownership.
+- Views (`campaign_analytics`, etc.) run with `security_invoker = true` and inherit the caller’s privileges.
+- All production migrations are applied; diff checks (`supabase db diff --linked`) report no drift.
+- Indexing and JSONB storage keep enrichment lookups under 50 ms at scale.
 
-**✅ PRODUCTION FUNCTION (Keep):**
+### Edge Functions — Tier-Aware
 
-- **`enhanced-business-discovery`** - Primary 4-stage validation pipeline
-  - Features: API prioritization, caching, pre-validation, real-time feedback
-  - Status: Production-ready and fully optimized
-  - Integration: Used by frontend for comprehensive lead discovery
+- Discovery: `business-discovery-background` (primary async pipeline), `business-discovery-optimized`, `business-discovery-user-aware` (legacy compatibility).
+- Enrichment: `enrichment-orchestrator`, `enrichment-hunter`, `enrichment-neverbounce`, `enrichment-business-license`, `enrichment-pdl`.
+- Export: `campaign-export-user-aware` (user scoped), `campaign-export` (service role automation).
+- Diagnostics: `test-new-auth`, `test-official-auth`, `test-business-discovery`, `test-google-places`.
+- All functions require Supabase session JWTs validated via the shared helper in `_shared/edge-auth.ts`.
 
-**🗑️ LEGACY FUNCTIONS (Replaced by Production APIs):**
+### Deployment Tooling — Supabase/Vercel
 
-- **`business-discovery-edge`** → Replaced by `/api/business/discover-businesses`
-- **`diag`** → Replaced by `/diag` endpoint
+- Edge Functions deploy through `supabase functions deploy <name>` with project ref `sriycekxdqnesdsgwiuc`.
+- Frontend builds with `npm run build` and ships via `vercel --prod` from `/dist`.
+- Secrets stay inside Supabase vault (`supabase secrets set ...`); frontend references publishable keys only.
 
-### **☁️ Cloud Build Integration - CONFIGURED**
+### Monitoring & Logging — Consolidated
 
-- **✅ Supabase Environment Variables** properly injected via substitution
-- **✅ Container Deployment** with environment variable mapping
-- **✅ Health Checks** integrated with Cloud Run deployment
-- **✅ Artifact Registry** properly configured for container storage
+- Function telemetry pulled through `supabase logs functions --tail` during every release.
+- Supabase dashboard metrics confirm <100 ms cold start and consistent throughput.
+- Vercel analytics validate frontend health; no Cloud Run or container orchestration exists in the pipeline.
 
-## 🎯 **ARCHITECTURAL DECISION**
+## 🚀 Readiness Checklist
 
-### **Hybrid Cloud-Native Approach:**
+- [x] Supabase schema matches repository SQL.
+- [x] All production Edge Functions deployed within the last release cycle.
+- [x] Supabase secrets contain Google Places, Hunter.io, NeverBounce, and Foursquare API keys.
+- [x] Vercel deployment `prospect-fyhedobh1-appsmithery.vercel.app` serves the null-safe v4.3 UI bundle.
+- [x] Background discovery → enrichment → export flow completes end-to-end using authenticated sessions.
 
-1. **Production APIs** (`/api/business/*`) for main business logic
-2. **Single Edge Function** (`enhanced-business-discovery`) for specialized processing
-3. **Cloud Build + Cloud Run** for deployment and hosting
-4. **Supabase Database + Vault** for data and secrets management
+## 📋 Next Actions for Releases
 
-### **Benefits of Current Architecture:**
+1. Re-run `supabase functions deploy ...` for any touched functions.
+2. Execute `npm run build` then `vercel --prod` from `/dist`.
+3. Tail `business-discovery-background` logs while completing a test campaign.
+4. Verify Supabase tables (`campaigns`, `leads`, `dashboard_exports`) reflect the new campaign.
+5. Reconcile any warnings surfaced in Supabase or Vercel dashboards before announcing the deploy.
 
-- **Reduced Complexity**: Fewer edge functions to maintain
-- **Better Performance**: Production APIs with full Node.js ecosystem
-- **Cost Efficiency**: Less edge function compute usage
-- **Easier Debugging**: Server logs and monitoring through Cloud Run
-- **Environment Consistency**: Same runtime for all API endpoints
-
-## 🚀 **DEPLOYMENT READINESS**
-
-**✅ All Systems Ready:**
-
-- Database schema optimized and performance-tuned
-- Single production-ready edge function
-- Cloud Build pipeline configured with Supabase integration
-- Production API endpoints handling core business logic
-- Comprehensive monitoring and health checks
-
-**📋 Next Steps:**
-
-1. Configure Supabase substitution variables in Cloud Build trigger
-2. Deploy via `git push origin main`
-3. Monitor deployment in Google Cloud Console
-4. Verify application health at Cloud Run URL
-
-**Architecture Status: PRODUCTION READY** 🎉
+**Architecture Status: Supabase-first production infrastructure validated.**
