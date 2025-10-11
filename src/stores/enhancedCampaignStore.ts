@@ -124,10 +124,10 @@ const mergeLeads = (
 ): BusinessLead[] => {
   const merged = new Map<string, BusinessLead>();
   for (const lead of existing) {
-    merged.set(lead.id, lead);
+    merged.set(String(lead.id), lead);
   }
   for (const lead of incoming) {
-    merged.set(lead.id, lead);
+    merged.set(String(lead.id), lead);
   }
   return Array.from(merged.values());
 };
@@ -251,7 +251,16 @@ export const useCampaignStore = create<
       requestsByService[metric.service] =
         (requestsByService[metric.service] || 0) + metric.requestCount;
 
-      const dateKey = metric.timestamp.toISOString().split("T")[0];
+      const timestamp =
+        metric.timestamp instanceof Date
+          ? metric.timestamp
+          : new Date(metric.timestamp);
+
+      if (Number.isNaN(timestamp.getTime())) {
+        return;
+      }
+
+      const dateKey = timestamp.toISOString().split("T")[0];
       const monthKey = dateKey.substring(0, 7);
 
       dailySpend[dateKey] = (dailySpend[dateKey] || 0) + metric.cost;
@@ -276,9 +285,14 @@ export const useCampaignStore = create<
     cutoff.setDate(cutoff.getDate() - olderThanDays);
 
     set((state) => ({
-      apiUsageMetrics: state.apiUsageMetrics.filter(
-        (metric) => metric.timestamp > cutoff
-      ),
+      apiUsageMetrics: state.apiUsageMetrics.filter((metric) => {
+        const timestamp =
+          metric.timestamp instanceof Date
+            ? metric.timestamp
+            : new Date(metric.timestamp);
+
+        return Number.isNaN(timestamp.getTime()) ? true : timestamp > cutoff;
+      }),
       lastMetricsCleanup: new Date(),
     }));
   },

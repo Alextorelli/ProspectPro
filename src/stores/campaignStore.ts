@@ -96,10 +96,10 @@ export const useCampaignStore = create<CampaignStore & CampaignActions>()(
       set((state) => {
         const merged = new Map<string, BusinessLead>();
         for (const lead of state.leads) {
-          merged.set(lead.id, lead);
+          merged.set(String(lead.id), lead);
         }
         for (const lead of leads) {
-          merged.set(lead.id, lead);
+          merged.set(String(lead.id), lead);
         }
         return { leads: Array.from(merged.values()) };
       }),
@@ -112,11 +112,11 @@ export const useCampaignStore = create<CampaignStore & CampaignActions>()(
           if (lead.campaign_id === campaignId) {
             continue;
           }
-          merged.set(lead.id, lead);
+          merged.set(String(lead.id), lead);
         }
 
         for (const lead of leads) {
-          merged.set(lead.id, lead);
+          merged.set(String(lead.id), lead);
         }
 
         return { leads: Array.from(merged.values()) };
