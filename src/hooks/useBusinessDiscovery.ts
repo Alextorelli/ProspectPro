@@ -2,7 +2,6 @@ import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import {
-  EDGE_FUNCTIONS_URL,
   ENRICHMENT_TIERS,
   SUPABASE_ANON_TOKEN,
   ensureSession,
@@ -77,27 +76,6 @@ export const useBusinessDiscovery = (
         );
         setProgress(20);
 
-        const fetchWithToken = async (token: string) => {
-          const headers: Record<string, string> = {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-            apikey: SUPABASE_ANON_TOKEN,
-            "X-Prospect-Session": token,
-          };
-
-          const response = await fetch(
-            `${EDGE_FUNCTIONS_URL}/business-discovery-background`,
-            {
-              method: "POST",
-              headers,
-              body: JSON.stringify(requestBody),
-            }
-          );
-
-          const payload = await response.json().catch(() => ({}));
-          return { response, payload } as const;
-        };
-
         const accessToken = await getSessionToken();
 
         const billingContext = {
@@ -133,35 +111,33 @@ export const useBusinessDiscovery = (
           );
         }
 
-        let { response, payload: rawResponse } = await fetchWithToken(
-          accessToken
-        );
+        const { data: rawResponse, error: invokeError } =
+          await supabase.functions.invoke("business-discovery-background", {
+            body: requestBody,
+            headers: {
+              ...(accessToken ? { "X-Prospect-Session": accessToken } : {}),
+              apikey: SUPABASE_ANON_TOKEN,
+              "Content-Type": "application/json",
+            },
+          });
 
-        if (response.status === 401) {
-          console.warn("Received 401 from edge function, attempting refresh");
-          const refreshResult = await supabase.auth.refreshSession();
-          if (refreshResult.error) {
-            console.error(
-              "Session refresh failed after 401:",
-              refreshResult.error
+        if (invokeError) {
+          console.error("❌ Background discovery error:", invokeError);
+
+          if (
+            invokeError.message?.includes("JWT") ||
+            invokeError.status === 401
+          ) {
+            await supabase.auth.signOut();
+            throw new Error(
+              "Your session expired. Please sign back in to run discovery."
             );
-          } else if (refreshResult.data.session?.access_token) {
-            const retryToken = refreshResult.data.session.access_token;
-            ({ response, payload: rawResponse } = await fetchWithToken(
-              retryToken
-            ));
           }
-        }
 
-        if (!response.ok) {
-          console.error("❌ Background discovery error:", rawResponse);
-          const message =
-            typeof rawResponse?.error === "string"
-              ? rawResponse.error
-              : typeof rawResponse?.message === "string"
-              ? rawResponse.message
-              : `Edge function request failed: ${response.status}`;
-          throw new Error(message);
+          throw new Error(
+            invokeError.message ||
+              `Edge function request failed: ${invokeError.status ?? 500}`
+          );
         }
 
         if (!rawResponse?.success) {
