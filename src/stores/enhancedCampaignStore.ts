@@ -123,11 +123,18 @@ const mergeLeads = (
   incoming: BusinessLead[]
 ): BusinessLead[] => {
   const merged = new Map<string, BusinessLead>();
-  for (const lead of existing) {
-    merged.set(String(lead.id), lead);
+  const existingLeads = existing || [];
+  const incomingLeads = incoming || [];
+
+  for (const lead of existingLeads) {
+    if (lead?.id != null) {
+      merged.set(String(lead.id), lead);
+    }
   }
-  for (const lead of incoming) {
-    merged.set(String(lead.id), lead);
+  for (const lead of incomingLeads) {
+    if (lead?.id != null) {
+      merged.set(String(lead.id), lead);
+    }
   }
   return Array.from(merged.values());
 };
@@ -164,17 +171,37 @@ export const useCampaignStore = create<
   setCurrentCampaignId: (campaignId) => set({ currentCampaignId: campaignId }),
 
   addLeads: (leads) =>
-    set((state) => ({
-      leads: mergeLeads(state.leads, leads),
-    })),
+    set((state) => {
+      const existingLeads = state.leads || [];
+      const incomingLeads = leads || [];
+      return { leads: mergeLeads(existingLeads, incomingLeads) };
+    }),
 
   setCampaignLeads: (campaignId, leads) =>
-    set((state) => ({
-      leads: mergeLeads(
-        state.leads.filter((lead) => lead.campaign_id !== campaignId),
-        leads
-      ),
-    })),
+    set((state) => {
+      const merged = new Map<string, BusinessLead>();
+
+      // Safe iteration - check if leads array exists
+      const existingLeads = state.leads || [];
+      const incomingLeads = leads || [];
+
+      for (const lead of existingLeads) {
+        if (lead?.campaign_id === campaignId) {
+          continue;
+        }
+        if (lead?.id != null) {
+          merged.set(String(lead.id), lead);
+        }
+      }
+
+      for (const lead of incomingLeads) {
+        if (lead?.id != null) {
+          merged.set(String(lead.id), lead);
+        }
+      }
+
+      return { leads: Array.from(merged.values()) };
+    }),
 
   updateLead: (leadId, updates) =>
     set((state) => ({

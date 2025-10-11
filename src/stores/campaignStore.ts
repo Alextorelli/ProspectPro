@@ -95,11 +95,18 @@ export const useCampaignStore = create<CampaignStore & CampaignActions>()(
     addLeads: (leads) =>
       set((state) => {
         const merged = new Map<string, BusinessLead>();
-        for (const lead of state.leads) {
-          merged.set(String(lead.id), lead);
+        const existingLeads = state.leads || [];
+        const incomingLeads = leads || [];
+
+        for (const lead of existingLeads) {
+          if (lead?.id != null) {
+            merged.set(String(lead.id), lead);
+          }
         }
-        for (const lead of leads) {
-          merged.set(String(lead.id), lead);
+        for (const lead of incomingLeads) {
+          if (lead?.id != null) {
+            merged.set(String(lead.id), lead);
+          }
         }
         return { leads: Array.from(merged.values()) };
       }),
@@ -108,15 +115,23 @@ export const useCampaignStore = create<CampaignStore & CampaignActions>()(
       set((state) => {
         const merged = new Map<string, BusinessLead>();
 
-        for (const lead of state.leads) {
-          if (lead.campaign_id === campaignId) {
+        // Safe iteration - check if leads array exists
+        const existingLeads = state.leads || [];
+        const incomingLeads = leads || [];
+
+        for (const lead of existingLeads) {
+          if (lead?.campaign_id === campaignId) {
             continue;
           }
-          merged.set(String(lead.id), lead);
+          if (lead?.id != null) {
+            merged.set(String(lead.id), lead);
+          }
         }
 
-        for (const lead of leads) {
-          merged.set(String(lead.id), lead);
+        for (const lead of incomingLeads) {
+          if (lead?.id != null) {
+            merged.set(String(lead.id), lead);
+          }
         }
 
         return { leads: Array.from(merged.values()) };
