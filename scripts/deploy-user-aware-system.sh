@@ -14,18 +14,18 @@ cat <<'EOF'
 	 4. Deploy Edge Functions via: supabase functions deploy <function-name>
 
 🧪 Testing shortcuts:
-	 - Background discovery:
-			 curl -X POST \
-				 https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/business-discovery-background \
-				 -H 'Authorization: Bearer <ANON_OR_SERVICE_ROLE_TOKEN>' \
-				 -H 'Content-Type: application/json' \
-				 -d '{"businessType":"coffee shop","location":"Seattle, WA","maxResults":2,"tierKey":"PROFESSIONAL"}'
-	 - Campaign export:
-			 curl -X POST \
-				 https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/campaign-export-user-aware \
-				 -H 'Authorization: Bearer <ANON_OR_SERVICE_ROLE_TOKEN>' \
-				 -H 'Content-Type: application/json' \
-				 -d '{"campaignId":"<CAMPAIGN_ID>","format":"csv","sessionUserId":"test_session_123"}'
+ 	 - Background discovery:
+		 curl -X POST \
+			 https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/business-discovery-background \
+			 -H 'Authorization: Bearer <SUPABASE_SESSION_JWT>' \
+			 -H 'Content-Type: application/json' \
+			 -d '{"businessType":"coffee shop","location":"Seattle, WA","maxResults":2,"tierKey":"PROFESSIONAL","sessionUserId":"test_session_123"}'
+ 	 - Campaign export:
+		 curl -X POST \
+			 https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/campaign-export-user-aware \
+			 -H 'Authorization: Bearer <SUPABASE_SESSION_JWT>' \
+			 -H 'Content-Type: application/json' \
+			 -d '{"campaignId":"<CAMPAIGN_ID>","format":"csv","sessionUserId":"test_session_123"}'
 
 📚 For the latest instructions see: DEPLOYMENT_CHECKLIST.md (or `.github/copilot-instructions.md`).
 

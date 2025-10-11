@@ -17,7 +17,7 @@ NC='\033[0m' # No Color
 
 # Test 1: Frontend accessibility
 echo "🌐 Testing frontend accessibility..."
-FRONTEND_URL="https://prospect-28j3db56m-appsmithery.vercel.app"
+FRONTEND_URL="${FRONTEND_URL:-https://prospect-fyhedobh1-appsmithery.vercel.app}"
 FRONTEND_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$FRONTEND_URL")
 FRONTEND_TIME=$(curl -s -o /dev/null -w "%{time_total}" "$FRONTEND_URL")
 
@@ -29,7 +29,8 @@ fi
 
 # Test 2: Edge Functions availability
 echo "⚡ Testing Edge Functions availability..."
-EDGE_BASE="https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1"
+PROJECT_REF="${SUPABASE_PROJECT_REF:-sriycekxdqnesdsgwiuc}"
+EDGE_BASE="https://${PROJECT_REF}.supabase.co/functions/v1"
 EDGE_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$EDGE_BASE/test-new-auth")
 
 if [ "$EDGE_STATUS" = "401" ]; then

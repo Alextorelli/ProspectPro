@@ -1,138 +1,67 @@
 #!/bin/bash
-# Deploy Background Task Architecture - ProspectPro v4.2
-# October 2025 - Complete deployment script
+# ProspectPro v4.3 – Background Discovery Deployment Helper
 
-set -e  # Exit on error
+set -euo pipefail
 
-echo "🚀 ProspectPro v4.2 - Background Task Architecture Deployment"
-echo "============================================================="
-echo ""
+PROJECT_REF=${SUPABASE_PROJECT_REF:-sriycekxdqnesdsgwiuc}
+FUNCTIONS=(
+  business-discovery-background
+  business-discovery-optimized
+  business-discovery-user-aware
+  enrichment-orchestrator
+  enrichment-hunter
+  enrichment-neverbounce
+  campaign-export-user-aware
+)
 
-resolve_env() {
-  for var in "$@"; do
-    local value="${!var}"
-    if [ -n "$value" ]; then
-      echo "$value"
-      return 0
-    fi
-  done
-  echo ""
-}
+echo "🚀 ProspectPro Background Discovery Release"
+echo "Supabase project: $PROJECT_REF"
+echo "---------------------------------------------"
 
-resolve_from_file() {
-  local key="$1"
-  shift
-  for file in "$@"; do
-    if [ -f "$file" ]; then
-      local value=$(grep "^$key=" "$file" | tail -n1 | cut -d '=' -f2-)
-      if [ -n "$value" ]; then
-        echo "$value"
-        return 0
-      fi
-    fi
-  done
-  echo ""
-}
-
-SUPABASE_URL=$(resolve_env VITE_SUPABASE_URL NEXT_PUBLIC_SUPABASE_URL SUPABASE_URL)
-if [ -z "$SUPABASE_URL" ]; then
-  SUPABASE_URL=$(resolve_from_file VITE_SUPABASE_URL .env.local .env)
-fi
-if [ -z "$SUPABASE_URL" ]; then
-  SUPABASE_URL="https://sriycekxdqnesdsgwiuc.supabase.co"
-  echo "ℹ️  Supabase URL not specified. Using default: $SUPABASE_URL"
-fi
-
-ANON_KEY=$(resolve_env VITE_SUPABASE_ANON_KEY NEXT_PUBLIC_SUPABASE_ANON_KEY SUPABASE_ANON_KEY)
-if [ -z "$ANON_KEY" ]; then
-  ANON_KEY=$(resolve_from_file VITE_SUPABASE_ANON_KEY .env.local .env)
-fi
-if [ -z "$ANON_KEY" ]; then
-  echo "❌ Supabase anon key not set. Configure VITE_SUPABASE_ANON_KEY or NEXT_PUBLIC_SUPABASE_ANON_KEY"
+if ! command -v supabase >/dev/null 2>&1; then
+  echo "❌ Supabase CLI not found. Install via 'brew install supabase/tap/supabase' or https://supabase.com/docs." >&2
   exit 1
 fi
 
-# Step 1: Database Schema
-echo "📊 Step 1: Creating job queue database schema..."
-echo "Run this SQL in Supabase Dashboard → SQL Editor:"
-echo ""
-cat database/job-queue-schema.sql
-echo ""
-read -p "Press Enter after running the SQL schema..."
+if ! supabase status >/dev/null 2>&1; then
+  echo "⚠️ Supabase project not linked in this repo. Run: supabase link --project-ref $PROJECT_REF" >&2
+  exit 1
+fi
 
-# Step 2: Deploy new Edge Function
-echo ""
-echo "🔧 Step 2: Deploying background task Edge Function..."
-supabase functions deploy business-discovery-background --no-verify-jwt
-echo "✅ Edge Function deployed"
+echo "📡 Deploying Edge Functions"
+for fn in "${FUNCTIONS[@]}"; do
+  echo "   • $fn"
+  supabase functions deploy "$fn" --project-ref "$PROJECT_REF"
+done
 
-# Step 3: Verify deployment
-echo ""
-echo "🧪 Step 3: Testing Edge Function..."
-CAMPAIGN_RESPONSE=$(curl -s -X POST "${SUPABASE_URL%/}/functions/v1/business-discovery-background" \
-  -H "Authorization: Bearer $ANON_KEY" \
-  -H 'Content-Type: application/json' \
-  -d '{
-    "businessType": "coffee shop",
-    "location": "Portland, OR",
-    "maxResults": 2,
-    "sessionUserId": "test_deployment"
-  }')
+echo "✅ Edge function deploys complete"
+echo
 
-echo "Response:"
-echo "$CAMPAIGN_RESPONSE" | jq '.'
+if [ -n "${SUPABASE_SESSION_JWT:-}" ]; then
+  echo "🧪 Running smoke test against business-discovery-background"
+  RESPONSE=$(curl -sS \
+    -H "Authorization: Bearer $SUPABASE_SESSION_JWT" \
+    -H "Content-Type: application/json" \
+    -d '{"businessType":"coffee shop","location":"Seattle, WA","maxResults":1,"tierKey":"PROFESSIONAL","sessionUserId":"deploy_script_smoke"}' \
+    "https://${PROJECT_REF}.supabase.co/functions/v1/business-discovery-background" || true)
 
-JOB_ID=$(echo "$CAMPAIGN_RESPONSE" | jq -r '.jobId')
-
-if [ "$JOB_ID" != "null" ] && [ -n "$JOB_ID" ]; then
-  echo ""
-  echo "✅ Job created successfully: $JOB_ID"
-  echo "🔄 Monitor job progress in Supabase Dashboard → Database → discovery_jobs table"
-  echo "📊 Real-time channel: discovery_jobs:id=eq.$JOB_ID"
+  if echo "$RESPONSE" | jq -e .jobId >/dev/null 2>&1; then
+    JOB_ID=$(echo "$RESPONSE" | jq -r .jobId)
+    echo "   ✅ Campaign queued (jobId: $JOB_ID)"
+    echo "   � Inspect progress in Supabase → Tables → discovery_jobs"
+  else
+    echo "   ⚠️ Smoke test did not return jobId. Inspect response below and review supabase logs:"
+    echo ""
+    echo "$RESPONSE"
+  fi
 else
-  echo ""
-  echo "❌ Job creation failed. Check Edge Function logs in Supabase Dashboard."
-  exit 1
+  echo "ℹ️ Set SUPABASE_SESSION_JWT to run an authenticated smoke test automatically."
 fi
 
-# Step 4: Frontend integration
-echo ""
-echo "🎨 Step 4: Frontend integration"
-echo "New files created:"
-echo "  - src/hooks/useJobProgress.tsx (Real-time progress hook)"
-echo ""
-echo "Next steps for frontend integration:"
-echo "  1. Import useJobProgress hook in your campaign component"
-echo "  2. Display JobProgressDisplay component with jobId"
-echo "  3. Update API call to use /business-discovery-background endpoint"
-echo ""
-
-# Step 5: Monitoring
-echo ""
-echo "📈 Step 5: Monitoring tools"
-echo "  - Supabase Dashboard → Database → discovery_jobs (job status)"
-echo "  - Supabase Dashboard → Edge Functions → Logs (execution logs)"
-echo "  - Real-time updates will appear in frontend automatically"
-echo ""
-
-echo "============================================================="
-echo "✅ Background Task Architecture Deployment Complete!"
-echo ""
-echo "🔍 What just happened:"
-echo "  ✅ Job queue database schema created"
-echo "  ✅ Background task Edge Function deployed"
-echo "  ✅ Real-time progress tracking enabled"
-echo "  ✅ Test campaign created and running"
-echo ""
-echo "📝 Key Changes:"
-echo "  • Edge Function returns immediately (no timeout)"
-echo "  • Processing continues in background with EdgeRuntime.waitUntil()"
-echo "  • Real-time updates via Supabase Real-time"
-echo "  • Complete campaign processing (1-2 minutes) without limits"
-echo ""
-echo "🎯 Frontend Integration:"
-echo "  1. Update CampaignForm to call /business-discovery-background"
-echo "  2. Show JobProgressDisplay component with returned jobId"
-echo "  3. Real-time updates will stream automatically"
-echo ""
-echo "🚀 Your app is now ready for production with unlimited processing time!"
+echo
+echo "Next steps:"
+echo "  1. npm run build"
+echo "  2. cd dist && vercel --prod"
+echo "  3. supabase logs functions --project-ref $PROJECT_REF --slug business-discovery-background --tail"
+echo
+echo "Done."
