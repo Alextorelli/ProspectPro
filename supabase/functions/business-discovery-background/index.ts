@@ -965,6 +965,66 @@ function createBusinessFingerprint(source: BusinessFingerprintSource): string {
   return "";
 }
 
+const FINGERPRINT_HEALTH_SAMPLE_LIMIT = 3;
+
+const makeFingerprintKey = (
+  fingerprint: string,
+  userId: string | null,
+  sessionUserId: string | null
+) => `${fingerprint}::${userId ?? ""}::${sessionUserId ?? ""}`;
+
+type FingerprintClient = Pick<ReturnType<typeof createClient>, "from">;
+
+async function leadFingerprintExists(
+  client: FingerprintClient,
+  {
+    fingerprint,
+    userId,
+    sessionUserId,
+  }: {
+    fingerprint: string;
+    userId: string | null;
+    sessionUserId: string | null;
+  }
+): Promise<boolean> {
+  if (!fingerprint) {
+    return false;
+  }
+
+  if (userId) {
+    const { count, error } = await client
+      .from("lead_fingerprints")
+      .select("id", { count: "exact", head: true })
+      .eq("fingerprint", fingerprint)
+      .eq("user_id", userId);
+
+    if (error) {
+      console.warn("leadFingerprintExists user check failed:", error.message);
+    } else if ((count ?? 0) > 0) {
+      return true;
+    }
+  }
+
+  if (sessionUserId) {
+    const { count, error } = await client
+      .from("lead_fingerprints")
+      .select("id", { count: "exact", head: true })
+      .eq("fingerprint", fingerprint)
+      .eq("session_user_id", sessionUserId);
+
+    if (error) {
+      console.warn(
+        "leadFingerprintExists session check failed:",
+        error.message
+      );
+    } else if ((count ?? 0) > 0) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
 function dedupeBusinesses(
   businesses: DiscoveredBusiness[]
 ): DiscoveredBusiness[] {
@@ -2074,15 +2134,133 @@ async function processDiscoveryJob(
         .filter((row): row is FingerprintRow => Boolean(row));
 
       if (fingerprintRows.length > 0) {
-        const { error: fingerprintInsertError } = await supabase
-          .from("lead_fingerprints")
-          .upsert(fingerprintRows, { onConflict: "fingerprint,user_id" });
+        const insertedFingerprintKeys = new Set<string>();
+        let insertedCount = 0;
 
-        if (fingerprintInsertError) {
-          console.warn(
-            "Lead fingerprint insert warning:",
-            fingerprintInsertError.message
-          );
+        const userFingerprintRows = fingerprintRows.filter((row) =>
+          Boolean(row.user_id)
+        );
+
+        if (userFingerprintRows.length > 0) {
+          const {
+            data: insertedUserFingerprints,
+            error: userFingerprintInsertError,
+          } = await supabase
+            .from("lead_fingerprints")
+            .upsert(userFingerprintRows, {
+              onConflict: "fingerprint,user_id",
+              ignoreDuplicates: true,
+            })
+            .select("fingerprint,user_id,session_user_id");
+
+          if (userFingerprintInsertError) {
+            console.warn(
+              "Lead fingerprint insert warning (user scope):",
+              userFingerprintInsertError.message
+            );
+          } else if (insertedUserFingerprints) {
+            insertedCount += insertedUserFingerprints.length;
+            for (const row of insertedUserFingerprints) {
+              insertedFingerprintKeys.add(
+                makeFingerprintKey(
+                  row.fingerprint,
+                  row.user_id ?? null,
+                  row.session_user_id ?? null
+                )
+              );
+            }
+          }
+        }
+
+        const sessionFingerprintRows = fingerprintRows.filter(
+          (row) => !row.user_id && Boolean(row.session_user_id)
+        );
+
+        if (sessionFingerprintRows.length > 0) {
+          const {
+            data: insertedSessionFingerprints,
+            error: sessionFingerprintInsertError,
+          } = await supabase
+            .from("lead_fingerprints")
+            .upsert(sessionFingerprintRows, {
+              onConflict: "fingerprint,session_user_id",
+              ignoreDuplicates: true,
+            })
+            .select("fingerprint,user_id,session_user_id");
+
+          if (sessionFingerprintInsertError) {
+            console.warn(
+              "Lead fingerprint insert warning (session scope):",
+              sessionFingerprintInsertError.message
+            );
+          } else if (insertedSessionFingerprints) {
+            insertedCount += insertedSessionFingerprints.length;
+            for (const row of insertedSessionFingerprints) {
+              insertedFingerprintKeys.add(
+                makeFingerprintKey(
+                  row.fingerprint,
+                  row.user_id ?? null,
+                  row.session_user_id ?? null
+                )
+              );
+            }
+          }
+        }
+
+        const expectedFingerprintWrites = fingerprintRows.length;
+        const duplicatesDetected = expectedFingerprintWrites - insertedCount;
+
+        const ledgerSummary = {
+          expectedWrites: expectedFingerprintWrites,
+          insertedWrites: insertedCount,
+          duplicatesDetected,
+          userRows: userFingerprintRows.length,
+          sessionRows: sessionFingerprintRows.length,
+        };
+
+        console.log("🧮 Lead fingerprint ledger summary:", ledgerSummary);
+
+        if (duplicatesDetected > 0) {
+          const diagnostics: Array<{
+            fingerprint: string;
+            userId: string | null;
+            sessionUserId: string | null;
+            exists: boolean;
+          }> = [];
+
+          for (const row of fingerprintRows) {
+            if (diagnostics.length >= FINGERPRINT_HEALTH_SAMPLE_LIMIT) {
+              break;
+            }
+
+            const key = makeFingerprintKey(
+              row.fingerprint,
+              row.user_id,
+              row.session_user_id
+            );
+
+            if (insertedFingerprintKeys.has(key)) {
+              continue;
+            }
+
+            const exists = await leadFingerprintExists(supabase, {
+              fingerprint: row.fingerprint,
+              userId: row.user_id,
+              sessionUserId: row.session_user_id,
+            });
+
+            diagnostics.push({
+              fingerprint: row.fingerprint,
+              userId: row.user_id,
+              sessionUserId: row.session_user_id,
+              exists,
+            });
+          }
+
+          console.log("🔍 Fingerprint ledger health check:", {
+            summary: ledgerSummary,
+            diagnostics,
+          });
         }
       }
     }
