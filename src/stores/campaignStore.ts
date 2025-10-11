@@ -95,51 +95,111 @@ export const useCampaignStore = create<CampaignStore & CampaignActions>()(
 
     addLeads: (leads) =>
       set((state) => {
-        const merged = new Map<string, BusinessLead>();
-        const existingLeads = state.leads || [];
-        const incomingLeads = sanitizeLeadCollection(leads, null);
+        if (!Array.isArray(leads)) {
+          console.warn("[campaignStore] addLeads called with non-array", {
+            type: typeof leads,
+          });
+          return state;
+        }
 
-        for (const lead of existingLeads) {
-          if (lead?.id != null) {
+        try {
+          const merged = new Map<string, BusinessLead>();
+          const existingLeads = state.leads || [];
+          const incomingLeads = sanitizeLeadCollection(leads, null);
+
+          for (const lead of existingLeads) {
+            if (lead?.id != null) {
+              merged.set(String(lead.id), lead);
+            }
+          }
+          for (const lead of incomingLeads) {
             merged.set(String(lead.id), lead);
           }
+          return { leads: Array.from(merged.values()) };
+        } catch (error) {
+          console.error("[campaignStore] addLeads error", {
+            error: error instanceof Error ? error.message : String(error),
+            stack: error instanceof Error ? error.stack : undefined,
+          });
+          return state;
         }
-        for (const lead of incomingLeads) {
-          merged.set(String(lead.id), lead);
-        }
-        return { leads: Array.from(merged.values()) };
       }),
 
     setCampaignLeads: (campaignId, leads) =>
       set((state) => {
-        const merged = new Map<string, BusinessLead>();
+        if (!campaignId) {
+          console.warn(
+            "[campaignStore] setCampaignLeads called without campaignId",
+            {
+              leadsType: typeof leads,
+            }
+          );
+          return state;
+        }
 
-        // Safe iteration - check if leads array exists
-        const existingLeads = state.leads || [];
-        const incomingLeads = sanitizeLeadCollection(leads, campaignId);
+        if (!Array.isArray(leads)) {
+          console.warn("[campaignStore] Non-array leads payload ignored", {
+            campaignId,
+            payload: leads,
+          });
+          return state;
+        }
 
-        for (const lead of existingLeads) {
-          if (lead?.campaign_id === campaignId) {
-            continue;
+        try {
+          const merged = new Map<string, BusinessLead>();
+          const existingLeads = state.leads || [];
+          const incomingLeads = sanitizeLeadCollection(leads, campaignId);
+
+          for (const lead of existingLeads) {
+            if (lead?.campaign_id === campaignId) {
+              continue;
+            }
+            if (lead?.id != null) {
+              merged.set(String(lead.id), lead);
+            }
           }
-          if (lead?.id != null) {
+
+          if (incomingLeads.length === 0 && leads.length > 0) {
+            console.warn(
+              "[campaignStore] All incoming leads dropped by sanitizer",
+              {
+                campaignId,
+                originalSize: leads.length,
+              }
+            );
+          }
+
+          for (const lead of incomingLeads) {
             merged.set(String(lead.id), lead);
           }
-        }
 
-        for (const lead of incomingLeads) {
-          merged.set(String(lead.id), lead);
+          return { leads: Array.from(merged.values()) };
+        } catch (error) {
+          console.error("[campaignStore] setCampaignLeads error", {
+            campaignId,
+            error: error instanceof Error ? error.message : String(error),
+            stack: error instanceof Error ? error.stack : undefined,
+          });
+          return state;
         }
-
-        return { leads: Array.from(merged.values()) };
       }),
 
     updateLead: (leadId, updates) =>
-      set((state) => ({
-        leads: state.leads.map((l) =>
-          l.id === leadId ? { ...l, ...updates } : l
-        ),
-      })),
+      set((state) => {
+        try {
+          return {
+            leads: state.leads.map((l) =>
+              l.id === leadId ? { ...l, ...updates } : l
+            ),
+          };
+        } catch (error) {
+          console.error("[campaignStore] updateLead error", {
+            leadId,
+            error: error instanceof Error ? error.message : String(error),
+          });
+          return state;
+        }
+      }),
 
     setLoading: (loading) => set({ isLoading: loading }),
 

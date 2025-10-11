@@ -73,7 +73,24 @@ export const Results: React.FC = () => {
     if (!campaignId) {
       return;
     }
-    setCampaignLeads(campaignId, leads);
+
+    if (!Array.isArray(leads)) {
+      console.warn("[Results] Non-array leads from useCampaignResults", {
+        campaignId,
+        leadsType: typeof leads,
+      });
+      return;
+    }
+
+    try {
+      setCampaignLeads(campaignId, leads);
+    } catch (error) {
+      console.error("[Results] setCampaignLeads error", {
+        campaignId,
+        error: error instanceof Error ? error.message : String(error),
+        leadsLength: Array.isArray(leads) ? leads.length : "not-array",
+      });
+    }
   }, [campaignId, leads, setCampaignLeads]);
 
   const displayCampaign = campaign ?? currentCampaign;

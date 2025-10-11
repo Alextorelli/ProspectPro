@@ -79,24 +79,64 @@ export const useCampaignResults = (
         throw leadsError;
       }
 
-      const safeLeadsData = Array.isArray(leadsData) ? leadsData : [];
-
       if (!Array.isArray(leadsData)) {
-        console.error("⚠️ Supabase returned a non-array leads payload", {
+        console.warn("[useCampaignResults] Non-array leads response", {
           campaignId,
-          receivedType: typeof leadsData,
+          typeofData: typeof leadsData,
+          raw: leadsData,
         });
+        const fallbackResult = transformCampaignData(campaignRecord, [], {});
+        return {
+          campaign: fallbackResult.campaignResult,
+          leads: [],
+          count: count ?? 0,
+        };
       }
 
-      const { campaignResult, leads } = transformCampaignData(
-        campaignRecord,
-        safeLeadsData
-      );
+      let transformedData;
+      try {
+        transformedData = transformCampaignData(campaignRecord, leadsData, {});
+      } catch (transformError) {
+        console.error("[useCampaignResults] Transform error", {
+          campaignId,
+          error:
+            transformError instanceof Error
+              ? transformError.message
+              : String(transformError),
+          leadsDataType: typeof leadsData,
+          leadsDataLength: Array.isArray(leadsData)
+            ? leadsData.length
+            : "not-array",
+        });
+        const fallbackResult = transformCampaignData(campaignRecord, [], {});
+        return {
+          campaign: fallbackResult.campaignResult,
+          leads: [],
+          count: count ?? 0,
+        };
+      }
+
+      const { campaignResult, leads } = transformedData;
+
+      if (!Array.isArray(leads)) {
+        console.error(
+          "[useCampaignResults] Transform returned non-array leads",
+          {
+            campaignId,
+            transformedLeadsType: typeof leads,
+          }
+        );
+        return {
+          campaign: campaignResult,
+          leads: [],
+          count: count ?? 0,
+        };
+      }
 
       return {
         campaign: campaignResult,
-        leads,
-        count: count ?? leads.length,
+        leads: leads,
+        count: count ?? 0,
       };
     },
   });
