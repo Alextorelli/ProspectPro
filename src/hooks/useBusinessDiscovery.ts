@@ -3,7 +3,6 @@ import { useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import {
   ENRICHMENT_TIERS,
-  SUPABASE_ANON_TOKEN,
   ensureSession,
   getSessionToken,
   supabase,
@@ -47,9 +46,18 @@ export const useBusinessDiscovery = (
 
       try {
         console.log("🚀 Starting user-aware business discovery:", config);
+        console.log("📊 Current user state:", {
+          userId: user?.id,
+          userEmail: user?.email,
+        });
 
         // Ensure we have a valid session before calling Edge Function
         const hasSession = await ensureSession();
+        console.log("🔑 Session check result:", {
+          hasSession,
+          userId: user?.id,
+        });
+
         if (!hasSession || !user?.id) {
           throw new Error("Please sign in to run a discovery campaign.");
         }
@@ -77,6 +85,15 @@ export const useBusinessDiscovery = (
         setProgress(20);
 
         const accessToken = await getSessionToken();
+        console.log("🎫 Retrieved session token:", {
+          hasToken: !!accessToken,
+          tokenLength: accessToken?.length,
+          tokenPreview: accessToken
+            ? `${accessToken.substring(0, 20)}...${accessToken.substring(
+                accessToken.length - 20
+              )}`
+            : null,
+        });
 
         const billingContext = {
           tier,
@@ -111,15 +128,40 @@ export const useBusinessDiscovery = (
           );
         }
 
+        console.log("📤 Calling edge function with:", {
+          functionName: "business-discovery-background",
+          hasToken: !!accessToken,
+          userId: user.id,
+          businessType: requestBody.businessType,
+          location: requestBody.location,
+          maxResults: requestBody.maxResults,
+        });
+
         const { data: rawResponse, error: invokeError } =
           await supabase.functions.invoke("business-discovery-background", {
             body: requestBody,
-            headers: {
-              ...(accessToken ? { "X-Prospect-Session": accessToken } : {}),
-              apikey: SUPABASE_ANON_TOKEN,
-              "Content-Type": "application/json",
-            },
           });
+
+        console.log("📥 Edge function response:", {
+          hasData: !!rawResponse,
+          hasError: !!invokeError,
+          errorDetails: invokeError
+            ? {
+                message: invokeError.message,
+                status: invokeError.status,
+                name: invokeError.name,
+                context: invokeError.context,
+              }
+            : null,
+          responsePreview: rawResponse
+            ? {
+                success: rawResponse.success,
+                campaignId: rawResponse.campaignId,
+                jobId: rawResponse.jobId,
+                error: rawResponse.error,
+              }
+            : null,
+        });
 
         if (invokeError) {
           console.error("❌ Background discovery error:", invokeError);
