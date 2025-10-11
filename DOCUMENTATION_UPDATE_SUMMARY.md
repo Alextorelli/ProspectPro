@@ -1,3 +1,39 @@
+# 📝 Documentation Update Summary – ProspectPro v4.3.1
+
+## Overview
+
+Documented the campaign store null-safety fix that resolves React runtime 185 blank screens after background discovery completes.
+
+---
+
+## ✅ Updated Assets
+
+### `.github/copilot-instructions.md`
+
+- Added the v4.3.1 root cause & solution for blank screens in the troubleshooting section.
+
+### `DOCUMENTATION_INDEX.md`
+
+- Linked the new blank screen guidance so operators know to redeploy the null-safe bundle.
+
+### `README.md`
+
+- Added a troubleshooting callout instructing teams to rebuild/redeploy if results do not render post-job.
+
+### `CHANGELOG.md`
+
+- Logged the v4.3.1 patch covering the campaign store hardening and documentation refresh.
+
+### `mcp-config.json`
+
+- Introduced a quick command for running the production frontend build so assistants can validate store fixes before deploys.
+
+### `mcp-servers/README.md`
+
+- Referenced the blank screen diagnostic within the troubleshooting workflow.
+
+---
+
 # 📝 Documentation Update Summary - ProspectPro v4.2
 
 ## Overview

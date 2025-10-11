@@ -123,6 +123,7 @@ Supporting scripts:
 ## 🛠️ Troubleshooting Quicklinks
 
 - **Publishable key or session mismatch:** See `NEED_ANON_KEY.md` (legacy) and `EDGE_FUNCTION_AUTH_UPDATE_GUIDE.md`
+- **Blank screen after campaign results:** Deploy the v4.3.1 build so the null-safe campaign store is active, then confirm the browser console is free of React 185 stacks.
 - **Edge function auth issues:** `EDGE_FUNCTION_AUTH_UPDATE_GUIDE.md`
 - **Deployment checklist:** `DEPLOYMENT_CHECKLIST.md`
 - **Environment sync:** `populate-secrets.sh`, `pull-env-from-secrets.js`

@@ -377,9 +377,16 @@ node -e "console.log(require('./development-server.js').tools.length + ' develop
    - Run diagnostics: `curl http://localhost:3000/diag`
 
 4. **API Testing Failures**
+
    - Verify API keys are configured
    - Check API quota limits
    - Test individual APIs outside MCP first
+
+5. **Blank Screen After Campaign Completion**
+
+- Run `npm install && npm run build` to ensure the v4.3.1 null-safe store is bundled before redeploying `/dist`.
+- Confirm the browser console is clear of React runtime error 185 using dev tools.
+- If the issue persists, tail the background discovery logs (`supabase functions logs business-discovery-background --follow`) to verify Supabase is still emitting lead batches.
 
 ## Development Notes
 

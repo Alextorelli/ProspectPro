@@ -265,6 +265,8 @@ const BUSINESS_CATEGORIES = {
    - **Solution**: Build first with `npm run build`, then deploy from `/dist`
    - **Command**: `npm run build && cd dist && vercel --prod`
    - **Auto-Deploy**: Use `./scripts/deploy.sh` for smart detection
+   - **Root Cause (Resolved in v4.3.1)**: Legacy bundles crashed when the campaign store received `undefined` lead batches, triggering React runtime error 185 after background jobs settled.
+   - **Solution**: Redeploy the latest build (`npm install && npm run build`) so the null-safe store ships to production; confirm dev tools no longer report the React 185 stack.
 
 2. **"Invalid JWT" / 401 Errors**
 

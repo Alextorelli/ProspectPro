@@ -5,6 +5,17 @@ All notable changes to ProspectPro will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.3.1] - 2025-10-11 - Campaign Store Null-Safety & Frontend Stability
+
+### Fixed
+
+- Hardened `campaignStore` and `enhancedCampaignStore` lead merging to tolerate `undefined` payloads and mixed identifier shapes, preventing React error #185 crashes after background jobs complete.
+- Eliminated blank screen regressions on the results page by normalizing campaign lead updates coming from Supabase pagination.
+
+### Documentation
+
+- Refreshed Copilot instructions, documentation index, README troubleshooting notes, and MCP quick commands to highlight the null-safe store behavior and new verification steps.
+
 ## [4.3.0] - 2025-10-09 - Supabase Session Enforcement & Tier-Aware Background Discovery
 
 ### Added

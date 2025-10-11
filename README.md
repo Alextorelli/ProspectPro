@@ -215,6 +215,10 @@ curl -X POST 'https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/test-new-aut
 
 ## 🎯 Roadmap
 
+## 🛠️ Troubleshooting
+
+- **Blank screen after campaign completes** – Indicates the browser hit an old build where the campaign store could not process undefined lead batches. Pull the latest `main`, run `npm install && npm run build`, and redeploy the `/dist` bundle. If the issue persists, open dev tools and confirm there are no React error #185 stacks; the null-safe store shipping in v4.3.1 should keep results rendering once Supabase returns data.
+
 ### ✅ Completed (v4.3)
 
 - Tier-aware background discovery pipeline (Google Places + Foursquare + Census)
