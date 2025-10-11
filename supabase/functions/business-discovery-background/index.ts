@@ -1419,59 +1419,60 @@ async function processDiscoveryJob(
     );
 
     let historicalFilteredCount = 0;
+    let totalRawDiscovered = 0;
+    const seenFingerprints = new Set<string>();
+    const uniqueBusinesses: DiscoveredBusiness[] = [];
+    const sourcesUsedSet = new Set<DataSource>();
+    const maxBufferedResults = Math.max(config.maxResults * 6, 24);
 
-    const applyHistoricalFilter = (
-      businesses: DiscoveredBusiness[]
-    ): DiscoveredBusiness[] => {
-      if (historicalFingerprints.size === 0) {
-        return businesses;
-      }
-
-      const filteredResults: DiscoveredBusiness[] = [];
+    const addUniqueBusinesses = (businesses: DiscoveredBusiness[]): number => {
+      let added = 0;
       for (const business of businesses) {
+        if (uniqueBusinesses.length >= maxBufferedResults) {
+          break;
+        }
+
         const fingerprint = createBusinessFingerprint(business);
+
         if (fingerprint && historicalFingerprints.has(fingerprint)) {
           historicalFilteredCount += 1;
           continue;
         }
-        filteredResults.push(business);
+
+        if (fingerprint && seenFingerprints.has(fingerprint)) {
+          continue;
+        }
+
+        if (fingerprint) {
+          seenFingerprints.add(fingerprint);
+        }
+
+        uniqueBusinesses.push(business);
+        if (business.source) {
+          sourcesUsedSet.add(business.source);
+        }
+        added += 1;
       }
-      return filteredResults;
+      return added;
     };
 
-    let discoveredBusinesses: DiscoveredBusiness[] = await discoverBusinesses(
-      config,
-      censusIntelligence,
-      usageLogger,
-      {
-        campaignId: config.campaignId,
-        sessionId: config.sessionUserId ?? config.userId ?? null,
-        jobId,
-        tierKey: config.tier.key,
-        businessQuery: config.businessType,
-        locationQuery: config.location,
-      }
-    );
-    let totalRawDiscovered = discoveredBusinesses.length;
-
-    discoveredBusinesses = applyHistoricalFilter(discoveredBusinesses);
-
-    if (
-      discoveredBusinesses.length === 0 &&
-      totalRawDiscovered > 0 &&
-      !config.expandGeography
-    ) {
-      console.log(
-        `ℹ️ No novel businesses found for ${config.businessType} in ${config.location}. Expanding geography to locate fresh results.`
+    const gatherBatch = async (
+      multiplier: number,
+      forceExpand: boolean
+    ): Promise<number> => {
+      const scaledMaxResults = Math.min(
+        Math.max(Math.round(config.maxResults * multiplier), config.maxResults),
+        Math.max(config.maxResults * 6, 36)
       );
 
-      const expandedConfig: JobConfig = {
+      const searchConfig: JobConfig = {
         ...config,
-        expandGeography: true,
+        maxResults: scaledMaxResults,
+        expandGeography: forceExpand ? true : config.expandGeography,
       };
 
-      const expandedResults = await discoverBusinesses(
-        expandedConfig,
+      const results = await discoverBusinesses(
+        searchConfig,
         censusIntelligence,
         usageLogger,
         {
@@ -1479,13 +1480,42 @@ async function processDiscoveryJob(
           sessionId: config.sessionUserId ?? config.userId ?? null,
           jobId,
           tierKey: config.tier.key,
-          businessQuery: expandedConfig.businessType,
-          locationQuery: expandedConfig.location,
+          businessQuery: searchConfig.businessType,
+          locationQuery: searchConfig.location,
         }
       );
 
-      totalRawDiscovered += expandedResults.length;
-      discoveredBusinesses = applyHistoricalFilter(expandedResults);
+      totalRawDiscovered += results.length;
+      return addUniqueBusinesses(results);
+    };
+
+    const discoveryPlan: Array<{ multiplier: number; expand: boolean }> = [
+      { multiplier: 2, expand: config.expandGeography ?? false },
+      { multiplier: 3, expand: config.expandGeography ?? false },
+      { multiplier: 4, expand: true },
+      { multiplier: 6, expand: true },
+      { multiplier: 8, expand: true },
+      { multiplier: 10, expand: true },
+    ];
+
+    let stagnationCount = 0;
+
+    for (const step of discoveryPlan) {
+      const added = await gatherBatch(step.multiplier, step.expand);
+
+      if (added === 0) {
+        stagnationCount += 1;
+      } else {
+        stagnationCount = 0;
+      }
+
+      if (
+        uniqueBusinesses.length >= config.maxResults ||
+        uniqueBusinesses.length >= maxBufferedResults ||
+        (stagnationCount >= 2 && uniqueBusinesses.length === 0)
+      ) {
+        break;
+      }
     }
 
     if (historicalFilteredCount > 0) {
@@ -1494,9 +1524,7 @@ async function processDiscoveryJob(
       );
     }
 
-    const sourcesUsed = Array.from(
-      new Set(discoveredBusinesses.map((business) => business.source))
-    );
+    const sourcesUsed = Array.from(sourcesUsedSet);
 
     await supabase
       .from("discovery_jobs")
@@ -1504,7 +1532,7 @@ async function processDiscoveryJob(
         current_stage: "scoring_businesses",
         progress: 30,
         metrics: {
-          businesses_found: discoveredBusinesses.length,
+          businesses_found: uniqueBusinesses.length,
           raw_candidates: totalRawDiscovered,
           previously_delivered_filtered: historicalFilteredCount,
           sources_used: sourcesUsed,
@@ -1519,7 +1547,7 @@ async function processDiscoveryJob(
       censusMultiplier: censusIntelligence?.optimization.confidence_multiplier,
     });
 
-    const scoredBusinesses = discoveredBusinesses.map((business) =>
+    const scoredBusinesses = uniqueBusinesses.map((business) =>
       scorer.scoreBusiness(business)
     );
 
@@ -1527,10 +1555,10 @@ async function processDiscoveryJob(
       .filter((lead) => lead.optimizedScore >= config.minConfidenceScore)
       .slice(0, config.maxResults);
 
-    const isExhausted = qualifiedLeads.length === 0;
+    const isExhausted = qualifiedLeads.length < config.maxResults;
 
     const sharedMetrics = {
-      businesses_found: discoveredBusinesses.length,
+      businesses_found: uniqueBusinesses.length,
       qualified_leads: qualifiedLeads.length,
       raw_candidates: totalRawDiscovered,
       previously_delivered_filtered: historicalFilteredCount,
