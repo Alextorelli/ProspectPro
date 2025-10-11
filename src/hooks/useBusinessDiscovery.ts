@@ -140,7 +140,13 @@ export const useBusinessDiscovery = (
         const { data: rawResponse, error: invokeError } =
           await supabase.functions.invoke("business-discovery-background", {
             body: requestBody,
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+              "Content-Type": "application/json",
+            },
           });
+
+        const invokeContext = (invokeError as any)?.context;
 
         console.log("📥 Edge function response:", {
           hasData: !!rawResponse,
@@ -150,7 +156,8 @@ export const useBusinessDiscovery = (
                 message: invokeError.message,
                 status: invokeError.status,
                 name: invokeError.name,
-                context: invokeError.context,
+                statusCode: invokeContext?.status,
+                statusText: invokeContext?.statusText,
               }
             : null,
           responsePreview: rawResponse
