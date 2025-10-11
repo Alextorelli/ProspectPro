@@ -49,6 +49,7 @@ export interface BusinessLead {
     licenseVerified?: boolean;
     validationStatus?: "pending" | "validating" | "validated" | "failed";
     enrichmentTier?: string;
+    verificationSources?: string[];
     processingMetadata?: {
       servicesUsed?: string[];
       servicesSkipped?: string[];

@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import type { BusinessLead, CampaignResult, CampaignStore } from "../types";
+import { sanitizeLeadCollection } from "./utils/leadSanitizers";
 
 interface CampaignActions {
   addCampaign: (campaign: CampaignResult) => void;
@@ -118,80 +119,6 @@ const dedupeCampaigns = (campaigns: CampaignResult[]): CampaignResult[] => {
   return uniqueCampaigns;
 };
 
-const sanitizeEnrichmentData = (
-  value: unknown
-): BusinessLead["enrichment_data"] => {
-  if (value == null) {
-    return undefined;
-  }
-
-  if (typeof value !== "object") {
-    return undefined;
-  }
-
-  try {
-    return JSON.parse(JSON.stringify(value)) as BusinessLead["enrichment_data"];
-  } catch (error) {
-    console.error("⚠️ Unable to sanitize enrichment data payload", error);
-    return undefined;
-  }
-};
-
-const sanitizeLead = (
-  lead: BusinessLead | null | undefined,
-  fallbackCampaignId: string | null
-): BusinessLead | null => {
-  if (!lead || lead.id == null) {
-    return null;
-  }
-
-  const campaignId = lead.campaign_id ?? fallbackCampaignId;
-
-  if (!campaignId) {
-    return null;
-  }
-
-  const enrichmentData = sanitizeEnrichmentData(lead.enrichment_data);
-
-  return {
-    ...lead,
-    id: String(lead.id),
-    campaign_id: String(campaignId),
-    enrichment_data: enrichmentData,
-  };
-};
-
-const sanitizeLeadCollection = (
-  leads: BusinessLead[] | null | undefined,
-  fallbackCampaignId: string | null
-): BusinessLead[] => {
-  if (!Array.isArray(leads)) {
-    console.error(
-      "⚠️ Enhanced campaign store received a non-array leads payload",
-      {
-        type: typeof leads,
-      }
-    );
-    return [];
-  }
-
-  const sanitized = leads
-    .map((lead) => sanitizeLead(lead, fallbackCampaignId))
-    .filter((lead): lead is BusinessLead => Boolean(lead));
-
-  if (sanitized.length < leads.length) {
-    console.warn(
-      "🧹 Filtered invalid leads before updating enhanced campaign store",
-      {
-        received: leads.length,
-        retained: sanitized.length,
-      }
-    );
-  }
-
-  return sanitized;
-};
-
 export const useCampaignStore = create<
   EnhancedCampaignStore & CampaignActions
 >()((set, get) => ({
@@ -227,7 +154,11 @@ export const useCampaignStore = create<
     set((state) => {
       const merged = new Map<string, BusinessLead>();
       const existingLeads = state.leads || [];
-      const incomingLeads = sanitizeLeadCollection(leads, null);
+      const incomingLeads = sanitizeLeadCollection(
+        leads,
+        null,
+        "enhanced campaign store"
+      );
 
       for (const lead of existingLeads) {
         if (lead?.id != null) {
@@ -248,7 +179,11 @@ export const useCampaignStore = create<
 
       // Safe iteration - check if leads array exists
       const existingLeads = state.leads || [];
-      const incomingLeads = sanitizeLeadCollection(leads, campaignId);
+      const incomingLeads = sanitizeLeadCollection(
+        leads,
+        campaignId,
+        "enhanced campaign store"
+      );
 
       for (const lead of existingLeads) {
         if (lead?.campaign_id === campaignId) {
