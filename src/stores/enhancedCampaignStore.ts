@@ -118,25 +118,78 @@ const dedupeCampaigns = (campaigns: CampaignResult[]): CampaignResult[] => {
   return uniqueCampaigns;
 };
 
-const mergeLeads = (
-  existing: BusinessLead[],
-  incoming: BusinessLead[]
-): BusinessLead[] => {
-  const merged = new Map<string, BusinessLead>();
-  const existingLeads = existing || [];
-  const incomingLeads = incoming || [];
+const sanitizeEnrichmentData = (
+  value: unknown
+): BusinessLead["enrichment_data"] => {
+  if (value == null) {
+    return undefined;
+  }
 
-  for (const lead of existingLeads) {
-    if (lead?.id != null) {
-      merged.set(String(lead.id), lead);
-    }
+  if (typeof value !== "object") {
+    return undefined;
   }
-  for (const lead of incomingLeads) {
-    if (lead?.id != null) {
-      merged.set(String(lead.id), lead);
-    }
+
+  try {
+    return JSON.parse(JSON.stringify(value)) as BusinessLead["enrichment_data"];
+  } catch (error) {
+    console.error("⚠️ Unable to sanitize enrichment data payload", error);
+    return undefined;
   }
-  return Array.from(merged.values());
+};
+
+const sanitizeLead = (
+  lead: BusinessLead | null | undefined,
+  fallbackCampaignId: string | null
+): BusinessLead | null => {
+  if (!lead || lead.id == null) {
+    return null;
+  }
+
+  const campaignId = lead.campaign_id ?? fallbackCampaignId;
+
+  if (!campaignId) {
+    return null;
+  }
+
+  const enrichmentData = sanitizeEnrichmentData(lead.enrichment_data);
+
+  return {
+    ...lead,
+    id: String(lead.id),
+    campaign_id: String(campaignId),
+    enrichment_data: enrichmentData,
+  };
+};
+
+const sanitizeLeadCollection = (
+  leads: BusinessLead[] | null | undefined,
+  fallbackCampaignId: string | null
+): BusinessLead[] => {
+  if (!Array.isArray(leads)) {
+    console.error(
+      "⚠️ Enhanced campaign store received a non-array leads payload",
+      {
+        type: typeof leads,
+      }
+    );
+    return [];
+  }
+
+  const sanitized = leads
+    .map((lead) => sanitizeLead(lead, fallbackCampaignId))
+    .filter((lead): lead is BusinessLead => Boolean(lead));
+
+  if (sanitized.length < leads.length) {
+    console.warn(
+      "🧹 Filtered invalid leads before updating enhanced campaign store",
+      {
+        received: leads.length,
+        retained: sanitized.length,
+      }
+    );
+  }
+
+  return sanitized;
 };
 
 export const useCampaignStore = create<
@@ -172,9 +225,21 @@ export const useCampaignStore = create<
 
   addLeads: (leads) =>
     set((state) => {
+      const merged = new Map<string, BusinessLead>();
       const existingLeads = state.leads || [];
-      const incomingLeads = leads || [];
-      return { leads: mergeLeads(existingLeads, incomingLeads) };
+      const incomingLeads = sanitizeLeadCollection(leads, null);
+
+      for (const lead of existingLeads) {
+        if (lead?.id != null) {
+          merged.set(String(lead.id), lead);
+        }
+      }
+
+      for (const lead of incomingLeads) {
+        merged.set(String(lead.id), lead);
+      }
+
+      return { leads: Array.from(merged.values()) };
     }),
 
   setCampaignLeads: (campaignId, leads) =>
@@ -183,7 +248,7 @@ export const useCampaignStore = create<
 
       // Safe iteration - check if leads array exists
       const existingLeads = state.leads || [];
-      const incomingLeads = leads || [];
+      const incomingLeads = sanitizeLeadCollection(leads, campaignId);
 
       for (const lead of existingLeads) {
         if (lead?.campaign_id === campaignId) {
@@ -195,9 +260,7 @@ export const useCampaignStore = create<
       }
 
       for (const lead of incomingLeads) {
-        if (lead?.id != null) {
-          merged.set(String(lead.id), lead);
-        }
+        merged.set(String(lead.id), lead);
       }
 
       return { leads: Array.from(merged.values()) };

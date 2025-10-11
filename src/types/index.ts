@@ -47,6 +47,8 @@ export interface BusinessLead {
     hunterVerified?: boolean;
     neverBounceVerified?: boolean;
     licenseVerified?: boolean;
+    validationStatus?: "pending" | "validating" | "validated" | "failed";
+    enrichmentTier?: string;
     processingMetadata?: {
       servicesUsed?: string[];
       servicesSkipped?: string[];

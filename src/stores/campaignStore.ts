@@ -28,6 +28,74 @@ const initialState: CampaignStore = {
   error: null,
 };
 
+const sanitizeEnrichmentData = (
+  value: unknown
+): BusinessLead["enrichment_data"] => {
+  if (value == null) {
+    return undefined;
+  }
+
+  if (typeof value !== "object") {
+    return undefined;
+  }
+
+  try {
+    return JSON.parse(JSON.stringify(value)) as BusinessLead["enrichment_data"];
+  } catch (error) {
+    console.error("⚠️ Unable to sanitize enrichment data payload", error);
+    return undefined;
+  }
+};
+
+const sanitizeLead = (
+  lead: BusinessLead | null | undefined,
+  fallbackCampaignId: string | null
+): BusinessLead | null => {
+  if (!lead || lead.id == null) {
+    return null;
+  }
+
+  const campaignId = lead.campaign_id ?? fallbackCampaignId;
+
+  if (!campaignId) {
+    return null;
+  }
+
+  const enrichmentData = sanitizeEnrichmentData(lead.enrichment_data);
+
+  return {
+    ...lead,
+    id: String(lead.id),
+    campaign_id: String(campaignId),
+    enrichment_data: enrichmentData,
+  };
+};
+
+const sanitizeLeadCollection = (
+  leads: BusinessLead[] | null | undefined,
+  fallbackCampaignId: string | null
+): BusinessLead[] => {
+  if (!Array.isArray(leads)) {
+    console.error("⚠️ Campaign store received a non-array leads payload", {
+      type: typeof leads,
+    });
+    return [];
+  }
+
+  const sanitized = leads
+    .map((lead) => sanitizeLead(lead, fallbackCampaignId))
+    .filter((lead): lead is BusinessLead => Boolean(lead));
+
+  if (sanitized.length < leads.length) {
+    console.warn("🧹 Filtered invalid leads before updating campaign store", {
+      received: leads.length,
+      retained: sanitized.length,
+    });
+  }
+
+  return sanitized;
+};
+
 const getCampaignKey = (campaign: CampaignResult): string | null => {
   if (campaign.campaign_id) {
     return campaign.campaign_id;
@@ -96,7 +164,7 @@ export const useCampaignStore = create<CampaignStore & CampaignActions>()(
       set((state) => {
         const merged = new Map<string, BusinessLead>();
         const existingLeads = state.leads || [];
-        const incomingLeads = leads || [];
+        const incomingLeads = sanitizeLeadCollection(leads, null);
 
         for (const lead of existingLeads) {
           if (lead?.id != null) {
@@ -104,9 +172,7 @@ export const useCampaignStore = create<CampaignStore & CampaignActions>()(
           }
         }
         for (const lead of incomingLeads) {
-          if (lead?.id != null) {
-            merged.set(String(lead.id), lead);
-          }
+          merged.set(String(lead.id), lead);
         }
         return { leads: Array.from(merged.values()) };
       }),
@@ -117,7 +183,7 @@ export const useCampaignStore = create<CampaignStore & CampaignActions>()(
 
         // Safe iteration - check if leads array exists
         const existingLeads = state.leads || [];
-        const incomingLeads = leads || [];
+        const incomingLeads = sanitizeLeadCollection(leads, campaignId);
 
         for (const lead of existingLeads) {
           if (lead?.campaign_id === campaignId) {
@@ -129,9 +195,7 @@ export const useCampaignStore = create<CampaignStore & CampaignActions>()(
         }
 
         for (const lead of incomingLeads) {
-          if (lead?.id != null) {
-            merged.set(String(lead.id), lead);
-          }
+          merged.set(String(lead.id), lead);
         }
 
         return { leads: Array.from(merged.values()) };

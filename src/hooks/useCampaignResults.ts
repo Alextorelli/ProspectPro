@@ -79,9 +79,18 @@ export const useCampaignResults = (
         throw leadsError;
       }
 
+      const safeLeadsData = Array.isArray(leadsData) ? leadsData : [];
+
+      if (!Array.isArray(leadsData)) {
+        console.error("⚠️ Supabase returned a non-array leads payload", {
+          campaignId,
+          receivedType: typeof leadsData,
+        });
+      }
+
       const { campaignResult, leads } = transformCampaignData(
         campaignRecord,
-        leadsData ?? []
+        safeLeadsData
       );
 
       return {

@@ -61,6 +61,35 @@ export interface CampaignTransformResult {
   leads: BusinessLead[];
 }
 
+const sanitizeEnrichmentData = (
+  value: unknown
+): BusinessLead["enrichment_data"] => {
+  if (value == null) {
+    return undefined;
+  }
+
+  if (typeof value !== "object") {
+    return undefined;
+  }
+
+  try {
+    return JSON.parse(JSON.stringify(value)) as BusinessLead["enrichment_data"];
+  } catch (error) {
+    console.error("⚠️ Unable to sanitize enrichment data in transform", error);
+    return undefined;
+  }
+};
+
+const normalizeLeadIdentifier = (lead: any): string | null => {
+  const candidate = lead?.id ?? lead?.lead_id ?? null;
+
+  if (candidate == null) {
+    return null;
+  }
+
+  return String(candidate);
+};
+
 export const transformCampaignData = (
   campaignRecord: any,
   leadsRecords: any[] = [],
@@ -72,8 +101,21 @@ export const transformCampaignData = (
 
   const metricsAny = options.metrics ?? {};
 
-  const mappedLeads: BusinessLead[] = leadsRecords.map((lead) => {
-    const enrichmentData = lead.enrichment_data ?? undefined;
+  const mappedLeads: BusinessLead[] = [];
+
+  for (const rawLead of leadsRecords) {
+    const leadId = normalizeLeadIdentifier(rawLead);
+
+    if (leadId == null) {
+      console.warn("⚠️ Dropping lead without identifier before hydration", {
+        campaignId: campaignRecord.id,
+        lead: rawLead,
+      });
+      continue;
+    }
+
+    const lead = rawLead ?? {};
+    const enrichmentData = sanitizeEnrichmentData(lead.enrichment_data);
     const rawCost =
       lead.validation_cost ??
       enrichmentData?.processingMetadata?.totalCost ??
@@ -83,9 +125,19 @@ export const transformCampaignData = (
       enrichmentData?.processingMetadata?.enrichmentTier ??
       enrichmentData?.enrichmentTier;
 
-    return {
-      id: String(lead.id),
-      campaign_id: lead.campaign_id ?? campaignRecord.id,
+    const campaignId = String(lead.campaign_id ?? campaignRecord.id ?? "");
+
+    if (!campaignId) {
+      console.warn("⚠️ Dropping lead without campaign association", {
+        campaignId: campaignRecord.id,
+        leadId,
+      });
+      continue;
+    }
+
+    mappedLeads.push({
+      id: leadId,
+      campaign_id: campaignId,
       business_name: lead.business_name ?? "Unknown Business",
       address: lead.address ?? "",
       phone: lead.phone ?? "",
@@ -105,8 +157,8 @@ export const transformCampaignData = (
         undefined,
       vault_secured: true,
       enrichment_data: enrichmentData,
-    };
-  });
+    });
+  }
 
   const leadsQualified = mappedLeads.filter(
     (lead) => lead.confidence_score >= 70
