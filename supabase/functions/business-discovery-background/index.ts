@@ -20,7 +20,11 @@ declare const EdgeRuntime: {
 
 type TierKey = "BASE" | "PROFESSIONAL" | "ENTERPRISE";
 
-type DataSource = "google_places" | "google_place_details" | "foursquare";
+type DataSource =
+  | "google_places"
+  | "google_place_details"
+  | "foursquare"
+  | "cached_reuse";
 
 interface TierSettings {
   key: TierKey;
@@ -158,8 +162,22 @@ interface BusinessData {
   foursquare_data?: Record<string, unknown>;
 }
 
+interface CachedLeadSnapshot {
+  businessName?: string | null;
+  address?: string | null;
+  phone?: string | null;
+  website?: string | null;
+  email?: string | null;
+  confidenceScore?: number | null;
+  validationCost?: number | null;
+  enrichmentData?: Record<string, unknown> | null;
+  sourceCampaignId?: string | null;
+  cachedAt?: string | null;
+}
+
 interface DiscoveredBusiness extends BusinessData {
   source: DataSource;
+  cachedLead?: CachedLeadSnapshot;
 }
 
 interface FoursquarePlace {
@@ -216,6 +234,8 @@ interface ScoredLead {
       emailStatus?: "verified" | "unconfirmed" | "not_found";
       verifiedEmail?: string;
       unverifiedEmail?: string;
+      reuseCampaignId?: string | null;
+      reusedFromCacheAt?: string | null;
     };
   };
 }
@@ -1032,6 +1052,126 @@ class QualityScorer {
 
     totalScore = Math.min(100, Math.round(totalScore * this.censusMultiplier));
 
+    if (business.source === "cached_reuse" && business.cachedLead) {
+      const cached = business.cachedLead;
+      const enrichment = (cached.enrichmentData ?? {}) as Record<
+        string,
+        unknown
+      >;
+      const cachedVerification = Array.isArray(enrichment.verificationSources)
+        ? (enrichment.verificationSources as unknown[]).map((value) =>
+            String(value)
+          )
+        : [];
+      const cachedDataSources = Array.isArray(enrichment.dataSources)
+        ? (enrichment.dataSources as unknown[]).map((value) => String(value))
+        : [];
+      const cachedEmails = Array.isArray(enrichment.emails)
+        ? (enrichment.emails as ScoredLead["enhancementData"]["emails"])
+        : undefined;
+      const cachedProcessing = (enrichment.processingMetadata ?? {}) as Record<
+        string,
+        unknown
+      >;
+
+      const combinedSources = new Set<string>([
+        "cached_reuse",
+        ...cachedVerification,
+        ...cachedDataSources,
+      ]);
+
+      const servicesUsed = Array.from(
+        new Set<string>([
+          "cached_reuse",
+          ...cachedVerification,
+          ...cachedDataSources,
+          ...(Array.isArray(cachedProcessing.servicesUsed)
+            ? (cachedProcessing.servicesUsed as unknown[]).map((value) =>
+                String(value)
+              )
+            : []),
+        ])
+      );
+
+      const validationCost =
+        typeof cached.validationCost === "number"
+          ? cached.validationCost
+          : typeof cachedProcessing?.validationCost === "number"
+          ? (cachedProcessing.validationCost as number)
+          : 0.02;
+
+      const finalProcessingMetadata: ScoredLead["enhancementData"]["processingMetadata"] & {
+        reuseCampaignId?: string | null;
+        reusedFromCacheAt?: string | null;
+      } = {
+        totalCost:
+          typeof cachedProcessing.totalCost === "number"
+            ? (cachedProcessing.totalCost as number)
+            : validationCost,
+        validationCost,
+        enrichmentCost:
+          typeof cachedProcessing.enrichmentCost === "number"
+            ? (cachedProcessing.enrichmentCost as number)
+            : 0,
+        totalConfidenceBoost:
+          typeof cachedProcessing.totalConfidenceBoost === "number"
+            ? (cachedProcessing.totalConfidenceBoost as number)
+            : 0,
+        processingStrategy: "cached_reuse",
+        servicesUsed,
+        servicesSkipped: Array.isArray(cachedProcessing.servicesSkipped)
+          ? (cachedProcessing.servicesSkipped as unknown[]).map((value) =>
+              String(value)
+            )
+          : [],
+        enrichmentTier:
+          typeof cachedProcessing.enrichmentTier === "string"
+            ? (cachedProcessing.enrichmentTier as string)
+            : this.tierName,
+        enrichmentCostBreakdown: (cachedProcessing.enrichmentCostBreakdown ??
+          undefined) as Record<string, number> | undefined,
+        emailStatus:
+          typeof cachedProcessing.emailStatus === "string" &&
+          ["verified", "unconfirmed", "not_found"].includes(
+            cachedProcessing.emailStatus as string
+          )
+            ? (cachedProcessing.emailStatus as
+                | "verified"
+                | "unconfirmed"
+                | "not_found")
+            : "verified",
+        verifiedEmail:
+          typeof cachedProcessing.verifiedEmail === "string"
+            ? (cachedProcessing.verifiedEmail as string)
+            : undefined,
+        unverifiedEmail:
+          typeof cachedProcessing.unverifiedEmail === "string"
+            ? (cachedProcessing.unverifiedEmail as string)
+            : undefined,
+        reuseCampaignId: cached.sourceCampaignId ?? null,
+        reusedFromCacheAt: cached.cachedAt ?? null,
+      };
+
+      return {
+        businessName: cached.businessName || businessName,
+        address: cached.address || address,
+        phone: cached.phone || phone,
+        website: cached.website || website,
+        email: cached.email || "",
+        optimizedScore:
+          typeof cached.confidenceScore === "number"
+            ? cached.confidenceScore
+            : totalScore,
+        validationCost,
+        dataSources: Array.from(combinedSources),
+        enhancementData: {
+          verificationSources: Array.from(combinedSources),
+          emails: cachedEmails,
+          processingMetadata: finalProcessingMetadata,
+        },
+      };
+    }
+
     const initialSources = new Set<string>();
     initialSources.add(business.source);
     if (business.data_enriched) {
@@ -1073,6 +1213,13 @@ async function enrichLead(
   lead: ScoredLead,
   config: JobConfig
 ): Promise<{ lead: ScoredLead; cost: number; enrichmentCost: number }> {
+  if (
+    lead.enhancementData?.processingMetadata?.processingStrategy ===
+    "cached_reuse"
+  ) {
+    return { lead, cost: lead.validationCost, enrichmentCost: 0 };
+  }
+
   const supabaseUrl = Deno.env.get("SUPABASE_URL");
   const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
   if (!supabaseUrl || !serviceKey) {
@@ -1420,10 +1567,14 @@ async function processDiscoveryJob(
 
     let historicalFilteredCount = 0;
     let totalRawDiscovered = 0;
+    let cachedReuseCount = 0;
     const seenFingerprints = new Set<string>();
     const uniqueBusinesses: DiscoveredBusiness[] = [];
     const sourcesUsedSet = new Set<DataSource>();
-    const maxBufferedResults = Math.max(config.maxResults * 6, 24);
+    const maxBufferedResults = Math.max(
+      config.maxResults * 10,
+      config.maxResults + 20
+    );
 
     const addUniqueBusinesses = (businesses: DiscoveredBusiness[]): number => {
       let added = 0;
@@ -1433,16 +1584,25 @@ async function processDiscoveryJob(
         }
 
         const fingerprint = createBusinessFingerprint(business);
-
         if (fingerprint && historicalFingerprints.has(fingerprint)) {
           historicalFilteredCount += 1;
           continue;
         }
 
-        if (fingerprint && seenFingerprints.has(fingerprint)) {
+        const fallbackKey =
+          fingerprint ||
+          business.place_id ||
+          `${business.source ?? "unknown"}:${normalizeString(
+            business.businessName ?? business.name ?? ""
+          )}`;
+
+        if (fallbackKey && seenFingerprints.has(fallbackKey)) {
           continue;
         }
 
+        if (fallbackKey) {
+          seenFingerprints.add(fallbackKey);
+        }
         if (fingerprint) {
           seenFingerprints.add(fingerprint);
         }
@@ -1456,19 +1616,170 @@ async function processDiscoveryJob(
       return added;
     };
 
-    const gatherBatch = async (
-      multiplier: number,
-      forceExpand: boolean
+    const hydrateFromCachedLeads = async (): Promise<number> => {
+      try {
+        const maxCached = Math.max(config.maxResults * 6, 30);
+        const { data, error } = await supabase
+          .from("leads")
+          .select(
+            `id,business_name,address,phone,website,email,confidence_score,validation_cost,enrichment_data,created_at,campaign_id,campaign:campaigns!inner(user_id,business_type,location,status)`
+          )
+          .eq("campaigns.business_type", config.businessType)
+          .eq("campaigns.location", config.location)
+          .eq("campaigns.status", "completed")
+          .neq("campaigns.user_id", config.userId)
+          .order("confidence_score", { ascending: false })
+          .limit(maxCached);
+
+        if (error) {
+          console.warn(
+            "Cached lead lookup failed, continuing with live discovery:",
+            error.message
+          );
+          return 0;
+        }
+
+        if (!data || data.length === 0) {
+          return 0;
+        }
+
+        let added = 0;
+        for (const row of data) {
+          const enrichment = (row.enrichment_data ?? {}) as Record<
+            string,
+            unknown
+          >;
+          const processingMetadata =
+            (enrichment?.processingMetadata as
+              | Record<string, unknown>
+              | undefined) ?? {};
+
+          const cachedBusiness: DiscoveredBusiness = {
+            source: "cached_reuse",
+            name:
+              typeof row.business_name === "string"
+                ? row.business_name
+                : undefined,
+            businessName:
+              typeof row.business_name === "string"
+                ? row.business_name
+                : undefined,
+            formatted_address:
+              typeof row.address === "string" ? row.address : undefined,
+            address: typeof row.address === "string" ? row.address : undefined,
+            formatted_phone_number:
+              typeof row.phone === "string" ? row.phone : undefined,
+            phone: typeof row.phone === "string" ? row.phone : undefined,
+            website: typeof row.website === "string" ? row.website : undefined,
+            place_id:
+              typeof (processingMetadata as Record<string, unknown>)
+                ?.placeId === "string"
+                ? ((processingMetadata as Record<string, unknown>)
+                    .placeId as string)
+                : typeof (enrichment?.placeId as string | undefined) ===
+                  "string"
+                ? (enrichment.placeId as string)
+                : undefined,
+            rating:
+              typeof (processingMetadata as Record<string, unknown>)?.rating ===
+              "number"
+                ? ((processingMetadata as Record<string, unknown>)
+                    .rating as number)
+                : typeof enrichment?.rating === "number"
+                ? (enrichment.rating as number)
+                : undefined,
+            user_ratings_total:
+              typeof (processingMetadata as Record<string, unknown>)
+                ?.ratingsCount === "number"
+                ? ((processingMetadata as Record<string, unknown>)
+                    .ratingsCount as number)
+                : typeof enrichment?.userRatingsTotal === "number"
+                ? (enrichment.userRatingsTotal as number)
+                : undefined,
+            data_enriched: true,
+            cachedLead: {
+              businessName: row.business_name,
+              address: row.address,
+              phone: row.phone,
+              website: row.website,
+              email: row.email,
+              confidenceScore: row.confidence_score,
+              validationCost: row.validation_cost,
+              enrichmentData: enrichment,
+              sourceCampaignId: row.campaign_id,
+              cachedAt: row.created_at,
+            },
+          };
+
+          const fingerprint = createBusinessFingerprint(cachedBusiness);
+          if (fingerprint && historicalFingerprints.has(fingerprint)) {
+            historicalFilteredCount += 1;
+            continue;
+          }
+
+          const fallbackKey =
+            fingerprint ||
+            cachedBusiness.place_id ||
+            `${cachedBusiness.source}:${normalizeString(
+              cachedBusiness.businessName ?? ""
+            )}`;
+
+          if (fallbackKey && seenFingerprints.has(fallbackKey)) {
+            continue;
+          }
+
+          if (fallbackKey) {
+            seenFingerprints.add(fallbackKey);
+          }
+          if (fingerprint) {
+            seenFingerprints.add(fingerprint);
+          }
+
+          uniqueBusinesses.push(cachedBusiness);
+          sourcesUsedSet.add("cached_reuse");
+          cachedReuseCount += 1;
+          added += 1;
+
+          if (uniqueBusinesses.length >= maxBufferedResults) {
+            break;
+          }
+        }
+
+        totalRawDiscovered += data.length;
+
+        if (added > 0) {
+          console.log(
+            `♻️ Reused ${added} cached leads from prior campaigns for ${config.businessType} in ${config.location}`
+          );
+        }
+
+        return added;
+      } catch (cacheError) {
+        console.warn(
+          "Cached lead reuse failed, continuing with live discovery:",
+          cacheError
+        );
+        return 0;
+      }
+    };
+
+    const runDiscoveryPass = async (
+      overrides: Partial<Pick<JobConfig, "maxResults" | "expandGeography">> = {}
     ): Promise<number> => {
-      const scaledMaxResults = Math.min(
-        Math.max(Math.round(config.maxResults * multiplier), config.maxResults),
-        Math.max(config.maxResults * 6, 36)
+      const requestedMaxResults = Math.max(
+        Math.round(overrides.maxResults ?? config.maxResults),
+        config.maxResults
+      );
+      const cappedMaxResults = Math.min(
+        requestedMaxResults,
+        maxBufferedResults
       );
 
       const searchConfig: JobConfig = {
         ...config,
-        maxResults: scaledMaxResults,
-        expandGeography: forceExpand ? true : config.expandGeography,
+        ...overrides,
+        maxResults: cappedMaxResults,
+        expandGeography: overrides.expandGeography ?? config.expandGeography,
       };
 
       const results = await discoverBusinesses(
@@ -1489,32 +1800,35 @@ async function processDiscoveryJob(
       return addUniqueBusinesses(results);
     };
 
-    const discoveryPlan: Array<{ multiplier: number; expand: boolean }> = [
-      { multiplier: 2, expand: config.expandGeography ?? false },
-      { multiplier: 3, expand: config.expandGeography ?? false },
-      { multiplier: 4, expand: true },
-      { multiplier: 6, expand: true },
-      { multiplier: 8, expand: true },
-      { multiplier: 10, expand: true },
-    ];
+    await hydrateFromCachedLeads();
 
-    let stagnationCount = 0;
+    if (uniqueBusinesses.length < config.maxResults) {
+      await runDiscoveryPass();
+    }
 
-    for (const step of discoveryPlan) {
-      const added = await gatherBatch(step.multiplier, step.expand);
+    if (uniqueBusinesses.length < config.maxResults) {
+      const expansionPlan: Array<{
+        maxResults: number;
+        expandGeography?: boolean;
+      }> = [
+        { maxResults: config.maxResults * 2 },
+        { maxResults: config.maxResults * 3 },
+        { maxResults: config.maxResults * 4 },
+        { maxResults: config.maxResults * 5, expandGeography: true },
+        { maxResults: config.maxResults * 6, expandGeography: true },
+        { maxResults: config.maxResults * 8, expandGeography: true },
+        { maxResults: config.maxResults * 10, expandGeography: true },
+      ];
 
-      if (added === 0) {
-        stagnationCount += 1;
-      } else {
-        stagnationCount = 0;
-      }
+      for (const step of expansionPlan) {
+        await runDiscoveryPass(step);
 
-      if (
-        uniqueBusinesses.length >= config.maxResults ||
-        uniqueBusinesses.length >= maxBufferedResults ||
-        (stagnationCount >= 2 && uniqueBusinesses.length === 0)
-      ) {
-        break;
+        if (
+          uniqueBusinesses.length >= config.maxResults ||
+          uniqueBusinesses.length >= maxBufferedResults
+        ) {
+          break;
+        }
       }
     }
 
@@ -1537,6 +1851,7 @@ async function processDiscoveryJob(
           previously_delivered_filtered: historicalFilteredCount,
           sources_used: sourcesUsed,
           census_density_score: censusIntelligence?.density_score ?? null,
+          cached_reuse_count: cachedReuseCount,
         },
       })
       .eq("id", jobId);
@@ -1565,6 +1880,7 @@ async function processDiscoveryJob(
       sources_used: sourcesUsed,
       census_density_score: censusIntelligence?.density_score ?? null,
       exhausted: isExhausted,
+      cached_reuse_count: cachedReuseCount,
     };
 
     await supabase
@@ -1757,6 +2073,7 @@ async function processDiscoveryJob(
       tier_name: config.tier.name,
       tier_price: config.tier.pricePerLead,
       leads_enriched: enrichedLeads.length,
+      cached_reuse_count: cachedReuseCount,
     };
 
     await supabase
