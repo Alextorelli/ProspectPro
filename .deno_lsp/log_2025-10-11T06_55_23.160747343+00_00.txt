@@ -2648,3 +2648,6 @@ Server ready.
 {"type":"measure","name":"tsc.op.op_load","count":247,"duration":0.087},
 {"type":"mark","name":"tsc.op.op_resolve","count":731,"args":{"base":"file:///workspaces/ProspectPro/src/hooks/useBusinessDiscovery.ts","specifiers":[[false,"@tanstack/react-query"],[false,"react"],[false,"../contexts/AuthContext"],[false,"../lib/supabase"],[false,"../stores/campaignStore"],[false,"../types"]]}},
 {"type":"measure","name":"tsc.op.op_resolve","count":731,"duration":4.643},
+{"type":"measure","name":"tsc.host.getEncodedSemanticClassifications","count":9,"duration":372.538},
+{"type":"measure","name":"tsc.request.getEncodedSemanticClassifications","count":9,"duration":372.919},
+{"type":"measure","name":"lsp.semantic_tokens_full","count":9,"duration":373.191},
