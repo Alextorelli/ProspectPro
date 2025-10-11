@@ -143,10 +143,25 @@ export const useBusinessDiscovery = (
             headers: {
               Authorization: `Bearer ${accessToken}`,
               "Content-Type": "application/json",
+              "x-prospect-session": accessToken,
             },
           });
 
         const invokeContext = (invokeError as any)?.context;
+        let errorPayload: unknown = null;
+        if (invokeContext) {
+          try {
+            const cloned = invokeContext.clone();
+            const rawText = await cloned.text();
+            try {
+              errorPayload = JSON.parse(rawText);
+            } catch (_jsonError) {
+              errorPayload = rawText;
+            }
+          } catch (parseError) {
+            console.warn("Unable to parse edge error payload", parseError);
+          }
+        }
 
         console.log("📥 Edge function response:", {
           hasData: !!rawResponse,
@@ -158,6 +173,7 @@ export const useBusinessDiscovery = (
                 name: invokeError.name,
                 statusCode: invokeContext?.status,
                 statusText: invokeContext?.statusText,
+                payload: errorPayload,
               }
             : null,
           responsePreview: rawResponse
