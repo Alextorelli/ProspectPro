@@ -7,6 +7,7 @@ import {
   SUPABASE_ANON_TOKEN,
   ensureSession,
   getSessionToken,
+  supabase,
 } from "../lib/supabase";
 import { useCampaignStore } from "../stores/campaignStore";
 import type { BusinessDiscoveryResponse, CampaignConfig } from "../types";
@@ -76,6 +77,27 @@ export const useBusinessDiscovery = (
         );
         setProgress(20);
 
+        const fetchWithToken = async (token: string) => {
+          const headers: Record<string, string> = {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+            apikey: SUPABASE_ANON_TOKEN,
+            "X-Prospect-Session": token,
+          };
+
+          const response = await fetch(
+            `${EDGE_FUNCTIONS_URL}/business-discovery-background`,
+            {
+              method: "POST",
+              headers,
+              body: JSON.stringify(requestBody),
+            }
+          );
+
+          const payload = await response.json().catch(() => ({}));
+          return { response, payload } as const;
+        };
+
         const accessToken = await getSessionToken();
 
         const billingContext = {
@@ -111,23 +133,25 @@ export const useBusinessDiscovery = (
           );
         }
 
-        const headers: Record<string, string> = {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${accessToken}`,
-          apikey: SUPABASE_ANON_TOKEN,
-          "X-Prospect-Session": accessToken,
-        };
-
-        const response = await fetch(
-          `${EDGE_FUNCTIONS_URL}/business-discovery-background`,
-          {
-            method: "POST",
-            headers,
-            body: JSON.stringify(requestBody),
-          }
+        let { response, payload: rawResponse } = await fetchWithToken(
+          accessToken
         );
 
-        const rawResponse = await response.json().catch(() => ({}));
+        if (response.status === 401) {
+          console.warn("Received 401 from edge function, attempting refresh");
+          const refreshResult = await supabase.auth.refreshSession();
+          if (refreshResult.error) {
+            console.error(
+              "Session refresh failed after 401:",
+              refreshResult.error
+            );
+          } else if (refreshResult.data.session?.access_token) {
+            const retryToken = refreshResult.data.session.access_token;
+            ({ response, payload: rawResponse } = await fetchWithToken(
+              retryToken
+            ));
+          }
+        }
 
         if (!response.ok) {
           console.error("❌ Background discovery error:", rawResponse);

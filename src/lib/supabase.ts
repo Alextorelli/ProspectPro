@@ -24,34 +24,58 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
 export const SUPABASE_ANON_TOKEN = supabaseAnonKey;
 
 // Helper function to get current session token for Edge Function calls
-export const getSessionToken = async (): Promise<string | null> => {
-  const {
-    data: { session },
-    error,
-  } = await supabase.auth.getSession();
+const SESSION_EXPIRY_BUFFER_SECONDS = 30;
 
-  if (error) {
-    console.error("Error getting session:", error);
+const isSessionExpiring = (expiresAt?: number | null): boolean => {
+  if (!expiresAt) {
+    return false;
+  }
+  const now = Math.floor(Date.now() / 1000);
+  return expiresAt <= now + SESSION_EXPIRY_BUFFER_SECONDS;
+};
+
+export const getSessionToken = async (): Promise<string | null> => {
+  const sessionResult = await supabase.auth.getSession();
+  let session = sessionResult.data.session;
+
+  if (sessionResult.error) {
+    console.error("Error getting session:", sessionResult.error);
     return null;
   }
 
-  // Return the access token (JWT) from the session
+  if (!session?.access_token || isSessionExpiring(session.expires_at)) {
+    const refreshResult = await supabase.auth.refreshSession();
+    if (refreshResult.error) {
+      console.error("Failed to refresh session:", refreshResult.error);
+      return session?.access_token ?? null;
+    }
+    session = refreshResult.data.session ?? session;
+  }
+
   return session?.access_token ?? null;
 };
 
 // Helper function to ensure we have a valid session
 export const ensureSession = async (): Promise<boolean> => {
-  const {
-    data: { session },
-    error,
-  } = await supabase.auth.getSession();
+  const sessionResult = await supabase.auth.getSession();
+  const session = sessionResult.data.session;
 
-  if (error) {
-    console.error("Failed to read session:", error);
+  if (sessionResult.error) {
+    console.error("Failed to read session:", sessionResult.error);
     return false;
   }
 
-  return Boolean(session?.access_token);
+  if (session?.access_token && !isSessionExpiring(session.expires_at)) {
+    return true;
+  }
+
+  const refreshResult = await supabase.auth.refreshSession();
+  if (refreshResult.error) {
+    console.error("Failed to refresh session:", refreshResult.error);
+    return Boolean(session?.access_token);
+  }
+
+  return Boolean(refreshResult.data.session?.access_token);
 };
 
 // Edge Functions URL
