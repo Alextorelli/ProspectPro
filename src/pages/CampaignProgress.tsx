@@ -296,12 +296,6 @@ export const CampaignProgress: React.FC = () => {
         <h1 className="text-3xl font-bold text-gray-900 mb-2">
           Campaign Discovery in Progress
         </h1>
-        <p className="text-gray-600">
-          Campaign ID: <span className="font-mono text-sm">{campaignId}</span>
-        </p>
-        <p className="text-gray-600">
-          Job ID: <span className="font-mono text-sm">{jobId}</span>
-        </p>
       </div>
 
       {isFetchingResults && !resultFetchError && (
