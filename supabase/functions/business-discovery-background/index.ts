@@ -5,7 +5,12 @@ import {
   UsageLogContext,
   UsageLogger,
 } from "../_shared/api-usage.ts";
-import { corsHeaders, handleCORS } from "../_shared/edge-auth.ts";
+import type { AuthenticatedRequestContext } from "../_shared/edge-auth.ts";
+import {
+  authenticateRequest,
+  corsHeaders,
+  handleCORS,
+} from "../_shared/edge-auth.ts";
 
 // Background Task Business Discovery with Tiered Enrichment + Multi-Source Discovery
 // ProspectPro v4.3 - October 2025
@@ -2141,78 +2146,21 @@ serve(async (req) => {
   if (corsResponse) return corsResponse;
 
   try {
-    const supabaseUrl = Deno.env.get("SUPABASE_URL");
-    const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY");
-    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-
-    if (!supabaseUrl || !supabaseAnonKey || !supabaseServiceKey) {
-      console.error("Missing Supabase environment variables", {
-        hasUrl: Boolean(supabaseUrl),
-        hasAnonKey: Boolean(supabaseAnonKey),
-        hasServiceKey: Boolean(supabaseServiceKey),
-      });
-
+    let authContext: AuthenticatedRequestContext;
+    try {
+      authContext = await authenticateRequest(req);
+    } catch (authError) {
+      console.error(
+        "❌ Authentication failed for discovery request",
+        authError
+      );
       return new Response(
         JSON.stringify({
           success: false,
           error:
-            "Edge function misconfigured: missing Supabase credentials. Verify SUPABASE_URL, SUPABASE_ANON_KEY, and SUPABASE_SERVICE_ROLE_KEY secrets.",
-        }),
-        {
-          status: 500,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        }
-      );
-    }
-
-    const authHeader = req.headers.get("Authorization");
-    const sessionHeader =
-      req.headers.get("x-prospect-session") ??
-      req.headers.get("X-Prospect-Session");
-    const globalHeaders: Record<string, string> = authHeader
-      ? { Authorization: authHeader }
-      : {};
-    const supabaseClient = createClient(supabaseUrl, supabaseAnonKey, {
-      global: { headers: globalHeaders },
-    });
-
-    const accessToken = sessionHeader?.startsWith("Bearer ")
-      ? sessionHeader.slice("Bearer ".length).trim()
-      : sessionHeader && sessionHeader.length > 0
-      ? sessionHeader
-      : authHeader?.startsWith("Bearer ")
-      ? authHeader.slice("Bearer ".length).trim()
-      : null;
-
-    const {
-      data: { user },
-      error: authError,
-    } = accessToken
-      ? await supabaseClient.auth.getUser(accessToken)
-      : await supabaseClient.auth.getUser();
-
-    if (authError) {
-      console.error("Auth session validation failed", {
-        message: authError.message,
-        status: authError.status,
-        authHeaderPreview: authHeader
-          ? `${authHeader.slice(0, 12)}...${authHeader.slice(-12)}`
-          : null,
-        sessionHeaderPreview: sessionHeader
-          ? `${sessionHeader.slice(0, 12)}...${sessionHeader.slice(-12)}`
-          : null,
-      });
-    }
-
-    if (!user?.id) {
-      const debugHint = authError
-        ? `Auth error: ${authError.message}`
-        : "Missing user in session";
-      return new Response(
-        JSON.stringify({
-          success: false,
-          error: "Authentication required to start discovery campaigns.",
-          debug: debugHint,
+            authError instanceof Error
+              ? authError.message
+              : "Authentication failed",
         }),
         {
           status: 401,
@@ -2220,6 +2168,17 @@ serve(async (req) => {
         }
       );
     }
+
+    const supabaseClient = authContext.supabaseClient;
+    const supabaseUrl = authContext.supabaseUrl;
+    const supabaseServiceKey = authContext.supabaseServiceRoleKey;
+    const { user } = authContext;
+
+    console.log(
+      `🔐 Authenticated Supabase session for ${authContext.userId} (${
+        authContext.isAnonymous ? "anonymous" : "authenticated"
+      })`
+    );
 
     const requestData: BusinessDiscoveryRequest = await req.json();
     const {
@@ -2363,7 +2322,7 @@ serve(async (req) => {
       budgetLimit: enforcedBudget,
       minConfidenceScore,
       userId: user.id,
-      sessionUserId: user.id,
+      sessionUserId: authContext.sessionId ?? user.id,
       tier: tierSettings,
       options: resolvedOptions,
       requestSnapshot,
@@ -2375,7 +2334,7 @@ serve(async (req) => {
         id: jobId,
         campaign_id: campaignId,
         user_id: user.id,
-        session_user_id: user.id,
+        session_user_id: authContext.sessionId ?? user.id,
         status: "pending",
         config: {
           ...jobConfig,

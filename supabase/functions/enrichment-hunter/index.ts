@@ -1,5 +1,6 @@
 // deno-lint-ignore-file
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import type { AuthenticatedRequestContext } from "../_shared/edge-auth.ts";
 import {
   authenticateRequest,
   corsHeaders,
@@ -532,7 +533,28 @@ serve(async (req) => {
   try {
     console.log(`🔍 Hunter.io Email Enrichment Edge Function`);
 
-    const authContext = await authenticateRequest(req);
+    let authContext: AuthenticatedRequestContext;
+    try {
+      authContext = await authenticateRequest(req);
+    } catch (authError) {
+      console.error(
+        "❌ Authentication failed for Hunter enrichment",
+        authError
+      );
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error:
+            authError instanceof Error
+              ? authError.message
+              : "Authentication failed",
+        }),
+        {
+          status: 401,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    }
     console.log(
       `🔐 Authenticated Supabase session for ${authContext.userId} (${
         authContext.isAnonymous ? "anonymous" : "authenticated"

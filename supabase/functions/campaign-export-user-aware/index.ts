@@ -190,7 +190,25 @@ serve(async (req) => {
   try {
     console.log(`📤 Campaign Export with User Authentication`);
 
-    const authContext = await authenticateRequest(req);
+    let authContext: AuthenticatedRequestContext;
+    try {
+      authContext = await authenticateRequest(req);
+    } catch (authError) {
+      console.error("❌ Authentication failed for campaign export", authError);
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error:
+            authError instanceof Error
+              ? authError.message
+              : "Authentication failed",
+        }),
+        {
+          status: 401,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    }
     console.log(
       `🔐 Authenticated Supabase session for ${authContext.userId} (${
         authContext.isAnonymous ? "anonymous" : "authenticated"

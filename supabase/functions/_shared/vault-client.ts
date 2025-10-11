@@ -198,12 +198,17 @@ export class VaultClient {
  * Create vault client instance with new authentication support
  */
 export function createVaultClient(): VaultClient {
-  const supabaseUrl = Deno.env.get("SUPABASE_URL");
+  const supabaseUrl =
+    Deno.env.get("SUPABASE_URL") || Deno.env.get("EDGE_SUPABASE_URL");
 
   // Try new secret key format first, then legacy
-  let serviceRoleKey =
+  const serviceRoleKey =
+    Deno.env.get("EDGE_SUPABASE_SERVICE_ROLE_KEY") ||
+    Deno.env.get("EDGE_SERVICE_ROLE_KEY") ||
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ||
     Deno.env.get("SUPABASE_SECRET_KEY") ||
+    Deno.env.get("EDGE_SUPABASE_ANON_KEY") ||
+    Deno.env.get("EDGE_ANON_KEY") ||
     Deno.env.get("SUPABASE_ANON_KEY");
 
   if (!supabaseUrl || !serviceRoleKey) {

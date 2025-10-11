@@ -2,6 +2,7 @@
 // deno-lint-ignore-file
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.38.0";
+import type { AuthenticatedRequestContext } from "../_shared/edge-auth.ts";
 import { authenticateRequest, corsHeaders } from "../_shared/edge-auth.ts";
 
 // Import optimization modules (converted to Deno-compatible imports)
@@ -1179,7 +1180,28 @@ serve(async (req) => {
   }
 
   try {
-    const authContext = await authenticateRequest(req);
+    let authContext: AuthenticatedRequestContext;
+    try {
+      authContext = await authenticateRequest(req);
+    } catch (authError) {
+      console.error(
+        "❌ Authentication failed for optimized discovery",
+        authError
+      );
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error:
+            authError instanceof Error
+              ? authError.message
+              : "Authentication failed",
+        }),
+        {
+          status: 401,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    }
     console.log(
       `🔐 Authenticated Supabase session for ${authContext.userId} (${
         authContext.isAnonymous ? "anonymous" : "authenticated"
