@@ -37,8 +37,19 @@ export const useCampaignResults = (
     staleTime: 60 * 1000,
     queryFn: async () => {
       if (!user?.id || !campaignId) {
+        console.log("[useCampaignResults] Early exit: no user or campaignId", {
+          hasUser: !!user?.id,
+          campaignId,
+        });
         return { campaign: null, leads: [], count: 0 };
       }
+
+      console.log("[useCampaignResults] Fetching campaign:", {
+        campaignId,
+        userId: user.id,
+        page,
+        pageSize,
+      });
 
       const { data: campaignRecord, error: campaignError } = await supabase
         .from("campaigns")
@@ -49,16 +60,49 @@ export const useCampaignResults = (
         .eq("user_id", user.id)
         .maybeSingle();
 
+      console.log("[useCampaignResults] Campaign query result:", {
+        campaignId,
+        hasCampaignRecord: !!campaignRecord,
+        campaignError: campaignError ? String(campaignError.message) : null,
+        campaignData: campaignRecord
+          ? {
+              id: campaignRecord.id,
+              business_type: campaignRecord.business_type,
+              location: campaignRecord.location,
+              status: campaignRecord.status,
+              results_count: campaignRecord.results_count,
+            }
+          : null,
+      });
+
       if (campaignError) {
+        console.error("[useCampaignResults] Campaign fetch error:", {
+          campaignId,
+          error: campaignError,
+          message: campaignError.message,
+          details: campaignError.details,
+          hint: campaignError.hint,
+        });
         throw campaignError;
       }
 
       if (!campaignRecord) {
+        console.warn("[useCampaignResults] No campaign found:", {
+          campaignId,
+          userId: user.id,
+        });
         return { campaign: null, leads: [], count: 0 };
       }
 
       const rangeStart = page * pageSize;
       const rangeEnd = rangeStart + pageSize - 1;
+
+      console.log("[useCampaignResults] Fetching leads:", {
+        campaignId,
+        userId: user.id,
+        rangeStart,
+        rangeEnd,
+      });
 
       const {
         data: leadsData,
@@ -75,7 +119,32 @@ export const useCampaignResults = (
         .order("confidence_score", { ascending: false })
         .range(rangeStart, rangeEnd);
 
+      console.log("[useCampaignResults] Leads query result:", {
+        campaignId,
+        hasLeadsData: !!leadsData,
+        leadsIsArray: Array.isArray(leadsData),
+        leadsCount: Array.isArray(leadsData) ? leadsData.length : "not-array",
+        totalCount: count,
+        leadsError: leadsError ? String(leadsError.message) : null,
+        firstLead:
+          Array.isArray(leadsData) && leadsData.length > 0
+            ? {
+                id: leadsData[0].id,
+                campaign_id: leadsData[0].campaign_id,
+                business_name: leadsData[0].business_name,
+                confidence_score: leadsData[0].confidence_score,
+              }
+            : null,
+      });
+
       if (leadsError) {
+        console.error("[useCampaignResults] Leads fetch error:", {
+          campaignId,
+          error: leadsError,
+          message: leadsError.message,
+          details: leadsError.details,
+          hint: leadsError.hint,
+        });
         throw leadsError;
       }
 
@@ -93,9 +162,23 @@ export const useCampaignResults = (
         };
       }
 
+      console.log("[useCampaignResults] About to transform data:", {
+        campaignId,
+        campaignRecordId: campaignRecord.id,
+        leadsDataLength: leadsData.length,
+      });
+
       let transformedData;
       try {
         transformedData = transformCampaignData(campaignRecord, leadsData, {});
+        console.log("[useCampaignResults] Transform SUCCESS:", {
+          campaignId,
+          hasCampaignResult: !!transformedData.campaignResult,
+          leadsIsArray: Array.isArray(transformedData.leads),
+          leadsLength: Array.isArray(transformedData.leads)
+            ? transformedData.leads.length
+            : "not-array",
+        });
       } catch (transformError) {
         console.error("[useCampaignResults] Transform error", {
           campaignId,
@@ -103,6 +186,8 @@ export const useCampaignResults = (
             transformError instanceof Error
               ? transformError.message
               : String(transformError),
+          errorStack:
+            transformError instanceof Error ? transformError.stack : undefined,
           leadsDataType: typeof leadsData,
           leadsDataLength: Array.isArray(leadsData)
             ? leadsData.length
@@ -132,6 +217,18 @@ export const useCampaignResults = (
           count: count ?? 0,
         };
       }
+
+      console.log("[useCampaignResults] Returning final result:", {
+        campaignId,
+        campaign: {
+          campaign_id: campaignResult.campaign_id,
+          status: campaignResult.status,
+          leads_found: campaignResult.leads_found,
+          leads_qualified: campaignResult.leads_qualified,
+        },
+        leadsCount: leads.length,
+        totalCount: count,
+      });
 
       return {
         campaign: campaignResult,

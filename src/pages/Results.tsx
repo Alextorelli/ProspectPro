@@ -63,14 +63,72 @@ export const Results: React.FC = () => {
     refetch,
   } = useCampaignResults(campaignId, { page, pageSize: PAGE_SIZE });
 
+  // DIAGNOSTIC: Log raw hook results
+  useEffect(() => {
+    console.log("[Results] useCampaignResults output:", {
+      campaignId,
+      campaign: campaign
+        ? {
+            campaign_id: campaign.campaign_id,
+            business_type: campaign.business_type,
+            location: campaign.location,
+            status: campaign.status,
+            leads_found: campaign.leads_found,
+            leads_qualified: campaign.leads_qualified,
+            hasRawData: !!campaign,
+          }
+        : null,
+      leads: {
+        isArray: Array.isArray(leads),
+        length: Array.isArray(leads) ? leads.length : "not-array",
+        type: typeof leads,
+        firstLead:
+          Array.isArray(leads) && leads.length > 0
+            ? {
+                id: leads[0].id,
+                campaign_id: leads[0].campaign_id,
+                business_name: leads[0].business_name,
+                hasPhone: !!leads[0].phone,
+                hasEmail: !!leads[0].email,
+                hasWebsite: !!leads[0].website,
+                confidence_score: leads[0].confidence_score,
+              }
+            : null,
+      },
+      totalLeads,
+      totalPages,
+      isLoading,
+      isError,
+      error: error ? String(error) : null,
+    });
+  }, [
+    campaign,
+    leads,
+    totalLeads,
+    totalPages,
+    isLoading,
+    isError,
+    error,
+    campaignId,
+  ]);
+
   useEffect(() => {
     if (campaign) {
+      console.log("[Results] Setting current campaign:", {
+        campaign_id: campaign.campaign_id,
+        business_type: campaign.business_type,
+        location: campaign.location,
+        status: campaign.status,
+        leads_found: campaign.leads_found,
+        leads_qualified: campaign.leads_qualified,
+      });
       setCurrentCampaign(campaign);
     }
   }, [campaign, setCurrentCampaign]);
 
   useEffect(() => {
     if (!campaignId) {
+      console.log("[Results] No campaignId, skipping setCampaignLeads");
       return;
     }
 
@@ -78,17 +136,31 @@ export const Results: React.FC = () => {
       console.warn("[Results] Non-array leads from useCampaignResults", {
         campaignId,
         leadsType: typeof leads,
+        leadsValue: leads,
       });
       return;
     }
 
+    console.log("[Results] About to call setCampaignLeads:", {
+      campaignId,
+      leadsCount: leads.length,
+      leadSample: leads.slice(0, 2).map((l) => ({
+        id: l.id,
+        business_name: l.business_name,
+        campaign_id: l.campaign_id,
+      })),
+    });
+
     try {
       setCampaignLeads(campaignId, leads);
+      console.log("[Results] setCampaignLeads SUCCESS");
     } catch (error) {
-      console.error("[Results] setCampaignLeads error", {
+      console.error("[Results] setCampaignLeads FAILED", {
         campaignId,
         error: error instanceof Error ? error.message : String(error),
+        errorStack: error instanceof Error ? error.stack : undefined,
         leadsLength: Array.isArray(leads) ? leads.length : "not-array",
+        leadsSample: Array.isArray(leads) ? leads.slice(0, 1) : null,
       });
     }
   }, [campaignId, leads, setCampaignLeads]);
