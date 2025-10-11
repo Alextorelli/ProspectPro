@@ -1032,24 +1032,49 @@ class QualityScorer {
     const phone = business.formatted_phone_number || business.phone || "";
     const website = business.website || "";
 
-    const scores = {
-      businessName: businessName ? Math.min(100, businessName.length * 3) : 0,
-      address: address ? 100 : 0,
-      phone: phone ? 85 : 0,
-      website: website ? 80 : 0,
-      rating: business.rating ? Math.min(20, business.rating * 4) : 0,
-    };
+    let totalScore = 0;
 
-    let totalScore =
-      Object.values(scores).reduce((sum, score) => sum + score, 0) /
-      Object.values(scores).length;
+    if (businessName) {
+      totalScore += 20;
+    }
 
-    if (business.source === "foursquare") {
-      totalScore += 8;
-    } else if (business.source === "google_place_details") {
+    if (address) {
+      totalScore += 35;
+    } else {
+      totalScore -= 10;
+    }
+
+    if (phone) {
+      totalScore += 15;
+    }
+
+    if (website) {
+      totalScore += 15;
+    }
+
+    if (!phone && !website) {
+      totalScore -= 5;
+    }
+
+    if (business.rating) {
+      totalScore += Math.min(15, business.rating * 3);
+    }
+
+    if (business.user_ratings_total && business.user_ratings_total > 25) {
       totalScore += 5;
     }
 
+    if (business.data_enriched) {
+      totalScore += 5;
+    }
+
+    if (business.source === "foursquare") {
+      totalScore += 6;
+    } else if (business.source === "google_place_details") {
+      totalScore += 4;
+    }
+
+    totalScore = Math.max(0, totalScore);
     totalScore = Math.min(100, Math.round(totalScore * this.censusMultiplier));
 
     if (business.source === "cached_reuse" && business.cachedLead) {
