@@ -111,6 +111,31 @@ function extractAccessToken(
 
 // No manual decode; Supabase SDK validates the token with auth.getUser.
 
+function decodeJwtClaims(token: string): JwtPayload {
+  const parts = token.split(".");
+  if (parts.length < 2) {
+    return {};
+  }
+
+  try {
+    const base64Segment = parts[1]
+      .replace(/-/g, "+")
+      .replace(/_/g, "/");
+    const padded = base64Segment.padEnd(
+      Math.ceil(base64Segment.length / 4) * 4,
+      "="
+    );
+    const decoded = atob(padded);
+    const parsed = JSON.parse(decoded);
+    return typeof parsed === "object" && parsed !== null ? parsed : {};
+  } catch (error) {
+    console.warn("JWT decode failed", {
+      error: error instanceof Error ? error.message : String(error),
+    });
+    return {};
+  }
+}
+
 function extractBearerToken(rawValue: string | null): string | null {
   if (!rawValue) return null;
   const trimmed = rawValue.trim();
@@ -139,18 +164,19 @@ export async function authenticateRequest(
     });
 
     const accessToken = extractAccessToken(req, diagnostics);
+    const tokenClaims = decodeJwtClaims(accessToken);
 
     // Minimal client per Supabase docs: pass anon key, and forward Authorization header via global headers
     debugStage = "create_client";
     const supabaseClient = createClient(supabaseUrl, supabaseAnonKey, {
-      auth: { persistSession: false },
+      auth: { persistSession: false, autoRefreshToken: false },
       global: { headers: { Authorization: `Bearer ${accessToken}` } },
     });
 
     // Validate the user using the forwarded Authorization; do not pass token param
     debugStage = "load_user";
     const { data: authData, error: authError } =
-      await supabaseClient.auth.getUser();
+      await supabaseClient.auth.getUser(accessToken);
 
     if (authError || !authData?.user) {
       throw new Error(
@@ -161,7 +187,10 @@ export async function authenticateRequest(
     const user = authData.user;
 
     debugStage = "finalize";
-    const sessionId = null;
+    const sessionId =
+      typeof tokenClaims.session_id === "string"
+        ? tokenClaims.session_id
+        : null;
     const isAnonymous = Boolean(user.is_anonymous);
     const email = typeof user.email === "string" ? user.email : null;
 
@@ -176,7 +205,7 @@ export async function authenticateRequest(
       email,
       isAnonymous,
       sessionId,
-      tokenClaims: {},
+      tokenClaims,
     };
   } catch (error) {
     console.error("❌ authenticateRequest failure", {
