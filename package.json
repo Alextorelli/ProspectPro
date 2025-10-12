@@ -37,7 +37,8 @@
     "clean": "rm -rf dist/ node_modules/ && echo 'Cleaned build artifacts'",
     "archive:legacy": "mkdir -p archive/legacy-server && mv server.js api/ modules/ docker/ archive/legacy-server/ 2>/dev/null || echo 'Legacy files managed separately'",
     "health": "echo 'Use Edge Function endpoints for health checks'",
-    "test": "echo 'Test Edge Functions via Supabase dashboard or curl'",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "test:verified-contacts": "echo 'Test verified contact discovery with zero fake data validation'",
     "mcp:install": "cd mcp-servers && npm install",
     "mcp:test": "cd mcp-servers && npm run test",
@@ -85,10 +86,12 @@
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.5",
+    "jsdom": "^27.0.0",
     "postcss": "^8.4.32",
     "tailwindcss": "^3.3.6",
     "typescript": "^5.2.2",
-    "vite": "^5.0.8"
+    "vite": "^5.0.8",
+    "vitest": "^3.2.4"
   },
   "engines": {
     "node": "22.x"
