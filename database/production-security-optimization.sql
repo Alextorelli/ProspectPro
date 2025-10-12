@@ -47,31 +47,38 @@ SELECT
       ELSE 0 
     END, 
     2
-  ) as daily_hit_ratio,
+  DROP POLICY IF EXISTS "Users can view own profile" ON public.user_profiles;
   SUM(cost_saved) as daily_cost_saved,
   SUM(total_cost) as daily_total_cost
 FROM enrichment_cache_stats
+  DROP POLICY IF EXISTS "Users can update own profile" ON public.user_profiles;
 GROUP BY date
 ORDER BY date DESC;
 
+  DROP POLICY IF EXISTS "Users can insert own profile" ON public.user_profiles;
 -- =============================================================================
 -- PART 2: Fix Function Search Path Warnings
 -- =============================================================================
 
+  DROP POLICY IF EXISTS "Users can view own subscription" ON public.user_subscriptions;
 -- All functions need explicit search_path to prevent mutable path vulnerabilities
 -- This ensures functions use qualified schema references and can't be hijacked
 
+  DROP POLICY IF EXISTS "Users can update own subscription" ON public.user_subscriptions;
 -- Fix 1: generate_cache_key function
 CREATE OR REPLACE FUNCTION public.generate_cache_key(
   p_request_type TEXT,
   p_params JSONB
+  DROP POLICY IF EXISTS "Users can view own usage" ON public.usage_logs;
 ) RETURNS TEXT 
 SET search_path = public
 AS $$
+  DROP POLICY IF EXISTS "System can insert usage logs" ON public.usage_logs;
 BEGIN
   RETURN encode(
     digest(
       p_request_type || '::' || p_params::text,
+  DROP POLICY IF EXISTS "Anyone can view active subscription tiers" ON public.subscription_tiers;
       'sha256'
     ),
     'hex'
@@ -79,12 +86,16 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql IMMUTABLE SECURITY DEFINER;
 
+
+  DROP POLICY IF EXISTS "Users can view own campaigns" ON public.campaigns;
 -- Fix 2: get_cached_response function
 CREATE OR REPLACE FUNCTION public.get_cached_response(
   p_request_type TEXT,
+  DROP POLICY IF EXISTS "Users can create campaigns" ON public.campaigns;
   p_params JSONB
 ) RETURNS JSONB 
 SET search_path = public
+  DROP POLICY IF EXISTS "Users can update own campaigns" ON public.campaigns;
 AS $$
 DECLARE
   v_cache_key TEXT;
@@ -92,6 +103,8 @@ DECLARE
 BEGIN
   v_cache_key := public.generate_cache_key(p_request_type, p_params);
   
+
+  DROP POLICY IF EXISTS "Users can view leads from own campaigns" ON public.leads;
   SELECT 
     response_data 
   INTO v_response
@@ -101,6 +114,7 @@ BEGIN
     AND expires_at > NOW()
     AND request_type = p_request_type;
   
+  DROP POLICY IF EXISTS "System can insert leads" ON public.leads;
   -- Update hit count and last accessed
   IF v_response IS NOT NULL THEN
     UPDATE public.enrichment_cache 

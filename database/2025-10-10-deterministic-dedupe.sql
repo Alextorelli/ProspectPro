@@ -34,6 +34,7 @@ CREATE INDEX IF NOT EXISTS idx_lead_fingerprints_created
 
 ALTER TABLE public.lead_fingerprints ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS lead_fingerprints_select_self ON public.lead_fingerprints;
 CREATE POLICY lead_fingerprints_select_self
   ON public.lead_fingerprints
   FOR SELECT
@@ -61,6 +62,7 @@ CREATE INDEX IF NOT EXISTS idx_campaign_request_snapshots_campaign
 
 ALTER TABLE public.campaign_request_snapshots ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS campaign_request_snapshots_select_self ON public.campaign_request_snapshots;
 CREATE POLICY campaign_request_snapshots_select_self
   ON public.campaign_request_snapshots
   FOR SELECT

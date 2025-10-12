@@ -119,27 +119,35 @@ BEGIN
 END $$;
 
 -- Create fresh RLS Policies for public access
+DROP POLICY IF EXISTS "Public read campaigns" ON campaigns;
 CREATE POLICY "Public read campaigns" ON campaigns 
   FOR SELECT USING (true);
 
+DROP POLICY IF EXISTS "Public insert campaigns" ON campaigns;
 CREATE POLICY "Public insert campaigns" ON campaigns 
   FOR INSERT WITH CHECK (true);
 
+DROP POLICY IF EXISTS "Public update campaigns" ON campaigns;
 CREATE POLICY "Public update campaigns" ON campaigns 
   FOR UPDATE USING (true);
 
+DROP POLICY IF EXISTS "Public read leads" ON leads;
 CREATE POLICY "Public read leads" ON leads 
   FOR SELECT USING (true);
 
+DROP POLICY IF EXISTS "Public insert leads" ON leads;
 CREATE POLICY "Public insert leads" ON leads 
   FOR INSERT WITH CHECK (true);
 
+DROP POLICY IF EXISTS "Public update leads" ON leads;
 CREATE POLICY "Public update leads" ON leads 
   FOR UPDATE USING (true);
 
+DROP POLICY IF EXISTS "Public read exports" ON dashboard_exports;
 CREATE POLICY "Public read exports" ON dashboard_exports 
   FOR SELECT USING (true);
 
+DROP POLICY IF EXISTS "Public insert exports" ON dashboard_exports;
 CREATE POLICY "Public insert exports" ON dashboard_exports 
   FOR INSERT WITH CHECK (true);
 

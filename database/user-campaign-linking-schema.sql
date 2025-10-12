@@ -23,6 +23,14 @@ DROP POLICY IF EXISTS "campaigns_new_api_access" ON public.campaigns;
 DROP POLICY IF EXISTS "leads_new_api_access" ON public.leads;
 DROP POLICY IF EXISTS "exports_new_api_access" ON public.dashboard_exports;
 
+DROP POLICY IF EXISTS "campaigns_user_access" ON public.campaigns;
+DROP POLICY IF EXISTS "campaigns_anon_create" ON public.campaigns;
+DROP POLICY IF EXISTS "campaigns_anon_access" ON public.campaigns;
+DROP POLICY IF EXISTS "leads_user_access" ON public.leads;
+DROP POLICY IF EXISTS "leads_anon_access" ON public.leads;
+DROP POLICY IF EXISTS "exports_user_access" ON public.dashboard_exports;
+DROP POLICY IF EXISTS "exports_anon_access" ON public.dashboard_exports;
+
 -- Create user-aware RLS policies for campaigns
 CREATE POLICY "campaigns_user_access" ON public.campaigns
     FOR ALL TO authenticated 
