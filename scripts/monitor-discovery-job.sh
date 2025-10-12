@@ -4,6 +4,31 @@
 
 set -euo pipefail
 
+require_repo_root() {
+  local expected_root="${EXPECTED_REPO_ROOT:-/workspaces/ProspectPro}"
+  local repo_root
+
+  if ! repo_root=$(git rev-parse --show-toplevel 2>/dev/null); then
+    echo "❌ Unable to determine git root. Run this monitor from inside the ProspectPro repository." >&2
+    exit 1
+  fi
+
+  local current_dir
+  current_dir=$(pwd -P)
+  if [[ "$current_dir" != "$repo_root" ]]; then
+    echo "❌ Run this monitor from the repository root ($repo_root). Current directory: $current_dir" >&2
+    exit 1
+  fi
+
+  if [[ "$repo_root" != "$expected_root" ]]; then
+    echo "❌ Repository root mismatch. Expected $expected_root but detected $repo_root." >&2
+    echo "   Set EXPECTED_REPO_ROOT to override when intentionally operating from another checkout." >&2
+    exit 1
+  fi
+}
+
+require_repo_root
+
 if ! command -v jq &>/dev/null; then
   echo "❌ jq is required for this script. Install jq and rerun." >&2
   exit 1

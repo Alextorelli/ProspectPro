@@ -4,6 +4,24 @@
 
 set -e
 
+EXPECTED_REPO_ROOT=${EXPECTED_REPO_ROOT:-/workspaces/ProspectPro}
+
+require_repo_root() {
+  local repo_root
+  if ! repo_root=$(git rev-parse --show-toplevel 2>/dev/null); then
+    echo "❌ Run this script from inside the ProspectPro repo"
+    exit 1
+  fi
+
+  if [ "$repo_root" != "$EXPECTED_REPO_ROOT" ]; then
+    echo "❌ Wrong directory. Expected repo root: $EXPECTED_REPO_ROOT"
+    echo "   Current directory: $repo_root"
+    exit 1
+  fi
+}
+
+require_repo_root
+
 if [ -z "$1" ]; then
   echo "❌ Error: SESSION_JWT required"
   echo "Usage: $0 <SESSION_JWT>"
