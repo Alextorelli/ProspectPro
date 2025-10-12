@@ -1359,17 +1359,51 @@ async function enrichLead(
   });
 
   if (!response.ok) {
+    console.warn("Enrichment orchestrator returned non-OK response", {
+      status: response.status,
+      statusText: response.statusText,
+    });
     return { lead, cost: lead.validationCost, enrichmentCost: 0 };
   }
 
-  const enrichmentData = await response.json();
   type EnrichedEmail = {
     email: string;
     verified?: boolean;
     [key: string]: unknown;
   };
 
-  const emails = (enrichmentData.enrichedData?.emails ?? []) as EnrichedEmail[];
+  type EnrichmentPayload = {
+    totalCost?: number;
+    costBreakdown?: Record<string, unknown>;
+    enrichedData?: {
+      emails?: EnrichedEmail[];
+    };
+    processingMetadata?: {
+      servicesUsed?: string[];
+      servicesSkipped?: string[];
+    };
+  };
+
+  let enrichmentPayload: EnrichmentPayload | null = null;
+  try {
+    const rawBody = await response.text();
+    if (!rawBody || !rawBody.trim()) {
+      console.warn("Enrichment orchestrator returned empty body", {
+        status: response.status,
+      });
+      return { lead, cost: lead.validationCost, enrichmentCost: 0 };
+    }
+    enrichmentPayload = JSON.parse(rawBody) as EnrichmentPayload;
+  } catch (parseError) {
+    console.error("Failed to parse enrichment orchestrator response", {
+      error:
+        parseError instanceof Error ? parseError.message : String(parseError),
+      status: response.status,
+    });
+    return { lead, cost: lead.validationCost, enrichmentCost: 0 };
+  }
+
+  const emails = enrichmentPayload?.enrichedData?.emails ?? [];
 
   const normalizeDomain = (value?: string) =>
     value ? value.toLowerCase().replace(/^www\./, "") : "";
@@ -1428,12 +1462,44 @@ async function enrichLead(
   const servicesUsed = new Set<string>(
     lead.enhancementData.verificationSources
   );
-  (enrichmentData.processingMetadata?.servicesUsed ?? []).forEach(
+  (enrichmentPayload?.processingMetadata?.servicesUsed ?? []).forEach(
     (service: string) => servicesUsed.add(service)
   );
 
-  const enrichmentCost = Number(enrichmentData.totalCost ?? 0);
+  const enrichmentCost = Number(enrichmentPayload?.totalCost ?? 0);
   const totalCost = lead.validationCost + enrichmentCost;
+
+  const enrichmentCostBreakdown = (() => {
+    const breakdown = enrichmentPayload?.costBreakdown;
+    if (!breakdown || typeof breakdown !== "object") return undefined;
+    const numericEntries = Object.entries(breakdown).reduce(
+      (acc, [key, value]) => {
+        const numericValue = Number(value);
+        if (Number.isFinite(numericValue)) {
+          acc[key] = numericValue;
+        }
+        return acc;
+      },
+      {} as Record<string, number>
+    );
+    return Object.keys(numericEntries).length > 0 ? numericEntries : undefined;
+  })();
+
+  const processingMetadataCast = {
+    ...lead.enhancementData.processingMetadata,
+    totalCost,
+    validationCost: lead.validationCost,
+    enrichmentCost,
+    servicesUsed: Array.from(servicesUsed),
+    servicesSkipped: [
+      ...(enrichmentPayload?.processingMetadata?.servicesSkipped ?? []),
+    ],
+    enrichmentTier: config.tier.name,
+    enrichmentCostBreakdown,
+    emailStatus,
+    verifiedEmail: verifiedEmailValue || undefined,
+    unverifiedEmail: unverifiedEmailValue || undefined,
+  };
 
   const updatedLead: ScoredLead = {
     ...lead,
@@ -1442,20 +1508,7 @@ async function enrichLead(
       ...lead.enhancementData,
       verificationSources: Array.from(servicesUsed),
       emails,
-      processingMetadata: {
-        ...lead.enhancementData.processingMetadata,
-        totalCost,
-        validationCost: lead.validationCost,
-        enrichmentCost,
-        servicesUsed: Array.from(servicesUsed),
-        servicesSkipped:
-          enrichmentData.processingMetadata?.servicesSkipped ?? [],
-        enrichmentTier: config.tier.name,
-        enrichmentCostBreakdown: enrichmentData.costBreakdown ?? undefined,
-        emailStatus,
-        verifiedEmail: verifiedEmailValue || undefined,
-        unverifiedEmail: unverifiedEmailValue || undefined,
-      },
+      processingMetadata: processingMetadataCast,
     },
   };
 

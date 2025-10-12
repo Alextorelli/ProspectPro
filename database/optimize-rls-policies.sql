@@ -53,86 +53,144 @@ DROP POLICY IF EXISTS "dashboard_exports_user_access" ON public.dashboard_export
 -- 2. REBUILD CANONICAL POLICIES
 -- ==========================================
 
--- Campaigns (user owned)
+-- Campaign ownership helper: allow direct user match or session match before linking
 CREATE POLICY "campaigns_user_access" ON public.campaigns
   FOR DELETE TO authenticated
-  USING (user_id = (SELECT auth.uid()));
+  USING (
+    user_id = auth.uid()
+    OR (
+      user_id IS NULL
+      AND session_user_id IS NOT NULL
+      AND session_user_id = COALESCE(auth.jwt() ->> 'session_id', auth.uid()::text)
+    )
+  );
 
 CREATE POLICY "Users can view their own campaigns" ON public.campaigns
   FOR SELECT TO authenticated
   USING (
-    user_id = (SELECT auth.uid()) OR
-    (auth.uid() IS NULL AND session_user_id IS NOT NULL)
+    user_id = auth.uid()
+    OR (
+      user_id IS NULL
+      AND session_user_id IS NOT NULL
+      AND session_user_id = COALESCE(auth.jwt() ->> 'session_id', auth.uid()::text)
+    )
   );
 
 CREATE POLICY "Users can insert their own campaigns" ON public.campaigns
   FOR INSERT TO authenticated
   WITH CHECK (
-    ((SELECT auth.uid()) IS NOT NULL AND user_id = (SELECT auth.uid())) OR
-    (auth.uid() IS NULL AND session_user_id IS NOT NULL)
+    user_id = auth.uid()
+    OR (
+      user_id IS NULL
+      AND session_user_id IS NOT NULL
+      AND session_user_id = COALESCE(auth.jwt() ->> 'session_id', auth.uid()::text)
+    )
   );
 
 CREATE POLICY "Users can update their own campaigns" ON public.campaigns
   FOR UPDATE TO authenticated
   USING (
-    user_id = (SELECT auth.uid()) OR
-    (auth.uid() IS NULL AND session_user_id IS NOT NULL)
+    user_id = auth.uid()
+    OR (
+      user_id IS NULL
+      AND session_user_id IS NOT NULL
+      AND session_user_id = COALESCE(auth.jwt() ->> 'session_id', auth.uid()::text)
+    )
   )
   WITH CHECK (
-    user_id = (SELECT auth.uid()) OR
-    (auth.uid() IS NULL AND session_user_id IS NOT NULL)
+    user_id = auth.uid()
+    OR (
+      user_id IS NULL
+      AND session_user_id IS NOT NULL
+      AND session_user_id = COALESCE(auth.jwt() ->> 'session_id', auth.uid()::text)
+    )
   );
 
 -- Leads (campaign-linked)
 CREATE POLICY "Users can view their own leads" ON public.leads
   FOR SELECT TO authenticated
   USING (
-    user_id = (SELECT auth.uid()) OR
-    (auth.uid() IS NULL AND session_user_id IS NOT NULL) OR
-    campaign_id IN (
+    user_id = auth.uid()
+    OR (
+      user_id IS NULL
+      AND session_user_id IS NOT NULL
+      AND session_user_id = COALESCE(auth.jwt() ->> 'session_id', auth.uid()::text)
+    )
+    OR campaign_id IN (
       SELECT id
       FROM public.campaigns
-      WHERE user_id = (SELECT auth.uid()) OR
-            (auth.uid() IS NULL AND session_user_id IS NOT NULL)
+      WHERE user_id = auth.uid()
+         OR (
+           user_id IS NULL
+           AND session_user_id IS NOT NULL
+           AND session_user_id = COALESCE(auth.jwt() ->> 'session_id', auth.uid()::text)
+         )
     )
   );
 
 CREATE POLICY "Users can insert their own leads" ON public.leads
   FOR INSERT TO authenticated
   WITH CHECK (
-    ((SELECT auth.uid()) IS NOT NULL AND user_id = (SELECT auth.uid())) OR
-    (auth.uid() IS NULL AND session_user_id IS NOT NULL) OR
-    campaign_id IN (
+    user_id = auth.uid()
+    OR (
+      user_id IS NULL
+      AND session_user_id IS NOT NULL
+      AND session_user_id = COALESCE(auth.jwt() ->> 'session_id', auth.uid()::text)
+    )
+    OR campaign_id IN (
       SELECT id
       FROM public.campaigns
-      WHERE user_id = (SELECT auth.uid()) OR
-            (auth.uid() IS NULL AND session_user_id IS NOT NULL)
+      WHERE user_id = auth.uid()
+         OR (
+           user_id IS NULL
+           AND session_user_id IS NOT NULL
+           AND session_user_id = COALESCE(auth.jwt() ->> 'session_id', auth.uid()::text)
+         )
     )
   );
 
 -- Dashboard exports (user owned)
 CREATE POLICY "dashboard_exports_user_access" ON public.dashboard_exports
   FOR DELETE TO authenticated
-  USING (user_id = (SELECT auth.uid()));
+  USING (
+    user_id = auth.uid()
+    OR (
+      user_id IS NULL
+      AND session_user_id IS NOT NULL
+      AND session_user_id = COALESCE(auth.jwt() ->> 'session_id', auth.uid()::text)
+    )
+  );
 
 CREATE POLICY "Users can view their own exports" ON public.dashboard_exports
   FOR SELECT TO authenticated
   USING (
-    user_id = (SELECT auth.uid()) OR
-    (auth.uid() IS NULL AND session_user_id IS NOT NULL) OR
-    campaign_id IN (
+    user_id = auth.uid()
+    OR (
+      user_id IS NULL
+      AND session_user_id IS NOT NULL
+      AND session_user_id = COALESCE(auth.jwt() ->> 'session_id', auth.uid()::text)
+    )
+    OR campaign_id IN (
       SELECT id
       FROM public.campaigns
-      WHERE user_id = (SELECT auth.uid()) OR
-            (auth.uid() IS NULL AND session_user_id IS NOT NULL)
+      WHERE user_id = auth.uid()
+         OR (
+           user_id IS NULL
+           AND session_user_id IS NOT NULL
+           AND session_user_id = COALESCE(auth.jwt() ->> 'session_id', auth.uid()::text)
+         )
     )
   );
 
 CREATE POLICY "Users can insert their own exports" ON public.dashboard_exports
   FOR INSERT TO authenticated
   WITH CHECK (
-    ((SELECT auth.uid()) IS NOT NULL AND user_id = (SELECT auth.uid())) OR
-    (auth.uid() IS NULL AND session_user_id IS NOT NULL)
+    user_id = auth.uid()
+    OR (
+      user_id IS NULL
+      AND session_user_id IS NOT NULL
+      AND session_user_id = COALESCE(auth.jwt() ->> 'session_id', auth.uid()::text)
+    )
   );
 
 COMMIT;
