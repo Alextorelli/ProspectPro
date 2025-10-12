@@ -1,5 +1,5 @@
--- ProspectPro v4.2 - User-Campaign Linking Database Schema Update
--- October 4, 2025 - Add user authentication and campaign ownership
+/* ProspectPro v4.2 - User-Campaign Linking Database Schema Update
+    October 4, 2025 - Add user authentication and campaign ownership */
 
 -- Add user_id column to campaigns table
 ALTER TABLE public.campaigns 
@@ -99,6 +99,9 @@ CREATE POLICY "exports_anon_access" ON public.dashboard_exports
     );
 
 -- Create a function to get user campaigns with counts
+DROP FUNCTION IF EXISTS public.get_user_campaigns();
+DROP FUNCTION IF EXISTS public.get_user_campaigns(uuid);
+DROP FUNCTION IF EXISTS public.get_user_campaigns(uuid, text);
 CREATE OR REPLACE FUNCTION public.get_user_campaigns(target_user_id UUID DEFAULT NULL)
 RETURNS TABLE (
     id TEXT,
@@ -159,6 +162,7 @@ END;
 $$;
 
 -- Create a function to link anonymous campaigns to authenticated users
+DROP FUNCTION IF EXISTS public.link_anonymous_campaigns_to_user(text,uuid);
 CREATE OR REPLACE FUNCTION public.link_anonymous_campaigns_to_user(
     session_user_id TEXT,
     authenticated_user_id UUID
@@ -272,8 +276,8 @@ END;
 $$;
 
 -- Comment updates
-COMMENT ON FUNCTION public.get_user_campaigns IS 'Get campaigns for a specific user with lead counts and confidence scores';
-COMMENT ON FUNCTION public.link_anonymous_campaigns_to_user IS 'Link anonymous campaigns to authenticated users during sign-in';
+COMMENT ON FUNCTION public.get_user_campaigns(uuid) IS 'Get campaigns for a specific user with lead counts and confidence scores';
+COMMENT ON FUNCTION public.link_anonymous_campaigns_to_user(text, uuid) IS 'Link anonymous campaigns to authenticated users during sign-in';
 COMMENT ON FUNCTION public.validate_security_configuration IS 'Comprehensive security validation with user-aware authentication features';
 
 -- Test the updated schema

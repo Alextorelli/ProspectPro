@@ -148,7 +148,7 @@ BEGIN
   END IF;
 
   -- Add extra entropy to avoid collisions on rapid submissions
-  random_component := SUBSTRING(MD5((RANDOM() || NOW())::TEXT) FROM 1 FOR 6);
+  random_component := SUBSTRING(MD5((RANDOM()::TEXT || NOW()::TEXT)) FROM 1 FOR 6);
   
   -- Combine into final campaign name
   campaign_name := business_code || '_' || location_code || '_' || date_string || '_' || time_string || '_' || user_code || '_' || random_component;

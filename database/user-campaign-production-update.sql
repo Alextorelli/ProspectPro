@@ -101,6 +101,9 @@ CREATE POLICY "Users can insert their own exports" ON dashboard_exports
 -- Step 4: Create helper functions
 
 -- Function to get user campaigns
+DROP FUNCTION IF EXISTS get_user_campaigns();
+DROP FUNCTION IF EXISTS get_user_campaigns(uuid);
+DROP FUNCTION IF EXISTS get_user_campaigns(uuid, text);
 CREATE OR REPLACE FUNCTION get_user_campaigns(target_user_id UUID DEFAULT NULL, target_session_user_id TEXT DEFAULT NULL)
 RETURNS TABLE (
     id TEXT,
@@ -134,6 +137,7 @@ END;
 $$;
 
 -- Function to link anonymous campaigns to authenticated user
+DROP FUNCTION IF EXISTS link_anonymous_campaigns_to_user(text, uuid);
 CREATE OR REPLACE FUNCTION link_anonymous_campaigns_to_user(target_session_user_id TEXT, authenticated_user_id UUID)
 RETURNS INTEGER
 SECURITY DEFINER
@@ -196,8 +200,8 @@ GROUP BY c.id, c.business_type, c.location, c.target_count, c.min_confidence_sco
 -- Step 6: Grant permissions
 GRANT USAGE ON SCHEMA public TO anon, authenticated;
 GRANT SELECT ON campaign_analytics TO anon, authenticated;
-GRANT EXECUTE ON FUNCTION get_user_campaigns TO anon, authenticated;
-GRANT EXECUTE ON FUNCTION link_anonymous_campaigns_to_user TO anon, authenticated;
+GRANT EXECUTE ON FUNCTION get_user_campaigns(uuid, text) TO anon, authenticated;
+GRANT EXECUTE ON FUNCTION link_anonymous_campaigns_to_user(text, uuid) TO anon, authenticated;
 
 -- Success notification
 SELECT 'User-campaign linking schema applied successfully!' as status;
