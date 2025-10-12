@@ -8,6 +8,8 @@
 - [ ] Confirm Vercel project `appsmithery/prospect-pro` points at the main branch and uses the static build output.
 - [ ] Pull latest `main`, ensure working tree is clean, and run `npm install` if dependencies changed.
 - [ ] Verify the frontend `.env` or config references `sb_publishable_your_key_here` style placeholders only.
+- [ ] Confirm you are at the Git top level: `git rev-parse --show-toplevel` must return `/workspaces/ProspectPro` (abort otherwise).
+- [ ] Pull Vercel environment variables locally: `vercel env pull .env.vercel` so scripts can source the current `sb_publishable_*` key.
 
 ### Phase 2: Deploy Supabase Edge Functions
 
@@ -69,6 +71,7 @@
 
 - **Supabase deploy fails** → Re-run `supabase login`, ensure you are on the correct organization/project, and confirm local CLI version via `supabase --version`.
 - **Vercel deploy issues** → Run `vercel logs <deployment-url>` and confirm build output was from `/dist`.
+- **Scripts act on wrong directory** → Run `git rev-parse --show-toplevel`; if it is not `/workspaces/ProspectPro`, `cd` to the repo root before re-running any Supabase/Vercel commands.
 - **Auth errors** → Re-authenticate from the UI, verify publishable key matches Supabase dashboard, and check Edge Function logs for `auth.getUser` failures.
 - **Data missing** → Inspect Supabase tables (`campaigns`, `leads`, `dashboard_exports`) and ensure RLS policies are in effect; use the Supabase SQL editor for targeted queries.
 

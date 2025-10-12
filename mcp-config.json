@@ -93,7 +93,9 @@
             "test export": "curl -X POST \"https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/campaign-export-user-aware\" -H \"Authorization: Bearer SUPABASE_SESSION_JWT\" -H \"Content-Type: application/json\" -d '{\"campaignId\":\"test\",\"format\":\"csv\",\"sessionUserId\":\"mcp-smoke\"}'",
             "test auth helper": "curl -X POST \"https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/test-new-auth\" -H \"Authorization: Bearer SUPABASE_SESSION_JWT\" -H \"Content-Type: application/json\" -d '{\"diagnostics\":true}'",
             "compare auth patterns": "./scripts/test-auth-patterns.sh SUPABASE_SESSION_JWT",
-            "rebuild frontend": "npm install && npm run build"
+            "rebuild frontend": "npm install && npm run build",
+            "verify repo root": "git rev-parse --show-toplevel && pwd",
+            "pull vercel env": "vercel env pull .env.vercel"
         }
     },
     "userAwareFeatures": {

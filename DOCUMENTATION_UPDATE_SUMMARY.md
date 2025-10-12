@@ -1,3 +1,35 @@
+# 📝 Documentation Update Summary – October 12, 2025
+
+## Overview
+
+Added operational guardrails so deployments never run from the workspace stub and assistants always load the current publishable key before invoking Supabase scripts.
+
+---
+
+## ✅ Updated Assets
+
+### `.github/copilot-instructions.md`
+
+- Documented the repo-root check + `vercel env pull .env.vercel` requirement in the troubleshooting patterns.
+
+### `docs/DEPLOYMENT_CHECKLIST.md`
+
+- Added Preflight items for verifying `git rev-parse --show-toplevel` and pulling the latest Vercel env file, plus troubleshooting guidance when scripts target the wrong directory.
+
+### `DOCUMENTATION_INDEX.md`
+
+- Highlighted the repo-root verification and env sync steps inside the deployment workflow and troubleshooting quicklinks.
+
+### `TECHNICAL_SUMMARY_v4.3.md`
+
+- Captured the repo guard + publishable key sync under operational notes for future technical briefings.
+
+### `mcp-config.json`
+
+- Added quick commands for confirming the Git top level and pulling Vercel env variables so MCP operators can snap into a clean deploy context.
+
+---
+
 # 📝 Documentation Update Summary – ProspectPro v4.3.1
 
 ## Overview

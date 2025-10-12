@@ -268,25 +268,31 @@ const BUSINESS_CATEGORIES = {
    - **Root Cause (Resolved in v4.3.1)**: Legacy bundles crashed when the campaign store received `undefined` lead batches, triggering React runtime error 185 after background jobs settled.
    - **Solution**: Redeploy the latest build (`npm install && npm run build`) so the null-safe store ships to production; confirm dev tools no longer report the React 185 stack.
 
-2. **"Invalid JWT" / 401 Errors**
+2. **"CLI deploys from wrong directory" / Publishable key missing during scripts**
+
+   - **Root Cause**: Running deployment scripts outside the Git repo root (`/workspaces/ProspectPro`) and skipping `vercel env pull` meant the CLI wrote to the workspace stub and scripts could not resolve `sb_publishable_*` keys.
+   - **Solution**: Before any Supabase/Vercel command, run `git rev-parse --show-toplevel` and ensure it matches `/workspaces/ProspectPro`; abort if not. Follow with `vercel env pull .env.vercel` so scripts can source the publishable key automatically.
+   - **Automation**: Update bash helpers to perform the top-level check and load `.env.vercel` on startup (already implemented in `scripts/campaign-validation.sh`; replicate in other deploy/test scripts).
+
+3. **"Invalid JWT" / 401 Errors**
 
    - **Root Cause**: Missing/expired Supabase session token or stale publishable key configuration
    - **Solution**: Refresh the session (`supabase.auth.getSession()` or prompt re-auth) and ensure the publishable key matches Supabase dashboard → Settings → API
    - **Update**: Redeploy frontend after updating publishable key or auth handling; verify callers forward `Authorization: Bearer <SUPABASE_SESSION_JWT>`
 
-3. **"API request failed: 404" Errors**
+4. **"API request failed: 404" Errors**
 
    - **Root Cause**: Database RLS policies blocking anon access
    - **Solution**: Run `/database/remove-security-definer.sql` in Supabase SQL editor
    - **Verify**: Check policies with `SELECT * FROM campaigns WHERE business_type = 'test'`
 
-4. **Edge Function Errors**
+5. **Edge Function Errors**
 
    - **Check**: Supabase dashboard → Edge Functions → Logs
    - **Verify**: API keys in Edge Function secrets are configured
    - **Test**: Direct curl to Edge Function with a Supabase **session** JWT in the Authorization header
 
-5. **Frontend Not Loading**
+6. **Frontend Not Loading**
    - **Check**: Vercel deployment status and error logs
    - **Verify**: Cache headers set to `public, max-age=0, s-maxage=0, must-revalidate`
    - **Test**: Access via direct Vercel URL first

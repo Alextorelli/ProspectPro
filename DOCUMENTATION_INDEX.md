@@ -84,6 +84,8 @@ ProspectPro v4.3 introduces the tier-aware background discovery pipeline with ze
 ## 🚀 Deployment Workflow
 
 - Install dependencies: `npm install`.
+- Confirm repo context: `git rev-parse --show-toplevel` must resolve to `/workspaces/ProspectPro` before running any deploy commands.
+- Sync environment variables locally: `vercel env pull .env.vercel` to refresh `sb_publishable_*` keys for scripts.
 - Deploy functions: `supabase functions deploy <name>` for every active slug listed above.
 - Build frontend: `npm run build` (outputs `/dist`).
 - Ship frontend: from `/dist` run `vercel --prod`.
@@ -117,7 +119,7 @@ ProspectPro v4.3 introduces the tier-aware background discovery pipeline with ze
 - Blank screen after campaign results: redeploy the v4.3.1 build, confirm React console warnings are cleared.
 - Edge function auth issues: `EDGE_FUNCTION_AUTH_UPDATE_GUIDE.md`, run `supabase logs functions --project-ref sriycekxdqnesdsgwiuc --slug <name> --tail`.
 - Deployment checklist: `DEPLOYMENT_CHECKLIST.md`.
-- Environment sync: `scripts/populate-secrets.sh`, `scripts/pull-env-from-secrets.js`.
+- Environment sync: `vercel env pull .env.vercel`, `scripts/populate-secrets.sh`, `scripts/pull-env-from-secrets.js`.
 - MCP troubleshooting server: `mcp-servers/` (see local README).
 
 ---

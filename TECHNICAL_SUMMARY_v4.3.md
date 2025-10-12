@@ -71,6 +71,8 @@ Base tier provides essential business data; higher tiers add progressive email d
 ## Operational Notes
 
 - **Secrets**: Ensure `CENSUS_API_KEY`, `FOURSQUARE_API_KEY`, `GOOGLE_PLACES_API_KEY`, `HUNTER_IO_API_KEY`, `NEVERBOUNCE_API_KEY`, and Supabase keys are populated in Edge Function secrets.
+- **Repo Root Guard**: Always confirm `git rev-parse --show-toplevel` resolves to `/workspaces/ProspectPro` before running Supabase or Vercel scripts; abort if the shell is pointed at a workspace stub.
+- **Publishable Key Sync**: Run `vercel env pull .env.vercel` ahead of validation/deploy scripts so `sb_publishable_*` keys are present locally for curl helpers.
 - **Session Tokens**: Frontend and automations must forward Supabase session JWTs; run `scripts/test-auth-patterns.sh <SUPABASE_SESSION_JWT>` after each deploy.
 - **Testing**: Run `supabase functions serve business-discovery-background --env-file .env.edge` for local dry runs; verify job status via `discovery_jobs` table.
 - **Exports**: `campaign-export-user-aware` now emits tier pricing, total validation/enrichment spend, and sources used for every lead.
