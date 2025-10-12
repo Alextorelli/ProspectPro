@@ -77,16 +77,22 @@ serve(async (req) => {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error) {
-    console.error("❌ Authentication diagnostics failed:", error);
+    const message = error instanceof Error ? error.message : "Unknown error";
+    const unauthorized =
+      message.includes("Auth failure") ||
+      message.includes("Missing bearer token") ||
+      message.toLowerCase().includes("authentication failed");
+
+    console.error("❌ Authentication diagnostics failed:", message);
 
     return new Response(
       JSON.stringify({
         success: false,
-        error: error instanceof Error ? error.message : "Unknown error",
+        error: message,
         timestamp: new Date().toISOString(),
       }),
       {
-        status: 500,
+        status: unauthorized ? 401 : 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       }
     );

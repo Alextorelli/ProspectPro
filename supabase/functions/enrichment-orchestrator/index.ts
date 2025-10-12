@@ -668,6 +668,20 @@ serve(async (req) => {
   try {
     console.log(`🎯 Enrichment Orchestrator Edge Function`);
 
+    if (req.method !== "POST") {
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: "Method not allowed. Use POST with a JSON payload.",
+          timestamp: new Date().toISOString(),
+        }),
+        {
+          status: 405,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    }
+
     // Get Supabase credentials
     const supabaseUrl = Deno.env.get("SUPABASE_URL");
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
@@ -676,8 +690,52 @@ serve(async (req) => {
       throw new Error("Supabase credentials not configured");
     }
 
-    // Parse request
-    const requestData: EnrichmentRequest = await req.json();
+    const contentType = req.headers.get("content-type") ?? "";
+    if (!contentType.toLowerCase().includes("application/json")) {
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: "Invalid content type. Expected application/json payload.",
+          timestamp: new Date().toISOString(),
+        }),
+        {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    }
+
+    let requestData: EnrichmentRequest;
+    try {
+      requestData = await req.json();
+    } catch (parseError) {
+      console.error("Invalid JSON payload", parseError);
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: "Invalid JSON payload.",
+          timestamp: new Date().toISOString(),
+        }),
+        {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    }
+
+    if (!requestData?.businessName) {
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: "Missing required field: businessName",
+          timestamp: new Date().toISOString(),
+        }),
+        {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    }
 
     console.log(
       `📋 Enriching business: ${requestData.businessName} (Domain: ${
