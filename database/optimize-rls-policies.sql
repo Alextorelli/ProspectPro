@@ -13,18 +13,28 @@ DROP POLICY IF EXISTS "campaigns_insert_optimized" ON public.campaigns;
 DROP POLICY IF EXISTS "campaigns_update_optimized" ON public.campaigns;
 DROP POLICY IF EXISTS "campaigns_unified_access" ON public.campaigns;
 DROP POLICY IF EXISTS "campaigns_new_api_access" ON public.campaigns;
+DROP POLICY IF EXISTS "campaigns_anon_access" ON public.campaigns;
+DROP POLICY IF EXISTS "campaigns_anon_create" ON public.campaigns;
+DROP POLICY IF EXISTS "Users can view own campaigns" ON public.campaigns;
+DROP POLICY IF EXISTS "Users can create campaigns" ON public.campaigns;
+DROP POLICY IF EXISTS "Users can update own campaigns" ON public.campaigns;
 
 -- Leads
 DROP POLICY IF EXISTS "leads_select_optimized" ON public.leads;
 DROP POLICY IF EXISTS "leads_insert_optimized" ON public.leads;
 DROP POLICY IF EXISTS "leads_unified_access" ON public.leads;
 DROP POLICY IF EXISTS "leads_new_api_access" ON public.leads;
+DROP POLICY IF EXISTS "leads_anon_access" ON public.leads;
+DROP POLICY IF EXISTS "leads_user_access" ON public.leads;
+DROP POLICY IF EXISTS "Users can view leads from own campaigns" ON public.leads;
 
 -- Dashboard exports
 DROP POLICY IF EXISTS "exports_select_optimized" ON public.dashboard_exports;
 DROP POLICY IF EXISTS "exports_insert_optimized" ON public.dashboard_exports;
 DROP POLICY IF EXISTS "exports_unified_access" ON public.dashboard_exports;
 DROP POLICY IF EXISTS "exports_new_api_access" ON public.dashboard_exports;
+DROP POLICY IF EXISTS "exports_anon_access" ON public.dashboard_exports;
+DROP POLICY IF EXISTS "exports_user_access" ON public.dashboard_exports;
 
 -- Canonical policies (will be recreated with optimized definitions)
 DROP POLICY IF EXISTS "campaigns_user_access" ON public.campaigns;
