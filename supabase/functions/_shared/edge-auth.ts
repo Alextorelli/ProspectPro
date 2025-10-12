@@ -118,9 +118,7 @@ function decodeJwtClaims(token: string): JwtPayload {
   }
 
   try {
-    const base64Segment = parts[1]
-      .replace(/-/g, "+")
-      .replace(/_/g, "/");
+    const base64Segment = parts[1].replace(/-/g, "+").replace(/_/g, "/");
     const padded = base64Segment.padEnd(
       Math.ceil(base64Segment.length / 4) * 4,
       "="
