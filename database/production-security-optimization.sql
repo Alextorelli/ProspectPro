@@ -8,77 +8,71 @@
 -- =============================================================================
 
 -- These views were detected with SECURITY DEFINER inheritance issues
--- We'll drop and recreate them without SECURITY DEFINER properties
+-- Drop and recreate them without SECURITY DEFINER properties
 
 -- Fix 1: enrichment_cache_analytics view
 DROP VIEW IF EXISTS public.enrichment_cache_analytics CASCADE;
 
 CREATE VIEW public.enrichment_cache_analytics
 WITH (security_invoker = true) AS
-SELECT 
+SELECT
   request_type,
-  COUNT(*) as total_entries,
-  SUM(hit_count) as total_hits,
-  AVG(confidence_score) as avg_confidence,
-  SUM(cost) as total_cost_saved,
-  ROUND(AVG(hit_count), 2) as avg_hit_count,
-  MIN(created_at) as oldest_entry,
-  MAX(last_accessed_at) as last_activity,
-  COUNT(*) FILTER (WHERE expires_at > NOW()) as active_entries,
-  COUNT(*) FILTER (WHERE expires_at <= NOW()) as expired_entries
-FROM enrichment_cache
+  COUNT(*) AS total_entries,
+  SUM(hit_count) AS total_hits,
+  AVG(confidence_score) AS avg_confidence,
+  SUM(cost) AS total_cost_saved,
+  ROUND(AVG(hit_count), 2) AS avg_hit_count,
+  MIN(created_at) AS oldest_entry,
+  MAX(last_accessed_at) AS last_activity,
+  COUNT(*) FILTER (WHERE expires_at > NOW()) AS active_entries,
+  COUNT(*) FILTER (WHERE expires_at <= NOW()) AS expired_entries
+FROM public.enrichment_cache
 GROUP BY request_type
 ORDER BY total_hits DESC;
 
--- Fix 2: cache_performance_summary view  
+-- Fix 2: cache_performance_summary view
 DROP VIEW IF EXISTS public.cache_performance_summary CASCADE;
 
 CREATE VIEW public.cache_performance_summary
 WITH (security_invoker = true) AS
-SELECT 
+SELECT
   date,
-  SUM(total_requests) as daily_requests,
-  SUM(cache_hits) as daily_hits,
-  SUM(cache_misses) as daily_misses,
+  SUM(total_requests) AS daily_requests,
+  SUM(cache_hits) AS daily_hits,
+  SUM(cache_misses) AS daily_misses,
   ROUND(
-    CASE 
-      WHEN SUM(total_requests) > 0 
-      THEN SUM(cache_hits)::DECIMAL / SUM(total_requests) * 100 
-      ELSE 0 
-    END, 
+    CASE
+      WHEN SUM(total_requests) > 0
+      THEN SUM(cache_hits)::DECIMAL / SUM(total_requests) * 100
+      ELSE 0
+    END,
     2
-  DROP POLICY IF EXISTS "Users can view own profile" ON public.user_profiles;
-  SUM(cost_saved) as daily_cost_saved,
-  SUM(total_cost) as daily_total_cost
-FROM enrichment_cache_stats
-  DROP POLICY IF EXISTS "Users can update own profile" ON public.user_profiles;
+  ) AS daily_hit_ratio,
+  SUM(cost_saved) AS daily_cost_saved,
+  SUM(total_cost) AS daily_total_cost
+FROM public.enrichment_cache_stats
 GROUP BY date
 ORDER BY date DESC;
 
-  DROP POLICY IF EXISTS "Users can insert own profile" ON public.user_profiles;
 -- =============================================================================
 -- PART 2: Fix Function Search Path Warnings
 -- =============================================================================
 
-  DROP POLICY IF EXISTS "Users can view own subscription" ON public.user_subscriptions;
 -- All functions need explicit search_path to prevent mutable path vulnerabilities
--- This ensures functions use qualified schema references and can't be hijacked
 
-  DROP POLICY IF EXISTS "Users can update own subscription" ON public.user_subscriptions;
 -- Fix 1: generate_cache_key function
+DROP FUNCTION IF EXISTS public.generate_cache_key(TEXT, JSONB);
+
 CREATE OR REPLACE FUNCTION public.generate_cache_key(
   p_request_type TEXT,
   p_params JSONB
-  DROP POLICY IF EXISTS "Users can view own usage" ON public.usage_logs;
-) RETURNS TEXT 
+) RETURNS TEXT
 SET search_path = public
 AS $$
-  DROP POLICY IF EXISTS "System can insert usage logs" ON public.usage_logs;
 BEGIN
   RETURN encode(
     digest(
       p_request_type || '::' || p_params::text,
-  DROP POLICY IF EXISTS "Anyone can view active subscription tiers" ON public.subscription_tiers;
       'sha256'
     ),
     'hex'
@@ -86,63 +80,60 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql IMMUTABLE SECURITY DEFINER;
 
-
-  DROP POLICY IF EXISTS "Users can view own campaigns" ON public.campaigns;
 -- Fix 2: get_cached_response function
+DROP FUNCTION IF EXISTS public.get_cached_response(TEXT, JSONB);
+
 CREATE OR REPLACE FUNCTION public.get_cached_response(
   p_request_type TEXT,
-  DROP POLICY IF EXISTS "Users can create campaigns" ON public.campaigns;
   p_params JSONB
-) RETURNS JSONB 
+) RETURNS JSONB
 SET search_path = public
-  DROP POLICY IF EXISTS "Users can update own campaigns" ON public.campaigns;
 AS $$
 DECLARE
   v_cache_key TEXT;
   v_response JSONB;
 BEGIN
   v_cache_key := public.generate_cache_key(p_request_type, p_params);
-  
 
-  DROP POLICY IF EXISTS "Users can view leads from own campaigns" ON public.leads;
-  SELECT 
-    response_data 
+  SELECT
+    response_data
   INTO v_response
-  FROM public.enrichment_cache 
-  WHERE 
-    cache_key = v_cache_key 
+  FROM public.enrichment_cache
+  WHERE
+    cache_key = v_cache_key
     AND expires_at > NOW()
     AND request_type = p_request_type;
-  
-  DROP POLICY IF EXISTS "System can insert leads" ON public.leads;
+
   -- Update hit count and last accessed
   IF v_response IS NOT NULL THEN
-    UPDATE public.enrichment_cache 
-    SET 
+    UPDATE public.enrichment_cache
+    SET
       hit_count = hit_count + 1,
       last_accessed_at = NOW()
     WHERE cache_key = v_cache_key;
   END IF;
-  
+
   RETURN v_response;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- Fix 3: store_cached_response function
+DROP FUNCTION IF EXISTS public.store_cached_response(TEXT, JSONB, JSONB, DECIMAL, INTEGER);
+
 CREATE OR REPLACE FUNCTION public.store_cached_response(
   p_request_type TEXT,
   p_params JSONB,
   p_response JSONB,
   p_cost DECIMAL DEFAULT 0,
   p_confidence_score INTEGER DEFAULT 0
-) RETURNS TEXT 
+) RETURNS TEXT
 SET search_path = public
 AS $$
 DECLARE
   v_cache_key TEXT;
 BEGIN
   v_cache_key := public.generate_cache_key(p_request_type, p_params);
-  
+
   -- Store with 90-day expiration
   INSERT INTO public.enrichment_cache (
     cache_key,
@@ -160,31 +151,33 @@ BEGIN
     p_cost,
     p_confidence_score,
     NOW() + INTERVAL '90 days'
-  ) ON CONFLICT (cache_key) 
+  ) ON CONFLICT (cache_key)
   DO UPDATE SET
     response_data = EXCLUDED.response_data,
     cost = EXCLUDED.cost,
     confidence_score = EXCLUDED.confidence_score,
     expires_at = EXCLUDED.expires_at,
     updated_at = NOW();
-  
+
   RETURN v_cache_key;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- Fix 4: cleanup_expired_cache function
-CREATE OR REPLACE FUNCTION public.cleanup_expired_cache() 
-RETURNS INTEGER 
+DROP FUNCTION IF EXISTS public.cleanup_expired_cache();
+
+CREATE OR REPLACE FUNCTION public.cleanup_expired_cache()
+RETURNS INTEGER
 SET search_path = public
 AS $$
 DECLARE
   v_deleted_count INTEGER;
 BEGIN
-  DELETE FROM public.enrichment_cache 
+  DELETE FROM public.enrichment_cache
   WHERE expires_at <= NOW();
-  
+
   GET DIAGNOSTICS v_deleted_count = ROW_COUNT;
-  
+
   RETURN v_deleted_count;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
@@ -221,7 +214,7 @@ CREATE TABLE IF NOT EXISTS public.subscription_tiers (
 CREATE TABLE IF NOT EXISTS public.user_subscriptions (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
-  tier_id INTEGER REFERENCES subscription_tiers(id),
+  tier_id INTEGER REFERENCES public.subscription_tiers(id),
   status VARCHAR(20) DEFAULT 'active' CHECK (status IN ('active', 'cancelled', 'expired')),
   current_period_start TIMESTAMPTZ DEFAULT NOW(),
   current_period_end TIMESTAMPTZ DEFAULT (NOW() + INTERVAL '30 days'),
@@ -257,30 +250,38 @@ ALTER TABLE public.subscription_tiers ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.campaigns ADD COLUMN IF NOT EXISTS user_id UUID REFERENCES auth.users(id);
 
 -- User profiles policies
+DROP POLICY IF EXISTS "Users can view own profile" ON public.user_profiles;
 CREATE POLICY "Users can view own profile" ON public.user_profiles
   FOR SELECT USING (id = (SELECT auth.uid()));
 
+DROP POLICY IF EXISTS "Users can update own profile" ON public.user_profiles;
 CREATE POLICY "Users can update own profile" ON public.user_profiles
   FOR UPDATE USING (id = (SELECT auth.uid()));
 
+DROP POLICY IF EXISTS "Users can insert own profile" ON public.user_profiles;
 CREATE POLICY "Users can insert own profile" ON public.user_profiles
   FOR INSERT WITH CHECK (id = (SELECT auth.uid()));
 
 -- Subscription policies
+DROP POLICY IF EXISTS "Users can view own subscription" ON public.user_subscriptions;
 CREATE POLICY "Users can view own subscription" ON public.user_subscriptions
   FOR SELECT USING (user_id = (SELECT auth.uid()));
 
+DROP POLICY IF EXISTS "Users can update own subscription" ON public.user_subscriptions;
 CREATE POLICY "Users can update own subscription" ON public.user_subscriptions
   FOR UPDATE USING (user_id = (SELECT auth.uid()));
 
 -- Usage logs policies
+DROP POLICY IF EXISTS "Users can view own usage" ON public.usage_logs;
 CREATE POLICY "Users can view own usage" ON public.usage_logs
   FOR SELECT USING (user_id = (SELECT auth.uid()));
 
+DROP POLICY IF EXISTS "System can insert usage logs" ON public.usage_logs;
 CREATE POLICY "System can insert usage logs" ON public.usage_logs
   FOR INSERT WITH CHECK (true);
 
 -- Subscription tiers (public read)
+DROP POLICY IF EXISTS "Anyone can view active subscription tiers" ON public.subscription_tiers;
 CREATE POLICY "Anyone can view active subscription tiers" ON public.subscription_tiers
   FOR SELECT USING (is_active = true);
 
@@ -289,12 +290,15 @@ DROP POLICY IF EXISTS "Public read campaigns" ON public.campaigns;
 DROP POLICY IF EXISTS "Public insert campaigns" ON public.campaigns;
 DROP POLICY IF EXISTS "Public update campaigns" ON public.campaigns;
 
+DROP POLICY IF EXISTS "Users can view own campaigns" ON public.campaigns;
 CREATE POLICY "Users can view own campaigns" ON public.campaigns
   FOR SELECT USING (user_id = (SELECT auth.uid()) OR user_id IS NULL);
 
+DROP POLICY IF EXISTS "Users can create campaigns" ON public.campaigns;
 CREATE POLICY "Users can create campaigns" ON public.campaigns
   FOR INSERT WITH CHECK (user_id = (SELECT auth.uid()));
 
+DROP POLICY IF EXISTS "Users can update own campaigns" ON public.campaigns;
 CREATE POLICY "Users can update own campaigns" ON public.campaigns
   FOR UPDATE USING (user_id = (SELECT auth.uid()));
 
@@ -303,15 +307,18 @@ DROP POLICY IF EXISTS "Public read leads" ON public.leads;
 DROP POLICY IF EXISTS "Public insert leads" ON public.leads;
 DROP POLICY IF EXISTS "Public update leads" ON public.leads;
 
+DROP POLICY IF EXISTS "Users can view leads from own campaigns" ON public.leads;
 CREATE POLICY "Users can view leads from own campaigns" ON public.leads
   FOR SELECT USING (
     EXISTS (
-      SELECT 1 FROM public.campaigns 
-      WHERE campaigns.id = leads.campaign_id 
-  AND (campaigns.user_id = (SELECT auth.uid()) OR campaigns.user_id IS NULL)
+      SELECT 1
+      FROM public.campaigns
+      WHERE campaigns.id = leads.campaign_id
+        AND (campaigns.user_id = (SELECT auth.uid()) OR campaigns.user_id IS NULL)
     )
   );
 
+DROP POLICY IF EXISTS "System can insert leads" ON public.leads;
 CREATE POLICY "System can insert leads" ON public.leads
   FOR INSERT WITH CHECK (true);
 
@@ -320,19 +327,23 @@ CREATE POLICY "System can insert leads" ON public.leads
 -- =============================================================================
 
 -- Function to create user profile and default subscription on signup
+DROP FUNCTION IF EXISTS public.create_user_profile_and_subscription();
+
 CREATE OR REPLACE FUNCTION public.create_user_profile_and_subscription()
-RETURNS TRIGGER 
+RETURNS TRIGGER
 SET search_path = public
 AS $$
 BEGIN
   -- Create user profile
   INSERT INTO public.user_profiles (id, full_name)
   VALUES (NEW.id, COALESCE(NEW.raw_user_meta_data->>'full_name', ''));
-  
-  -- Create free subscription (assuming Free tier exists with id=1)
+
+  -- Create free subscription (assuming Free tier exists with id = 1)
   INSERT INTO public.user_subscriptions (user_id, tier_id)
-  VALUES (NEW.id, (SELECT id FROM public.subscription_tiers WHERE name = 'Free' LIMIT 1));
-  
+  VALUES (NEW.id, (
+    SELECT id FROM public.subscription_tiers WHERE name = 'Free' LIMIT 1
+  ));
+
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
@@ -344,8 +355,10 @@ CREATE TRIGGER create_user_profile_and_subscription_trigger
   FOR EACH ROW EXECUTE FUNCTION public.create_user_profile_and_subscription();
 
 -- Function to check usage limits before actions
+DROP FUNCTION IF EXISTS public.check_usage_limit(UUID, TEXT);
+
 CREATE OR REPLACE FUNCTION public.check_usage_limit(user_uuid UUID, action_type TEXT)
-RETURNS JSONB 
+RETURNS JSONB
 SET search_path = public
 AS $$
 DECLARE
@@ -355,12 +368,12 @@ DECLARE
   can_proceed BOOLEAN;
 BEGIN
   -- Get user subscription with tier info
-  SELECT us.*, st.max_searches, st.max_exports, st.name as tier_name
+  SELECT us.*, st.max_searches, st.max_exports, st.name AS tier_name
   INTO subscription_record
   FROM public.user_subscriptions us
   JOIN public.subscription_tiers st ON us.tier_id = st.id
   WHERE us.user_id = user_uuid AND us.status = 'active';
-  
+
   IF NOT FOUND THEN
     RETURN json_build_object(
       'can_proceed', false,
@@ -369,25 +382,25 @@ BEGIN
       'error', 'No active subscription found'
     );
   END IF;
-  
+
   -- Reset monthly usage if period has ended
   IF subscription_record.current_period_end < NOW() THEN
-    UPDATE public.user_subscriptions 
-    SET 
+    UPDATE public.user_subscriptions
+    SET
       current_period_start = NOW(),
       current_period_end = NOW() + INTERVAL '30 days',
       searches_used = 0,
       exports_used = 0
     WHERE user_id = user_uuid;
-    
+
     -- Refresh the record
-    SELECT us.*, st.max_searches, st.max_exports, st.name as tier_name
+    SELECT us.*, st.max_searches, st.max_exports, st.name AS tier_name
     INTO subscription_record
     FROM public.user_subscriptions us
     JOIN public.subscription_tiers st ON us.tier_id = st.id
     WHERE us.user_id = user_uuid AND us.status = 'active';
   END IF;
-  
+
   -- Check limits based on action type
   IF action_type = 'search' THEN
     current_usage := subscription_record.searches_used;
@@ -403,10 +416,10 @@ BEGIN
       'error', 'Invalid action type'
     );
   END IF;
-  
-  -- Check if can proceed (-1 means unlimited)
+
+  -- Check if action is allowed (-1 means unlimited)
   can_proceed := (max_allowed = -1) OR (current_usage < max_allowed);
-  
+
   RETURN json_build_object(
     'can_proceed', can_proceed,
     'usage', current_usage,
@@ -418,32 +431,34 @@ END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- Function to increment usage after successful actions
+DROP FUNCTION IF EXISTS public.increment_usage(UUID, TEXT, TEXT, DECIMAL);
+
 CREATE OR REPLACE FUNCTION public.increment_usage(
-  user_uuid UUID, 
-  action_type TEXT, 
-  campaign_id_param TEXT DEFAULT NULL, 
+  user_uuid UUID,
+  action_type TEXT,
+  campaign_id_param TEXT DEFAULT NULL,
   cost_param DECIMAL DEFAULT 0
 )
-RETURNS BOOLEAN 
+RETURNS BOOLEAN
 SET search_path = public
 AS $$
 BEGIN
   -- Log the usage
   INSERT INTO public.usage_logs (user_id, action_type, campaign_id, cost)
   VALUES (user_uuid, action_type, campaign_id_param, cost_param);
-  
+
   -- Increment the appropriate counter
   IF action_type = 'search' THEN
-    UPDATE public.user_subscriptions 
+    UPDATE public.user_subscriptions
     SET searches_used = searches_used + 1
     WHERE user_id = user_uuid;
   ELSIF action_type = 'export' THEN
-    UPDATE public.user_subscriptions 
+    UPDATE public.user_subscriptions
     SET exports_used = exports_used + 1
     WHERE user_id = user_uuid;
   END IF;
-  
-  RETURN TRUE;
+
+  RETURN true;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
@@ -492,36 +507,33 @@ COMMENT ON TABLE public.usage_logs IS 'Detailed usage logs for analytics and bil
 -- =============================================================================
 
 /*
--- Verify views are fixed (should return no SECURITY DEFINER references)
-SELECT 
-  schemaname, 
-  viewname, 
-  definition 
-FROM pg_views 
+SELECT
+  schemaname,
+  viewname,
+  definition
+FROM pg_views
 WHERE viewname IN ('enrichment_cache_analytics', 'cache_performance_summary')
-AND definition LIKE '%SECURITY DEFINER%';
+  AND definition LIKE '%SECURITY DEFINER%';
 
--- Verify functions have proper search_path (should return all functions with search_path set)
-SELECT 
+SELECT
   routine_name,
   routine_type,
   routine_definition
-FROM information_schema.routines 
+FROM information_schema.routines
 WHERE routine_name IN ('generate_cache_key', 'get_cached_response', 'store_cached_response', 'cleanup_expired_cache')
-AND routine_schema = 'public';
+  AND routine_schema = 'public';
 
--- Verify RLS policies are active
-SELECT 
-  schemaname, 
-  tablename, 
-  policyname, 
-  permissive, 
-  roles, 
-  cmd, 
-  qual 
-FROM pg_policies 
+SELECT
+  schemaname,
+  tablename,
+  policyname,
+  permissive,
+  roles,
+  cmd,
+  qual
+FROM pg_policies
 WHERE tablename IN ('user_profiles', 'user_subscriptions', 'usage_logs', 'campaigns', 'leads');
 
--- Test user subscription system (after authentication is enabled)
 SELECT * FROM public.subscription_tiers WHERE is_active = true;
 */
+
