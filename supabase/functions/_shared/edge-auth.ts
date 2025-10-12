@@ -171,18 +171,45 @@ export async function authenticateRequest(
       global: { headers: { Authorization: `Bearer ${accessToken}` } },
     });
 
-    // Validate the user using the forwarded Authorization; do not pass token param
-    debugStage = "load_user";
-    const { data: authData, error: authError } =
-      await supabaseClient.auth.getUser(accessToken);
+    // Validate the user using direct auth endpoint call to capture detailed errors
+    debugStage = "fetch_user";
+    const authResponse = await fetch(`${supabaseUrl}/auth/v1/user`, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        apikey: supabaseAnonKey,
+      },
+    });
 
-    if (authError || !authData?.user) {
+    if (!authResponse.ok) {
+      const errorPayload = await authResponse.text();
+      console.error("❌ Supabase auth endpoint error", {
+        status: authResponse.status,
+        bodyPreview: errorPayload.slice(0, 200),
+      });
       throw new Error(
-        `Authentication failed: ${authError?.message ?? "No user found"}`
+        `Authentication failed: Supabase returned ${authResponse.status}`
       );
     }
 
-    const user = authData.user;
+    type AuthUserPayload = {
+      user?: User | null;
+    };
+
+    let user: User | null = null;
+    try {
+      const payload = (await authResponse.json()) as AuthUserPayload;
+      user = payload?.user ?? null;
+    } catch (parseError) {
+      console.error("❌ Failed to parse auth user payload", {
+        error:
+          parseError instanceof Error ? parseError.message : String(parseError),
+      });
+      throw new Error("Authentication failed: Unable to parse user payload");
+    }
+
+    if (!user) {
+      throw new Error("Authentication failed: No user returned from auth");
+    }
 
     debugStage = "finalize";
     const sessionId =
