@@ -125,7 +125,7 @@ function extractAccessToken(
     req.headers.get("x-prospect-session")
   );
 
-  const token = authHeader ?? sessionHeader;
+  const token = sessionHeader ?? authHeader;
   if (!token) {
     throw new Error("Missing bearer token on request");
   }
@@ -188,7 +188,7 @@ export async function authenticateRequest(
 
     debugStage = "load_user";
     const { data: authData, error: authError } =
-      await supabaseClient.auth.getUser();
+      await supabaseClient.auth.getUser(accessToken);
 
     if (authError || !authData?.user) {
       throw new Error(

@@ -62,18 +62,23 @@ echo ""
 
 # Step 1: Authentication test
 echo -e "${BLUE}Step 1: Testing authentication...${NC}"
-AUTH_RESPONSE=$(curl -s -X POST "$EDGE_BASE/test-new-auth" \
-  -H "Authorization: Bearer $SESSION_JWT" \
+AUTH_RESPONSE=$(curl --compressed -s -X POST "$EDGE_BASE/test-new-auth" \
+  -H "Authorization: Bearer $PUBLISHABLE_KEY" \
   -H "apikey: $PUBLISHABLE_KEY" \
+  -H "x-prospect-session: Bearer $SESSION_JWT" \
   -H "Content-Type: application/json" \
   -d '{"diagnostics": true}')
 
-if echo "$AUTH_RESPONSE" | grep -q '"userId"'; then
+if echo "$AUTH_RESPONSE" | grep -q '"userId"[[:space:]]*:'; then
   echo -e "   ${GREEN}✅ Authentication: Success${NC}"
-  USER_ID=$(echo "$AUTH_RESPONSE" | grep -o '"userId":"[^"]*"' | cut -d'"' -f4)
-  USER_EMAIL=$(echo "$AUTH_RESPONSE" | grep -o '"email":"[^"]*"' | cut -d'"' -f4 || echo "N/A")
-  echo "   👤 User ID: $USER_ID"
-  echo "   📧 Email: $USER_EMAIL"
+  USER_ID=$(echo "$AUTH_RESPONSE" | python3 -c 'import json, sys; data=json.load(sys.stdin); print(data.get("authentication", {}).get("request", {}).get("userId", ""))')
+  USER_EMAIL=$(echo "$AUTH_RESPONSE" | python3 -c 'import json, sys; data=json.load(sys.stdin); print(data.get("authentication", {}).get("request", {}).get("email", "N/A"))')
+  SESSION_ID=$(echo "$AUTH_RESPONSE" | python3 -c 'import json, sys; data=json.load(sys.stdin); print(data.get("authentication", {}).get("request", {}).get("sessionId", ""))')
+  echo "   👤 User ID: ${USER_ID:-unknown}"
+  echo "   📧 Email: ${USER_EMAIL:-N/A}"
+  if [ -n "$SESSION_ID" ]; then
+    echo "   🔐 Session ID: $SESSION_ID"
+  fi
 else
   echo -e "   ${RED}❌ Authentication: Failed${NC}"
   echo "   Response: $AUTH_RESPONSE"
@@ -88,11 +93,13 @@ fi
 # Step 2: Campaign discovery test
 echo ""
 echo -e "${BLUE}Step 2: Testing campaign discovery...${NC}"
-DISCOVERY_PAYLOAD="{\"businessType\": \"coffee shop\", \"location\": \"Seattle, WA\", \"maxResults\": 3, \"tierKey\": \"PROFESSIONAL\", \"sessionUserId\": \"$CAMPAIGN_TEST_ID\"}"
+SESSION_USER_ID=${USER_ID:-""}
+DISCOVERY_PAYLOAD="{\"businessType\": \"coffee shop\", \"location\": \"Seattle, WA\", \"maxResults\": 3, \"tierKey\": \"PROFESSIONAL\", \"sessionUserId\": \"$SESSION_USER_ID\", \"clientReference\": \"$CAMPAIGN_TEST_ID\"}"
 
 DISCOVERY_RESPONSE=$(curl -s -X POST "$EDGE_BASE/business-discovery-background" \
-  -H "Authorization: Bearer $SESSION_JWT" \
+  -H "Authorization: Bearer $PUBLISHABLE_KEY" \
   -H "apikey: $PUBLISHABLE_KEY" \
+  -H "x-prospect-session: Bearer $SESSION_JWT" \
   -H "Content-Type: application/json" \
   -d "$DISCOVERY_PAYLOAD")
 
@@ -132,25 +139,59 @@ echo ""
 echo ""
 echo -e "${BLUE}Step 4: Checking campaign completion...${NC}"
 # We'll use the export function to verify completion since it checks campaign status
-EXPORT_RESPONSE=$(curl -s -X POST "$EDGE_BASE/campaign-export-user-aware" \
-  -H "Authorization: Bearer $SESSION_JWT" \
+EXPORT_RESPONSE=$(curl --compressed -s -X POST "$EDGE_BASE/campaign-export-user-aware" \
+  -H "Authorization: Bearer $PUBLISHABLE_KEY" \
   -H "apikey: $PUBLISHABLE_KEY" \
+  -H "x-prospect-session: Bearer $SESSION_JWT" \
   -H "Content-Type: application/json" \
-  -d "{\"campaignId\": \"$CAMPAIGN_ID\", \"format\": \"csv\", \"sessionUserId\": \"$CAMPAIGN_TEST_ID\"}")
+  -d "{\"campaignId\": \"$CAMPAIGN_ID\", \"format\": \"csv\", \"sessionUserId\": \"$SESSION_USER_ID\", \"clientReference\": \"$CAMPAIGN_TEST_ID\"}")
 
-if echo "$EXPORT_RESPONSE" | grep -q '"rowCount"'; then
+EXPORT_SUCCESS=$(echo "$EXPORT_RESPONSE" | python3 -c 'import json, sys
+try:
+    data = json.load(sys.stdin)
+except Exception:
+    print("false")
+else:
+    print("true" if data.get("success") else "false")
+' 2>/dev/null || echo "false")
+ROW_COUNT=$(echo "$EXPORT_RESPONSE" | python3 -c 'import json, sys
+try:
+    data = json.load(sys.stdin)
+except Exception:
+    print("")
+else:
+    value = data.get("campaign", {}).get("leadCount")
+    print(value if value is not None else "")
+' 2>/dev/null)
+EXPORT_FILE=$(echo "$EXPORT_RESPONSE" | python3 -c 'import json, sys
+try:
+    data = json.load(sys.stdin)
+except Exception:
+    print("")
+else:
+    print(data.get("export", {}).get("fileName", ""))
+' 2>/dev/null)
+EXPORT_SIZE=$(echo "$EXPORT_RESPONSE" | python3 -c 'import json, sys
+try:
+    data = json.load(sys.stdin)
+except Exception:
+    print("")
+else:
+    print(data.get("export", {}).get("size", ""))
+' 2>/dev/null)
+
+if [ "$EXPORT_SUCCESS" = "true" ]; then
   echo -e "   ${GREEN}✅ Campaign: Completed successfully${NC}"
-  ROW_COUNT=$(echo "$EXPORT_RESPONSE" | grep -o '"rowCount":[0-9]*' | cut -d':' -f2)
-  echo "   📊 Leads Generated: $ROW_COUNT"
-  
-  # Check for data quality indicators in response
-  if echo "$EXPORT_RESPONSE" | grep -q '"phone"' && echo "$EXPORT_RESPONSE" | grep -q '"website"'; then
-    echo -e "   ${GREEN}✅ Data Quality: Phone and website data present${NC}"
+  if [ -n "$ROW_COUNT" ]; then
+    echo "   📊 Leads Generated: $ROW_COUNT"
   fi
-  
+  if [ -n "$EXPORT_FILE" ]; then
+    echo "   📁 Export File: $EXPORT_FILE${EXPORT_SIZE:+ ($EXPORT_SIZE bytes)}"
+  fi
+
 elif echo "$EXPORT_RESPONSE" | grep -q '"error"'; then
   echo -e "   ${YELLOW}⚠️  Campaign: Processing issue detected${NC}"
-  ERROR_MSG=$(echo "$EXPORT_RESPONSE" | grep -o '"error":"[^"]*"' | cut -d'"' -f4)
+  ERROR_MSG=$(echo "$EXPORT_RESPONSE" | grep -o '"error":"[^\"]*"' | cut -d'"' -f4)
   echo "   ❗ Error: $ERROR_MSG"
 else
   echo -e "   ${RED}❌ Campaign: Export failed${NC}"
@@ -160,22 +201,17 @@ fi
 # Step 5: Data quality validation
 echo ""
 echo -e "${BLUE}Step 5: Validating data quality...${NC}"
-if [ ! -z "$ROW_COUNT" ] && [ "$ROW_COUNT" -gt 0 ]; then
+if [ -n "$ROW_COUNT" ] && [ "${ROW_COUNT:-0}" -gt 0 ] 2>/dev/null; then
   echo -e "   ${GREEN}✅ Lead Generation: $ROW_COUNT leads discovered${NC}"
-  
-  # Check for CSV structure
-  if echo "$EXPORT_RESPONSE" | grep -q '"csvData"'; then
-    echo -e "   ${GREEN}✅ Export Format: CSV data generated${NC}"
-    
-    # Check for required columns
-    CSV_DATA=$(echo "$EXPORT_RESPONSE" | grep -o '"csvData":"[^"]*"' | cut -d'"' -f4)
-    if echo "$CSV_DATA" | grep -q "business_name" && echo "$CSV_DATA" | grep -q "phone"; then
-      echo -e "   ${GREEN}✅ Data Structure: Required columns present${NC}"
-    else
-      echo -e "   ${YELLOW}⚠️  Data Structure: Some columns may be missing${NC}"
-    fi
+
+  if echo "$EXPORT_RESPONSE" | grep -q '"recordedInDatabase"[[:space:]]*:[[:space:]]*true'; then
+    echo -e "   ${GREEN}✅ Export Record: Stored in dashboard_exports${NC}"
   fi
-  
+
+  if [ -n "$EXPORT_FILE" ]; then
+    echo "   📂 File Ready: $EXPORT_FILE"
+  fi
+
   echo "   🎯 Quality Expectations:"
   echo "      - Phone coverage: >95% (via Google Places)"
   echo "      - Website coverage: >90% (via Google Places)"
