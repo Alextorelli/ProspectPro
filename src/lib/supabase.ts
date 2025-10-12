@@ -178,7 +178,6 @@ export async function invokeWithSession<T = unknown>(
     body,
     headers: {
       Authorization: `Bearer ${token}`,
-      "x-prospect-session": `Bearer ${token}`,
       "Content-Type": "application/json",
       ...options.headers,
     },

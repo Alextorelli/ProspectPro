@@ -66,25 +66,7 @@ function getEnvFallback(
   );
 }
 
-function base64UrlToUint8Array(value: string): Uint8Array {
-  const padded = value.padEnd(
-    value.length + ((4 - (value.length % 4)) % 4),
-    "="
-  );
-  const base64 = padded.replace(/-/g, "+").replace(/_/g, "/");
-  const binary = atob(base64);
-  const bytes = new Uint8Array(binary.length);
-  for (let i = 0; i < binary.length; i += 1) {
-    bytes[i] = binary.charCodeAt(i);
-  }
-  return bytes;
-}
-
-function parseJwtSegment<T = Record<string, unknown>>(segment: string): T {
-  const bytes = base64UrlToUint8Array(segment);
-  const decoded = new TextDecoder().decode(bytes);
-  return JSON.parse(decoded) as T;
-}
+// Drop custom JWT parsing; rely on Supabase client auth helpers per docs.
 
 interface SupabaseEnv {
   url: string;
@@ -120,32 +102,14 @@ function extractAccessToken(
   req: Request,
   diagnostics: AuthDiagnostics
 ): string {
-  const authHeader = extractBearerToken(req.headers.get("Authorization"));
-  const sessionHeader = extractBearerToken(
-    req.headers.get("x-prospect-session")
-  );
-
-  const token = sessionHeader ?? authHeader;
-  if (!token) {
-    throw new Error("Missing bearer token on request");
-  }
-
+  // Per Supabase Functions auth guide: use Authorization header only.
+  const token = extractBearerToken(req.headers.get("Authorization"));
+  if (!token) throw new Error("Missing Authorization bearer token");
   diagnostics.tokenPreview = `${token.slice(0, 8)}…${token.slice(-6)}`;
   return token;
 }
 
-function decodeJwtPayload(token: string): JwtPayload {
-  try {
-    const segments = token.split(".");
-    if (segments.length !== 3) {
-      return {};
-    }
-    return parseJwtSegment<JwtPayload>(segments[1]);
-  } catch (error) {
-    console.warn("Unable to decode JWT payload", error);
-    return {};
-  }
-}
+// No manual decode; Supabase SDK validates the token with auth.getUser.
 
 function extractBearerToken(rawValue: string | null): string | null {
   if (!rawValue) return null;
@@ -176,19 +140,17 @@ export async function authenticateRequest(
 
     const accessToken = extractAccessToken(req, diagnostics);
 
+    // Minimal client per Supabase docs: pass anon key, and forward Authorization header via global headers
     debugStage = "create_client";
     const supabaseClient = createClient(supabaseUrl, supabaseAnonKey, {
       auth: { persistSession: false },
-      global: {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      },
+      global: { headers: { Authorization: `Bearer ${accessToken}` } },
     });
 
+    // Validate the user using the forwarded Authorization; do not pass token param
     debugStage = "load_user";
     const { data: authData, error: authError } =
-      await supabaseClient.auth.getUser(accessToken);
+      await supabaseClient.auth.getUser();
 
     if (authError || !authData?.user) {
       throw new Error(
@@ -197,23 +159,11 @@ export async function authenticateRequest(
     }
 
     const user = authData.user;
-    const tokenClaims = decodeJwtPayload(accessToken);
 
     debugStage = "finalize";
-    const sessionId =
-      typeof tokenClaims.session_id === "string"
-        ? (tokenClaims.session_id as string)
-        : null;
-    const isAnonymous =
-      typeof user.is_anonymous === "boolean"
-        ? user.is_anonymous
-        : Boolean(tokenClaims.is_anonymous);
-    const email =
-      typeof user.email === "string"
-        ? user.email
-        : typeof tokenClaims.email === "string"
-        ? (tokenClaims.email as string)
-        : null;
+    const sessionId = null;
+    const isAnonymous = Boolean(user.is_anonymous);
+    const email = typeof user.email === "string" ? user.email : null;
 
     return {
       supabaseUrl,
@@ -226,7 +176,7 @@ export async function authenticateRequest(
       email,
       isAnonymous,
       sessionId,
-      tokenClaims,
+      tokenClaims: {},
     };
   } catch (error) {
     console.error("❌ authenticateRequest failure", {
@@ -236,10 +186,9 @@ export async function authenticateRequest(
       error: error instanceof Error ? error.message : String(error),
     });
 
-    if (error instanceof Error) {
-      throw new Error(`Auth failure (${debugStage}): ${error.message}`);
-    }
-    throw new Error(`Auth failure (${debugStage})`);
+    const message = error instanceof Error ? error.message : String(error);
+    // Normalize common Supabase error wording
+    throw new Error(`Auth failure (${debugStage}): ${message}`);
   }
 }
 
