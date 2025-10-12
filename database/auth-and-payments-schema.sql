@@ -73,24 +73,31 @@ ALTER TABLE public.payment_transactions ENABLE ROW LEVEL SECURITY;
 
 -- User profiles policies
 CREATE POLICY "Users can view own profile" ON public.user_profiles
-  FOR SELECT USING (auth.uid() = id);
+  FOR SELECT USING (id = (SELECT auth.uid()));
 
 CREATE POLICY "Users can update own profile" ON public.user_profiles
-  FOR UPDATE USING (auth.uid() = id);
+  FOR UPDATE USING (id = (SELECT auth.uid()));
 
 CREATE POLICY "Users can insert own profile" ON public.user_profiles
-  FOR INSERT WITH CHECK (auth.uid() = id);
+  FOR INSERT WITH CHECK (id = (SELECT auth.uid()));
 
 -- Payment methods policies
 CREATE POLICY "Users can view own payment methods" ON public.payment_methods
-  FOR SELECT USING (auth.uid() = user_id);
+  FOR SELECT TO authenticated USING (user_id = (SELECT auth.uid()));
 
-CREATE POLICY "Users can manage own payment methods" ON public.payment_methods
-  FOR ALL USING (auth.uid() = user_id);
+CREATE POLICY "Users can insert own payment methods" ON public.payment_methods
+  FOR INSERT TO authenticated WITH CHECK (user_id = (SELECT auth.uid()));
+
+CREATE POLICY "Users can update own payment methods" ON public.payment_methods
+  FOR UPDATE TO authenticated USING (user_id = (SELECT auth.uid()))
+  WITH CHECK (user_id = (SELECT auth.uid()));
+
+CREATE POLICY "Users can delete own payment methods" ON public.payment_methods
+  FOR DELETE TO authenticated USING (user_id = (SELECT auth.uid()));
 
 -- Payment transactions policies
 CREATE POLICY "Users can view own transactions" ON public.payment_transactions
-  FOR SELECT USING (auth.uid() = user_id);
+  FOR SELECT USING (user_id = (SELECT auth.uid()));
 
 -- =============================================================================
 -- PART 4: Campaign Naming Functions
@@ -273,7 +280,7 @@ FROM campaigns c
 LEFT JOIN leads l ON l.campaign_id = c.id
 LEFT JOIN user_profiles up ON up.id = c.user_id
 WHERE
-  c.user_id = auth.uid() OR
+  c.user_id = (SELECT auth.uid()) OR
   (auth.uid() IS NULL AND c.session_user_id IS NOT NULL)
 GROUP BY c.id, c.generated_name, c.display_name, c.business_type, c.location, 
          c.target_count, c.min_confidence_score, c.status, c.results_count, 

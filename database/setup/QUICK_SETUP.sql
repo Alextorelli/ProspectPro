@@ -222,10 +222,10 @@ ALTER TABLE lead_qualification_metrics ENABLE ROW LEVEL SECURITY;
 ALTER TABLE dashboard_exports ENABLE ROW LEVEL SECURITY;
 
 -- Create basic RLS policies
-CREATE POLICY "campaigns_user_access" ON campaigns FOR ALL TO authenticated USING (user_id = auth.uid()) WITH CHECK (user_id = auth.uid());
-CREATE POLICY "enhanced_leads_campaign_access" ON enhanced_leads FOR ALL TO authenticated USING (campaign_id IN (SELECT id FROM campaigns WHERE user_id = auth.uid())) WITH CHECK (campaign_id IN (SELECT id FROM campaigns WHERE user_id = auth.uid()));
-CREATE POLICY "system_settings_user_access" ON system_settings FOR ALL TO authenticated USING (user_id = auth.uid()) WITH CHECK (user_id = auth.uid());
-CREATE POLICY "dashboard_exports_user_access" ON dashboard_exports FOR ALL TO authenticated USING (user_id = auth.uid()) WITH CHECK (user_id = auth.uid());
+CREATE POLICY "campaigns_user_access" ON campaigns FOR ALL TO authenticated USING (user_id = (SELECT auth.uid())) WITH CHECK (user_id = (SELECT auth.uid()));
+CREATE POLICY "enhanced_leads_campaign_access" ON enhanced_leads FOR ALL TO authenticated USING (campaign_id IN (SELECT id FROM campaigns WHERE user_id = (SELECT auth.uid()))) WITH CHECK (campaign_id IN (SELECT id FROM campaigns WHERE user_id = (SELECT auth.uid())));
+CREATE POLICY "system_settings_user_access" ON system_settings FOR ALL TO authenticated USING (user_id = (SELECT auth.uid())) WITH CHECK (user_id = (SELECT auth.uid()));
+CREATE POLICY "dashboard_exports_user_access" ON dashboard_exports FOR ALL TO authenticated USING (user_id = (SELECT auth.uid())) WITH CHECK (user_id = (SELECT auth.uid()));
 
 -- Create indexes for performance
 CREATE INDEX IF NOT EXISTS idx_campaigns_user_id ON campaigns(user_id);

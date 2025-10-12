@@ -97,7 +97,7 @@ DO $$ BEGIN IF NOT EXISTS (
   WHERE schemaname = 'public'
     AND tablename = 'campaigns'
     AND policyname = 'campaigns_user_access'
-) THEN CREATE POLICY "campaigns_user_access" ON campaigns FOR ALL TO authenticated USING (user_id = auth.uid()) WITH CHECK (user_id = auth.uid());
+) THEN CREATE POLICY "campaigns_user_access" ON campaigns FOR DELETE TO authenticated USING (user_id = (SELECT auth.uid()));
 RAISE NOTICE 'Created policy: campaigns_user_access';
 ELSE RAISE NOTICE 'Policy already exists: campaigns_user_access';
 END IF;
@@ -110,7 +110,7 @@ DO $$ BEGIN IF NOT EXISTS (
   WHERE schemaname = 'public'
     AND tablename = 'system_settings'
     AND policyname = 'system_settings_user_access'
-) THEN CREATE POLICY "system_settings_user_access" ON system_settings FOR ALL TO authenticated USING (user_id = auth.uid()) WITH CHECK (user_id = auth.uid());
+) THEN CREATE POLICY "system_settings_user_access" ON system_settings FOR ALL TO authenticated USING (user_id = (SELECT auth.uid())) WITH CHECK (user_id = (SELECT auth.uid()));
 RAISE NOTICE 'Created policy: system_settings_user_access';
 ELSE RAISE NOTICE 'Policy already exists: system_settings_user_access';
 END IF;
@@ -175,13 +175,13 @@ DO $$ BEGIN IF NOT EXISTS (
   campaign_id IN (
     SELECT id
     FROM campaigns
-    WHERE user_id = auth.uid()
+  WHERE user_id = (SELECT auth.uid())
   )
 ) WITH CHECK (
   campaign_id IN (
     SELECT id
     FROM campaigns
-    WHERE user_id = auth.uid()
+  WHERE user_id = (SELECT auth.uid())
   )
 );
 RAISE NOTICE 'Created policy: enhanced_leads_campaign_access';
@@ -201,14 +201,14 @@ DO $$ BEGIN IF NOT EXISTS (
     SELECT el.id
     FROM enhanced_leads el
       JOIN campaigns c ON el.campaign_id = c.id
-    WHERE c.user_id = auth.uid()
+  WHERE c.user_id = (SELECT auth.uid())
   )
 ) WITH CHECK (
   lead_id IN (
     SELECT el.id
     FROM enhanced_leads el
       JOIN campaigns c ON el.campaign_id = c.id
-    WHERE c.user_id = auth.uid()
+  WHERE c.user_id = (SELECT auth.uid())
   )
 );
 RAISE NOTICE 'Created policy: lead_emails_campaign_access';
@@ -228,14 +228,14 @@ DO $$ BEGIN IF NOT EXISTS (
     SELECT el.id
     FROM enhanced_leads el
       JOIN campaigns c ON el.campaign_id = c.id
-    WHERE c.user_id = auth.uid()
+  WHERE c.user_id = (SELECT auth.uid())
   )
 ) WITH CHECK (
   lead_id IN (
     SELECT el.id
     FROM enhanced_leads el
       JOIN campaigns c ON el.campaign_id = c.id
-    WHERE c.user_id = auth.uid()
+  WHERE c.user_id = (SELECT auth.uid())
   )
 );
 RAISE NOTICE 'Created policy: lead_social_profiles_campaign_access';
@@ -262,14 +262,14 @@ DO $$ BEGIN IF NOT EXISTS (
   OR campaign_id IN (
     SELECT id
     FROM campaigns
-    WHERE user_id = auth.uid()
+  WHERE user_id = (SELECT auth.uid())
   )
 ) WITH CHECK (
   campaign_id IS NULL
   OR campaign_id IN (
     SELECT id
     FROM campaigns
-    WHERE user_id = auth.uid()
+  WHERE user_id = (SELECT auth.uid())
   )
 );
 RAISE NOTICE 'Created policy: api_usage_log_campaign_access';
@@ -293,13 +293,13 @@ DO $$ BEGIN IF NOT EXISTS (
   campaign_id IN (
     SELECT id
     FROM campaigns
-    WHERE user_id = auth.uid()
+  WHERE user_id = (SELECT auth.uid())
   )
 ) WITH CHECK (
   campaign_id IN (
     SELECT id
     FROM campaigns
-    WHERE user_id = auth.uid()
+  WHERE user_id = (SELECT auth.uid())
   )
 );
 RAISE NOTICE 'Created policy: campaign_analytics_campaign_access';
@@ -319,14 +319,14 @@ DO $$ BEGIN IF NOT EXISTS (
   OR campaign_id IN (
     SELECT id
     FROM campaigns
-    WHERE user_id = auth.uid()
+  WHERE user_id = (SELECT auth.uid())
   )
 ) WITH CHECK (
   campaign_id IS NULL
   OR campaign_id IN (
     SELECT id
     FROM campaigns
-    WHERE user_id = auth.uid()
+  WHERE user_id = (SELECT auth.uid())
   )
 );
 RAISE NOTICE 'Created policy: api_cost_tracking_campaign_access';
@@ -345,13 +345,13 @@ DO $$ BEGIN IF NOT EXISTS (
   campaign_id IN (
     SELECT id
     FROM campaigns
-    WHERE user_id = auth.uid()
+  WHERE user_id = (SELECT auth.uid())
   )
 ) WITH CHECK (
   campaign_id IN (
     SELECT id
     FROM campaigns
-    WHERE user_id = auth.uid()
+  WHERE user_id = (SELECT auth.uid())
   )
 );
 RAISE NOTICE 'Created policy: lead_qualification_metrics_campaign_access';
@@ -366,7 +366,7 @@ DO $$ BEGIN IF NOT EXISTS (
   WHERE schemaname = 'public'
     AND tablename = 'dashboard_exports'
     AND policyname = 'dashboard_exports_user_access'
-) THEN CREATE POLICY "dashboard_exports_user_access" ON dashboard_exports FOR ALL TO authenticated USING (user_id = auth.uid()) WITH CHECK (user_id = auth.uid());
+) THEN CREATE POLICY "dashboard_exports_user_access" ON dashboard_exports FOR DELETE TO authenticated USING (user_id = (SELECT auth.uid()));
 RAISE NOTICE 'Created policy: dashboard_exports_user_access';
 ELSE RAISE NOTICE 'Policy already exists: dashboard_exports_user_access';
 END IF;

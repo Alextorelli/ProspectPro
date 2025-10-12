@@ -1837,10 +1837,10 @@ END $$;
 -- ============================================================================
 -- Campaigns: Direct user ownership
 DROP POLICY IF EXISTS "campaigns_user_access" ON campaigns;
-CREATE POLICY "campaigns_user_access" ON campaigns FOR ALL TO authenticated USING (user_id = auth.uid()) WITH CHECK (user_id = auth.uid());
+CREATE POLICY "campaigns_user_access" ON campaigns FOR DELETE TO authenticated USING (user_id = (SELECT auth.uid()));
 -- System settings: Direct user ownership
 DROP POLICY IF EXISTS "system_settings_user_access" ON system_settings;
-CREATE POLICY "system_settings_user_access" ON system_settings FOR ALL TO authenticated USING (user_id = auth.uid()) WITH CHECK (user_id = auth.uid());
+CREATE POLICY "system_settings_user_access" ON system_settings FOR ALL TO authenticated USING (user_id = (SELECT auth.uid())) WITH CHECK (user_id = (SELECT auth.uid()));
 -- Service health metrics: Read-only for all authenticated users
 DROP POLICY IF EXISTS "service_health_metrics_read_all" ON service_health_metrics;
 CREATE POLICY "service_health_metrics_read_all" ON service_health_metrics FOR
@@ -1865,13 +1865,13 @@ CREATE POLICY "enhanced_leads_campaign_access" ON enhanced_leads FOR ALL TO auth
   campaign_id IN (
     SELECT id
     FROM campaigns
-    WHERE user_id = auth.uid()
+  WHERE user_id = (SELECT auth.uid())
   )
 ) WITH CHECK (
   campaign_id IN (
     SELECT id
     FROM campaigns
-    WHERE user_id = auth.uid()
+  WHERE user_id = (SELECT auth.uid())
   )
 );
 -- Lead emails: Access via lead->campaign chain
@@ -1881,14 +1881,14 @@ CREATE POLICY "lead_emails_campaign_access" ON lead_emails FOR ALL TO authentica
     SELECT el.id
     FROM enhanced_leads el
       JOIN campaigns c ON el.campaign_id = c.id
-    WHERE c.user_id = auth.uid()
+  WHERE c.user_id = (SELECT auth.uid())
   )
 ) WITH CHECK (
   lead_id IN (
     SELECT el.id
     FROM enhanced_leads el
       JOIN campaigns c ON el.campaign_id = c.id
-    WHERE c.user_id = auth.uid()
+  WHERE c.user_id = (SELECT auth.uid())
   )
 );
 -- Lead social profiles: Access via lead->campaign chain
@@ -1898,14 +1898,14 @@ CREATE POLICY "lead_social_profiles_campaign_access" ON lead_social_profiles FOR
     SELECT el.id
     FROM enhanced_leads el
       JOIN campaigns c ON el.campaign_id = c.id
-    WHERE c.user_id = auth.uid()
+  WHERE c.user_id = (SELECT auth.uid())
   )
 ) WITH CHECK (
   lead_id IN (
     SELECT el.id
     FROM enhanced_leads el
       JOIN campaigns c ON el.campaign_id = c.id
-    WHERE c.user_id = auth.uid()
+  WHERE c.user_id = (SELECT auth.uid())
   )
 );
 DO $$ BEGIN RAISE NOTICE '✅ Phase 5.4 Complete: Lead management security policies created';
@@ -1922,14 +1922,14 @@ CREATE POLICY "api_usage_log_campaign_access" ON api_usage_log FOR ALL TO authen
   OR campaign_id IN (
     SELECT id
     FROM campaigns
-    WHERE user_id = auth.uid()
+  WHERE user_id = (SELECT auth.uid())
   )
 ) WITH CHECK (
   campaign_id IS NULL
   OR campaign_id IN (
     SELECT id
     FROM campaigns
-    WHERE user_id = auth.uid()
+  WHERE user_id = (SELECT auth.uid())
   )
 );
 DO $$ BEGIN RAISE NOTICE '✅ Phase 5.5 Complete: API usage tracking security policies created';
@@ -1943,13 +1943,13 @@ CREATE POLICY "campaign_analytics_campaign_access" ON campaign_analytics FOR ALL
   campaign_id IN (
     SELECT id
     FROM campaigns
-    WHERE user_id = auth.uid()
+  WHERE user_id = (SELECT auth.uid())
   )
 ) WITH CHECK (
   campaign_id IN (
     SELECT id
     FROM campaigns
-    WHERE user_id = auth.uid()
+  WHERE user_id = (SELECT auth.uid())
   )
 );
 -- API cost tracking: Campaign-based access (with NULL campaign support)
@@ -1959,14 +1959,14 @@ CREATE POLICY "api_cost_tracking_campaign_access" ON api_cost_tracking FOR ALL T
   OR campaign_id IN (
     SELECT id
     FROM campaigns
-    WHERE user_id = auth.uid()
+  WHERE user_id = (SELECT auth.uid())
   )
 ) WITH CHECK (
   campaign_id IS NULL
   OR campaign_id IN (
     SELECT id
     FROM campaigns
-    WHERE user_id = auth.uid()
+  WHERE user_id = (SELECT auth.uid())
   )
 );
 -- Lead qualification metrics: Campaign-based access
@@ -1975,18 +1975,18 @@ CREATE POLICY "lead_qualification_metrics_campaign_access" ON lead_qualification
   campaign_id IN (
     SELECT id
     FROM campaigns
-    WHERE user_id = auth.uid()
+  WHERE user_id = (SELECT auth.uid())
   )
 ) WITH CHECK (
   campaign_id IN (
     SELECT id
     FROM campaigns
-    WHERE user_id = auth.uid()
+  WHERE user_id = (SELECT auth.uid())
   )
 );
 -- Dashboard exports: User-based access with campaign filtering
 DROP POLICY IF EXISTS "dashboard_exports_user_access" ON dashboard_exports;
-CREATE POLICY "dashboard_exports_user_access" ON dashboard_exports FOR ALL TO authenticated USING (user_id = auth.uid()) WITH CHECK (user_id = auth.uid());
+CREATE POLICY "dashboard_exports_user_access" ON dashboard_exports FOR DELETE TO authenticated USING (user_id = (SELECT auth.uid()));
 DO $$ BEGIN RAISE NOTICE '✅ Phase 5.6 Complete: Analytics and monitoring security policies created';
 RAISE NOTICE '   - campaign_analytics: Campaign-based access';
 RAISE NOTICE '   - api_cost_tracking: Campaign-based with system support';

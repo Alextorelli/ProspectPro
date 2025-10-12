@@ -244,24 +244,24 @@ ALTER TABLE public.campaigns ADD COLUMN IF NOT EXISTS user_id UUID REFERENCES au
 
 -- User profiles policies
 CREATE POLICY "Users can view own profile" ON public.user_profiles
-  FOR SELECT USING (auth.uid() = id);
+  FOR SELECT USING (id = (SELECT auth.uid()));
 
 CREATE POLICY "Users can update own profile" ON public.user_profiles
-  FOR UPDATE USING (auth.uid() = id);
+  FOR UPDATE USING (id = (SELECT auth.uid()));
 
 CREATE POLICY "Users can insert own profile" ON public.user_profiles
-  FOR INSERT WITH CHECK (auth.uid() = id);
+  FOR INSERT WITH CHECK (id = (SELECT auth.uid()));
 
 -- Subscription policies
 CREATE POLICY "Users can view own subscription" ON public.user_subscriptions
-  FOR SELECT USING (auth.uid() = user_id);
+  FOR SELECT USING (user_id = (SELECT auth.uid()));
 
 CREATE POLICY "Users can update own subscription" ON public.user_subscriptions
-  FOR UPDATE USING (auth.uid() = user_id);
+  FOR UPDATE USING (user_id = (SELECT auth.uid()));
 
 -- Usage logs policies
 CREATE POLICY "Users can view own usage" ON public.usage_logs
-  FOR SELECT USING (auth.uid() = user_id);
+  FOR SELECT USING (user_id = (SELECT auth.uid()));
 
 CREATE POLICY "System can insert usage logs" ON public.usage_logs
   FOR INSERT WITH CHECK (true);
@@ -276,13 +276,13 @@ DROP POLICY IF EXISTS "Public insert campaigns" ON public.campaigns;
 DROP POLICY IF EXISTS "Public update campaigns" ON public.campaigns;
 
 CREATE POLICY "Users can view own campaigns" ON public.campaigns
-  FOR SELECT USING (auth.uid() = user_id OR user_id IS NULL);
+  FOR SELECT USING (user_id = (SELECT auth.uid()) OR user_id IS NULL);
 
 CREATE POLICY "Users can create campaigns" ON public.campaigns
-  FOR INSERT WITH CHECK (auth.uid() = user_id);
+  FOR INSERT WITH CHECK (user_id = (SELECT auth.uid()));
 
 CREATE POLICY "Users can update own campaigns" ON public.campaigns
-  FOR UPDATE USING (auth.uid() = user_id);
+  FOR UPDATE USING (user_id = (SELECT auth.uid()));
 
 -- Update leads policies for user-owned campaigns
 DROP POLICY IF EXISTS "Public read leads" ON public.leads;
@@ -294,7 +294,7 @@ CREATE POLICY "Users can view leads from own campaigns" ON public.leads
     EXISTS (
       SELECT 1 FROM public.campaigns 
       WHERE campaigns.id = leads.campaign_id 
-      AND (campaigns.user_id = auth.uid() OR campaigns.user_id IS NULL)
+  AND (campaigns.user_id = (SELECT auth.uid()) OR campaigns.user_id IS NULL)
     )
   );
 

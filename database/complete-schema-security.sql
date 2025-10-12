@@ -81,25 +81,19 @@ DROP POLICY IF EXISTS "campaigns_anon_access" ON public.campaigns;
 DROP POLICY IF EXISTS "Public read campaigns" ON public.campaigns;
 DROP POLICY IF EXISTS "Public insert campaigns" ON public.campaigns;
 DROP POLICY IF EXISTS "Allow anon access to campaigns" ON public.campaigns;
-
-CREATE POLICY "campaigns_new_api_access" ON public.campaigns
-    FOR ALL TO anon USING (true) WITH CHECK (true);
+DROP POLICY IF EXISTS "campaigns_new_api_access" ON public.campaigns;
 
 DROP POLICY IF EXISTS "leads_anon_access" ON public.leads;
 DROP POLICY IF EXISTS "Public read leads" ON public.leads;
 DROP POLICY IF EXISTS "Public insert leads" ON public.leads;
 DROP POLICY IF EXISTS "Allow anon access to leads" ON public.leads;
-
-CREATE POLICY "leads_new_api_access" ON public.leads
-    FOR ALL TO anon USING (true) WITH CHECK (true);
+DROP POLICY IF EXISTS "leads_new_api_access" ON public.leads;
 
 DROP POLICY IF EXISTS "exports_anon_access" ON public.dashboard_exports;
 DROP POLICY IF EXISTS "Public read dashboard_exports" ON public.dashboard_exports;
 DROP POLICY IF EXISTS "Public insert dashboard_exports" ON public.dashboard_exports;
 DROP POLICY IF EXISTS "Allow anon access to exports" ON public.dashboard_exports;
-
-CREATE POLICY "exports_new_api_access" ON public.dashboard_exports
-    FOR ALL TO anon USING (true) WITH CHECK (true);
+DROP POLICY IF EXISTS "exports_new_api_access" ON public.dashboard_exports;
 
 -- =============================================================================
 -- PART 4: New API Key Format Support Functions

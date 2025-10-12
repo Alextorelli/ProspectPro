@@ -36,61 +36,65 @@ DROP POLICY IF EXISTS "Users can insert their own exports" ON dashboard_exports;
 
 -- Campaigns table policies
 CREATE POLICY "Users can view their own campaigns" ON campaigns
-    FOR SELECT USING (
-        auth.uid() = user_id OR 
+    FOR SELECT TO authenticated USING (
+        user_id = (SELECT auth.uid()) OR 
         (auth.uid() IS NULL AND session_user_id IS NOT NULL)
     );
 
 CREATE POLICY "Users can insert their own campaigns" ON campaigns
-    FOR INSERT WITH CHECK (
-        (auth.uid() IS NOT NULL AND auth.uid() = user_id) OR
+    FOR INSERT TO authenticated WITH CHECK (
+        ((SELECT auth.uid()) IS NOT NULL AND user_id = (SELECT auth.uid())) OR
         (auth.uid() IS NULL AND session_user_id IS NOT NULL)
     );
 
 CREATE POLICY "Users can update their own campaigns" ON campaigns
-    FOR UPDATE USING (
-        auth.uid() = user_id OR 
+    FOR UPDATE TO authenticated USING (
+        user_id = (SELECT auth.uid()) OR 
+        (auth.uid() IS NULL AND session_user_id IS NOT NULL)
+    )
+    WITH CHECK (
+        user_id = (SELECT auth.uid()) OR 
         (auth.uid() IS NULL AND session_user_id IS NOT NULL)
     );
 
 -- Leads table policies
 CREATE POLICY "Users can view their own leads" ON leads
-    FOR SELECT USING (
-        auth.uid() = user_id OR 
+    FOR SELECT TO authenticated USING (
+        user_id = (SELECT auth.uid()) OR 
         (auth.uid() IS NULL AND session_user_id IS NOT NULL) OR
         campaign_id IN (
             SELECT id FROM campaigns 
-            WHERE auth.uid() = user_id OR 
+            WHERE user_id = (SELECT auth.uid()) OR 
                   (auth.uid() IS NULL AND session_user_id IS NOT NULL)
         )
     );
 
 CREATE POLICY "Users can insert their own leads" ON leads
-    FOR INSERT WITH CHECK (
-        (auth.uid() IS NOT NULL AND auth.uid() = user_id) OR
+    FOR INSERT TO authenticated WITH CHECK (
+        ((SELECT auth.uid()) IS NOT NULL AND user_id = (SELECT auth.uid())) OR
         (auth.uid() IS NULL AND session_user_id IS NOT NULL) OR
         campaign_id IN (
             SELECT id FROM campaigns 
-            WHERE auth.uid() = user_id OR 
+            WHERE user_id = (SELECT auth.uid()) OR 
                   (auth.uid() IS NULL AND session_user_id IS NOT NULL)
         )
     );
 
 -- Dashboard exports table policies
 CREATE POLICY "Users can view their own exports" ON dashboard_exports
-    FOR SELECT USING (
-        auth.uid() = user_id OR 
+    FOR SELECT TO authenticated USING (
+        user_id = (SELECT auth.uid()) OR 
         (auth.uid() IS NULL AND session_user_id IS NOT NULL) OR
         campaign_id IN (
             SELECT id FROM campaigns 
-            WHERE auth.uid() = user_id OR 
+            WHERE user_id = (SELECT auth.uid()) OR 
                   (auth.uid() IS NULL AND session_user_id IS NOT NULL)
         )
     );
 
 CREATE POLICY "Users can insert their own exports" ON dashboard_exports
-    FOR INSERT WITH CHECK (
-        (auth.uid() IS NOT NULL AND auth.uid() = user_id) OR
+    FOR INSERT TO authenticated WITH CHECK (
+        ((SELECT auth.uid()) IS NOT NULL AND user_id = (SELECT auth.uid())) OR
         (auth.uid() IS NULL AND session_user_id IS NOT NULL)
     );
 
@@ -122,7 +126,7 @@ BEGIN
         (target_user_id IS NOT NULL AND c.user_id = target_user_id) OR
         (target_session_user_id IS NOT NULL AND c.session_user_id = target_session_user_id) OR
         (target_user_id IS NULL AND target_session_user_id IS NULL AND (
-            c.user_id = auth.uid() OR 
+            c.user_id = (SELECT auth.uid()) OR 
             (auth.uid() IS NULL AND c.session_user_id IS NOT NULL)
         ))
     ORDER BY c.created_at DESC;
@@ -182,8 +186,8 @@ AS SELECT
   COALESCE(AVG(l.confidence_score), 0)::numeric(10,2) AS avg_confidence
 FROM campaigns c
 LEFT JOIN leads l ON l.campaign_id = c.id
-WHERE 
-    c.user_id = auth.uid() OR 
+    WHERE 
+    c.user_id = (SELECT auth.uid()) OR 
     (auth.uid() IS NULL AND c.session_user_id IS NOT NULL)
 GROUP BY c.id, c.business_type, c.location, c.target_count, c.min_confidence_score,
          c.status, c.results_count, c.total_cost, c.budget_limit, c.processing_time_ms, 

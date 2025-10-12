@@ -26,8 +26,8 @@ DROP POLICY IF EXISTS "exports_new_api_access" ON public.dashboard_exports;
 -- Create user-aware RLS policies for campaigns
 CREATE POLICY "campaigns_user_access" ON public.campaigns
     FOR ALL TO authenticated 
-    USING (auth.uid() = user_id) 
-    WITH CHECK (auth.uid() = user_id);
+    USING (user_id = (SELECT auth.uid())) 
+    WITH CHECK (user_id = (SELECT auth.uid()));
 
 -- Allow anon users to create campaigns (they'll be linked to user_id when available)
 CREATE POLICY "campaigns_anon_create" ON public.campaigns
@@ -45,8 +45,8 @@ CREATE POLICY "campaigns_anon_access" ON public.campaigns
 -- Create user-aware RLS policies for leads
 CREATE POLICY "leads_user_access" ON public.leads
     FOR ALL TO authenticated 
-    USING (auth.uid() = user_id) 
-    WITH CHECK (auth.uid() = user_id);
+    USING (user_id = (SELECT auth.uid())) 
+    WITH CHECK (user_id = (SELECT auth.uid()));
 
 -- Allow anon users to access leads linked to their campaigns
 CREATE POLICY "leads_anon_access" ON public.leads
@@ -69,8 +69,8 @@ CREATE POLICY "leads_anon_access" ON public.leads
 -- Create user-aware RLS policies for dashboard exports
 CREATE POLICY "exports_user_access" ON public.dashboard_exports
     FOR ALL TO authenticated 
-    USING (auth.uid() = user_id) 
-    WITH CHECK (auth.uid() = user_id);
+    USING (user_id = (SELECT auth.uid())) 
+    WITH CHECK (user_id = (SELECT auth.uid()));
 
 -- Allow anon users to access exports for their campaigns
 CREATE POLICY "exports_anon_access" ON public.dashboard_exports

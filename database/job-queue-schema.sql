@@ -43,7 +43,7 @@ DROP POLICY IF EXISTS jobs_select_own ON discovery_jobs;
 CREATE POLICY jobs_select_own ON discovery_jobs
   FOR SELECT
   USING (
-    auth.uid() = user_id OR
+    user_id = (SELECT auth.uid()) OR
     (auth.uid() IS NULL AND session_user_id IS NOT NULL)
   );
 
@@ -52,7 +52,7 @@ DROP POLICY IF EXISTS jobs_insert_own ON discovery_jobs;
 CREATE POLICY jobs_insert_own ON discovery_jobs
   FOR INSERT
   WITH CHECK (
-    auth.uid() = user_id OR
+    user_id = (SELECT auth.uid()) OR
     (auth.uid() IS NULL AND session_user_id IS NOT NULL)
   );
 

@@ -37,10 +37,7 @@ ALTER TABLE public.lead_fingerprints ENABLE ROW LEVEL SECURITY;
 CREATE POLICY lead_fingerprints_select_self
   ON public.lead_fingerprints
   FOR SELECT
-  USING (
-    auth.uid() IS NOT NULL
-    AND user_id = auth.uid()
-  );
+  USING (user_id = (SELECT auth.uid()));
 
 -- ============================================================================
 -- Campaign request snapshots (immutable audit of queued work)
@@ -67,9 +64,6 @@ ALTER TABLE public.campaign_request_snapshots ENABLE ROW LEVEL SECURITY;
 CREATE POLICY campaign_request_snapshots_select_self
   ON public.campaign_request_snapshots
   FOR SELECT
-  USING (
-    auth.uid() IS NOT NULL
-    AND user_id = auth.uid()
-  );
+  USING (user_id = (SELECT auth.uid()));
 
 COMMIT;
