@@ -4,6 +4,30 @@
 
 set -e
 
+# Attempt to auto-load Vercel environment variables if publishable key missing
+if [ -z "${VITE_SUPABASE_ANON_KEY:-}" ] && [ -f ".env.vercel" ]; then
+  # shellcheck disable=SC1091
+  set -a && source .env.vercel >/dev/null 2>&1 && set +a || set +a
+fi
+
+# Resolve publishable key from common environment variable names
+PUBLISHABLE_KEY="${SUPABASE_PUBLISHABLE_KEY:-${NEXT_PUBLIC_SUPABASE_ANON_KEY:-${VITE_SUPABASE_ANON_KEY:-${SUPABASE_ANON_KEY:-}}}}"
+
+if [ -z "$PUBLISHABLE_KEY" ]; then
+  echo "❌ Error: Supabase publishable key not found"
+  echo ""
+  echo "Set one of the following environment variables before running:"
+  echo "  - VITE_SUPABASE_ANON_KEY"
+  echo "  - NEXT_PUBLIC_SUPABASE_ANON_KEY"
+  echo "  - SUPABASE_PUBLISHABLE_KEY"
+  echo "  - SUPABASE_ANON_KEY"
+  echo ""
+  echo "Tip: Run 'vercel env pull .env.vercel' to sync the latest values from Vercel."
+  exit 1
+fi
+
+MASKED_KEY="${PUBLISHABLE_KEY:0:20}****************"
+
 if [ -z "$1" ]; then
   echo "❌ Error: SESSION_JWT required"
   echo ""
@@ -33,12 +57,14 @@ echo "🚀 ProspectPro v4.3 Full Campaign Validation"
 echo "============================================"
 echo "Timestamp: $(date)"
 echo "Test ID: $CAMPAIGN_TEST_ID"
+echo "Publishable Key: ${MASKED_KEY}"
 echo ""
 
 # Step 1: Authentication test
 echo -e "${BLUE}Step 1: Testing authentication...${NC}"
 AUTH_RESPONSE=$(curl -s -X POST "$EDGE_BASE/test-new-auth" \
   -H "Authorization: Bearer $SESSION_JWT" \
+  -H "apikey: $PUBLISHABLE_KEY" \
   -H "Content-Type: application/json" \
   -d '{"diagnostics": true}')
 
@@ -66,6 +92,7 @@ DISCOVERY_PAYLOAD="{\"businessType\": \"coffee shop\", \"location\": \"Seattle, 
 
 DISCOVERY_RESPONSE=$(curl -s -X POST "$EDGE_BASE/business-discovery-background" \
   -H "Authorization: Bearer $SESSION_JWT" \
+  -H "apikey: $PUBLISHABLE_KEY" \
   -H "Content-Type: application/json" \
   -d "$DISCOVERY_PAYLOAD")
 
@@ -107,6 +134,7 @@ echo -e "${BLUE}Step 4: Checking campaign completion...${NC}"
 # We'll use the export function to verify completion since it checks campaign status
 EXPORT_RESPONSE=$(curl -s -X POST "$EDGE_BASE/campaign-export-user-aware" \
   -H "Authorization: Bearer $SESSION_JWT" \
+  -H "apikey: $PUBLISHABLE_KEY" \
   -H "Content-Type: application/json" \
   -d "{\"campaignId\": \"$CAMPAIGN_ID\", \"format\": \"csv\", \"sessionUserId\": \"$CAMPAIGN_TEST_ID\"}")
 
