@@ -2,7 +2,7 @@
 
 > Primary #codebase reference. Regenerate with `npm run codebase:index` before audits or deployments.
 
-_Last generated: 2025-10-13T02:46:26.653Z_
+_Last generated: 2025-10-13T03:13:38.700Z_
 
 ## Supabase Edge Functions
 
@@ -44,11 +44,12 @@ _Last generated: 2025-10-13T02:46:26.653Z_
 
 ## Database & Security Artifacts
 
-- [database/supabase-first-schema.sql](database/supabase-first-schema.sql) — Canonical schema definition for campaigns, leads, exports
+- [database/production/001_core_schema.sql](database/production/001_core_schema.sql) — Canonical campaigns/leads/exports tables with RLS and analytics view
+- [database/production/002_user_functions.sql](database/production/002_user_functions.sql) — User-aware helper functions and security validators
+- [database/production/003_deduplication.sql](database/production/003_deduplication.sql) — Deduplication ledger plus hash/filter routines
+- [database/production/004_enrichment_cache.sql](database/production/004_enrichment_cache.sql) — Enrichment cache tables, views, and maintenance helpers
 - [database/rls-setup.sql](database/rls-setup.sql) — Row Level Security policies enforcing user/session isolation
 - [database/remove-security-definer.sql](database/remove-security-definer.sql) — Utility script to strip SECURITY DEFINER functions
-- [database/user-campaign-linking-schema.sql](database/user-campaign-linking-schema.sql) — Supplemental schema for user-aware campaign ownership
-- [database/security-update-oct-2025.sql](database/security-update-oct-2025.sql) — Latest security hardening batch for Supabase project
 
 ## Automation & Scripts
 
