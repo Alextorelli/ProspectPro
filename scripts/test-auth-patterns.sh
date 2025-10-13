@@ -38,11 +38,11 @@ echo ""
 
 # Test 1: Security verification - No auth header (should fail)
 echo "Test 1: No auth header - security verification"
-RESPONSE_1=$(curl -s -X POST "$EDGE_BASE/test-new-auth" \
+RESPONSE_1=$(curl -s -X POST "$EDGE_BASE/business-discovery-background" \
   -H "Content-Type: application/json" \
-  -d '{"diagnostics": true}')
+  -d '{"businessType":"coffee shop","location":"Seattle, WA","maxResults":1}')
 
-if echo "$RESPONSE_1" | grep -q "401" || echo "$RESPONSE_1" | grep -q "Invalid JWT"; then
+if echo "$RESPONSE_1" | grep -q "401" || echo "$RESPONSE_1" | grep -q "Invalid JWT" || echo "$RESPONSE_1" | grep -q "Auth failure"; then
   echo "   ✅ Security: Correctly rejects unauthenticated requests"
 else
   echo "   ❌ Security: VULNERABILITY - Accepts unauthenticated requests"
@@ -52,12 +52,12 @@ fi
 # Test 2: Security verification - Invalid JWT (should fail) 
 echo ""
 echo "Test 2: Invalid JWT - security verification"
-RESPONSE_2=$(curl -s -X POST "$EDGE_BASE/test-new-auth" \
+RESPONSE_2=$(curl -s -X POST "$EDGE_BASE/business-discovery-background" \
   -H "Authorization: Bearer invalid.jwt.token" \
   -H "Content-Type: application/json" \
-  -d '{"diagnostics": true}')
+  -d '{"businessType":"coffee shop","location":"Seattle, WA","maxResults":1}')
 
-if echo "$RESPONSE_2" | grep -q "401" || echo "$RESPONSE_2" | grep -q "Invalid JWT"; then
+if echo "$RESPONSE_2" | grep -q "401" || echo "$RESPONSE_2" | grep -q "Invalid JWT" || echo "$RESPONSE_2" | grep -q "Auth failure"; then
   echo "   ✅ Security: Correctly rejects invalid JWT"
 else
   echo "   ❌ Security: VULNERABILITY - Accepts invalid JWT"

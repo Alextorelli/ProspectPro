@@ -10,7 +10,7 @@
     "deploy:discovery": "supabase functions deploy business-discovery-background && supabase functions deploy business-discovery-optimized && supabase functions deploy business-discovery-user-aware",
     "deploy:enrichment": "supabase functions deploy enrichment-orchestrator && supabase functions deploy enrichment-hunter && supabase functions deploy enrichment-neverbounce && supabase functions deploy enrichment-business-license && supabase functions deploy enrichment-pdl",
     "deploy:exports": "supabase functions deploy campaign-export-user-aware",
-    "deploy:diagnostics": "supabase functions deploy test-new-auth && supabase functions deploy test-official-auth && supabase functions deploy test-business-discovery && supabase functions deploy test-google-places",
+    "deploy:diagnostics": "supabase functions deploy test-google-places",
     "deploy:critical": "supabase functions deploy business-discovery-background && supabase functions deploy enrichment-orchestrator",
     "deploy:functions": "npm run deploy:discovery && npm run deploy:enrichment && npm run deploy:exports && npm run deploy:diagnostics",
     "deploy:all": "npm run deploy:functions",

@@ -17,9 +17,6 @@ const allowedFunctionSlugs = new Set([
   "enrichment-neverbounce",
   "enrichment-business-license",
   "enrichment-pdl",
-  "test-new-auth",
-  "test-official-auth",
-  "test-business-discovery",
   "test-google-places",
 ]);
 
@@ -59,18 +56,6 @@ const descriptionOverrides = new Map([
   [
     "supabase/functions/enrichment-business-license/index.ts",
     "Professional licensing enrichment module",
-  ],
-  [
-    "supabase/functions/test-new-auth/index.ts",
-    "Auth diagnostics using shared helper",
-  ],
-  [
-    "supabase/functions/test-official-auth/index.ts",
-    "Supabase reference auth implementation mirror",
-  ],
-  [
-    "supabase/functions/test-business-discovery/index.ts",
-    "Smoke test harness for discovery endpoints",
   ],
   [
     "supabase/functions/test-google-places/index.ts",

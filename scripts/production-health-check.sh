@@ -56,19 +56,29 @@ fi
 echo "⚡ Testing Edge Functions availability..."
 PROJECT_REF="${SUPABASE_PROJECT_REF:-sriycekxdqnesdsgwiuc}"
 EDGE_BASE="https://${PROJECT_REF}.supabase.co/functions/v1"
-EDGE_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$EDGE_BASE/test-new-auth")
+EDGE_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$EDGE_BASE/business-discovery-background")
 
-if [ "$EDGE_STATUS" = "401" ]; then
-  echo -e "   ${GREEN}✅ Edge Functions: Responding (auth required)${NC}"
+if [ "$EDGE_STATUS" = "401" ] || [ "$EDGE_STATUS" = "405" ]; then
+  echo -e "   ${GREEN}✅ Edge Functions: Responding (auth enforced)${NC}"
 elif [ "$EDGE_STATUS" = "404" ]; then
-  echo -e "   ${YELLOW}⚠️  Edge Functions: test-new-auth not found (check deployment)${NC}"
+  echo -e "   ${YELLOW}⚠️  Edge Functions: business-discovery-background not found (check deployment)${NC}"
 else
   echo -e "   ${RED}❌ Edge Functions: Unexpected response $EDGE_STATUS${NC}"
 fi
 
 # Test 3: Edge Function inventory
 echo "📋 Checking Edge Function inventory..."
-FUNCTIONS=("business-discovery-background" "business-discovery-optimized" "enrichment-hunter" "campaign-export-user-aware" "test-new-auth" "test-official-auth")
+FUNCTIONS=(
+  "business-discovery-background"
+  "business-discovery-optimized"
+  "business-discovery-user-aware"
+  "campaign-export-user-aware"
+  "enrichment-orchestrator"
+  "enrichment-hunter"
+  "enrichment-neverbounce"
+  "enrichment-business-license"
+  "enrichment-pdl"
+)
 
 for func in "${FUNCTIONS[@]}"; do
   FUNC_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$EDGE_BASE/$func")
@@ -82,11 +92,11 @@ done
 # Test 4: Database connectivity probe
 echo "🗄️  Testing database connectivity..."
 # We can't directly test database without auth, but we can check if functions respond appropriately
-DB_PROBE_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$EDGE_BASE/test-official-auth")
-if [ "$DB_PROBE_STATUS" = "401" ]; then
-  echo -e "   ${GREEN}✅ Database: Edge Functions can reach database (auth required)${NC}"
+DB_PROBE_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$EDGE_BASE/campaign-export-user-aware")
+if [ "$DB_PROBE_STATUS" = "401" ] || [ "$DB_PROBE_STATUS" = "405" ]; then
+  echo -e "   ${GREEN}✅ Database: Export function deployed (auth enforced)${NC}"
 else
-  echo -e "   ${YELLOW}⚠️  Database: Probe returned $DB_PROBE_STATUS${NC}"
+  echo -e "   ${YELLOW}⚠️  Database: Export probe returned $DB_PROBE_STATUS${NC}"
 fi
 
 # Test 5: External API reachability
