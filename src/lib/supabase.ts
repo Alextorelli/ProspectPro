@@ -184,8 +184,7 @@ export async function invokeWithSession<T = unknown>(
     try {
       const clone = response.clone();
       const contentType =
-        clone.headers.get("Content-Type")?.split(";")[0].trim() ??
-        "text/plain";
+        clone.headers.get("Content-Type")?.split(";")[0].trim() ?? "text/plain";
 
       if (contentType === "application/json") {
         return await clone.json();
