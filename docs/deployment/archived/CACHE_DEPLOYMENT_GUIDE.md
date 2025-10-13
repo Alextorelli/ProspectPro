@@ -12,7 +12,7 @@
 
 #### **Step 2: Copy the Complete Schema**
 
-1. Open `/workspaces/ProspectPro/database/enrichment-cache-schema.sql`
+1. Open `/workspaces/ProspectPro/database/production/004_enrichment_cache.sql`
 2. **Copy ALL contents** (274 lines) - the complete schema including:
    - 📦 **enrichment_cache** table (main caching table)
    - 📊 **enrichment_cache_stats** table (performance analytics)
@@ -108,7 +108,7 @@ Once the schema is deployed:
 ## **📋 DEPLOYMENT CHECKLIST:**
 
 - [ ] Access Supabase SQL Editor
-- [ ] Copy complete schema from `database/enrichment-cache-schema.sql`
+- [ ] Copy complete schema from `database/production/004_enrichment_cache.sql`
 - [ ] Execute schema in SQL Editor
 - [ ] Run verification query
 - [ ] Confirm all components show "✅ Deployed"

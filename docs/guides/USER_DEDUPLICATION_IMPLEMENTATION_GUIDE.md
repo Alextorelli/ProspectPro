@@ -31,7 +31,7 @@ Run this SQL in the [Supabase SQL Editor](https://supabase.com/dashboard/project
 
 ```sql
 -- Copy and paste the entire contents of:
--- /workspaces/ProspectPro/database/user-deduplication-enhancement.sql
+-- /workspaces/ProspectPro/database/production/003_deduplication.sql
 ```
 
 This creates:
@@ -163,7 +163,7 @@ curl -X POST 'https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/test-user-de
 ```sql
 -- Run in Supabase SQL Editor:
 -- https://supabase.com/dashboard/project/sriycekxdqnesdsgwiuc/sql
--- Paste contents of database/user-deduplication-enhancement.sql
+-- Paste contents of database/production/003_deduplication.sql
 ```
 
 ### Deploy Edge Functions

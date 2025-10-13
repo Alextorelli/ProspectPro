@@ -22,7 +22,7 @@
 - ✅ RLS policies for data isolation
 - ✅ Helper functions for campaign management
 - ✅ Anonymous-to-authenticated user linking workflow
-- 📋 **ACTION REQUIRED:** Apply `database/user-campaign-production-update.sql` in Supabase dashboard
+- 📋 **ACTION REQUIRED:** Apply `database/production/001_core_schema.sql` (then run `002_user_functions.sql`) in Supabase dashboard
 
 ### 3. User-Aware Frontend (BUILT)
 
@@ -46,7 +46,7 @@
 
 ```sql
 -- COPY THIS TO SUPABASE SQL EDITOR:
--- /workspaces/ProspectPro/database/user-campaign-production-update.sql
+-- /workspaces/ProspectPro/database/production/001_core_schema.sql
 ```
 
 ### Frontend Build
@@ -90,7 +90,10 @@
 ### Step 1: Apply Database Schema
 
 1. Go to [Supabase SQL Editor](https://supabase.com/dashboard/project/sriycekxdqnesdsgwiuc/sql)
-2. Copy and run: `database/user-campaign-production-update.sql`
+2. Copy and run: `database/production/001_core_schema.sql`
+
+- Follow with `database/production/002_user_functions.sql` for helper routines
+
 3. Verify with: `SELECT 'user_id column exists' as test, COUNT(*) FROM information_schema.columns WHERE table_name='campaigns' AND column_name='user_id';`
 
 ### Step 2: Deploy Frontend

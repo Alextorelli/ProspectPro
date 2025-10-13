@@ -1,5 +1,9 @@
 # Database notes and PostGIS guidance
 
+## Production schema bundle
+
+The canonical database definition lives in `database/production/`. Apply the SQL files in lexical order (`001_...` → `004_...`) to provision a clean environment. Older one-off patch files remain in version control history but are no longer required during setup.
+
 This file documents important repository decisions and special-case treatments for database objects that are created and managed by extensions (notably PostGIS). It is intended to help operators and CI/lint rules understand why certain linter warnings are intentionally acknowledged.
 
 ## PostGIS and `public.spatial_ref_sys`

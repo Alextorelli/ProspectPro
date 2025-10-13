@@ -16,7 +16,7 @@ ProspectPro v4.4 delivers per-user campaign deduplication, deterministic campaig
 
 ## 🧱 Database Schema
 
-Apply `database/user-deduplication-enhancement.sql` to create and secure:
+Apply `database/production/003_deduplication.sql` to create and secure:
 
 - `user_campaign_results` ledger with combined `user_id` / `session_user_id` uniqueness.
 - `generate_campaign_hash`, `generate_business_identifier`, `filter_already_served_businesses`, `record_served_businesses`, `get_user_usage_stats`, and cleanup helpers.
@@ -41,7 +41,7 @@ Apply `database/user-deduplication-enhancement.sql` to create and secure:
 
 ## ✅ Deployment Checklist
 
-1. Run `database/user-deduplication-enhancement.sql` in Supabase.
+1. Run `database/production/003_deduplication.sql` in Supabase.
 2. Deploy Edge Functions:
    ```bash
    supabase functions deploy business-discovery-background

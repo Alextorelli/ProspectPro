@@ -113,8 +113,20 @@ const descriptionOverrides = new Map([
     "Hook tracking asynchronous discovery job progress",
   ],
   [
-    "database/supabase-first-schema.sql",
-    "Canonical schema definition for campaigns, leads, exports",
+    "database/production/001_core_schema.sql",
+    "Canonical campaigns/leads/exports tables with RLS and analytics view",
+  ],
+  [
+    "database/production/002_user_functions.sql",
+    "User-aware helper functions and security validators",
+  ],
+  [
+    "database/production/003_deduplication.sql",
+    "Deduplication ledger plus hash/filter routines",
+  ],
+  [
+    "database/production/004_enrichment_cache.sql",
+    "Enrichment cache tables, views, and maintenance helpers",
   ],
   [
     "database/rls-setup.sql",
@@ -123,14 +135,6 @@ const descriptionOverrides = new Map([
   [
     "database/remove-security-definer.sql",
     "Utility script to strip SECURITY DEFINER functions",
-  ],
-  [
-    "database/user-campaign-linking-schema.sql",
-    "Supplemental schema for user-aware campaign ownership",
-  ],
-  [
-    "database/security-update-oct-2025.sql",
-    "Latest security hardening batch for Supabase project",
   ],
   ["CODEBASE_INDEX.md", "Auto-generated index consumed by #codebase command"],
   [
@@ -260,11 +264,12 @@ async function main() {
   ]);
 
   const databaseFiles = await filterExisting([
-    "database/supabase-first-schema.sql",
+    "database/production/001_core_schema.sql",
+    "database/production/002_user_functions.sql",
+    "database/production/003_deduplication.sql",
+    "database/production/004_enrichment_cache.sql",
     "database/rls-setup.sql",
     "database/remove-security-definer.sql",
-    "database/user-campaign-linking-schema.sql",
-    "database/security-update-oct-2025.sql",
   ]);
 
   const automationFiles = await filterExisting([

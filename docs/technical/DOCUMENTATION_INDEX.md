@@ -53,10 +53,11 @@ ProspectPro v4.4 adds user-aware campaign deduplication and billing-ready analyt
 ## 🗄️ Database & Security
 
 - **Schema Files:** `/database/`
-  - `supabase-first-schema.sql` – Canonical schema
-  - `rls-setup.sql` – Row Level Security enforcement
-  - `user-campaign-production-update.sql` – Authenticated ownership columns
-  - `user-deduplication-enhancement.sql` – Dedup ledger, helper functions, and usage analytics (v4.4)
+  - `production/001_core_schema.sql` – Canonical schema with RLS + analytics view
+  - `production/002_user_functions.sql` – User-aware helper functions and security validators
+  - `production/003_deduplication.sql` – Dedup ledger, hash helpers, usage analytics
+  - `production/004_enrichment_cache.sql` – Enrichment cache storage + reporting
+  - `rls-setup.sql` – Legacy RLS helper (kept for historical reference)
 - **Core Tables:** `campaigns`, `leads`, `dashboard_exports`
 - **Security Model:** JWT-authenticated access with user_id + session_user_id; anonymous fallback removed from production
 

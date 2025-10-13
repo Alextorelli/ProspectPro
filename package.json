@@ -37,7 +37,7 @@
     "serve:local": "npm run preview",
     "test:edge-functions": "supabase functions serve",
     "deploy:edge-functions": "npm run deploy:functions",
-    "db:setup": "echo 'Run SQL from /database/supabase-first-schema.sql in Supabase dashboard'",
+    "db:setup": "echo 'Apply /database/production/001_core_schema.sql through 004_enrichment_cache.sql in Supabase dashboard'",
     "db:status": "supabase db status",
     "functions:list": "supabase functions list",
     "functions:logs": "supabase functions logs",

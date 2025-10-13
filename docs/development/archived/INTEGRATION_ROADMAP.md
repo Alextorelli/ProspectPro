@@ -137,7 +137,7 @@ cd /workspaces/ProspectPro
 
 # 3. Create enrichment cache table
 # Run in Supabase SQL editor:
-cat database/enrichment-cache-schema.sql | supabase db execute
+cat database/production/004_enrichment_cache.sql | supabase db execute
 
 # 4. Update orchestrator
 supabase functions deploy enrichment-orchestrator

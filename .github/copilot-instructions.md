@@ -410,7 +410,7 @@ Static Frontend → Supabase Edge Functions → Supabase Database
 /supabase/functions/campaign-export       # CSV export functionality
 /public/index-supabase.html              # Static frontend
 /public/supabase-app.js                  # Frontend with Supabase client
-/database/supabase-first-schema.sql      # Database schema
+/database/production/001_core_schema.sql  # Database schema (apply 001-004 sequentially)
 ```
 
 ### File Structure (REFERENCE ONLY)
@@ -421,7 +421,7 @@ Static Frontend → Supabase Edge Functions → Supabase Database
 /index.html                              # Static frontend entry
 /src/lib/supabase.ts                     # Frontend Supabase client helper
 CODEBASE_INDEX.md                        # Auto-generated #codebase index
-/database/supabase-first-schema.sql      # Database setup
+/database/production/001_core_schema.sql  # Database setup (see production bundle)
 /docs/                                   # Documentation
 /archive/                                # Legacy files (deprecated)
 ```
@@ -495,7 +495,7 @@ supabase logs functions \
 
 ### For Database Issues:
 
-1. Review schema in `/database/supabase-first-schema.sql`
+1. Review schema in `/database/production/001_core_schema.sql`
 2. Check RLS policies in Supabase dashboard
 3. Verify Edge Function database connections
 4. Test database queries in Supabase SQL editor

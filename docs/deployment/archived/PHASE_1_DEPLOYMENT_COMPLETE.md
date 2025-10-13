@@ -144,7 +144,7 @@
 
 ### **2. Database Schema Deployment** (5 minutes)
 
-- Deploy enrichment-cache-schema.sql to Supabase
+- Deploy `database/production/004_enrichment_cache.sql` to Supabase
 - Enable 90-day intelligent caching
 - Activate cost savings tracking
 

@@ -67,7 +67,7 @@ Your ProspectPro has been successfully transformed from a complex container-base
 
 ```sql
 -- In Supabase Dashboard → SQL Editor
--- Copy and paste contents from /database/supabase-first-schema.sql
+-- Copy and paste contents from /database/production/001_core_schema.sql
 ```
 
 ### **2. Configure Environment Variables**
