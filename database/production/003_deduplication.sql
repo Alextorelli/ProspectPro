@@ -16,6 +16,21 @@ CREATE TABLE IF NOT EXISTS public.user_campaign_results (
     WHERE user_id IS NULL
 );
 
+ALTER TABLE public.user_campaign_results
+  ADD COLUMN IF NOT EXISTS user_id UUID REFERENCES auth.users(id),
+  ADD COLUMN IF NOT EXISTS session_user_id TEXT,
+  ADD COLUMN IF NOT EXISTS campaign_hash TEXT,
+  ADD COLUMN IF NOT EXISTS business_identifier TEXT,
+  ADD COLUMN IF NOT EXISTS served_at TIMESTAMPTZ DEFAULT NOW(),
+  ADD COLUMN IF NOT EXISTS campaign_id TEXT REFERENCES public.campaigns(id),
+  ADD COLUMN IF NOT EXISTS business_name TEXT,
+  ADD COLUMN IF NOT EXISTS business_address TEXT,
+  ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT NOW();
+
+ALTER TABLE public.user_campaign_results
+  ALTER COLUMN campaign_hash SET NOT NULL,
+  ALTER COLUMN business_identifier SET NOT NULL;
+
 CREATE INDEX IF NOT EXISTS idx_user_campaign_results_user_hash
   ON public.user_campaign_results(user_id, campaign_hash)
   WHERE user_id IS NOT NULL;

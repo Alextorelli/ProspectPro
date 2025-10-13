@@ -25,6 +25,13 @@ CREATE TABLE IF NOT EXISTS public.campaigns (
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+ALTER TABLE public.campaigns
+  ADD COLUMN IF NOT EXISTS campaign_hash TEXT,
+  ADD COLUMN IF NOT EXISTS user_id UUID REFERENCES auth.users(id),
+  ADD COLUMN IF NOT EXISTS session_user_id TEXT,
+  ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT NOW(),
+  ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT NOW();
+
 CREATE TABLE IF NOT EXISTS public.leads (
   id BIGSERIAL PRIMARY KEY,
   campaign_id TEXT NOT NULL REFERENCES public.campaigns(id) ON DELETE CASCADE,
@@ -44,6 +51,12 @@ CREATE TABLE IF NOT EXISTS public.leads (
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+ALTER TABLE public.leads
+  ADD COLUMN IF NOT EXISTS user_id UUID REFERENCES auth.users(id),
+  ADD COLUMN IF NOT EXISTS session_user_id TEXT,
+  ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT NOW(),
+  ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT NOW();
+
 CREATE TABLE IF NOT EXISTS public.dashboard_exports (
   id BIGSERIAL PRIMARY KEY,
   campaign_id TEXT REFERENCES public.campaigns(id) ON DELETE CASCADE,
@@ -56,6 +69,12 @@ CREATE TABLE IF NOT EXISTS public.dashboard_exports (
   completed_at TIMESTAMPTZ DEFAULT NOW(),
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
+
+ALTER TABLE public.dashboard_exports
+  ADD COLUMN IF NOT EXISTS user_id UUID REFERENCES auth.users(id),
+  ADD COLUMN IF NOT EXISTS session_user_id TEXT,
+  ADD COLUMN IF NOT EXISTS completed_at TIMESTAMPTZ DEFAULT NOW(),
+  ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT NOW();
 
 -- ============================================================================
 -- INDEXES

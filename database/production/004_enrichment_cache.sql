@@ -16,6 +16,27 @@ CREATE TABLE IF NOT EXISTS public.enrichment_cache (
   is_active BOOLEAN DEFAULT true
 );
 
+ALTER TABLE public.enrichment_cache
+  ADD COLUMN IF NOT EXISTS cache_key TEXT,
+  ADD COLUMN IF NOT EXISTS request_type TEXT,
+  ADD COLUMN IF NOT EXISTS request_params JSONB,
+  ADD COLUMN IF NOT EXISTS response_data JSONB,
+  ADD COLUMN IF NOT EXISTS cost DECIMAL(10,4) DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS confidence_score INTEGER DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS hit_count INTEGER DEFAULT 1,
+  ADD COLUMN IF NOT EXISTS expires_at TIMESTAMPTZ,
+  ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT NOW(),
+  ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT NOW(),
+  ADD COLUMN IF NOT EXISTS last_accessed_at TIMESTAMPTZ DEFAULT NOW(),
+  ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT true;
+
+ALTER TABLE public.enrichment_cache
+  ALTER COLUMN cache_key SET NOT NULL,
+  ALTER COLUMN request_type SET NOT NULL,
+  ALTER COLUMN request_params SET NOT NULL,
+  ALTER COLUMN response_data SET NOT NULL,
+  ALTER COLUMN expires_at SET NOT NULL;
+
 CREATE TABLE IF NOT EXISTS public.enrichment_cache_stats (
   id BIGSERIAL PRIMARY KEY,
   date DATE NOT NULL DEFAULT CURRENT_DATE,
@@ -30,6 +51,22 @@ CREATE TABLE IF NOT EXISTS public.enrichment_cache_stats (
   updated_at TIMESTAMPTZ DEFAULT NOW(),
   UNIQUE(date, request_type)
 );
+
+ALTER TABLE public.enrichment_cache_stats
+  ADD COLUMN IF NOT EXISTS date DATE DEFAULT CURRENT_DATE,
+  ADD COLUMN IF NOT EXISTS request_type TEXT,
+  ADD COLUMN IF NOT EXISTS total_requests INTEGER DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS cache_hits INTEGER DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS cache_misses INTEGER DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS cost_saved DECIMAL(10,4) DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS total_cost DECIMAL(10,4) DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS hit_ratio DECIMAL(5,2) DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT NOW(),
+  ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT NOW();
+
+ALTER TABLE public.enrichment_cache_stats
+  ALTER COLUMN date SET NOT NULL,
+  ALTER COLUMN request_type SET NOT NULL;
 
 CREATE INDEX IF NOT EXISTS idx_enrichment_cache_key ON public.enrichment_cache(cache_key);
 CREATE INDEX IF NOT EXISTS idx_enrichment_cache_type ON public.enrichment_cache(request_type);
