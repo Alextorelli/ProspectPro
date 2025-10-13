@@ -1,4 +1,4 @@
-# ProspectPro v4.3 Documentation Index
+# ProspectPro v4.4 Documentation Index
 
 **🚀 Tier-Aware Background Discovery & Verification Platform**
 
@@ -6,7 +6,7 @@
 
 ## 📋 Documentation Overview
 
-ProspectPro v4.3 introduces the tier-aware background discovery pipeline with zero-fake-data enforcement. This index points to the live references that back the production system.
+ProspectPro v4.4 adds user-aware campaign deduplication and billing-ready analytics while maintaining the tier-aware background discovery pipeline. This index points to the live references backing the production system.
 
 ---
 
@@ -16,6 +16,7 @@ ProspectPro v4.3 introduces the tier-aware background discovery pipeline with ze
 - **[README](README.md)** – Platform overview and quickstart
 - **[ARCHITECTURE_DECISION_BACKGROUND_TASKS.md](ARCHITECTURE_DECISION_BACKGROUND_TASKS.md)** – Rationale for asynchronous discovery orchestration
 - **[BACKGROUND_TASKS_IMPLEMENTATION.md](BACKGROUND_TASKS_IMPLEMENTATION.md)** – Implementation notes for `business-discovery-background`
+- **[PRODUCTION_READY_V4.4.md](PRODUCTION_READY_V4.4.md)** – Release summary for the user-aware deduplication launch
 
 ---
 
@@ -32,12 +33,12 @@ ProspectPro v4.3 introduces the tier-aware background discovery pipeline with ze
 
 ## ☁️ Supabase Edge Functions
 
-### Active Production Functions (v4.3)
+### Active Production Functions (v4.4)
 
 - Discovery: `business-discovery-background` (primary), `business-discovery-optimized`, `business-discovery-user-aware`.
 - Enrichment: `enrichment-hunter`, `enrichment-neverbounce`, `enrichment-orchestrator`, `enrichment-business-license`, `enrichment-pdl`.
 - Export: `campaign-export-user-aware`, `campaign-export` (service-role only).
-- Diagnostics: `test-new-auth`, `test-official-auth`, `test-business-discovery`, `test-google-places`.
+- Diagnostics: `test-new-auth`, `test-official-auth`, `test-business-discovery`, `test-google-places`, `test-user-deduplication`.
 
 > ℹ️ Session JWTs are mandatory for every authenticated Edge Function call. Use `EDGE_FUNCTION_AUTH_UPDATE_GUIDE.md` plus `scripts/test-auth-patterns.sh` to validate flows.
 
@@ -55,6 +56,7 @@ ProspectPro v4.3 introduces the tier-aware background discovery pipeline with ze
   - `supabase-first-schema.sql` – Canonical schema
   - `rls-setup.sql` – Row Level Security enforcement
   - `user-campaign-production-update.sql` – Authenticated ownership columns
+  - `user-deduplication-enhancement.sql` – Dedup ledger, helper functions, and usage analytics (v4.4)
 - **Core Tables:** `campaigns`, `leads`, `dashboard_exports`
 - **Security Model:** JWT-authenticated access with user_id + session_user_id; anonymous fallback removed from production
 
@@ -76,6 +78,7 @@ ProspectPro v4.3 introduces the tier-aware background discovery pipeline with ze
 - **ESLint:** `npm run lint` (configured via `.eslintrc.cjs` & `.eslintignore`)
 - **Edge Function Smoke Tests:**
   - `supabase functions serve business-discovery-background`
+  - `supabase functions serve test-user-deduplication`
   - `scripts/test-background-tasks.sh`
 - **Manual curl probes:** see `.github/copilot-instructions.md` → “Debugging Commands”
 
@@ -99,8 +102,7 @@ ProspectPro v4.3 introduces the tier-aware background discovery pipeline with ze
 - **Supabase Project:** `sriycekxdqnesdsgwiuc`
 - **Edge Function URL Base:** `https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/`
 - **Publishable Key Management:** Supabase dashboard → Settings → API (sync with `/src/lib/supabase.ts`)
-- **Session Tokens:** Frontend/services must forward `Authorization: Bearer <SUPABASE_SESSION_JWT>`
-- **Session Tokens:** Frontend + services must forward Supabase session JWTs (`Authorization: Bearer <token>`) per `EDGE_FUNCTION_AUTH_UPDATE_GUIDE.md`
+- **Session Tokens:** Frontend/services must forward Supabase session JWTs (`Authorization: Bearer <token>`) per `EDGE_FUNCTION_AUTH_UPDATE_GUIDE.md`
 
 ---
 
@@ -118,6 +120,7 @@ ProspectPro v4.3 introduces the tier-aware background discovery pipeline with ze
 - Publishable key or session mismatch: `EDGE_FUNCTION_AUTH_UPDATE_GUIDE.md`, `NEED_ANON_KEY.md` (historical reference only).
 - Blank screen after campaign results: redeploy the v4.3.1 build, confirm React console warnings are cleared.
 - Edge function auth issues: `EDGE_FUNCTION_AUTH_UPDATE_GUIDE.md`, run `supabase logs functions --project-ref sriycekxdqnesdsgwiuc --slug <name> --tail`.
+- Dedup validation or ledger anomalies: `PRODUCTION_READY_V4.4.md` (deployment + validation checklist).
 - Deployment checklist: `DEPLOYMENT_CHECKLIST.md`.
 - Environment sync: `vercel env pull .env.vercel`, `scripts/populate-secrets.sh`, `scripts/pull-env-from-secrets.js`.
 - MCP troubleshooting server: `mcp-servers/` (see local README).
@@ -133,6 +136,13 @@ curl -X POST \
   -H 'Authorization: Bearer <SUPABASE_SESSION_JWT>' \
   -H 'Content-Type: application/json' \
   -d '{"businessType":"coffee shop","location":"Seattle, WA","maxResults":2,"tierKey":"PROFESSIONAL","sessionUserId":"test_session_123"}'
+
+# Deduplication ledger validation
+curl -X POST \
+  'https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/test-user-deduplication' \
+  -H 'Authorization: Bearer <SUPABASE_SESSION_JWT>' \
+  -H 'Content-Type: application/json' \
+  -d '{"action":"test_deduplication","sessionUserId":"cli-smoke","businesses":[{"name":"Coffee Collective","address":"123 Brew St, Seattle, WA"}]}'
 
 # Export campaign results
 curl -X POST \
@@ -153,9 +163,10 @@ npm run build
 
 ## 🗓️ Release Timeline
 
-- **v4.1** – Verification-first enrichment pipeline
-- **v4.2** – Authenticated user-aware discovery (deprecated backend retained only for exports)
+- **v4.4** – User-aware deduplication, campaign hashing, billing-ready analytics
 - **v4.3** – Tier-aware background discovery, lint tooling alignment, legacy asset removal
+- **v4.2** – Authenticated user-aware discovery (deprecated backend retained only for exports)
+- **v4.1** – Verification-first enrichment pipeline
 
 For historical artifacts see `/archive/`.
 
@@ -167,5 +178,5 @@ For historical artifacts see `/archive/`.
 
 ---
 
-**ProspectPro v4.3** – Tier-Aware Background Discovery & Session-Enforced Edge Functions  
-_Documentation updated October 9, 2025_ 🚀
+**ProspectPro v4.4** – User-Aware Deduplication & Billing Analytics  
+_Documentation updated October 13, 2025_ 🚀

@@ -141,6 +141,7 @@ interface JobConfig {
   userId?: string;
   sessionUserId?: string;
   jobId?: string;
+  campaignHash: string;
   tier: TierSettings;
   options: {
     tradeAssociation: boolean;
@@ -149,6 +150,21 @@ interface JobConfig {
     apolloDiscovery: boolean;
   };
   requestSnapshot: RequestSnapshot;
+}
+
+interface UserDeduplicationContext {
+  userId: string | null;
+  sessionUserId: string | null;
+  campaignHash: string;
+  isAuthenticated: boolean;
+}
+
+type DedupSupabaseClient = Pick<ReturnType<typeof createClient>, "from">;
+
+interface DeduplicationStats {
+  total: number;
+  filtered: number;
+  fresh: number;
 }
 
 interface BusinessData {
@@ -973,6 +989,210 @@ const makeFingerprintKey = (
   sessionUserId: string | null
 ) => `${fingerprint}::${userId ?? ""}::${sessionUserId ?? ""}`;
 
+function normalizeIdentifierValue(raw: string): string {
+  if (!raw) return "";
+  try {
+    if (typeof globalThis.btoa === "function") {
+      return globalThis.btoa(raw).replace(/[^A-Za-z0-9]/g, "");
+    }
+  } catch (error) {
+    console.warn("Identifier encoding failed", error);
+  }
+  return raw.replace(/\s+/g, "_").slice(0, 128);
+}
+
+function createDedupIdentifierFromSource(
+  source: BusinessFingerprintSource
+): string {
+  const fingerprint = createBusinessFingerprint(source);
+  if (fingerprint) {
+    return normalizeIdentifierValue(fingerprint);
+  }
+
+  const fallback = `${normalizeString(
+    source.business_name ?? source.businessName ?? source.name ?? ""
+  )}|${normalizeString(
+    source.address ?? source.formatted_address ?? ""
+  )}|${normalizePhone(
+    source.phone ?? source.formatted_phone_number ?? ""
+  )}|${normalizeWebsite(source.website ?? "")}`;
+
+  if (!fallback.trim()) {
+    return "";
+  }
+
+  return normalizeIdentifierValue(fallback);
+}
+
+async function filterAlreadyServedBusinesses(
+  supabase: DedupSupabaseClient,
+  businesses: DiscoveredBusiness[],
+  context: UserDeduplicationContext
+): Promise<{ filtered: DiscoveredBusiness[]; stats: DeduplicationStats }> {
+  const baselineStats: DeduplicationStats = {
+    total: businesses.length,
+    filtered: 0,
+    fresh: businesses.length,
+  };
+
+  if (!businesses.length) {
+    return { filtered: businesses, stats: baselineStats };
+  }
+
+  if (!context.campaignHash || (!context.userId && !context.sessionUserId)) {
+    return { filtered: businesses, stats: baselineStats };
+  }
+
+  const identifiers = businesses.map((business) =>
+    createDedupIdentifierFromSource({
+      businessName: business.businessName ?? business.name ?? "",
+      address: business.address ?? business.formatted_address ?? "",
+      phone: business.phone ?? business.formatted_phone_number ?? "",
+      website: business.website ?? "",
+      source: business.source,
+    })
+  );
+
+  const lookupIdentifiers = identifiers.filter((value) => Boolean(value));
+  if (!lookupIdentifiers.length) {
+    return { filtered: businesses, stats: baselineStats };
+  }
+
+  let query = supabase
+    .from("user_campaign_results")
+    .select("business_identifier")
+    .eq("campaign_hash", context.campaignHash)
+    .in("business_identifier", lookupIdentifiers);
+
+  if (context.userId) {
+    query = query.eq("user_id", context.userId);
+  } else if (context.sessionUserId) {
+    query = query.eq("session_user_id", context.sessionUserId);
+  } else {
+    return { filtered: businesses, stats: baselineStats };
+  }
+
+  const { data, error } = await query;
+
+  if (error) {
+    console.warn("User deduplication lookup failed", error.message);
+    return { filtered: businesses, stats: baselineStats };
+  }
+
+  const servedIdentifiers = new Set(
+    (data ?? []).map((row: { business_identifier: string }) => {
+      return row.business_identifier;
+    })
+  );
+
+  if (!servedIdentifiers.size) {
+    return { filtered: businesses, stats: baselineStats };
+  }
+
+  const freshBusinesses = businesses.filter((_business, index) => {
+    const identifier = identifiers[index];
+    if (!identifier) return true;
+    return !servedIdentifiers.has(identifier);
+  });
+
+  const stats: DeduplicationStats = {
+    total: businesses.length,
+    filtered: businesses.length - freshBusinesses.length,
+    fresh: freshBusinesses.length,
+  };
+
+  console.log(
+    "🔄 User deduplication",
+    JSON.stringify({
+      userId: context.userId,
+      sessionUserId: context.sessionUserId,
+      campaignHash: context.campaignHash,
+      stats,
+    })
+  );
+
+  return { filtered: freshBusinesses, stats };
+}
+
+type UserCampaignResultInsert = {
+  campaign_hash: string;
+  business_identifier: string;
+  campaign_id: string;
+  business_name: string;
+  business_address: string;
+  user_id?: string;
+  session_user_id?: string;
+};
+
+async function recordServedBusinesses(
+  supabase: DedupSupabaseClient,
+  leads: ScoredLead[],
+  context: UserDeduplicationContext,
+  campaignId: string
+): Promise<number> {
+  if (!leads.length) {
+    return 0;
+  }
+
+  if (!context.campaignHash || (!context.userId && !context.sessionUserId)) {
+    return 0;
+  }
+
+  const records: UserCampaignResultInsert[] = [];
+  for (const lead of leads) {
+    const identifier = createDedupIdentifierFromSource({
+      businessName: lead.businessName,
+      address: lead.address,
+      phone: lead.phone,
+      website: lead.website,
+    });
+
+    if (!identifier) {
+      continue;
+    }
+
+    const record: UserCampaignResultInsert = {
+      campaign_hash: context.campaignHash,
+      business_identifier: identifier,
+      campaign_id: campaignId,
+      business_name: lead.businessName,
+      business_address: lead.address,
+    };
+
+    if (context.userId) {
+      record.user_id = context.userId;
+    } else if (context.sessionUserId) {
+      record.session_user_id = context.sessionUserId;
+    }
+
+    records.push(record);
+  }
+
+  if (!records.length) {
+    return 0;
+  }
+
+  const { error } = await (
+    supabase as unknown as {
+      from: (table: string) => {
+        insert: (
+          values: UserCampaignResultInsert[],
+          options?: { ignoreDuplicates?: boolean }
+        ) => Promise<{ error: { message: string } | null }>;
+      };
+    }
+  )
+    .from("user_campaign_results")
+    .insert(records, { ignoreDuplicates: true });
+
+  if (error) {
+    console.warn("Failed to record deduplicated businesses", error.message);
+    return 0;
+  }
+
+  return records.length;
+}
+
 type FingerprintClient = Pick<ReturnType<typeof createClient>, "from">;
 
 async function leadFingerprintExists(
@@ -1612,6 +1832,20 @@ async function processDiscoveryJob(
   });
   config.jobId = jobId;
 
+  const userDedupContext: UserDeduplicationContext = {
+    userId: config.userId ?? null,
+    sessionUserId: config.sessionUserId ?? null,
+    campaignHash: config.campaignHash,
+    isAuthenticated: Boolean(config.userId),
+  };
+
+  let deduplicationStats: DeduplicationStats = {
+    total: 0,
+    filtered: 0,
+    fresh: 0,
+  };
+  let dedupRecordsPersisted = 0;
+
   try {
     const { error: snapshotError } = await supabase
       .from("campaign_request_snapshots")
@@ -1983,6 +2217,25 @@ async function processDiscoveryJob(
 
     const sourcesUsed = Array.from(sourcesUsedSet);
 
+    let businessesForScoring = uniqueBusinesses;
+    deduplicationStats = {
+      total: uniqueBusinesses.length,
+      filtered: 0,
+      fresh: uniqueBusinesses.length,
+    };
+
+    try {
+      const dedupResult = await filterAlreadyServedBusinesses(
+        supabase,
+        uniqueBusinesses,
+        userDedupContext
+      );
+      businessesForScoring = dedupResult.filtered;
+      deduplicationStats = dedupResult.stats;
+    } catch (dedupError) {
+      console.warn("User deduplication filter failed", dedupError);
+    }
+
     await supabase
       .from("discovery_jobs")
       .update({
@@ -1990,8 +2243,12 @@ async function processDiscoveryJob(
         progress: 30,
         metrics: {
           businesses_found: uniqueBusinesses.length,
+          fresh_after_dedup: businessesForScoring.length,
           raw_candidates: totalRawDiscovered,
           previously_delivered_filtered: historicalFilteredCount,
+          user_dedup_filtered: deduplicationStats.filtered,
+          user_dedup_total: deduplicationStats.total,
+          user_dedup_fresh: deduplicationStats.fresh,
           sources_used: sourcesUsed,
           census_density_score: censusIntelligence?.density_score ?? null,
           cached_reuse_count: cachedReuseCount,
@@ -2005,7 +2262,7 @@ async function processDiscoveryJob(
       censusMultiplier: censusIntelligence?.optimization.confidence_multiplier,
     });
 
-    const scoredBusinesses = uniqueBusinesses.map((business) =>
+    const scoredBusinesses = businessesForScoring.map((business) =>
       scorer.scoreBusiness(business)
     );
 
@@ -2017,6 +2274,7 @@ async function processDiscoveryJob(
 
     const sharedMetrics = {
       businesses_found: uniqueBusinesses.length,
+      fresh_after_dedup: businessesForScoring.length,
       qualified_leads: qualifiedLeads.length,
       raw_candidates: totalRawDiscovered,
       previously_delivered_filtered: historicalFilteredCount,
@@ -2024,6 +2282,9 @@ async function processDiscoveryJob(
       census_density_score: censusIntelligence?.density_score ?? null,
       exhausted: isExhausted,
       cached_reuse_count: cachedReuseCount,
+      user_dedup_filtered: deduplicationStats.filtered,
+      user_dedup_total: deduplicationStats.total,
+      user_dedup_fresh: deduplicationStats.fresh,
     };
 
     await supabase
@@ -2101,8 +2362,9 @@ async function processDiscoveryJob(
         results_count: enrichedLeads.length,
         total_cost: Number(totalCost.toFixed(3)),
         status: "completed",
-        user_id: config.userId,
-        session_user_id: config.sessionUserId,
+        campaign_hash: config.campaignHash,
+        user_id: config.userId ?? null,
+        session_user_id: config.sessionUserId ?? null,
         processing_time_ms: null,
       })
       .select("id")
@@ -2127,8 +2389,8 @@ async function processDiscoveryJob(
         dataSources: lead.dataSources,
       },
       validation_cost: lead.enhancementData.processingMetadata.validationCost,
-      user_id: config.userId,
-      session_user_id: config.sessionUserId,
+      user_id: config.userId ?? null,
+      session_user_id: config.sessionUserId ?? null,
     }));
 
     let insertedLeads: Array<{
@@ -2318,6 +2580,17 @@ async function processDiscoveryJob(
       }
     }
 
+    try {
+      dedupRecordsPersisted = await recordServedBusinesses(
+        supabase,
+        enrichedLeads,
+        userDedupContext,
+        config.campaignId
+      );
+    } catch (dedupInsertError) {
+      console.warn("User deduplication recording failed", dedupInsertError);
+    }
+
     const averageConfidence = enrichedLeads.length
       ? enrichedLeads.reduce((sum, lead) => sum + lead.optimizedScore, 0) /
         enrichedLeads.length
@@ -2335,6 +2608,8 @@ async function processDiscoveryJob(
       tier_price: config.tier.pricePerLead,
       leads_enriched: enrichedLeads.length,
       cached_reuse_count: cachedReuseCount,
+      campaign_hash: config.campaignHash,
+      dedup_records_inserted: dedupRecordsPersisted,
     };
 
     await supabase
@@ -2445,6 +2720,13 @@ serve(async (req) => {
       budgetLimit ?? maxResults * tierSettings.pricePerLead;
     const keywordList = parseKeywords(keywords);
 
+    const resolvedSessionId =
+      sessionUserId ??
+      authContext.sessionId ??
+      (authContext.isAnonymous ? user.id : null);
+
+    const trackingUserId = authContext.isAnonymous ? null : user.id;
+
     const jobRandomSource =
       typeof crypto !== "undefined" && "randomUUID" in crypto
         ? crypto.randomUUID()
@@ -2531,10 +2813,25 @@ serve(async (req) => {
     };
     const requestedAt = new Date().toISOString();
     const requestHash = await createStableHash({
-      userId: user.id,
-      sessionUserId: sessionUserId ?? user.id,
+      userId: trackingUserId,
+      sessionUserId: resolvedSessionId,
       snapshotPayload,
     });
+
+    const campaignHash = await createStableHash({
+      businessType,
+      location,
+      minConfidenceScore,
+    });
+
+    const userDedupContext: UserDeduplicationContext = {
+      userId: trackingUserId,
+      sessionUserId: resolvedSessionId,
+      campaignHash,
+      isAuthenticated: !authContext.isAnonymous,
+    };
+
+    console.log("🧮 Dedup context", userDedupContext);
 
     const requestSnapshot: RequestSnapshot = {
       requestedAt,
@@ -2552,8 +2849,9 @@ serve(async (req) => {
       maxResults,
       budgetLimit: enforcedBudget,
       minConfidenceScore,
-      userId: user.id,
-      sessionUserId: authContext.sessionId ?? user.id,
+      userId: trackingUserId ?? undefined,
+      sessionUserId: resolvedSessionId ?? undefined,
+      campaignHash,
       tier: tierSettings,
       options: resolvedOptions,
       requestSnapshot,
@@ -2564,8 +2862,8 @@ serve(async (req) => {
       .insert({
         id: jobId,
         campaign_id: campaignId,
-        user_id: user.id,
-        session_user_id: authContext.sessionId ?? user.id,
+        user_id: trackingUserId,
+        session_user_id: resolvedSessionId,
         status: "pending",
         config: {
           ...jobConfig,
@@ -2593,6 +2891,11 @@ serve(async (req) => {
       status: "processing",
       estimatedTime: "1-2 minutes",
       realtimeChannel: `discovery_jobs:id=eq.${jobId}`,
+      deduplication: {
+        campaignHash,
+        mode: trackingUserId ? "user" : "session",
+        trackedId: trackingUserId ?? resolvedSessionId,
+      },
     };
 
     return new Response(JSON.stringify(responsePayload), {

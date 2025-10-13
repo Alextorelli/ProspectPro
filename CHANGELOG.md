@@ -5,6 +5,26 @@ All notable changes to ProspectPro will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.4.0] - 2025-10-13 - User-Aware Deduplication & Billing Metrics
+
+### Added
+
+- **User-Specific Deduplication:** `business-discovery-background` now filters previously delivered businesses via the new `user_campaign_results` ledger so every user/session receives fresh leads for identical searches.
+- **Campaign Hash Tracking:** Each campaign records a deterministic `campaign_hash`, enabling consistent billing aggregation and cross-function deduplication.
+- **Usage Analytics Helpers:** New SQL helpers generate per-user/session usage summaries and deduplication savings to support usage-based billing models.
+- **Test Harness:** `test-user-deduplication` Edge Function validates the deduplication pipeline, helper functions, and usage analytics end-to-end.
+
+### Changed
+
+- **Discovery Metrics:** Background discovery jobs surface `fresh_after_dedup`, `user_dedup_filtered`, and `dedup_records_inserted` in `discovery_jobs.metrics` for real-time monitoring.
+- **Campaign Storage:** Campaigns and leads now persist `campaign_hash` alongside `user_id` / `session_user_id`, ensuring analytics and exports can gate on deduplication context.
+- **Documentation:** Added `PRODUCTION_READY_V4.4.md`, outlining deployment steps, validation flows, and troubleshooting patterns for the deduplication release.
+
+### Notes
+
+- Apply `database/user-deduplication-enhancement.sql` before deploying the updated Edge Functions so the `user_campaign_results` table, policies, and helper functions exist.
+- Redeploy `business-discovery-background` and (optionally) `test-user-deduplication` after pulling this release.
+
 ## [4.3.1] - 2025-10-11 - Campaign Store Null-Safety & Frontend Stability
 
 ### Fixed
