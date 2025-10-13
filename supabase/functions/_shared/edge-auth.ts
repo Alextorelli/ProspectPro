@@ -202,22 +202,44 @@ export async function authenticateRequest(
         },
       });
 
-      debugStage = "verify_user_service";
-      const { data: serviceData, error: serviceError } =
-        await serviceClient.auth.getUser(accessToken);
-
-      if (serviceError || !serviceData?.user) {
-        console.error("❌ auth.getUser (service) failed", {
-          message: serviceError?.message,
-          status: serviceError?.status,
-        });
-        throw new Error(
-          serviceError?.message ?? "Authentication failed: user not found"
-        );
-      }
-
-      user = serviceData.user;
       usedServiceFallback = true;
+
+      const tokenSub =
+        typeof tokenClaims.sub === "string" ? tokenClaims.sub : null;
+
+      if (tokenSub) {
+        debugStage = "verify_user_admin";
+        const { data: adminData, error: adminError } =
+          await serviceClient.auth.admin.getUserById(tokenSub);
+
+        if (adminError || !adminData?.user) {
+          console.error("❌ auth.admin.getUserById failed", {
+            message: adminError?.message,
+            status: adminError?.status,
+          });
+          throw new Error(
+            adminError?.message ?? "Authentication failed: user not found"
+          );
+        }
+
+        user = adminData.user;
+      } else {
+        debugStage = "verify_user_service";
+        const { data: serviceData, error: serviceError } =
+          await serviceClient.auth.getUser(accessToken);
+
+        if (serviceError || !serviceData?.user) {
+          console.error("❌ auth.getUser (service) failed", {
+            message: serviceError?.message,
+            status: serviceError?.status,
+          });
+          throw new Error(
+            serviceError?.message ?? "Authentication failed: user not found"
+          );
+        }
+
+        user = serviceData.user;
+      }
     }
 
     debugStage = "finalize";
