@@ -2,7 +2,7 @@
 
 > Primary #codebase reference. Regenerate with `npm run codebase:index` before audits or deployments.
 
-_Last generated: 2025-10-13T04:32:59.476Z_
+_Last generated: 2025-10-13T04:45:04.812Z_
 
 ## Supabase Edge Functions
 
@@ -13,10 +13,7 @@ _Last generated: 2025-10-13T04:32:59.476Z_
 - [supabase/functions/enrichment-hunter/index.ts](supabase/functions/enrichment-hunter/index.ts) — Hunter.io email discovery wrapper with caching
 - [supabase/functions/enrichment-neverbounce/index.ts](supabase/functions/enrichment-neverbounce/index.ts) — NeverBounce verification helper
 - [supabase/functions/enrichment-orchestrator/index.ts](supabase/functions/enrichment-orchestrator/index.ts) — Central enrichment coordinator calling Hunter, NeverBounce, licensing
-- [supabase/functions/test-business-discovery/index.ts](supabase/functions/test-business-discovery/index.ts) — Smoke test harness for discovery endpoints
 - [supabase/functions/test-google-places/index.ts](supabase/functions/test-google-places/index.ts) — Standalone Google Places API test harness
-- [supabase/functions/test-new-auth/index.ts](supabase/functions/test-new-auth/index.ts) — Auth diagnostics using shared helper
-- [supabase/functions/test-official-auth/index.ts](supabase/functions/test-official-auth/index.ts) — Supabase reference auth implementation mirror
 
 ## Shared Edge Utilities
 
