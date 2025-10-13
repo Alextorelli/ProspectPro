@@ -147,6 +147,7 @@ export async function authenticateRequest(
 ): Promise<AuthenticatedRequestContext> {
   const diagnostics: AuthDiagnostics = { envSources: {}, tokenPreview: null };
   let debugStage = "resolve_env";
+  let usedServiceFallback = false;
 
   try {
     const {
@@ -167,31 +168,57 @@ export async function authenticateRequest(
     // Minimal client per Supabase docs: pass anon key, and forward Authorization header via global headers
     debugStage = "create_client";
     const supabaseClient = createClient(supabaseUrl, supabaseAnonKey, {
-      auth: { persistSession: false, autoRefreshToken: false },
+      auth: {
+        persistSession: false,
+        autoRefreshToken: false,
+        detectSessionInUrl: false,
+      },
       global: { headers: { Authorization: `Bearer ${accessToken}` } },
     });
 
-    // Service-role client is required to validate ES256 session tokens
-    debugStage = "create_admin_client";
-    const serviceClient = createClient(supabaseUrl, serviceRoleKey, {
-      auth: { persistSession: false, autoRefreshToken: false },
-    });
+    // First attempt: rely on anon client with forwarded Authorization header
+    debugStage = "verify_user_forwarded";
+    const { data: forwardedData, error: forwardedError } =
+      await supabaseClient.auth.getUser(accessToken);
 
-    debugStage = "verify_user";
-    const { data: serviceData, error: serviceError } =
-      await serviceClient.auth.getUser(accessToken);
+    let user = forwardedData?.user ?? null;
 
-    if (serviceError || !serviceData?.user) {
-      console.error("❌ auth.getUser (service) failed", {
-        message: serviceError?.message,
-        status: serviceError?.status,
+    if (!user) {
+      if (forwardedError) {
+        console.warn("⚠️ auth.getUser (forwarded) failed", {
+          message: forwardedError.message,
+          status: (forwardedError as { status?: number }).status ?? null,
+        });
+      } else {
+        console.warn("⚠️ auth.getUser (forwarded) returned no user");
+      }
+
+      debugStage = "create_admin_client";
+      const serviceClient = createClient(supabaseUrl, serviceRoleKey, {
+        auth: {
+          persistSession: false,
+          autoRefreshToken: false,
+          detectSessionInUrl: false,
+        },
       });
-      throw new Error(
-        serviceError?.message ?? "Authentication failed: user not found"
-      );
-    }
 
-    const user = serviceData.user;
+      debugStage = "verify_user_service";
+      const { data: serviceData, error: serviceError } =
+        await serviceClient.auth.getUser(accessToken);
+
+      if (serviceError || !serviceData?.user) {
+        console.error("❌ auth.getUser (service) failed", {
+          message: serviceError?.message,
+          status: serviceError?.status,
+        });
+        throw new Error(
+          serviceError?.message ?? "Authentication failed: user not found"
+        );
+      }
+
+      user = serviceData.user;
+      usedServiceFallback = true;
+    }
 
     debugStage = "finalize";
     const sessionId =
@@ -219,6 +246,7 @@ export async function authenticateRequest(
       stage: debugStage,
       envSources: diagnostics.envSources,
       tokenPreview: diagnostics.tokenPreview,
+      usedServiceFallback,
       error: error instanceof Error ? error.message : String(error),
     });
 
