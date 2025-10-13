@@ -12,11 +12,11 @@ ProspectPro v4.4 adds user-aware campaign deduplication and billing-ready analyt
 
 ## 🏗️ Core Architecture
 
-- **[Copilot Instructions](.github/copilot-instructions.md)** – Authoritative production guide (deployment, troubleshooting, SLAs)
-- **[README](README.md)** – Platform overview and quickstart
-- **[ARCHITECTURE_DECISION_BACKGROUND_TASKS.md](ARCHITECTURE_DECISION_BACKGROUND_TASKS.md)** – Rationale for asynchronous discovery orchestration
-- **[BACKGROUND_TASKS_IMPLEMENTATION.md](BACKGROUND_TASKS_IMPLEMENTATION.md)** – Implementation notes for `business-discovery-background`
-- **[PRODUCTION_READY_V4.4.md](PRODUCTION_READY_V4.4.md)** – Release summary for the user-aware deduplication launch
+- **[Copilot Instructions](../.github/copilot-instructions.md)** – Authoritative production guide (deployment, troubleshooting, SLAs)
+- **[README](../README.md)** – Platform overview and quickstart
+- **[ARCHITECTURE_DECISION_BACKGROUND_TASKS.md](archived/ARCHITECTURE_DECISION_BACKGROUND_TASKS.md)** – Rationale for asynchronous discovery orchestration
+- **[BACKGROUND_TASKS_IMPLEMENTATION.md](../development/archived/BACKGROUND_TASKS_IMPLEMENTATION.md)** – Implementation notes for `business-discovery-background`
+- **[PRODUCTION_READY_V4.4.md](../deployment/PRODUCTION_READY_V4.4.md)** – Release summary for the user-aware deduplication launch
 
 ---
 
@@ -40,7 +40,7 @@ ProspectPro v4.4 adds user-aware campaign deduplication and billing-ready analyt
 - Export: `campaign-export-user-aware`, `campaign-export` (service-role only).
 - Diagnostics: `test-new-auth`, `test-official-auth`, `test-business-discovery`, `test-google-places`, `test-user-deduplication`.
 
-> ℹ️ Session JWTs are mandatory for every authenticated Edge Function call. Use `EDGE_FUNCTION_AUTH_UPDATE_GUIDE.md` plus `scripts/test-auth-patterns.sh` to validate flows.
+> ℹ️ Session JWTs are mandatory for every authenticated Edge Function call. Use [`EDGE_FUNCTION_AUTH_UPDATE_GUIDE.md`](../setup/archived/EDGE_FUNCTION_AUTH_UPDATE_GUIDE.md) plus `scripts/test-auth-patterns.sh` to validate flows.
 
 ### Key Sources
 
@@ -117,11 +117,11 @@ ProspectPro v4.4 adds user-aware campaign deduplication and billing-ready analyt
 
 ## 🛠️ Troubleshooting Quicklinks
 
-- Publishable key or session mismatch: `EDGE_FUNCTION_AUTH_UPDATE_GUIDE.md`, `NEED_ANON_KEY.md` (historical reference only).
+- Publishable key or session mismatch: [`EDGE_FUNCTION_AUTH_UPDATE_GUIDE.md`](../setup/archived/EDGE_FUNCTION_AUTH_UPDATE_GUIDE.md), [`NEED_ANON_KEY.md`](../setup/archived/NEED_ANON_KEY.md) (historical reference only).
 - Blank screen after campaign results: redeploy the v4.3.1 build, confirm React console warnings are cleared.
 - Edge function auth issues: `EDGE_FUNCTION_AUTH_UPDATE_GUIDE.md`, run `supabase logs functions --project-ref sriycekxdqnesdsgwiuc --slug <name> --tail`.
-- Dedup validation or ledger anomalies: `PRODUCTION_READY_V4.4.md` (deployment + validation checklist).
-- Deployment checklist: `DEPLOYMENT_CHECKLIST.md`.
+- Dedup validation or ledger anomalies: [`PRODUCTION_READY_V4.4.md`](../deployment/PRODUCTION_READY_V4.4.md) (deployment + validation checklist).
+- Deployment checklist: [`DEPLOYMENT_CHECKLIST.md`](../deployment/archived/DEPLOYMENT_CHECKLIST.md).
 - Environment sync: `vercel env pull .env.vercel`, `scripts/populate-secrets.sh`, `scripts/pull-env-from-secrets.js`.
 - MCP troubleshooting server: `mcp-servers/` (see local README).
 
