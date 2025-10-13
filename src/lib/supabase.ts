@@ -177,6 +177,7 @@ export async function invokeWithSession<T = unknown>(
   return supabase.functions.invoke<T>(functionName, {
     body,
     headers: {
+      apikey: SUPABASE_ANON_TOKEN,
       Authorization: `Bearer ${token}`,
       "Content-Type": "application/json",
       ...options.headers,
