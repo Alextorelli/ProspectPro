@@ -173,22 +173,41 @@ export async function authenticateRequest(
 
     // Validate the user using Supabase client helper for consistent behavior
     debugStage = "get_user";
-    const {
-      data: { user },
-      error: userError,
-    } = await supabaseClient.auth.getUser(accessToken);
+    const userResponse = await supabaseClient.auth.getUser(accessToken);
+    let user = userResponse.data.user ?? null;
+    let userError = userResponse.error ?? null;
 
-    if (userError) {
-      console.error("❌ Supabase auth.getUser error", {
-        message: userError.message,
-        name: userError.name,
-        status: userError.status,
+    if (userError || !user) {
+      console.warn("⚠️ Primary auth.getUser failed", {
+        message: userError?.message,
+        status: userError?.status,
       });
-      throw new Error(`Authentication failed: ${userError.message}`);
-    }
 
-    if (!user) {
-      throw new Error("Authentication failed: No user returned from auth");
+      debugStage = "service_fallback";
+      const serviceClient = createClient(supabaseUrl, serviceRoleKey, {
+        auth: { persistSession: false, autoRefreshToken: false },
+      });
+
+      const serviceResponse = await serviceClient.auth.getUser(accessToken);
+      userError = serviceResponse.error ?? null;
+      user = serviceResponse.data.user ?? null;
+
+      if (userError) {
+        console.error("❌ Service fallback auth.getUser failed", {
+          message: userError.message,
+          name: userError.name,
+          status: userError.status,
+        });
+        throw new Error(`Authentication failed: ${userError.message}`);
+      }
+
+      if (!user) {
+        throw new Error("Authentication failed: No user returned from auth");
+      }
+
+      console.log("✅ Service auth fallback succeeded", {
+        provider: user.app_metadata?.provider ?? null,
+      });
     }
 
     debugStage = "finalize";

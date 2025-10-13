@@ -10,6 +10,13 @@
 - [ ] Verify the frontend `.env` or config references `sb_publishable_your_key_here` style placeholders only.
 - [ ] Confirm you are at the Git top level: `git rev-parse --show-toplevel` must return `/workspaces/ProspectPro` (abort otherwise).
 - [ ] Pull Vercel environment variables locally: `vercel env pull .env.vercel` so scripts can source the current `sb_publishable_*` key.
+- [ ] Populate `.env.sync` with real Supabase + Google keys and push them to secrets:
+
+  ```bash
+  supabase secrets set --env-file .env.sync
+  ```
+
+- [ ] Mirror the same values into Vercel (`vercel env pull` already downloaded the current set) before deploying the frontend.
 
 ### Phase 2: Deploy Supabase Edge Functions
 
