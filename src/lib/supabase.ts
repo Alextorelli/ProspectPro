@@ -180,6 +180,13 @@ export async function invokeWithSession<T = unknown>(
     headers?: Record<string, string>;
   } = {}
 ) {
+  const logEdgeAuthFailure = (
+    stage: string,
+    details: { functionName: string; payload: unknown }
+  ) => {
+    console.warn(`Edge function auth failure (${stage})`, details);
+  };
+
   const parseErrorPayload = async (response: Response) => {
     try {
       const clone = response.clone();
@@ -247,7 +254,7 @@ export async function invokeWithSession<T = unknown>(
         }
 
         if (response.status === 401) {
-          console.warn("Edge function responded with 401", {
+          logEdgeAuthFailure("http", {
             functionName,
             payload,
           });
@@ -300,15 +307,26 @@ export async function invokeWithSession<T = unknown>(
     result.error.context?.status === 401;
 
   if (isAuthError) {
-    console.warn(
-      "Edge function returned 401. Attempting session refresh and retry."
-    );
+    logEdgeAuthFailure("retry_initiated", {
+      functionName,
+      payload: (result.error as Error & { payload?: unknown }).payload,
+    });
     const refreshed = await supabase.auth.refreshSession();
     const refreshedToken = refreshed.data.session?.access_token ?? null;
 
     if (!refreshed.error && refreshedToken && refreshedToken !== initialToken) {
       result = await executeInvoke(refreshedToken);
     }
+  }
+
+  if (
+    result.error instanceof FunctionsHttpError &&
+    result.error.context?.status === 401
+  ) {
+    logEdgeAuthFailure("retry_failed", {
+      functionName,
+      payload: (result.error as Error & { payload?: unknown }).payload,
+    });
   }
 
   return result;
