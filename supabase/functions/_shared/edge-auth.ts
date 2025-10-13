@@ -171,44 +171,27 @@ export async function authenticateRequest(
       global: { headers: { Authorization: `Bearer ${accessToken}` } },
     });
 
-    // Validate the user using Supabase client helper for consistent behavior
-    debugStage = "get_user";
-    const userResponse = await supabaseClient.auth.getUser(accessToken);
-    let user = userResponse.data.user ?? null;
-    let userError = userResponse.error ?? null;
+    // Service-role client is required to validate ES256 session tokens
+    debugStage = "create_admin_client";
+    const serviceClient = createClient(supabaseUrl, serviceRoleKey, {
+      auth: { persistSession: false, autoRefreshToken: false },
+    });
 
-    if (userError || !user) {
-      console.warn("⚠️ Primary auth.getUser failed", {
-        message: userError?.message,
-        status: userError?.status,
+    debugStage = "verify_user";
+    const { data: serviceData, error: serviceError } =
+      await serviceClient.auth.getUser(accessToken);
+
+    if (serviceError || !serviceData?.user) {
+      console.error("❌ auth.getUser (service) failed", {
+        message: serviceError?.message,
+        status: serviceError?.status,
       });
-
-      debugStage = "service_fallback";
-      const serviceClient = createClient(supabaseUrl, serviceRoleKey, {
-        auth: { persistSession: false, autoRefreshToken: false },
-      });
-
-      const serviceResponse = await serviceClient.auth.getUser(accessToken);
-      userError = serviceResponse.error ?? null;
-      user = serviceResponse.data.user ?? null;
-
-      if (userError) {
-        console.error("❌ Service fallback auth.getUser failed", {
-          message: userError.message,
-          name: userError.name,
-          status: userError.status,
-        });
-        throw new Error(`Authentication failed: ${userError.message}`);
-      }
-
-      if (!user) {
-        throw new Error("Authentication failed: No user returned from auth");
-      }
-
-      console.log("✅ Service auth fallback succeeded", {
-        provider: user.app_metadata?.provider ?? null,
-      });
+      throw new Error(
+        serviceError?.message ?? "Authentication failed: user not found"
+      );
     }
+
+    const user = serviceData.user;
 
     debugStage = "finalize";
     const sessionId =
