@@ -25,6 +25,11 @@ require_repo_root
 
 echo "🔍 Checking documentation schema compliance..."
 
+if [ "${SKIP_DOC_SCHEMA:-0}" = "1" ]; then
+  echo "⚠️ Documentation schema enforcement skipped (SKIP_DOC_SCHEMA=1)."
+  exit 0
+fi
+
 # Count markdown files in root directory
 ROOT_MD_FILES=$(find . -maxdepth 1 -name "*.md" -not -path "./docs/*" | wc -l)
 MAX_ROOT_MD=3

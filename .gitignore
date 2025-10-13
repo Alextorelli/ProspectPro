@@ -142,6 +142,8 @@ coverage/
 
 # IDE and editor files
 .vscode/
+!.vscode/
+!.vscode/**
 .idea/
 *.swp
 *.swo

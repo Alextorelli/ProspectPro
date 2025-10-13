@@ -92,6 +92,7 @@
             "test background job": "curl -X POST \"https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/business-discovery-background\" -H \"Authorization: Bearer SUPABASE_SESSION_JWT\" -H \"Content-Type: application/json\" -d '{\"businessType\":\"coffee shop\",\"location\":\"Seattle, WA\",\"maxResults\":2,\"tierKey\":\"PROFESSIONAL\",\"sessionUserId\":\"mcp-smoke\"}'",
             "test export": "curl -X POST \"https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/campaign-export-user-aware\" -H \"Authorization: Bearer SUPABASE_SESSION_JWT\" -H \"Content-Type: application/json\" -d '{\"campaignId\":\"test\",\"format\":\"csv\",\"sessionUserId\":\"mcp-smoke\"}'",
             "test auth helper": "curl -X POST \"https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/test-new-auth\" -H \"Authorization: Bearer SUPABASE_SESSION_JWT\" -H \"Content-Type: application/json\" -d '{\"diagnostics\":true}'",
+            "refresh codebase index": "npm run codebase:index",
             "compare auth patterns": "./scripts/test-auth-patterns.sh SUPABASE_SESSION_JWT",
             "rebuild frontend": "npm install && npm run build",
             "verify repo root": "git rev-parse --show-toplevel && pwd",

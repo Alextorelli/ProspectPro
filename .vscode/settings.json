@@ -51,7 +51,8 @@
   // === INTELLIGENT CONTEXT MANAGEMENT ===
   "ai.contextFiles": [
     "supabase/functions/*/index.ts",
-    "public/supabase-app.js",
+    "CODEBASE_INDEX.md",
+    "src/lib/supabase.ts",
     "TECHNICAL_SUMMARY_v4.3.md",
     "PROSPECTPRO_V4.3_RELEASE_NOTES.md",
     ".vscode/settings.json"

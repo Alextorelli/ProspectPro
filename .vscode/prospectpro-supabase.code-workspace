@@ -58,6 +58,32 @@
     "version": "2.0.0",
     "tasks": [
       {
+        "label": "Generate Codebase Index",
+        "type": "shell",
+        "command": "npm run codebase:index",
+        "group": "build",
+        "presentation": {
+          "echo": true,
+          "reveal": "always",
+          "focus": false,
+          "panel": "shared"
+        },
+        "problemMatcher": []
+      },
+      {
+        "label": "Start MCP Servers",
+        "type": "shell",
+        "command": "bash ./scripts/start-mcp.sh",
+        "group": "build",
+        "presentation": {
+          "echo": true,
+          "reveal": "always",
+          "focus": false,
+          "panel": "shared"
+        },
+        "problemMatcher": []
+      },
+      {
         "label": "Supabase: Serve Functions",
         "type": "shell",
         "command": "supabase functions serve",
@@ -73,7 +99,7 @@
       {
         "label": "Supabase: Deploy Functions",
         "type": "shell",
-        "command": "supabase functions deploy business-discovery && supabase functions deploy campaign-export",
+        "command": "npm run deploy:functions",
         "group": "build",
         "presentation": {
           "echo": true,
@@ -84,9 +110,9 @@
         "problemMatcher": []
       },
       {
-        "label": "Build Static Site",
+        "label": "Build Frontend",
         "type": "shell",
-        "command": "npm run build:static",
+        "command": "npm run build",
         "group": "build",
         "presentation": {
           "echo": true,
@@ -99,7 +125,7 @@
       {
         "label": "Serve Local Development",
         "type": "shell",
-        "command": "npm run serve:local",
+        "command": "npm run dev",
         "group": "build",
         "presentation": {
           "echo": true,
@@ -113,7 +139,7 @@
       {
         "label": "Deploy to Production",
         "type": "shell",
-        "command": "npm run deploy:static",
+        "command": "npm run frontend:deploy",
         "group": "build",
         "presentation": {
           "echo": true,
@@ -121,7 +147,20 @@
           "focus": false,
           "panel": "shared"
         },
-        "dependsOn": "Build Static Site",
+        "dependsOn": "Build Frontend",
+        "problemMatcher": []
+      },
+      {
+        "label": "Session Wrap-Up",
+        "type": "shell",
+        "command": "bash ./scripts/post-session.sh",
+        "group": "build",
+        "presentation": {
+          "echo": true,
+          "reveal": "always",
+          "focus": false,
+          "panel": "shared"
+        },
         "problemMatcher": []
       }
     ]
@@ -133,7 +172,7 @@
         "name": "Preview Static Site",
         "type": "node",
         "request": "launch",
-        "program": "${workspaceFolder}/public/index-supabase.html",
+        "program": "${workspaceFolder}/index.html",
         "console": "integratedTerminal",
         "env": {
           "NODE_ENV": "development"

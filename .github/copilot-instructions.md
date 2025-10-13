@@ -217,6 +217,7 @@ const BUSINESS_CATEGORIES = {
 - Database → `/database/` folder ONLY
 - Documentation → `/docs/` folder ONLY
 - Archive material → `/archive/` folder ONLY
+- Codebase index → `CODEBASE_INDEX.md` (regenerate with `npm run codebase:index`)
 
 **SUPABASE-FIRST APPROACH**
 
@@ -417,8 +418,9 @@ Static Frontend → Supabase Edge Functions → Supabase Database
 ```
 /supabase/functions/business-discovery/  # Core discovery Edge Function
 /supabase/functions/campaign-export/     # Export Edge Function
-/public/index-supabase.html              # Static frontend
-/public/supabase-app.js                  # Frontend JavaScript
+/index.html                              # Static frontend entry
+/src/lib/supabase.ts                     # Frontend Supabase client helper
+CODEBASE_INDEX.md                        # Auto-generated #codebase index
 /database/supabase-first-schema.sql      # Database setup
 /docs/                                   # Documentation
 /archive/                                # Legacy files (deprecated)
@@ -437,6 +439,9 @@ supabase functions deploy enrichment-orchestrator
 # Frontend build & deploy
 npm run build
 vercel --prod
+
+# Regenerate #codebase inventory before audits
+npm run codebase:index
 
 # Stream background-discovery logs
 supabase logs functions \

@@ -43,6 +43,16 @@ cat > .git/hooks/pre-commit << 'EOF'
 # ProspectPro Documentation Schema Pre-commit Hook
 # Automatically enforces documentation organization rules
 
+# Regenerate codebase index before validation
+if command -v npm >/dev/null 2>&1; then
+  echo "🔁 Regenerating codebase index..."
+  if ! npm run --silent codebase:index; then
+    echo "❌ Failed to refresh CODEBASE_INDEX.md" >&2
+    exit 1
+  fi
+  git add CODEBASE_INDEX.md 2>/dev/null || true
+fi
+
 # Check if the documentation schema validation script exists
 if [ -f "scripts/check-docs-schema.sh" ]; then
   echo "🔍 Validating documentation schema..."
@@ -75,6 +85,15 @@ cat > .git/hooks/pre-push << 'EOF'
 
 # ProspectPro Documentation Schema Pre-push Hook
 # Final validation before pushing to remote
+
+if command -v npm >/dev/null 2>&1; then
+  echo "🔁 Ensuring codebase index is current before push..."
+  if ! npm run --silent codebase:index; then
+    echo "❌ Codebase index refresh failed" >&2
+    exit 1
+  fi
+  git add CODEBASE_INDEX.md 2>/dev/null || true
+fi
 
 echo "🚀 Final documentation schema validation before push..."
 

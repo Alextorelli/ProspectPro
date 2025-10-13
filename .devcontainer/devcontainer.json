@@ -138,8 +138,8 @@
     }
   },
   "forwardPorts": [3000, 5432],
-  "postCreateCommand": "bash -lc 'set -e; echo \"� Setting up ProspectPro Verified Business Intelligence Environment...\"; sudo apt-get update && sudo apt-get install -y docker.io; if [ -f package-lock.json ]; then npm ci; else npm install; fi; npm i supabase --save-dev; npm run mcp:install; npm run mcp:test; echo \"✅ Verified data environment ready with zero fake data policy!\"; echo \"🚀 ProspectPro verified business intelligence development ready\"'",
-  "postStartCommand": "bash -c 'echo \"� ProspectPro Verified Business Intelligence Started\"; echo \"Data Policy: Zero Fake Data | Contacts: Verified Only | Architecture: Supabase Edge Functions\"; echo \"💡 Use Copilot Chat for AI-assisted development with verified data context\"'",
+  "postCreateCommand": "bash -lc 'set -e; echo \"[setup] Initializing ProspectPro verified business intelligence environment...\"; sudo apt-get update && sudo apt-get install -y docker.io; if [ -f package-lock.json ]; then npm ci; else npm install; fi; npm i supabase --save-dev; npm run mcp:init; npm run codebase:index; echo \"[ready] Verified data environment prepared with zero fake data policy.\"; echo \"[next] ProspectPro verified business intelligence development ready.\"'",
+  "postStartCommand": "bash -c 'echo \"[start] ProspectPro verified business intelligence environment active.\"; echo \"Data Policy: Zero Fake Data | Contacts: Verified Only | Architecture: Supabase Edge Functions\"; echo \"[hint] Use Copilot Chat for AI-assisted development with verified data context.\"'",
   "runArgs": ["--init", "-v", "/var/run/docker.sock:/var/run/docker.sock"],
   "remoteUser": "node"
 }
