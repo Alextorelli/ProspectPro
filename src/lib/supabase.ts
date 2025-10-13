@@ -180,6 +180,30 @@ export async function invokeWithSession<T = unknown>(
     headers?: Record<string, string>;
   } = {}
 ) {
+  const parseErrorPayload = async (response: Response) => {
+    try {
+      const clone = response.clone();
+      const contentType =
+        clone.headers.get("Content-Type")?.split(";")[0].trim() ??
+        "text/plain";
+
+      if (contentType === "application/json") {
+        return await clone.json();
+      }
+
+      if (contentType === "text/plain") {
+        const text = await clone.text();
+        return text ? { message: text } : null;
+      }
+
+      // Fallback for unhandled response types
+      return await clone.text();
+    } catch (parseError) {
+      console.warn("Failed to parse edge function error payload", parseError);
+      return null;
+    }
+  };
+
   const executeInvoke = async (
     accessToken: string
   ): Promise<EdgeInvokeResult<T>> => {
@@ -214,6 +238,22 @@ export async function invokeWithSession<T = unknown>(
 
       if (!response.ok) {
         const httpError = new FunctionsHttpError(response);
+        const payload = await parseErrorPayload(response);
+        if (payload) {
+          try {
+            (httpError as Error & { payload?: unknown }).payload = payload;
+          } catch (_assignError) {
+            // Ignore assignment issues (readonly error), payload logged below
+          }
+        }
+
+        if (response.status === 401) {
+          console.warn("Edge function responded with 401", {
+            functionName,
+            payload,
+          });
+        }
+
         return {
           data: null,
           error: httpError,
