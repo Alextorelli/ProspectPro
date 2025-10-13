@@ -1,3 +1,8 @@
+import {
+  FunctionsFetchError,
+  FunctionsHttpError,
+  FunctionsRelayError,
+} from "@supabase/functions-js";
 import { createClient } from "@supabase/supabase-js";
 
 const supabaseUrl =
@@ -161,6 +166,12 @@ export const ENRICHMENT_TIERS = {
   },
 } as const;
 
+type EdgeInvokeResult<T> = {
+  data: T | null;
+  error: any;
+  response?: Response;
+};
+
 export async function invokeWithSession<T = unknown>(
   functionName: string,
   body: Record<string, unknown> | undefined,
@@ -169,18 +180,97 @@ export async function invokeWithSession<T = unknown>(
     headers?: Record<string, string>;
   } = {}
 ) {
-  const token = options.token ?? (await getSessionToken());
-  if (!token) {
+  const executeInvoke = async (
+    accessToken: string
+  ): Promise<EdgeInvokeResult<T>> => {
+    const headers = new Headers(options.headers ?? {});
+    headers.set("apikey", SUPABASE_ANON_TOKEN);
+    headers.set("Authorization", `Bearer ${accessToken.trim()}`);
+
+    let requestBody: BodyInit | undefined;
+    if (typeof body !== "undefined") {
+      if (!headers.has("Content-Type")) {
+        headers.set("Content-Type", "application/json");
+      }
+      requestBody = JSON.stringify(body);
+    }
+
+    try {
+      const response = await fetch(`${EDGE_FUNCTIONS_URL}/${functionName}`, {
+        method: "POST",
+        headers,
+        body: requestBody,
+      });
+
+      const relayFlag = response.headers.get("x-relay-error");
+      if (relayFlag && relayFlag === "true") {
+        const relayError = new FunctionsRelayError(response);
+        return {
+          data: null,
+          error: relayError,
+          response: relayError.context,
+        };
+      }
+
+      if (!response.ok) {
+        const httpError = new FunctionsHttpError(response);
+        return {
+          data: null,
+          error: httpError,
+          response: httpError.context,
+        };
+      }
+
+      const contentType =
+        response.headers.get("Content-Type")?.split(";")[0].trim() ??
+        "text/plain";
+
+      let data: unknown;
+      if (contentType === "application/json") {
+        data = await response.json();
+      } else if (contentType === "application/octet-stream") {
+        data = await response.blob();
+      } else if (contentType === "text/event-stream") {
+        data = response;
+      } else if (contentType === "multipart/form-data") {
+        data = await response.formData();
+      } else {
+        data = await response.text();
+      }
+
+      return {
+        data: data as T,
+        error: null,
+        response,
+      };
+    } catch (error) {
+      const fetchError = new FunctionsFetchError(error);
+      return { data: null, error: fetchError, response: undefined };
+    }
+  };
+
+  const initialToken = options.token ?? (await getSessionToken());
+  if (!initialToken) {
     throw new Error("Unable to determine Supabase session. Please sign in.");
   }
 
-  return supabase.functions.invoke<T>(functionName, {
-    body,
-    headers: {
-      apikey: SUPABASE_ANON_TOKEN,
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json",
-      ...options.headers,
-    },
-  });
+  let result = await executeInvoke(initialToken);
+
+  const isAuthError =
+    result.error instanceof FunctionsHttpError &&
+    result.error.context?.status === 401;
+
+  if (isAuthError) {
+    console.warn(
+      "Edge function returned 401. Attempting session refresh and retry."
+    );
+    const refreshed = await supabase.auth.refreshSession();
+    const refreshedToken = refreshed.data.session?.access_token ?? null;
+
+    if (!refreshed.error && refreshedToken && refreshedToken !== initialToken) {
+      result = await executeInvoke(refreshedToken);
+    }
+  }
+
+  return result;
 }
