@@ -7,7 +7,19 @@ The commands below mirror the successful CLI tests from 2025-10-14. They avoid h
 > - `jq` is required for JSON payload assembly: `sudo apt-get update && sudo apt-get install jq`
 > - Supabase CLI is already available via `npx supabase@latest`
 
+### Supabase CLI Authentication (Global)
+
+Always ensure the Supabase CLI session is authenticated before running any tests:
+
+```bash
+source scripts/ensure-supabase-cli-session.sh
+```
+
+If the script triggers a login prompt, share the displayed device code + URL with Alex for browser approval, then rerun the script to confirm the session before continuing.
+
 ## Environment Preparation
+
+> Shortcut: `source scripts/setup-edge-auth-env.sh` performs the steps below (after you set `SUPABASE_SESSION_JWT`).
 
 ```bash
 # Required Supabase context

@@ -331,6 +331,12 @@ curl -X POST 'https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/test-officia
 # Check active Edge Functions
 supabase functions list
 
+
+**SUPABASE CLI AUTH WORKFLOW (GLOBAL)**
+
+- Before running any `supabase` CLI command (deploy, secrets, logs, etc.), execute `scripts/ensure-supabase-cli-session.sh` so the workspace escalates authentication automatically.
+- If the guard script triggers a login prompt, share the displayed device code + URL with Alex for browser approval, then rerun the script to verify the session.
+
 # Deploy frontend to custom domain
 npm run build && cd dist && vercel --prod
 
@@ -340,6 +346,13 @@ curl -I https://prospect-fyhedobh1-appsmithery.vercel.app
 # Check database permissions with user-aware schema
 # Run in Supabase SQL editor: SELECT * FROM campaigns LIMIT 1;
 ```
+
+**EDGE FUNCTION VALIDATION CHECKLIST (CLI-FIRST)**
+
+- Run `npx --yes supabase@latest login` whenever the CLI reports unauthenticated access; share the generated device code or auth URL so Alex can approve the session in the browser.
+- Export `SUPABASE_SESSION_JWT` first, then execute the environment prep block in `docs/edge-auth-testing.md` to resolve the publishable key via `supabase projects api-keys` and list deployed functions.
+- After modifying any Edge Function code or configuration, immediately execute the relevant curl suite from `docs/edge-auth-testing.md` to confirm authentication, payload schema alignment, and basic functionality.
+- Capture curl responses (HTTP status + body) in the workspace before proceeding with deployments so regressions can be triaged quickly.
 
 **ENVIRONMENT VERIFICATION CHECKLIST**
 
