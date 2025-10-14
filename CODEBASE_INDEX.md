@@ -2,7 +2,7 @@
 
 > Primary #codebase reference. Regenerate with `npm run codebase:index` before audits or deployments.
 
-_Last generated: 2025-10-14T21:28:55.209Z_
+_Last generated: 2025-10-14T21:42:48.286Z_
 
 ## Supabase Edge Functions
 
@@ -74,6 +74,7 @@ _Last generated: 2025-10-14T21:28:55.209Z_
 - [scripts/post-session.sh](scripts/post-session.sh) — Project maintenance script
 - [scripts/ensure-supabase-cli-session.sh](scripts/ensure-supabase-cli-session.sh) — Project maintenance script
 - [scripts/setup-edge-auth-env.sh](scripts/setup-edge-auth-env.sh) — Project maintenance script
+- [scripts/stop-mcp.sh](scripts/stop-mcp.sh) — Project maintenance script
 
 ## Configuration & Policies
 

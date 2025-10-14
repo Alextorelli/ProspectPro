@@ -289,6 +289,7 @@ async function main() {
     "scripts/post-session.sh",
     "scripts/ensure-supabase-cli-session.sh",
     "scripts/setup-edge-auth-env.sh",
+    "scripts/stop-mcp.sh",
   ]);
 
   const configFiles = await filterExisting([

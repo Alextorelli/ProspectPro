@@ -86,6 +86,7 @@
             "run prod mcp": "cd /workspaces/ProspectPro/mcp-servers && npm run start:production",
             "ensure supabase session": "source scripts/ensure-supabase-cli-session.sh",
             "prepare edge auth env": "source scripts/setup-edge-auth-env.sh",
+            "stop mcp": "./scripts/stop-mcp.sh",
             "deploy discovery background": "source scripts/ensure-supabase-cli-session.sh && npx --yes supabase@latest functions deploy business-discovery-background",
             "deploy orchestrator": "source scripts/ensure-supabase-cli-session.sh && npx --yes supabase@latest functions deploy enrichment-orchestrator",
             "deploy export": "source scripts/ensure-supabase-cli-session.sh && npx --yes supabase@latest functions deploy campaign-export-user-aware",
