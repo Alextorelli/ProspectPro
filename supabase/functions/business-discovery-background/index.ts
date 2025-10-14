@@ -2667,6 +2667,35 @@ serve(async (req) => {
         "❌ Authentication failed for discovery request",
         authError
       );
+      const diagnostics =
+        authError &&
+        typeof authError === "object" &&
+        "diagnostics" in (authError as Record<string, unknown>)
+          ? (
+              authError as {
+                diagnostics?: {
+                  stage?: string;
+                  failureReason?: string;
+                  tokenPreview?: string | null;
+                  hasSubClaim?: boolean;
+                  hasSessionIdClaim?: boolean;
+                  claimKeys?: string[];
+                  usedServiceFallback?: boolean;
+                };
+              }
+            ).diagnostics ?? null
+          : null;
+      const sanitizedDiagnostics = diagnostics
+        ? {
+            stage: diagnostics.stage ?? null,
+            failureReason: diagnostics.failureReason ?? null,
+            tokenPreview: diagnostics.tokenPreview ?? null,
+            hasSubClaim: diagnostics.hasSubClaim ?? null,
+            hasSessionIdClaim: diagnostics.hasSessionIdClaim ?? null,
+            claimKeys: diagnostics.claimKeys ?? null,
+            usedServiceFallback: diagnostics.usedServiceFallback ?? null,
+          }
+        : undefined;
       return new Response(
         JSON.stringify({
           success: false,
@@ -2674,6 +2703,7 @@ serve(async (req) => {
             authError instanceof Error
               ? authError.message
               : "Authentication failed",
+          diagnostics: sanitizedDiagnostics,
         }),
         {
           status: 401,

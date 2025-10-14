@@ -32,6 +32,9 @@ interface AuthDiagnostics {
   tokenPreview: string | null;
   hasAuthHeader?: boolean;
   authorizationHeaderLength?: number;
+  claimKeys?: string[];
+  hasSubClaim?: boolean;
+  hasSessionIdClaim?: boolean;
   failureReason?:
     | "missing_header"
     | "invalid_bearer_format"
@@ -209,6 +212,20 @@ export async function authenticateRequest(
 
     const accessToken = extractAccessToken(req, diagnostics);
     const tokenClaims = decodeJwtClaims(accessToken, diagnostics);
+    try {
+      const claimKeys = Object.keys(tokenClaims ?? {});
+      diagnostics.claimKeys = claimKeys;
+      diagnostics.hasSubClaim = typeof tokenClaims.sub === "string";
+      diagnostics.hasSessionIdClaim =
+        typeof tokenClaims.session_id === "string";
+      console.log("🔎 Token claims extracted", {
+        keys: claimKeys,
+        hasSub: diagnostics.hasSubClaim,
+        hasSessionId: diagnostics.hasSessionIdClaim,
+      });
+    } catch (claimLogError) {
+      console.warn("Token claim inspection failed", claimLogError);
+    }
 
     // Minimal client per Supabase docs: pass anon key, and forward Authorization header via global headers
     debugStage = "create_client";
@@ -328,8 +345,37 @@ export async function authenticateRequest(
 
     const message = error instanceof Error ? error.message : String(error);
     const normalized = formatAuthError(debugStage, message);
+    const enrichedError = new Error(normalized);
+    (
+      enrichedError as Error & {
+        diagnostics?: {
+          stage: string;
+          envSources: Record<string, string>;
+          tokenPreview: string | null;
+          hasAuthHeader?: boolean;
+          authorizationHeaderLength?: number;
+          failureReason?: string;
+          usedServiceFallback: boolean;
+          claimKeys?: string[];
+          hasSubClaim?: boolean;
+          hasSessionIdClaim?: boolean;
+        };
+      }
+    ).diagnostics = {
+      stage: debugStage,
+      envSources: diagnostics.envSources,
+      tokenPreview: diagnostics.tokenPreview,
+      hasAuthHeader: diagnostics.hasAuthHeader,
+      authorizationHeaderLength: diagnostics.authorizationHeaderLength,
+      failureReason: diagnostics.failureReason,
+      usedServiceFallback,
+      claimKeys: diagnostics.claimKeys,
+      hasSubClaim: diagnostics.hasSubClaim,
+      hasSessionIdClaim: diagnostics.hasSessionIdClaim,
+    };
+
     // Normalize common Supabase error wording
-    throw new Error(normalized);
+    throw enrichedError;
   }
 }
 
