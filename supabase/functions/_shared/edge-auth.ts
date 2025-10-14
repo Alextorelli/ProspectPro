@@ -224,7 +224,7 @@ export async function authenticateRequest(
     // First attempt: rely on anon client with forwarded Authorization header
     debugStage = "verify_user_forwarded";
     const { data: forwardedData, error: forwardedError } =
-      await supabaseClient.auth.getUser(accessToken);
+      await supabaseClient.auth.getUser();
 
     let user = forwardedData?.user ?? null;
 
