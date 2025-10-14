@@ -1,6 +1,6 @@
 {
     "version": "1.1",
-    "description": "ProspectPro v4.3 MCP Server Configuration - Tier-Aware Background Discovery & Supabase Session Enforcement",
+    "description": "ProspectPro v4.3 MCP Server Configuration - Tier-Aware Background Discovery & Supabase CLI Guard",
     "servers": {
         "prospectpro-production": {
             "autoStart": true,
@@ -84,16 +84,17 @@
         "smartContext": true,
         "quickCommands": {
             "run prod mcp": "cd /workspaces/ProspectPro/mcp-servers && npm run start:production",
-            "deploy discovery background": "supabase functions deploy business-discovery-background --no-verify-jwt",
-            "deploy orchestrator": "supabase functions deploy enrichment-orchestrator",
-            "deploy export": "supabase functions deploy campaign-export-user-aware",
-            "deploy auth diagnostics": "supabase functions deploy business-discovery-background --no-verify-jwt",
-            "check background logs": "supabase logs functions --project-ref sriycekxdqnesdsgwiuc --slug business-discovery-background --tail",
-            "test background job": "curl -X POST \"https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/business-discovery-background\" -H \"Authorization: Bearer SUPABASE_SESSION_JWT\" -H \"Content-Type: application/json\" -d '{\"businessType\":\"coffee shop\",\"location\":\"Seattle, WA\",\"maxResults\":2,\"tierKey\":\"PROFESSIONAL\",\"sessionUserId\":\"mcp-smoke\"}'",
-            "test export": "curl -X POST \"https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/campaign-export-user-aware\" -H \"Authorization: Bearer SUPABASE_SESSION_JWT\" -H \"Content-Type: application/json\" -d '{\"campaignId\":\"test\",\"format\":\"csv\",\"sessionUserId\":\"mcp-smoke\"}'",
-            "test auth helper": "curl -X GET \"https://sriycekxdqnesdsgwiuc.supabase.co/auth/v1/user\" -H \"Authorization: Bearer SUPABASE_SESSION_JWT\" -H \"apikey: sb_publishable_your_key_here\"",
+            "ensure supabase session": "source scripts/ensure-supabase-cli-session.sh",
+            "prepare edge auth env": "source scripts/setup-edge-auth-env.sh",
+            "deploy discovery background": "source scripts/ensure-supabase-cli-session.sh && npx --yes supabase@latest functions deploy business-discovery-background",
+            "deploy orchestrator": "source scripts/ensure-supabase-cli-session.sh && npx --yes supabase@latest functions deploy enrichment-orchestrator",
+            "deploy export": "source scripts/ensure-supabase-cli-session.sh && npx --yes supabase@latest functions deploy campaign-export-user-aware",
+            "check background logs": "source scripts/ensure-supabase-cli-session.sh && npx --yes supabase@latest logs functions --project-ref sriycekxdqnesdsgwiuc --slug business-discovery-background --tail",
+            "test background job": "curl -sS -X POST \"$SUPABASE_URL/functions/v1/business-discovery-background\" -H \"Authorization: Bearer $SUPABASE_SESSION_JWT\" -H \"apikey: $SUPABASE_PUBLISHABLE_KEY\" -H \"Content-Type: application/json\" -d '{\"businessType\":\"coffee shop\",\"location\":\"Seattle, WA\",\"maxResults\":1,\"tierKey\":\"PROFESSIONAL\"}'",
+            "test export": "curl -sS -X POST \"$SUPABASE_URL/functions/v1/campaign-export-user-aware\" -H \"Authorization: Bearer $SUPABASE_SESSION_JWT\" -H \"apikey: $SUPABASE_PUBLISHABLE_KEY\" -H \"Content-Type: application/json\" -d '{\"campaignId\":\"test\",\"format\":\"csv\"}'",
+            "test auth diagnostics": "curl -sS -X POST \"$SUPABASE_URL/functions/v1/auth-diagnostics\" -H \"Authorization: Bearer $SUPABASE_SESSION_JWT\" -H \"apikey: $SUPABASE_PUBLISHABLE_KEY\" -H \"Content-Type: application/json\" -d '{\"echo\": true}'",
             "refresh codebase index": "npm run codebase:index",
-            "compare auth patterns": "./scripts/test-auth-patterns.sh SUPABASE_SESSION_JWT",
+            "compare auth patterns": "./scripts/test-auth-patterns.sh \"$SUPABASE_SESSION_JWT\"",
             "rebuild frontend": "npm install && npm run build",
             "verify repo root": "git rev-parse --show-toplevel && pwd",
             "pull vercel env": "vercel env pull .env.vercel"
