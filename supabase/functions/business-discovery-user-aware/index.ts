@@ -3,6 +3,8 @@ import type { AuthenticatedRequestContext } from "../_shared/edge-auth.ts";
 import {
   authenticateRequest,
   corsHeaders,
+  extractBearerToken,
+  getAuthorizationHeader,
   handleCORS,
 } from "../_shared/edge-auth.ts";
 
@@ -132,19 +134,27 @@ function getUserContext(
   }
 
   // Fallback to manual JWT decoding (for backward compatibility)
-  const authHeader = req.headers.get("Authorization");
-  let userFromJWT = null;
+  const authHeader = getAuthorizationHeader(req);
+  const token = extractBearerToken(authHeader);
+  let userFromJWT: string | null = null;
 
-  if (authHeader?.startsWith("Bearer ")) {
-    const token = authHeader.substring(7);
+  if (token) {
     try {
-      // For JWT tokens, we can decode to get user info
       if (token.startsWith("eyJ")) {
-        const payload = JSON.parse(atob(token.split(".")[1]));
-        userFromJWT = payload.sub; // User ID from JWT
+        const payloadSegment = token.split(".")[1];
+        if (payloadSegment) {
+          const payload = JSON.parse(
+            atob(payloadSegment.replace(/-/g, "+").replace(/_/g, "/"))
+          );
+          if (payload && typeof payload.sub === "string") {
+            userFromJWT = payload.sub;
+          }
+        }
       }
     } catch (error) {
-      console.log("Could not decode JWT for user info:", error);
+      console.log("Could not decode JWT for user info:", {
+        message: error instanceof Error ? error.message : String(error),
+      });
     }
   }
 
@@ -385,10 +395,12 @@ serve(async (req) => {
           `🔄 Calling enrichment orchestrator for ${lead.businessName}...`
         );
 
+        const forwardedAuthorization = getAuthorizationHeader(req) ?? "";
         const enrichmentResponse = await fetch(enrichmentUrl, {
           method: "POST",
           headers: {
-            Authorization: req.headers.get("Authorization") || "",
+            Authorization: forwardedAuthorization,
+            apikey: authContext.supabaseAnonKey,
             "Content-Type": "application/json",
           },
           body: JSON.stringify({

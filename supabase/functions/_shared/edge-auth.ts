@@ -30,6 +30,15 @@ export interface AuthenticatedRequestContext {
 interface AuthDiagnostics {
   envSources: Record<string, string>;
   tokenPreview: string | null;
+  hasAuthHeader?: boolean;
+  authorizationHeaderLength?: number;
+  failureReason?:
+    | "missing_header"
+    | "invalid_bearer_format"
+    | "jwt_decode_failure"
+    | "user_not_found"
+    | "admin_lookup_failed"
+    | "service_lookup_failed";
 }
 
 function formatAuthError(stage: string, message: string): string {
@@ -105,20 +114,53 @@ function resolveSupabaseEnv(diagnostics: AuthDiagnostics): SupabaseEnv {
   return { url, anonKey, serviceRoleKey };
 }
 
+export function getAuthorizationHeader(req: Request): string | null {
+  return (
+    req.headers.get("authorization") ?? req.headers.get("Authorization") ?? null
+  );
+}
+
+export function extractBearerToken(rawValue: string | null): string | null {
+  if (!rawValue) return null;
+  const trimmed = rawValue.trim();
+  if (!trimmed) return null;
+  const match = /^Bearer\s+(.+)$/i.exec(trimmed);
+  if (match) {
+    return match[1]?.trim() || null;
+  }
+  return null;
+}
+
 function extractAccessToken(
   req: Request,
   diagnostics: AuthDiagnostics
 ): string {
-  // Per Supabase Functions auth guide: use Authorization header only.
-  const token = extractBearerToken(req.headers.get("Authorization"));
-  if (!token) throw new Error("Missing Authorization bearer token");
+  const authHeader = getAuthorizationHeader(req);
+  diagnostics.hasAuthHeader = Boolean(authHeader);
+  diagnostics.authorizationHeaderLength = authHeader?.length ?? undefined;
+
+  const token = extractBearerToken(authHeader);
+  if (!token) {
+    diagnostics.failureReason = authHeader
+      ? "invalid_bearer_format"
+      : "missing_header";
+    throw new Error(
+      authHeader
+        ? "Invalid Authorization header format"
+        : "Missing Authorization bearer token"
+    );
+  }
+
   diagnostics.tokenPreview = `${token.slice(0, 8)}…${token.slice(-6)}`;
   return token;
 }
 
 // No manual decode; Supabase SDK validates the token with auth.getUser.
 
-function decodeJwtClaims(token: string): JwtPayload {
+function decodeJwtClaims(
+  token: string,
+  diagnostics: AuthDiagnostics
+): JwtPayload {
   const parts = token.split(".");
   if (parts.length < 2) {
     return {};
@@ -134,19 +176,13 @@ function decodeJwtClaims(token: string): JwtPayload {
     const parsed = JSON.parse(decoded);
     return typeof parsed === "object" && parsed !== null ? parsed : {};
   } catch (error) {
+    diagnostics.failureReason =
+      diagnostics.failureReason ?? "jwt_decode_failure";
     console.warn("JWT decode failed", {
       error: error instanceof Error ? error.message : String(error),
     });
     return {};
   }
-}
-
-function extractBearerToken(rawValue: string | null): string | null {
-  if (!rawValue) return null;
-  const trimmed = rawValue.trim();
-  if (!trimmed) return null;
-  const matches = /^Bearer\s+(.+)$/i.exec(trimmed);
-  return matches ? matches[1] : trimmed;
 }
 
 export async function authenticateRequest(
@@ -165,12 +201,14 @@ export async function authenticateRequest(
 
     debugStage = "extract_token";
     console.log("🔐 Edge auth headers", {
-      hasAuthorization: Boolean(req.headers.get("Authorization")),
+      hasAuthorization:
+        Boolean(req.headers.get("Authorization")) ||
+        Boolean(req.headers.get("authorization")),
       hasProspectSession: Boolean(req.headers.get("x-prospect-session")),
     });
 
     const accessToken = extractAccessToken(req, diagnostics);
-    const tokenClaims = decodeJwtClaims(accessToken);
+    const tokenClaims = decodeJwtClaims(accessToken, diagnostics);
 
     // Minimal client per Supabase docs: pass anon key, and forward Authorization header via global headers
     debugStage = "create_client";
@@ -220,8 +258,11 @@ export async function authenticateRequest(
           await serviceClient.auth.admin.getUserById(tokenSub);
 
         if (adminError || !adminData?.user) {
-          const adminMessage = adminError?.message ??
-            "Authentication failed: user not found";
+          const adminMessage =
+            adminError?.message ?? "Authentication failed: user not found";
+          diagnostics.failureReason = adminError
+            ? "admin_lookup_failed"
+            : "user_not_found";
           console.error("❌ auth.admin.getUserById failed", {
             message: adminMessage,
             status: adminError?.status,
@@ -236,8 +277,11 @@ export async function authenticateRequest(
           await serviceClient.auth.getUser(accessToken);
 
         if (serviceError || !serviceData?.user) {
-          const serviceMessage = serviceError?.message ??
-            "Authentication failed: user not found";
+          const serviceMessage =
+            serviceError?.message ?? "Authentication failed: user not found";
+          diagnostics.failureReason = serviceError
+            ? "service_lookup_failed"
+            : "user_not_found";
           console.error("❌ auth.getUser (service) failed", {
             message: serviceMessage,
             status: serviceError?.status,
@@ -275,6 +319,9 @@ export async function authenticateRequest(
       stage: debugStage,
       envSources: diagnostics.envSources,
       tokenPreview: diagnostics.tokenPreview,
+      hasAuthHeader: diagnostics.hasAuthHeader,
+      authorizationHeaderLength: diagnostics.authorizationHeaderLength,
+      failureReason: diagnostics.failureReason,
       usedServiceFallback,
       error: error instanceof Error ? error.message : String(error),
     });
