@@ -10,10 +10,7 @@ CREATE TABLE IF NOT EXISTS public.user_campaign_results (
   campaign_id TEXT REFERENCES public.campaigns(id),
   business_name TEXT,
   business_address TEXT,
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  CONSTRAINT unique_user_campaign_business UNIQUE(user_id, campaign_hash, business_identifier),
-  CONSTRAINT unique_session_campaign_business UNIQUE(session_user_id, campaign_hash, business_identifier)
-    WHERE user_id IS NULL
+  created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 ALTER TABLE public.user_campaign_results
@@ -31,12 +28,18 @@ ALTER TABLE public.user_campaign_results
   ALTER COLUMN campaign_hash SET NOT NULL,
   ALTER COLUMN business_identifier SET NOT NULL;
 
+CREATE UNIQUE INDEX IF NOT EXISTS uniq_user_campaign_results_user_hash
+  ON public.user_campaign_results(user_id, campaign_hash, business_identifier)
+  WHERE user_id IS NOT NULL;
+CREATE UNIQUE INDEX IF NOT EXISTS uniq_user_campaign_results_session_hash
+  ON public.user_campaign_results(session_user_id, campaign_hash, business_identifier)
+  WHERE user_id IS NULL AND session_user_id IS NOT NULL;
 CREATE INDEX IF NOT EXISTS idx_user_campaign_results_user_hash
   ON public.user_campaign_results(user_id, campaign_hash)
   WHERE user_id IS NOT NULL;
 CREATE INDEX IF NOT EXISTS idx_user_campaign_results_session_hash
   ON public.user_campaign_results(session_user_id, campaign_hash)
-  WHERE user_id IS NULL;
+  WHERE user_id IS NULL AND session_user_id IS NOT NULL;
 CREATE INDEX IF NOT EXISTS idx_user_campaign_results_business_id
   ON public.user_campaign_results(business_identifier);
 CREATE INDEX IF NOT EXISTS idx_user_campaign_results_served_at
