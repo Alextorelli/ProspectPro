@@ -2,6 +2,33 @@
 # ProspectPro v4.3 Edge Auth Environment Bootstrapper
 # Usage: source scripts/setup-edge-auth-env.sh
 
+# Preserve caller shell options so sourcing this script does not mutate the
+# interactive environment (RETURN fires both for functions and sourced files).
+if [[ -z "${_PP_EDGE_ENV_PREV_OPTS_CAPTURED:-}" ]]; then
+  _PP_EDGE_ENV_PREV_OPTS_CAPTURED=$(set +o)
+  _PP_EDGE_ENV_PREV_RETURN_TRAP=$(trap -p RETURN || true)
+  _PP_EDGE_ENV_PREV_EXIT_TRAP=$(trap -p EXIT || true)
+  _pp_edge_env_restore_shell_opts() {
+    eval "$_PP_EDGE_ENV_PREV_OPTS_CAPTURED"
+    if [[ -n "${_PP_EDGE_ENV_PREV_RETURN_TRAP:-}" ]]; then
+      eval "$_PP_EDGE_ENV_PREV_RETURN_TRAP"
+    else
+      trap - RETURN
+    fi
+    if [[ -n "${_PP_EDGE_ENV_PREV_EXIT_TRAP:-}" ]]; then
+      eval "$_PP_EDGE_ENV_PREV_EXIT_TRAP"
+    else
+      trap - EXIT
+    fi
+    unset _PP_EDGE_ENV_PREV_OPTS_CAPTURED
+    unset _PP_EDGE_ENV_PREV_RETURN_TRAP
+    unset _PP_EDGE_ENV_PREV_EXIT_TRAP
+    unset -f _pp_edge_env_restore_shell_opts
+  }
+  trap _pp_edge_env_restore_shell_opts RETURN
+  trap _pp_edge_env_restore_shell_opts EXIT
+fi
+
 set -euo pipefail
 
 EXPECTED_REPO_ROOT=${EXPECTED_REPO_ROOT:-/workspaces/ProspectPro}
