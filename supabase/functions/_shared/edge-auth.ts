@@ -32,6 +32,13 @@ interface AuthDiagnostics {
   tokenPreview: string | null;
 }
 
+function formatAuthError(stage: string, message: string): string {
+  const trimmed = message?.trim?.() ?? "";
+  return trimmed.startsWith("Auth failure (")
+    ? trimmed
+    : `Auth failure (${stage}): ${trimmed || "Unknown authentication error"}`;
+}
+
 function maskSecret(value: string): string {
   if (value.length <= 8) {
     return "****";
@@ -213,13 +220,13 @@ export async function authenticateRequest(
           await serviceClient.auth.admin.getUserById(tokenSub);
 
         if (adminError || !adminData?.user) {
+          const adminMessage = adminError?.message ??
+            "Authentication failed: user not found";
           console.error("❌ auth.admin.getUserById failed", {
-            message: adminError?.message,
+            message: adminMessage,
             status: adminError?.status,
           });
-          throw new Error(
-            adminError?.message ?? "Authentication failed: user not found"
-          );
+          throw new Error(formatAuthError(debugStage, adminMessage));
         }
 
         user = adminData.user;
@@ -229,13 +236,13 @@ export async function authenticateRequest(
           await serviceClient.auth.getUser(accessToken);
 
         if (serviceError || !serviceData?.user) {
+          const serviceMessage = serviceError?.message ??
+            "Authentication failed: user not found";
           console.error("❌ auth.getUser (service) failed", {
-            message: serviceError?.message,
+            message: serviceMessage,
             status: serviceError?.status,
           });
-          throw new Error(
-            serviceError?.message ?? "Authentication failed: user not found"
-          );
+          throw new Error(formatAuthError(debugStage, serviceMessage));
         }
 
         user = serviceData.user;
@@ -273,8 +280,9 @@ export async function authenticateRequest(
     });
 
     const message = error instanceof Error ? error.message : String(error);
+    const normalized = formatAuthError(debugStage, message);
     // Normalize common Supabase error wording
-    throw new Error(`Auth failure (${debugStage}): ${message}`);
+    throw new Error(normalized);
   }
 }
 
