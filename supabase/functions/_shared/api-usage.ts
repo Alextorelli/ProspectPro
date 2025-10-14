@@ -105,7 +105,8 @@ function buildInsertPayload(
   const estimatedCost = roundCost(entry.estimatedCost);
   const actualCost = roundCost(entry.actualCost ?? entry.estimatedCost ?? null);
   const billingCategory =
-    entry.billingCategory ?? (actualCost && actualCost > 0 ? "paid_usage" : "free_tier");
+    entry.billingCategory ??
+    (actualCost && actualCost > 0 ? "paid_usage" : "free_tier");
 
   return {
     campaign_id: campaignId,
@@ -131,7 +132,8 @@ function buildInsertPayload(
     useful_results: entry.usefulResults ?? entry.resultsReturned ?? null,
     cache_hit: entry.cacheHit ?? false,
     rate_limited:
-      entry.rateLimited ?? (typeof entry.responseCode === "number" && entry.responseCode === 429),
+      entry.rateLimited ??
+      (typeof entry.responseCode === "number" && entry.responseCode === 429),
     retry_count: entry.retryCount ?? 0,
   };
 }
@@ -148,13 +150,45 @@ export function createUsageLogger(
     },
   });
 
+  let usageLoggingDisabled = false;
+
+  const suppressibleErrorPatterns = [
+    "does not exist",
+    'relation "enhanced_api_usage" does not exist',
+    "404",
+  ];
+
+  const shouldSuppressError = (error: { message?: string } | null) => {
+    if (!error?.message) {
+      return false;
+    }
+    const normalized = error.message.toLowerCase();
+    return suppressibleErrorPatterns.some((fragment) =>
+      normalized.includes(fragment.toLowerCase())
+    );
+  };
+
   return {
     async log(entry: UsageLogParams) {
+      if (usageLoggingDisabled) {
+        return;
+      }
+
       try {
         const payload = buildInsertPayload(baseContext, entry);
-        const { error } = await supabase.from("enhanced_api_usage").insert(payload);
+        const { error } = await supabase
+          .from("enhanced_api_usage")
+          .insert(payload);
         if (error) {
-          console.error("📉 API usage logging error:", error.message);
+          if (shouldSuppressError(error)) {
+            usageLoggingDisabled = true;
+            console.warn(
+              "📉 API usage logging suppressed until next cold start:",
+              error.message
+            );
+          } else {
+            console.error("📉 API usage logging error:", error.message);
+          }
         }
       } catch (error) {
         console.error("📉 API usage logging failed:", error);
