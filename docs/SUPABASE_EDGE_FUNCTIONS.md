@@ -36,7 +36,11 @@ Edge Functions that need privileged database writes (e.g. `business-discovery-ba
 ```ts
 const { supabaseUrl, supabaseServiceRoleKey, user } = authContext;
 const adminClient = createClient(supabaseUrl, supabaseServiceRoleKey, {
-  auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
+  auth: {
+    persistSession: false,
+    autoRefreshToken: false,
+    detectSessionInUrl: false,
+  },
 });
 
 await adminClient.rpc("generate_campaign_name", {
@@ -66,12 +70,12 @@ await adminClient.rpc("generate_campaign_name", {
 Use the Supabase JS client:
 
 ```ts
-import { createClient } from '@supabase/supabase-js'
+import { createClient } from "@supabase/supabase-js";
 
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
-const { data, error } = await supabase.functions.invoke('business-discovery', {
-  body: { query: 'roofing contractors', location: 'San Diego' },
-})
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const { data, error } = await supabase.functions.invoke("business-discovery", {
+  body: { query: "roofing contractors", location: "San Diego" },
+});
 ```
 
 ## Environment Variables
