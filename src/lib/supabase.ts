@@ -209,10 +209,47 @@ export async function invokeWithSession<T = unknown>(
     }
   };
 
-  const executeInvoke = async (): Promise<EdgeInvokeResult<T>> => {
+  const resolveAccessToken = async (
+    explicitToken?: string | null
+  ): Promise<string> => {
+    if (typeof explicitToken === "string" && explicitToken.trim().length > 0) {
+      return explicitToken.trim();
+    }
+
+    const sessionToken = await getSessionToken();
+    if (typeof sessionToken === "string" && sessionToken.trim().length > 0) {
+      return sessionToken.trim();
+    }
+
+    throw new Error("Unable to determine Supabase session. Please sign in.");
+  };
+
+  const executeInvoke = async (
+    tokenOverride?: string | null
+  ): Promise<EdgeInvokeResult<T>> => {
+    let accessToken: string | null = null;
+
+    try {
+      accessToken = await resolveAccessToken(tokenOverride);
+    } catch (tokenError) {
+      const normalizedError =
+        tokenError instanceof Error
+          ? tokenError
+          : new Error(String(tokenError));
+      return {
+        data: null,
+        error: normalizedError,
+        response: undefined,
+      };
+    }
+
+    const headerBag = new Headers(options.headers ?? {});
+    headerBag.set("apikey", SUPABASE_ANON_TOKEN);
+    headerBag.set("Authorization", `Bearer ${accessToken}`);
+
     const invokeResult = await supabase.functions.invoke<T>(functionName, {
       body,
-      headers: options.headers,
+      headers: Object.fromEntries(headerBag.entries()),
     });
 
     if (!invokeResult.error) {
@@ -264,7 +301,7 @@ export async function invokeWithSession<T = unknown>(
     };
   };
 
-  let result = await executeInvoke();
+  let result = await executeInvoke(options.token);
 
   const isAuthError =
     result.error instanceof FunctionsHttpError &&
@@ -279,7 +316,7 @@ export async function invokeWithSession<T = unknown>(
     const refreshed = await supabase.auth.refreshSession();
 
     if (!refreshed.error && refreshed.data.session?.access_token) {
-      result = await executeInvoke();
+      result = await executeInvoke(refreshed.data.session.access_token);
     }
   }
 
