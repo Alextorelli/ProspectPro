@@ -31,7 +31,38 @@ curl -X GET 'https://sriycekxdqnesdsgwiuc.supabase.co/rest/v1/campaigns?select=c
 - ❌ **Vercel 401** = Deployment protection enabled
 - ❌ **Database 401** = RLS policies not configured
 
-### 2. ANON KEY MISMATCH (MOST COMMON ISSUE)
+### 2. BACKGROUND DISCOVERY RETURNS 401 AFTER SIGN-IN (SESSION REQUIRED)
+
+**SYMPTOMS**
+
+- Browser console prints repeated `Edge function auth failure` messages followed by `⚠️ Falling back to legacy user-aware discovery`.
+- Supabase logs show `Auth failure` or `Missing Authorization bearer token` for `business-discovery-background`.
+- Campaign records appear via the legacy synchronous path while `discovery_jobs` remains empty.
+
+**DIAGNOSIS**
+
+```bash
+# Confirm the request uses a session JWT (not the anon key)
+curl -i \
+  -X POST 'https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/business-discovery-background' \
+  -H 'Authorization: Bearer SUPABASE_SESSION_JWT' \
+  -H 'Content-Type: application/json' \
+  -d '{"businessType": "coffee shop", "location": "Seattle, WA", "maxResults": 2}'
+
+# Inspect recent background function logs
+supabase functions logs business-discovery-background --project-ref sriycekxdqnesdsgwiuc
+```
+
+**FIX PROCEDURE**
+
+1. Refresh the user session in the frontend (`supabase.auth.getSession()` or `signInWithPassword`) before invoking the background function.
+2. Verify Supabase Edge Function secrets include `EDGE_SUPABASE_ANON_KEY`, `EDGE_SUPABASE_SERVICE_ROLE_KEY`, and `EDGE_SUPABASE_URL`.
+3. Redeploy auth helper + function: `supabase functions deploy business-discovery-background`.
+4. Retest with a clean browser session. If failures persist, invoke the `auth-diagnostics` function to inspect headers and token claims.
+
+> **Reminder:** The UI automatically pivots to `business-discovery-user-aware` after repeated 401s. Treat this as degraded mode and resolve the background auth gap before releasing.
+
+### 3. ANON KEY MISMATCH (MOST COMMON ISSUE)
 
 **DETECTION**
 
@@ -54,12 +85,7 @@ vercel --prod
 curl -I "https://your-new-vercel-url.vercel.app"
 ```
 
-### 3. DATABASE RLS POLICIES NOT CONFIGURED
-
-**SYMPTOMS**
-
-- Edge Function test returns 401 errors
-- Database queries fail with "new row violates row-level security policy"
+### 4. DATABASE RLS POLICIES NOT CONFIGURED
 
 **FIX PROCEDURE**
 
@@ -87,7 +113,7 @@ INSERT INTO campaigns (id, business_type, location) VALUES ('test-' || now(), 't
 SELECT * FROM campaigns WHERE business_type = 'test' LIMIT 1;
 ```
 
-### 4. VERCEL DEPLOYMENT PROTECTION
+### 5. VERCEL DEPLOYMENT PROTECTION
 
 **SYMPTOMS**
 
@@ -104,7 +130,7 @@ SELECT * FROM campaigns WHERE business_type = 'test' LIMIT 1;
 6. Save changes
 7. Test: `curl -I "https://your-vercel-url.vercel.app"`
 
-### 5. EDGE FUNCTIONS NOT RESPONDING
+### 6. EDGE FUNCTIONS NOT RESPONDING
 
 **DIAGNOSIS**
 
@@ -125,7 +151,7 @@ supabase functions serve business-discovery
 - **Function not deployed**: Run `supabase functions deploy business-discovery`
 - **Wrong project reference**: Verify project ref in logs
 
-### 6. MCP TROUBLESHOOTING SERVER USAGE
+### 7. MCP TROUBLESHOOTING SERVER USAGE
 
 **Available Tools**
 
