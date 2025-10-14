@@ -4,6 +4,11 @@ import { BrowserRouter } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import App from './App'
 import './index.css'
+import { supabase } from './lib/supabase'
+
+if (typeof window !== 'undefined') {
+  (window as typeof window & { __supabase?: typeof supabase }).__supabase = supabase
+}
 
 // Create a client
 const queryClient = new QueryClient({
