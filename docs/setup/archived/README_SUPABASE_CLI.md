@@ -43,10 +43,7 @@ For batch deploys the repository includes `scripts/deploy-background-tasks.sh`, 
 ## 📡 Tail Logs in Real Time
 
 ```bash
-supabase logs functions \
-  --project-ref sriycekxdqnesdsgwiuc \
-  --slug business-discovery-background \
-  --tail
+# CLI log streaming removed in Supabase CLI v2. Use the Supabase dashboard → Edge Functions → business-discovery-background → Logs.
 ```
 
 Adjust `--slug` for enrichment or diagnostic functions. Use `--since 1h` to review historical events.

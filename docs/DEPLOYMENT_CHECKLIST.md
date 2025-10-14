@@ -57,10 +57,8 @@
 - [ ] Tail function logs for regressions while triggering discovery:
 
   ```bash
-  supabase logs functions \
-    --project-ref sriycekxdqnesdsgwiuc \
-    --slug business-discovery-background \
-    --tail
+  # CLI log streaming is deprecated. Use the Supabase dashboard:
+  # Edge Functions → business-discovery-background → Logs
   ```
 
 - [ ] Trigger a background discovery via UI and confirm campaign + leads rows appear in Supabase tables.

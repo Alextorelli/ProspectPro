@@ -3,9 +3,13 @@
 # ProspectPro API Key Injection Script
 # Injects API keys from Supabase Edge Function secrets into Vite environment variables
 
-set -e
+set -euo pipefail
 
 EXPECTED_REPO_ROOT=${EXPECTED_REPO_ROOT:-/workspaces/ProspectPro}
+
+SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+# shellcheck source=/workspaces/ProspectPro/scripts/lib/supabase_cli_helpers.sh
+source "$SCRIPT_DIR/lib/supabase_cli_helpers.sh"
 
 require_repo_root() {
     local repo_root
@@ -26,14 +30,10 @@ require_repo_root
 echo "🔑 ProspectPro API Key Injection"
 echo "================================"
 
-# Check if Supabase CLI is available
-if ! command -v supabase &> /dev/null; then
-    echo "❌ Supabase CLI not found. Please install: npm install -g supabase"
-    exit 1
-fi
+pp_require_npx
 
 # Check if we're linked to a Supabase project
-if ! supabase status &> /dev/null; then
+if ! prospectpro_supabase_cli status >/dev/null 2>&1; then
     echo "❌ Not linked to Supabase project. Run: supabase link --project-ref sriycekxdqnesdsgwiuc"
     exit 1
 fi
@@ -75,15 +75,16 @@ else
     echo "✅ Resolved Edge Functions URL from environment"
 fi
 
-# Get the Google Maps API key from Supabase secrets
-GOOGLE_MAPS_KEY=$(supabase secrets get GOOGLE_PLACES_API_KEY 2>/dev/null || echo "")
+# Supabase CLI v2 no longer exposes raw secret values. Prompt the user if the key
+# is missing rather than attempting unsupported retrieval.
+GOOGLE_MAPS_KEY="${VITE_GOOGLE_MAPS_API_KEY:-${GOOGLE_MAPS_API_KEY:-}}"
 
 if [ -z "$GOOGLE_MAPS_KEY" ]; then
-    echo "⚠️  Warning: GOOGLE_PLACES_API_KEY not found in Supabase secrets"
-    echo "   Using empty value for development"
-    GOOGLE_MAPS_KEY=""
+    echo "⚠️  Warning: GOOGLE_PLACES_API_KEY is not present in the environment."
+    echo "   Retrieve the value from the Supabase dashboard → Edge Function secrets."
+    echo "   Leaving it blank for local development."
 else
-    echo "✅ Retrieved Google Maps API key from Supabase secrets"
+    echo "✅ GOOGLE_PLACES_API_KEY sourced from local environment"
 fi
 
 # Update .env.local with injected API keys

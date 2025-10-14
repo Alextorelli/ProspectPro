@@ -120,7 +120,7 @@ ProspectPro v4.4 adds user-aware campaign deduplication and billing-ready analyt
 
 - Publishable key or session mismatch: [`EDGE_FUNCTION_AUTH_UPDATE_GUIDE.md`](../setup/archived/EDGE_FUNCTION_AUTH_UPDATE_GUIDE.md), [`NEED_ANON_KEY.md`](../setup/archived/NEED_ANON_KEY.md) (historical reference only).
 - Blank screen after campaign results: redeploy the v4.3.1 build, confirm React console warnings are cleared.
-- Edge function auth issues: `EDGE_FUNCTION_AUTH_UPDATE_GUIDE.md`, run `supabase logs functions --project-ref sriycekxdqnesdsgwiuc --slug <name> --tail`.
+- Edge function auth issues: `EDGE_FUNCTION_AUTH_UPDATE_GUIDE.md`, review Supabase dashboard → Edge Functions → `<name>` → Logs.
 - Dedup validation or ledger anomalies: [`PRODUCTION_READY_V4.4.md`](../deployment/PRODUCTION_READY_V4.4.md) (deployment + validation checklist).
 - Deployment checklist: [`DEPLOYMENT_CHECKLIST.md`](../deployment/archived/DEPLOYMENT_CHECKLIST.md).
 - Environment sync: `vercel env pull .env.vercel`, `scripts/populate-secrets.sh`, `scripts/pull-env-from-secrets.js`.

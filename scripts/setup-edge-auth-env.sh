@@ -6,6 +6,10 @@ set -euo pipefail
 
 EXPECTED_REPO_ROOT=${EXPECTED_REPO_ROOT:-/workspaces/ProspectPro}
 
+SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+# shellcheck source=/workspaces/ProspectPro/scripts/lib/supabase_cli_helpers.sh
+source "$SCRIPT_DIR/lib/supabase_cli_helpers.sh"
+
 require_repo_root() {
   local repo_root
   if ! repo_root=$(git rev-parse --show-toplevel 2>/dev/null); then
@@ -23,7 +27,7 @@ require_repo_root() {
 resolve_publishable_key() {
   local project_ref publishable_key
   project_ref="$1"
-  publishable_key=$(npx --yes supabase@latest projects api-keys \
+  publishable_key=$(prospectpro_supabase_cli projects api-keys \
     --project-ref "$project_ref" \
     --output json \
     | jq -r '.[] | select(.type == "publishable") | .api_key')
@@ -89,8 +93,7 @@ else
 fi
 
 echo "📋 Edge Functions deployed:" 
-npx --yes supabase@latest functions list \
-  --project-ref "$SUPABASE_PROJECT_REF" \
+prospectpro_supabase_cli functions list \
   --output json | jq '.[] | {slug: .slug, status: .status}'
 
 cat <<'EON'

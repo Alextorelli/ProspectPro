@@ -2,7 +2,7 @@
 # Diagnostic Script for Campaign Discovery Failures
 # ProspectPro v4.3 - October 8, 2025
 
-set -e
+set -euo pipefail
 
 EXPECTED_REPO_ROOT=${EXPECTED_REPO_ROOT:-/workspaces/ProspectPro}
 
@@ -21,6 +21,10 @@ require_repo_root() {
 }
 
 require_repo_root
+
+SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+# shellcheck source=/workspaces/ProspectPro/scripts/lib/supabase_cli_helpers.sh
+source "$SCRIPT_DIR/lib/supabase_cli_helpers.sh"
 
 echo "🔍 ProspectPro Campaign Failure Diagnostic"
 echo "=========================================="
@@ -127,7 +131,7 @@ echo "----------------------------------------"
 
 # Check if user is logged in via Supabase CLI
 echo "Checking Supabase CLI login status..."
-if supabase projects list >/dev/null 2>&1; then
+if prospectpro_supabase_cli projects list >/dev/null 2>&1; then
   echo "✅ Supabase CLI authenticated"
   
   # Try to use an existing user session token
@@ -173,7 +177,7 @@ if supabase projects list >/dev/null 2>&1; then
   
 else
   echo "❌ Supabase CLI not authenticated"
-  echo "   Run: supabase login"
+  echo "   Run: source scripts/ensure-supabase-cli-session.sh"
   echo ""
   
   # Fall back to anon key testing
@@ -263,11 +267,8 @@ fi
 echo ""
 echo "5️⃣  Checking Edge Function Logs..."
 echo "----------------------------------------"
-echo "To view live logs, run:"
-echo "  supabase functions logs business-discovery-background --follow"
-echo ""
-echo "Or check logs in Supabase Dashboard:"
-echo "  Edge Functions → business-discovery-background → Logs"
+echo "Supabase CLI no longer streams Edge Function logs."
+echo "Open the Supabase dashboard → Edge Functions → business-discovery-background → Logs for real-time output."
 
 echo ""
 echo "=========================================="

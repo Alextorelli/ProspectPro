@@ -129,7 +129,7 @@ for fn in "${FUNCTIONS[@]}"; do
   read -r code body < <(invoke_function "$fn")
   inspect_response "$fn" "$code" "$body"
   if [ "$code" = "500" ]; then
-    echo "      ❗ Capture logs: supabase logs functions --project-ref $PROJECT_REF --slug $fn --tail"
+    echo "      ❗ Capture logs via Supabase dashboard → Edge Functions → $fn → Logs."
   fi
   if [ "$code" = "200" ] && echo "$body" | grep -q '"error"'; then
     echo "      ⚠️  Function responded with error payload:" "$body"
@@ -190,8 +190,8 @@ inspect_response "business-discovery-background (session)" "$http_code" "$body"
 if [ "$http_code" = "500" ] || echo "$body" | grep -qi 'Unexpected end of JSON'; then
   echo "      ❗ Edge function returned malformed response"
   echo "      Next steps:"
-  echo "         supabase logs functions --project-ref $PROJECT_REF --slug business-discovery-background --tail"
-  echo "         Verify secrets via supabase secrets list"
+  echo "         Review Supabase dashboard → Edge Functions → business-discovery-background → Logs"
+  echo "         Verify secrets via 'source scripts/setup-edge-auth-env.sh' or the Supabase dashboard"
 fi
 
 # Export check to ensure campaign pipeline works

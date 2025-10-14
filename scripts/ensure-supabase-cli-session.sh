@@ -6,6 +6,10 @@ set -euo pipefail
 
 EXPECTED_REPO_ROOT=${EXPECTED_REPO_ROOT:-/workspaces/ProspectPro}
 
+SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+# shellcheck source=/workspaces/ProspectPro/scripts/lib/supabase_cli_helpers.sh
+source "$SCRIPT_DIR/lib/supabase_cli_helpers.sh"
+
 require_repo_root() {
   local repo_root
   if ! repo_root=$(git rev-parse --show-toplevel 2>/dev/null); then
@@ -22,7 +26,7 @@ require_repo_root() {
 
 check_supabase_login() {
   local project_list_output
-  if project_list_output=$(npx --yes supabase@latest projects list --output json 2>&1); then
+  if project_list_output=$(prospectpro_supabase_cli projects list --output json 2>&1); then
     echo "✅ Supabase CLI session authenticated."
     return 0
   fi
@@ -30,10 +34,10 @@ check_supabase_login() {
   echo "⚠️ Supabase CLI session not authenticated."
   echo "👇 Triggering login flow. Share the device code + URL below with Alex so the session can be approved in the browser."
   echo "---- Supabase CLI Login Prompt ----"
-  npx --yes supabase@latest login --no-browser
+  prospectpro_supabase_cli login --no-browser
   echo "-----------------------------------"
 
-  if npx --yes supabase@latest projects list --output json >/dev/null 2>&1; then
+  if prospectpro_supabase_cli projects list --output json >/dev/null 2>&1; then
     echo "✅ Supabase CLI session authenticated after login."
     return 0
   fi
@@ -52,7 +56,7 @@ fi
 token_authenticated="false"
 
 if [[ -n "${SUPABASE_ACCESS_TOKEN:-}" ]]; then
-  if npx --yes supabase@latest projects list --output json >/dev/null 2>&1; then
+  if prospectpro_supabase_cli projects list --output json >/dev/null 2>&1; then
     echo "✅ Supabase CLI session authenticated via SUPABASE_ACCESS_TOKEN."
     token_authenticated="true"
   else

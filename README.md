@@ -187,10 +187,7 @@ supabase functions deploy campaign-export-user-aware
 supabase functions deploy enrichment-orchestrator
 
 # Stream background discovery logs
-supabase logs functions \
-  --project-ref sriycekxdqnesdsgwiuc \
-  --slug business-discovery-background \
-  --tail
+Open the Supabase dashboard → Edge Functions → business-discovery-background → Logs for live output.
 
 # Build and deploy frontend
 npm run build

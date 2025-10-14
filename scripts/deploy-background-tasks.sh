@@ -29,6 +29,10 @@ require_repo_root() {
 
 require_repo_root
 
+SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+# shellcheck source=/workspaces/ProspectPro/scripts/lib/supabase_cli_helpers.sh
+source "$SCRIPT_DIR/lib/supabase_cli_helpers.sh"
+
 PROJECT_REF=${SUPABASE_PROJECT_REF:-sriycekxdqnesdsgwiuc}
 FUNCTIONS=(
   business-discovery-background
@@ -44,12 +48,9 @@ echo "🚀 ProspectPro Background Discovery Release"
 echo "Supabase project: $PROJECT_REF"
 echo "---------------------------------------------"
 
-if ! command -v supabase >/dev/null 2>&1; then
-  echo "❌ Supabase CLI not found. Install via 'brew install supabase/tap/supabase' or https://supabase.com/docs." >&2
-  exit 1
-fi
+pp_require_npx
 
-if ! supabase status >/dev/null 2>&1; then
+if ! prospectpro_supabase_cli status >/dev/null 2>&1; then
   echo "⚠️ Supabase project not linked in this repo. Run: supabase link --project-ref $PROJECT_REF" >&2
   exit 1
 fi
@@ -57,7 +58,7 @@ fi
 echo "📡 Deploying Edge Functions"
 for fn in "${FUNCTIONS[@]}"; do
   echo "   • $fn"
-  supabase functions deploy "$fn" --project-ref "$PROJECT_REF"
+  prospectpro_supabase_cli functions deploy "$fn" --project-ref "$PROJECT_REF"
 done
 
 echo "✅ Edge function deploys complete"
@@ -88,6 +89,6 @@ echo
 echo "Next steps:"
 echo "  1. npm run build"
 echo "  2. cd dist && vercel --prod"
-echo "  3. supabase logs functions --project-ref $PROJECT_REF --slug business-discovery-background --tail"
+echo "  3. Review Supabase dashboard → Edge Functions → business-discovery-background logs"
 echo
 echo "Done."

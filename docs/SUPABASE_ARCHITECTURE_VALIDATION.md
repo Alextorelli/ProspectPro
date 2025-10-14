@@ -27,7 +27,7 @@ ProspectPro v4.3 runs entirely on Supabase Edge Functions backed by a tier-aware
 
 ### Monitoring & Logging — Consolidated
 
-- Function telemetry pulled through `supabase logs functions --tail` during every release.
+- Function telemetry pulled from Supabase dashboard → Edge Functions → <slug> → Logs during every release.
 - Supabase dashboard metrics confirm <100 ms cold start and consistent throughput.
 - Vercel analytics validate frontend health; no Cloud Run or container orchestration exists in the pipeline.
 

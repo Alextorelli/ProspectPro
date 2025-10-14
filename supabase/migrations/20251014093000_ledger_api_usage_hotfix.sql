@@ -1,14 +1,13 @@
--- NOTE: The canonical migration is stored in supabase/migrations/20251014093000_ledger_api_usage_hotfix.sql
---       This copy is retained for documentation and legacy automation only.
+-- ProspectPro Hotfix Migration: Ledger indexes + Enhanced API usage table
+-- Generated: 2025-10-14
 BEGIN;
 -- ---------------------------------------------------------------------------
 -- Lead fingerprint ledger conflict targets
 -- ---------------------------------------------------------------------------
--- Guarantee conflict targets exist for ON CONFLICT clauses used by edge functions.
 CREATE UNIQUE INDEX IF NOT EXISTS idx_lead_fingerprints_conflict_user ON public.lead_fingerprints (fingerprint, user_id);
 CREATE UNIQUE INDEX IF NOT EXISTS idx_lead_fingerprints_conflict_session ON public.lead_fingerprints (fingerprint, session_user_id);
 -- ---------------------------------------------------------------------------
--- Enhanced API usage telemetry table (service role writes only)
+-- Enhanced API usage telemetry table (service role only)
 -- ---------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS public.enhanced_api_usage (
     id BIGSERIAL PRIMARY KEY,
@@ -38,7 +37,6 @@ CREATE TABLE IF NOT EXISTS public.enhanced_api_usage (
     rate_limited BOOLEAN DEFAULT FALSE,
     retry_count INTEGER DEFAULT 0
 );
--- Align existing deployments with current edge-function payload shape.
 ALTER TABLE public.enhanced_api_usage
 ALTER COLUMN http_method
 SET DEFAULT 'GET';
@@ -54,12 +52,10 @@ SET DEFAULT FALSE;
 ALTER TABLE public.enhanced_api_usage
 ALTER COLUMN retry_count
 SET DEFAULT 0;
--- Lightweight indexes for diagnostics dashboards.
 CREATE INDEX IF NOT EXISTS idx_enhanced_api_usage_created_at ON public.enhanced_api_usage (created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_enhanced_api_usage_campaign_id ON public.enhanced_api_usage (campaign_id);
 CREATE INDEX IF NOT EXISTS idx_enhanced_api_usage_source_name ON public.enhanced_api_usage (source_name);
 CREATE INDEX IF NOT EXISTS idx_enhanced_api_usage_success ON public.enhanced_api_usage (success);
--- Harden RLS (service role only until per-user reports ship).
 ALTER TABLE public.enhanced_api_usage ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS service_role_enhanced_api_usage_access ON public.enhanced_api_usage;
 CREATE POLICY service_role_enhanced_api_usage_access ON public.enhanced_api_usage FOR ALL TO PUBLIC USING (auth.role() = 'service_role') WITH CHECK (auth.role() = 'service_role');

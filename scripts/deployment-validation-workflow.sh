@@ -26,6 +26,12 @@ require_repo_root() {
 
 require_repo_root
 
+SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+# shellcheck source=/workspaces/ProspectPro/scripts/lib/supabase_cli_helpers.sh
+source "$SCRIPT_DIR/lib/supabase_cli_helpers.sh"
+
+pp_require_npx
+
 usage() {
   cat <<'EOF'
 ProspectPro Deployment & Validation Workflow
@@ -341,15 +347,9 @@ step1_environment_observability() {
     run_cmd_capture "Snapshot Vercel environment variables" "$RUN_DIR/vercel-env.txt" vercel env ls "$PROJECT_SLUG" || true
     run_cmd_capture "Fetch Vercel logs (last hour)" "$RUN_DIR/vercel-logs.txt" vercel logs "$PROJECT_SLUG" --since=1h --no-ansi || true
   fi
-  if require_command supabase; then
-    run_cmd_capture "Snapshot Supabase secrets digests" "$RUN_DIR/supabase-secrets.txt" supabase secrets list --project-ref "$SUPABASE_PROJECT_REF" || true
-    if command -v timeout >/dev/null 2>&1; then
-      run_cmd_capture "Supabase function logs (business-discovery-background)" "$RUN_DIR/supabase-business-discovery.log" timeout 5 supabase functions logs business-discovery-background --follow --project-ref "$SUPABASE_PROJECT_REF" || log_warn "Supabase CLI log follow unavailable—review dashboards manually."
-      run_cmd_capture "Supabase function logs (campaign-export-user-aware)" "$RUN_DIR/supabase-export.log" timeout 5 supabase functions logs campaign-export-user-aware --follow --project-ref "$SUPABASE_PROJECT_REF" || log_warn "Supabase CLI log follow unavailable—review dashboards manually."
-    else
-      log_warn "timeout command missing—monitor Supabase logs via dashboard."
-    fi
-  fi
+  run_cmd_capture "Snapshot Supabase secrets digests" "$RUN_DIR/supabase-secrets.txt" \
+    prospectpro_supabase_cli secrets list --project-ref "$SUPABASE_PROJECT_REF" || true
+  log_warn "Supabase CLI log streaming was removed upstream. Capture logs from the dashboard (Edge Functions → Logs) instead."
   log_info "Capture dashboard screenshots manually and store them in $RUN_DIR as needed."
 }
 
@@ -376,8 +376,9 @@ step2_data_cache_scrub() {
   else
     log_info "No CACHE_TABLES override supplied; skipping additional cache purge."
   fi
-  if confirmed "List Supabase storage buckets (requires supabase login)?" && require_command supabase; then
-    run_cmd_capture "List Supabase storage buckets" "$RUN_DIR/supabase-storage.txt" supabase storage ls --experimental --project-ref "$SUPABASE_PROJECT_REF" || true
+  if confirmed "List Supabase storage buckets (requires supabase login)?"; then
+    run_cmd_capture "List Supabase storage buckets" "$RUN_DIR/supabase-storage.txt" \
+      prospectpro_supabase_cli storage ls --experimental --project-ref "$SUPABASE_PROJECT_REF" || true
     log_info "Use 'supabase storage rm ss:///bucket/path --recursive --experimental' for targeted cleanup—never run blindly."
   else
     log_warn "Supabase storage cleanup deferred to manual review."
@@ -398,12 +399,14 @@ step3_backend_redeploy() {
     return
   fi
   if [ -n "$PUBLISHABLE_KEY" ]; then
-    run_cmd_plain "Reapply Supabase publishable key" supabase secrets set SUPABASE_PUBLISHABLE_KEY="$PUBLISHABLE_KEY" --project-ref "$SUPABASE_PROJECT_REF" || true
+    run_cmd_plain "Reapply Supabase publishable key" \
+      prospectpro_supabase_cli secrets set SUPABASE_PUBLISHABLE_KEY="$PUBLISHABLE_KEY" --project-ref "$SUPABASE_PROJECT_REF" || true
   else
     log_warn "Publishable key not supplied; skipping secret reset."
   fi
   if [ -n "$SERVICE_ROLE_KEY" ]; then
-    run_cmd_plain "Reapply Supabase service role key" supabase secrets set SUPABASE_SERVICE_ROLE_KEY="$SERVICE_ROLE_KEY" --project-ref "$SUPABASE_PROJECT_REF" || true
+    run_cmd_plain "Reapply Supabase service role key" \
+      prospectpro_supabase_cli secrets set SUPABASE_SERVICE_ROLE_KEY="$SERVICE_ROLE_KEY" --project-ref "$SUPABASE_PROJECT_REF" || true
   else
     log_warn "Service role key not supplied; skipping secret reset."
   fi
@@ -419,7 +422,8 @@ step3_backend_redeploy() {
     function_slugs+=(enrichment-orchestrator)
   fi
   for fn in "${function_slugs[@]}"; do
-    run_cmd_capture "Deploy Supabase function: $fn" "$RUN_DIR/deploy-$fn.log" supabase functions deploy "$fn" --project-ref "$SUPABASE_PROJECT_REF" || true
+    run_cmd_capture "Deploy Supabase function: $fn" "$RUN_DIR/deploy-$fn.log" \
+      prospectpro_supabase_cli functions deploy "$fn" --project-ref "$SUPABASE_PROJECT_REF" || true
   done
   if [ -x "$REPO_ROOT/scripts/diagnose-campaign-failure.sh" ]; then
     run_cmd_capture "Run diagnose-campaign-failure.sh" "$RUN_DIR/diagnose-campaign-failure.log" "$REPO_ROOT/scripts/diagnose-campaign-failure.sh" || true
