@@ -258,7 +258,7 @@ export async function invokeWithSession<T = unknown>(
 
     const headerBag = new Headers(options.headers ?? {});
     headerBag.set("apikey", SUPABASE_ANON_TOKEN);
-  headerBag.set("Authorization", `Bearer ${accessToken}`);
+    headerBag.set("Authorization", `Bearer ${accessToken}`);
 
     const invokeResult = await supabase.functions.invoke<T>(functionName, {
       body,

@@ -8,9 +8,11 @@ const __dirname = path.dirname(__filename);
 const repoRoot = path.resolve(__dirname, "..");
 
 const allowedFunctionSlugs = new Set([
+  "auth-diagnostics",
   "business-discovery-background",
   "business-discovery-optimized",
   "business-discovery-user-aware",
+  "campaign-export",
   "campaign-export-user-aware",
   "enrichment-orchestrator",
   "enrichment-hunter",
@@ -18,6 +20,7 @@ const allowedFunctionSlugs = new Set([
   "enrichment-business-license",
   "enrichment-pdl",
   "test-google-places",
+  "test-user-deduplication",
 ]);
 
 const descriptionOverrides = new Map([
@@ -144,6 +147,9 @@ const descriptionOverrides = new Map([
 
 function defaultDescription(relPath) {
   if (relPath.startsWith("supabase/functions/")) {
+    if (relPath.endsWith("function.toml")) {
+      return "Supabase function configuration";
+    }
     return "Supabase Edge Function module";
   }
   if (relPath.startsWith("src/")) {
@@ -190,6 +196,23 @@ async function collectEdgeFunctions() {
   return items;
 }
 
+async function collectFunctionConfigs() {
+  const baseDir = path.join(repoRoot, "supabase", "functions");
+  const entries = await fs.readdir(baseDir, { withFileTypes: true });
+  const items = [];
+  for (const entry of entries) {
+    if (!entry.isDirectory()) continue;
+    if (entry.name.startsWith(".")) continue;
+    if (!allowedFunctionSlugs.has(entry.name)) continue;
+    const configPath = path.join(baseDir, entry.name, "function.toml");
+    if (!(await pathExists(configPath))) continue;
+    const rel = path.relative(repoRoot, configPath).replace(/\\/g, "/");
+    items.push(rel);
+  }
+  items.sort();
+  return items;
+}
+
 async function collectSharedModules() {
   const baseDir = path.join(repoRoot, "supabase", "functions", "_shared");
   const entries = await fs.readdir(baseDir, { withFileTypes: true });
@@ -228,6 +251,7 @@ async function main() {
 
   const edgeFunctions = await collectEdgeFunctions();
   const sharedModules = await collectSharedModules();
+  const functionConfigs = await collectFunctionConfigs();
 
   const frontendFiles = await filterExisting([
     "src/App.tsx",
@@ -279,6 +303,10 @@ async function main() {
     {
       title: "Supabase Edge Functions",
       items: edgeFunctions,
+    },
+    {
+      title: "Edge Function Configuration",
+      items: functionConfigs,
     },
     {
       title: "Shared Edge Utilities",

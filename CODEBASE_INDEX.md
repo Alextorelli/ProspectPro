@@ -2,18 +2,35 @@
 
 > Primary #codebase reference. Regenerate with `npm run codebase:index` before audits or deployments.
 
-_Last generated: 2025-10-14T18:48:45.302Z_
+_Last generated: 2025-10-14T19:55:12.375Z_
 
 ## Supabase Edge Functions
 
+- [supabase/functions/auth-diagnostics/index.ts](supabase/functions/auth-diagnostics/index.ts) — Supabase Edge Function module
 - [supabase/functions/business-discovery-background/index.ts](supabase/functions/business-discovery-background/index.ts) — Primary asynchronous, tier-aware discovery pipeline
 - [supabase/functions/business-discovery-optimized/index.ts](supabase/functions/business-discovery-optimized/index.ts) — Session-aware synchronous discovery path for validation campaigns
 - [supabase/functions/business-discovery-user-aware/index.ts](supabase/functions/business-discovery-user-aware/index.ts) — Legacy synchronous discovery retained for backward compatibility
 - [supabase/functions/campaign-export-user-aware/index.ts](supabase/functions/campaign-export-user-aware/index.ts) — Authenticated campaign export handler
+- [supabase/functions/campaign-export/index.ts](supabase/functions/campaign-export/index.ts) — Supabase Edge Function module
 - [supabase/functions/enrichment-hunter/index.ts](supabase/functions/enrichment-hunter/index.ts) — Hunter.io email discovery wrapper with caching
 - [supabase/functions/enrichment-neverbounce/index.ts](supabase/functions/enrichment-neverbounce/index.ts) — NeverBounce verification helper
 - [supabase/functions/enrichment-orchestrator/index.ts](supabase/functions/enrichment-orchestrator/index.ts) — Central enrichment coordinator calling Hunter, NeverBounce, licensing
 - [supabase/functions/test-google-places/index.ts](supabase/functions/test-google-places/index.ts) — Standalone Google Places API test harness
+- [supabase/functions/test-user-deduplication/index.ts](supabase/functions/test-user-deduplication/index.ts) — Supabase Edge Function module
+
+## Edge Function Configuration
+
+- [supabase/functions/auth-diagnostics/function.toml](supabase/functions/auth-diagnostics/function.toml) — Supabase function configuration
+- [supabase/functions/business-discovery-background/function.toml](supabase/functions/business-discovery-background/function.toml) — Supabase function configuration
+- [supabase/functions/business-discovery-optimized/function.toml](supabase/functions/business-discovery-optimized/function.toml) — Supabase function configuration
+- [supabase/functions/business-discovery-user-aware/function.toml](supabase/functions/business-discovery-user-aware/function.toml) — Supabase function configuration
+- [supabase/functions/campaign-export-user-aware/function.toml](supabase/functions/campaign-export-user-aware/function.toml) — Supabase function configuration
+- [supabase/functions/campaign-export/function.toml](supabase/functions/campaign-export/function.toml) — Supabase function configuration
+- [supabase/functions/enrichment-hunter/function.toml](supabase/functions/enrichment-hunter/function.toml) — Supabase function configuration
+- [supabase/functions/enrichment-neverbounce/function.toml](supabase/functions/enrichment-neverbounce/function.toml) — Supabase function configuration
+- [supabase/functions/enrichment-orchestrator/function.toml](supabase/functions/enrichment-orchestrator/function.toml) — Supabase function configuration
+- [supabase/functions/test-google-places/function.toml](supabase/functions/test-google-places/function.toml) — Supabase function configuration
+- [supabase/functions/test-user-deduplication/function.toml](supabase/functions/test-user-deduplication/function.toml) — Supabase function configuration
 
 ## Shared Edge Utilities
 

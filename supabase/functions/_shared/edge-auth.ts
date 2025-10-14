@@ -194,7 +194,6 @@ export async function authenticateRequest(
 ): Promise<AuthenticatedRequestContext> {
   const diagnostics: AuthDiagnostics = { envSources: {}, tokenPreview: null };
   let debugStage = "resolve_env";
-  let usedServiceFallback = false;
 
   try {
     const {
@@ -239,77 +238,32 @@ export async function authenticateRequest(
       global: { headers: { Authorization: `Bearer ${accessToken}` } },
     });
 
-    // First attempt: rely on anon client with forwarded Authorization header
-    debugStage = "verify_user_forwarded";
-    const { data: forwardedData, error: forwardedError } =
-      await supabaseClient.auth.getUser();
+    debugStage = "create_service_client";
+    const serviceClient = createClient(supabaseUrl, serviceRoleKey, {
+      auth: {
+        persistSession: false,
+        autoRefreshToken: false,
+        detectSessionInUrl: false,
+      },
+    });
 
-    let user = forwardedData?.user ?? null;
+    debugStage = "verify_user_service";
+    const { data: serviceData, error: serviceError } =
+      await serviceClient.auth.getUser(accessToken);
 
-    if (!user) {
-      if (forwardedError) {
-        console.warn("⚠️ auth.getUser (forwarded) failed", {
-          message: forwardedError.message,
-          status: (forwardedError as { status?: number }).status ?? null,
-        });
-      } else {
-        console.warn("⚠️ auth.getUser (forwarded) returned no user");
-      }
-
-      debugStage = "create_admin_client";
-      const serviceClient = createClient(supabaseUrl, serviceRoleKey, {
-        auth: {
-          persistSession: false,
-          autoRefreshToken: false,
-          detectSessionInUrl: false,
-        },
+    if (serviceError || !serviceData?.user) {
+      const serviceMessage =
+        serviceError?.message ?? "Authentication failed: user not found";
+      diagnostics.failureReason = serviceError
+        ? "service_lookup_failed"
+        : "user_not_found";
+      console.error("❌ auth.getUser (service) failed", {
+        message: serviceMessage,
+        status: serviceError?.status,
       });
-
-      usedServiceFallback = true;
-
-      const tokenSub =
-        typeof tokenClaims.sub === "string" ? tokenClaims.sub : null;
-
-      if (tokenSub) {
-        debugStage = "verify_user_admin";
-        const { data: adminData, error: adminError } =
-          await serviceClient.auth.admin.getUserById(tokenSub);
-
-        if (adminError || !adminData?.user) {
-          const adminMessage =
-            adminError?.message ?? "Authentication failed: user not found";
-          diagnostics.failureReason = adminError
-            ? "admin_lookup_failed"
-            : "user_not_found";
-          console.error("❌ auth.admin.getUserById failed", {
-            message: adminMessage,
-            status: adminError?.status,
-          });
-          throw new Error(formatAuthError(debugStage, adminMessage));
-        }
-
-        user = adminData.user;
-      } else {
-        debugStage = "verify_user_service";
-        const { data: serviceData, error: serviceError } =
-          await serviceClient.auth.getUser(accessToken);
-
-        if (serviceError || !serviceData?.user) {
-          const serviceMessage =
-            serviceError?.message ?? "Authentication failed: user not found";
-          diagnostics.failureReason = serviceError
-            ? "service_lookup_failed"
-            : "user_not_found";
-          console.error("❌ auth.getUser (service) failed", {
-            message: serviceMessage,
-            status: serviceError?.status,
-          });
-          throw new Error(formatAuthError(debugStage, serviceMessage));
-        }
-
-        user = serviceData.user;
-      }
+      throw new Error(formatAuthError(debugStage, serviceMessage));
     }
+    const user = serviceData.user;
 
     debugStage = "finalize";
     const sessionId =
@@ -340,7 +294,6 @@ export async function authenticateRequest(
       hasAuthHeader: diagnostics.hasAuthHeader,
       authorizationHeaderLength: diagnostics.authorizationHeaderLength,
       failureReason: diagnostics.failureReason,
-      usedServiceFallback,
       error: error instanceof Error ? error.message : String(error),
     });
 
@@ -356,7 +309,6 @@ export async function authenticateRequest(
           hasAuthHeader?: boolean;
           authorizationHeaderLength?: number;
           failureReason?: string;
-          usedServiceFallback: boolean;
           claimKeys?: string[];
           hasSubClaim?: boolean;
           hasSessionIdClaim?: boolean;
@@ -369,7 +321,6 @@ export async function authenticateRequest(
       hasAuthHeader: diagnostics.hasAuthHeader,
       authorizationHeaderLength: diagnostics.authorizationHeaderLength,
       failureReason: diagnostics.failureReason,
-      usedServiceFallback,
       claimKeys: diagnostics.claimKeys,
       hasSubClaim: diagnostics.hasSubClaim,
       hasSessionIdClaim: diagnostics.hasSessionIdClaim,
