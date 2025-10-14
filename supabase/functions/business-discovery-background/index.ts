@@ -2675,10 +2675,19 @@ serve(async (req) => {
       );
     }
 
-    const supabaseClient = authContext.supabaseClient;
-    const supabaseUrl = authContext.supabaseUrl;
-    const supabaseServiceKey = authContext.supabaseServiceRoleKey;
-    const { user } = authContext;
+    const {
+      supabaseUrl,
+      supabaseServiceRoleKey: supabaseServiceKey,
+      user,
+    } = authContext;
+
+    const adminClient = createClient(supabaseUrl, supabaseServiceKey, {
+      auth: {
+        persistSession: false,
+        autoRefreshToken: false,
+        detectSessionInUrl: false,
+      },
+    });
 
     console.log(
       `🔐 Authenticated Supabase session for ${authContext.userId} (${
@@ -2765,12 +2774,14 @@ serve(async (req) => {
     // Generate structured campaign ID using database function
     let campaignId: string;
     try {
-      const { data: generatedName, error: nameError } =
-        await supabaseClient.rpc("generate_campaign_name", {
+      const { data: generatedName, error: nameError } = await adminClient.rpc(
+        "generate_campaign_name",
+        {
           business_type: businessType,
           location: location,
           user_id: user?.id || null,
-        });
+        }
+      );
 
       if (nameError) {
         console.warn(
@@ -2857,7 +2868,7 @@ serve(async (req) => {
       requestSnapshot,
     };
 
-    const { error: jobError } = await supabaseClient
+    const { error: jobError } = await adminClient
       .from("discovery_jobs")
       .insert({
         id: jobId,
