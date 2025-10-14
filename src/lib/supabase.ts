@@ -30,6 +30,13 @@ export const SUPABASE_ANON_TOKEN = supabaseAnonKey;
 // Helper function to get current session token for Edge Function calls
 const SESSION_EXPIRY_BUFFER_SECONDS = 30;
 
+const stripBearerPrefix = (value: string | null | undefined): string | null => {
+  if (typeof value !== "string") {
+    return value ?? null;
+  }
+  return value.replace(/^Bearer\s+/i, "").trim();
+};
+
 const isSessionExpiring = (expiresAt?: number | null): boolean => {
   if (!expiresAt) {
     return false;
@@ -56,7 +63,7 @@ export const getSessionToken = async (): Promise<string | null> => {
     session = refreshResult.data.session ?? session;
   }
 
-  return session?.access_token ?? null;
+  return stripBearerPrefix(session?.access_token) ?? null;
 };
 
 // Helper function to ensure we have a valid session
@@ -213,12 +220,18 @@ export async function invokeWithSession<T = unknown>(
     explicitToken?: string | null
   ): Promise<string> => {
     if (typeof explicitToken === "string" && explicitToken.trim().length > 0) {
-      return explicitToken.trim();
+      const sanitizedExplicit = stripBearerPrefix(explicitToken);
+      if (sanitizedExplicit) {
+        return sanitizedExplicit;
+      }
     }
 
     const sessionToken = await getSessionToken();
     if (typeof sessionToken === "string" && sessionToken.trim().length > 0) {
-      return sessionToken.trim();
+      const sanitizedSession = stripBearerPrefix(sessionToken);
+      if (sanitizedSession) {
+        return sanitizedSession;
+      }
     }
 
     throw new Error("Unable to determine Supabase session. Please sign in.");
@@ -245,7 +258,7 @@ export async function invokeWithSession<T = unknown>(
 
     const headerBag = new Headers(options.headers ?? {});
     headerBag.set("apikey", SUPABASE_ANON_TOKEN);
-    headerBag.set("Authorization", `Bearer ${accessToken}`);
+  headerBag.set("Authorization", `Bearer ${accessToken}`);
 
     const invokeResult = await supabase.functions.invoke<T>(functionName, {
       body,

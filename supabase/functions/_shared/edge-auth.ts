@@ -129,7 +129,8 @@ export function extractBearerToken(rawValue: string | null): string | null {
   if (!trimmed) return null;
   const match = /^Bearer\s+(.+)$/i.exec(trimmed);
   if (match) {
-    return match[1]?.trim() || null;
+    const value = match[1]?.trim() ?? "";
+    return value.replace(/^Bearer\s+/i, "").trim() || null;
   }
   return null;
 }
