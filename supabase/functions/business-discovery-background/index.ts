@@ -993,7 +993,14 @@ function normalizeIdentifierValue(raw: string): string {
   if (!raw) return "";
   try {
     if (typeof globalThis.btoa === "function") {
-      return globalThis.btoa(raw).replace(/[^A-Za-z0-9]/g, "");
+      const bytes = new TextEncoder().encode(raw);
+      let binary = "";
+      const chunkSize = 0x8000; // Avoid call stack overflow on large strings
+      for (let index = 0; index < bytes.length; index += chunkSize) {
+        const slice = bytes.subarray(index, index + chunkSize);
+        binary += String.fromCharCode(...slice);
+      }
+      return globalThis.btoa(binary).replace(/[^A-Za-z0-9]/g, "");
     }
   } catch (error) {
     console.warn("Identifier encoding failed", error);
