@@ -346,10 +346,7 @@ export const useBusinessDiscovery = (
         const { data: rawResponse, error: invokeError } =
           await invokeWithSession<BackgroundDiscoveryInvokeResponse>(
             "business-discovery-background",
-            requestBody,
-            {
-              token: accessToken,
-            }
+            requestBody
           );
 
         const invokeContext = (invokeError as any)?.context;
@@ -415,10 +412,7 @@ export const useBusinessDiscovery = (
           const { data: legacyPayload, error: legacyError } =
             await invokeWithSession<LegacyDiscoveryRaw>(
               "business-discovery-user-aware",
-              legacyRequestBody,
-              {
-                token: accessToken,
-              }
+              legacyRequestBody
             );
 
           if (legacyError) {

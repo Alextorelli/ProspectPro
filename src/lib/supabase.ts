@@ -1,5 +1,4 @@
 import {
-  FunctionsFetchError,
   FunctionsHttpError,
   FunctionsRelayError,
 } from "@supabase/functions-js";
@@ -179,7 +178,7 @@ export async function invokeWithSession<T = unknown>(
     token?: string | null;
     headers?: Record<string, string>;
   } = {}
-) {
+): Promise<EdgeInvokeResult<T>> {
   const logEdgeAuthFailure = (
     stage: string,
     details: { functionName: string; payload: unknown }
@@ -210,97 +209,62 @@ export async function invokeWithSession<T = unknown>(
     }
   };
 
-  const executeInvoke = async (
-    accessToken: string
-  ): Promise<EdgeInvokeResult<T>> => {
-    const headers = new Headers(options.headers ?? {});
-    headers.set("apikey", SUPABASE_ANON_TOKEN);
-    headers.set("Authorization", `Bearer ${accessToken.trim()}`);
+  const executeInvoke = async (): Promise<EdgeInvokeResult<T>> => {
+    const invokeResult = await supabase.functions.invoke<T>(functionName, {
+      body,
+      headers: options.headers,
+    });
 
-    let requestBody: BodyInit | undefined;
-    if (typeof body !== "undefined") {
-      if (!headers.has("Content-Type")) {
-        headers.set("Content-Type", "application/json");
-      }
-      requestBody = JSON.stringify(body);
+    if (!invokeResult.error) {
+      return {
+        data: (invokeResult.data ?? null) as T | null,
+        error: null,
+        response: undefined,
+      };
     }
 
-    try {
-      const response = await fetch(`${EDGE_FUNCTIONS_URL}/${functionName}`, {
-        method: "POST",
-        headers,
-        body: requestBody,
-      });
+    const error = invokeResult.error;
 
-      const relayFlag = response.headers.get("x-relay-error");
-      if (relayFlag && relayFlag === "true") {
-        const relayError = new FunctionsRelayError(response);
-        return {
-          data: null,
-          error: relayError,
-          response: relayError.context,
-        };
+    if (error instanceof FunctionsRelayError) {
+      return {
+        data: null,
+        error,
+        response: error.context,
+      };
+    }
+
+    if (error instanceof FunctionsHttpError && error.context) {
+      const payload = await parseErrorPayload(error.context.clone());
+      if (payload) {
+        try {
+          (error as Error & { payload?: unknown }).payload = payload;
+        } catch (_assignError) {
+          // Ignore assignment issues when error object is frozen
+        }
       }
 
-      if (!response.ok) {
-        const httpError = new FunctionsHttpError(response);
-        const payload = await parseErrorPayload(response);
-        if (payload) {
-          try {
-            (httpError as Error & { payload?: unknown }).payload = payload;
-          } catch (_assignError) {
-            // Ignore assignment issues (readonly error), payload logged below
-          }
-        }
-
-        if (response.status === 401) {
-          logEdgeAuthFailure("http", {
-            functionName,
-            payload,
-          });
-        }
-
-        return {
-          data: null,
-          error: httpError,
-          response: httpError.context,
-        };
-      }
-
-      const contentType =
-        response.headers.get("Content-Type")?.split(";")[0].trim() ??
-        "text/plain";
-
-      let data: unknown;
-      if (contentType === "application/json") {
-        data = await response.json();
-      } else if (contentType === "application/octet-stream") {
-        data = await response.blob();
-      } else if (contentType === "text/event-stream") {
-        data = response;
-      } else if (contentType === "multipart/form-data") {
-        data = await response.formData();
-      } else {
-        data = await response.text();
+      if (error.context.status === 401) {
+        logEdgeAuthFailure("http", {
+          functionName,
+          payload: (error as Error & { payload?: unknown }).payload ?? payload,
+        });
       }
 
       return {
-        data: data as T,
-        error: null,
-        response,
+        data: null,
+        error,
+        response: error.context,
       };
-    } catch (error) {
-      const fetchError = new FunctionsFetchError(error);
-      return { data: null, error: fetchError, response: undefined };
     }
+
+    return {
+      data: null,
+      error,
+      response: undefined,
+    };
   };
 
-  const initialToken = options.token ?? (await getSessionToken());
-  if (!initialToken) {
-    throw new Error("Unable to determine Supabase session. Please sign in.");
-  }
-
-  let result = await executeInvoke(initialToken);
+  let result = await executeInvoke();
 
   const isAuthError =
     result.error instanceof FunctionsHttpError &&
@@ -311,11 +275,11 @@ export async function invokeWithSession<T = unknown>(
       functionName,
       payload: (result.error as Error & { payload?: unknown }).payload,
     });
-    const refreshed = await supabase.auth.refreshSession();
-    const refreshedToken = refreshed.data.session?.access_token ?? null;
 
-    if (!refreshed.error && refreshedToken && refreshedToken !== initialToken) {
-      result = await executeInvoke(refreshedToken);
+    const refreshed = await supabase.auth.refreshSession();
+
+    if (!refreshed.error && refreshed.data.session?.access_token) {
+      result = await executeInvoke();
     }
   }
 
