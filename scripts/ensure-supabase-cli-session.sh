@@ -30,7 +30,7 @@ check_supabase_login() {
   echo "⚠️ Supabase CLI session not authenticated."
   echo "👇 Triggering login flow. Share the device code + URL below with Alex so the session can be approved in the browser."
   echo "---- Supabase CLI Login Prompt ----"
-  npx --yes supabase@latest login
+  npx --yes supabase@latest login --no-browser
   echo "-----------------------------------"
 
   if npx --yes supabase@latest projects list --output json >/dev/null 2>&1; then
@@ -49,4 +49,17 @@ if ! command -v npx >/dev/null 2>&1; then
   return 1
 fi
 
-check_supabase_login
+token_authenticated="false"
+
+if [[ -n "${SUPABASE_ACCESS_TOKEN:-}" ]]; then
+  if npx --yes supabase@latest projects list --output json >/dev/null 2>&1; then
+    echo "✅ Supabase CLI session authenticated via SUPABASE_ACCESS_TOKEN."
+    token_authenticated="true"
+  else
+    echo "⚠️ SUPABASE_ACCESS_TOKEN present but authentication failed. Falling back to interactive login."
+  fi
+fi
+
+if [[ "$token_authenticated" != "true" ]]; then
+  check_supabase_login
+fi
