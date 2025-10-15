@@ -26,6 +26,63 @@ SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 # shellcheck source=/workspaces/ProspectPro/scripts/lib/supabase_cli_helpers.sh
 source "$SCRIPT_DIR/lib/supabase_cli_helpers.sh"
 
+usage() {
+  cat <<'EOF'
+Usage: diagnose-campaign-failure.sh [mode]
+
+Modes:
+  business-discovery   Analyze Supabase logs for discovery functions (24h window)
+  enrichment           Analyze Supabase logs for enrichment functions (24h window)
+  export               Analyze Supabase logs for export functions (24h window)
+  --help               Show this message
+
+Run without arguments to execute the full campaign diagnostic flow.
+EOF
+}
+
+analyze_function_logs() {
+  local fn="$1"
+  local hours="${2:-24}"
+  supabase_setup || return 1
+  local sanitized_fn
+  sanitized_fn=$(printf '%s' "$fn" | tr '/' '_')
+  local log_file="/tmp/${sanitized_fn}_logs.txt"
+
+  echo "📊 Analyzing logs for $fn (last ${hours}h)"
+  if ! prospectpro_supabase_cli functions logs "$fn" --since="${hours}h" | tee "$log_file"; then
+    echo "⚠️  Unable to stream logs with Supabase CLI; collect logs via Supabase dashboard." >&2
+    return 1
+  fi
+
+  echo "🔍 Error patterns:"
+  if ! grep -Ei '(error|timeout|429|500|503)' "$log_file" | cut -d' ' -f4- | sort | uniq -c | sort -nr | head -20; then
+    echo "No error signatures detected in captured window."
+  fi
+  echo "Logs saved to $log_file"
+}
+
+case "${1:-}" in
+  --help|-h)
+    usage
+    exit 0
+    ;;
+  business-discovery)
+    analyze_function_logs "business-discovery-background" 24
+    analyze_function_logs "business-discovery-optimized" 24
+    exit 0
+    ;;
+  enrichment)
+    analyze_function_logs "enrichment-orchestrator" 24
+    analyze_function_logs "enrichment-hunter" 24
+    analyze_function_logs "enrichment-neverbounce" 24
+    exit 0
+    ;;
+  export)
+    analyze_function_logs "campaign-export-user-aware" 24
+    exit 0
+    ;;
+esac
+
 echo "🔍 ProspectPro Campaign Failure Diagnostic"
 echo "=========================================="
 echo ""

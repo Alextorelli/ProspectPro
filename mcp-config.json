@@ -118,7 +118,12 @@
             "compare auth patterns": "./scripts/test-auth-patterns.sh \"$SUPABASE_SESSION_JWT\"",
             "rebuild frontend": "npm install && npm run build",
             "verify repo root": "git rev-parse --show-toplevel && pwd",
-            "pull vercel env": "vercel env pull .env.vercel"
+            "pull vercel env": "vercel env pull .env.vercel",
+            "run supabase db tests": "npm run supabase:test:db",
+            "run supabase function tests": "npm run supabase:test:functions",
+            "diagnose discovery logs": "./scripts/diagnose-campaign-failure.sh business-discovery",
+            "diagnose enrichment logs": "./scripts/diagnose-campaign-failure.sh enrichment",
+            "function report discovery": "source scripts/ensure-supabase-cli-session.sh && source scripts/lib/supabase_cli_helpers.sh && get_function_report business-discovery-background"
         }
     },
     "userAwareFeatures": {

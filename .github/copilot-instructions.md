@@ -340,6 +340,7 @@ supabase functions list
 - Always run `cd /workspaces/ProspectPro/supabase &&` before any Supabase CLI command.
 - Invoke the CLI with `npx --yes supabase@latest <command>`; no global binary is installed.
 - Ensure `source scripts/ensure-supabase-cli-session.sh` has run in the current shell.
+- Prefer helper wrappers in `scripts/lib/supabase_cli_helpers.sh`—they auto-link the project and run commands inside `/supabase`.
 
 ### Verified Working Commands
 ```bash
@@ -356,7 +357,16 @@ cd /workspaces/ProspectPro/supabase && npx --yes supabase@latest db pull --schem
 
 # Type generation
 cd /workspaces/ProspectPro/supabase && npx --yes supabase@latest gen types --lang typescript
+# Edge function logs (24h window)
+cd /workspaces/ProspectPro/supabase && npx --yes supabase@latest functions logs business-discovery-background --since=24h
 ````
+
+### Testing & Logging Routines
+
+- Run database regression suite: `npm run supabase:test:db` (pgTAP tests in `supabase/tests/database`).
+- Execute local Edge Function tests: `npm run supabase:test:functions` (Deno suite auto-starts `supabase functions serve`).
+- Full diagnostics: `./scripts/edge-function-diagnostics.sh [SESSION_JWT]` (production health check + local tests).
+- Log summarisation: `./scripts/diagnose-campaign-failure.sh {business-discovery|enrichment|export}` plus `get_function_report <slug>` for SQL summaries.
 
 ### Official Supabase CLI References
 
@@ -368,10 +378,11 @@ cd /workspaces/ProspectPro/supabase && npx --yes supabase@latest gen types --lan
 
 1. `source scripts/ensure-supabase-cli-session.sh` to refresh Supabase auth before every CLI task.
 2. Use `npm run edge:serve -- <function-slug>` for local Deno execution with live reload; stop with `Ctrl+C` once testing finishes.
-3. Validate against Supabase by running `npm run edge:deploy:test -- <function-slug>` which calls `supabase functions deploy <slug> --no-verify-jwt` for staging-style checks.
-4. Ship to production with `npm run edge:deploy -- <function-slug>` after verifying logs via `npm run edge:logs -- <function-slug>` for at least one invocation cycle.
-5. Regenerate documentation with `npm run docs:update` so `docs/technical/SYSTEM_REFERENCE.md` reflects the new function state.
-6. Confirm the frontend still communicates correctly by running the relevant curl probes from `docs/edge-auth-testing.md` using a fresh `SUPABASE_SESSION_JWT`.
+3. Run the automated checks with `npm run supabase:test:functions` (spawns a local serve instance if needed).
+4. Validate against Supabase by running `npm run edge:deploy:test -- <function-slug>` which calls `supabase functions deploy <slug> --no-verify-jwt` for staging-style checks.
+5. Ship to production with `npm run edge:deploy -- <function-slug>` after verifying logs via `npm run edge:logs -- <function-slug>` for at least one invocation cycle.
+6. Regenerate documentation with `npm run docs:update` so `docs/technical/SYSTEM_REFERENCE.md` reflects the new function state.
+7. Confirm the frontend still communicates correctly by running the relevant curl probes from `docs/edge-auth-testing.md` using a fresh `SUPABASE_SESSION_JWT`.
 
 ### Known Issues to Avoid
 
@@ -444,7 +455,7 @@ When Alex asks about:
 - **"Cost optimization"** → Static hosting + serverless functions (90% cost reduction)
 - **"Quality scoring"** → Integrated into Edge Functions
 - **"Export functionality"** → `campaign-export-user-aware` Edge Function
-- **"Testing"** → Direct Edge Function testing via Supabase dashboard
+- **"Testing"** → Supabase CLI test suite (`npm run supabase:test:db`, `npm run supabase:test:functions`) plus dashboard validation
 - **"User authentication"** → Supabase Auth with JWT tokens and session management
 - **"Campaign ownership"** → User-aware RLS policies with user_id and session_user_id
 - **"Data isolation"** → Database-level access control via RLS policies
@@ -514,7 +525,7 @@ CODEBASE_INDEX.md # Auto-generated #codebase index
 
 ```bash
 # Deploy production edge functions
-cd /workspaces/ProspectPro/supabase && npx --yes supabase@latest functions deploy business-discovery-background
+cd /workspaces/ProspectPro/supabase && npx --yes supabase@latest functions deploy business-discovery-background --no-verify-jwt
 cd /workspaces/ProspectPro/supabase && npx --yes supabase@latest functions deploy business-discovery-optimized
 cd /workspaces/ProspectPro/supabase && npx --yes supabase@latest functions deploy business-discovery-user-aware
 cd /workspaces/ProspectPro/supabase && npx --yes supabase@latest functions deploy campaign-export-user-aware
@@ -528,7 +539,11 @@ vercel --prod
 npm run codebase:index
 
 # Stream background-discovery logs
-cd /workspaces/ProspectPro/supabase && npx --yes supabase@latest functions logs --project-ref sriycekxdqnesdsgwiuc --slug business-discovery-background --follow
+cd /workspaces/ProspectPro/supabase && npx --yes supabase@latest functions logs business-discovery-background --since=24h --follow
+
+# Supabase automated tests
+npm run supabase:test:db
+npm run supabase:test:functions
 
 # Database setup: run SQL directly in the Supabase dashboard
 ````

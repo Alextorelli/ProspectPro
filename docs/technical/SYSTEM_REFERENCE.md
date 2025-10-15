@@ -149,6 +149,16 @@ const user = await authenticateRequest(request);
 // Enforces session JWT + RLS policies
 ```
 
+## Testing & Diagnostics
+
+- **Database Tests**: `supabase/tests/database/core_schema.test.sql` (pgTAP) validates billing tables, RLS, and performance indexes.
+- **Edge Function Tests**: `supabase/functions/tests/business-discovery.test.ts` (Deno) confirms background discovery responses and auth enforcement for enrichment orchestrator.
+- **Automation Hooks**:
+  - Run database suite: `npm run supabase:test:db` or `run_database_tests` from `scripts/lib/supabase_cli_helpers.sh`.
+  - Execute local function tests: `npm run supabase:test:functions` (starts local serve inside `edge-function-diagnostics.sh`).
+- **Log Summaries**: `scripts/diagnose-campaign-failure.sh {business-discovery|enrichment|export}` captures CLI logs and surfaces frequent error signatures. Use `get_function_report <slug>` for SQL summaries plus recent CLI output.
+- **Diagnostics Script**: `scripts/edge-function-diagnostics.sh` now bootstraps Supabase auth, launches a local serve instance if needed, executes the Deno test suite, and reports production endpoint health.
+
 ## Maintenance Commands
 
 ### Keep System Reference Current
@@ -172,11 +182,13 @@ source scripts/ensure-supabase-cli-session.sh
 
 # 2. Deploy all core functions
 cd /workspaces/ProspectPro/supabase && \
-npx --yes supabase@latest functions deploy business-discovery-background && \
+npx --yes supabase@latest functions deploy business-discovery-background --no-verify-jwt && \
 npx --yes supabase@latest functions deploy enrichment-orchestrator && \
 npx --yes supabase@latest functions deploy campaign-export-user-aware
 
 # 3. Test core functionality
+source scripts/lib/supabase_cli_helpers.sh && run_database_tests
+npm run supabase:test:functions
 ./scripts/test-auth-patterns.sh "$SUPABASE_SESSION_JWT"
 ./scripts/campaign-validation.sh
 

@@ -14,6 +14,10 @@ readonly _PROSPECTPRO_SUPABASE_CLI_HELPERS_SOURCED=1
 
 PROSPECTPRO_REPO_ROOT=${PROSPECTPRO_REPO_ROOT:-/workspaces/ProspectPro}
 DEFAULT_SUPABASE_PROJECT_REF=${SUPABASE_PROJECT_REF:-sriycekxdqnesdsgwiuc}
+SUPABASE_DIR=${SUPABASE_DIR:-${PROSPECTPRO_REPO_ROOT}/supabase}
+
+# Guard variables to prevent recursive setup when the auth helper shells out
+: "${PROSPECTPRO_SUPABASE_SUPPRESS_SETUP:=0}"
 
 pp_fail() {
   local exit_code=${1:-1}
@@ -54,6 +58,9 @@ _pp_cli_supports_project_ref() {
 
 _pp_invoke_supabase_cli() {
   pp_require_npx || return 1
+  if [[ "${PROSPECTPRO_SUPABASE_SUPPRESS_SETUP:-0}" != "1" ]]; then
+    supabase_setup || return 1
+  fi
   local top_level="$1"
   shift
   local args=("$@")
@@ -72,7 +79,10 @@ _pp_invoke_supabase_cli() {
       fi
     fi
   fi
-  npx --yes supabase@latest "$top_level" "${args[@]}"
+  (
+    cd "$SUPABASE_DIR" || return 1
+    npx --yes supabase@latest "$top_level" "${args[@]}"
+  )
 }
 
 prospectpro_supabase_cli() {
@@ -92,15 +102,31 @@ pp_run_supabase_cli() {
 }
 
 supabase_setup() {
-  local target="${PROSPECTPRO_REPO_ROOT}/supabase"
-  if [[ ! -d "$target" ]]; then
-    pp_fail 1 "❌ Supabase directory not found at $target"
+  pp_require_repo_root || return 1
+  if [[ ! -d "$SUPABASE_DIR" ]]; then
+    pp_fail 1 "❌ Supabase directory not found at $SUPABASE_DIR"
   fi
-  if [[ "$PWD" != "$target" ]]; then
-    cd "$target" || return 1
+
+  if [[ "${PROSPECTPRO_SUPABASE_SESSION_READY:-0}" != "1" ]]; then
+    local _prev_guard="${PROSPECTPRO_SUPABASE_SUPPRESS_SETUP:-0}"
+    export PROSPECTPRO_SUPABASE_SUPPRESS_SETUP=1
+    # shellcheck source=/workspaces/ProspectPro/scripts/ensure-supabase-cli-session.sh
+    source "$PROSPECTPRO_REPO_ROOT/scripts/ensure-supabase-cli-session.sh" || return 1
+    export PROSPECTPRO_SUPABASE_SUPPRESS_SETUP="$_prev_guard"
+    PROSPECTPRO_SUPABASE_SESSION_READY=1
   fi
-  # shellcheck source=/workspaces/ProspectPro/scripts/ensure-supabase-cli-session.sh
-  source ../scripts/ensure-supabase-cli-session.sh
+
+  local project_ref="${SUPABASE_PROJECT_REF:-$DEFAULT_SUPABASE_PROJECT_REF}"
+  local config_file="$SUPABASE_DIR/.supabase/config.toml"
+  if [[ ! -f "$config_file" ]] || ! grep -q "ref *= *\"$project_ref\"" "$config_file"; then
+    local _prev_guard="${PROSPECTPRO_SUPABASE_SUPPRESS_SETUP:-0}"
+    export PROSPECTPRO_SUPABASE_SUPPRESS_SETUP=1
+    (
+      cd "$SUPABASE_DIR" || return 1
+      npx --yes supabase@latest link --project-ref "$project_ref" >/dev/null
+    ) || return 1
+    export PROSPECTPRO_SUPABASE_SUPPRESS_SETUP="$_prev_guard"
+  fi
 }
 
 # Database & migration workflows ------------------------------------------
@@ -229,6 +255,35 @@ edge_functions_dev_workflow() {
   edge_functions_serve "$@" || return 1
 }
 
+run_database_tests() {
+  supabase_setup || return 1
+  prospectpro_supabase_cli test db "$@"
+}
+
+get_function_report() {
+  if [[ -z "${1:-}" ]]; then
+    pp_fail 1 "❌ get_function_report requires a function name."
+  fi
+  local function_name="$1"
+  local hours="${2:-24}"
+  supabase_setup || return 1
+
+  echo "📊 Function Report: $function_name (${hours}h)"
+  local sql_file
+  sql_file=$(mktemp /tmp/function-report.XXXXXX.sql)
+  cat >"$sql_file" <<EOF
+SELECT public.get_function_summary('$function_name', $hours);
+EOF
+  echo "Run in Supabase SQL Editor or psql:" && cat "$sql_file"
+  rm -f "$sql_file"
+
+  echo ""
+  echo "Recent CLI logs:"
+  if ! prospectpro_supabase_cli functions logs "$function_name" --since="${hours}h" | tail -20; then
+    echo "⚠️  Supabase CLI log stream unavailable; capture logs via dashboard."
+  fi
+}
+
 # Export helper symbols ----------------------------------------------------
 
 export -f pp_fail
@@ -254,3 +309,5 @@ export -f edge_functions_deploy_group
 export -f edge_functions_logs
 export -f edge_functions_list
 export -f edge_functions_dev_workflow
+export -f run_database_tests
+export -f get_function_report

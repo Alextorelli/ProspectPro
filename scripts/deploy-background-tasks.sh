@@ -49,16 +49,20 @@ echo "Supabase project: $PROJECT_REF"
 echo "---------------------------------------------"
 
 pp_require_npx
+supabase_setup || exit 1
 
 if ! prospectpro_supabase_cli status >/dev/null 2>&1; then
-  echo "⚠️ Supabase project not linked in this repo. Run: supabase link --project-ref $PROJECT_REF" >&2
-  exit 1
+  echo "⚠️ Unable to confirm Supabase project status via CLI." >&2
 fi
 
 echo "📡 Deploying Edge Functions"
 for fn in "${FUNCTIONS[@]}"; do
   echo "   • $fn"
-  prospectpro_supabase_cli functions deploy "$fn" --project-ref "$PROJECT_REF"
+  if [[ "$fn" == "business-discovery-background" ]]; then
+    prospectpro_supabase_cli functions deploy "$fn" --no-verify-jwt
+  else
+    prospectpro_supabase_cli functions deploy "$fn"
+  fi
 done
 
 echo "✅ Edge function deploys complete"

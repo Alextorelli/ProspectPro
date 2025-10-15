@@ -29,6 +29,21 @@ require_repo_root() {
 
 require_repo_root
 
+SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+# shellcheck source=/workspaces/ProspectPro/scripts/lib/supabase_cli_helpers.sh
+source "$SCRIPT_DIR/lib/supabase_cli_helpers.sh"
+
+SUPABASE_SERVE_PID=""
+
+cleanup_serve() {
+  if [[ -n "$SUPABASE_SERVE_PID" ]] && kill -0 "$SUPABASE_SERVE_PID" >/dev/null 2>&1; then
+    kill "$SUPABASE_SERVE_PID" >/dev/null 2>&1 || true
+    wait "$SUPABASE_SERVE_PID" 2>/dev/null || true
+  fi
+}
+
+trap cleanup_serve EXIT
+
 # Auto-load publishable key when available
 if [ -z "${VITE_SUPABASE_ANON_KEY:-}" ] && [ -f ".env.vercel" ]; then
   set -a && source .env.vercel >/dev/null 2>&1 && set +a || set +a
@@ -105,6 +120,51 @@ inspect_response() {
   fi
 }
 
+ensure_local_supabase() {
+  if curl -s "http://localhost:54321" >/dev/null 2>&1; then
+    return 0
+  fi
+
+  echo "Starting local Supabase Edge Function server (debug mode)..."
+  supabase_setup || return 1
+  (
+    cd "$SUPABASE_DIR" || exit 1
+    npx --yes supabase@latest functions serve --no-verify-jwt --debug >/tmp/prospectpro-functions-serve.log 2>&1
+  ) &
+  SUPABASE_SERVE_PID=$!
+  sleep 5
+
+  if ! curl -s "http://localhost:54321" >/dev/null 2>&1; then
+    echo "❌ Unable to start local Supabase functions server; see /tmp/prospectpro-functions-serve.log" >&2
+    return 1
+  fi
+  echo "✅ Local Supabase functions server ready"
+}
+
+run_function_tests() {
+  print_header "Local Function Tests"
+  if ! command -v deno >/dev/null 2>&1; then
+    echo "❌ Deno CLI not available; install before running local function tests." >&2
+    return 1
+  fi
+
+  ensure_local_supabase || return 1
+
+  local env_flag=()
+  if [[ -f "$PROSPECTPRO_REPO_ROOT/.env.local" ]]; then
+    env_flag=(--env-file ../.env.local)
+  fi
+
+  (
+    cd "$SUPABASE_DIR" || exit 1
+    if ! deno test --allow-all functions/tests/ "${env_flag[@]}"; then
+      echo "❌ Edge Function tests failed" >&2
+      return 1
+    fi
+  )
+  echo "✅ Edge Function tests completed"
+}
+
 print_header "ProspectPro Edge Function Diagnostics"
 echo "Timestamp: $TIMESTAMP"
 echo "Project Ref: $PROJECT_REF"
@@ -135,6 +195,10 @@ for fn in "${FUNCTIONS[@]}"; do
     echo "      ⚠️  Function responded with error payload:" "$body"
   fi
 done
+
+if ! run_function_tests; then
+  echo "⚠️  Local function tests encountered issues; review output above." >&2
+fi
 
 if [ -z "$SESSION_JWT" ]; then
   echo ""

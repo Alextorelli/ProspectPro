@@ -60,6 +60,8 @@
     "supabase:migrations:new": "bash -lc 'cd supabase && source ../scripts/ensure-supabase-cli-session.sh && read -p \"Migration name: \" name && npx --yes supabase@latest migration new \"$name\"'",
     "supabase:status": "bash -lc 'cd supabase && source ../scripts/ensure-supabase-cli-session.sh && npx --yes supabase@latest status'",
     "supabase:types": "bash -lc 'cd supabase && source ../scripts/ensure-supabase-cli-session.sh && npx --yes supabase@latest gen types --lang typescript > ../src/types/supabase.ts'",
+    "supabase:test:db": "bash -lc 'cd supabase && source ../scripts/ensure-supabase-cli-session.sh && npx --yes supabase@latest test db'",
+    "supabase:test:functions": "bash -lc 'cd supabase && source ../scripts/ensure-supabase-cli-session.sh && deno test --allow-all functions/tests/'",
     "supabase:workflow": "npm run supabase:auth && npm run supabase:link && npm run supabase:migrations:list",
     "edge:serve": "bash -lc 'cd supabase && source ../scripts/ensure-supabase-cli-session.sh && npx --yes supabase@latest functions serve --no-verify-jwt --debug'",
     "edge:serve:single": "bash -lc 'cd supabase && source ../scripts/ensure-supabase-cli-session.sh && read -p \"Function name: \" func && npx --yes supabase@latest functions serve \"$func\" --no-verify-jwt --debug'",

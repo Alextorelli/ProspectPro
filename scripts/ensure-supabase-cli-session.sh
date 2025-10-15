@@ -5,11 +5,20 @@
 if [[ -z "${_PP_SUPABASE_CLI_PREV_OPTS_CAPTURED:-}" ]]; then
   _PP_SUPABASE_CLI_PREV_OPTS_CAPTURED=1
   _PP_SUPABASE_CLI_PREV_OPTS=$(set +o)
+  _PP_SUPABASE_PREV_SUPPRESS="${PROSPECTPRO_SUPABASE_SUPPRESS_SETUP-}"
   trap '
     eval "$_PP_SUPABASE_CLI_PREV_OPTS"
+    if [[ -n "${_PP_SUPABASE_PREV_SUPPRESS+x}" ]]; then
+      if [[ -z "$_PP_SUPABASE_PREV_SUPPRESS" ]]; then
+        unset PROSPECTPRO_SUPABASE_SUPPRESS_SETUP
+      else
+        export PROSPECTPRO_SUPABASE_SUPPRESS_SETUP="$_PP_SUPABASE_PREV_SUPPRESS"
+      fi
+    fi
     trap - RETURN
     unset _PP_SUPABASE_CLI_PREV_OPTS_CAPTURED
     unset _PP_SUPABASE_CLI_PREV_OPTS
+    unset _PP_SUPABASE_PREV_SUPPRESS
   ' RETURN
 fi
 
@@ -20,6 +29,8 @@ EXPECTED_REPO_ROOT=${EXPECTED_REPO_ROOT:-/workspaces/ProspectPro}
 SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 # shellcheck source=/workspaces/ProspectPro/scripts/lib/supabase_cli_helpers.sh
 source "$SCRIPT_DIR/lib/supabase_cli_helpers.sh"
+
+export PROSPECTPRO_SUPABASE_SUPPRESS_SETUP=1
 
 require_repo_root() {
   local repo_root
@@ -78,3 +89,6 @@ fi
 if [[ "$token_authenticated" != "true" ]]; then
   check_supabase_login
 fi
+
+PROSPECTPRO_SUPABASE_SESSION_READY=1
+unset PROSPECTPRO_SUPABASE_SUPPRESS_SETUP
