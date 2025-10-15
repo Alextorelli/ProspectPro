@@ -2,7 +2,7 @@
 
 > Primary #codebase reference. Regenerate with `npm run codebase:index` before audits or deployments.
 
-_Last generated: 2025-10-15T21:11:56.840Z_
+_Last generated: 2025-10-15T22:40:31.674Z_
 
 ## Supabase Edge Functions
 
@@ -39,6 +39,8 @@ _Last generated: 2025-10-15T21:11:56.840Z_
 ## Shared Edge Utilities
 
 - [supabase/functions/_shared/api-usage.ts](supabase/functions/_shared/api-usage.ts) — Usage logging helper for third-party API consumption
+- [supabase/functions/_shared/cache-manager.ts](supabase/functions/_shared/cache-manager.ts) — Supabase Edge Function module
+- [supabase/functions/_shared/cobalt-cache.ts](supabase/functions/_shared/cobalt-cache.ts) — Supabase Edge Function module
 - [supabase/functions/_shared/edge-auth-simplified.ts](supabase/functions/_shared/edge-auth-simplified.ts) — Supabase Edge Function module
 - [supabase/functions/_shared/edge-auth.ts](supabase/functions/_shared/edge-auth.ts) — Shared Supabase session validator for edge functions
 - [supabase/functions/_shared/vault-client.ts](supabase/functions/_shared/vault-client.ts) — Supabase Edge Function module
