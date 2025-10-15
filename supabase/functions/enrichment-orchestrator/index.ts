@@ -158,6 +158,76 @@ interface EnrichmentResponse {
   };
 }
 
+interface BusinessLicenseEdgeRecord {
+  source: string;
+  licenseNumber?: string;
+  status?: string;
+  expirationDate?: string;
+  professionalType?: string;
+  issuingAuthority?: string;
+  raw?: Record<string, unknown>;
+}
+
+interface BusinessLicenseEdgeResponse {
+  success: boolean;
+  requestId: string;
+  businessName: string;
+  state?: string;
+  licenseNumber?: string;
+  records?: BusinessLicenseEdgeRecord[];
+  sources?: Array<{
+    provider: string;
+    success: boolean;
+    responseCode: number;
+    records: BusinessLicenseEdgeRecord[];
+    durationMs: number;
+    warnings?: string[];
+    error?: string;
+  }>;
+  durationMs: number;
+  errors?: string[];
+}
+
+interface PeopleDataLabsEdgeCompany {
+  status: number;
+  success: boolean;
+  enriched: boolean;
+  data: Record<string, unknown> | null;
+  warnings?: string[];
+}
+
+interface PeopleDataLabsEdgePerson {
+  status: number;
+  success: boolean;
+  enriched: boolean;
+  data: Record<string, unknown> | null;
+  likelihood?: number;
+  warnings?: string[];
+  matchesReturned?: number;
+}
+
+interface PeopleDataLabsEdgeResponse {
+  success: boolean;
+  requestId: string;
+  lookupType: "company" | "person" | "company_and_person" | "none";
+  company?: PeopleDataLabsEdgeCompany;
+  person?: PeopleDataLabsEdgePerson;
+  durationMs: number;
+  errors?: string[];
+}
+
+const BUSINESS_LICENSE_COST_ESTIMATE = 0.05;
+const PDL_COMPANY_COST_ESTIMATE = 0.05;
+const PDL_PERSON_COST_ESTIMATE = 0.28;
+const DEFAULT_PDL_TITLE_KEYWORDS = [
+  "Owner",
+  "Founder",
+  "Chief Executive Officer",
+  "CEO",
+  "Principal",
+  "Managing Partner",
+];
+
 class EnrichmentOrchestrator {
   private supabaseUrl: string;
   private supabaseAccessToken: string;
@@ -397,6 +467,419 @@ class EnrichmentOrchestrator {
         }
       }
 
+      // State licensing validation (business license datasets + regulators)
+      if (enrichmentConfig.includeBusinessLicense) {
+        if (
+          currentCost + BUSINESS_LICENSE_COST_ESTIMATE <=
+          this.maxCostPerBusiness
+        ) {
+          try {
+            const licenseResult = await this.callBusinessLicense({
+              businessName: request.businessName,
+              state: request.state,
+              licenseNumber: (request as { licenseNumber?: string })
+                ?.licenseNumber,
+              professionalType: request.industry,
+              includeInactive: false,
+            });
+
+            const payload = licenseResult.payload;
+
+            if (
+              payload?.success &&
+              Array.isArray(payload.records) &&
+              payload.records.length > 0
+            ) {
+              const primary = payload.records[0];
+              const status =
+                typeof primary.status === "string" ? primary.status : undefined;
+              const normalizedStatus = status?.toLowerCase();
+              const isValid = normalizedStatus
+                ? !normalizedStatus.includes("inactive") &&
+                  !normalizedStatus.includes("expired") &&
+                  !normalizedStatus.includes("suspended")
+                : Boolean(primary.licenseNumber);
+
+              response.enrichedData.businessLicense = {
+                isValid,
+                licenseNumber: primary.licenseNumber,
+                status,
+                expirationDate: primary.expirationDate,
+                professionalType: primary.professionalType,
+                source: primary.source,
+              };
+
+              response.costBreakdown.businessLicenseCost =
+                BUSINESS_LICENSE_COST_ESTIMATE;
+              currentCost += BUSINESS_LICENSE_COST_ESTIMATE;
+              response.processingMetadata.servicesUsed.push("state_license");
+            } else if (payload?.errors && payload.errors.length > 0) {
+              response.processingMetadata.errors.push({
+                service: "state_license",
+                error: payload.errors.join("; "),
+              });
+            } else {
+              response.processingMetadata.servicesSkipped.push(
+                "state_license (no match)"
+              );
+            }
+          } catch (error) {
+            console.error("State licensing error:", error);
+            response.processingMetadata.errors.push({
+              service: "state_license",
+              error:
+                error instanceof Error
+                  ? error.message
+                  : "State licensing lookup failed",
+            });
+          }
+        } else {
+          response.processingMetadata.servicesSkipped.push(
+            "state_license (budget)"
+          );
+        }
+      }
+
+      // People Data Labs enrichment (company + owner contacts)
+      const includeCompanyEnrichment =
+        enrichmentConfig.includeCompanyEnrichment ?? false;
+      const includePersonEnrichment =
+        enrichmentConfig.includePersonEnrichment ?? false;
+
+      if (includeCompanyEnrichment || includePersonEnrichment) {
+        const pdlBasePayload: Record<string, unknown> = {
+          businessName: request.businessName,
+          domain: request.domain,
+          website: request.website,
+          state: request.state,
+        };
+
+        const titleKeywords = enrichmentConfig.executiveContactsOnly
+          ? ["Owner", "Principal", "Managing Partner"]
+          : DEFAULT_PDL_TITLE_KEYWORDS;
+
+        if (includePersonEnrichment) {
+          pdlBasePayload["search"] = {
+            company: request.businessName,
+            titleKeywords,
+            location: request.state,
+            minimumLikelihood:
+              typeof enrichmentConfig.minConfidenceScore === "number"
+                ? Math.min(
+                    0.95,
+                    Math.max(0.5, enrichmentConfig.minConfidenceScore / 100)
+                  )
+                : undefined,
+          };
+        }
+
+        const pdlCalls: Array<{
+          lookupType: "company" | "person" | "company_and_person";
+          estimate: number;
+          serviceTag: string;
+        }> = [];
+
+        if (includeCompanyEnrichment && includePersonEnrichment) {
+          const combinedEstimate =
+            PDL_COMPANY_COST_ESTIMATE + PDL_PERSON_COST_ESTIMATE;
+          if (currentCost + combinedEstimate <= this.maxCostPerBusiness) {
+            pdlCalls.push({
+              lookupType: "company_and_person",
+              estimate: combinedEstimate,
+              serviceTag: "people_data_labs_company_and_person",
+            });
+          } else {
+            if (
+              currentCost + PDL_COMPANY_COST_ESTIMATE <=
+              this.maxCostPerBusiness
+            ) {
+              pdlCalls.push({
+                lookupType: "company",
+                estimate: PDL_COMPANY_COST_ESTIMATE,
+                serviceTag: "people_data_labs_company",
+              });
+            } else {
+              response.processingMetadata.servicesSkipped.push(
+                "people_data_labs_company (budget)"
+              );
+            }
+
+            if (
+              currentCost + PDL_PERSON_COST_ESTIMATE <=
+              this.maxCostPerBusiness
+            ) {
+              pdlCalls.push({
+                lookupType: "person",
+                estimate: PDL_PERSON_COST_ESTIMATE,
+                serviceTag: "people_data_labs_person",
+              });
+            } else {
+              response.processingMetadata.servicesSkipped.push(
+                "people_data_labs_person (budget)"
+              );
+            }
+          }
+        } else if (includeCompanyEnrichment) {
+          if (
+            currentCost + PDL_COMPANY_COST_ESTIMATE <=
+            this.maxCostPerBusiness
+          ) {
+            pdlCalls.push({
+              lookupType: "company",
+              estimate: PDL_COMPANY_COST_ESTIMATE,
+              serviceTag: "people_data_labs_company",
+            });
+          } else {
+            response.processingMetadata.servicesSkipped.push(
+              "people_data_labs_company (budget)"
+            );
+          }
+        } else if (includePersonEnrichment) {
+          if (
+            currentCost + PDL_PERSON_COST_ESTIMATE <=
+            this.maxCostPerBusiness
+          ) {
+            pdlCalls.push({
+              lookupType: "person",
+              estimate: PDL_PERSON_COST_ESTIMATE,
+              serviceTag: "people_data_labs_person",
+            });
+          } else {
+            response.processingMetadata.servicesSkipped.push(
+              "people_data_labs_person (budget)"
+            );
+          }
+        }
+
+        for (const call of pdlCalls) {
+          try {
+            const payload = {
+              ...pdlBasePayload,
+              lookupType: call.lookupType,
+            };
+
+            const pdlResult = await this.callPeopleDataLabs(payload);
+            const responsePayload = pdlResult.payload;
+
+            if (!responsePayload) {
+              response.processingMetadata.errors.push({
+                service: call.serviceTag,
+                error: "People Data Labs response was empty",
+              });
+              continue;
+            }
+
+            const companyEnriched = Boolean(
+              responsePayload.company?.enriched && responsePayload.company.data
+            );
+            const personEnriched = Boolean(
+              responsePayload.person?.enriched && responsePayload.person.data
+            );
+
+            const appliedCompanyCost = companyEnriched
+              ? PDL_COMPANY_COST_ESTIMATE
+              : 0;
+            const appliedPersonCost = personEnriched
+              ? PDL_PERSON_COST_ESTIMATE
+              : 0;
+            const totalAppliedCost = appliedCompanyCost + appliedPersonCost;
+
+            if (companyEnriched && responsePayload.company?.data) {
+              const companyData = responsePayload.company.data;
+              const industry = (() => {
+                const value = companyData["industry"];
+                if (typeof value === "string") return value;
+                if (Array.isArray(value) && typeof value[0] === "string") {
+                  return value[0] as string;
+                }
+                const naics = companyData["naics"];
+                if (Array.isArray(naics) && typeof naics[0] === "string") {
+                  return naics[0] as string;
+                }
+                return undefined;
+              })();
+
+              const employeeRange = (() => {
+                const range = companyData["employee_count_range"];
+                if (typeof range === "string") return range;
+                const employees = companyData["employee_count"];
+                if (typeof employees === "number") {
+                  return `${employees}`;
+                }
+                const size = companyData["size"];
+                if (typeof size === "string") return size;
+                return undefined;
+              })();
+
+              const founded = (() => {
+                const foundedValue = companyData["founded"];
+                if (typeof foundedValue === "number") return foundedValue;
+                const yearFounded = companyData["year_founded"];
+                if (typeof yearFounded === "number") return yearFounded;
+                return undefined;
+              })();
+
+              const revenue = (() => {
+                const annual = companyData["annual_revenue"];
+                if (typeof annual === "string") return annual;
+                const revenues = companyData["revenue"];
+                if (
+                  Array.isArray(revenues) &&
+                  typeof revenues[0] === "string"
+                ) {
+                  return revenues[0] as string;
+                }
+                return undefined;
+              })();
+
+              response.enrichedData.companyInfo = {
+                name:
+                  typeof companyData["name"] === "string"
+                    ? (companyData["name"] as string)
+                    : request.businessName,
+                industry,
+                size: employeeRange,
+                founded,
+                revenue,
+                website:
+                  typeof companyData["website"] === "string"
+                    ? (companyData["website"] as string)
+                    : request.website,
+                description:
+                  typeof companyData["summary"] === "string"
+                    ? (companyData["summary"] as string)
+                    : undefined,
+                source: "people_data_labs",
+              };
+            }
+
+            if (personEnriched && responsePayload.person?.data) {
+              const personData = responsePayload.person.data;
+
+              const fullName = (() => {
+                if (typeof personData["full_name"] === "string") {
+                  return personData["full_name"] as string;
+                }
+                if (typeof personData["name"] === "string") {
+                  return personData["name"] as string;
+                }
+                if (
+                  typeof personData["first_name"] === "string" &&
+                  typeof personData["last_name"] === "string"
+                ) {
+                  return `${personData["first_name"]} ${personData["last_name"]}`.trim();
+                }
+                return request.businessName;
+              })();
+
+              const jobTitle =
+                typeof personData["job_title"] === "string"
+                  ? (personData["job_title"] as string)
+                  : undefined;
+
+              const workEmail = (() => {
+                if (typeof personData["work_email"] === "string") {
+                  return personData["work_email"] as string;
+                }
+                const emails = personData["emails"];
+                if (Array.isArray(emails)) {
+                  const first = emails.find(
+                    (entry) => typeof entry?.["address"] === "string"
+                  );
+                  if (first && typeof first["address"] === "string") {
+                    return first["address"] as string;
+                  }
+                }
+                return undefined;
+              })();
+
+              const phoneNumber = (() => {
+                const phones = personData["phone_numbers"];
+                if (Array.isArray(phones)) {
+                  const primary = phones.find(
+                    (entry) => typeof entry?.["number"] === "string"
+                  );
+                  if (primary && typeof primary["number"] === "string") {
+                    return primary["number"] as string;
+                  }
+                }
+                return undefined;
+              })();
+
+              const linkedinProfile = (() => {
+                if (typeof personData["linkedin_url"] === "string") {
+                  return personData["linkedin_url"] as string;
+                }
+                const profiles = personData["profiles"];
+                if (Array.isArray(profiles)) {
+                  const linkedin = profiles.find(
+                    (profile) =>
+                      typeof profile?.["network"] === "string" &&
+                      (profile["network"] as string).toLowerCase() ===
+                        "linkedin"
+                  );
+                  if (linkedin && typeof linkedin["url"] === "string") {
+                    return linkedin["url"] as string;
+                  }
+                }
+                return undefined;
+              })();
+
+              if (!response.enrichedData.personEnrichment) {
+                response.enrichedData.personEnrichment = [];
+              }
+
+              const confidenceScore = (() => {
+                if (typeof responsePayload.person?.likelihood === "number") {
+                  return Math.round(responsePayload.person.likelihood * 100);
+                }
+                if (typeof personData["likelihood"] === "number") {
+                  return Math.round((personData["likelihood"] as number) * 100);
+                }
+                return 0;
+              })();
+
+              response.enrichedData.personEnrichment.push({
+                name: fullName,
+                title: jobTitle ?? "Executive",
+                email: workEmail,
+                phone: phoneNumber,
+                linkedin: linkedinProfile,
+                confidence: confidenceScore,
+              });
+            }
+
+            if (totalAppliedCost > 0) {
+              currentCost += totalAppliedCost;
+              response.costBreakdown.companyEnrichmentCost +=
+                appliedCompanyCost;
+              response.costBreakdown.personEnrichmentCost += appliedPersonCost;
+              response.processingMetadata.servicesUsed.push(call.serviceTag);
+            } else {
+              response.processingMetadata.servicesSkipped.push(
+                `${call.serviceTag} (no match)`
+              );
+            }
+
+            if (responsePayload.errors && responsePayload.errors.length > 0) {
+              response.processingMetadata.errors.push({
+                service: call.serviceTag,
+                error: responsePayload.errors.join("; "),
+              });
+            }
+          } catch (error) {
+            console.error("People Data Labs error:", error);
+            response.processingMetadata.errors.push({
+              service: call.serviceTag,
+              error:
+                error instanceof Error
+                  ? error.message
+                  : "People Data Labs enrichment failed",
+            });
+          }
+        }
+      }
+
       // Progressive Enrichment Waterfall - Stage 4: Email Verification ($0.008 per email)
       if (
         enrichmentConfig.verifyEmails &&
@@ -529,6 +1012,11 @@ class EnrichmentOrchestrator {
    * Get tier-based enrichment defaults
    */
   private getTierDefaults(tier: string) {
+    const useStateLicense =
+      (Deno.env.get("USE_STATE_LICENSE") ?? "true").toLowerCase() !== "false";
+    const usePdl =
+      (Deno.env.get("USE_PDL") ?? "true").toLowerCase() !== "false";
+
     const tierConfigs = {
       starter: {
         includeBusinessLicense: false,
@@ -541,7 +1029,7 @@ class EnrichmentOrchestrator {
         maxCostPerBusiness: 0.5,
       },
       professional: {
-        includeBusinessLicense: true,
+        includeBusinessLicense: useStateLicense,
         includeCompanyEnrichment: true,
         discoverEmails: true,
         verifyEmails: true,
@@ -551,21 +1039,21 @@ class EnrichmentOrchestrator {
         maxCostPerBusiness: 1.5,
       },
       enterprise: {
-        includeBusinessLicense: true,
+        includeBusinessLicense: useStateLicense,
         includeCompanyEnrichment: true,
         discoverEmails: true,
         verifyEmails: true,
-        includePersonEnrichment: true,
+        includePersonEnrichment: usePdl,
         apolloEnrichment: false,
         complianceVerification: false,
         maxCostPerBusiness: 3.5,
       },
       compliance: {
-        includeBusinessLicense: true,
+        includeBusinessLicense: useStateLicense,
         includeCompanyEnrichment: true,
         discoverEmails: true,
         verifyEmails: true,
-        includePersonEnrichment: true,
+        includePersonEnrichment: usePdl,
         apolloEnrichment: true,
         complianceVerification: true,
         maxCostPerBusiness: 7.5,
@@ -810,6 +1298,174 @@ class EnrichmentOrchestrator {
         estimatedCost,
         actualCost: 0,
       });
+      throw error;
+    }
+  }
+
+  private async callBusinessLicense(params: Record<string, unknown>) {
+    const startedAt = performance.now();
+    let response: Response | null = null;
+
+    try {
+      response = await fetch(
+        `${this.supabaseUrl}/functions/v1/enrichment-business-license`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${this.supabaseAccessToken}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(params),
+        }
+      );
+
+      const payload =
+        (await response.json()) as BusinessLicenseEdgeResponse | null;
+      const durationMs = Math.round(performance.now() - startedAt);
+
+      await this.logUsage({
+        sourceName: "state_license",
+        endpoint: "enrichment-business-license",
+        httpMethod: "POST",
+        requestParams: {
+          state: params.state,
+          hasLicenseNumber: Boolean(params.licenseNumber),
+        },
+        queryType: "enrichment",
+        responseCode: response.status,
+        responseTimeMs: durationMs,
+        resultsReturned: Array.isArray(payload?.records)
+          ? payload?.records.length ?? 0
+          : 0,
+        usefulResults:
+          Array.isArray(payload?.records) && payload.records.length > 0 ? 1 : 0,
+        success: response.ok && (payload?.success ?? false),
+        estimatedCost: BUSINESS_LICENSE_COST_ESTIMATE,
+        actualCost:
+          response.ok && payload?.success ? BUSINESS_LICENSE_COST_ESTIMATE : 0,
+      });
+
+      return {
+        status: response.status,
+        payload,
+        success: response.ok && (payload?.success ?? false),
+        durationMs,
+      };
+    } catch (error) {
+      const durationMs = Math.round(performance.now() - startedAt);
+      await this.logUsage({
+        sourceName: "state_license",
+        endpoint: "enrichment-business-license",
+        httpMethod: "POST",
+        requestParams: {
+          state: params.state,
+          hasLicenseNumber: Boolean(params.licenseNumber),
+        },
+        queryType: "enrichment",
+        responseCode: response?.status ?? null,
+        responseTimeMs: durationMs,
+        resultsReturned: 0,
+        usefulResults: 0,
+        success: false,
+        errorMessage: error instanceof Error ? error.message : String(error),
+        estimatedCost: BUSINESS_LICENSE_COST_ESTIMATE,
+        actualCost: 0,
+      });
+
+      throw error;
+    }
+  }
+
+  private async callPeopleDataLabs(params: Record<string, unknown>): Promise<{
+    status: number;
+    payload: PeopleDataLabsEdgeResponse | null;
+    success: boolean;
+    durationMs: number;
+  }> {
+    const startedAt = performance.now();
+    let response: Response | null = null;
+
+    const lookupType = (params.lookupType as string | undefined) ?? "auto";
+    const estimatedCost = (() => {
+      if (lookupType === "company") return PDL_COMPANY_COST_ESTIMATE;
+      if (lookupType === "person") return PDL_PERSON_COST_ESTIMATE;
+      if (lookupType === "company_and_person") {
+        return PDL_COMPANY_COST_ESTIMATE + PDL_PERSON_COST_ESTIMATE;
+      }
+      return PDL_COMPANY_COST_ESTIMATE + PDL_PERSON_COST_ESTIMATE;
+    })();
+
+    try {
+      response = await fetch(
+        `${this.supabaseUrl}/functions/v1/enrichment-pdl`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${this.supabaseAccessToken}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(params),
+        }
+      );
+
+      const payload =
+        (await response.json()) as PeopleDataLabsEdgeResponse | null;
+      const durationMs = Math.round(performance.now() - startedAt);
+
+      const companyMatch = payload?.company?.enriched ? 1 : 0;
+      const personMatch = payload?.person?.enriched ? 1 : 0;
+      const actualCost =
+        (companyMatch ? PDL_COMPANY_COST_ESTIMATE : 0) +
+        (personMatch ? PDL_PERSON_COST_ESTIMATE : 0);
+
+      await this.logUsage({
+        sourceName: "people_data_labs",
+        endpoint: `enrichment-pdl:${lookupType}`,
+        httpMethod: "POST",
+        requestParams: {
+          lookupType,
+          hasDomain: Boolean(params.domain),
+          hasWebsite: Boolean(params.website),
+        },
+        queryType: "enrichment",
+        responseCode: response.status,
+        responseTimeMs: durationMs,
+        resultsReturned: companyMatch + personMatch,
+        usefulResults: companyMatch + personMatch,
+        success: response.ok && (payload?.success ?? false),
+        estimatedCost,
+        actualCost: response.ok && (payload?.success ?? false) ? actualCost : 0,
+      });
+
+      return {
+        status: response.status,
+        payload,
+        success: response.ok && (payload?.success ?? false),
+        durationMs,
+      };
+    } catch (error) {
+      const durationMs = Math.round(performance.now() - startedAt);
+
+      await this.logUsage({
+        sourceName: "people_data_labs",
+        endpoint: `enrichment-pdl:${lookupType}`,
+        httpMethod: "POST",
+        requestParams: {
+          lookupType,
+          hasDomain: Boolean(params.domain),
+          hasWebsite: Boolean(params.website),
+        },
+        queryType: "enrichment",
+        responseCode: response?.status ?? null,
+        responseTimeMs: durationMs,
+        resultsReturned: 0,
+        usefulResults: 0,
+        success: false,
+        errorMessage: error instanceof Error ? error.message : String(error),
+        estimatedCost,
+        actualCost: 0,
+      });
+
       throw error;
     }
   }
