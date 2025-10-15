@@ -53,6 +53,8 @@ interface HunterRequest {
 
   // Budget control
   maxCostPerRequest?: number;
+  tier?: string;
+  tierKey?: string;
 }
 
 interface HunterResponse {
@@ -65,6 +67,7 @@ interface HunterResponse {
     requests_remaining?: number;
     requests_used?: number;
     reset_date?: string;
+    tier?: string;
   };
   error?: string;
 }
@@ -645,6 +648,16 @@ serve(async (req) => {
     }
 
     console.log(`✅ Hunter.io ${action} completed - Cost: $${result.cost}`);
+
+    if (requestData.tier || requestData.tierKey) {
+      const normalizedTier = (requestData.tier ?? requestData.tierKey ?? "")
+        .toString()
+        .toLowerCase();
+      result.metadata = {
+        ...result.metadata,
+        tier: normalizedTier || undefined,
+      };
+    }
 
     return new Response(
       JSON.stringify({

@@ -30,6 +30,8 @@ interface NeverBounceRequest {
   email?: string;
   emails?: string[];
   maxCostPerRequest?: number;
+  tier?: string;
+  tierKey?: string;
 }
 
 interface NeverBounceResponse {
@@ -40,6 +42,7 @@ interface NeverBounceResponse {
   confidence?: number;
   quotaUsed?: number;
   quotaRemaining?: number;
+  tier?: string;
   error?: string;
 }
 
@@ -406,6 +409,13 @@ serve(async (req) => {
         result.cost
       } - Quota remaining: ${result.quotaRemaining || "N/A"}`
     );
+
+    if (requestData.tier || requestData.tierKey) {
+      const normalizedTier = (requestData.tier ?? requestData.tierKey ?? "")
+        .toString()
+        .toLowerCase();
+      result.tier = normalizedTier || undefined;
+    }
 
     return new Response(
       JSON.stringify({

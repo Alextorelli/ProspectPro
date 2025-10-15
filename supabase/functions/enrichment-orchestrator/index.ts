@@ -306,8 +306,15 @@ class EnrichmentOrchestrator {
     let currentCost = 0;
 
     try {
+      const resolvedTier = this.resolveTierInput(
+        request.tier ?? null,
+        request.tierKey ?? null
+      );
+      request.tier = resolvedTier;
+      request.tierKey = resolvedTier.toUpperCase();
+
       // Apply tier-based defaults
-      const tierDefaults = this.getTierDefaults(request.tier || "professional");
+      const tierDefaults = this.getTierDefaults(resolvedTier);
       const enrichmentConfig = { ...tierDefaults, ...request };
 
       // Progressive Enrichment Waterfall - Stage 3: Email Discovery ($0.034)
@@ -324,6 +331,8 @@ class EnrichmentOrchestrator {
               action: "domain-search",
               domain: request.domain,
               limit: 10,
+              tier: request.tier,
+              tierKey: request.tierKey,
             });
 
             if (hunterResult.success && hunterResult.data?.emails) {
@@ -383,6 +392,8 @@ class EnrichmentOrchestrator {
                 sessionUserId: request.sessionUserId,
                 campaignId: request.campaignId,
                 jobId: request.jobId,
+                tier: request.tier,
+                tierKey: request.tierKey,
               });
 
               if (cobaltResult.success && cobaltResult.data) {
@@ -481,6 +492,8 @@ class EnrichmentOrchestrator {
                 ?.licenseNumber,
               professionalType: request.industry,
               includeInactive: false,
+              tier: request.tier,
+              tierKey: request.tierKey,
             });
 
             const payload = licenseResult.payload;
@@ -552,6 +565,8 @@ class EnrichmentOrchestrator {
           domain: request.domain,
           website: request.website,
           state: request.state,
+          tier: request.tier,
+          tierKey: request.tierKey,
         };
 
         const titleKeywords = enrichmentConfig.executiveContactsOnly
@@ -901,6 +916,8 @@ class EnrichmentOrchestrator {
             const neverBounceResult = await this.callNeverBounce({
               action: "verify-batch",
               emails: emailsToVerify,
+              tier: request.tier,
+              tierKey: request.tierKey,
             });
 
             if (neverBounceResult.success && neverBounceResult.data?.results) {
@@ -1011,6 +1028,24 @@ class EnrichmentOrchestrator {
   /**
    * Get tier-based enrichment defaults
    */
+  private resolveTierInput(
+    tier?: string | null,
+    tierKey?: string | null
+  ): "starter" | "professional" | "enterprise" | "compliance" {
+    const candidates = [tier, tierKey]
+      .filter((value): value is string => Boolean(value && value.trim()))
+      .map((value) => value.trim().toLowerCase());
+
+    for (const candidate of candidates) {
+      if (candidate.includes("starter")) return "starter";
+      if (candidate.includes("professional")) return "professional";
+      if (candidate.includes("enterprise")) return "enterprise";
+      if (candidate.includes("compliance")) return "compliance";
+    }
+
+    return "professional";
+  }
+
   private getTierDefaults(tier: string) {
     const useStateLicense =
       (Deno.env.get("USE_STATE_LICENSE") ?? "true").toLowerCase() !== "false";

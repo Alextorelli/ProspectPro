@@ -51,6 +51,8 @@ interface EnrichmentRequestPayload {
   search?: PdlSearchRequest;
   minimumLikelihood?: number;
   size?: number;
+  tier?: string;
+  tierKey?: string;
 }
 
 interface PdlCompanyResponse {
@@ -78,6 +80,7 @@ interface EdgeResponseBody {
   company?: PdlCompanyResponse;
   person?: PdlPersonResponse;
   durationMs: number;
+  tier?: string;
   errors?: string[];
 }
 
@@ -439,6 +442,7 @@ serve(async (req) => {
       lookupType: resolvedLookup,
       company: companyResponse,
       person: personResponse,
+      tier: payload.tier,
       durationMs,
       errors: errors.length > 0 ? errors : undefined,
     };

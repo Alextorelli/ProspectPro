@@ -1,5 +1,10 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import {
+  CobaltCache,
+  resolveTierCachePolicy,
+  type TierCachePolicy,
+} from "../_shared/cobalt-cache.ts";
+import {
   authenticateRequest,
   corsHeaders,
   extractBearerToken,
@@ -19,6 +24,8 @@ interface CobaltRequest {
   campaignId?: string;
   jobId?: string;
   sessionUserId?: string;
+  tier?: string;
+  tierKey?: string;
 }
 
 interface CobaltResponse {
@@ -29,12 +36,36 @@ interface CobaltResponse {
   pollAttempts: number;
   attemptedLiveLookup: boolean;
   usedCache: boolean;
+  cacheMetadata?: {
+    cacheKey?: string;
+    tier: string;
+    strategy: string;
+    expiresAt?: string | null;
+    refreshedAt?: string | null;
+    fallbackUsed?: boolean;
+  };
   error?: string;
 }
 
 const FALLBACK_BASE_URL = "https://apigateway.cobaltintelligence.com/v1";
 const POLL_INTERVAL_MS = 4000;
 const MAX_POLL_ATTEMPTS = 6;
+
+const cobaltCache = new CobaltCache();
+
+function resolveTierPolicyFromRequest(
+  request: CobaltRequest,
+  req: Request
+): TierCachePolicy {
+  const headerTier =
+    req.headers.get("x-prospectpro-tier") ??
+    req.headers.get("x-prospectpro-tier-key");
+  const tierInput = request.tier ?? request.tierKey ?? headerTier;
+  const policy = resolveTierCachePolicy(tierInput);
+  request.tier = policy.tier;
+  request.tierKey = policy.tier.toUpperCase();
+  return policy;
+}
 
 function normalizeState(value?: string): string | null {
   if (!value) return null;
@@ -112,15 +143,20 @@ async function requestCobalt(
 
 async function executeCobaltLookup(
   apiKey: string,
-  params: CobaltRequest
+  params: CobaltRequest,
+  policy: TierCachePolicy
 ): Promise<CobaltResponse> {
   const baseUrl = Deno.env.get("COBALT_SOS_BASE_URL") ?? FALLBACK_BASE_URL;
 
   const startedAt = Date.now();
   let attempts = 0;
-  const attemptedLiveLookup = Boolean(params.liveData);
+  const shouldForceLive = policy.forceLiveLookup || params.liveData === true;
+  const attemptedLiveLookup = shouldForceLive || Boolean(params.liveData);
 
-  let currentParams = { ...params };
+  let currentParams: CobaltRequest = {
+    ...params,
+    liveData: shouldForceLive ? true : params.liveData,
+  };
   let lastResponse = await requestCobalt(baseUrl, apiKey, currentParams);
   attempts += 1;
 
@@ -180,8 +216,12 @@ serve(async (req) => {
 
   const authHeader = getAuthorizationHeader(req);
   const bearer = extractBearerToken(authHeader);
-  const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
-  const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
+  const serviceRoleKey =
+    Deno.env.get("EDGE_SUPABASE_SERVICE_ROLE_KEY") ??
+    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ??
+    "";
+  const supabaseUrl =
+    Deno.env.get("EDGE_SUPABASE_URL") ?? Deno.env.get("SUPABASE_URL") ?? "";
 
   if (!bearer || !supabaseUrl) {
     return new Response(
@@ -261,18 +301,160 @@ serve(async (req) => {
   }
 
   try {
-    const result = await executeCobaltLookup(cobaltKey, requestData);
+    const tierPolicy = resolveTierPolicyFromRequest(requestData, req);
 
-    return new Response(
-      JSON.stringify({
-        ...result,
-        timestamp: new Date().toISOString(),
-      }),
-      {
-        status: result.status,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      }
-    );
+    const cacheLookup = await cobaltCache.lookup({
+      businessName: requestData.businessName,
+      state: requestData.state,
+      street: requestData.street,
+      city: requestData.city,
+      postalCode: requestData.postalCode,
+      includeUccData: requestData.includeUccData,
+      tier: tierPolicy.tier,
+    });
+
+    const shouldReturnCachedOnly =
+      cacheLookup.hit &&
+      cacheLookup.data &&
+      cacheLookup.policy.strategy !== "live-refresh" &&
+      requestData.liveData !== true;
+
+    if (shouldReturnCachedOnly) {
+      const responsePayload: CobaltResponse = {
+        success: true,
+        status: 200,
+        data: cacheLookup.data,
+        durationMs: 0,
+        pollAttempts: 0,
+        attemptedLiveLookup: false,
+        usedCache: true,
+        cacheMetadata: {
+          cacheKey: cacheLookup.cacheKey,
+          tier: cacheLookup.policy.tier,
+          strategy: cacheLookup.policy.strategy,
+          expiresAt: cacheLookup.metadata?.expiresAt ?? null,
+          refreshedAt: null,
+          fallbackUsed: false,
+        },
+      };
+
+      return new Response(
+        JSON.stringify({
+          ...responsePayload,
+          timestamp: new Date().toISOString(),
+        }),
+        {
+          status: 200,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    }
+
+    let liveResult: CobaltResponse | null = null;
+    let liveError: unknown = null;
+
+    try {
+      liveResult = await executeCobaltLookup(
+        cobaltKey,
+        requestData,
+        cacheLookup.policy
+      );
+    } catch (error) {
+      liveError = error;
+    }
+
+    if (liveResult && liveResult.success && liveResult.data) {
+      const storeResult = await cobaltCache.store(
+        {
+          businessName: requestData.businessName,
+          state: requestData.state,
+          street: requestData.street,
+          city: requestData.city,
+          postalCode: requestData.postalCode,
+          includeUccData: requestData.includeUccData,
+          tier: cacheLookup.policy.tier,
+        },
+        liveResult.data,
+        cacheLookup.policy
+      );
+
+      const expiresAt = new Date(
+        Date.now() + cacheLookup.policy.ttlSeconds * 1000
+      ).toISOString();
+
+      const responsePayload: CobaltResponse = {
+        ...liveResult,
+        usedCache: false,
+        cacheMetadata: {
+          cacheKey: storeResult.cacheKey,
+          tier: cacheLookup.policy.tier,
+          strategy: cacheLookup.policy.strategy,
+          expiresAt,
+          refreshedAt: new Date().toISOString(),
+          fallbackUsed: cacheLookup.hit,
+        },
+      };
+
+      return new Response(
+        JSON.stringify({
+          ...responsePayload,
+          timestamp: new Date().toISOString(),
+        }),
+        {
+          status: responsePayload.status,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    }
+
+    if (cacheLookup.hit && cacheLookup.data) {
+      const responsePayload: CobaltResponse = {
+        success: true,
+        status: liveResult?.status ?? 200,
+        data: cacheLookup.data,
+        durationMs: liveResult?.durationMs ?? 0,
+        pollAttempts: liveResult?.pollAttempts ?? 0,
+        attemptedLiveLookup: true,
+        usedCache: true,
+        cacheMetadata: {
+          cacheKey: cacheLookup.cacheKey,
+          tier: cacheLookup.policy.tier,
+          strategy: cacheLookup.policy.strategy,
+          expiresAt: cacheLookup.metadata?.expiresAt ?? null,
+          refreshedAt: null,
+          fallbackUsed: true,
+        },
+        error:
+          liveResult?.error ??
+          (liveError instanceof Error ? liveError.message : undefined),
+      };
+
+      return new Response(
+        JSON.stringify({
+          ...responsePayload,
+          timestamp: new Date().toISOString(),
+        }),
+        {
+          status: responsePayload.status,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    }
+
+    if (liveResult) {
+      return new Response(
+        JSON.stringify({
+          ...liveResult,
+          timestamp: new Date().toISOString(),
+        }),
+        {
+          status: liveResult.status,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    }
+
+    throw liveError ?? new Error("Cobalt lookup failed without response");
   } catch (error) {
     console.error("Cobalt enrichment error", error);
     return new Response(

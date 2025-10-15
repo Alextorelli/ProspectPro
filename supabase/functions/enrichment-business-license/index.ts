@@ -17,6 +17,8 @@ interface BusinessLicenseRequest {
   includeUccData?: boolean;
   includeLiveData?: boolean;
   sources?: Array<"cobalt" | "ny_socrata">;
+  tier?: string;
+  tierKey?: string;
 }
 
 interface LicenseRecord {
@@ -47,6 +49,7 @@ interface EdgeResponseBody {
   businessName: string;
   state?: string;
   licenseNumber?: string;
+  tier?: string;
   records: LicenseRecord[];
   sources: SourceResult[];
   durationMs: number;
@@ -456,6 +459,7 @@ serve(async (req) => {
       businessName: payload.businessName,
       state: normalizeState(payload.state),
       licenseNumber: payload.licenseNumber,
+      tier: payload.tier,
       records: consolidatedRecords,
       sources: results,
       durationMs: Math.round(performance.now() - startedAt),
@@ -480,6 +484,7 @@ serve(async (req) => {
         requestId,
         businessName: payload.businessName,
         state: normalizeState(payload.state),
+        tier: payload.tier,
         durationMs: Math.round(performance.now() - startedAt),
         errors,
       }),
