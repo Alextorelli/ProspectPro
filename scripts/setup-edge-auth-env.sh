@@ -52,14 +52,34 @@ require_repo_root() {
 }
 
 resolve_publishable_key() {
-  local project_ref publishable_key
+  local project_ref api_keys_json publishable_key
   project_ref="$1"
-  publishable_key=$(prospectpro_supabase_cli projects api-keys \
+  if ! api_keys_json=$(prospectpro_supabase_cli projects api-keys \
     --project-ref "$project_ref" \
-    --output json \
-    | jq -r '.[] | select(.type == "publishable") | .api_key')
+    --output json); then
+    echo "❌ Failed to call supabase projects api-keys" >&2
+    return 1
+  fi
 
-  if [ -z "$publishable_key" ] || [ "$publishable_key" = "null" ]; then
+  publishable_key=$(PP_API_KEYS_JSON="$api_keys_json" python <<'PY'
+import json
+import os
+
+raw = os.environ.get("PP_API_KEYS_JSON", "[]")
+try:
+    data = json.loads(raw)
+except json.JSONDecodeError:
+    raise SystemExit(0)
+for entry in data:
+    if entry.get("type") == "publishable":
+        key = entry.get("api_key")
+        if key:
+            print(key)
+        break
+PY
+)
+
+  if [ -z "$publishable_key" ]; then
     echo "❌ Unable to retrieve publishable key via supabase projects api-keys" >&2
     return 1
   fi
@@ -119,9 +139,26 @@ else
   echo "(SESSION_USER_ID not set; commands will omit sessionUserId)"
 fi
 
-echo "📋 Edge Functions deployed:" 
-prospectpro_supabase_cli functions list \
-  --output json | jq '.[] | {slug: .slug, status: .status}'
+echo "📋 Edge Functions deployed:"
+if command -v jq >/dev/null 2>&1; then
+  prospectpro_supabase_cli functions list \
+    --output json | jq '.[] | {slug: .slug, status: .status}'
+else
+  prospectpro_supabase_cli functions list \
+    --output json | python <<'PY'
+import json
+import sys
+
+try:
+    data = json.load(sys.stdin)
+except json.JSONDecodeError:
+    data = []
+for entry in data:
+    slug = entry.get("slug", "<unknown>")
+    status = entry.get("status", "unknown")
+    print(f"- {slug}: {status}")
+PY
+fi
 
 cat <<'EON'
 
