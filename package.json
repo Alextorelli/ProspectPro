@@ -11,6 +11,8 @@
     "codebase:index": "node scripts/generate-codebase-index.js",
     "cost:analyze": "echo 'Check GitHub billing dashboard for usage trends'",
     "db:setup": "echo 'Apply /database/production/001_core_schema.sql through 004_enrichment_cache.sql in Supabase dashboard'",
+    "docs:update": "npm run codebase:index && npm run system:reference",
+    "system:reference": "node scripts/generate-system-reference.js",
     "db:status": "bash -lc 'cd supabase && source ../scripts/ensure-supabase-cli-session.sh && npx --yes supabase@latest db status'",
     "debug:edge-function": "echo 'Test Verified Edge Function: curl -X POST https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/business-discovery-background -H \"Authorization: Bearer YOUR_SESSION_JWT\" -H \"Content-Type: application/json\" -d \"{\\\"businessType\\\": \\\"test\\\", \\\"location\\\": \\\"test\\\"}\"'",
     "debug:fake-data": "echo 'Verify zero fake data: Check CSV exports for pattern emails (info@, contact@, etc.)'",
@@ -126,5 +128,6 @@
     "dataPolicy": "Zero fake data - verified contacts only",
     "hosting": "Static hosting (Cloud Storage/CDN)",
     "deployment": "Supabase CLI + gsutil"
-  }
+  },
+  "postdeploy": "npm run docs:update"
 }
