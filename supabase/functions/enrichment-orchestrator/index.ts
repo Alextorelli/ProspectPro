@@ -5,6 +5,12 @@ import {
   UsageLogger,
   UsageLogParams,
 } from "../_shared/api-usage.ts";
+import type { AuthenticatedRequestContext } from "../_shared/edge-auth.ts";
+import {
+  authenticateRequest,
+  corsHeaders,
+  handleCORS,
+} from "../_shared/edge-auth.ts";
 
 /**
  * ProspectPro v4.3 - Advanced Enrichment Orchestrator Edge Function
@@ -27,12 +33,6 @@ import {
  * - Budget constraints with early termination
  * - Confidence scoring and quality thresholds
  */
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type",
-};
 
 interface EnrichmentRequest {
   businessName: string;
@@ -83,6 +83,15 @@ interface EnrichmentResponse {
       lastName?: string;
       position?: string;
     }>;
+    secretaryOfState?: {
+      entityName?: string;
+      registryNumber?: string;
+      status?: string;
+      state?: string;
+      goodStanding?: boolean;
+      source: string;
+      raw?: Record<string, unknown>;
+    };
     businessLicense?: {
       isValid: boolean;
       licenseNumber?: string;
@@ -151,20 +160,20 @@ interface EnrichmentResponse {
 
 class EnrichmentOrchestrator {
   private supabaseUrl: string;
-  private supabaseKey: string;
+  private supabaseAccessToken: string;
   private maxCostPerBusiness: number;
   private usageLogger?: UsageLogger;
   private usageContext: UsageLogContext;
 
   constructor(
     supabaseUrl: string,
-    supabaseKey: string,
+    supabaseAccessToken: string,
     maxCostPerBusiness = 2.0,
     usageLogger?: UsageLogger,
     usageContext: UsageLogContext = {}
   ) {
     this.supabaseUrl = supabaseUrl;
-    this.supabaseKey = supabaseKey;
+    this.supabaseAccessToken = supabaseAccessToken;
     this.maxCostPerBusiness = maxCostPerBusiness;
     this.usageLogger = usageLogger;
     this.usageContext = usageContext;
@@ -270,6 +279,121 @@ class EnrichmentOrchestrator {
           response.processingMetadata.servicesSkipped.push(
             "hunter_io (budget)"
           );
+        }
+      }
+
+      // Compliance Verification - Secretary of State filings via Cobalt Intelligence
+      const needsCobaltLookup =
+        (enrichmentConfig.complianceVerification ?? false) ||
+        (enrichmentConfig.includeBusinessLicense ?? false);
+
+      if (needsCobaltLookup) {
+        if (!request.state) {
+          console.warn(
+            "⚠️ Skipping Cobalt SOS lookup - state information not provided"
+          );
+          response.processingMetadata.servicesSkipped.push(
+            "cobalt_sos (missing state)"
+          );
+        } else {
+          const cobaltEstimatedCost = 0.9;
+
+          if (currentCost + cobaltEstimatedCost <= this.maxCostPerBusiness) {
+            try {
+              console.log(
+                `🏛️ Running Cobalt SOS lookup for ${request.businessName} (${request.state})`
+              );
+
+              const cobaltResult = await this.callCobalt({
+                businessName: request.businessName,
+                state: request.state,
+                liveData: enrichmentConfig.complianceVerification ?? false,
+                includeUccData:
+                  enrichmentConfig.includeCompanyEnrichment ?? false,
+                sessionUserId: request.sessionUserId,
+                campaignId: request.campaignId,
+                jobId: request.jobId,
+              });
+
+              if (cobaltResult.success && cobaltResult.data) {
+                const rawData = cobaltResult.data as Record<
+                  string,
+                  unknown
+                > | null;
+                const entitiesValue = rawData?.["entities"] as unknown;
+                const entity = Array.isArray(entitiesValue)
+                  ? (entitiesValue[0] as Record<string, unknown>)
+                  : (rawData?.["entity"] as Record<string, unknown>) ?? null;
+
+                const statusValue = entity?.["status"] ?? rawData?.["status"];
+                const status =
+                  typeof statusValue === "string" ? statusValue : undefined;
+
+                const registryValue =
+                  entity?.["registrationNumber"] ??
+                  entity?.["id"] ??
+                  rawData?.["registryNumber"];
+                const registryNumberCandidate =
+                  typeof registryValue === "string" ? registryValue : undefined;
+
+                const goodStanding = (() => {
+                  const direct = entity?.["goodStanding"];
+                  if (typeof direct === "boolean") return direct;
+                  if (typeof status === "string") {
+                    return /good/i.test(status);
+                  }
+                  return undefined;
+                })();
+
+                response.enrichedData.secretaryOfState = {
+                  entityName:
+                    (typeof entity?.["name"] === "string"
+                      ? (entity["name"] as string)
+                      : undefined) ?? request.businessName,
+                  registryNumber: registryNumberCandidate,
+                  status,
+                  state: request.state,
+                  goodStanding,
+                  source: "cobalt_intelligence",
+                  raw: (rawData ?? undefined) as
+                    | Record<string, unknown>
+                    | undefined,
+                };
+
+                const cobaltCostApplied =
+                  typeof cobaltResult.cost === "number"
+                    ? cobaltResult.cost
+                    : cobaltEstimatedCost;
+                response.costBreakdown.complianceCost = cobaltCostApplied;
+                currentCost += cobaltCostApplied;
+                response.processingMetadata.servicesUsed.push("cobalt_sos");
+
+                console.log(
+                  `✅ Cobalt SOS lookup complete (status: ${
+                    status ?? "unknown"
+                  })`
+                );
+              } else {
+                response.processingMetadata.errors.push({
+                  service: "cobalt_sos",
+                  error:
+                    cobaltResult.error ||
+                    `Cobalt response status ${cobaltResult.status}`,
+                });
+              }
+            } catch (error) {
+              console.error("Cobalt SOS error:", error);
+              response.processingMetadata.errors.push({
+                service: "cobalt_sos",
+                error: error instanceof Error ? error.message : "Unknown error",
+              });
+            }
+          } else {
+            console.warn("⚠️ Skipping Cobalt SOS lookup - would exceed budget");
+            response.processingMetadata.servicesSkipped.push(
+              "cobalt_sos (budget)"
+            );
+          }
         }
       }
 
@@ -468,7 +592,7 @@ class EnrichmentOrchestrator {
         {
           method: "POST",
           headers: {
-            Authorization: `Bearer ${this.supabaseKey}`,
+            Authorization: `Bearer ${this.supabaseAccessToken}`,
             "Content-Type": "application/json",
           },
           body: JSON.stringify(params),
@@ -550,7 +674,7 @@ class EnrichmentOrchestrator {
         {
           method: "POST",
           headers: {
-            Authorization: `Bearer ${this.supabaseKey}`,
+            Authorization: `Bearer ${this.supabaseAccessToken}`,
             "Content-Type": "application/json",
           },
           body: JSON.stringify(params),
@@ -596,6 +720,87 @@ class EnrichmentOrchestrator {
         requestParams: {
           action: params.action,
           emailCount,
+        },
+        queryType: "enrichment",
+        responseCode: response?.status ?? null,
+        responseTimeMs: Math.round(performance.now() - startedAt),
+        success: false,
+        errorMessage: error instanceof Error ? error.message : String(error),
+        estimatedCost,
+        actualCost: 0,
+      });
+      throw error;
+    }
+  }
+
+  /**
+   * Call Cobalt SOS Edge Function
+   */
+  private async callCobalt(params: Record<string, unknown>) {
+    const startedAt = performance.now();
+    let response: Response | null = null;
+    const estimatedCost = 0.9;
+
+    try {
+      response = await fetch(
+        `${this.supabaseUrl}/functions/v1/enrichment-cobalt`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${this.supabaseAccessToken}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(params),
+        }
+      );
+
+      const payload = await response.json();
+
+      await this.logUsage({
+        sourceName: "cobalt_sos",
+        endpoint: "search",
+        httpMethod: "POST",
+        requestParams: {
+          state: params.state,
+          liveData: params.liveData,
+        },
+        queryType: "enrichment",
+        responseCode: response.status,
+        responseTimeMs: Math.round(performance.now() - startedAt),
+        resultsReturned: Array.isArray(payload?.data?.entities)
+          ? payload.data.entities.length
+          : payload?.data
+          ? 1
+          : 0,
+        usefulResults: payload?.success ? 1 : 0,
+        success: response.ok && payload?.success !== false,
+        estimatedCost,
+        actualCost:
+          typeof payload?.cost === "number"
+            ? payload.cost
+            : response.ok
+            ? estimatedCost
+            : 0,
+      });
+
+      return {
+        ...payload,
+        cost:
+          typeof payload?.cost === "number"
+            ? payload.cost
+            : response.ok
+            ? estimatedCost
+            : 0,
+        status: response.status,
+      };
+    } catch (error) {
+      await this.logUsage({
+        sourceName: "cobalt_sos",
+        endpoint: "search",
+        httpMethod: "POST",
+        requestParams: {
+          state: params.state,
+          liveData: params.liveData,
         },
         queryType: "enrichment",
         responseCode: response?.status ?? null,
@@ -656,39 +861,63 @@ class EnrichmentOrchestrator {
       score += 5;
     }
 
+    // Secretary of State filings bonus
+    if (response.enrichedData.secretaryOfState) {
+      score += 10;
+      if (response.enrichedData.secretaryOfState.goodStanding) {
+        score += 5;
+      }
+    }
+
     return Math.min(score, 100);
   }
 }
 
 serve(async (req) => {
-  if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
+  const corsResponse = handleCORS(req);
+  if (corsResponse) return corsResponse;
+
+  if (req.method !== "POST") {
+    return new Response(
+      JSON.stringify({
+        success: false,
+        error: "Method not allowed. Use POST with a JSON payload.",
+        timestamp: new Date().toISOString(),
+      }),
+      {
+        status: 405,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      }
+    );
+  }
+
+  let authContext: AuthenticatedRequestContext;
+  try {
+    authContext = await authenticateRequest(req);
+  } catch (authError) {
+    console.error("❌ Authentication failed for enrichment orchestrator", {
+      error: authError instanceof Error ? authError.message : String(authError),
+    });
+    return new Response(
+      JSON.stringify({
+        success: false,
+        error:
+          authError instanceof Error
+            ? authError.message
+            : "Authentication failed",
+        timestamp: new Date().toISOString(),
+      }),
+      {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      }
+    );
   }
 
   try {
-    console.log(`🎯 Enrichment Orchestrator Edge Function`);
-
-    if (req.method !== "POST") {
-      return new Response(
-        JSON.stringify({
-          success: false,
-          error: "Method not allowed. Use POST with a JSON payload.",
-          timestamp: new Date().toISOString(),
-        }),
-        {
-          status: 405,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        }
-      );
-    }
-
-    // Get Supabase credentials
-    const supabaseUrl = Deno.env.get("SUPABASE_URL");
-    const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-
-    if (!supabaseUrl || !supabaseKey) {
-      throw new Error("Supabase credentials not configured");
-    }
+    console.log(
+      `🎯 Enrichment Orchestrator Edge Function (user: ${authContext.userId})`
+    );
 
     const contentType = req.headers.get("content-type") ?? "";
     if (!contentType.toLowerCase().includes("application/json")) {
@@ -737,6 +966,9 @@ serve(async (req) => {
       );
     }
 
+    const supabaseUrl = authContext.supabaseUrl;
+    const supabaseServiceRoleKey = authContext.supabaseServiceRoleKey;
+
     console.log(
       `📋 Enriching business: ${requestData.businessName} (Domain: ${
         requestData.domain || "N/A"
@@ -754,20 +986,18 @@ serve(async (req) => {
 
     const usageLogger = createUsageLogger(
       supabaseUrl,
-      supabaseKey,
+      supabaseServiceRoleKey,
       usageContext
     );
 
-    // Initialize orchestrator
     const orchestrator = new EnrichmentOrchestrator(
       supabaseUrl,
-      supabaseKey,
-      requestData.maxCostPerBusiness || 2.0,
+      authContext.accessToken,
+      requestData.maxCostPerBusiness ?? 2.0,
       usageLogger,
       usageContext
     );
 
-    // Enrich business
     const result = await orchestrator.enrichBusiness(requestData);
 
     return new Response(

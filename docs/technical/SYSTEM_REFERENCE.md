@@ -186,13 +186,19 @@ npx --yes supabase@latest functions deploy business-discovery-background --no-ve
 npx --yes supabase@latest functions deploy enrichment-orchestrator && \
 npx --yes supabase@latest functions deploy campaign-export-user-aware
 
-# 3. Test core functionality
+# 3. Deploy frontend (Vercel CLI)
+cd /workspaces/ProspectPro && \
+npx vercel@latest login && \
+npm run build && \
+cd dist && npx vercel@latest --prod
+
+# 4. Test core functionality
 source scripts/lib/supabase_cli_helpers.sh && run_database_tests
 npm run supabase:test:functions
 ./scripts/test-auth-patterns.sh "$SUPABASE_SESSION_JWT"
 ./scripts/campaign-validation.sh
 
-# 4. Update documentation
+# 5. Update documentation
 npm run docs:update
 ```
 

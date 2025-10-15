@@ -1854,6 +1854,36 @@ async function processDiscoveryJob(
   let dedupRecordsPersisted = 0;
 
   try {
+    const initialCampaignPayload = {
+      id: config.campaignId,
+      business_type: config.businessType,
+      location: config.location,
+      target_count: config.maxResults,
+      results_count: 0,
+      total_cost: 0,
+      status: "processing",
+      campaign_hash: config.campaignHash,
+      user_id: config.userId ?? null,
+      session_user_id: config.sessionUserId ?? null,
+      budget_limit: config.budgetLimit ?? null,
+      min_confidence_score: config.minConfidenceScore ?? null,
+    };
+
+    const { error: initialCampaignError } = await supabase
+      .from("campaigns")
+      .upsert(initialCampaignPayload, { onConflict: "id" });
+
+    if (initialCampaignError) {
+      console.warn(
+        "Initial campaign upsert warning:",
+        initialCampaignError.message
+      );
+    }
+  } catch (campaignInitError) {
+    console.warn("Initial campaign upsert failed:", campaignInitError);
+  }
+
+  try {
     const { error: snapshotError } = await supabase
       .from("campaign_request_snapshots")
       .insert({
@@ -2359,26 +2389,24 @@ async function processDiscoveryJob(
         .eq("id", jobId);
     }
 
-    const campaignInsert = await supabase
+    const campaignUpdate = await supabase
       .from("campaigns")
-      .insert({
-        id: config.campaignId,
+      .update({
         business_type: config.businessType,
         location: config.location,
         target_count: config.maxResults,
         results_count: enrichedLeads.length,
         total_cost: Number(totalCost.toFixed(3)),
         status: "completed",
-        campaign_hash: config.campaignHash,
-        user_id: config.userId ?? null,
-        session_user_id: config.sessionUserId ?? null,
         processing_time_ms: null,
+        updated_at: new Date().toISOString(),
       })
+      .eq("id", config.campaignId)
       .select("id")
       .single();
 
-    if (campaignInsert.error) {
-      console.warn("Campaign insert warning:", campaignInsert.error.message);
+    if (campaignUpdate.error) {
+      console.warn("Campaign update warning:", campaignUpdate.error.message);
     }
 
     const leadsPayload = enrichedLeads.map((lead) => ({

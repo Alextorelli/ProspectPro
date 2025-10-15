@@ -1,4 +1,10 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import type { AuthenticatedRequestContext } from "../_shared/edge-auth.ts";
+import {
+  authenticateRequest,
+  corsHeaders,
+  handleCORS,
+} from "../_shared/edge-auth.ts";
 import { API_SECRETS, createVaultClient } from "../_shared/vault-client.ts";
 
 /**
@@ -18,12 +24,6 @@ import { API_SECRETS, createVaultClient } from "../_shared/vault-client.ts";
  * - Syntax validation (free)
  * - Confidence scoring
  */
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type",
-};
 
 interface NeverBounceRequest {
   action: "verify" | "verify-batch" | "account-info" | "syntax-check";
@@ -58,12 +58,12 @@ class NeverBounceClient {
   /**
    * FREE: Syntax validation (doesn't count against quota)
    */
-  async syntaxCheck(email: string): Promise<NeverBounceResponse> {
+  syntaxCheck(email: string): Promise<NeverBounceResponse> {
     // Basic regex validation (completely free, no API call)
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const isValid = emailRegex.test(email);
 
-    return {
+    return Promise.resolve({
       success: true,
       action: "syntax-check",
       data: {
@@ -73,7 +73,7 @@ class NeverBounceClient {
       },
       cost: 0,
       confidence: isValid ? 50 : 0,
-    };
+    });
   }
 
   /**
@@ -253,12 +253,99 @@ class NeverBounceClient {
 }
 
 serve(async (req) => {
-  if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
+  const corsResponse = handleCORS(req);
+  if (corsResponse) return corsResponse;
+
+  if (req.method !== "POST") {
+    return new Response(
+      JSON.stringify({
+        success: false,
+        error: "Method not allowed. Use POST with a JSON payload.",
+        timestamp: new Date().toISOString(),
+      }),
+      {
+        status: 405,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      }
+    );
+  }
+
+  let authContext: AuthenticatedRequestContext;
+  try {
+    authContext = await authenticateRequest(req);
+  } catch (authError) {
+    console.error("❌ Authentication failed for NeverBounce enrichment", {
+      error: authError instanceof Error ? authError.message : String(authError),
+    });
+    return new Response(
+      JSON.stringify({
+        success: false,
+        error:
+          authError instanceof Error
+            ? authError.message
+            : "Authentication failed",
+        timestamp: new Date().toISOString(),
+      }),
+      {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      }
+    );
   }
 
   try {
-    console.log(`✅ NeverBounce Email Verification Edge Function`);
+    console.log(
+      `✅ NeverBounce Email Verification Edge Function (user: ${authContext.userId})`
+    );
+
+    const contentType = req.headers.get("content-type") ?? "";
+    if (!contentType.toLowerCase().includes("application/json")) {
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: "Invalid content type. Expected application/json payload.",
+          timestamp: new Date().toISOString(),
+        }),
+        {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    }
+
+    let requestData: NeverBounceRequest;
+    try {
+      requestData = await req.json();
+    } catch (parseError) {
+      console.error("Invalid JSON payload", parseError);
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: "Invalid JSON payload.",
+          timestamp: new Date().toISOString(),
+        }),
+        {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    }
+
+    const { action, maxCostPerRequest = 2.0 } = requestData;
+
+    if (!action) {
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: "Missing required field: action",
+          timestamp: new Date().toISOString(),
+        }),
+        {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    }
 
     // Get NeverBounce API key from vault
     const vaultClient = createVaultClient();
@@ -266,38 +353,28 @@ serve(async (req) => {
       API_SECRETS.NEVERBOUNCE
     );
 
-    // Parse request
-    const requestData: NeverBounceRequest = await req.json();
-    const { action, maxCostPerRequest = 2.0 } = requestData;
-
-    console.log(`📋 Action: ${action}`);
-
-    // Initialize NeverBounce client
     const neverBounceClient = new NeverBounceClient(neverBounceApiKey);
 
-    // Route to appropriate action
     let result: NeverBounceResponse;
-
     switch (action) {
-      case "syntax-check":
+      case "syntax-check": {
         if (!requestData.email) {
           throw new Error("email is required for syntax-check");
         }
         result = await neverBounceClient.syntaxCheck(requestData.email);
         break;
-
-      case "verify":
+      }
+      case "verify": {
         if (!requestData.email) {
           throw new Error("email is required for verify");
         }
         result = await neverBounceClient.verifySingle(requestData.email);
         break;
-
-      case "verify-batch":
+      }
+      case "verify-batch": {
         if (!requestData.emails || requestData.emails.length === 0) {
           throw new Error("emails array is required for verify-batch");
         }
-        // Check cost limit for batch
         const estimatedCost = requestData.emails.length * 0.008;
         if (estimatedCost > maxCostPerRequest) {
           throw new Error(
@@ -308,16 +385,16 @@ serve(async (req) => {
         }
         result = await neverBounceClient.verifyBatch(requestData.emails);
         break;
-
-      case "account-info":
+      }
+      case "account-info": {
         result = await neverBounceClient.getAccountInfo();
         break;
-
-      default:
+      }
+      default: {
         throw new Error(`Unknown action: ${action}`);
+      }
     }
 
-    // Check cost limit
     if (result.cost > maxCostPerRequest) {
       console.warn(
         `⚠️ Cost limit exceeded: $${result.cost} > $${maxCostPerRequest}`
