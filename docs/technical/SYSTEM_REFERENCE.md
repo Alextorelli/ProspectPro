@@ -1,6 +1,33 @@
 # ProspectPro v4.3 System Reference Guide
 
-*Auto-generated: 2025-10-15 - Tier-Aware Background Discovery & Verification System*
+_Auto-generated: 2025-10-15 - Tier-Aware Background Discovery & Verification System_
+
+---
+
+## Production API Integrations & Associated Clients (2025-10-15)
+
+This section lists only APIs and client modules that are actually built out and integrated into production edge functions and modules.
+
+| API/Source              | Client File                       | Base Tier Data                         | Professional Tier Data                            | Enterprise/Compliance Data                           |
+| ----------------------- | --------------------------------- | -------------------------------------- | ------------------------------------------------- | ---------------------------------------------------- |
+| Google Places API       | \_shared/google-places-service.ts | Business name, address, phone, website | Same as Base                                      | Same as Base                                         |
+| Foursquare Places API   | \_shared/foursquare-service.ts    | Category context, discovery expansion  | Same as Base                                      | Same as Base                                         |
+| Hunter.io               | \_shared/hunter-service.ts        | Not included                           | Corporate email discovery + domain enrichment     | Executive/owner emails when available                |
+| NeverBounce             | \_shared/neverbounce-service.ts   | Not included                           | Email deliverability verification                 | Same as Professional                                 |
+| Cobalt Intelligence SOS | \_shared/cobalt-sos-service.ts    | Not included                           | Secretary of State filings (cached good-standing) | Live compliance check + officer/ownership enrichment |
+
+All API usage is orchestrated by Edge Functions:
+
+- business-discovery-background
+- business-discovery-optimized
+- enrichment-orchestrator
+- enrichment-hunter
+- enrichment-neverbounce
+- enrichment-cobalt
+
+Dedicated People Data Labs and state licensing edge functions have not been deployed in production; see the testing plan below for the validation steps required before enabling those integrations.
+
+These functions invoke the above client modules to discover, enrich, and validate corporate and individual owner contact information (website URL, physical address, email, phone) in production.
 
 **Quick Navigation**: [Discovery](#discovery-module) | [Enrichment](#enrichment-module) | [Validation](#validation-module) | [Maintenance](#maintenance-commands)
 
@@ -9,11 +36,13 @@
 ## Discovery Module
 
 ### Core Architecture
+
 - **Primary Function**: `business-discovery-background` - Tier-aware async discovery with user authentication
 - **Business Logic**: Multi-source business discovery → Background processing → Quality scoring
 - **Technical Flow**: Google Places API → Foursquare Places API → Census targeting → User-aware database storage
 
 ### Key Files
+
 ```typescript
 // Core Discovery Module Functions
 /supabase/functions/business-discovery-background/                    # PRIMARY: Tier-aware async discovery
@@ -31,6 +60,7 @@
 ```
 
 ### Quick Commands
+
 ```bash
 # Test discovery
 curl -X POST "$SUPABASE_URL/functions/v1/business-discovery-background"
@@ -47,11 +77,13 @@ source scripts/ensure-supabase-cli-session.sh
 ## Enrichment Module
 
 ### Core Architecture
+
 - **Primary Function**: `enrichment-orchestrator` - Budget-controlled multi-service coordination with tier awareness
 - **Business Logic**: Tier-based enrichment pipeline with 24-hour caching and circuit breakers
 - **Technical Flow**: Hunter.io (email discovery) → NeverBounce (verification) → Cobalt SOS (filings) → Quality scoring
 
 ### Key Files
+
 ```typescript
 // Core Enrichment Module Functions
 /supabase/functions/enrichment-orchestrator/                    # PRIMARY: Multi-service coordination
@@ -69,6 +101,7 @@ source scripts/ensure-supabase-cli-session.sh
 ```
 
 ### Quick Commands
+
 ```bash
 # Test enrichment
 curl -X POST "$SUPABASE_URL/functions/v1/enrichment-orchestrator"
@@ -82,11 +115,13 @@ curl -X POST "$SUPABASE_URL/functions/v1/enrichment-orchestrator"
 ## Validation Module
 
 ### Core Architecture
+
 - **Primary Function**: `test-new-auth` - Session JWT enforcement across all functions with RLS policies
 - **Business Logic**: Contact verification with 95% email accuracy and zero fake patterns
 - **Technical Flow**: Supabase Auth → RLS policies → Session validation → Quality scoring → Data isolation
 
 ### Key Files
+
 ```typescript
 // Core Validation Module Functions
 /supabase/functions/test-new-auth/                    # PRIMARY: Session diagnostics & RLS validation
@@ -101,6 +136,7 @@ curl -X POST "$SUPABASE_URL/functions/v1/enrichment-orchestrator"
 ```
 
 ### Quick Commands
+
 ```bash
 # Test validation
 ./scripts/test-auth-patterns.sh "$SUPABASE_SESSION_JWT"
@@ -114,6 +150,7 @@ curl -X POST "$SUPABASE_URL/functions/v1/test-new-auth"
 ## Cross-Module Integration
 
 ### Export System (User-Aware)
+
 ```typescript
 // User-authorized exports with enrichment metadata
 /supabase/functions/campaign-export-user-aware/       # PRIMARY: User-authorized exports
@@ -128,6 +165,7 @@ curl -X POST "$SUPABASE_URL/functions/v1/test-new-auth"
 ```
 
 ### Shared Authentication Infrastructure
+
 ```typescript
 /supabase/functions/_shared/authenticateRequest.ts    # Session JWT validation
 /supabase/functions/_shared/rls-helpers.ts             # RLS policy helpers
@@ -141,6 +179,7 @@ const user = await authenticateRequest(request);
 ## Maintenance Commands
 
 ### Keep System Reference Current
+
 ```bash
 # Regenerate system reference (run after code changes)
 npm run system:reference
@@ -153,6 +192,7 @@ npm run postdeploy
 ```
 
 ### Deployment & Testing Workflow
+
 ```bash
 # 1. Ensure Supabase CLI session
 source scripts/ensure-supabase-cli-session.sh
@@ -172,6 +212,7 @@ npm run docs:update
 ```
 
 ### Environment Verification Checklist
+
 - [ ] Frontend publishable key (`sb_publishable_*`) matches Supabase dashboard
 - [ ] Frontend/services forward Supabase session JWTs on authenticated requests
 - [ ] RLS policies active for campaigns, leads, dashboard_exports tables
@@ -180,25 +221,27 @@ npm run docs:update
 - [ ] Production URL accessible: https://prospect-fyhedobh1-appsmithery.vercel.app
 - [ ] User authentication system working (signup/signin/session management)
 
-
 ---
 
 ## Current Production Status
 
 ### Deployment URLs
+
 - **Production Frontend**: https://prospectpro.appsmithery.co
 - **Edge Functions**: https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/
 - **Database**: Supabase project `sriycekxdqnesdsgwiuc`
 
 ### System Health
+
 - ✅ **Edge Functions**: All deployed and operational with user authentication
-- ✅ **Database**: RLS policies active, user-aware schema implemented  
+- ✅ **Database**: RLS policies active, user-aware schema implemented
 - ✅ **Frontend**: Static deployment with session management
 - ✅ **API Integrations**: Google Places, Hunter.io, NeverBounce, Cobalt Intelligence configured
 - ✅ **User Authentication**: Complete signup/signin with session JWT enforcement
 - ✅ **Data Quality**: 95% email accuracy, zero fake data tolerance maintained
 
 ### Architecture Benefits
+
 - **90% Cost Reduction**: Serverless functions vs. container infrastructure
 - **<100ms Cold Starts**: Global edge deployment via Supabase
 - **Auto-Scaling**: Native Supabase Edge Function scaling
@@ -207,5 +250,5 @@ npm run docs:update
 
 ---
 
-*Last Updated: 2025-10-15 | Auto-generated from ProspectPro v4.3 codebase analysis*
-*Run `npm run system:reference` to regenerate this reference*
+_Last Updated: 2025-10-15 | Auto-generated from ProspectPro v4.3 codebase analysis_
+_Run `npm run system:reference` to regenerate this reference_
