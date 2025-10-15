@@ -717,25 +717,77 @@ async function searchGooglePlaces(
 
   const keywordSuffix = keywords.length > 0 ? ` ${keywords.join(" ")}` : "";
   const query = `${businessType}${keywordSuffix} in ${location}`;
-  const searchUrl = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${encodeURIComponent(
-    query
-  )}&key=${apiKey}`;
+
+  // Fetch up to 60 results using pagination (3 pages × 20 results)
+  const targetResults = Math.max(maxResults * 3, 60);
+  const allResults: BusinessData[] = [];
+  let nextPageToken: string | undefined;
+  let pageCount = 0;
+  const maxPages = 3;
 
   const requestParams = {
     query,
     businessType,
     location,
     keywordCount: keywords.length,
-    maxResults,
+    maxResults: targetResults,
+    paginationEnabled: true,
   };
 
-  let textResponse: Response | null = null;
-  let data: Record<string, unknown> = {};
   const searchStarted = performance.now();
+  let textResponse: Response | null = null;
 
+  // Fetch first page
   try {
+    const searchUrl = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${encodeURIComponent(
+      query
+    )}&key=${apiKey}`;
+
     textResponse = await fetch(searchUrl);
-    data = await textResponse.json();
+    const data = await textResponse.json();
+
+    if (data.status !== "OK") {
+      if (data.status === "ZERO_RESULTS") {
+        await usageLogger?.log({
+          sourceName: "google_places",
+          endpoint: "textsearch",
+          httpMethod: "GET",
+          requestParams,
+          queryType: "discovery",
+          responseCode: textResponse.status,
+          responseTimeMs: Math.round(performance.now() - searchStarted),
+          resultsReturned: 0,
+          usefulResults: 0,
+          success: true,
+          estimatedCost: GOOGLE_TEXT_SEARCH_COST,
+          actualCost: GOOGLE_TEXT_SEARCH_COST,
+          ...usageContext,
+        });
+        return [];
+      }
+
+      await usageLogger?.log({
+        sourceName: "google_places",
+        endpoint: "textsearch",
+        httpMethod: "GET",
+        requestParams,
+        queryType: "discovery",
+        responseCode: textResponse.status,
+        responseTimeMs: Math.round(performance.now() - searchStarted),
+        success: false,
+        errorMessage:
+          (data.error_message as string | undefined) || (data.status as string),
+        estimatedCost: GOOGLE_TEXT_SEARCH_COST,
+        actualCost: 0,
+      });
+      throw new Error(`Google Places API failed: ${data.status}`);
+    }
+
+    if (Array.isArray(data.results)) {
+      allResults.push(...data.results);
+      nextPageToken = data.next_page_token;
+      pageCount++;
+    }
   } catch (error) {
     await usageLogger?.log({
       sourceName: "google_places",
@@ -751,27 +803,47 @@ async function searchGooglePlaces(
     throw error;
   }
 
-  const searchElapsed = Math.round(performance.now() - searchStarted);
+  // Fetch additional pages if available and needed
+  while (
+    nextPageToken &&
+    pageCount < maxPages &&
+    allResults.length < targetResults
+  ) {
+    // Google requires 2-second delay between pagination requests
+    await new Promise((resolve) => setTimeout(resolve, 2000));
 
-  if (data.status !== "OK") {
-    await usageLogger?.log({
-      sourceName: "google_places",
-      endpoint: "textsearch",
-      httpMethod: "GET",
-      requestParams,
-      queryType: "discovery",
-      responseCode: textResponse.status,
-      responseTimeMs: searchElapsed,
-      success: false,
-      errorMessage:
-        (data.error_message as string | undefined) || (data.status as string),
-      estimatedCost: GOOGLE_TEXT_SEARCH_COST,
-      actualCost: 0,
-    });
-    throw new Error(`Google Places API failed: ${data.status}`);
+    try {
+      const pageUrl = `https://maps.googleapis.com/maps/api/place/textsearch/json?pagetoken=${nextPageToken}&key=${apiKey}`;
+      const pageResponse = await fetch(pageUrl);
+      const pageData = await pageResponse.json();
+
+      if (pageData.status === "OK" && Array.isArray(pageData.results)) {
+        allResults.push(...pageData.results);
+        nextPageToken = pageData.next_page_token;
+        pageCount++;
+
+        console.log(
+          `📄 Fetched page ${pageCount} with ${pageData.results.length} results (total: ${allResults.length})`
+        );
+      } else {
+        console.warn(
+          `Google Places pagination page ${pageCount + 1} status: ${
+            pageData.status
+          }`
+        );
+        break;
+      }
+    } catch (error) {
+      console.error(
+        `Google Places pagination page ${pageCount + 1} failed:`,
+        error
+      );
+      break;
+    }
   }
 
-  const results = (data.results as BusinessData[]).slice(0, maxResults * 2);
+  const searchElapsed = Math.round(performance.now() - searchStarted);
+  const results = allResults.slice(0, targetResults);
 
   await usageLogger?.log({
     sourceName: "google_places",
@@ -1063,26 +1135,28 @@ function createBusinessFingerprint(source: BusinessFingerprintSource): string {
   );
   const website = normalizeWebsite(source.website ?? "");
 
+  // Priority 1: Name + Address (most specific)
   if (name && address) {
     return `${name}::${address}`;
   }
 
-  if (name && phone) {
+  // Priority 2: Name + Phone (highly specific)
+  if (name && phone && phone.length >= 10) {
     return `${name}::${phone}`;
   }
 
+  // Priority 3: Website domain (unique identifier)
   if (website) {
     return `domain::${website}`;
   }
 
-  if (phone) {
+  // Priority 4: Phone only (if 10+ digits, likely unique)
+  if (phone && phone.length >= 10) {
     return `phone::${phone}`;
   }
 
-  if (name) {
-    return `name::${name}`;
-  }
-
+  // DO NOT create fingerprint from name alone - too generic
+  // This prevents false positive deduplication
   return "";
 }
 
@@ -1362,9 +1436,12 @@ function dedupeBusinesses(
 ): DiscoveredBusiness[] {
   const map = new Map<string, DiscoveredBusiness>();
   let fallbackIndex = 0;
+  let duplicatesFound = 0;
 
   for (const business of businesses) {
     const fingerprint = createBusinessFingerprint(business);
+
+    // Use place_id as fallback for businesses without strong fingerprints
     const key = fingerprint
       ? fingerprint
       : business.place_id
@@ -1376,6 +1453,8 @@ function dedupeBusinesses(
       continue;
     }
 
+    // Duplicate found - decide which version to keep
+    duplicatesFound++;
     const existing = map.get(key)!;
     const existingHasWebsite = Boolean(existing.website);
     const candidateHasWebsite = Boolean(business.website);
@@ -1401,6 +1480,11 @@ function dedupeBusinesses(
       map.set(key, business);
     }
   }
+
+  console.log(
+    `🔄 Dedupe: ${businesses.length} raw → ${map.size} unique (${duplicatesFound} duplicates removed)`
+  );
+
   return Array.from(map.values());
 }
 
@@ -1913,7 +1997,7 @@ async function discoverBusinesses(
       config.businessType,
       census.geographic_data.raw_location,
       config.keywords,
-      Math.min(census.optimization.expected_results, config.maxResults * 2),
+      Math.min(census.optimization.expected_results, config.maxResults * 3),
       usageLogger,
       {
         ...usageContext,
@@ -1925,7 +2009,8 @@ async function discoverBusinesses(
     deduped.push(...expandedResults);
   }
 
-  return dedupeBusinesses(deduped).slice(0, config.maxResults * 2);
+  // Return up to 3x maxResults to allow for deduplication filtering
+  return dedupeBusinesses(deduped).slice(0, config.maxResults * 3);
 }
 
 async function processDiscoveryJob(
