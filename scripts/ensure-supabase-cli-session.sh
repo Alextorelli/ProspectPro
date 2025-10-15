@@ -2,6 +2,17 @@
 # ProspectPro v4.3 - Supabase CLI Authentication Guard
 # Usage: source scripts/ensure-supabase-cli-session.sh
 
+if [[ -z "${_PP_SUPABASE_CLI_PREV_OPTS_CAPTURED:-}" ]]; then
+  _PP_SUPABASE_CLI_PREV_OPTS_CAPTURED=1
+  _PP_SUPABASE_CLI_PREV_OPTS=$(set +o)
+  trap '
+    eval "$_PP_SUPABASE_CLI_PREV_OPTS"
+    trap - RETURN
+    unset _PP_SUPABASE_CLI_PREV_OPTS_CAPTURED
+    unset _PP_SUPABASE_CLI_PREV_OPTS
+  ' RETURN
+fi
+
 set -euo pipefail
 
 EXPECTED_REPO_ROOT=${EXPECTED_REPO_ROOT:-/workspaces/ProspectPro}

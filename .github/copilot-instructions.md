@@ -335,6 +335,7 @@ supabase functions list
 **SUPABASE CLI AUTH WORKFLOW (GLOBAL)**
 
 - Before running any `supabase` CLI command (deploy, secrets, logs, etc.), execute `scripts/ensure-supabase-cli-session.sh` so the workspace escalates authentication automatically.
+- The guard script now captures and restores caller shell options; source it as often as needed without leaving `set -euo pipefail` active in your terminal.
 - If the guard script triggers a login prompt, share the displayed device code + URL with Alex for browser approval, then rerun the script to verify the session.
 
 # Deploy frontend to custom domain

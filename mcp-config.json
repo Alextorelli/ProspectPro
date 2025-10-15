@@ -84,7 +84,7 @@
         "smartContext": true,
         "quickCommands": {
             "run prod mcp": "cd /workspaces/ProspectPro/mcp-servers && npm run start:production",
-            "ensure supabase session": "source scripts/ensure-supabase-cli-session.sh",
+            "ensure supabase session": "source scripts/ensure-supabase-cli-session.sh && echo 'Supabase CLI session ready (shell opts restored).'",
             "prepare edge auth env": "source scripts/setup-edge-auth-env.sh",
             "stop mcp": "./scripts/stop-mcp.sh",
             "deploy discovery background": "source scripts/ensure-supabase-cli-session.sh && source scripts/lib/supabase_cli_helpers.sh && prospectpro_supabase_cli functions deploy business-discovery-background",
