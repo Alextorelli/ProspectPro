@@ -300,7 +300,7 @@ const BUSINESS_CATEGORIES = {
 
 **DEBUGGING COMMANDS**
 
-```bash
+````bash
 # Test background discovery Edge Function directly (session token required)
 curl -X POST 'https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/business-discovery-background' \
    -H 'Authorization: Bearer SUPABASE_SESSION_JWT' \
@@ -332,6 +332,49 @@ curl -X POST 'https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/test-officia
 supabase functions list
 
 
+## Supabase CLI Command Guidelines - Terminal-Tested Patterns
+
+### Critical Command Structure
+- Always run `cd /workspaces/ProspectPro/supabase &&` before any Supabase CLI command.
+- Invoke the CLI with `npx --yes supabase@latest <command>`; no global binary is installed.
+- Ensure `source scripts/ensure-supabase-cli-session.sh` has run in the current shell.
+
+### Verified Working Commands
+```bash
+# Project linking (required first step)
+cd /workspaces/ProspectPro/supabase && npx --yes supabase@latest link --project-ref sriycekxdqnesdsgwiuc
+
+# Migration management
+cd /workspaces/ProspectPro/supabase && npx --yes supabase@latest migration list
+cd /workspaces/ProspectPro/supabase && npx --yes supabase@latest migration new <descriptive_name>
+
+# Database operations
+cd /workspaces/ProspectPro/supabase && npx --yes supabase@latest db push
+cd /workspaces/ProspectPro/supabase && npx --yes supabase@latest db pull --schema public
+
+# Type generation
+cd /workspaces/ProspectPro/supabase && npx --yes supabase@latest gen types --lang typescript
+````
+
+### Known Issues to Avoid
+
+1. Deprecated commands: replace `db remote commit` with `db pull`.
+2. Invalid output flags: only use `env`, `pretty`, `json`, `toml`, or `yaml`.
+3. Docker registry rate limits can interrupt `db pull`; wait and retry.
+4. Flag typos like `--use-migra` do not exist; check `--help` first.
+
+### Authentication Requirements
+
+- Source `scripts/ensure-supabase-cli-session.sh` before starting CLI work.
+- Session tokens persist per terminal; re-run the guard after opening a new shell.
+
+### Error Recovery Patterns
+
+- **Rate limits**: wait for back-off, then rerun the same command.
+- **SQL syntax**: inspect migration quoting (`EXECUTE` blocks) for escaping bugs.
+- **Schema conflicts**: prefer `IF NOT EXISTS` / `DROP IF EXISTS` for idempotence.
+- **Policy conflicts**: drop legacy policies before applying canonical replacements.
+
 **SUPABASE CLI AUTH WORKFLOW (GLOBAL)**
 
 - Before running any `supabase` CLI command (deploy, secrets, logs, etc.), execute `scripts/ensure-supabase-cli-session.sh` so the workspace escalates authentication automatically.
@@ -339,13 +382,17 @@ supabase functions list
 - If the guard script triggers a login prompt, share the displayed device code + URL with Alex for browser approval, then rerun the script to verify the session.
 
 # Deploy frontend to custom domain
+
 npm run build && cd dist && vercel --prod
 
 # Test production URL
+
 curl -I https://prospect-fyhedobh1-appsmithery.vercel.app
 
 # Check database permissions with user-aware schema
-# Run in Supabase SQL editor: SELECT * FROM campaigns LIMIT 1;
+
+# Run in Supabase SQL editor: SELECT \* FROM campaigns LIMIT 1;
+
 ```
 
 **EDGE FUNCTION VALIDATION CHECKLIST (CLI-FIRST)**
@@ -410,45 +457,51 @@ When Alex asks about:
 ### **Supabase-First Serverless Pipeline**
 
 ```
+
 Static Frontend → Supabase Edge Functions → Supabase Database
-                                      ↓
-                     Supabase Environment Variables → External APIs
-                                      ↓
-                     Real-time Database Updates → Live Frontend Updates
+↓
+Supabase Environment Variables → External APIs
+↓
+Real-time Database Updates → Live Frontend Updates
+
 ```
 
 ### **Edge Function Infrastructure (Production Ready)**
 
 ```
-/supabase/functions/business-discovery    # Main business discovery logic
-/supabase/functions/campaign-export       # CSV export functionality
-/public/index-supabase.html              # Static frontend
-/public/supabase-app.js                  # Frontend with Supabase client
-/database/production/001_core_schema.sql  # Database schema (apply 001-004 sequentially)
+
+/supabase/functions/business-discovery # Main business discovery logic
+/supabase/functions/campaign-export # CSV export functionality
+/public/index-supabase.html # Static frontend
+/public/supabase-app.js # Frontend with Supabase client
+/database/production/001_core_schema.sql # Database schema (apply 001-004 sequentially)
+
 ```
 
 ### File Structure (REFERENCE ONLY)
 
 ```
-/supabase/functions/business-discovery/  # Core discovery Edge Function
-/supabase/functions/campaign-export/     # Export Edge Function
-/index.html                              # Static frontend entry
-/src/lib/supabase.ts                     # Frontend Supabase client helper
-CODEBASE_INDEX.md                        # Auto-generated #codebase index
-/database/production/001_core_schema.sql  # Database setup (see production bundle)
-/docs/                                   # Documentation
-/archive/                                # Legacy files (deprecated)
-```
+
+/supabase/functions/business-discovery/ # Core discovery Edge Function
+/supabase/functions/campaign-export/ # Export Edge Function
+/index.html # Static frontend entry
+/src/lib/supabase.ts # Frontend Supabase client helper
+CODEBASE_INDEX.md # Auto-generated #codebase index
+/database/production/001_core_schema.sql # Database setup (see production bundle)
+/docs/ # Documentation
+/archive/ # Legacy files (deprecated)
+
+````
 
 ### Current Working Commands (USE THESE)
 
 ```bash
 # Deploy production edge functions
-supabase functions deploy business-discovery-background
-supabase functions deploy business-discovery-optimized
-supabase functions deploy business-discovery-user-aware
-supabase functions deploy campaign-export-user-aware
-supabase functions deploy enrichment-orchestrator
+cd /workspaces/ProspectPro/supabase && npx --yes supabase@latest functions deploy business-discovery-background
+cd /workspaces/ProspectPro/supabase && npx --yes supabase@latest functions deploy business-discovery-optimized
+cd /workspaces/ProspectPro/supabase && npx --yes supabase@latest functions deploy business-discovery-user-aware
+cd /workspaces/ProspectPro/supabase && npx --yes supabase@latest functions deploy campaign-export-user-aware
+cd /workspaces/ProspectPro/supabase && npx --yes supabase@latest functions deploy enrichment-orchestrator
 
 # Frontend build & deploy
 npm run build
@@ -458,13 +511,10 @@ vercel --prod
 npm run codebase:index
 
 # Stream background-discovery logs
-supabase logs functions \
-   --project-ref sriycekxdqnesdsgwiuc \
-   --slug business-discovery-background \
-   --tail
+cd /workspaces/ProspectPro/supabase && npx --yes supabase@latest functions logs --project-ref sriycekxdqnesdsgwiuc --slug business-discovery-background --follow
 
 # Database setup: run SQL directly in the Supabase dashboard
-```
+````
 
 ### API Integration Stack (WORKING)
 

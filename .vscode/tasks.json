@@ -1,0 +1,71 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Supabase: Link Project",
+      "type": "shell",
+      "command": "bash",
+      "args": [
+        "-lc",
+        "cd supabase && source ../scripts/ensure-supabase-cli-session.sh && npx --yes supabase@latest link --project-ref sriycekxdqnesdsgwiuc"
+      ],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Supabase: List Migrations",
+      "type": "shell",
+      "command": "bash",
+      "args": [
+        "-lc",
+        "cd supabase && source ../scripts/ensure-supabase-cli-session.sh && npx --yes supabase@latest migration list"
+      ],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Supabase: Push Database",
+      "type": "shell",
+      "command": "bash",
+      "args": [
+        "-lc",
+        "cd supabase && source ../scripts/ensure-supabase-cli-session.sh && npx --yes supabase@latest db push"
+      ],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": true,
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Supabase: Generate Types",
+      "type": "shell",
+      "command": "bash",
+      "args": [
+        "-lc",
+        "cd supabase && source ../scripts/ensure-supabase-cli-session.sh && npx --yes supabase@latest gen types --lang typescript > ../src/types/supabase.ts"
+      ],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Supabase: Full Workflow",
+      "dependsOrder": "sequence",
+      "dependsOn": ["Supabase: Link Project", "Supabase: List Migrations"]
+    }
+  ]
+}

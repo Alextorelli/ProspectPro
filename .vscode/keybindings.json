@@ -2,19 +2,25 @@
   {
     "key": "ctrl+shift+s",
     "command": "workbench.action.terminal.sendSequence",
-    "args": { "text": "supabase functions serve\n" },
+    "args": {
+      "text": "cd /workspaces/ProspectPro/supabase && source ../scripts/ensure-supabase-cli-session.sh && npx --yes supabase@latest functions serve --no-verify-jwt --debug\n"
+    },
     "when": "terminalFocus"
   },
   {
     "key": "ctrl+shift+d",
     "command": "workbench.action.terminal.sendSequence",
-    "args": { "text": "supabase functions deploy " },
+    "args": {
+      "text": "cd /workspaces/ProspectPro/supabase && source ../scripts/ensure-supabase-cli-session.sh && npx --yes supabase@latest functions deploy "
+    },
     "when": "terminalFocus"
   },
   {
     "key": "ctrl+shift+l",
     "command": "workbench.action.terminal.sendSequence",
-    "args": { "text": "supabase functions logs " },
+    "args": {
+      "text": "cd /workspaces/ProspectPro/supabase && source ../scripts/ensure-supabase-cli-session.sh && npx --yes supabase@latest functions logs "
+    },
     "when": "terminalFocus"
   },
   {

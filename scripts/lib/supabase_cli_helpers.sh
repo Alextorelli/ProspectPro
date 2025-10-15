@@ -142,3 +142,70 @@ pp_supabase_db_push() {
   pp_require_repo_root || return 1
   prospectpro_supabase_cli db push "$@"
 }
+
+# Convenience helpers aligned with terminal usage --------------------------------
+
+supabase_setup() {
+  local target="${PROSPECTPRO_REPO_ROOT}/supabase"
+  if [[ ! -d "$target" ]]; then
+    pp_fail 1 "❌ Supabase directory not found at $target"
+  fi
+
+  if [[ "$PWD" != "$target" ]]; then
+    cd "$target" || return 1
+  fi
+
+  # shellcheck source=/workspaces/ProspectPro/scripts/ensure-supabase-cli-session.sh
+  source ../scripts/ensure-supabase-cli-session.sh
+}
+
+supabase_link() {
+  supabase_setup || return 1
+  local project_ref="${SUPABASE_PROJECT_REF:-$DEFAULT_SUPABASE_PROJECT_REF}"
+  prospectpro_supabase_cli link --project-ref "$project_ref"
+}
+
+supabase_migrations_status() {
+  supabase_setup || return 1
+  prospectpro_supabase_cli migration list "$@"
+}
+
+supabase_new_migration() {
+  supabase_setup || return 1
+  if [[ -z "${1:-}" ]]; then
+    pp_fail 1 "❌ supabase_new_migration requires a descriptive migration name."
+  fi
+  prospectpro_supabase_cli migration new "$1"
+}
+
+supabase_push() {
+  supabase_setup || return 1
+  prospectpro_supabase_cli migration list
+  prospectpro_supabase_cli db push "$@"
+}
+
+supabase_pull_schema() {
+  supabase_setup || return 1
+  local schema="${1:-public}"
+  prospectpro_supabase_cli db pull --schema "$schema"
+}
+
+supabase_generate_types() {
+  supabase_setup || return 1
+  prospectpro_supabase_cli gen types --lang typescript > ../src/types/supabase.ts
+}
+
+supabase_full_workflow() {
+  supabase_link || return 1
+  supabase_migrations_status || return 1
+  printf '%s\n' '✅ Supabase workflow complete'
+}
+
+export -f supabase_setup
+export -f supabase_link
+export -f supabase_migrations_status
+export -f supabase_new_migration
+export -f supabase_push
+export -f supabase_pull_schema
+export -f supabase_generate_types
+export -f supabase_full_workflow
