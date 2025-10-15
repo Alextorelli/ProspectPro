@@ -4,7 +4,7 @@
   "deno.enablePaths": ["./supabase/functions"],
   "deno.lint": true,
   "deno.unstable": ["bare-node-builtins", "byonm", "sloppy-imports"],
-  "deno.path": "/usr/local/bin/deno",
+  "deno.path": "/home/node/.deno/bin/deno",
   "files.associations": {
     "**/supabase/functions/**/*.ts": "typescript",
     "**/supabase/functions/**/index.ts": "typescript",
