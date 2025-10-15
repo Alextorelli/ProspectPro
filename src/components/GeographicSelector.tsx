@@ -27,6 +27,7 @@ export const GeographicSelector: React.FC<GeographicSelectorProps> = ({
   const googleMapsApiKey =
     import.meta.env.VITE_GOOGLE_MAPS_API_KEY ||
     import.meta.env.VITE_GOOGLE_PLACES_API_KEY;
+  const googleMapId = import.meta.env.VITE_GOOGLE_MAP_ID;
   // Optional dev flag: skip loading Google Maps instrumentation to avoid gen_204 noise
   const suppressMapsTelemetry =
     import.meta.env.DEV &&
@@ -321,12 +322,18 @@ export const GeographicSelector: React.FC<GeographicSelectorProps> = ({
     const center = { lat: location.lat, lng: location.lng };
 
     if (!mapRef.current) {
-      mapRef.current = new modules.Map(mapContainerRef.current, {
+      const mapOptions: google.maps.MapOptions = {
         center,
         zoom: getZoomFromRadius(radius),
         disableDefaultUI: true,
         zoomControl: true,
-      });
+      };
+
+      if (googleMapId) {
+        mapOptions.mapId = googleMapId;
+      }
+
+      mapRef.current = new modules.Map(mapContainerRef.current, mapOptions);
 
       markerRef.current = new modules.AdvancedMarkerElement({
         position: center,
