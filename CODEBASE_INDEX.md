@@ -2,7 +2,7 @@
 
 > Primary #codebase reference. Regenerate with `npm run codebase:index` before audits or deployments.
 
-_Last generated: 2025-10-15T20:49:42.826Z_
+_Last generated: 2025-10-15T21:11:21.489Z_
 
 ## Supabase Edge Functions
 
@@ -28,9 +28,11 @@ _Last generated: 2025-10-15T20:49:42.826Z_
 - [supabase/functions/business-discovery-user-aware/function.toml](supabase/functions/business-discovery-user-aware/function.toml) — Supabase function configuration
 - [supabase/functions/campaign-export-user-aware/function.toml](supabase/functions/campaign-export-user-aware/function.toml) — Supabase function configuration
 - [supabase/functions/campaign-export/function.toml](supabase/functions/campaign-export/function.toml) — Supabase function configuration
+- [supabase/functions/enrichment-business-license/function.toml](supabase/functions/enrichment-business-license/function.toml) — Supabase function configuration
 - [supabase/functions/enrichment-hunter/function.toml](supabase/functions/enrichment-hunter/function.toml) — Supabase function configuration
 - [supabase/functions/enrichment-neverbounce/function.toml](supabase/functions/enrichment-neverbounce/function.toml) — Supabase function configuration
 - [supabase/functions/enrichment-orchestrator/function.toml](supabase/functions/enrichment-orchestrator/function.toml) — Supabase function configuration
+- [supabase/functions/enrichment-pdl/function.toml](supabase/functions/enrichment-pdl/function.toml) — Supabase function configuration
 - [supabase/functions/test-google-places/function.toml](supabase/functions/test-google-places/function.toml) — Supabase function configuration
 - [supabase/functions/test-user-deduplication/function.toml](supabase/functions/test-user-deduplication/function.toml) — Supabase function configuration
 
