@@ -2,7 +2,7 @@
 
 > Primary #codebase reference. Regenerate with `npm run codebase:index` before audits or deployments.
 
-_Last generated: 2025-10-15T19:55:59.957Z_
+_Last generated: 2025-10-15T20:44:52.510Z_
 
 ## Supabase Edge Functions
 
@@ -12,9 +12,11 @@ _Last generated: 2025-10-15T19:55:59.957Z_
 - [supabase/functions/business-discovery-user-aware/index.ts](supabase/functions/business-discovery-user-aware/index.ts) — Legacy synchronous discovery retained for backward compatibility
 - [supabase/functions/campaign-export-user-aware/index.ts](supabase/functions/campaign-export-user-aware/index.ts) — Authenticated campaign export handler
 - [supabase/functions/campaign-export/index.ts](supabase/functions/campaign-export/index.ts) — Supabase Edge Function module
+- [supabase/functions/enrichment-business-license/index.ts](supabase/functions/enrichment-business-license/index.ts) — Professional licensing enrichment module
 - [supabase/functions/enrichment-hunter/index.ts](supabase/functions/enrichment-hunter/index.ts) — Hunter.io email discovery wrapper with caching
 - [supabase/functions/enrichment-neverbounce/index.ts](supabase/functions/enrichment-neverbounce/index.ts) — NeverBounce verification helper
 - [supabase/functions/enrichment-orchestrator/index.ts](supabase/functions/enrichment-orchestrator/index.ts) — Central enrichment coordinator calling Hunter, NeverBounce, licensing
+- [supabase/functions/enrichment-pdl/index.ts](supabase/functions/enrichment-pdl/index.ts) — PDL enrichment logic for enterprise compliance
 - [supabase/functions/test-google-places/index.ts](supabase/functions/test-google-places/index.ts) — Standalone Google Places API test harness
 - [supabase/functions/test-user-deduplication/index.ts](supabase/functions/test-user-deduplication/index.ts) — Supabase Edge Function module
 
