@@ -1,21 +1,12 @@
 {
-  // === SUPABASE-FIRST CONFIGURATION ===
   "deno.enable": true,
   "deno.enablePaths": ["./supabase/functions"],
   "deno.lint": true,
   "deno.unstable": ["bare-node-builtins", "byonm", "sloppy-imports"],
   "deno.path": "/home/node/.deno/bin/deno",
-  "files.associations": {
-    "**/supabase/functions/**/*.ts": "typescript",
-    "**/supabase/functions/**/index.ts": "typescript",
-    "supabase/migrations/*.sql": "sql",
-    "*.sql": "sql"
-  },
   "supabase.projectRef": "sriycekxdqnesdsgwiuc",
   "supabase.workspaceFolder": "${workspaceFolder}",
   "supabase.functions.autoWatch": true,
-
-  // === GITHUB COPILOT COST OPTIMIZATIONS (40% token reduction) ===
   "github.copilot.enable": {
     "*": true,
     "plaintext": false,
@@ -24,46 +15,85 @@
   },
   "github.copilot.editor.enableCodeActions": true,
   "github.copilot.inlineSuggest.enable": true,
+  "github.copilot.chat.codeGeneration.useInstructionFiles": true,
+  "github.copilot.chat.agent.runTasks": true,
+  "github.copilot.chat.agent.autoFix": false,
+  "github.copilot.chat.historyCount": 3,
   "github.copilot.chat.welcomeMessage": "never",
   "github.copilot.chat.localeOverride": "en",
-  "github.copilot.chat.historyCount": 3,
-  "github.copilot.chat.completionPhrasesEnabled": false,
   "github.copilot.chat.dynamicContextTrailingLength": 150,
   "github.copilot.advanced.setAutoCompletionTriggerThreshold": 150,
   "github.copilot.advanced": {
     "debug.overrideEngine": "gpt-4",
     "debug.useNodeFetcher": true
   },
-
-  // === PERFORMANCE OPTIMIZATIONS (50% faster) ===
-  "search.searchOnType": false,
-  "editor.minimap.enabled": false,
-  "typescript.suggest.autoImports": false,
+  "chat.agent.maxRequests": 5,
+  "chat.editing.autoAcceptDelay": 100,
+  "chat.useAgentsMdFile": true,
+  "chat.instructionsFilesLocations": {
+    ".github": true,
+    ".vscode/context": true,
+    ".vscode/prompts": true
+  },
+  "chat.promptFiles": true,
+  "chat.promptFilesLocations": {
+    ".github/prompts": true,
+    ".vscode/prompts": true
+  },
+  "chat.checkpoints.enabled": true,
+  "chat.checkpoints.showFileChanges": true,
+  "typescript.preferences.importModuleSpecifier": "relative",
+  "typescript.updateImportsOnFileMove.enabled": "always",
+  "typescript.suggest.autoImports": true,
   "typescript.preferences.includePackageJsonAutoImports": "on",
+  "search.searchOnType": false,
   "editor.suggestOnTriggerCharacters": false,
   "editor.acceptSuggestionOnCommitCharacter": false,
-
-  // === EDITOR OPTIMIZATIONS ===
+  "editor.minimap.enabled": false,
   "editor.formatOnSave": true,
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit",
     "source.organizeImports": "explicit"
   },
-
-  // === FILE WATCHING EXCLUSIONS (Memory optimization) ===
+  "files.associations": {
+    "**/supabase/functions/**/*.ts": "typescript",
+    "**/supabase/functions/**/index.ts": "typescript",
+    "supabase/migrations/*.sql": "sql",
+    "*.sql": "sql",
+    "*.mdx": "markdown",
+    ".env*": "dotenv",
+    "mcp-config.json": "jsonc",
+    "copilot-instructions.md": "markdown"
+  },
+  "explorer.fileNesting.enabled": true,
+  "explorer.fileNesting.expand": false,
+  "explorer.fileNesting.patterns": {
+    "*.ts": "${capture}.js, ${capture}.d.ts, ${capture}.test.ts",
+    "*.tsx": "${capture}.test.tsx",
+    "package.json": "package-lock.json, tsconfig.json, vercel.json",
+    ".env": ".env.*, .env.local, .env.example, .env.vercel"
+  },
   "files.watcherExclude": {
+    "**/supabase/.temp/**": true,
     "**/node_modules/**": true,
     "**/mcp-servers/node_modules/**": true,
     "**/.git/objects/**": true,
     "**/.git/subtree-cache/**": true,
-    "**/target/**": true,
     "**/.deno_lsp/**": true,
+    "**/dist/**": true,
     "**/archive/**": true,
     "**/logs/**": true,
     "**/.vscode/extensions/**": true
   },
-
-  // === INTELLIGENT CONTEXT MANAGEMENT ===
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/dist": true,
+    "**/.git": true,
+    "**/supabase/.temp": true,
+    "**/archive": true,
+    "**/mcp-servers/logs": true
+  },
   "ai.contextFiles": [
     "supabase/functions/*/index.ts",
     "CODEBASE_INDEX.md",
@@ -79,16 +109,12 @@
     ".deno_lsp/**",
     "*.log"
   ],
-
-  // === GIT OPTIMIZATIONS ===
   "git.ignoreLimitWarning": true,
-  "git.autofetch": false,
+  "git.autofetch": true,
   "git.confirmSync": false,
   "git.enableSmartCommit": true,
   "git.fetchOnPull": true,
   "git.mergeEditor": false,
-
-  // === MCP SERVER OPTIMIZATIONS ===
   "mcp.enable": true,
   "mcp.servers": {
     "prospectpro-production": {
@@ -114,18 +140,23 @@
       "maxMemory": "128MB"
     }
   },
-
-  // === TERMINAL OPTIMIZATIONS ===
+  "terminal.integrated.cwd": "${workspaceFolder}",
   "terminal.integrated.enableMultiLinePasteWarning": "never",
   "terminal.integrated.persistentSessionReviveProcess": "never",
   "terminal.integrated.env.linux": {
     "SUPABASE_PROJECT_REF": "sriycekxdqnesdsgwiuc"
   },
+  "terminal.integrated.profiles.linux": {
+    "supabase": {
+      "path": "/bin/bash",
+      "args": ["-c", "cd ${workspaceFolder}/supabase && exec bash"]
+    }
+  },
+  "tasks.showQuickPick": true,
   "chat.todoListTool.writeOnly": true,
   "chat.agent.todoList": {
     "position": "default"
   },
-  "tasks.showQuickPick": true,
   "sqltools.connections": [
     {
       "name": "Supabase Local",
@@ -137,5 +168,29 @@
       "username": "postgres",
       "password": "postgres"
     }
-  ]
+  ],
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.tabSize": 2
+  },
+  "[javascript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.tabSize": 2
+  },
+  "[json]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.tabSize": 2
+  },
+  "[jsonc]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.tabSize": 2
+  },
+  "[sql]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.tabSize": 2
+  },
+  "[markdown]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.wordWrap": "on"
+  }
 }

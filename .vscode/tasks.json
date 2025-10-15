@@ -2,29 +2,48 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "Supabase: Link Project",
+      "label": "Supabase: Ensure Session",
       "type": "shell",
       "command": "bash",
       "args": [
         "-lc",
-        "cd supabase && source ../scripts/ensure-supabase-cli-session.sh && npx --yes supabase@latest link --project-ref sriycekxdqnesdsgwiuc"
+        "cd supabase && source ../scripts/ensure-supabase-cli-session.sh"
       ],
       "group": "build",
       "presentation": {
+        "echo": false,
+        "reveal": "silent",
+        "focus": false,
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Supabase: Link Project",
+      "type": "shell",
+      "command": "npm",
+      "args": ["run", "supabase:link"],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "group": "build",
+      "dependsOn": "Supabase: Ensure Session",
+      "presentation": {
         "echo": true,
         "reveal": "always",
+        "focus": false,
         "panel": "shared"
       }
     },
     {
       "label": "Supabase: List Migrations",
       "type": "shell",
-      "command": "bash",
-      "args": [
-        "-lc",
-        "cd supabase && source ../scripts/ensure-supabase-cli-session.sh && npx --yes supabase@latest migration list"
-      ],
+      "command": "npm",
+      "args": ["run", "supabase:migrations:list"],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
       "group": "build",
+      "dependsOn": "Supabase: Ensure Session",
       "presentation": {
         "echo": true,
         "reveal": "always",
@@ -34,28 +53,29 @@
     {
       "label": "Supabase: Push Database",
       "type": "shell",
-      "command": "bash",
-      "args": [
-        "-lc",
-        "cd supabase && source ../scripts/ensure-supabase-cli-session.sh && npx --yes supabase@latest db push"
-      ],
+      "command": "npm",
+      "args": ["run", "supabase:db:push"],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
       "group": "build",
+      "dependsOn": "Supabase: Ensure Session",
       "presentation": {
         "echo": true,
         "reveal": "always",
-        "focus": true,
         "panel": "shared"
       }
     },
     {
       "label": "Supabase: Generate Types",
       "type": "shell",
-      "command": "bash",
-      "args": [
-        "-lc",
-        "cd supabase && source ../scripts/ensure-supabase-cli-session.sh && npx --yes supabase@latest gen types --lang typescript > ../src/types/supabase.ts"
-      ],
+      "command": "npm",
+      "args": ["run", "supabase:types"],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
       "group": "build",
+      "dependsOn": "Supabase: Ensure Session",
       "presentation": {
         "echo": true,
         "reveal": "always",
@@ -65,12 +85,13 @@
     {
       "label": "Supabase: Pull Public Schema",
       "type": "shell",
-      "command": "bash",
-      "args": [
-        "-lc",
-        "cd supabase && source ../scripts/ensure-supabase-cli-session.sh && npx --yes supabase@latest db pull --schema public"
-      ],
+      "command": "npm",
+      "args": ["run", "supabase:db:pull"],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
       "group": "build",
+      "dependsOn": "Supabase: Ensure Session",
       "presentation": {
         "echo": true,
         "reveal": "always",
@@ -80,18 +101,38 @@
     {
       "label": "Supabase: Full Workflow",
       "dependsOrder": "sequence",
-      "dependsOn": ["Supabase: Link Project", "Supabase: List Migrations"]
+      "dependsOn": [
+        "Supabase: Ensure Session",
+        "Supabase: Link Project",
+        "Supabase: List Migrations"
+      ]
     },
     {
-      "label": "Edge Functions: Serve Local (Debug Mode)",
+      "label": "Database: Create Migration",
       "type": "shell",
       "command": "bash",
       "args": [
         "-lc",
-        "cd supabase && source ../scripts/ensure-supabase-cli-session.sh && npx --yes supabase@latest functions serve --no-verify-jwt --debug"
+        "cd supabase && source ../scripts/ensure-supabase-cli-session.sh && npx --yes supabase@latest migration new ${input:migrationName}"
       ],
       "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Supabase: Serve Local Functions",
+      "type": "shell",
+      "command": "npm",
+      "args": ["run", "edge:serve"],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "group": "build",
       "isBackground": true,
+      "dependsOn": "Supabase: Ensure Session",
       "presentation": {
         "echo": true,
         "reveal": "always",
@@ -102,30 +143,47 @@
       "problemMatcher": []
     },
     {
-      "label": "Edge Functions: Deploy Critical Set",
+      "label": "Edge Functions: Deploy Function",
       "type": "shell",
       "command": "bash",
       "args": [
         "-lc",
-        "cd supabase && source ../scripts/ensure-supabase-cli-session.sh && npx --yes supabase@latest functions deploy business-discovery-background --no-verify-jwt && npx --yes supabase@latest functions deploy enrichment-orchestrator"
+        "cd supabase && source ../scripts/ensure-supabase-cli-session.sh && npx --yes supabase@latest functions deploy ${input:functionName} --no-verify-jwt"
       ],
       "group": "build",
+      "dependsOn": "Supabase: Ensure Session",
       "presentation": {
         "echo": true,
         "reveal": "always",
-        "panel": "shared",
-        "group": "edge-functions"
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Edge Functions: Deploy Critical Set",
+      "type": "shell",
+      "command": "npm",
+      "args": ["run", "deploy:critical"],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "group": "build",
+      "dependsOn": "Supabase: Ensure Session",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "panel": "shared"
       }
     },
     {
       "label": "Edge Functions: Deploy Discovery Group",
       "type": "shell",
-      "command": "bash",
-      "args": [
-        "-lc",
-        "cd supabase && source ../scripts/ensure-supabase-cli-session.sh && npx --yes supabase@latest functions deploy business-discovery-background --no-verify-jwt && npx --yes supabase@latest functions deploy business-discovery-optimized && npx --yes supabase@latest functions deploy business-discovery-user-aware"
-      ],
+      "command": "npm",
+      "args": ["run", "deploy:discovery"],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
       "group": "build",
+      "dependsOn": "Supabase: Ensure Session",
       "presentation": {
         "echo": true,
         "reveal": "always",
@@ -135,12 +193,13 @@
     {
       "label": "Edge Functions: Deploy Enrichment Group",
       "type": "shell",
-      "command": "bash",
-      "args": [
-        "-lc",
-        "cd supabase && source ../scripts/ensure-supabase-cli-session.sh && npx --yes supabase@latest functions deploy enrichment-orchestrator && npx --yes supabase@latest functions deploy enrichment-hunter && npx --yes supabase@latest functions deploy enrichment-neverbounce && npx --yes supabase@latest functions deploy enrichment-business-license && npx --yes supabase@latest functions deploy enrichment-pdl"
-      ],
+      "command": "npm",
+      "args": ["run", "deploy:enrichment"],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
       "group": "build",
+      "dependsOn": "Supabase: Ensure Session",
       "presentation": {
         "echo": true,
         "reveal": "always",
@@ -150,12 +209,13 @@
     {
       "label": "Edge Functions: Deploy Export Functions",
       "type": "shell",
-      "command": "bash",
-      "args": [
-        "-lc",
-        "cd supabase && source ../scripts/ensure-supabase-cli-session.sh && npx --yes supabase@latest functions deploy campaign-export-user-aware"
-      ],
+      "command": "npm",
+      "args": ["run", "deploy:exports"],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
       "group": "build",
+      "dependsOn": "Supabase: Ensure Session",
       "presentation": {
         "echo": true,
         "reveal": "always",
@@ -168,9 +228,10 @@
       "command": "bash",
       "args": [
         "-lc",
-        "cd supabase && source ../scripts/ensure-supabase-cli-session.sh && npx --yes supabase@latest functions deploy test-google-places && npx --yes supabase@latest functions deploy auth-diagnostics"
+        "cd supabase && source ../scripts/ensure-supabase-cli-session.sh && npx --yes supabase@latest functions deploy test-google-places --no-verify-jwt && npx --yes supabase@latest functions deploy test-new-auth --no-verify-jwt && npx --yes supabase@latest functions deploy auth-diagnostics --no-verify-jwt"
       ],
       "group": "build",
+      "dependsOn": "Supabase: Ensure Session",
       "presentation": {
         "echo": true,
         "reveal": "always",
@@ -188,19 +249,36 @@
       ]
     },
     {
-      "label": "Edge Functions: Live Logs (All)",
+      "label": "Edge Functions: List Functions",
       "type": "shell",
-      "command": "bash",
-      "args": [
-        "-lc",
-        "cd supabase && source ../scripts/ensure-supabase-cli-session.sh && npx --yes supabase@latest functions logs --follow"
-      ],
-      "isBackground": true,
+      "command": "npm",
+      "args": ["run", "edge:list"],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
       "group": "build",
+      "dependsOn": "Supabase: Ensure Session",
       "presentation": {
         "echo": true,
         "reveal": "always",
-        "focus": true,
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Edge Functions: Live Logs (All)",
+      "type": "shell",
+      "command": "npm",
+      "args": ["run", "edge:logs"],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "isBackground": true,
+      "group": "build",
+      "dependsOn": "Supabase: Ensure Session",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
         "panel": "dedicated",
         "group": "logs"
       },
@@ -209,13 +287,14 @@
     {
       "label": "Edge Functions: Error Logs Only",
       "type": "shell",
-      "command": "bash",
-      "args": [
-        "-lc",
-        "cd supabase && source ../scripts/ensure-supabase-cli-session.sh && npx --yes supabase@latest functions logs --filter=error --follow"
-      ],
+      "command": "npm",
+      "args": ["run", "edge:logs:errors"],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
       "isBackground": true,
       "group": "build",
+      "dependsOn": "Supabase: Ensure Session",
       "presentation": {
         "echo": true,
         "reveal": "always",
@@ -225,14 +304,15 @@
       "problemMatcher": []
     },
     {
-      "label": "Edge Functions: List Functions",
+      "label": "Logs: Edge Function",
       "type": "shell",
       "command": "bash",
       "args": [
         "-lc",
-        "cd supabase && source ../scripts/ensure-supabase-cli-session.sh && npx --yes supabase@latest functions list"
+        "cd supabase && source ../scripts/ensure-supabase-cli-session.sh && npx --yes supabase@latest functions logs ${input:functionName} --follow"
       ],
       "group": "build",
+      "dependsOn": "Supabase: Ensure Session",
       "presentation": {
         "echo": true,
         "reveal": "always",
@@ -242,11 +322,11 @@
     {
       "label": "Edge Functions: Test Business Discovery (Local)",
       "type": "shell",
-      "command": "bash",
-      "args": [
-        "-lc",
-        "curl -X POST \"http://localhost:54321/functions/v1/business-discovery-background\" -H \"Content-Type: application/json\" -d '{\"businessType\":\"test\",\"location\":\"test\"}'"
-      ],
+      "command": "npm",
+      "args": ["run", "edge:test:local"],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
       "group": "test",
       "presentation": {
         "echo": true,
@@ -258,19 +338,224 @@
       "label": "Edge Functions: Full Development Workflow",
       "dependsOrder": "sequence",
       "dependsOn": [
+        "Supabase: Ensure Session",
         "Supabase: Link Project",
         "Edge Functions: List Functions",
-        "Edge Functions: Serve Local (Debug Mode)"
+        "Supabase: Serve Local Functions"
       ]
     },
     {
       "label": "Edge Functions: Production Deploy Workflow",
       "dependsOrder": "sequence",
       "dependsOn": [
-        "Supabase: Link Project",
+        "Supabase: Ensure Session",
         "Edge Functions: Deploy Critical Set",
         "Edge Functions: Live Logs (All)"
       ]
+    },
+    {
+      "label": "Test: Run Database Tests",
+      "type": "shell",
+      "command": "npm",
+      "args": ["run", "supabase:test:db"],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "group": "test",
+      "dependsOn": "Supabase: Ensure Session",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Test: Run Edge Function Tests",
+      "type": "shell",
+      "command": "npm",
+      "args": ["run", "supabase:test:functions"],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "group": "test",
+      "dependsOn": "Supabase: Ensure Session",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Test: Campaign Validation",
+      "type": "shell",
+      "command": "bash",
+      "args": [
+        "-lc",
+        "${workspaceFolder}/scripts/campaign-validation.sh ${input:sessionJWT}"
+      ],
+      "group": "test",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Test: Auth Patterns",
+      "type": "shell",
+      "command": "bash",
+      "args": [
+        "-lc",
+        "${workspaceFolder}/scripts/test-auth-patterns.sh ${input:sessionJWT}"
+      ],
+      "group": "test",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Diagnostics: Full Campaign",
+      "type": "shell",
+      "command": "bash",
+      "args": [
+        "-lc",
+        "${workspaceFolder}/scripts/edge-function-diagnostics.sh ${input:sessionJWT}"
+      ],
+      "group": "test",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "MCP: Start All Servers",
+      "type": "shell",
+      "command": "npm",
+      "args": ["run", "mcp:start"],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "group": "build",
+      "isBackground": true,
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "new"
+      }
+    },
+    {
+      "label": "Build: Frontend Production",
+      "type": "shell",
+      "command": "npm",
+      "args": ["run", "build"],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": ["$tsc", "$eslint-stylish"]
+    },
+    {
+      "label": "Deploy: Vercel Production",
+      "type": "shell",
+      "command": "bash",
+      "args": ["-lc", "cd dist && vercel --prod"],
+      "group": "build",
+      "dependsOn": "Build: Frontend Production",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Docs: Update System Reference",
+      "type": "shell",
+      "command": "npm",
+      "args": ["run", "docs:update"],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Docs: Update Codebase Index",
+      "type": "shell",
+      "command": "npm",
+      "args": ["run", "codebase:index"],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Workspace: Validate Configuration",
+      "type": "shell",
+      "command": "bash",
+      "args": [
+        "-lc",
+        "${workspaceFolder}/.vscode/validate-workspace-config.sh"
+      ],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "panel": "shared"
+      }
+    }
+  ],
+  "inputs": [
+    {
+      "id": "functionName",
+      "type": "pickString",
+      "description": "Supabase Edge Function",
+      "options": [
+        "auth-diagnostics",
+        "business-discovery-background",
+        "business-discovery-deduplication",
+        "business-discovery-optimized",
+        "business-discovery-user-aware",
+        "campaign-export",
+        "campaign-export-user-aware",
+        "enrichment-business-license",
+        "enrichment-cobalt",
+        "enrichment-hunter",
+        "enrichment-neverbounce",
+        "enrichment-orchestrator",
+        "enrichment-pdl",
+        "test-google-places",
+        "test-new-auth",
+        "test-user-deduplication"
+      ],
+      "default": "business-discovery-background"
+    },
+    {
+      "id": "migrationName",
+      "type": "promptString",
+      "description": "Database migration name"
+    },
+    {
+      "id": "sessionJWT",
+      "type": "promptString",
+      "description": "Supabase session JWT (required for authenticated tests)"
     }
   ]
 }

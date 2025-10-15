@@ -1,40 +1,74 @@
 [
   {
     "key": "ctrl+shift+s",
-    "command": "workbench.action.terminal.sendSequence",
-    "args": {
-      "text": "cd /workspaces/ProspectPro/supabase && source ../scripts/ensure-supabase-cli-session.sh && npx --yes supabase@latest functions serve --no-verify-jwt --debug\n"
-    },
-    "when": "terminalFocus"
+    "command": "workbench.action.tasks.runTask",
+    "args": "Supabase: Serve Local Functions",
+    "when": "!terminalFocus"
   },
   {
     "key": "ctrl+shift+d",
-    "command": "workbench.action.terminal.sendSequence",
-    "args": {
-      "text": "cd /workspaces/ProspectPro/supabase && source ../scripts/ensure-supabase-cli-session.sh && npx --yes supabase@latest functions deploy "
-    },
-    "when": "terminalFocus"
+    "command": "workbench.action.tasks.runTask",
+    "args": "Edge Functions: Deploy Function",
+    "when": "!terminalFocus"
   },
   {
     "key": "ctrl+shift+l",
-    "command": "workbench.action.terminal.sendSequence",
-    "args": {
-      "text": "cd /workspaces/ProspectPro/supabase && source ../scripts/ensure-supabase-cli-session.sh && npx --yes supabase@latest functions logs "
-    },
-    "when": "terminalFocus"
+    "command": "workbench.action.tasks.runTask",
+    "args": "Logs: Edge Function",
+    "when": "!terminalFocus"
   },
   {
     "key": "ctrl+shift+m",
-    "command": "workbench.action.terminal.sendSequence",
-    "args": {
-      "text": "cd /workspaces/ProspectPro/mcp-servers && npm run start:production\n"
-    },
-    "when": "terminalFocus"
+    "command": "workbench.action.tasks.runTask",
+    "args": "MCP: Start All Servers",
+    "when": "!terminalFocus"
+  },
+  {
+    "key": "ctrl+shift+b",
+    "command": "workbench.action.tasks.runTask",
+    "args": "Build: Frontend Production",
+    "when": "!terminalFocus"
+  },
+  {
+    "key": "ctrl+shift+f5",
+    "command": "workbench.action.tasks.runTask",
+    "args": "Deploy: Vercel Production",
+    "when": "!terminalFocus"
+  },
+  {
+    "key": "ctrl+shift+e",
+    "command": "workbench.action.tasks.runTask",
+    "args": "Supabase: Ensure Session",
+    "when": "!terminalFocus"
+  },
+  {
+    "key": "ctrl+shift+t",
+    "command": "workbench.action.tasks.runTask",
+    "args": "Test: Campaign Validation",
+    "when": "!terminalFocus"
+  },
+  {
+    "key": "ctrl+shift+a",
+    "command": "workbench.action.tasks.runTask",
+    "args": "Test: Auth Patterns",
+    "when": "!terminalFocus"
+  },
+  {
+    "key": "ctrl+shift+i",
+    "command": "workbench.action.tasks.runTask",
+    "args": "Docs: Update Codebase Index",
+    "when": "!terminalFocus"
   },
   {
     "key": "ctrl+shift+v",
-    "command": "workbench.action.terminal.sendSequence",
-    "args": { "text": "cd public && vercel --prod\n" },
-    "when": "terminalFocus"
+    "command": "workbench.action.tasks.runTask",
+    "args": "Workspace: Validate Configuration",
+    "when": "!terminalFocus"
+  },
+  {
+    "key": "f5",
+    "command": "workbench.action.tasks.runTask",
+    "args": "Supabase: Serve Local Functions",
+    "when": "!inDebugMode && !terminalFocus"
   }
 ]
