@@ -29,6 +29,7 @@
 - **Google Place Details API**: Complete phone/website verification (100% coverage)
 - **Hunter.io API**: Professional email discovery with confidence scoring ($0.034/search)
 - **NeverBounce API**: Real-time email deliverability verification (95% accuracy, $0.008/verification)
+- **Cobalt Intelligence SOS API**: Nationwide Secretary of State filings with officer data (cache-first with live fallback)
 - **Executive Contact Discovery**: C-suite contacts for Enterprise tier ($1.00 per verified contact)
 - **Professional Licensing**: State licensing boards (CPA, Healthcare, Legal)
 - **Chamber of Commerce**: Membership verification and directory contacts
@@ -253,6 +254,7 @@ const BUSINESS_CATEGORIES = {
 - ✅ Legacy `business-discovery-user-aware` remains available for backward compatibility
 - ✅ Database tables created with proper RLS policies and user linking
 - ✅ API integrations (Google Places, Foursquare, Hunter.io, Census) configured
+- ✅ Cobalt Intelligence SOS provider delivers nationwide filings and officer data with cache-first lookups
 - ✅ Smart deployment script handles build and deploy process
 - ✅ MECE taxonomy integration with 16 categories and 300+ business types
 - ✅ User authentication with anonymous session support
@@ -407,7 +409,7 @@ curl -I https://prospect-fyhedobh1-appsmithery.vercel.app
 - [ ] Frontend publishable key (`sb_publishable_*`) matches Supabase dashboard
 - [ ] Frontend/services forward Supabase session JWTs on authenticated requests
 - [ ] RLS policies created for campaigns, leads, dashboard_exports tables with user_id and session_user_id columns
-- [ ] Edge Function secrets contain: GOOGLE_PLACES_API_KEY, HUNTER_IO_API_KEY, NEVERBOUNCE_API_KEY, FOURSQUARE_API_KEY
+- [ ] Edge Function secrets contain: GOOGLE_PLACES_API_KEY, HUNTER_IO_API_KEY, NEVERBOUNCE_API_KEY, FOURSQUARE_API_KEY, COBALT_INTELLIGENCE_API_KEY
 - [ ] Database tables exist with user columns: campaigns, leads, dashboard_exports, campaign_analytics view
 - [ ] Custom domain prospect-fyhedobh1-appsmithery.vercel.app accessible and properly linked
 - [ ] Cache headers set to `public, max-age=0, s-maxage=0, must-revalidate`
@@ -521,6 +523,7 @@ cd /workspaces/ProspectPro/supabase && npx --yes supabase@latest functions logs 
 - **Google Places API**: Business discovery integrated in Edge Functions
 - **Hunter.io**: Email discovery in Edge Functions
 - **NeverBounce**: Email verification in Edge Functions
+- **Cobalt Intelligence SOS**: Nationwide Secretary of State verification with officer extraction
 - **Supabase Database**: Native integration with campaigns and leads tables
 - **Supabase Real-time**: Ready for live updates and notifications
 - **Static Hosting**: Cloud Storage, Vercel, or Netlify deployment
