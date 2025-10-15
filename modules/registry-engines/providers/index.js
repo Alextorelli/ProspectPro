@@ -4,16 +4,21 @@
  */
 
 // Import all providers
-const CaliforniaSOSProvider = require("./california-sos-provider");
-const NewYorkSOSProvider = require("./newyork-sos-provider");
-const ProPublicaProvider = require("./propublica-provider");
-const SECEdgarProvider = require("./sec-edgar-provider");
-const USPTOProvider = require("./uspto-provider");
-const CompaniesHouseUKProvider = require("./companies-house-uk-provider");
+// eslint-disable-next-line no-eval
+const localRequire = eval("require");
+
+const CaliforniaSOSProvider = localRequire("./california-sos-provider");
+const CobaltSOSProvider = localRequire("./cobalt-sos-provider");
+const NewYorkSOSProvider = localRequire("./newyork-sos-provider");
+const ProPublicaProvider = localRequire("./propublica-provider");
+const SECEdgarProvider = localRequire("./sec-edgar-provider");
+const USPTOProvider = localRequire("./uspto-provider");
+const CompaniesHouseUKProvider = localRequire("./companies-house-uk-provider");
 
 // Provider registry
 const AVAILABLE_PROVIDERS = {
   "california-sos": CaliforniaSOSProvider,
+  "cobalt-sos": CobaltSOSProvider,
   "newyork-sos": NewYorkSOSProvider,
   propublica: ProPublicaProvider,
   "sec-edgar": SECEdgarProvider,
@@ -57,6 +62,9 @@ function createAllProviders(config = {}) {
         case "california-sos":
           instances[name] = new ProviderClass(providerConfig.apiKey);
           break;
+        case "cobalt-sos":
+          instances[name] = new ProviderClass(providerConfig);
+          break;
         case "newyork-sos":
           instances[name] = new ProviderClass(providerConfig.apiKey);
           break;
@@ -96,6 +104,8 @@ function createProvider(name, config = {}) {
   switch (name) {
     case "california-sos":
       return new ProviderClass(config.apiKey);
+    case "cobalt-sos":
+      return new ProviderClass(config);
     case "newyork-sos":
       return new ProviderClass(config.apiKey);
     case "propublica":
