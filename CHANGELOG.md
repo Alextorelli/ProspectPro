@@ -5,6 +5,30 @@ All notable changes to ProspectPro will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.4.1] - 2025-10-15 - Workspace Configuration Validation & Git Workflow
+
+### Added
+
+- **Workspace Validation Script:** `.vscode/validate-workspace-config.sh` performs comprehensive validation of tasks, settings, keybindings, MCP servers, Edge Functions, and npm scripts against ProspectPro v4.3 standards.
+- **Automated Task Management:** Task definitions now use npm script references for consistency and leverage reusable inputs for function deployment and authenticated tests.
+- **Enhanced Keybindings:** Replaced legacy terminal sequences with task-based keyboard shortcuts for serve, deploy, logs, validation, and diagnostics workflows.
+
+### Changed
+
+- **Tasks Configuration:** Rebuilt `.vscode/tasks.json` around npm-backed Supabase flows with proper authentication dependencies and input pickers aligned to current edge function roster.
+- **Settings Normalization:** Converted `.vscode/settings.json` to strict JSON format while preserving Deno, Supabase, MCP, and Copilot configurations required for semantic search alignment.
+- **Keybindings Update:** Migrated from `sendSequence` terminal commands to `runTask` actions for better integration with VS Code task runner.
+
+### Fixed
+
+- **Git Branch Divergence:** Resolved rebase conflict between local workspace updates and remote webhook configuration changes, ensuring clean commit history.
+- **Settings Validation:** Corrected JSON formatting issues and adjusted configuration values to match VS Code's supported ranges and formatter options.
+
+### Notes
+
+- Run `Workspace: Validate Configuration` task after workspace automation changes to catch configuration drift immediately.
+- All validation checks now pass, confirming alignment with ProspectPro v4.3 architecture and tooling.
+
 ## [4.4.0] - 2025-10-13 - User-Aware Deduplication & Billing Metrics
 
 ### Added
