@@ -4,6 +4,7 @@ const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
     "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
 serve(async (req) => {
@@ -32,38 +33,69 @@ serve(async (req) => {
       );
     }
 
-    // Test Google Places API with a simple query
-    const testQuery = "coffee shop in Seattle, WA";
-    const url = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${encodeURIComponent(
-      testQuery
+    // Accept payload to replicate campaign searches
+    const payload = await req.json().catch(() => ({} as any));
+    const businessType =
+      payload.businessType || payload.searchTerms || "coffee shop";
+    const searchTerms = payload.searchTerms || businessType;
+    const location = payload.location || "Seattle, WA";
+    const radiusMiles = Number(payload.radiusMiles ?? 5);
+
+    // Compose a Text Search query matching campaign style: "{terms} in {location}"
+    const textQuery = `${searchTerms} in ${location}`;
+
+    const textUrl = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${encodeURIComponent(
+      textQuery
     )}&key=${apiKey}`;
 
-    console.log(`🔍 Testing Google Places API with query: ${testQuery}`);
+    console.log(`🔍 Text Search: ${textQuery}`);
 
-    const response = await fetch(url);
-    const data = await response.json();
+    const textRes = await fetch(textUrl);
+    const textData = await textRes.json();
+    const textCount = Array.isArray(textData.results)
+      ? textData.results.length
+      : 0;
 
-    console.log(`📊 Google Places Response Status: ${data.status}`);
-    console.log(`📊 Results Count: ${data.results?.length || 0}`);
-
-    if (data.error_message) {
-      console.log(`⚠️ Error Message: ${data.error_message}`);
+    // Try nearby search centered on geocoded location for radiusMiles
+    // First geocode the location to lat/lng (using Places textsearch first result as a simple geocode)
+    let lat: number | null = null;
+    let lng: number | null = null;
+    if (textData.results?.[0]?.geometry?.location) {
+      lat = textData.results[0].geometry.location.lat;
+      lng = textData.results[0].geometry.location.lng;
     }
+
+    let nearbyCount = 0;
+    let nearbySample: any[] = [];
+    if (lat != null && lng != null) {
+      const radiusMeters = Math.max(
+        100,
+        Math.min(50000, Math.round(radiusMiles * 1609.34))
+      );
+      const nearbyUrl = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?keyword=${encodeURIComponent(
+        businessType
+      )}&location=${lat},${lng}&radius=${radiusMeters}&key=${apiKey}`;
+      console.log(`📍 Nearby Search @ ${lat},${lng} within ${radiusMeters}m`);
+      const nearRes = await fetch(nearbyUrl);
+      const nearData = await nearRes.json();
+      nearbyCount = Array.isArray(nearData.results)
+        ? nearData.results.length
+        : 0;
+      nearbySample = (nearData.results || [])
+        .slice(0, 3)
+        .map((r: any) => ({ name: r.name, place_id: r.place_id }));
+    }
+
+    const sample = (textData.results || [])
+      .slice(0, 3)
+      .map((r: any) => ({ name: r.name, place_id: r.place_id }));
 
     return new Response(
       JSON.stringify({
-        success: data.status === "OK",
-        googlePlacesStatus: data.status,
-        errorMessage: data.error_message || null,
-        resultsCount: data.results?.length || 0,
-        firstResult: data.results?.[0]
-          ? {
-              name: data.results[0].name,
-              address: data.results[0].formatted_address,
-              rating: data.results[0].rating,
-            }
-          : null,
-        rawResponse: data,
+        success: true,
+        inputs: { businessType, searchTerms, location, radiusMiles },
+        textSearch: { count: textCount, status: textData.status, sample },
+        nearbySearch: { count: nearbyCount, sample: nearbySample },
       }),
       {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
