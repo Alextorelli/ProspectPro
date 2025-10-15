@@ -11,13 +11,14 @@
  * - Development utilities
  */
 
-const { Server } = require("@modelcontextprotocol/sdk/server/index.js");
-const {
-  StdioServerTransport,
-} = require("@modelcontextprotocol/sdk/server/stdio.js");
-const { CallToolRequestSchema } = require("@modelcontextprotocol/sdk/types.js");
-const fs = require("fs");
-const path = require("path");
+import { Server } from "@modelcontextprotocol/sdk/server/index.js";
+import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
+import { CallToolRequestSchema } from "@modelcontextprotocol/sdk/types.js";
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 class DevelopmentMCPServer {
   constructor() {
@@ -669,9 +670,9 @@ module.exports = ${apiName.replace(/[^a-zA-Z0-9]/g, "")}Client;
 }
 
 // Start server if run directly
-if (require.main === module) {
+if (import.meta.url === `file://${process.argv[1]}`) {
   const server = new DevelopmentMCPServer();
   server.run().catch(console.error);
 }
 
-module.exports = DevelopmentMCPServer;
+export default DevelopmentMCPServer;
