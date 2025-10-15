@@ -1,10 +1,19 @@
 {
   // === SUPABASE-FIRST CONFIGURATION ===
-  "deno.enable": false,
-  "deno.enablePaths": ["supabase/functions"],
+  "deno.enable": true,
+  "deno.enablePaths": ["./supabase/functions"],
   "deno.lint": true,
   "deno.unstable": ["bare-node-builtins", "byonm", "sloppy-imports"],
+  "deno.path": "/usr/local/bin/deno",
+  "files.associations": {
+    "**/supabase/functions/**/*.ts": "typescript",
+    "**/supabase/functions/**/index.ts": "typescript",
+    "supabase/migrations/*.sql": "sql",
+    "*.sql": "sql"
+  },
   "supabase.projectRef": "sriycekxdqnesdsgwiuc",
+  "supabase.workspaceFolder": "${workspaceFolder}",
+  "supabase.functions.autoWatch": true,
 
   // === GITHUB COPILOT COST OPTIMIZATIONS (40% token reduction) ===
   "github.copilot.enable": {
@@ -13,6 +22,7 @@
     "markdown": false,
     "scminput": false
   },
+  "github.copilot.editor.enableCodeActions": true,
   "github.copilot.inlineSuggest.enable": true,
   "github.copilot.chat.welcomeMessage": "never",
   "github.copilot.chat.localeOverride": "en",
@@ -20,11 +30,16 @@
   "github.copilot.chat.completionPhrasesEnabled": false,
   "github.copilot.chat.dynamicContextTrailingLength": 150,
   "github.copilot.advanced.setAutoCompletionTriggerThreshold": 150,
+  "github.copilot.advanced": {
+    "debug.overrideEngine": "gpt-4",
+    "debug.useNodeFetcher": true
+  },
 
   // === PERFORMANCE OPTIMIZATIONS (50% faster) ===
   "search.searchOnType": false,
   "editor.minimap.enabled": false,
   "typescript.suggest.autoImports": false,
+  "typescript.preferences.includePackageJsonAutoImports": "on",
   "editor.suggestOnTriggerCharacters": false,
   "editor.acceptSuggestionOnCommitCharacter": false,
 
@@ -103,8 +118,24 @@
   // === TERMINAL OPTIMIZATIONS ===
   "terminal.integrated.enableMultiLinePasteWarning": "never",
   "terminal.integrated.persistentSessionReviveProcess": "never",
+  "terminal.integrated.env.linux": {
+    "SUPABASE_PROJECT_REF": "sriycekxdqnesdsgwiuc"
+  },
   "chat.todoListTool.writeOnly": true,
   "chat.agent.todoList": {
     "position": "default"
-  }
+  },
+  "tasks.showQuickPick": true,
+  "sqltools.connections": [
+    {
+      "name": "Supabase Local",
+      "driver": "PostgreSQL",
+      "previewLimit": 50,
+      "server": "127.0.0.1",
+      "port": 54322,
+      "database": "postgres",
+      "username": "postgres",
+      "password": "postgres"
+    }
+  ]
 }

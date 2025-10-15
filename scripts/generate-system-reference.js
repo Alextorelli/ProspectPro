@@ -15,14 +15,14 @@ const __dirname = path.dirname(__filename);
 
 // Configuration
 const CONFIG = {
-  outputFile: 'docs/technical/SYSTEM_REFERENCE.md',
-  version: '4.3',
-  projectName: 'ProspectPro',
-  baseDir: path.resolve(__dirname, '..'),
-  supabaseFunctionsDir: 'supabase/functions',
-  sharedDir: 'supabase/functions/_shared',
-  scriptsDir: 'scripts',
-  databaseDir: 'database/production'
+  outputFile: "docs/technical/SYSTEM_REFERENCE.md",
+  version: "4.3",
+  projectName: "ProspectPro",
+  baseDir: path.resolve(__dirname, ".."),
+  supabaseFunctionsDir: "supabase/functions",
+  sharedDir: "supabase/functions/_shared",
+  scriptsDir: "scripts",
+  databaseDir: "database/production",
 };
 
 // Module definitions

@@ -358,6 +358,21 @@ cd /workspaces/ProspectPro/supabase && npx --yes supabase@latest db pull --schem
 cd /workspaces/ProspectPro/supabase && npx --yes supabase@latest gen types --lang typescript
 ````
 
+### Official Supabase CLI References
+
+- Functions overview: https://supabase.com/docs/reference/cli/supabase-functions
+- Local serving: https://supabase.com/docs/reference/cli/supabase-functions-serve
+- Deploying functions: https://supabase.com/docs/reference/cli/supabase-functions-deploy
+
+### Edge Functions Development Workflow
+
+1. `source scripts/ensure-supabase-cli-session.sh` to refresh Supabase auth before every CLI task.
+2. Use `npm run edge:serve -- <function-slug>` for local Deno execution with live reload; stop with `Ctrl+C` once testing finishes.
+3. Validate against Supabase by running `npm run edge:deploy:test -- <function-slug>` which calls `supabase functions deploy <slug> --no-verify-jwt` for staging-style checks.
+4. Ship to production with `npm run edge:deploy -- <function-slug>` after verifying logs via `npm run edge:logs -- <function-slug>` for at least one invocation cycle.
+5. Regenerate documentation with `npm run docs:update` so `docs/technical/SYSTEM_REFERENCE.md` reflects the new function state.
+6. Confirm the frontend still communicates correctly by running the relevant curl probes from `docs/edge-auth-testing.md` using a fresh `SUPABASE_SESSION_JWT`.
+
 ### Known Issues to Avoid
 
 1. Deprecated commands: replace `db remote commit` with `db pull`.

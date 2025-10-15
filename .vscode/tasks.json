@@ -63,9 +63,214 @@
       }
     },
     {
+      "label": "Supabase: Pull Public Schema",
+      "type": "shell",
+      "command": "bash",
+      "args": [
+        "-lc",
+        "cd supabase && source ../scripts/ensure-supabase-cli-session.sh && npx --yes supabase@latest db pull --schema public"
+      ],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "panel": "shared"
+      }
+    },
+    {
       "label": "Supabase: Full Workflow",
       "dependsOrder": "sequence",
       "dependsOn": ["Supabase: Link Project", "Supabase: List Migrations"]
+    },
+    {
+      "label": "Edge Functions: Serve Local (Debug Mode)",
+      "type": "shell",
+      "command": "bash",
+      "args": [
+        "-lc",
+        "cd supabase && source ../scripts/ensure-supabase-cli-session.sh && npx --yes supabase@latest functions serve --no-verify-jwt --debug"
+      ],
+      "group": "build",
+      "isBackground": true,
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "dedicated",
+        "group": "edge-functions"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Edge Functions: Deploy Critical Set",
+      "type": "shell",
+      "command": "bash",
+      "args": [
+        "-lc",
+        "cd supabase && source ../scripts/ensure-supabase-cli-session.sh && npx --yes supabase@latest functions deploy business-discovery-background --no-verify-jwt && npx --yes supabase@latest functions deploy enrichment-orchestrator"
+      ],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "panel": "shared",
+        "group": "edge-functions"
+      }
+    },
+    {
+      "label": "Edge Functions: Deploy Discovery Group",
+      "type": "shell",
+      "command": "bash",
+      "args": [
+        "-lc",
+        "cd supabase && source ../scripts/ensure-supabase-cli-session.sh && npx --yes supabase@latest functions deploy business-discovery-background --no-verify-jwt && npx --yes supabase@latest functions deploy business-discovery-optimized && npx --yes supabase@latest functions deploy business-discovery-user-aware"
+      ],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Edge Functions: Deploy Enrichment Group",
+      "type": "shell",
+      "command": "bash",
+      "args": [
+        "-lc",
+        "cd supabase && source ../scripts/ensure-supabase-cli-session.sh && npx --yes supabase@latest functions deploy enrichment-orchestrator && npx --yes supabase@latest functions deploy enrichment-hunter && npx --yes supabase@latest functions deploy enrichment-neverbounce && npx --yes supabase@latest functions deploy enrichment-business-license && npx --yes supabase@latest functions deploy enrichment-pdl"
+      ],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Edge Functions: Deploy Export Functions",
+      "type": "shell",
+      "command": "bash",
+      "args": [
+        "-lc",
+        "cd supabase && source ../scripts/ensure-supabase-cli-session.sh && npx --yes supabase@latest functions deploy campaign-export-user-aware"
+      ],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Edge Functions: Deploy Diagnostics",
+      "type": "shell",
+      "command": "bash",
+      "args": [
+        "-lc",
+        "cd supabase && source ../scripts/ensure-supabase-cli-session.sh && npx --yes supabase@latest functions deploy test-google-places && npx --yes supabase@latest functions deploy auth-diagnostics"
+      ],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Edge Functions: Deploy All Functions",
+      "dependsOrder": "sequence",
+      "dependsOn": [
+        "Edge Functions: Deploy Discovery Group",
+        "Edge Functions: Deploy Enrichment Group",
+        "Edge Functions: Deploy Export Functions",
+        "Edge Functions: Deploy Diagnostics"
+      ]
+    },
+    {
+      "label": "Edge Functions: Live Logs (All)",
+      "type": "shell",
+      "command": "bash",
+      "args": [
+        "-lc",
+        "cd supabase && source ../scripts/ensure-supabase-cli-session.sh && npx --yes supabase@latest functions logs --follow"
+      ],
+      "isBackground": true,
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": true,
+        "panel": "dedicated",
+        "group": "logs"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Edge Functions: Error Logs Only",
+      "type": "shell",
+      "command": "bash",
+      "args": [
+        "-lc",
+        "cd supabase && source ../scripts/ensure-supabase-cli-session.sh && npx --yes supabase@latest functions logs --filter=error --follow"
+      ],
+      "isBackground": true,
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "panel": "dedicated",
+        "group": "logs"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Edge Functions: List Functions",
+      "type": "shell",
+      "command": "bash",
+      "args": [
+        "-lc",
+        "cd supabase && source ../scripts/ensure-supabase-cli-session.sh && npx --yes supabase@latest functions list"
+      ],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Edge Functions: Test Business Discovery (Local)",
+      "type": "shell",
+      "command": "bash",
+      "args": [
+        "-lc",
+        "curl -X POST \"http://localhost:54321/functions/v1/business-discovery-background\" -H \"Content-Type: application/json\" -d '{\"businessType\":\"test\",\"location\":\"test\"}'"
+      ],
+      "group": "test",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Edge Functions: Full Development Workflow",
+      "dependsOrder": "sequence",
+      "dependsOn": [
+        "Supabase: Link Project",
+        "Edge Functions: List Functions",
+        "Edge Functions: Serve Local (Debug Mode)"
+      ]
+    },
+    {
+      "label": "Edge Functions: Production Deploy Workflow",
+      "dependsOrder": "sequence",
+      "dependsOn": [
+        "Supabase: Link Project",
+        "Edge Functions: Deploy Critical Set",
+        "Edge Functions: Live Logs (All)"
+      ]
     }
   ]
 }
