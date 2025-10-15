@@ -1,5 +1,11 @@
 import { importLibrary, setOptions } from "@googlemaps/js-api-loader";
-import React, { useEffect, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
 export interface GeographicLocation {
   lat: number;
@@ -44,6 +50,7 @@ export const GeographicSelector: React.FC<GeographicSelectorProps> = ({
   const [mapStatus, setMapStatus] = useState<MapStatus>(
     googleMapsApiKey && !suppressMapsTelemetry ? "loading" : "idle"
   );
+  const [mapError, setMapError] = useState<string | null>(null);
   type MapsModules = {
     Map: typeof google.maps.Map;
     AdvancedMarkerElement: typeof google.maps.marker.AdvancedMarkerElement;
@@ -146,19 +153,27 @@ export const GeographicSelector: React.FC<GeographicSelectorProps> = ({
     }
   };
 
-  const handleRadiusChange = (newRadius: number) => {
-    setRadius(newRadius);
-    onLocationChange(location, newRadius);
-  };
+  const handleRadiusChange = useCallback(
+    (newRadius: number) => {
+      setRadius(newRadius);
+      onLocationChange(location, newRadius);
+    },
+    [location, onLocationChange]
+  );
 
-  const radiusOptions = [
-    { value: 1, label: "1 mile" },
-    { value: 5, label: "5 miles" },
-    { value: 10, label: "10 miles" },
-    { value: 25, label: "25 miles" },
-    { value: 50, label: "50 miles" },
-    { value: 100, label: "100 miles" },
-  ];
+  const radiusOptions = useMemo(
+    () => [
+      { value: 1, label: "1 mile" },
+      { value: 5, label: "5 miles" },
+      { value: 10, label: "10 miles" },
+      { value: 25, label: "25 miles" },
+      { value: 50, label: "50 miles" },
+      { value: 100, label: "100 miles" },
+    ],
+    []
+  );
+
+  const milesToMeters = useCallback((value: number) => value * 1609.34, []);
 
   // Simple map visualization using CSS
   const SimpleMapView: React.FC = () => {
@@ -256,7 +271,15 @@ export const GeographicSelector: React.FC<GeographicSelectorProps> = ({
 
     const loadLibraries = async () => {
       try {
-        setOptions({ key: googleMapsApiKey });
+        setOptions({
+          key: googleMapsApiKey,
+          ...(googleMapId ? { mapIds: [googleMapId] } : {}),
+        });
+
+        console.info("Loading Google Maps", {
+          hasKey: !!googleMapsApiKey,
+          mapId: googleMapId ? `${googleMapId.slice(0, 8)}…` : "none",
+        });
 
         const [{ Map, Circle }, { AdvancedMarkerElement }, { Geocoder }] =
           await Promise.all([
@@ -276,6 +299,7 @@ export const GeographicSelector: React.FC<GeographicSelectorProps> = ({
           AdvancedMarkerElement,
           Geocoder,
         };
+        setMapError(null);
         setMapStatus("ready");
       } catch (error) {
         if (didCancel) {
@@ -286,6 +310,9 @@ export const GeographicSelector: React.FC<GeographicSelectorProps> = ({
         mapsApiRef.current = null;
         mapsModulesRef.current = null;
         loaderPromiseRef.current = null;
+        setMapError(
+          error instanceof Error ? error.message : "Failed to load Google Maps"
+        );
         setMapStatus("error");
       }
     };
@@ -297,14 +324,14 @@ export const GeographicSelector: React.FC<GeographicSelectorProps> = ({
     };
   }, [googleMapsApiKey, suppressMapsTelemetry]);
 
-  const getZoomFromRadius = (radiusInMiles: number) => {
+  const getZoomFromRadius = useCallback((radiusInMiles: number) => {
     if (radiusInMiles <= 1) return 14;
     if (radiusInMiles <= 5) return 12;
     if (radiusInMiles <= 10) return 11;
-    if (radiusInMiles <= 25) return 10;
+    if (radiusInMiles <= 25) return 9;
     if (radiusInMiles <= 50) return 8;
     return 7;
-  };
+  }, []);
 
   useEffect(() => {
     if (mapStatus !== "ready" || !mapContainerRef.current) {
@@ -335,15 +362,22 @@ export const GeographicSelector: React.FC<GeographicSelectorProps> = ({
 
       mapRef.current = new modules.Map(mapContainerRef.current, mapOptions);
 
-      markerRef.current = new modules.AdvancedMarkerElement({
-        position: center,
-        map: mapRef.current,
-      });
+      if (modules.AdvancedMarkerElement) {
+        markerRef.current = new modules.AdvancedMarkerElement({
+          position: center,
+          map: mapRef.current,
+        });
+      } else if (maps && maps.Marker) {
+        markerRef.current = new maps.Marker({
+          position: center,
+          map: mapRef.current,
+        });
+      }
 
       circleRef.current = new modules.Circle({
         map: mapRef.current,
         center,
-        radius: radius * 1609.34,
+        radius: milesToMeters(radius),
         strokeColor: "#2563EB",
         strokeOpacity: 0.8,
         strokeWeight: 2,
@@ -353,13 +387,39 @@ export const GeographicSelector: React.FC<GeographicSelectorProps> = ({
     } else {
       mapRef.current.setCenter(center);
       mapRef.current.setZoom(getZoomFromRadius(radius));
-      if (markerRef.current) {
+      if (markerRef.current?.setPosition) {
+        markerRef.current.setPosition(center);
+      } else if (markerRef.current) {
         markerRef.current.position = center;
       }
       circleRef.current?.setCenter(center);
-      circleRef.current?.setRadius(radius * 1609.34);
+      circleRef.current?.setRadius(milesToMeters(radius));
     }
-  }, [mapStatus, location, radius]);
+  }, [
+    getZoomFromRadius,
+    googleMapId,
+    mapStatus,
+    milesToMeters,
+    radius,
+    location,
+  ]);
+
+  const MapsDiagnostics: React.FC = () => {
+    if (!import.meta.env.DEV) return null;
+    return (
+      <div className="pointer-events-auto fixed bottom-4 right-4 z-50 max-w-xs rounded-md border border-slate-300 bg-white p-3 text-[11px] shadow-lg dark:border-slate-700 dark:bg-slate-900">
+        <div className="font-semibold">Maps Diagnostics</div>
+        <div>Status: {mapStatus}</div>
+        <div>Has window.google: {String(!!window.google)}</div>
+        <div>Has maps: {String(!!window.google?.maps)}</div>
+        <div>
+          Map ID: {googleMapId ? `${googleMapId.slice(0, 8)}…` : "(none)"}
+        </div>
+        <div>Key present: {googleMapsApiKey ? "yes" : "no"}</div>
+        {mapError && <div className="text-red-500">Error: {mapError}</div>}
+      </div>
+    );
+  };
 
   return (
     <div className="grid gap-6 lg:grid-cols-[minmax(0,380px),1fr]">
@@ -518,8 +578,19 @@ export const GeographicSelector: React.FC<GeographicSelectorProps> = ({
                 {googleMapsApiKey && mapStatus === "error" && (
                   <div className="absolute inset-0 flex items-center justify-center px-4 text-center">
                     <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm font-medium text-red-600 dark:border-red-800 dark:bg-red-900/30 dark:text-red-300">
-                      Unable to load Google Maps. Please verify your API key in
-                      the environment configuration.
+                      Unable to load Google Maps.{" "}
+                      {mapError ??
+                        "Check API key, Map ID, and browser extensions."}
+                      <button
+                        type="button"
+                        className="mt-3 rounded-md border border-red-300 px-3 py-1 text-xs font-semibold text-red-600 transition hover:bg-red-100"
+                        onClick={() => {
+                          setMapError(null);
+                          setMapStatus("loading");
+                        }}
+                      >
+                        Retry
+                      </button>
                     </div>
                   </div>
                 )}
@@ -534,6 +605,8 @@ export const GeographicSelector: React.FC<GeographicSelectorProps> = ({
           </div>
         </div>
       </section>
+
+      <MapsDiagnostics />
     </div>
   );
 };
