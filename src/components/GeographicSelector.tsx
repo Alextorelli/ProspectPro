@@ -27,6 +27,12 @@ export const GeographicSelector: React.FC<GeographicSelectorProps> = ({
   const googleMapsApiKey =
     import.meta.env.VITE_GOOGLE_MAPS_API_KEY ||
     import.meta.env.VITE_GOOGLE_PLACES_API_KEY;
+  // Optional dev flag: skip loading Google Maps instrumentation to avoid gen_204 noise
+  const suppressMapsTelemetry =
+    import.meta.env.DEV &&
+    String(
+      import.meta.env.VITE_SUPPRESS_MAPS_TELEMETRY ?? "false"
+    ).toLowerCase() === "true";
 
   type MapStatus = "idle" | "loading" | "ready" | "error";
 
@@ -35,11 +41,11 @@ export const GeographicSelector: React.FC<GeographicSelectorProps> = ({
   const [address, setAddress] = useState<string>(initialLocation.address);
   const [isGeocoding, setIsGeocoding] = useState(false);
   const [mapStatus, setMapStatus] = useState<MapStatus>(
-    googleMapsApiKey ? "loading" : "idle"
+    googleMapsApiKey && !suppressMapsTelemetry ? "loading" : "idle"
   );
   type MapsModules = {
     Map: typeof google.maps.Map;
-    Marker: typeof google.maps.Marker;
+    AdvancedMarkerElement: typeof google.maps.marker.AdvancedMarkerElement;
     Circle: typeof google.maps.Circle;
     Geocoder: typeof google.maps.Geocoder;
   };
@@ -230,7 +236,12 @@ export const GeographicSelector: React.FC<GeographicSelectorProps> = ({
   const currentMapStatus = mapStatusStyles[mapStatus];
 
   useEffect(() => {
-    if (!googleMapsApiKey) {
+    if (!googleMapsApiKey || suppressMapsTelemetry) {
+      if (suppressMapsTelemetry) {
+        console.info(
+          "Google Maps loading suppressed in development (VITE_SUPPRESS_MAPS_TELEMETRY)."
+        );
+      }
       mapsApiRef.current = null;
       mapsModulesRef.current = null;
       loaderPromiseRef.current = null;
@@ -246,11 +257,12 @@ export const GeographicSelector: React.FC<GeographicSelectorProps> = ({
       try {
         setOptions({ key: googleMapsApiKey });
 
-        const [{ Map, Circle }, { Marker }, { Geocoder }] = await Promise.all([
-          importLibrary("maps"),
-          importLibrary("marker"),
-          importLibrary("geocoding"),
-        ]);
+        const [{ Map, Circle }, { AdvancedMarkerElement }, { Geocoder }] =
+          await Promise.all([
+            importLibrary("maps"),
+            importLibrary("marker"),
+            importLibrary("geocoding"),
+          ]);
 
         if (didCancel) {
           return;
@@ -260,7 +272,7 @@ export const GeographicSelector: React.FC<GeographicSelectorProps> = ({
         mapsModulesRef.current = {
           Map,
           Circle,
-          Marker,
+          AdvancedMarkerElement,
           Geocoder,
         };
         setMapStatus("ready");
@@ -282,7 +294,7 @@ export const GeographicSelector: React.FC<GeographicSelectorProps> = ({
     return () => {
       didCancel = true;
     };
-  }, [googleMapsApiKey]);
+  }, [googleMapsApiKey, suppressMapsTelemetry]);
 
   const getZoomFromRadius = (radiusInMiles: number) => {
     if (radiusInMiles <= 1) return 14;
@@ -316,10 +328,9 @@ export const GeographicSelector: React.FC<GeographicSelectorProps> = ({
         zoomControl: true,
       });
 
-      markerRef.current = new modules.Marker({
+      markerRef.current = new modules.AdvancedMarkerElement({
         position: center,
         map: mapRef.current,
-        animation: maps.Animation.DROP,
       });
 
       circleRef.current = new modules.Circle({
@@ -335,7 +346,9 @@ export const GeographicSelector: React.FC<GeographicSelectorProps> = ({
     } else {
       mapRef.current.setCenter(center);
       mapRef.current.setZoom(getZoomFromRadius(radius));
-      markerRef.current?.setPosition(center);
+      if (markerRef.current) {
+        markerRef.current.position = center;
+      }
       circleRef.current?.setCenter(center);
       circleRef.current?.setRadius(radius * 1609.34);
     }

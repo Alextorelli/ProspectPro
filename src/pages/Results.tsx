@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { useCampaignResults } from "../hooks/useCampaignResults";
 import { useCampaignStore } from "../stores/campaignStore";
@@ -58,10 +58,12 @@ export const Results: React.FC = () => {
     totalLeads,
     totalPages,
     isLoading,
+    isFetching,
     isError,
     error,
     refetch,
   } = useCampaignResults(campaignId, { page, pageSize: PAGE_SIZE });
+  const lastSyncSignatureRef = useRef<string | null>(null);
 
   // DIAGNOSTIC: Log raw hook results
   useEffect(() => {
@@ -141,6 +143,26 @@ export const Results: React.FC = () => {
       return;
     }
 
+    if (isLoading || isFetching) {
+      console.log("[Results] Skipping setCampaignLeads while loading", {
+        campaignId,
+        isLoading,
+        isFetching,
+        leadsCount: Array.isArray(leads) ? leads.length : "not-array",
+      });
+      return;
+    }
+
+    const leadSignature = `${campaignId}|${leads.length}|${
+      leads[0]?.id ?? "none"
+    }|${leads[leads.length - 1]?.id ?? "none"}`;
+
+    if (lastSyncSignatureRef.current === leadSignature) {
+      return;
+    }
+
+    lastSyncSignatureRef.current = leadSignature;
+
     console.log("[Results] About to call setCampaignLeads:", {
       campaignId,
       leadsCount: leads.length,
@@ -163,7 +185,7 @@ export const Results: React.FC = () => {
         leadsSample: Array.isArray(leads) ? leads.slice(0, 1) : null,
       });
     }
-  }, [campaignId, leads, setCampaignLeads]);
+  }, [campaignId, isFetching, isLoading, leads, setCampaignLeads]);
 
   const displayCampaign = campaign ?? currentCampaign;
   const displayLeads = leads;

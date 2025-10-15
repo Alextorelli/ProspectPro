@@ -66,6 +66,7 @@ export function useJobProgress(jobId: string | null) {
   const [progress, setProgress] = useState<JobProgress | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const pollingRef = useRef<number | null>(null);
+  const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
 
   const stopPolling = useCallback(() => {
     if (pollingRef.current !== null) {
@@ -158,22 +159,54 @@ export function useJobProgress(jobId: string | null) {
 
     void bootstrap();
 
-    const channel = supabase
-      .channel(`discovery_jobs:${jobId}`)
-      .on(
-        "postgres_changes",
-        {
-          event: "UPDATE",
-          schema: "public",
-          table: "discovery_jobs",
-          filter: `id=eq.${jobId}`,
+    const establishRealtime = async () => {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      const accessToken = session?.access_token ?? null;
+
+      const channelOptions = accessToken
+        ? { auth: { accessToken } }
+        : undefined;
+
+      const channel = supabase.channel(`discovery_jobs:${jobId}`, {
+        config: {
+          broadcast: { ack: false },
         },
-        (payload: RealtimePayload) => {
-          console.log("Real-time update:", payload.new);
-          updateFromRow(payload.new);
+        ...channelOptions,
+      });
+
+      channelRef.current = channel;
+
+      channel
+        .on(
+          "postgres_changes",
+          {
+            event: "UPDATE",
+            schema: "public",
+            table: "discovery_jobs",
+            filter: `id=eq.${jobId}`,
+          },
+          (payload: RealtimePayload) => {
+            console.log("Real-time update:", payload.new);
+            updateFromRow(payload.new);
+          }
+        )
+        .on("system", { event: "channel_error" }, (payload) => {
+          console.warn("Realtime channel error", { jobId, payload });
+          startPolling();
+        })
+        .on("system", { event: "close" }, (payload) => {
+          console.warn("Realtime channel closed", { jobId, payload });
+          startPolling();
+        });
+
+      channel.subscribe((status) => {
+        if (status === "SUBSCRIBED") {
+          stopPolling();
+          return;
         }
-      )
-      .subscribe((status) => {
+
         if (
           status === "TIMED_OUT" ||
           status === "CHANNEL_ERROR" ||
@@ -189,10 +222,16 @@ export function useJobProgress(jobId: string | null) {
           startPolling();
         }
       });
+    };
+
+    void establishRealtime();
 
     return () => {
       isMounted = false;
-      supabase.removeChannel(channel);
+      if (channelRef.current) {
+        supabase.removeChannel(channelRef.current);
+        channelRef.current = null;
+      }
       stopPolling();
     };
   }, [fetchStatus, jobId, startPolling, stopPolling, updateFromRow]);
