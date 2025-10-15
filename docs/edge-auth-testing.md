@@ -234,8 +234,12 @@ curl -sS -X POST "$SUPABASE_URL/functions/v1/campaign-export-user-aware" \
 
 ### Tail background discovery logs
 
+> **Heads up (Oct 2025):** Supabase CLI v2.51.0 removed the `functions logs` subcommand.
+> Use the Supabase dashboard (Edge Functions → Logs) for real-time output, or pin an
+> earlier 1.x CLI until Supabase publishes a replacement:
+
 ```bash
-npx supabase@latest functions logs \
+npx --yes supabase@1.179.0 functions logs \
   --project-ref "$SUPABASE_PROJECT_REF" \
   --slug business-discovery-background \
   --tail

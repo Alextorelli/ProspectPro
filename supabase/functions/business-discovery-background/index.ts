@@ -261,6 +261,111 @@ interface ScoredLead {
   };
 }
 
+const STATE_NAME_VARIANTS: Record<string, string[]> = {
+  AL: ["alabama"],
+  AK: ["alaska"],
+  AZ: ["arizona"],
+  AR: ["arkansas"],
+  CA: ["california"],
+  CO: ["colorado"],
+  CT: ["connecticut"],
+  DE: ["delaware"],
+  FL: ["florida"],
+  GA: ["georgia"],
+  HI: ["hawaii"],
+  ID: ["idaho"],
+  IL: ["illinois"],
+  IN: ["indiana"],
+  IA: ["iowa"],
+  KS: ["kansas"],
+  KY: ["kentucky"],
+  LA: ["louisiana"],
+  ME: ["maine"],
+  MD: ["maryland"],
+  MA: ["massachusetts"],
+  MI: ["michigan"],
+  MN: ["minnesota"],
+  MS: ["mississippi"],
+  MO: ["missouri"],
+  MT: ["montana"],
+  NE: ["nebraska"],
+  NV: ["nevada"],
+  NH: ["new hampshire"],
+  NJ: ["new jersey"],
+  NM: ["new mexico"],
+  NY: ["new york"],
+  NC: ["north carolina"],
+  ND: ["north dakota"],
+  OH: ["ohio"],
+  OK: ["oklahoma"],
+  OR: ["oregon"],
+  PA: ["pennsylvania"],
+  RI: ["rhode island"],
+  SC: ["south carolina"],
+  SD: ["south dakota"],
+  TN: ["tennessee"],
+  TX: ["texas"],
+  UT: ["utah"],
+  VT: ["vermont"],
+  VA: ["virginia"],
+  WA: ["washington"],
+  WV: ["west virginia"],
+  WI: ["wisconsin"],
+  WY: ["wyoming"],
+  DC: ["district of columbia", "washington dc", "dc"],
+};
+
+const US_STATE_CODES = new Set(Object.keys(STATE_NAME_VARIANTS));
+
+const STATE_NAME_TO_CODE = Object.entries(STATE_NAME_VARIANTS).reduce(
+  (acc, [code, names]) => {
+    for (const name of names) {
+      acc[name] = code;
+    }
+    return acc;
+  },
+  {} as Record<string, string>
+);
+
+const STATE_NAME_ENTRIES = Object.entries(STATE_NAME_TO_CODE).sort(
+  (a, b) => b[0].length - a[0].length
+);
+
+function extractStateCodeFromText(value?: string | null): string | undefined {
+  if (!value) return undefined;
+  const upper = value.toUpperCase();
+  const abbreviationMatch = upper.match(/\b([A-Z]{2})\b/);
+  if (abbreviationMatch) {
+    const candidate = abbreviationMatch[1];
+    if (US_STATE_CODES.has(candidate)) {
+      return candidate;
+    }
+  }
+
+  const normalized = value.toLowerCase();
+  for (const [name, code] of STATE_NAME_ENTRIES) {
+    if (normalized.includes(name)) {
+      return code;
+    }
+  }
+
+  return undefined;
+}
+
+function resolveStateForLead(
+  lead: ScoredLead,
+  config: JobConfig
+): string | undefined {
+  const candidates = [lead.address, config.location];
+  for (const candidate of candidates) {
+    const state = extractStateCodeFromText(candidate ?? undefined);
+    if (state) {
+      return state;
+    }
+  }
+  return undefined;
+}
+
 interface CensusIntelligence {
   total_establishments: number;
   density_score: number;
@@ -1553,12 +1658,15 @@ async function enrichLead(
     config.budgetLimit / Math.max(config.maxResults, 1)
   );
 
+  const stateCode = resolveStateForLead(lead, config);
+
   const body = {
     businessName: lead.businessName,
     domain,
     address: lead.address,
     phone: lead.phone,
     website: lead.website,
+    state: stateCode,
     discoverEmails: true,
     verifyEmails: config.tier.includes.verifyEmails,
     includePersonEnrichment: config.tier.includes.personEnrichment,
