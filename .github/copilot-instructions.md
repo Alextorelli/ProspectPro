@@ -206,7 +206,7 @@ const BUSINESS_CATEGORIES = {
 - ✅ Core production files: Edge Functions, static frontend, database schema
 - ✅ `/supabase/functions/` - Background discovery, enrichment, export, and diagnostics only
 - ✅ `/public/` - Static frontend with MECE taxonomy integration
-- ✅ `/database/` - Cleaned schema with security fixes applied
+- ✅ `/supabase/schema-sql/` - Cleaned schema with security fixes applied
 - ❌ NO server.js, Express routes, or Node.js backend files
 - ❌ NO Docker containers, Cloud Run configs, or build pipelines
 - ❌ NO complex deployment scripts or container orchestration
@@ -215,7 +215,7 @@ const BUSINESS_CATEGORIES = {
 
 - Edge Functions → `/supabase/functions/` folder ONLY
 - Frontend → React/Vite app in root with `/dist` build output
-- Database → `/database/` folder ONLY
+- Database → `/supabase/schema-sql/` folder ONLY
 - Documentation → `/docs/` folder ONLY
 - Archive material → `/archive/` folder ONLY
 - Codebase index → `CODEBASE_INDEX.md` (regenerate with `npm run codebase:index`)
@@ -286,7 +286,7 @@ const BUSINESS_CATEGORIES = {
 4. **"API request failed: 404" Errors**
 
    - **Root Cause**: Database RLS policies blocking anon access
-   - **Solution**: Run `/database/remove-security-definer.sql` in Supabase SQL editor
+   - **Solution**: Run `/supabase/migrations/20251008080709_security_fixes_consolidated.sql` in the Supabase SQL editor
    - **Verify**: Check policies with `SELECT * FROM campaigns WHERE business_type = 'test'`
 
 5. **Edge Function Errors**
@@ -502,7 +502,7 @@ Real-time Database Updates → Live Frontend Updates
 /supabase/functions/campaign-export # CSV export functionality
 /public/index-supabase.html # Static frontend
 /public/supabase-app.js # Frontend with Supabase client
-/database/production/001_core_schema.sql # Database schema (apply 001-004 sequentially)
+/supabase/schema-sql/001_core_schema.sql # Database schema (apply 001-004 sequentially)
 
 ```
 
@@ -515,7 +515,7 @@ Real-time Database Updates → Live Frontend Updates
 /index.html # Static frontend entry
 /src/lib/supabase.ts # Frontend Supabase client helper
 CODEBASE_INDEX.md # Auto-generated #codebase index
-/database/production/001_core_schema.sql # Database setup (see production bundle)
+/supabase/schema-sql/001_core_schema.sql # Database setup (see production bundle)
 /docs/ # Documentation
 /archive/ # Legacy files (deprecated)
 
@@ -592,7 +592,7 @@ npm run supabase:test:functions
 
 ### For Database Issues:
 
-1. Review schema in `/database/production/001_core_schema.sql`
+1. Review schema in `/supabase/schema-sql/001_core_schema.sql`
 2. Check RLS policies in Supabase dashboard
 3. Verify Edge Function database connections
 4. Test database queries in Supabase SQL editor
@@ -624,7 +624,7 @@ npm run supabase:test:functions
 1. **Frontend shows "Discovery Failed: API request failed: 404"**
 
    - Confirm publishable key (`sb_publishable_*`) in `/public/supabase-app.js` matches Supabase dashboard
-   - Verify RLS policies exist: run `/database/rls-setup.sql`
+   - Verify RLS policies exist: re-run `/supabase/schema-sql/001_core_schema.sql`
    - Test Edge Function directly with curl command above
    - Redeploy frontend after fixes: `cd public && vercel --prod`
 
@@ -657,7 +657,7 @@ npm run supabase:test:functions
 
 - **Edge Function URL**: https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/business-discovery
 - **Current Vercel URL**: https://prospect-bk0sh7f6l-alex-torellis-projects.vercel.app
-- **Database Schema**: `/database/rls-setup.sql` (verified working)
+- **Database Schema**: `/supabase/schema-sql/001_core_schema.sql` (verified working)
 - **Frontend Config**: `/public/supabase-app.js` (publishable key only; session tokens retrieved per request)
 
 **ENHANCED MCP TROUBLESHOOTING**
@@ -715,7 +715,7 @@ npm run start:troubleshooting
 - Supabase-first architecture explanations
 - Edge Function setup procedures (automated)
 - Static hosting deployment (documented)
-- Database schema explanations (in `/database/`)
+- Database schema explanations (in `/supabase/schema-sql/`)
 - Cost optimization strategies (implemented)
 - Serverless benefits (established)
 

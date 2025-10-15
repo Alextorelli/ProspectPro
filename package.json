@@ -10,7 +10,7 @@
     "clean": "rm -rf dist/ node_modules/ && echo 'Cleaned build artifacts'",
     "codebase:index": "node scripts/generate-codebase-index.js",
     "cost:analyze": "echo 'Check GitHub billing dashboard for usage trends'",
-    "db:setup": "echo 'Apply /database/production/001_core_schema.sql through 004_enrichment_cache.sql in Supabase dashboard'",
+    "db:setup": "echo 'Apply /supabase/schema-sql/001_core_schema.sql through 004_enrichment_cache.sql in Supabase dashboard'",
     "docs:update": "npm run codebase:index && npm run system:reference",
     "system:reference": "node scripts/generate-system-reference.js",
     "db:status": "bash -lc 'cd supabase && source ../scripts/ensure-supabase-cli-session.sh && npx --yes supabase@latest db status'",
@@ -60,8 +60,7 @@
     "supabase:migrations:new": "bash -lc 'cd supabase && source ../scripts/ensure-supabase-cli-session.sh && read -p \"Migration name: \" name && npx --yes supabase@latest migration new \"$name\"'",
     "supabase:status": "bash -lc 'cd supabase && source ../scripts/ensure-supabase-cli-session.sh && npx --yes supabase@latest status'",
     "supabase:types": "bash -lc 'cd supabase && source ../scripts/ensure-supabase-cli-session.sh && npx --yes supabase@latest gen types --lang typescript > ../src/types/supabase.ts'",
-    "supabase:test:db": "bash -lc 'cd supabase && source ../scripts/ensure-supabase-cli-session.sh && npx --yes supabase@latest test db'",
-    "supabase:test:functions": "bash -lc 'cd supabase && source ../scripts/ensure-supabase-cli-session.sh && deno test --allow-all functions/tests/'",
+    "supabase:test:functions": "deno test --allow-all supabase/functions/tests/",
     "supabase:workflow": "npm run supabase:auth && npm run supabase:link && npm run supabase:migrations:list",
     "edge:serve": "bash -lc 'cd supabase && source ../scripts/ensure-supabase-cli-session.sh && npx --yes supabase@latest functions serve --no-verify-jwt --debug'",
     "edge:serve:single": "bash -lc 'cd supabase && source ../scripts/ensure-supabase-cli-session.sh && read -p \"Function name: \" func && npx --yes supabase@latest functions serve \"$func\" --no-verify-jwt --debug'",
@@ -82,7 +81,8 @@
     "test:edge-functions": "bash -lc 'cd supabase && source ../scripts/ensure-supabase-cli-session.sh && npx --yes supabase@latest functions serve'",
     "test:verified-contacts": "echo 'Test verified contact discovery with zero fake data validation'",
     "test:watch": "vitest",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "supabase:test:db": "bash -lc 'cd supabase && source ../scripts/ensure-supabase-cli-session.sh && npx --yes supabase@latest test db'"
   },
   "keywords": [
     "verified-business-intelligence",

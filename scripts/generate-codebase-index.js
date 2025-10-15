@@ -101,28 +101,20 @@ const descriptionOverrides = new Map([
     "Hook tracking asynchronous discovery job progress",
   ],
   [
-    "database/production/001_core_schema.sql",
+    "supabase/schema-sql/001_core_schema.sql",
     "Canonical campaigns/leads/exports tables with RLS and analytics view",
   ],
   [
-    "database/production/002_user_functions.sql",
+    "supabase/schema-sql/002_user_functions.sql",
     "User-aware helper functions and security validators",
   ],
   [
-    "database/production/003_deduplication.sql",
+    "supabase/schema-sql/003_deduplication.sql",
     "Deduplication ledger plus hash/filter routines",
   ],
   [
-    "database/production/004_enrichment_cache.sql",
+    "supabase/schema-sql/004_enrichment_cache.sql",
     "Enrichment cache tables, views, and maintenance helpers",
-  ],
-  [
-    "database/rls-setup.sql",
-    "Row Level Security policies enforcing user/session isolation",
-  ],
-  [
-    "database/remove-security-definer.sql",
-    "Utility script to strip SECURITY DEFINER functions",
   ],
   ["CODEBASE_INDEX.md", "Auto-generated index consumed by #codebase command"],
   [
@@ -154,6 +146,9 @@ function defaultDescription(relPath) {
   }
   if (relPath.startsWith("src/")) {
     return "React frontend module";
+  }
+  if (relPath.startsWith("supabase/schema-sql/")) {
+    return "Database schema artifact";
   }
   if (relPath.startsWith("database/")) {
     return "Database migration/utility";
@@ -273,12 +268,10 @@ async function main() {
   ]);
 
   const databaseFiles = await filterExisting([
-    "database/production/001_core_schema.sql",
-    "database/production/002_user_functions.sql",
-    "database/production/003_deduplication.sql",
-    "database/production/004_enrichment_cache.sql",
-    "database/rls-setup.sql",
-    "database/remove-security-definer.sql",
+    "supabase/schema-sql/001_core_schema.sql",
+    "supabase/schema-sql/002_user_functions.sql",
+    "supabase/schema-sql/003_deduplication.sql",
+    "supabase/schema-sql/004_enrichment_cache.sql",
   ]);
 
   const automationFiles = await filterExisting([

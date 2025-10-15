@@ -22,7 +22,7 @@ const CONFIG = {
   supabaseFunctionsDir: "supabase/functions",
   sharedDir: "supabase/functions/_shared",
   scriptsDir: "scripts",
-  databaseDir: "database/production",
+  databaseDir: "supabase/schema-sql",
 };
 
 // Module definitions

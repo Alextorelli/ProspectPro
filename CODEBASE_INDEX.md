@@ -2,7 +2,7 @@
 
 > Primary #codebase reference. Regenerate with `npm run codebase:index` before audits or deployments.
 
-_Last generated: 2025-10-15T05:11:47.867Z_
+_Last generated: 2025-10-15T06:37:11.566Z_
 
 ## Supabase Edge Functions
 
@@ -58,12 +58,10 @@ _Last generated: 2025-10-15T05:11:47.867Z_
 
 ## Database & Security Artifacts
 
-- [database/production/001_core_schema.sql](database/production/001_core_schema.sql) — Canonical campaigns/leads/exports tables with RLS and analytics view
-- [database/production/002_user_functions.sql](database/production/002_user_functions.sql) — User-aware helper functions and security validators
-- [database/production/003_deduplication.sql](database/production/003_deduplication.sql) — Deduplication ledger plus hash/filter routines
-- [database/production/004_enrichment_cache.sql](database/production/004_enrichment_cache.sql) — Enrichment cache tables, views, and maintenance helpers
-- [database/rls-setup.sql](database/rls-setup.sql) — Row Level Security policies enforcing user/session isolation
-- [database/remove-security-definer.sql](database/remove-security-definer.sql) — Utility script to strip SECURITY DEFINER functions
+- [supabase/schema-sql/001_core_schema.sql](supabase/schema-sql/001_core_schema.sql) — Canonical campaigns/leads/exports tables with RLS and analytics view
+- [supabase/schema-sql/002_user_functions.sql](supabase/schema-sql/002_user_functions.sql) — User-aware helper functions and security validators
+- [supabase/schema-sql/003_deduplication.sql](supabase/schema-sql/003_deduplication.sql) — Deduplication ledger plus hash/filter routines
+- [supabase/schema-sql/004_enrichment_cache.sql](supabase/schema-sql/004_enrichment_cache.sql) — Enrichment cache tables, views, and maintenance helpers
 
 ## Automation & Scripts
 

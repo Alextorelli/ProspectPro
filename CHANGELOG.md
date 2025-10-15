@@ -22,7 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Notes
 
-- Apply `database/production/003_deduplication.sql` before deploying the updated Edge Functions so the `user_campaign_results` table, policies, and helper functions exist.
+- Apply `supabase/schema-sql/003_deduplication.sql` before deploying the updated Edge Functions so the `user_campaign_results` table, policies, and helper functions exist.
 - Redeploy `business-discovery-background` and (optionally) `test-user-deduplication` after pulling this release.
 
 ## [4.3.1] - 2025-10-11 - Campaign Store Null-Safety & Frontend Stability

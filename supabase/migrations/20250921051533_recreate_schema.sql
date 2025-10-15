@@ -1814,9 +1814,9 @@ ALTER TABLE api_cost_tracking ENABLE ROW LEVEL SECURITY;
 ALTER TABLE lead_qualification_metrics ENABLE ROW LEVEL SECURITY;
 ALTER TABLE dashboard_exports ENABLE ROW LEVEL SECURITY;
 -- Enable RLS on deployment monitoring tables (private/internal use)
-ALTER TABLE production_webhook_logs ENABLE ROW LEVEL SECURITY;
-ALTER TABLE deployment_metrics ENABLE ROW LEVEL SECURITY;
-ALTER TABLE deployment_failures ENABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS production_webhook_logs ENABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS deployment_metrics ENABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS deployment_failures ENABLE ROW LEVEL SECURITY;
 DO $$ BEGIN RAISE NOTICE '✅ Phase 5.2 Complete: Row Level Security enabled on all tables';
 END $$;
 -- If PostGIS created spatial_ref_sys in public (older installs), attempt to enable RLS
