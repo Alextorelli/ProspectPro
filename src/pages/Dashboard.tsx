@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { CampaignsTable } from "../components/CampaignsTable";
 import { LeadDetailsDrawer } from "../components/LeadDetailsDrawer";
 import { LeadExplorerTable } from "../components/LeadExplorerTable";
 import { TabConfig, Tabs } from "../components/Tabs";
@@ -24,11 +25,69 @@ const DATE_PRESETS: Array<{
   { label: "Last 90 days", value: "90d", days: 90 },
 ];
 
+type CampaignFilter = {
+  status?: CampaignResult["status"];
+  tier?: string;
+  datePreset?: NonNullable<LeadFilter["datePreset"]>;
+  dateRange?: {
+    start: string;
+    end: string;
+  };
+};
+
 type StatsCardTarget = "leads" | "qualified" | "campaigns";
 
 const coerceNumber = (value: unknown, fallback = 0): number => {
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : fallback;
+};
+
+const normalizeDateValue = (value?: string) => {
+  if (!value) {
+    return null;
+  }
+
+  const parsed = new Date(value);
+  return Number.isNaN(parsed.getTime()) ? null : parsed;
+};
+
+const applyCampaignFilters = (
+  campaigns: CampaignResult[],
+  filters: CampaignFilter
+): CampaignResult[] => {
+  if (!campaigns.length) {
+    return campaigns;
+  }
+
+  return campaigns.filter((campaign) => {
+    const { status, tier, dateRange } = filters;
+
+    if (status && campaign.status !== status) {
+      return false;
+    }
+
+    if (tier) {
+      const normalizedTier = tier.toLowerCase();
+      const campaignTier = (campaign.tier_used || "").toLowerCase();
+      if (!campaignTier || campaignTier !== normalizedTier) {
+        return false;
+      }
+    }
+
+    if (dateRange) {
+      const createdAt = normalizeDateValue(campaign.created_at);
+      const start = normalizeDateValue(dateRange.start);
+      const end = normalizeDateValue(dateRange.end);
+
+      if (createdAt && start && end) {
+        if (createdAt < start || createdAt > end) {
+          return false;
+        }
+      }
+    }
+
+    return true;
+  });
 };
 
 const normalizeCampaignStatus = (value: unknown): CampaignResult["status"] => {
@@ -146,10 +205,13 @@ const Dashboard: React.FC = () => {
   const [campaignError, setCampaignError] = useState<string | null>(null);
   const [leadsError, setLeadsError] = useState<string | null>(null);
   const [leadFilters, setLeadFilters] = useState<LeadFilter>({});
+  const [campaignFilters, setCampaignFilters] = useState<CampaignFilter>({});
   const [selectedLead, setSelectedLead] = useState<BusinessLead | null>(null);
   const [activeTab, setActiveTab] = useState<string>("leads");
   const [activeDatePreset, setActiveDatePreset] =
     useState<LeadFilter["datePreset"]>();
+  const [activeCampaignDatePreset, setActiveCampaignDatePreset] =
+    useState<CampaignFilter["datePreset"]>();
 
   useEffect(() => {
     if (storeCampaigns.length) {
@@ -301,15 +363,25 @@ const Dashboard: React.FC = () => {
     [leadCollection, leadFilters]
   );
 
+  const filteredCampaigns = useMemo(
+    () => applyCampaignFilters(campaignCollection, campaignFilters),
+    [campaignCollection, campaignFilters]
+  );
+
   const stats = useMemo(
     () => calculateDashboardStats(leadCollection, campaignCollection.length),
     [leadCollection, campaignCollection.length]
   );
 
-  const recentCampaigns = useMemo(
-    () => campaignCollection.slice(0, 5),
-    [campaignCollection]
-  );
+  const campaignTierOptions = useMemo(() => {
+    const tiers = new Set<string>();
+    for (const campaign of campaignCollection) {
+      if (campaign.tier_used) {
+        tiers.add(campaign.tier_used);
+      }
+    }
+    return Array.from(tiers).sort((a, b) => a.localeCompare(b));
+  }, [campaignCollection]);
 
   const enrichmentOptions = useMemo(() => {
     const tiers = new Set<string>();
@@ -344,6 +416,29 @@ const Dashboard: React.FC = () => {
   const handleClearFilters = () => {
     setLeadFilters({});
     setActiveDatePreset(undefined);
+  };
+
+  const applyCampaignDatePreset = (preset: (typeof DATE_PRESETS)[number]) => {
+    const range = getDateRangePreset(preset.days);
+    setCampaignFilters((current) => ({
+      ...current,
+      datePreset: preset.value,
+      dateRange: range,
+    }));
+    setActiveCampaignDatePreset(preset.value);
+  };
+
+  const removeCampaignDatePreset = () => {
+    setCampaignFilters((current) => {
+      const { datePreset: _preset, dateRange: _range, ...rest } = current;
+      return rest;
+    });
+    setActiveCampaignDatePreset(undefined);
+  };
+
+  const handleClearCampaignFilters = () => {
+    setCampaignFilters({});
+    setActiveCampaignDatePreset(undefined);
   };
 
   const handleStatsCardClick = (target: StatsCardTarget) => {
@@ -436,57 +531,98 @@ const Dashboard: React.FC = () => {
       id: "campaigns",
       label: "Campaigns",
       content: (
-        <div className="space-y-3">
-          {recentCampaigns.length === 0 ? (
-            <div className="text-center py-12 text-gray-500 dark:text-gray-400">
-              No campaigns yet. Create your first campaign to see results here.
-            </div>
-          ) : (
-            recentCampaigns.map((campaign) => {
-              const campaignId = campaign.campaign_id || campaign.id || "";
-              const leadsCount =
-                campaign.results_count || campaign.leads_found || 0;
-              const qualifiedCount = campaign.leads_qualified || 0;
-
-              return (
-                <button
-                  key={campaignId}
-                  type="button"
-                  onClick={() => navigate(`/campaign?id=${campaignId}`)}
-                  className="w-full text-left p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+        <div className="space-y-4">
+          <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg p-4 space-y-4">
+            <div className="flex flex-wrap items-center gap-3">
+              <label className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
+                <span className="font-medium text-gray-700 dark:text-gray-200">
+                  Status
+                </span>
+                <select
+                  className="block w-44 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-900 text-sm"
+                  value={campaignFilters.status || ""}
+                  onChange={(event) => {
+                    const value = event.target.value as
+                      | CampaignResult["status"]
+                      | "";
+                    setCampaignFilters((current) => ({
+                      ...current,
+                      status: value
+                        ? (value as CampaignResult["status"])
+                        : undefined,
+                    }));
+                  }}
                 >
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <div className="flex items-center gap-3">
-                        <span
-                          className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${
-                            campaign.status === "completed"
-                              ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-200"
-                              : campaign.status === "running"
-                              ? "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-200"
-                              : campaign.status === "failed"
-                              ? "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-200"
-                              : "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200"
-                          }`}
-                        >
-                          {campaign.status}
-                        </span>
-                        <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                          {campaign.business_type} in {campaign.location}
-                        </span>
-                      </div>
-                      <div className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                        {leadsCount} results • {qualifiedCount} qualified
-                      </div>
-                    </div>
-                    <div className="text-xs text-gray-500 dark:text-gray-400">
-                      {new Date(campaign.created_at).toLocaleDateString()}
-                    </div>
-                  </div>
+                  <option value="">All statuses</option>
+                  <option value="running">Running</option>
+                  <option value="completed">Completed</option>
+                  <option value="failed">Failed</option>
+                  <option value="cancelled">Cancelled</option>
+                </select>
+              </label>
+
+              <label className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
+                <span className="font-medium text-gray-700 dark:text-gray-200">
+                  Tier
+                </span>
+                <select
+                  className="block w-44 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-900 text-sm"
+                  value={campaignFilters.tier || ""}
+                  onChange={(event) =>
+                    setCampaignFilters((current) => ({
+                      ...current,
+                      tier: event.target.value || undefined,
+                    }))
+                  }
+                  disabled={campaignTierOptions.length === 0}
+                >
+                  <option value="">All tiers</option>
+                  {campaignTierOptions.map((tier) => (
+                    <option key={tier} value={tier}>
+                      {tier}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2">
+              {DATE_PRESETS.map((preset) => (
+                <button
+                  key={preset.value}
+                  type="button"
+                  onClick={() =>
+                    activeCampaignDatePreset === preset.value
+                      ? removeCampaignDatePreset()
+                      : applyCampaignDatePreset(preset)
+                  }
+                  className={`px-3 py-2 text-xs font-medium rounded-md border transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-900 ${
+                    activeCampaignDatePreset === preset.value
+                      ? "border-blue-500 bg-blue-50 text-blue-700 dark:border-blue-400 dark:bg-blue-900/40 dark:text-blue-200"
+                      : "border-gray-300 text-gray-600 hover:bg-gray-100 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-800"
+                  }`}
+                >
+                  {preset.label}
                 </button>
-              );
-            })
-          )}
+              ))}
+
+              <button
+                type="button"
+                onClick={handleClearCampaignFilters}
+                className="ml-auto px-3 py-2 text-xs font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+              >
+                Clear filters
+              </button>
+            </div>
+          </div>
+
+          <CampaignsTable
+            campaigns={filteredCampaigns}
+            onRowClick={(campaign: CampaignResult) =>
+              navigate(`/campaign?id=${campaign.campaign_id}`)
+            }
+            isLoading={campaignsLoading}
+          />
         </div>
       ),
     },
@@ -604,7 +740,7 @@ const Dashboard: React.FC = () => {
             {campaignCollection.length}
           </div>
           <div className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-            Showing last {recentCampaigns.length} campaigns
+            Showing {filteredCampaigns.length} campaigns
           </div>
         </button>
       </div>
