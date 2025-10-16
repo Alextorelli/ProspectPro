@@ -165,6 +165,31 @@ export const BusinessDiscovery: React.FC = () => {
   const isTargetingValid =
     selectedBusinessTypes.length > 0 && location.address.trim().length > 0;
 
+  // Calculate current step index for Stepper (0-indexed)
+  const currentStepIndex = activeStep - 1;
+
+  // Map active filters to chips (must be declared before any early returns to satisfy rules-of-hooks)
+  const activeFilterChips = useMemo(() => {
+    return createChipsFromFilters({
+      categories: selectedCategories,
+      location: location.address,
+      radius: searchRadius,
+      // Add business types as custom chips
+    }).concat(
+      selectedBusinessTypes.map((type, index) => ({
+        id: `type-${index}`,
+        label: "Type",
+        value: type,
+        category: "Business Type",
+      }))
+    );
+  }, [
+    selectedCategories,
+    location.address,
+    searchRadius,
+    selectedBusinessTypes,
+  ]);
+
   const handleGeographicChange = (
     updatedLocation: GeographicLocation,
     radius: number
@@ -290,31 +315,6 @@ export const BusinessDiscovery: React.FC = () => {
       </div>
     );
   }
-
-  // Calculate current step index for Stepper (0-indexed)
-  const currentStepIndex = activeStep - 1;
-
-  // Map active filters to chips
-  const activeFilterChips = useMemo(() => {
-    return createChipsFromFilters({
-      categories: selectedCategories,
-      location: location.address,
-      radius: searchRadius,
-      // Add business types as custom chips
-    }).concat(
-      selectedBusinessTypes.map((type, index) => ({
-        id: `type-${index}`,
-        label: "Type",
-        value: type,
-        category: "Business Type",
-      }))
-    );
-  }, [
-    selectedCategories,
-    location.address,
-    searchRadius,
-    selectedBusinessTypes,
-  ]);
 
   const handleRemoveFilterChip = (chipId: string) => {
     if (chipId.startsWith("type-")) {

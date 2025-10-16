@@ -30,6 +30,7 @@ export const LeadExplorerGrid: React.FC<LeadExplorerGridProps> = ({
   const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
   const [currentPage, setCurrentPage] = useState(0);
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
+  const [showFilters, setShowFilters] = useState(false);
 
   // Filter states for sidebar
   const [confidenceRange, setConfidenceRange] = useState<[number, number]>([
@@ -157,164 +158,188 @@ export const LeadExplorerGrid: React.FC<LeadExplorerGridProps> = ({
       ? 0
       : Math.min(sortedLeads.length, (currentPage + 1) * pageSize);
 
+  // Accessibility and UX: close drawer on Escape and lock body scroll while open
+  useEffect(() => {
+    if (!showFilters) return;
+
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setShowFilters(false);
+      }
+    };
+    document.addEventListener("keydown", onKeyDown);
+
+    // Lock body scroll
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.removeEventListener("keydown", onKeyDown);
+      document.body.style.overflow = originalOverflow;
+    };
+  }, [showFilters]);
+
+  // Reusable Filters content for desktop sidebar and mobile drawer
+  const FiltersContent = () => (
+    <>
+      <CollapsibleCard
+        title="Confidence Score"
+        persistKey="lead-explorer-confidence-filter"
+        defaultOpen
+      >
+        <div className="space-y-4">
+          <div>
+            <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Range: {confidenceRange[0]}% - {confidenceRange[1]}%
+            </label>
+            <div className="space-y-2">
+              <input
+                type="range"
+                min="0"
+                max="100"
+                value={confidenceRange[0]}
+                onChange={(e) =>
+                  setConfidenceRange([
+                    parseInt(e.target.value),
+                    confidenceRange[1],
+                  ])
+                }
+                className="w-full"
+              />
+              <input
+                type="range"
+                min="0"
+                max="100"
+                value={confidenceRange[1]}
+                onChange={(e) =>
+                  setConfidenceRange([
+                    confidenceRange[0],
+                    parseInt(e.target.value),
+                  ])
+                }
+                className="w-full"
+              />
+            </div>
+          </div>
+        </div>
+      </CollapsibleCard>
+
+      <CollapsibleCard
+        title="Enrichment Tier"
+        persistKey="lead-explorer-tier-filter"
+        defaultOpen
+        subtitle={
+          selectedTiers.size > 0 ? `${selectedTiers.size} selected` : undefined
+        }
+      >
+        <div className="space-y-2">
+          {["ESSENTIAL", "PROFESSIONAL", "BUSINESS", "ENTERPRISE"].map(
+            (tier) => (
+              <label key={tier} className="flex items-center gap-2 text-sm">
+                <input
+                  type="checkbox"
+                  checked={selectedTiers.has(tier)}
+                  onChange={() => handleTierToggle(tier)}
+                  className="rounded border-gray-300 dark:border-gray-600"
+                />
+                <span className="text-gray-700 dark:text-gray-300">{tier}</span>
+              </label>
+            )
+          )}
+        </div>
+      </CollapsibleCard>
+
+      <CollapsibleCard
+        title="Contact Data"
+        persistKey="lead-explorer-contact-filter"
+        defaultOpen
+        subtitle={
+          (hasEmail !== null ? 1 : 0) + (hasPhone !== null ? 1 : 0) > 0
+            ? `${
+                (hasEmail !== null ? 1 : 0) + (hasPhone !== null ? 1 : 0)
+              } filters active`
+            : undefined
+        }
+      >
+        <div className="space-y-3">
+          <div>
+            <span className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Email Available
+            </span>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => setHasEmail(hasEmail === true ? null : true)}
+                className={`px-3 py-1 text-xs rounded ${
+                  hasEmail === true
+                    ? "bg-blue-600 text-white"
+                    : "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300"
+                }`}
+              >
+                Yes
+              </button>
+              <button
+                type="button"
+                onClick={() => setHasEmail(hasEmail === false ? null : false)}
+                className={`px-3 py-1 text-xs rounded ${
+                  hasEmail === false
+                    ? "bg-blue-600 text-white"
+                    : "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300"
+                }`}
+              >
+                No
+              </button>
+            </div>
+          </div>
+          <div>
+            <span className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Phone Available
+            </span>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => setHasPhone(hasPhone === true ? null : true)}
+                className={`px-3 py-1 text-xs rounded ${
+                  hasPhone === true
+                    ? "bg-blue-600 text-white"
+                    : "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300"
+                }`}
+              >
+                Yes
+              </button>
+              <button
+                type="button"
+                onClick={() => setHasPhone(hasPhone === false ? null : false)}
+                className={`px-3 py-1 text-xs rounded ${
+                  hasPhone === false
+                    ? "bg-blue-600 text-white"
+                    : "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300"
+                }`}
+              >
+                No
+              </button>
+            </div>
+          </div>
+        </div>
+      </CollapsibleCard>
+
+      {activeFilterCount > 0 && (
+        <button
+          type="button"
+          onClick={handleClearFilters}
+          className="w-full px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700"
+        >
+          Clear All Filters ({activeFilterCount})
+        </button>
+      )}
+    </>
+  );
+
   return (
     <div className="flex gap-6">
-      {/* Sidebar Filters */}
-      <aside className="w-64 flex-shrink-0 space-y-4">
-        <CollapsibleCard
-          title="Confidence Score"
-          persistKey="lead-explorer-confidence-filter"
-          defaultOpen
-        >
-          <div className="space-y-4">
-            <div>
-              <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Range: {confidenceRange[0]}% - {confidenceRange[1]}%
-              </label>
-              <div className="space-y-2">
-                <input
-                  type="range"
-                  min="0"
-                  max="100"
-                  value={confidenceRange[0]}
-                  onChange={(e) =>
-                    setConfidenceRange([
-                      parseInt(e.target.value),
-                      confidenceRange[1],
-                    ])
-                  }
-                  className="w-full"
-                />
-                <input
-                  type="range"
-                  min="0"
-                  max="100"
-                  value={confidenceRange[1]}
-                  onChange={(e) =>
-                    setConfidenceRange([
-                      confidenceRange[0],
-                      parseInt(e.target.value),
-                    ])
-                  }
-                  className="w-full"
-                />
-              </div>
-            </div>
-          </div>
-        </CollapsibleCard>
-
-        <CollapsibleCard
-          title="Enrichment Tier"
-          persistKey="lead-explorer-tier-filter"
-          defaultOpen
-          subtitle={
-            selectedTiers.size > 0
-              ? `${selectedTiers.size} selected`
-              : undefined
-          }
-        >
-          <div className="space-y-2">
-            {["ESSENTIAL", "PROFESSIONAL", "BUSINESS", "ENTERPRISE"].map(
-              (tier) => (
-                <label key={tier} className="flex items-center gap-2 text-sm">
-                  <input
-                    type="checkbox"
-                    checked={selectedTiers.has(tier)}
-                    onChange={() => handleTierToggle(tier)}
-                    className="rounded border-gray-300 dark:border-gray-600"
-                  />
-                  <span className="text-gray-700 dark:text-gray-300">
-                    {tier}
-                  </span>
-                </label>
-              )
-            )}
-          </div>
-        </CollapsibleCard>
-
-        <CollapsibleCard
-          title="Contact Data"
-          persistKey="lead-explorer-contact-filter"
-          defaultOpen
-          subtitle={
-            (hasEmail !== null ? 1 : 0) + (hasPhone !== null ? 1 : 0) > 0
-              ? `${
-                  (hasEmail !== null ? 1 : 0) + (hasPhone !== null ? 1 : 0)
-                } filters active`
-              : undefined
-          }
-        >
-          <div className="space-y-3">
-            <div>
-              <span className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Email Available
-              </span>
-              <div className="flex gap-2">
-                <button
-                  type="button"
-                  onClick={() => setHasEmail(hasEmail === true ? null : true)}
-                  className={`px-3 py-1 text-xs rounded ${
-                    hasEmail === true
-                      ? "bg-blue-600 text-white"
-                      : "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300"
-                  }`}
-                >
-                  Yes
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setHasEmail(hasEmail === false ? null : false)}
-                  className={`px-3 py-1 text-xs rounded ${
-                    hasEmail === false
-                      ? "bg-blue-600 text-white"
-                      : "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300"
-                  }`}
-                >
-                  No
-                </button>
-              </div>
-            </div>
-            <div>
-              <span className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Phone Available
-              </span>
-              <div className="flex gap-2">
-                <button
-                  type="button"
-                  onClick={() => setHasPhone(hasPhone === true ? null : true)}
-                  className={`px-3 py-1 text-xs rounded ${
-                    hasPhone === true
-                      ? "bg-blue-600 text-white"
-                      : "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300"
-                  }`}
-                >
-                  Yes
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setHasPhone(hasPhone === false ? null : false)}
-                  className={`px-3 py-1 text-xs rounded ${
-                    hasPhone === false
-                      ? "bg-blue-600 text-white"
-                      : "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300"
-                  }`}
-                >
-                  No
-                </button>
-              </div>
-            </div>
-          </div>
-        </CollapsibleCard>
-
-        {activeFilterCount > 0 && (
-          <button
-            type="button"
-            onClick={handleClearFilters}
-            className="w-full px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700"
-          >
-            Clear All Filters ({activeFilterCount})
-          </button>
-        )}
+      {/* Sidebar Filters (desktop and up) */}
+      <aside className="hidden md:block w-64 flex-shrink-0 space-y-4">
+        <FiltersContent />
       </aside>
 
       {/* Main Content */}
@@ -351,6 +376,36 @@ export const LeadExplorerGrid: React.FC<LeadExplorerGridProps> = ({
                 <span className="text-gray-600 dark:text-gray-400">
                   {sortDirection === "asc" ? "↑" : "↓"}
                 </span>
+              </button>
+            </div>
+
+            {/* Mobile Filters Button */}
+            <div className="md:hidden">
+              <button
+                type="button"
+                onClick={() => setShowFilters(true)}
+                className="inline-flex items-center gap-2 px-3 py-1.5 text-sm rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700"
+                aria-label="Open filters"
+              >
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M3 4h18M6 8h12M9 12h6M11 16h2"
+                  />
+                </svg>
+                <span>Filters</span>
+                {activeFilterCount > 0 && (
+                  <span className="ml-1 inline-flex items-center justify-center rounded-full bg-blue-600 text-white text-[10px] font-semibold min-w-[18px] h-[18px] px-1">
+                    {activeFilterCount}
+                  </span>
+                )}
               </button>
             </div>
 
@@ -452,6 +507,57 @@ export const LeadExplorerGrid: React.FC<LeadExplorerGridProps> = ({
           </div>
         ) : (
           <>
+            {/* Mobile Filters Drawer */}
+            {showFilters && (
+              <div
+                className="fixed inset-0 z-40"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="filters-title"
+              >
+                <div
+                  className="fixed inset-0 bg-black/40"
+                  onClick={() => setShowFilters(false)}
+                  aria-hidden="true"
+                />
+                <div className="fixed inset-y-0 right-0 w-full max-w-sm bg-white dark:bg-gray-900 shadow-xl p-4 overflow-y-auto">
+                  <div className="flex items-center justify-between mb-3">
+                    <h2
+                      id="filters-title"
+                      className="text-base font-semibold text-gray-900 dark:text-gray-100"
+                    >
+                      Filters
+                    </h2>
+                    <button
+                      type="button"
+                      onClick={() => setShowFilters(false)}
+                      className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800"
+                      aria-label="Close filters"
+                      autoFocus
+                    >
+                      <svg
+                        className="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M6 18L18 6M6 6l12 12"
+                        />
+                      </svg>
+                    </button>
+                  </div>
+
+                  <div className="space-y-4">
+                    <FiltersContent />
+                  </div>
+                </div>
+              </div>
+            )}
+
             <div
               className={
                 viewMode === "grid"
