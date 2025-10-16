@@ -467,7 +467,7 @@
       "label": "Deploy: Vercel Production",
       "type": "shell",
       "command": "bash",
-      "args": ["-lc", "cd dist && vercel --prod"],
+      "args": ["-lc", "cd dist && npx --yes vercel@latest --prod"],
       "group": "build",
       "dependsOn": "Build: Frontend Production",
       "presentation": {
