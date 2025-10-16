@@ -80,6 +80,14 @@ class ProductionMCPServer {
           return await this.generatePerformanceReport(request.params.arguments);
         case "monitor_api_quotas":
           return await this.monitorAPIQuotas(request.params.arguments);
+        case "validate_supabase_session":
+          return await this.validateSupabaseSession(request.params.arguments);
+        case "diagnose_rls_failure":
+          return await this.diagnoseRLSFailure(request.params.arguments);
+        case "analyze_campaign_costs":
+          return await this.analyzeCampaignCosts(request.params.arguments);
+        case "predict_campaign_cost":
+          return await this.predictCampaignCost(request.params.arguments);
 
         // === DATABASE ANALYTICS TOOLS (from database-server) ===
         case "query_leads":
@@ -163,6 +171,483 @@ class ProductionMCPServer {
         );
       }
     }
+  }
+
+  decodeJwt(token) {
+    if (!token || typeof token !== "string") {
+      return null;
+    }
+
+    const parts = token.split(".");
+    if (parts.length !== 3) {
+      return null;
+    }
+
+    try {
+      const payload = Buffer.from(parts[1], "base64").toString("utf8");
+      return JSON.parse(payload);
+    } catch (error) {
+      console.warn("Failed to decode JWT payload", error.message);
+      return null;
+    }
+  }
+
+  createSessionClient(sessionJwt) {
+    if (!sessionJwt || !process.env.SUPABASE_URL) {
+      return null;
+    }
+
+    const anonKey =
+      process.env.SUPABASE_ANON_KEY || process.env.SUPABASE_SECRET_KEY;
+
+    if (!anonKey) {
+      return null;
+    }
+
+    return createClient(process.env.SUPABASE_URL, anonKey, {
+      global: {
+        headers: {
+          Authorization: `Bearer ${sessionJwt}`,
+        },
+      },
+      auth: {
+        persistSession: false,
+        autoRefreshToken: false,
+      },
+    });
+  }
+
+  async validateSupabaseSession({ sessionJwt } = {}) {
+    if (!sessionJwt) {
+      throw new Error("sessionJwt is required");
+    }
+
+    await this.initializeSupabase();
+
+    const response = {
+      received_at: new Date().toISOString(),
+      session_claims: this.decodeJwt(sessionJwt),
+      user: null,
+      policies: [],
+      warnings: [],
+      checks: [],
+    };
+
+    try {
+      const { data, error } = await this.supabase.auth.getUser(sessionJwt);
+
+      if (error) {
+        response.warnings.push(`auth.getUser failed: ${error.message}`);
+      } else {
+        response.user = data.user;
+        response.checks.push("✅ Supabase auth.getUser succeeded");
+      }
+    } catch (error) {
+      response.warnings.push(`auth.getUser threw error: ${error.message}`);
+    }
+
+    if (response.session_claims) {
+      response.checks.push(
+        `✅ JWT decoded (sub: ${response.session_claims.sub || "n/a"})`
+      );
+    } else {
+      response.warnings.push("Unable to decode JWT payload");
+    }
+
+    try {
+      const { data, error } = await this.supabase
+        .from("pg_policies")
+        .select("policyname, schemaname, tablename, roles, cmd")
+        .eq("tablename", "campaigns")
+        .limit(5);
+
+      if (!error && data) {
+        response.policies = data;
+      }
+    } catch (error) {
+      response.warnings.push(
+        `Unable to read pg_policies (service role required): ${error.message}`
+      );
+    }
+
+    return {
+      content: [
+        {
+          type: "text",
+          text: `🔐 **Supabase Session Validation**\n\n${JSON.stringify(
+            response,
+            null,
+            2
+          )}`,
+        },
+      ],
+    };
+  }
+
+  async diagnoseRLSFailure({
+    tableName,
+    operation = "SELECT",
+    sessionJwt = null,
+  } = {}) {
+    if (!tableName) {
+      throw new Error("tableName is required");
+    }
+
+    await this.initializeSupabase();
+
+    const diagnosis = {
+      table: tableName,
+      operation,
+      timestamp: new Date().toISOString(),
+      session_claims: this.decodeJwt(sessionJwt),
+      policies: [],
+      session_test: null,
+      recommendations: [],
+    };
+
+    try {
+      const { data, error } = await this.supabase
+        .from("pg_policies")
+        .select(
+          "policyname, schemaname, tablename, roles, cmd, qual, with_check"
+        )
+        .eq("tablename", tableName);
+
+      if (error) {
+        diagnosis.recommendations.push(
+          `Unable to query pg_policies: ${error.message}`
+        );
+      } else {
+        diagnosis.policies = data.filter((policy) => {
+          if (!operation) return true;
+          return policy.cmd?.toUpperCase() === operation.toUpperCase();
+        });
+
+        if (diagnosis.policies.length === 0) {
+          diagnosis.recommendations.push(
+            "No matching RLS policies found - ensure policy exists for requested operation"
+          );
+        }
+      }
+    } catch (error) {
+      diagnosis.recommendations.push(
+        `Failed to read RLS policies: ${error.message}`
+      );
+    }
+
+    if (sessionJwt) {
+      const sessionClient = this.createSessionClient(sessionJwt);
+
+      if (sessionClient) {
+        try {
+          if (operation.toUpperCase() === "SELECT") {
+            const { data, error } = await sessionClient
+              .from(tableName)
+              .select("*")
+              .limit(1);
+
+            diagnosis.session_test = {
+              success: !error,
+              error: error ? error.message : null,
+              sample: data?.[0] || null,
+            };
+
+            if (error) {
+              diagnosis.recommendations.push(
+                `SELECT failed with session: ${error.message}`
+              );
+            }
+          } else {
+            diagnosis.recommendations.push(
+              "Only SELECT operations are tested automatically. Use Supabase SQL editor for mutations."
+            );
+          }
+        } catch (error) {
+          diagnosis.recommendations.push(
+            `Session-based SELECT failed unexpectedly: ${error.message}`
+          );
+        }
+      } else {
+        diagnosis.recommendations.push(
+          "Session client could not be created (missing anon or secret key)"
+        );
+      }
+    } else {
+      diagnosis.recommendations.push(
+        "Provide sessionJwt to run live RLS checks with session context"
+      );
+    }
+
+    if (!diagnosis.recommendations.length) {
+      diagnosis.recommendations.push(
+        "RLS configuration appears healthy based on available diagnostics"
+      );
+    }
+
+    return {
+      content: [
+        {
+          type: "text",
+          text: `🛡️ **RLS Diagnostic Report**\n\n${JSON.stringify(
+            diagnosis,
+            null,
+            2
+          )}`,
+        },
+      ],
+    };
+  }
+
+  groupByField(records, field) {
+    return records.reduce((acc, item) => {
+      const key = (item?.[field] ?? "unknown").toString();
+      if (!acc[key]) {
+        acc[key] = [];
+      }
+      acc[key].push(item);
+      return acc;
+    }, {});
+  }
+
+  summarizeCampaignGroup(records) {
+    const totals = records.reduce(
+      (acc, item) => {
+        const cost = Number(item.total_cost) || 0;
+        const budget = Number(item.budget_limit) || 0;
+        const target = Number(item.target_count) || 0;
+        const results = Number(item.results_count) || 0;
+
+        acc.totalCost += cost;
+        acc.totalBudget += budget;
+        acc.totalTargets += target;
+        acc.totalResults += results;
+        return acc;
+      },
+      { totalCost: 0, totalBudget: 0, totalTargets: 0, totalResults: 0 }
+    );
+
+    const count = records.length || 1;
+
+    return {
+      campaigns: count,
+      total_cost: totals.totalCost,
+      total_budget: totals.totalBudget,
+      average_cost: totals.totalCost / count,
+      average_budget_utilization:
+        totals.totalBudget > 0
+          ? Number(((totals.totalCost / totals.totalBudget) * 100).toFixed(2))
+          : null,
+      average_cost_per_result:
+        totals.totalResults > 0
+          ? Number((totals.totalCost / totals.totalResults).toFixed(2))
+          : null,
+      average_target_count: totals.totalTargets / count,
+    };
+  }
+
+  async analyzeCampaignCosts({
+    campaignId = null,
+    dateRange = null,
+    groupBy = "tier",
+  } = {}) {
+    await this.initializeSupabase();
+
+    let query = this.supabase
+      .from("campaigns")
+      .select(
+        "id, business_type, location, target_count, total_cost, budget_limit, tier_key, tier, created_at, status, results_count"
+      );
+
+    if (campaignId) {
+      query = query.eq("id", campaignId);
+    }
+
+    if (dateRange?.start) {
+      query = query.gte("created_at", dateRange.start);
+    }
+
+    if (dateRange?.end) {
+      query = query.lte("created_at", dateRange.end);
+    }
+
+    const { data, error } = await query;
+
+    if (error) {
+      throw new Error(`Unable to fetch campaigns: ${error.message}`);
+    }
+
+    if (!data || data.length === 0) {
+      return {
+        content: [
+          {
+            type: "text",
+            text: "📊 No campaign records found for the specified filters.",
+          },
+        ],
+      };
+    }
+
+    const normalizedGroupBy =
+      groupBy === "tier"
+        ? "tier_key"
+        : groupBy === "businessType"
+        ? "business_type"
+        : groupBy === "location"
+        ? "location"
+        : groupBy === "date"
+        ? "created_at"
+        : groupBy;
+
+    const grouped =
+      normalizedGroupBy === "created_at"
+        ? data.reduce((acc, item) => {
+            const dateKey = new Date(item.created_at)
+              .toISOString()
+              .slice(0, 10);
+            if (!acc[dateKey]) acc[dateKey] = [];
+            acc[dateKey].push(item);
+            return acc;
+          }, {})
+        : this.groupByField(data, normalizedGroupBy);
+
+    const summary = Object.entries(grouped).map(([key, records]) => ({
+      group: key,
+      ...this.summarizeCampaignGroup(records),
+    }));
+
+    const overall = this.summarizeCampaignGroup(data);
+
+    return {
+      content: [
+        {
+          type: "text",
+          text: `📊 **Campaign Cost Analysis**\n\nFilters:\n- campaignId: ${
+            campaignId || "(all)"
+          }\n- groupBy: ${groupBy}\n- records: ${
+            data.length
+          }\n\nOverall Summary:\n${JSON.stringify(
+            overall,
+            null,
+            2
+          )}\n\nBreakdown:\n${JSON.stringify(summary, null, 2)}`,
+        },
+      ],
+    };
+  }
+
+  async predictCampaignCost({
+    tierKey,
+    businessType,
+    location = null,
+    targetCount,
+  } = {}) {
+    if (!tierKey || !businessType || !targetCount) {
+      throw new Error("tierKey, businessType, and targetCount are required");
+    }
+
+    await this.initializeSupabase();
+
+    let query = this.supabase
+      .from("campaigns")
+      .select(
+        "id, business_type, location, target_count, total_cost, tier_key, tier, results_count, created_at"
+      )
+      .eq("business_type", businessType)
+      .order("created_at", { ascending: false })
+      .limit(200);
+
+    query = query.or(
+      `tier_key.eq.${tierKey},tier.eq.${tierKey},tier_key.is.null`
+    );
+
+    const { data, error } = await query;
+
+    if (error) {
+      throw new Error(`Unable to load campaign history: ${error.message}`);
+    }
+
+    const relevant = (data || []).filter((campaign) => {
+      if (location && campaign.location) {
+        return campaign.location?.includes(location);
+      }
+      return true;
+    });
+
+    if (relevant.length === 0) {
+      return {
+        content: [
+          {
+            type: "text",
+            text: `⚠️ Insufficient historical data to predict cost for ${businessType} (${tierKey}).`,
+          },
+        ],
+      };
+    }
+
+    const averages = relevant.reduce(
+      (acc, campaign) => {
+        const cost = Number(campaign.total_cost) || 0;
+        const results = Number(campaign.results_count) || 0;
+        const targets = Number(campaign.target_count) || 0;
+
+        acc.totalCost += cost;
+        acc.totalResults += results;
+        acc.totalTargets += targets;
+        acc.samples += 1;
+        return acc;
+      },
+      { totalCost: 0, totalResults: 0, totalTargets: 0, samples: 0 }
+    );
+
+    const avgCost = averages.totalCost / averages.samples;
+    const avgCostPerLead =
+      averages.totalResults > 0
+        ? averages.totalCost / averages.totalResults
+        : null;
+    const avgCostPerTarget =
+      averages.totalTargets > 0
+        ? averages.totalCost / averages.totalTargets
+        : null;
+
+    const targetNumber = Number(targetCount);
+
+    const predictions = {
+      tierKey,
+      businessType,
+      historical_samples: averages.samples,
+      average_cost: Number(avgCost.toFixed(2)),
+      average_cost_per_lead: avgCostPerLead
+        ? Number(avgCostPerLead.toFixed(2))
+        : null,
+      average_cost_per_target: avgCostPerTarget
+        ? Number(avgCostPerTarget.toFixed(2))
+        : null,
+      projected_cost_by_leads:
+        avgCostPerLead &&
+        averages.totalResults > 0 &&
+        !Number.isNaN(targetNumber)
+          ? Number((avgCostPerLead * targetNumber).toFixed(2))
+          : null,
+      projected_cost_by_targets:
+        avgCostPerTarget &&
+        averages.totalTargets > 0 &&
+        !Number.isNaN(targetNumber)
+          ? Number((avgCostPerTarget * targetNumber).toFixed(2))
+          : null,
+    };
+
+    return {
+      content: [
+        {
+          type: "text",
+          text: `💰 **Campaign Cost Prediction**\n\n${JSON.stringify(
+            predictions,
+            null,
+            2
+          )}`,
+        },
+      ],
+    };
   }
 
   async initializeAPIClients() {

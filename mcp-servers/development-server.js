@@ -14,11 +14,15 @@
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { CallToolRequestSchema } from "@modelcontextprotocol/sdk/types.js";
+import { exec } from "child_process";
+import fs from "fs/promises";
 import path from "path";
 import { fileURLToPath } from "url";
+import { promisify } from "util";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+const execAsync = promisify(exec);
 
 class DevelopmentMCPServer {
   constructor() {
@@ -65,11 +69,58 @@ class DevelopmentMCPServer {
           return await this.validateEnvironmentSetup(request.params.arguments);
         case "create_test_scenario":
           return await this.createTestScenario(request.params.arguments);
+        case "deploy_and_validate_function":
+          return await this.deployAndValidateFunction(request.params.arguments);
+        case "compare_edge_function_versions":
+          return await this.compareEdgeFunctionVersions(
+            request.params.arguments
+          );
+        case "update_technical_docs":
+          return await this.updateTechnicalDocs(request.params.arguments);
+        case "generate_api_changelog":
+          return await this.generateAPIChangelog(request.params.arguments);
 
         default:
           throw new Error(`Unknown tool: ${request.params.name}`);
       }
     });
+  }
+
+  createTextResponse(text) {
+    return {
+      content: [
+        {
+          type: "text",
+          text,
+        },
+      ],
+    };
+  }
+
+  async runWorkspaceCommand(command, options = {}) {
+    const { stdout, stderr } = await execAsync(command, {
+      cwd: this.workspaceRoot,
+      shell: true,
+      maxBuffer: 1024 * 1024 * 10,
+      env: { ...process.env, ...(options.env || {}) },
+    });
+
+    return {
+      stdout: stdout.trim(),
+      stderr: stderr.trim(),
+    };
+  }
+
+  toPosixPath(...segments) {
+    return path.posix.join(...segments);
+  }
+
+  validateFunctionName(functionName) {
+    if (!functionName || !/^[a-z0-9_\-/]+$/i.test(functionName)) {
+      throw new Error(
+        "functionName may only include letters, numbers, hyphen, underscore, or forward slash"
+      );
+    }
   }
 
   // === NEW API INTEGRATION METHODS ===
@@ -645,6 +696,255 @@ module.exports = ${apiName.replace(/[^a-zA-Z0-9]/g, "")}Client;
         },
       ],
     };
+  }
+
+  // === EDGE FUNCTION DEPLOYMENT WORKFLOW ===
+
+  async deployAndValidateFunction(args = {}) {
+    const { functionName, sessionJwt = null, skipTests = false } = args;
+
+    this.validateFunctionName(functionName);
+
+    const functionDir = path.join(
+      this.workspaceRoot,
+      "supabase",
+      "functions",
+      functionName
+    );
+
+    try {
+      await fs.access(functionDir);
+    } catch {
+      throw new Error(`Edge function directory not found: ${functionDir}`);
+    }
+
+    const steps = [
+      {
+        label: "ensure_supabase_session",
+        command:
+          'bash -lc "cd supabase && source ../scripts/ensure-supabase-cli-session.sh"',
+      },
+      {
+        label: "deploy_edge_function",
+        command: `bash -lc "cd supabase && npx --yes supabase@latest functions deploy ${functionName} --no-verify-jwt"`,
+      },
+    ];
+
+    if (!skipTests) {
+      steps.push({
+        label: "run_function_tests",
+        command: `bash -lc "cd supabase && deno test --allow-all functions/tests --filter ${functionName}"`,
+      });
+    }
+
+    if (sessionJwt) {
+      const payload =
+        args.testPayload ||
+        JSON.stringify({
+          test: true,
+          timestamp: new Date().toISOString(),
+        });
+      const escapedPayload = payload.replace(/"/g, '\\"').replace(/\s+/g, " ");
+
+      const baseUrl = process.env.SUPABASE_URL;
+      if (baseUrl) {
+        steps.push({
+          label: "invoke_function",
+          command: `bash -lc "curl -s -X POST '${baseUrl}/functions/v1/${functionName}' -H 'Authorization: Bearer ${sessionJwt}' -H 'Content-Type: application/json' -d '${escapedPayload}'"`,
+        });
+      }
+    }
+
+    const report = [];
+
+    for (const step of steps) {
+      try {
+        const { stdout, stderr } = await this.runWorkspaceCommand(step.command);
+        report.push({
+          step: step.label,
+          success: true,
+          stdout,
+          stderr,
+        });
+      } catch (error) {
+        report.push({
+          step: step.label,
+          success: false,
+          error: error.message,
+          stdout: error.stdout?.toString()?.trim() || "",
+          stderr: error.stderr?.toString()?.trim() || "",
+        });
+        break;
+      }
+    }
+
+    return this.createTextResponse(
+      `🚀 Edge Function Deployment Report (function=${functionName})\n\n${JSON.stringify(
+        report,
+        null,
+        2
+      )}`
+    );
+  }
+
+  async compareEdgeFunctionVersions(args = {}) {
+    const { functionName, ref = "origin/main" } = args;
+
+    this.validateFunctionName(functionName);
+
+    const functionDir = path.join(
+      this.workspaceRoot,
+      "supabase",
+      "functions",
+      functionName
+    );
+
+    try {
+      await fs.access(functionDir);
+    } catch {
+      throw new Error(`Edge function directory not found: ${functionDir}`);
+    }
+
+    const entries = await fs.readdir(functionDir);
+    const trackedFiles = entries
+      .filter((entry) =>
+        [".ts", ".tsx", ".js", ".json", ".toml", ".md"].some((ext) =>
+          entry.endsWith(ext)
+        )
+      )
+      .map((entry) =>
+        this.toPosixPath("supabase", "functions", functionName, entry)
+      );
+
+    if (trackedFiles.length === 0) {
+      return this.createTextResponse(
+        `ℹ️ No tracked files found for ${functionName}; nothing to compare.`
+      );
+    }
+
+    const diffCommand = `git --no-pager diff ${ref} -- ${trackedFiles.join(
+      " "
+    )}`;
+    const statusCommand = `git --no-pager status --short -- ${trackedFiles.join(
+      " "
+    )}`;
+
+    const [diffResult, statusResult] = await Promise.all([
+      this.runWorkspaceCommand(diffCommand),
+      this.runWorkspaceCommand(statusCommand),
+    ]);
+
+    const summary = {
+      function: functionName,
+      reference: ref,
+      has_diff: Boolean(diffResult.stdout),
+      diff: diffResult.stdout || "No differences",
+      pending_changes: statusResult.stdout || "(clean)",
+    };
+
+    return this.createTextResponse(
+      `📦 Edge Function Diff\n\n${JSON.stringify(summary, null, 2)}`
+    );
+  }
+
+  async updateTechnicalDocs(args = {}) {
+    const {
+      regenerateCodebaseIndex = true,
+      updateSystemReference = true,
+      runDocsUpdate = true,
+    } = args;
+
+    const steps = [];
+
+    if (runDocsUpdate) {
+      steps.push({ label: "docs_update", command: "npm run docs:update" });
+    }
+
+    if (regenerateCodebaseIndex && !runDocsUpdate) {
+      steps.push({
+        label: "codebase_index",
+        command: "npm run codebase:index",
+      });
+    }
+
+    if (updateSystemReference && !runDocsUpdate) {
+      steps.push({
+        label: "system_reference",
+        command: "npm run system:reference",
+      });
+    }
+
+    if (steps.length === 0) {
+      return this.createTextResponse(
+        "ℹ️ No documentation commands requested; nothing to execute."
+      );
+    }
+
+    const outputs = [];
+
+    for (const step of steps) {
+      try {
+        const { stdout, stderr } = await this.runWorkspaceCommand(step.command);
+        outputs.push({
+          step: step.label,
+          success: true,
+          stdout,
+          stderr,
+        });
+      } catch (error) {
+        outputs.push({
+          step: step.label,
+          success: false,
+          error: error.message,
+          stdout: error.stdout?.toString()?.trim() || "",
+          stderr: error.stderr?.toString()?.trim() || "",
+        });
+      }
+    }
+
+    return this.createTextResponse(
+      `📚 Documentation Update Summary\n\n${JSON.stringify(outputs, null, 2)}`
+    );
+  }
+
+  async generateAPIChangelog(args = {}) {
+    const { limit = 5, includeDocs = false, pathFilters = [] } = args;
+
+    const targets = pathFilters.length
+      ? pathFilters
+      : ["supabase/functions", ...(includeDocs ? ["docs"] : [])];
+
+    const sanitizedTargets = targets
+      .filter((p) => typeof p === "string" && p.trim().length > 0)
+      .map((p) => p.replace(/'/g, ""));
+
+    if (sanitizedTargets.length === 0) {
+      throw new Error(
+        "No valid path filters provided for changelog generation"
+      );
+    }
+
+    const targetArgs = sanitizedTargets.map((p) => `'${p}'`).join(" ");
+    const logCommand = `git --no-pager log -n ${limit} --date=short --pretty=format:'%h %ad %an %s' -- ${targetArgs}`;
+    const statusCommand = `git --no-pager status --short -- ${targetArgs}`;
+
+    const [{ stdout: logOutput }, { stdout: statusOutput }] = await Promise.all(
+      [
+        this.runWorkspaceCommand(logCommand),
+        this.runWorkspaceCommand(statusCommand),
+      ]
+    );
+
+    const changelog = {
+      limit,
+      targets: sanitizedTargets,
+      recent_commits: logOutput ? logOutput.split("\n") : [],
+      pending_changes: statusOutput ? statusOutput.split("\n") : [],
+    };
+
+    return this.createTextResponse(
+      `📝 API Changelog Insight\n\n${JSON.stringify(changelog, null, 2)}`
+    );
   }
 
   setupErrorHandling() {
