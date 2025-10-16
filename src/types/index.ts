@@ -71,6 +71,26 @@ export interface BusinessLead {
   };
 }
 
+export type ConfidenceBucket = "high" | "medium" | "low";
+
+export interface LeadFilter {
+  confidenceBucket?: ConfidenceBucket;
+  validationStatuses?: Array<BusinessLead["validation_status"]>;
+  enrichmentTier?: string;
+  datePreset?: "7d" | "30d" | "90d";
+  dateRange?: {
+    start: string;
+    end: string;
+  };
+}
+
+export interface DashboardStats {
+  totalLeads: number;
+  qualifiedLeads: number;
+  totalCampaigns: number;
+  averageConfidence: number;
+}
+
 export interface CampaignConfig {
   search_terms: string;
   location: string;

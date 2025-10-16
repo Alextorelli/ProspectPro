@@ -1,115 +1,485 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { LeadDetailsDrawer } from "../components/LeadDetailsDrawer";
+import { LeadExplorerTable } from "../components/LeadExplorerTable";
+import { TabConfig, Tabs } from "../components/Tabs";
 import { useAuth } from "../contexts/AuthContext";
 import { supabase } from "../lib/supabase";
 import { useCampaignStore } from "../stores/campaignStore";
+import type { BusinessLead, CampaignResult, LeadFilter } from "../types";
+import {
+  CONFIDENCE_BUCKETS,
+  applyLeadFilters,
+  calculateDashboardStats,
+  getDateRangePreset,
+} from "../utils/leadFilters";
 
-interface Campaign {
-  id: string;
-  campaign_id?: string;
-  business_type: string;
-  location: string;
-  status: string;
-  results_count: number;
-  leads_found?: number;
-  leads_qualified?: number;
-  total_cost: number;
-  created_at: string;
-}
+const VALIDATION_ORDER: BusinessLead["validation_status"][] = [
+  "validated",
+  "validating",
+  "pending",
+  "failed",
+];
 
-export const Dashboard: React.FC = () => {
-  const { user, loading: authLoading } = useAuth();
-  const { campaigns: localCampaigns, leads: localLeads } = useCampaignStore();
+const DATE_PRESETS: Array<{
+  label: string;
+  value: NonNullable<LeadFilter["datePreset"]>;
+  days: number;
+}> = [
+  { label: "Last 7 days", value: "7d", days: 7 },
+  { label: "Last 30 days", value: "30d", days: 30 },
+  { label: "Last 90 days", value: "90d", days: 90 },
+];
+
+type StatsCardTarget = "leads" | "qualified" | "campaigns";
+
+const Dashboard: React.FC = () => {
   const navigate = useNavigate();
+  const { user, loading: authLoading } = useAuth();
 
-  const [campaigns, setCampaigns] = useState<Campaign[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { campaigns: storeCampaigns, leads: storeLeads } = useCampaignStore();
 
-  // Fetch user-aware campaigns from database
+  const [campaignCollection, setCampaignCollection] =
+    useState<CampaignResult[]>(storeCampaigns);
+  const [leadCollection, setLeadCollection] =
+    useState<BusinessLead[]>(storeLeads);
+  const [campaignsLoading, setCampaignsLoading] = useState(true);
+  const [leadsLoading, setLeadsLoading] = useState(true);
+  const [campaignError, setCampaignError] = useState<string | null>(null);
+  const [leadsError, setLeadsError] = useState<string | null>(null);
+  const [leadFilters, setLeadFilters] = useState<LeadFilter>({});
+  const [selectedLead, setSelectedLead] = useState<BusinessLead | null>(null);
+  const [activeTab, setActiveTab] = useState<string>("leads");
+  const [activeDatePreset, setActiveDatePreset] =
+    useState<LeadFilter["datePreset"]>();
+
   useEffect(() => {
+    if (storeCampaigns.length) {
+      setCampaignCollection(storeCampaigns);
+    }
+  }, [storeCampaigns]);
+
+  useEffect(() => {
+    if (storeLeads.length) {
+      setLeadCollection(storeLeads);
+    }
+  }, [storeLeads]);
+
+  useEffect(() => {
+    if (authLoading) {
+      return;
+    }
+
+    if (!user?.id) {
+      setCampaignCollection([]);
+      setCampaignsLoading(false);
+      setCampaignError(null);
+      return;
+    }
+
+    let isCancelled = false;
+
     const fetchCampaigns = async () => {
-      if (authLoading) {
-        return;
-      }
-
-      if (!user?.id) {
-        setCampaigns([]);
-        setLoading(false);
-        setError(null);
-        return;
-      }
-
+      setCampaignsLoading(true);
       try {
-        setLoading(true);
-        console.log("📊 Fetching campaigns for user:", user.id);
-
-        // Query campaigns scoped to the authenticated user
-        const query = supabase
+        const { data, error } = await supabase
           .from("campaigns")
-          .select("*")
-          .eq("user_id", user.id);
+          .select(
+            "id,campaign_id,business_type,location,status,total_cost,results_count,leads_found,leads_qualified,created_at"
+          )
+          .eq("user_id", user.id)
+          .order("created_at", { ascending: false });
 
-        const { data, error } = await query.order("created_at", {
-          ascending: false,
-        });
-
-        if (error) {
-          console.error("❌ Error fetching campaigns:", error);
-          setError(error.message);
+        if (isCancelled) {
           return;
         }
 
-        console.log("✅ Campaigns loaded:", data?.length || 0);
-        setCampaigns(data || []);
-      } catch (err) {
-        console.error("❌ Unexpected error:", err);
-        setError(
-          err instanceof Error ? err.message : "Failed to load campaigns"
+        if (error) {
+          console.error("[Dashboard] campaign fetch error", error);
+          setCampaignError(error.message);
+          return;
+        }
+
+        setCampaignCollection((data as CampaignResult[]) ?? []);
+        setCampaignError(null);
+      } catch (error) {
+        if (isCancelled) {
+          return;
+        }
+        console.error("[Dashboard] campaign fetch unexpected error", error);
+        setCampaignError(
+          error instanceof Error ? error.message : "Failed to load campaigns"
         );
       } finally {
-        setLoading(false);
+        if (!isCancelled) {
+          setCampaignsLoading(false);
+        }
       }
     };
 
     fetchCampaigns();
+
+    return () => {
+      isCancelled = true;
+    };
   }, [authLoading, user?.id]);
 
-  // Calculate stats from database campaigns
-  const totalCost = campaigns.reduce(
-    (sum, campaign) => sum + (campaign.total_cost || 0),
-    0
-  );
-  const totalLeads = campaigns.reduce(
-    (sum, campaign) => sum + (campaign.results_count || 0),
-    0
-  );
-  const qualifiedLeads = localLeads.filter(
-    (lead) => lead.confidence_score >= 80
-  ).length;
+  useEffect(() => {
+    if (authLoading) {
+      return;
+    }
 
-  // Fallback to local store data if no database campaigns
-  const stats = [
+    if (!user?.id) {
+      setLeadCollection([]);
+      setLeadsLoading(false);
+      setLeadsError(null);
+      return;
+    }
+
+    let isCancelled = false;
+
+    const fetchLeads = async () => {
+      setLeadsLoading(true);
+      try {
+        const { data, error } = await supabase
+          .from("leads")
+          .select(
+            "id,campaign_id,business_name,address,phone,website,email,industry,confidence_score,validation_status,created_at,cost_to_acquire,data_sources,enrichment_tier,enrichment_data"
+          )
+          .eq("user_id", user.id)
+          .order("created_at", { ascending: false });
+
+        if (isCancelled) {
+          return;
+        }
+
+        if (error) {
+          console.error("[Dashboard] lead fetch error", error);
+          setLeadsError(error.message);
+          return;
+        }
+
+        setLeadCollection((data as BusinessLead[]) ?? []);
+        setLeadsError(null);
+      } catch (error) {
+        if (isCancelled) {
+          return;
+        }
+        console.error("[Dashboard] lead fetch unexpected error", error);
+        setLeadsError(
+          error instanceof Error ? error.message : "Failed to load leads"
+        );
+      } finally {
+        if (!isCancelled) {
+          setLeadsLoading(false);
+        }
+      }
+    };
+
+    fetchLeads();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [authLoading, user?.id]);
+
+  useEffect(() => {
+    if (!leadCollection.length) {
+      setSelectedLead(null);
+    }
+  }, [leadCollection.length]);
+
+  const filteredLeads = useMemo(
+    () => applyLeadFilters(leadCollection, leadFilters),
+    [leadCollection, leadFilters]
+  );
+
+  const stats = useMemo(
+    () => calculateDashboardStats(leadCollection, campaignCollection.length),
+    [leadCollection, campaignCollection.length]
+  );
+
+  const recentCampaigns = useMemo(
+    () => campaignCollection.slice(0, 5),
+    [campaignCollection]
+  );
+
+  const confidenceOptions = useMemo(
+    () =>
+      (
+        Object.entries(CONFIDENCE_BUCKETS) as Array<
+          [NonNullable<LeadFilter["confidenceBucket"]>, { label: string }]
+        >
+      ).map(([value, bucket]) => ({ value, label: bucket.label })),
+    []
+  );
+
+  const enrichmentOptions = useMemo(() => {
+    const tiers = new Set<string>();
+    for (const lead of leadCollection) {
+      const tier =
+        lead.enrichment_tier || lead.enrichment_data?.enrichmentTier || "";
+      if (tier) {
+        tiers.add(tier);
+      }
+    }
+    return Array.from(tiers).sort((a, b) => a.localeCompare(b));
+  }, [leadCollection]);
+
+  const validationFilters = leadFilters.validationStatuses ?? [];
+
+  const toggleValidationStatus = (
+    status: BusinessLead["validation_status"]
+  ) => {
+    setLeadFilters((current) => {
+      const next = new Set(current.validationStatuses ?? []);
+      if (next.has(status)) {
+        next.delete(status);
+      } else {
+        next.add(status);
+      }
+
+      return {
+        ...current,
+        validationStatuses: next.size ? Array.from(next) : undefined,
+      };
+    });
+  };
+
+  const applyDatePresetFilter = (preset: (typeof DATE_PRESETS)[number]) => {
+    const range = getDateRangePreset(preset.days);
+    setLeadFilters((current) => ({
+      ...current,
+      datePreset: preset.value,
+      dateRange: range,
+    }));
+    setActiveDatePreset(preset.value);
+  };
+
+  const removeDatePresetFilter = () => {
+    setLeadFilters((current) => {
+      const { datePreset: _preset, dateRange: _range, ...rest } = current;
+      return rest;
+    });
+    setActiveDatePreset(undefined);
+  };
+
+  const handleClearFilters = () => {
+    setLeadFilters({});
+    setActiveDatePreset(undefined);
+  };
+
+  const handleStatsCardClick = (target: StatsCardTarget) => {
+    if (target === "campaigns") {
+      setActiveTab("campaigns");
+      return;
+    }
+
+    setActiveTab("leads");
+
+    if (target === "qualified") {
+      setLeadFilters((current) => ({
+        ...current,
+        confidenceBucket: "high",
+      }));
+    }
+  };
+
+  const tabs: TabConfig[] = [
     {
-      name: "Total Campaigns",
-      value: campaigns.length || localCampaigns.length,
-      icon: "🚀",
+      id: "leads",
+      label: "Lead Explorer",
+      content: (
+        <div className="space-y-4">
+          <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg p-4 space-y-4">
+            <div className="flex flex-wrap items-center gap-3">
+              <label className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
+                <span className="font-medium text-gray-700 dark:text-gray-200">
+                  Confidence
+                </span>
+                <select
+                  className="block w-44 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-900 text-sm"
+                  value={leadFilters.confidenceBucket || ""}
+                  onChange={(event) =>
+                    setLeadFilters((current) => ({
+                      ...current,
+                      confidenceBucket: (event.target.value ||
+                        undefined) as LeadFilter["confidenceBucket"],
+                    }))
+                  }
+                >
+                  <option value="">All bands</option>
+                  {confidenceOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-sm font-medium text-gray-700 dark:text-gray-200">
+                  Validation
+                </span>
+                {VALIDATION_ORDER.map((status) => {
+                  const isActive = validationFilters.includes(status);
+                  return (
+                    <button
+                      key={status}
+                      type="button"
+                      onClick={() => toggleValidationStatus(status)}
+                      className={`px-3 py-1 text-xs font-medium rounded-full border transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-900 ${
+                        isActive
+                          ? "border-blue-500 bg-blue-50 text-blue-700 dark:border-blue-400 dark:bg-blue-900/40 dark:text-blue-200"
+                          : "border-gray-300 text-gray-600 hover:bg-gray-100 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-800"
+                      }`}
+                    >
+                      {status}
+                    </button>
+                  );
+                })}
+              </div>
+
+              <label className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
+                <span className="font-medium text-gray-700 dark:text-gray-200">
+                  Tier
+                </span>
+                <select
+                  className="block w-44 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-900 text-sm"
+                  value={leadFilters.enrichmentTier || ""}
+                  onChange={(event) =>
+                    setLeadFilters((current) => ({
+                      ...current,
+                      enrichmentTier: event.target.value || undefined,
+                    }))
+                  }
+                >
+                  <option value="">All tiers</option>
+                  {enrichmentOptions.map((tier) => (
+                    <option key={tier} value={tier}>
+                      {tier}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2">
+              {DATE_PRESETS.map((preset) => (
+                <button
+                  key={preset.value}
+                  type="button"
+                  onClick={() =>
+                    activeDatePreset === preset.value
+                      ? removeDatePresetFilter()
+                      : applyDatePresetFilter(preset)
+                  }
+                  className={`px-3 py-2 text-xs font-medium rounded-md border transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-900 ${
+                    activeDatePreset === preset.value
+                      ? "border-blue-500 bg-blue-50 text-blue-700 dark:border-blue-400 dark:bg-blue-900/40 dark:text-blue-200"
+                      : "border-gray-300 text-gray-600 hover:bg-gray-100 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-800"
+                  }`}
+                >
+                  {preset.label}
+                </button>
+              ))}
+
+              <button
+                type="button"
+                onClick={handleClearFilters}
+                className="ml-auto px-3 py-2 text-xs font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+              >
+                Clear filters
+              </button>
+            </div>
+          </div>
+
+          <LeadExplorerTable
+            leads={filteredLeads}
+            onRowClick={(lead) => setSelectedLead(lead)}
+            isLoading={leadsLoading}
+          />
+        </div>
+      ),
     },
-    { name: "Total Leads", value: totalLeads || localLeads.length, icon: "👥" },
-    { name: "Qualified Leads", value: qualifiedLeads, icon: "✅" },
-    { name: "Total Cost", value: `$${totalCost.toFixed(2)}`, icon: "💰" },
+    {
+      id: "campaigns",
+      label: "Campaigns",
+      content: (
+        <div className="space-y-3">
+          {recentCampaigns.length === 0 ? (
+            <div className="text-center py-12 text-gray-500 dark:text-gray-400">
+              No campaigns yet. Create your first campaign to see results here.
+            </div>
+          ) : (
+            recentCampaigns.map((campaign) => {
+              const campaignId = campaign.campaign_id || campaign.id || "";
+              const leadsCount =
+                campaign.results_count || campaign.leads_found || 0;
+              const qualifiedCount = campaign.leads_qualified || 0;
+
+              return (
+                <button
+                  key={campaignId}
+                  type="button"
+                  onClick={() => navigate(`/campaign?id=${campaignId}`)}
+                  className="w-full text-left p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                >
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="flex items-center gap-3">
+                        <span
+                          className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${
+                            campaign.status === "completed"
+                              ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-200"
+                              : campaign.status === "running"
+                              ? "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-200"
+                              : campaign.status === "failed"
+                              ? "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-200"
+                              : "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200"
+                          }`}
+                        >
+                          {campaign.status}
+                        </span>
+                        <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                          {campaign.business_type} in {campaign.location}
+                        </span>
+                      </div>
+                      <div className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                        {leadsCount} results • {qualifiedCount} qualified
+                      </div>
+                    </div>
+                    <div className="text-xs text-gray-500 dark:text-gray-400">
+                      {new Date(campaign.created_at).toLocaleDateString()}
+                    </div>
+                  </div>
+                </button>
+              );
+            })
+          )}
+        </div>
+      ),
+    },
+    {
+      id: "insights",
+      label: "Insights",
+      content: (
+        <div className="text-center py-16 text-gray-500 dark:text-gray-400">
+          Analytics and trends are coming soon.
+        </div>
+      ),
+    },
   ];
 
-  const recentCampaigns =
-    campaigns.length > 0 ? campaigns.slice(0, 5) : localCampaigns.slice(0, 5);
+  const combinedError = campaignError ?? leadsError;
 
-  if (loading || authLoading) {
+  if (authLoading || (campaignsLoading && leadsLoading)) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto" />
           <p className="mt-4 text-gray-600 dark:text-gray-400">
-            Loading campaigns...
+            Loading dashboard...
           </p>
         </div>
       </div>
@@ -120,27 +490,27 @@ export const Dashboard: React.FC = () => {
     return (
       <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-8 text-center">
         <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
-          Sign in to view your campaigns
+          Sign in to view your dashboard
         </h2>
         <p className="text-sm text-gray-600 dark:text-gray-300">
-          Create an account or sign in to access saved campaigns and lead
+          Create an account or sign in to access campaign analytics and lead
           history.
         </p>
       </div>
     );
   }
 
-  if (error) {
+  if (combinedError) {
     return (
       <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
         <div className="flex">
           <div className="text-red-500 dark:text-red-400 text-xl mr-3">⚠️</div>
           <div>
             <h3 className="text-sm font-medium text-red-800 dark:text-red-200">
-              Error loading campaigns
+              Error loading dashboard
             </h3>
             <p className="text-sm text-red-700 dark:text-red-300 mt-1">
-              {error}
+              {combinedError}
             </p>
           </div>
         </div>
@@ -150,127 +520,74 @@ export const Dashboard: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
           Dashboard
         </h1>
         <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-          Overview of your lead generation campaigns and results
+          Monitor lead quality, campaign performance, and enrichment progress.
         </p>
       </div>
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-        {stats.map((stat) => (
-          <div
-            key={stat.name}
-            className="bg-white dark:bg-gray-700 overflow-hidden shadow rounded-lg border border-gray-200 dark:border-gray-600"
-          >
-            <div className="p-5">
-              <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <span className="text-2xl">{stat.icon}</span>
-                </div>
-                <div className="ml-5 w-0 flex-1">
-                  <dl>
-                    <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">
-                      {stat.name}
-                    </dt>
-                    <dd className="text-lg font-medium text-gray-900 dark:text-gray-100">
-                      {stat.value}
-                    </dd>
-                  </dl>
-                </div>
-              </div>
-            </div>
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <button
+          type="button"
+          onClick={() => handleStatsCardClick("leads")}
+          className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-5 text-left hover:shadow transition-shadow"
+        >
+          <div className="text-sm text-gray-500 dark:text-gray-400">
+            Total Leads
           </div>
-        ))}
+          <div className="mt-2 text-3xl font-semibold text-gray-900 dark:text-gray-100">
+            {stats.totalLeads}
+          </div>
+          <div className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+            Avg confidence: {stats.averageConfidence}%
+          </div>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => handleStatsCardClick("qualified")}
+          className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-5 text-left hover:shadow transition-shadow"
+        >
+          <div className="text-sm text-gray-500 dark:text-gray-400">
+            Qualified Leads
+          </div>
+          <div className="mt-2 text-3xl font-semibold text-green-600 dark:text-green-400">
+            {stats.qualifiedLeads}
+          </div>
+          <div className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+            Confidence ≥ 80%
+          </div>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => handleStatsCardClick("campaigns")}
+          className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-5 text-left hover:shadow transition-shadow"
+        >
+          <div className="text-sm text-gray-500 dark:text-gray-400">
+            Active Campaigns
+          </div>
+          <div className="mt-2 text-3xl font-semibold text-blue-600 dark:text-blue-400">
+            {campaignCollection.length}
+          </div>
+          <div className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+            Showing last {recentCampaigns.length} campaigns
+          </div>
+        </button>
       </div>
 
-      {/* Recent Campaigns */}
-      <div className="bg-white dark:bg-gray-700 shadow rounded-lg border border-gray-200 dark:border-gray-600">
-        <div className="px-4 py-5 sm:p-6">
-          <h3 className="text-lg leading-6 font-medium text-gray-900 dark:text-gray-100 mb-4">
-            Recent Campaigns
-          </h3>
-          {recentCampaigns.length === 0 ? (
-            <div className="text-center py-8">
-              <span className="text-4xl">🔍</span>
-              <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-gray-100">
-                No campaigns yet
-              </h3>
-              <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                Get started by creating your first lead discovery campaign.
-              </p>
-              <div className="mt-6">
-                <a
-                  href="/discovery"
-                  className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-gray-800 focus:ring-blue-500 dark:focus:ring-blue-400 transition-colors"
-                >
-                  Start Discovery
-                </a>
-              </div>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {recentCampaigns.map((campaign: any) => {
-                const campaignId = campaign.id || campaign.campaign_id || "";
-                const leadsCount =
-                  campaign.results_count || campaign.leads_found || 0;
-                const qualifiedCount = campaign.leads_qualified || 0;
+      <Tabs tabs={tabs} activeTab={activeTab} onChange={setActiveTab} />
 
-                return (
-                  <div
-                    key={campaignId}
-                    className="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 cursor-pointer transition-colors"
-                    onClick={() => navigate(`/campaign?id=${campaignId}`)}
-                  >
-                    <div className="flex-1">
-                      <div className="flex items-center">
-                        <span
-                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                            campaign.status === "completed"
-                              ? "bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200"
-                              : campaign.status === "running"
-                              ? "bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200"
-                              : campaign.status === "failed"
-                              ? "bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200"
-                              : "bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200"
-                          }`}
-                        >
-                          {campaign.status}
-                        </span>
-                        <span className="ml-3 text-sm font-weight-medium text-gray-900 dark:text-gray-100">
-                          {campaign.business_type} in {campaign.location}
-                        </span>
-                      </div>
-                      <div className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                        {leadsCount} results • {qualifiedCount} qualified • $
-                        {campaign.total_cost.toFixed(2)} cost
-                      </div>
-                    </div>
-                    <div className="flex items-center space-x-3">
-                      <div className="text-sm text-gray-500 dark:text-gray-400">
-                        {new Date(campaign.created_at).toLocaleDateString()}
-                      </div>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          navigate(`/campaign?id=${campaignId}`);
-                        }}
-                        className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 text-sm font-medium transition-colors"
-                      >
-                        View Details →
-                      </button>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
-      </div>
+      <LeadDetailsDrawer
+        lead={selectedLead}
+        isOpen={Boolean(selectedLead)}
+        onClose={() => setSelectedLead(null)}
+      />
     </div>
   );
 };
+
+export default Dashboard;
