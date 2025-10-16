@@ -192,5 +192,7 @@
   "[markdown]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode",
     "editor.wordWrap": "on"
-  }
+  },
+  "chat.edits2.enabled": true,
+  "chat.todoListTool.descriptionField": true
 }
