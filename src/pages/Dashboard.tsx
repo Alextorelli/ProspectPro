@@ -190,7 +190,7 @@ const Dashboard: React.FC = () => {
         const { data, error } = await supabase
           .from("campaigns")
           .select(
-            "id,campaign_id,business_type,location,status,total_cost,results_count,leads_found,leads_qualified,created_at"
+            "id,business_type,location,status,total_cost,results_count,created_at,updated_at"
           )
           .eq("user_id", user.id)
           .order("created_at", { ascending: false });

@@ -348,6 +348,26 @@ export const GeographicSelector: React.FC<GeographicSelectorProps> = ({
 
     const center = { lat: location.lat, lng: location.lng };
 
+    const getCircleConstructor = () => {
+      if (modules?.Circle) {
+        return modules.Circle;
+      }
+      if (maps?.Circle) {
+        return maps.Circle;
+      }
+      return null;
+    };
+
+    const CircleConstructor = getCircleConstructor();
+
+    if (!CircleConstructor) {
+      if (!circleRef.current) {
+        console.warn(
+          "[GeographicSelector] Google Maps Circle class not available."
+        );
+      }
+    }
+
     if (!mapRef.current) {
       const mapOptions: google.maps.MapOptions = {
         center,
@@ -374,16 +394,25 @@ export const GeographicSelector: React.FC<GeographicSelectorProps> = ({
         });
       }
 
-      circleRef.current = new modules.Circle({
-        map: mapRef.current,
-        center,
-        radius: milesToMeters(radius),
-        strokeColor: "#2563EB",
-        strokeOpacity: 0.8,
-        strokeWeight: 2,
-        fillColor: "#60A5FA",
-        fillOpacity: 0.2,
-      });
+      if (CircleConstructor) {
+        circleRef.current = new CircleConstructor({
+          center,
+          radius: milesToMeters(radius),
+          strokeColor: "#2563EB",
+          strokeOpacity: 0.8,
+          strokeWeight: 2,
+          fillColor: "#60A5FA",
+          fillOpacity: 0.2,
+        });
+
+        if (circleRef.current) {
+          if (typeof circleRef.current.setMap === "function") {
+            circleRef.current.setMap(mapRef.current);
+          } else {
+            circleRef.current.map = mapRef.current;
+          }
+        }
+      }
     } else {
       mapRef.current.setCenter(center);
       mapRef.current.setZoom(getZoomFromRadius(radius));
@@ -392,6 +421,26 @@ export const GeographicSelector: React.FC<GeographicSelectorProps> = ({
       } else if (markerRef.current) {
         markerRef.current.position = center;
       }
+      if (!circleRef.current && CircleConstructor && mapRef.current) {
+        circleRef.current = new CircleConstructor({
+          center,
+          radius: milesToMeters(radius),
+          strokeColor: "#2563EB",
+          strokeOpacity: 0.8,
+          strokeWeight: 2,
+          fillColor: "#60A5FA",
+          fillOpacity: 0.2,
+        });
+
+        if (circleRef.current) {
+          if (typeof circleRef.current.setMap === "function") {
+            circleRef.current.setMap(mapRef.current);
+          } else {
+            circleRef.current.map = mapRef.current;
+          }
+        }
+      }
+
       circleRef.current?.setCenter(center);
       circleRef.current?.setRadius(milesToMeters(radius));
     }
