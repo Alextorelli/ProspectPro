@@ -6,6 +6,7 @@ import { TabConfig, Tabs } from "../components/Tabs";
 import { useAuth } from "../contexts/AuthContext";
 import { supabase } from "../lib/supabase";
 import { useCampaignStore } from "../stores/campaignStore";
+import { sanitizeLeadCollection } from "../stores/utils/leadSanitizers";
 import type { BusinessLead, CampaignResult, LeadFilter } from "../types";
 import {
   CONFIDENCE_BUCKETS,
@@ -253,7 +254,7 @@ const Dashboard: React.FC = () => {
         const { data, error } = await supabase
           .from("leads")
           .select(
-            "id,campaign_id,business_name,address,phone,website,email,industry,confidence_score,validation_status,created_at,cost_to_acquire,data_sources,enrichment_tier,enrichment_data"
+            "id,campaign_id,business_name,address,phone,website,email,confidence_score,validation_cost,enrichment_data,created_at"
           )
           .eq("user_id", user.id)
           .order("created_at", { ascending: false });
@@ -268,7 +269,12 @@ const Dashboard: React.FC = () => {
           return;
         }
 
-        setLeadCollection((data as BusinessLead[]) ?? []);
+        const sanitized = sanitizeLeadCollection(
+          (data as any[]) ?? [],
+          null,
+          "dashboard leads fetch"
+        );
+        setLeadCollection(sanitized);
         setLeadsError(null);
       } catch (error) {
         if (isCancelled) {
