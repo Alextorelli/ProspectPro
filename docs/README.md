@@ -12,6 +12,13 @@
 - [Campaign Management](guides/CAMPAIGN_SETUP.md) - Managing lead generation campaigns
 - [CSV Export](guides/CSV_EXPORT.md) - Exporting leads to CSV format
 
+### 📋 Task Management & TODO Lists  
+- [TODO Quickstart](TODO_QUICKSTART.md) - Get started with TODO lists in 30 seconds
+- [TODO List Guide](TODO_LIST_GUIDE.md) - Complete guide to task management
+- [TODO Workflow](TODO_WORKFLOW.md) - Visual workflow diagrams
+- [TODO Summary](TODO_SUMMARY.md) - Overview of TODO documentation
+- [Project TODO](../TODO.md) - Current project tasks and roadmap
+
 ### 🔧 Technical Documentation
 - [System Architecture](technical/ARCHITECTURE.md) - System design and components
 - [API Reference](technical/API_REFERENCE.md) - Complete API documentation
