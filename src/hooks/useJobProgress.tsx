@@ -32,7 +32,8 @@ interface JobProgress {
 }
 
 interface RealtimePayload {
-  new: DiscoveryJobRow;
+  new: DiscoveryJobRow | Record<string, unknown>;
+  old?: DiscoveryJobRow | Record<string, unknown>;
 }
 
 type DiscoveryJobRow = {
@@ -169,7 +170,7 @@ export function useJobProgress(jobId: string | null) {
         ? { auth: { accessToken } }
         : undefined;
 
-      const channel = supabase.channel(`discovery_jobs:${jobId}`, {
+      const channel = supabase.channel(`discovery_jobs_${jobId}`, {
         config: {
           broadcast: { ack: false },
         },
@@ -182,14 +183,16 @@ export function useJobProgress(jobId: string | null) {
         .on(
           "postgres_changes",
           {
-            event: "UPDATE",
+            event: "*",
             schema: "public",
             table: "discovery_jobs",
             filter: `id=eq.${jobId}`,
           },
           (payload: RealtimePayload) => {
-            console.log("Real-time update:", payload.new);
-            updateFromRow(payload.new);
+            console.log("✅ Realtime job update:", payload.new);
+            if (payload.new && typeof payload.new === "object") {
+              updateFromRow(payload.new as DiscoveryJobRow);
+            }
           }
         )
         .on("system", { event: "channel_error" }, (payload) => {
@@ -202,7 +205,15 @@ export function useJobProgress(jobId: string | null) {
         });
 
       channel.subscribe((status) => {
+        console.log(
+          "🔌 Realtime subscription status:",
+          status,
+          "for job:",
+          jobId
+        );
+
         if (status === "SUBSCRIBED") {
+          console.log("✅ Realtime updates active for job:", jobId);
           stopPolling();
           return;
         }
@@ -213,7 +224,7 @@ export function useJobProgress(jobId: string | null) {
           status === "CLOSED"
         ) {
           console.warn(
-            "Realtime subscription failed. Falling back to polling.",
+            "⚠️ Realtime subscription failed. Falling back to polling.",
             {
               status,
               jobId,

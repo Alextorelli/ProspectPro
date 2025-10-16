@@ -218,7 +218,7 @@ const BUSINESS_CATEGORIES = {
 - Database → `/supabase/schema-sql/` folder ONLY
 - Documentation → `/docs/` folder ONLY
 - Archive material → `/archive/` folder ONLY
-- Codebase index → `CODEBASE_INDEX.md` (regenerate with `npm run codebase:index`)
+- Codebase index → `docs/technical/CODEBASE_INDEX.md` (regenerate with `npm run docs:update`)
 
 **SUPABASE-FIRST APPROACH**
 
@@ -514,7 +514,7 @@ Real-time Database Updates → Live Frontend Updates
 /supabase/functions/campaign-export/ # Export Edge Function
 /index.html # Static frontend entry
 /src/lib/supabase.ts # Frontend Supabase client helper
-CODEBASE_INDEX.md # Auto-generated #codebase index
+docs/technical/CODEBASE_INDEX.md # Auto-generated #codebase index
 /supabase/schema-sql/001_core_schema.sql # Database setup (see production bundle)
 /docs/ # Documentation
 /archive/ # Legacy files (deprecated)

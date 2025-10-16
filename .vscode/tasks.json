@@ -386,6 +386,75 @@
       }
     },
     {
+      "label": "Test: Discovery Pipeline",
+      "type": "shell",
+      "command": "bash",
+      "args": [
+        "-lc",
+        "cd ${workspaceFolder} && ./scripts/test-discovery-pipeline.sh"
+      ],
+      "group": "test",
+      "dependsOn": "Supabase: Ensure Session",
+      "options": {
+        "env": {
+          "SUPABASE_SESSION_JWT": "${input:sessionJWT}"
+        }
+      },
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Test: Enrichment Chain",
+      "type": "shell",
+      "command": "bash",
+      "args": [
+        "-lc",
+        "cd ${workspaceFolder} && ./scripts/test-enrichment-chain.sh"
+      ],
+      "group": "test",
+      "dependsOn": "Supabase: Ensure Session",
+      "options": {
+        "env": {
+          "SUPABASE_SESSION_JWT": "${input:sessionJWT}"
+        }
+      },
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Test: Export Flow",
+      "type": "shell",
+      "command": "bash",
+      "args": ["-lc", "cd ${workspaceFolder} && ./scripts/test-export-flow.sh"],
+      "group": "test",
+      "dependsOn": "Supabase: Ensure Session",
+      "options": {
+        "env": {
+          "SUPABASE_SESSION_JWT": "${input:sessionJWT}"
+        }
+      },
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Test: Full Stack Validation",
+      "dependsOrder": "sequence",
+      "dependsOn": [
+        "Test: Discovery Pipeline",
+        "Test: Enrichment Chain",
+        "Test: Export Flow"
+      ]
+    },
+    {
       "label": "Test: Campaign Validation",
       "type": "shell",
       "command": "bash",
@@ -477,10 +546,27 @@
       }
     },
     {
-      "label": "Docs: Update System Reference",
+      "label": "Docs: Update All Documentation",
       "type": "shell",
       "command": "npm",
       "args": ["run", "docs:update"],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "panel": "shared",
+        "showReuseMessage": false
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Docs: Update System Reference (Legacy)",
+      "type": "shell",
+      "command": "npm",
+      "args": ["run", "system:reference"],
       "options": {
         "cwd": "${workspaceFolder}"
       },
@@ -492,7 +578,7 @@
       }
     },
     {
-      "label": "Docs: Update Codebase Index",
+      "label": "Docs: Update Codebase Index (Legacy)",
       "type": "shell",
       "command": "npm",
       "args": ["run", "codebase:index"],

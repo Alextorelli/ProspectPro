@@ -343,6 +343,7 @@ ${generateMaintenanceSection()}
 
 function writeSystemReference() {
   try {
+    console.time("system:reference");
     const content = generateSystemReference();
     const outputPath = path.join(CONFIG.baseDir, CONFIG.outputFile);
 
@@ -361,6 +362,7 @@ function writeSystemReference() {
     console.log("");
     console.log("🔄 To keep current: npm run system:reference");
     console.log("📚 Full docs update: npm run docs:update");
+    console.timeEnd("system:reference");
   } catch (error) {
     console.error("❌ Error generating system reference:", error.message);
     process.exit(1);
@@ -370,6 +372,8 @@ function writeSystemReference() {
 // Run if called directly
 if (import.meta.url === `file://${process.argv[1]}`) {
   writeSystemReference();
+  // Make sure the process exits (prevents perceived hangs in some task runners)
+  process.exit(0);
 }
 
 export { CONFIG, generateSystemReference, MODULES, writeSystemReference };

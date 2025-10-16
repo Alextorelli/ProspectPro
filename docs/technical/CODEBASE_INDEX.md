@@ -1,8 +1,8 @@
 # ProspectPro Codebase Index
 
-> Primary #codebase reference. Regenerate with `npm run codebase:index` before audits or deployments.
+> Primary #codebase reference. Regenerate with `npm run docs:update` before audits or deployments.
 
-_Last generated: 2025-10-16T21:49:31.279Z_
+_Last generated: 2025-10-16T23:11:48.530Z_
 
 ## Supabase Edge Functions
 
@@ -13,11 +13,13 @@ _Last generated: 2025-10-16T21:49:31.279Z_
 - [supabase/functions/campaign-export-user-aware/index.ts](supabase/functions/campaign-export-user-aware/index.ts) — Authenticated campaign export handler
 - [supabase/functions/campaign-export/index.ts](supabase/functions/campaign-export/index.ts) — Supabase Edge Function module
 - [supabase/functions/enrichment-business-license/index.ts](supabase/functions/enrichment-business-license/index.ts) — Professional licensing enrichment module
+- [supabase/functions/enrichment-cobalt/index.ts](supabase/functions/enrichment-cobalt/index.ts) — Supabase Edge Function module
 - [supabase/functions/enrichment-hunter/index.ts](supabase/functions/enrichment-hunter/index.ts) — Hunter.io email discovery wrapper with caching
 - [supabase/functions/enrichment-neverbounce/index.ts](supabase/functions/enrichment-neverbounce/index.ts) — NeverBounce verification helper
 - [supabase/functions/enrichment-orchestrator/index.ts](supabase/functions/enrichment-orchestrator/index.ts) — Central enrichment coordinator calling Hunter, NeverBounce, licensing
 - [supabase/functions/enrichment-pdl/index.ts](supabase/functions/enrichment-pdl/index.ts) — PDL enrichment logic for enterprise compliance
 - [supabase/functions/test-google-places/index.ts](supabase/functions/test-google-places/index.ts) — Standalone Google Places API test harness
+- [supabase/functions/test-new-auth/index.ts](supabase/functions/test-new-auth/index.ts) — Supabase Edge Function module
 - [supabase/functions/test-user-deduplication/index.ts](supabase/functions/test-user-deduplication/index.ts) — Supabase Edge Function module
 
 ## Edge Function Configuration
@@ -29,11 +31,13 @@ _Last generated: 2025-10-16T21:49:31.279Z_
 - [supabase/functions/campaign-export-user-aware/function.toml](supabase/functions/campaign-export-user-aware/function.toml) — Supabase function configuration
 - [supabase/functions/campaign-export/function.toml](supabase/functions/campaign-export/function.toml) — Supabase function configuration
 - [supabase/functions/enrichment-business-license/function.toml](supabase/functions/enrichment-business-license/function.toml) — Supabase function configuration
+- [supabase/functions/enrichment-cobalt/function.toml](supabase/functions/enrichment-cobalt/function.toml) — Supabase function configuration
 - [supabase/functions/enrichment-hunter/function.toml](supabase/functions/enrichment-hunter/function.toml) — Supabase function configuration
 - [supabase/functions/enrichment-neverbounce/function.toml](supabase/functions/enrichment-neverbounce/function.toml) — Supabase function configuration
 - [supabase/functions/enrichment-orchestrator/function.toml](supabase/functions/enrichment-orchestrator/function.toml) — Supabase function configuration
 - [supabase/functions/enrichment-pdl/function.toml](supabase/functions/enrichment-pdl/function.toml) — Supabase function configuration
 - [supabase/functions/test-google-places/function.toml](supabase/functions/test-google-places/function.toml) — Supabase function configuration
+- [supabase/functions/test-new-auth/function.toml](supabase/functions/test-new-auth/function.toml) — Supabase function configuration
 - [supabase/functions/test-user-deduplication/function.toml](supabase/functions/test-user-deduplication/function.toml) — Supabase function configuration
 
 ## Shared Edge Utilities
@@ -71,7 +75,9 @@ _Last generated: 2025-10-16T21:49:31.279Z_
 
 ## Automation & Scripts
 
+- [scripts/update-docs.js](scripts/update-docs.js) — Project maintenance script
 - [scripts/generate-codebase-index.js](scripts/generate-codebase-index.js) — Project maintenance script
+- [scripts/generate-system-reference.js](scripts/generate-system-reference.js) — Project maintenance script
 - [scripts/campaign-validation.sh](scripts/campaign-validation.sh) — Project maintenance script
 - [scripts/deploy-background-tasks.sh](scripts/deploy-background-tasks.sh) — Project maintenance script
 - [scripts/start-mcp.sh](scripts/start-mcp.sh) — Project maintenance script
@@ -82,7 +88,7 @@ _Last generated: 2025-10-16T21:49:31.279Z_
 
 ## Configuration & Policies
 
-- [CODEBASE_INDEX.md](CODEBASE_INDEX.md) — Auto-generated index consumed by #codebase command
+- [docs/technical/CODEBASE_INDEX.md](docs/technical/CODEBASE_INDEX.md) — Auto-generated index consumed by #codebase command
 - [.github/copilot-instructions.md](.github/copilot-instructions.md) — AI assistant operating instructions (keep in sync)
 - [.vscode/settings.json](.vscode/settings.json) — Workspace defaults for Supabase + Copilot context
 - [.vscode/prospectpro-supabase.code-workspace](.vscode/prospectpro-supabase.code-workspace) — Workspace file bundling tasks and recommendations
@@ -92,6 +98,6 @@ _Last generated: 2025-10-16T21:49:31.279Z_
 
 ## Update Procedure
 
-1. Run `npm run codebase:index` after modifying edge functions, frontend workflow, or security policies.
-2. Commit the refreshed `CODEBASE_INDEX.md` alongside your changes so #codebase stays current.
+1. Run `npm run docs:update` after modifying edge functions, frontend workflow, or security policies.
+2. Commit the refreshed `docs/technical/CODEBASE_INDEX.md` alongside your changes so #codebase stays current.
 3. Legacy documentation referencing the codebase is archived—treat this file as the single source of truth.

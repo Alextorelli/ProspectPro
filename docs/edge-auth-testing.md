@@ -76,6 +76,33 @@ else
 fi
 ```
 
+## Automated Integration Scripts (Updated October 2025)
+
+Once `SUPABASE_SESSION_JWT` is exported, run the new CLI helpers from the repository root to validate each stage end-to-end:
+
+```bash
+./scripts/test-discovery-pipeline.sh      # business-discovery-background → job + campaign snapshot
+./scripts/test-enrichment-chain.sh        # enrichment-orchestrator + Hunter + NeverBounce
+./scripts/test-export-flow.sh             # campaign-export-user-aware (+ download check)
+```
+
+The scripts record structured artifacts in `scripts/test-artifacts/` so downstream steps can reuse the latest campaign context:
+
+- `latest-discovery.json` – discovery job status, campaign record, lead preview
+- `latest-enrichment.json` – orchestrator output plus Hunter/NeverBounce responses
+- `latest-export.json` and `latest-export-data.json` – export metadata and downloaded payload
+
+### VS Code Tasks
+
+Matching tasks are available under the **Test** group:
+
+- `Test: Discovery Pipeline`
+- `Test: Enrichment Chain`
+- `Test: Export Flow`
+- `Test: Full Stack Validation` (runs all three sequentially)
+
+Each task depends on `Supabase: Ensure Session` and prompts for `SUPABASE_SESSION_JWT`, keeping the workflow aligned with the existing authentication guardrails. The scripts exit non-zero on failure, making them safe to chain inside automation.
+
 Set a campaign identifier variable after the background run succeeds (replace with the job result value when you have it):
 
 ```bash

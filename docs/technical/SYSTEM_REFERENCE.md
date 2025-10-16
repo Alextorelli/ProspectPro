@@ -142,9 +142,6 @@ const user = await authenticateRequest(request);
 
 ### Keep System Reference Current
 ```bash
-# Regenerate system reference (run after code changes)
-npm run system:reference
-
 # Full documentation update (codebase index + system reference)
 npm run docs:update
 
@@ -180,7 +177,6 @@ npm run docs:update
 - [ ] Production URL accessible: https://prospect-fyhedobh1-appsmithery.vercel.app
 - [ ] User authentication system working (signup/signin/session management)
 
-
 ---
 
 ## Current Production Status
@@ -208,4 +204,4 @@ npm run docs:update
 ---
 
 *Last Updated: 2025-10-16 | Auto-generated from ProspectPro v4.3 codebase analysis*
-*Run `npm run system:reference` to regenerate this reference*
+*Run `npm run docs:update` to regenerate this reference*

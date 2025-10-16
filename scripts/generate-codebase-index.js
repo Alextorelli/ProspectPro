@@ -12,6 +12,7 @@ const allowedFunctionSlugs = new Set([
   "business-discovery-background",
   "business-discovery-optimized",
   "business-discovery-user-aware",
+  "business-discovery-deduplication",
   "campaign-export",
   "campaign-export-user-aware",
   "enrichment-orchestrator",
@@ -19,7 +20,9 @@ const allowedFunctionSlugs = new Set([
   "enrichment-neverbounce",
   "enrichment-business-license",
   "enrichment-pdl",
+  "enrichment-cobalt",
   "test-google-places",
+  "test-new-auth",
   "test-user-deduplication",
 ]);
 
@@ -116,7 +119,10 @@ const descriptionOverrides = new Map([
     "supabase/schema-sql/004_enrichment_cache.sql",
     "Enrichment cache tables, views, and maintenance helpers",
   ],
-  ["CODEBASE_INDEX.md", "Auto-generated index consumed by #codebase command"],
+  [
+    "docs/technical/CODEBASE_INDEX.md",
+    "Auto-generated index consumed by #codebase command",
+  ],
   [
     ".github/copilot-instructions.md",
     "AI assistant operating instructions (keep in sync)",
@@ -242,6 +248,7 @@ function formatList(relPaths) {
 }
 
 async function main() {
+  console.time("codebase:index");
   const timestamp = new Date().toISOString();
 
   const edgeFunctions = await collectEdgeFunctions();
@@ -286,7 +293,7 @@ async function main() {
   ]);
 
   const configFiles = await filterExisting([
-    "CODEBASE_INDEX.md",
+    "docs/technical/CODEBASE_INDEX.md",
     ".github/copilot-instructions.md",
     ".vscode/settings.json",
     ".vscode/prospectpro-supabase.code-workspace",
@@ -353,18 +360,25 @@ async function main() {
     "1. Run `npm run codebase:index` after modifying edge functions, frontend workflow, or security policies."
   );
   lines.push(
-    "2. Commit the refreshed `CODEBASE_INDEX.md` alongside your changes so #codebase stays current."
+    "2. Commit the refreshed `docs/technical/CODEBASE_INDEX.md` alongside your changes so #codebase stays current."
   );
   lines.push(
     "3. Legacy documentation referencing the codebase is archived—treat this file as the single source of truth."
   );
   lines.push("");
 
-  const destination = path.join(repoRoot, "CODEBASE_INDEX.md");
+  const destination = path.join(repoRoot, "docs/technical/CODEBASE_INDEX.md");
   await fs.writeFile(destination, lines.join("\n"));
+  console.timeEnd("codebase:index");
+  console.log(`✅ docs/technical/CODEBASE_INDEX.md updated at ${destination}`);
 }
 
-main().catch((error) => {
-  console.error("Failed to generate CODEBASE_INDEX.md", error);
-  process.exitCode = 1;
-});
+main()
+  .then(() => {
+    // Ensure clean exit to avoid lingering handles being interpreted as a hang
+    process.exit(0);
+  })
+  .catch((error) => {
+    console.error("Failed to generate CODEBASE_INDEX.md", error);
+    process.exit(1);
+  });
