@@ -9,18 +9,10 @@ import { useCampaignStore } from "../stores/campaignStore";
 import { sanitizeLeadCollection } from "../stores/utils/leadSanitizers";
 import type { BusinessLead, CampaignResult, LeadFilter } from "../types";
 import {
-  CONFIDENCE_BUCKETS,
   applyLeadFilters,
   calculateDashboardStats,
   getDateRangePreset,
 } from "../utils/leadFilters";
-
-const VALIDATION_ORDER: BusinessLead["validation_status"][] = [
-  "validated",
-  "validating",
-  "pending",
-  "failed",
-];
 
 const DATE_PRESETS: Array<{
   label: string;
@@ -319,16 +311,6 @@ const Dashboard: React.FC = () => {
     [campaignCollection]
   );
 
-  const confidenceOptions = useMemo(
-    () =>
-      (
-        Object.entries(CONFIDENCE_BUCKETS) as Array<
-          [NonNullable<LeadFilter["confidenceBucket"]>, { label: string }]
-        >
-      ).map(([value, bucket]) => ({ value, label: bucket.label })),
-    []
-  );
-
   const enrichmentOptions = useMemo(() => {
     const tiers = new Set<string>();
     for (const lead of leadCollection) {
@@ -340,26 +322,6 @@ const Dashboard: React.FC = () => {
     }
     return Array.from(tiers).sort((a, b) => a.localeCompare(b));
   }, [leadCollection]);
-
-  const validationFilters = leadFilters.validationStatuses ?? [];
-
-  const toggleValidationStatus = (
-    status: BusinessLead["validation_status"]
-  ) => {
-    setLeadFilters((current) => {
-      const next = new Set(current.validationStatuses ?? []);
-      if (next.has(status)) {
-        next.delete(status);
-      } else {
-        next.add(status);
-      }
-
-      return {
-        ...current,
-        validationStatuses: next.size ? Array.from(next) : undefined,
-      };
-    });
-  };
 
   const applyDatePresetFilter = (preset: (typeof DATE_PRESETS)[number]) => {
     const range = getDateRangePreset(preset.days);
@@ -408,53 +370,6 @@ const Dashboard: React.FC = () => {
         <div className="space-y-4">
           <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg p-4 space-y-4">
             <div className="flex flex-wrap items-center gap-3">
-              <label className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
-                <span className="font-medium text-gray-700 dark:text-gray-200">
-                  Confidence
-                </span>
-                <select
-                  className="block w-44 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-900 text-sm"
-                  value={leadFilters.confidenceBucket || ""}
-                  onChange={(event) =>
-                    setLeadFilters((current) => ({
-                      ...current,
-                      confidenceBucket: (event.target.value ||
-                        undefined) as LeadFilter["confidenceBucket"],
-                    }))
-                  }
-                >
-                  <option value="">All bands</option>
-                  {confidenceOptions.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-              </label>
-
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="text-sm font-medium text-gray-700 dark:text-gray-200">
-                  Validation
-                </span>
-                {VALIDATION_ORDER.map((status) => {
-                  const isActive = validationFilters.includes(status);
-                  return (
-                    <button
-                      key={status}
-                      type="button"
-                      onClick={() => toggleValidationStatus(status)}
-                      className={`px-3 py-1 text-xs font-medium rounded-full border transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-900 ${
-                        isActive
-                          ? "border-blue-500 bg-blue-50 text-blue-700 dark:border-blue-400 dark:bg-blue-900/40 dark:text-blue-200"
-                          : "border-gray-300 text-gray-600 hover:bg-gray-100 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-800"
-                      }`}
-                    >
-                      {status}
-                    </button>
-                  );
-                })}
-              </div>
-
               <label className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
                 <span className="font-medium text-gray-700 dark:text-gray-200">
                   Tier

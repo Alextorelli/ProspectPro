@@ -48,7 +48,7 @@ export const LeadDetailsDrawer: React.FC<LeadDetailsDrawerProps> = ({
         <div className="px-6 py-6 space-y-8">
           <section>
             <h3 className="text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
-              Business Information
+              Business Summary
             </h3>
             <div className="mt-4 space-y-3 text-sm text-gray-700 dark:text-gray-200">
               <div>
@@ -62,12 +62,6 @@ export const LeadDetailsDrawer: React.FC<LeadDetailsDrawerProps> = ({
                   Address:
                 </span>{" "}
                 {formatDisplayValue(lead.address)}
-              </div>
-              <div>
-                <span className="font-medium text-gray-900 dark:text-gray-100">
-                  Industry:
-                </span>{" "}
-                {formatDisplayValue(lead.industry)}
               </div>
             </div>
           </section>
@@ -126,66 +120,6 @@ export const LeadDetailsDrawer: React.FC<LeadDetailsDrawerProps> = ({
               </div>
             </div>
           </section>
-
-          <section>
-            <h3 className="text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
-              Verification
-            </h3>
-            <div className="mt-4 space-y-3 text-sm text-gray-700 dark:text-gray-200">
-              <div className="flex items-center space-x-2">
-                <span
-                  className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${
-                    lead.validation_status === "validated"
-                      ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-200"
-                      : lead.validation_status === "validating"
-                      ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-200"
-                      : lead.validation_status === "failed"
-                      ? "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-200"
-                      : "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200"
-                  }`}
-                >
-                  {lead.validation_status}
-                </span>
-                <span className="text-xs text-gray-500 dark:text-gray-400">
-                  Confidence score: {lead.confidence_score ?? 0}%
-                </span>
-              </div>
-              <div>
-                <span className="font-medium text-gray-900 dark:text-gray-100">
-                  Enrichment Tier:
-                </span>{" "}
-                {formatDisplayValue(
-                  lead.enrichment_tier || lead.enrichment_data?.enrichmentTier
-                )}
-              </div>
-            </div>
-          </section>
-
-          {lead.enrichment_data && (
-            <section>
-              <h3 className="text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
-                Enrichment Summary
-              </h3>
-              <div className="mt-4 bg-gray-50 dark:bg-gray-800/60 rounded-lg p-4 text-xs text-gray-600 dark:text-gray-300 overflow-x-auto">
-                <pre className="whitespace-pre-wrap break-words">
-                  {JSON.stringify(lead.enrichment_data, null, 2)}
-                </pre>
-              </div>
-            </section>
-          )}
-
-          {lead.data_sources?.length ? (
-            <section>
-              <h3 className="text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
-                Data Sources
-              </h3>
-              <ul className="mt-4 space-y-2 text-sm text-gray-700 dark:text-gray-200">
-                {lead.data_sources.map((source, index) => (
-                  <li key={`${source}-${index}`}>• {source}</li>
-                ))}
-              </ul>
-            </section>
-          ) : null}
         </div>
       </aside>
     </>
