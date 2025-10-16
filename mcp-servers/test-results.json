@@ -1,5 +1,5 @@
 {
-  "timestamp": "2025-10-15T16:49:04.248Z",
+  "timestamp": "2025-10-16T00:30:06.053Z",
   "servers": {
     "production-server": {
       "name": "production-server",
@@ -9,6 +9,14 @@
       "server_methods": [
         "setupTools",
         "initializeSupabase",
+        "decodeJwt",
+        "createSessionClient",
+        "validateSupabaseSession",
+        "diagnoseRLSFailure",
+        "groupByField",
+        "summarizeCampaignGroup",
+        "analyzeCampaignCosts",
+        "predictCampaignCost",
         "initializeAPIClients",
         "environmentHealthCheck",
         "githubActionsMonitor",
@@ -24,10 +32,6 @@
         "validateConfiguration",
         "generatePerformanceReport",
         "monitorAPIQuotas",
-        "validateSupabaseSession",
-        "diagnoseRLSFailure",
-        "analyzeCampaignCosts",
-        "predictCampaignCost",
         "queryLeads",
         "getCampaignStats",
         "analyzeLeadQuality",
@@ -61,6 +65,10 @@
       "class_instantiable": true,
       "server_methods": [
         "setupTools",
+        "createTextResponse",
+        "runWorkspaceCommand",
+        "toPosixPath",
+        "validateFunctionName",
         "testNewAPIIntegration",
         "testUSChamberAPI",
         "testBBBAPI",

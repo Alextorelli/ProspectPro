@@ -7,16 +7,40 @@
             "lazyLoad": true,
             "maxMemory": "192MB",
             "priority": "high",
-            "description": "Production monitoring for tier-aware background discovery, enrichment, and session-enforced auth (28 tools)",
+            "description": "Production monitoring for tier-aware background discovery, enrichment, and session-enforced auth (32 tools)",
             "tools": [
-                "monitor_api_performance",
-                "analyze_database_metrics",
-                "check_edge_function_health",
-                "track_api_costs",
-                "monitor_supabase_usage",
-                "track_user_sessions",
-                "monitor_authentication",
-                "analyze_campaign_ownership"
+                "environment_health_check",
+                "github_actions_monitor",
+                "dev_prod_config_diff",
+                "cost_budget_monitor",
+                "api_health_dashboard",
+                "vault_api_key_status",
+                "production_startup_validator",
+                "github_workflow_optimizer",
+                "get_system_health",
+                "read_diagnostics",
+                "analyze_logs",
+                "validate_configuration",
+                "generate_performance_report",
+                "monitor_api_quotas",
+                "validate_supabase_session",
+                "diagnose_rls_failure",
+                "analyze_campaign_costs",
+                "predict_campaign_cost",
+                "query_leads",
+                "get_campaign_stats",
+                "analyze_lead_quality",
+                "get_api_costs",
+                "test_google_places",
+                "test_foursquare_places",
+                "test_email_discovery",
+                "verify_email",
+                "get_api_usage_stats",
+                "simulate_lead_discovery",
+                "analyze_project_structure",
+                "find_code_patterns",
+                "analyze_api_clients",
+                "check_fake_data_violations"
             ]
         },
         "prospectpro-development": {
@@ -24,14 +48,33 @@
             "onDemand": true,
             "maxMemory": "96MB",
             "priority": "medium",
-            "description": "Development tools for background discovery, census targeting, enrichment, and session token workflows",
+            "description": "Development tools for API integration testing, edge function deployment, documentation automation (12 tools)",
+            "tools": [
+                "test_new_api_integration",
+                "compare_api_sources",
+                "benchmark_api_performance",
+                "analyze_error_handling",
+                "get_configuration_overview",
+                "check_docker_status",
+                "generate_api_client_template",
+                "validate_environment_setup",
+                "create_test_scenario",
+                "deploy_and_validate_function",
+                "compare_edge_function_versions",
+                "update_technical_docs",
+                "generate_api_changelog"
+            ],
             "activationKeywords": [
                 "develop",
                 "integrate",
                 "new api",
                 "test integration",
-                "user auth",
-                "session management"
+                "deploy function",
+                "edge function",
+                "documentation",
+                "changelog",
+                "diff",
+                "version compare"
             ]
         },
         "prospectpro-troubleshooting": {
@@ -39,7 +82,15 @@
             "onDemand": true,
             "maxMemory": "96MB",
             "priority": "medium",
-            "description": "Debugging tools for background jobs, Supabase auth sessions, and enrichment pipelines",
+            "description": "Debugging tools for background jobs, Supabase auth sessions, RLS policies, and enrichment pipelines (6 tools)",
+            "tools": [
+                "test_edge_function",
+                "validate_database_permissions",
+                "check_vercel_deployment",
+                "diagnose_anon_key_mismatch",
+                "run_rls_diagnostics",
+                "generate_debugging_commands"
+            ],
             "activationKeywords": [
                 "debug",
                 "error",
@@ -49,7 +100,10 @@
                 "500",
                 "auth error",
                 "jwt",
-                "session"
+                "session",
+                "rls",
+                "permission denied",
+                "policy"
             ]
         },
         "supabase_cli_context": {
@@ -123,7 +177,15 @@
             "run supabase function tests": "npm run supabase:test:functions",
             "diagnose discovery logs": "./scripts/diagnose-campaign-failure.sh business-discovery",
             "diagnose enrichment logs": "./scripts/diagnose-campaign-failure.sh enrichment",
-            "function report discovery": "source scripts/ensure-supabase-cli-session.sh && source scripts/lib/supabase_cli_helpers.sh && get_function_report business-discovery-background"
+            "function report discovery": "source scripts/ensure-supabase-cli-session.sh && source scripts/lib/supabase_cli_helpers.sh && get_function_report business-discovery-background",
+            "validate session": "echo 'Use MCP production tool: validate_supabase_session with sessionJwt parameter'",
+            "diagnose rls": "echo 'Use MCP production tool: diagnose_rls_failure with tableName and sessionJwt parameters'",
+            "analyze costs": "echo 'Use MCP production tool: analyze_campaign_costs with optional campaignId, dateRange, groupBy parameters'",
+            "predict cost": "echo 'Use MCP production tool: predict_campaign_cost with tierKey, businessType, targetCount parameters'",
+            "deploy edge function": "echo 'Use MCP development tool: deploy_and_validate_function with functionName and optional sessionJwt'",
+            "compare function versions": "echo 'Use MCP development tool: compare_edge_function_versions with functionName and optional ref'",
+            "update docs": "echo 'Use MCP development tool: update_technical_docs or run: npm run docs:update'",
+            "generate changelog": "echo 'Use MCP development tool: generate_api_changelog with optional limit, includeDocs, pathFilters'"
         }
     },
     "userAwareFeatures": {
