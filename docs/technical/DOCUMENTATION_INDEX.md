@@ -8,6 +8,13 @@
 
 ProspectPro v4.4 adds user-aware campaign deduplication and billing-ready analytics while maintaining the tier-aware background discovery pipeline. This index points to the live references backing the production system.
 
+### 📝 Task Management & Contribution
+
+- **[TODO List Guide](../TODO_LIST_GUIDE.md)** – Complete guide to creating and managing tasks
+- **[TODO Quickstart](../TODO_QUICKSTART.md)** – Quick reference for task creation
+- **[Project TODO](../../TODO.md)** – Current tasks and roadmap items
+- **[Contributing Guide](../../.github/CONTRIBUTING.md)** – How to contribute to ProspectPro
+
 ---
 
 ## 🏗️ Core Architecture

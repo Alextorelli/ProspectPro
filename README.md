@@ -256,10 +256,16 @@ MIT License - see [LICENSE](LICENSE) file for details.
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
+**New to the project?** Check out our guides:
+- [Contributing Guide](.github/CONTRIBUTING.md) - Detailed contribution guidelines
+- [TODO List Guide](docs/TODO_LIST_GUIDE.md) - How to create and manage tasks
+- [Project TODO](TODO.md) - Current tasks and roadmap items
+
 ## 📞 Support
 
 - **Documentation:** [GitHub Wiki](https://github.com/Alextorelli/ProspectPro/wiki)
 - **Issues:** [GitHub Issues](https://github.com/Alextorelli/ProspectPro/issues)
+- **TODO & Tasks:** [TODO List Guide](docs/TODO_LIST_GUIDE.md)
 - **Email:** support@prospectpro.com
 
 ---
