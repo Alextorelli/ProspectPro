@@ -27,7 +27,7 @@
     "debug.overrideEngine": "gpt-4",
     "debug.useNodeFetcher": true
   },
-  "chat.agent.maxRequests": 15,
+  "chat.agent.maxRequests": 20,
   "chat.editing.autoAcceptDelay": 100,
   "chat.useAgentsMdFile": true,
   "chat.instructionsFilesLocations": {
