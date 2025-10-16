@@ -8,7 +8,7 @@ import { AuthCallback } from "./pages/AuthCallback";
 import { BusinessDiscovery } from "./pages/BusinessDiscovery";
 import { Campaign } from "./pages/Campaign";
 import { CampaignProgress } from "./pages/CampaignProgress";
-import { Dashboard } from "./pages/Dashboard";
+import Dashboard from "./pages/Dashboard";
 import { Results } from "./pages/Results";
 
 function App() {

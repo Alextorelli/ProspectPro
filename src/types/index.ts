@@ -117,12 +117,14 @@ export interface ValidationResult {
 }
 
 export interface CampaignResult {
+  id?: string;
   campaign_id: string;
   business_type?: string;
   location?: string;
   status: "running" | "completed" | "failed" | "cancelled";
   progress: number;
   total_cost: number;
+  results_count?: number;
   leads_found: number;
   leads_qualified: number;
   leads_validated: number;

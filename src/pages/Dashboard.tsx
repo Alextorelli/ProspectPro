@@ -33,6 +33,111 @@ const DATE_PRESETS: Array<{
 
 type StatsCardTarget = "leads" | "qualified" | "campaigns";
 
+const coerceNumber = (value: unknown, fallback = 0): number => {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : fallback;
+};
+
+const normalizeCampaignStatus = (value: unknown): CampaignResult["status"] => {
+  if (value === "completed" || value === "failed" || value === "cancelled") {
+    return value;
+  }
+
+  if (value === "running") {
+    return "running";
+  }
+
+  return "running";
+};
+
+const mapCampaignRecord = (record: any): CampaignResult | null => {
+  if (!record) {
+    return null;
+  }
+
+  const campaignIdentifier = record.campaign_id ?? record.id;
+
+  if (!campaignIdentifier) {
+    console.warn("[Dashboard] Ignoring campaign without identifier", record);
+    return null;
+  }
+
+  const status = normalizeCampaignStatus(record.status);
+  const leadsFound = coerceNumber(
+    record.leads_found ?? record.results_count,
+    0
+  );
+  const leadsQualified = coerceNumber(record.leads_qualified, 0);
+  const leadsValidated = coerceNumber(
+    record.leads_validated ?? record.leads_qualified,
+    leadsQualified
+  );
+
+  const progressValue = (() => {
+    if (typeof record.progress === "number") {
+      return Math.min(100, Math.max(0, record.progress));
+    }
+
+    if (status === "completed") {
+      return 100;
+    }
+
+    return leadsFound > 0 ? 80 : 0;
+  })();
+
+  const parsedCreatedAt =
+    typeof record.created_at === "string"
+      ? record.created_at
+      : new Date().toISOString();
+
+  const parsedCompletedAt =
+    typeof record.completed_at === "string" ? record.completed_at : undefined;
+
+  const cachePerformance =
+    record.cache_performance && typeof record.cache_performance === "object"
+      ? record.cache_performance
+      : undefined;
+
+  return {
+    id: typeof record.id === "string" ? record.id : undefined,
+    campaign_id: String(campaignIdentifier),
+    business_type:
+      typeof record.business_type === "string"
+        ? record.business_type
+        : undefined,
+    location: typeof record.location === "string" ? record.location : undefined,
+    status,
+    progress: progressValue,
+    total_cost: coerceNumber(record.total_cost, 0),
+    results_count:
+      record.results_count != null
+        ? coerceNumber(record.results_count, 0)
+        : undefined,
+    leads_found: leadsFound,
+    leads_qualified: leadsQualified,
+    leads_validated: leadsValidated,
+    created_at: parsedCreatedAt,
+    completed_at: parsedCompletedAt,
+    error_message:
+      typeof record.error_message === "string"
+        ? record.error_message
+        : undefined,
+    tier_used:
+      typeof record.tier_used === "string" ? record.tier_used : undefined,
+    vault_secured:
+      typeof record.vault_secured === "boolean"
+        ? record.vault_secured
+        : status === "completed"
+        ? true
+        : undefined,
+    cache_performance: cachePerformance,
+  } satisfies CampaignResult;
+};
+
+const isCampaignResult = (
+  value: CampaignResult | null
+): value is CampaignResult => value !== null;
+
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
@@ -100,7 +205,11 @@ const Dashboard: React.FC = () => {
           return;
         }
 
-        setCampaignCollection((data as CampaignResult[]) ?? []);
+        const mappedCampaigns = Array.isArray(data)
+          ? data.map(mapCampaignRecord).filter(isCampaignResult)
+          : [];
+
+        setCampaignCollection(mappedCampaigns);
         setCampaignError(null);
       } catch (error) {
         if (isCancelled) {
