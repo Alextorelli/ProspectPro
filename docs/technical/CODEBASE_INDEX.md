@@ -1,8 +1,8 @@
 # ProspectPro Codebase Index
 
-> Primary #codebase reference. Regenerate with `npm run docs:update` before audits or deployments.
+> Primary #codebase reference. Regenerate with `npm run codebase:index` before audits or deployments.
 
-_Last generated: 2025-10-17T09:31:45.180Z_
+_Last generated: 2025-10-17T09:33:57.212Z_
 
 ## Supabase Edge Functions
 
@@ -71,9 +71,7 @@ _Last generated: 2025-10-17T09:31:45.180Z_
 
 ## Automation & Scripts
 
-- [scripts/update-docs.js](scripts/update-docs.js) — Project maintenance script
 - [scripts/generate-codebase-index.js](scripts/generate-codebase-index.js) — Project maintenance script
-- [scripts/generate-system-reference.js](scripts/generate-system-reference.js) — Project maintenance script
 - [scripts/campaign-validation.sh](scripts/campaign-validation.sh) — Project maintenance script
 - [scripts/deploy-background-tasks.sh](scripts/deploy-background-tasks.sh) — Project maintenance script
 - [scripts/start-mcp.sh](scripts/start-mcp.sh) — Project maintenance script
@@ -93,6 +91,6 @@ _Last generated: 2025-10-17T09:31:45.180Z_
 
 ## Update Procedure
 
-1. Run `npm run docs:update` after modifying edge functions, frontend workflow, or security policies.
+1. Run `npm run codebase:index` after modifying edge functions, frontend workflow, or security policies.
 2. Commit the refreshed `docs/technical/CODEBASE_INDEX.md` alongside your changes so #codebase stays current.
 3. Legacy documentation referencing the codebase is archived—treat this file as the single source of truth.

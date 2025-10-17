@@ -26,7 +26,8 @@
         "Docs: Update Codebase Index (Legacy)",
         "Git: Remind to Push Before Exit",
         "Git: Commit and Push All"
-      ]
+      ],
+      "problemMatcher": ["$deno-lint"]
     },
     {
       "label": "Git: Remind to Push Before Exit",
