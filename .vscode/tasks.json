@@ -695,6 +695,51 @@
       }
     },
     {
+      "label": "Context: Fetch Repo Snapshot",
+      "type": "shell",
+      "command": "node",
+      "args": ["scripts/context/fetch-repo-context.js"],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "group": "none",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Context: Fetch Supabase Snapshot",
+      "type": "shell",
+      "command": "node",
+      "args": ["scripts/context/fetch-supabase-context.js"],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "group": "none",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Context: Cache Session JWT",
+      "type": "shell",
+      "command": "node",
+      "args": ["scripts/context/cache-session.js", "${input:sessionJWT}"],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "group": "none",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "panel": "shared"
+      }
+    },
+    {
       "label": "Workspace: Validate Configuration",
       "type": "shell",
       "command": "bash",

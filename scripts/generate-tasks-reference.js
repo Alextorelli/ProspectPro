@@ -191,6 +191,12 @@ function sanitizeDescription(task) {
       "Pulls open items from Project 5 → [`docs/roadmap/project-open-items.md`](../docs/roadmap/project-open-items.md)",
     "Workspace: Validate Configuration":
       "Validates workspace config and environment setup",
+    "Context: Fetch Repo Snapshot":
+      "Captures current git branch, status, and diff summary to `.cache/agent/context/repo-context.json`",
+    "Context: Fetch Supabase Snapshot":
+      "Summarizes Edge Function directories and verify_jwt settings to `.cache/agent/context/supabase-functions.json`",
+    "Context: Cache Session JWT":
+      "Stores the provided session JWT locally at `.cache/agent/context/session.json`",
   };
 
   return descriptions[label] || "No description available";
