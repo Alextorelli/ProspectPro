@@ -623,6 +623,21 @@
       }
     },
     {
+      "label": "🗂️ Batch Generate Epics + Project",
+      "type": "shell",
+      "command": "npm",
+      "args": ["run", "roadmap:batch", "--", "--project"],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "panel": "shared"
+      }
+    },
+    {
       "label": "🌐 Open Project 5",
       "type": "shell",
       "command": "npm",
@@ -655,11 +670,23 @@
     {
       "label": "🛠️ Start Epic Scaffolding",
       "type": "shell",
-      "command": "bash",
-      "args": [
-        "-lc",
-        "${workspaceFolder}/scripts/start-epic.sh ${input:epicKey}"
-      ],
+      "command": "npm",
+      "args": ["run", "roadmap:start", "--", "${input:epicKey}"],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "📋 Roadmap: Pull Open Items",
+      "type": "shell",
+      "command": "npm",
+      "args": ["run", "roadmap:pull"],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
       "group": "build",
       "presentation": {
         "echo": true,

@@ -37,14 +37,6 @@ function toTitleFromSlug(slug) {
     .join(" ");
 }
 
-function padAcceptanceCriteria(entries) {
-  const padded = entries.slice(0, 3);
-  while (padded.length < 3) {
-    padded.push("TBD");
-  }
-  return padded;
-}
-
 async function promptForEpic() {
   const rl = createInterface({ input, output });
   try {
@@ -60,21 +52,28 @@ async function promptForEpic() {
       (await rl.question(`Title (${defaultTitle}): `)).trim() || defaultTitle;
     const problem = (await rl.question("Problem statement: ")).trim() || "TBD";
     const solution = (await rl.question("Solution summary: ")).trim() || "TBD";
+
     const acRaw = (
       await rl.question("Acceptance criteria (semicolon separated): ")
     ).trim();
-    const acList = acRaw
+    const acceptance = acRaw
       ? acRaw
           .split(";")
           .map((item) => item.trim())
           .filter(Boolean)
       : [];
-    const acceptance = padAcceptanceCriteria(acList);
+
+    const reqRaw = (
+      await rl.question("Technical requirements (semicolon separated): ")
+    ).trim();
+    const requirements = reqRaw
+      ? reqRaw
+          .split(";")
+          .map((item) => item.trim())
+          .filter(Boolean)
+      : [];
+
     const impact = (await rl.question("Business impact: ")).trim() || "TBD";
-    const req1 =
-      (await rl.question("Primary technical requirement: ")).trim() || "TBD";
-    const req2 =
-      (await rl.question("Secondary technical requirement: ")).trim() || "TBD";
     const priority =
       (await rl.question("Priority (e.g., High): ")).trim() || "TBD";
     const phase =
@@ -91,9 +90,8 @@ async function promptForEpic() {
       problem,
       solution,
       acceptance,
+      requirements,
       impact,
-      req1,
-      req2,
       priority,
       phase,
       points,
@@ -109,17 +107,26 @@ async function promptForEpic() {
 }
 
 function applyTemplate(template, data) {
+  const acceptanceList = (
+    data.acceptance.length > 0 ? data.acceptance : ["TBD"]
+  )
+    .map((item) => `- [ ] ${item}`)
+    .join("\n");
+
+  const requirementList = (
+    data.requirements.length > 0 ? data.requirements : ["TBD", "TBD"]
+  )
+    .map((item) => `- ${item}`)
+    .join("\n");
+
   return template
     .replace(/{EMOJI}/g, data.emoji)
     .replace(/{TITLE}/g, data.title)
     .replace(/{PROBLEM}/g, data.problem)
     .replace(/{SOLUTION}/g, data.solution)
-    .replace(/{AC1}/g, data.acceptance[0])
-    .replace(/{AC2}/g, data.acceptance[1])
-    .replace(/{AC3}/g, data.acceptance[2])
+    .replace(/{ACCEPTANCE_LIST}/g, acceptanceList)
     .replace(/{IMPACT}/g, data.impact)
-    .replace(/{REQ1}/g, data.req1)
-    .replace(/{REQ2}/g, data.req2)
+    .replace(/{REQUIREMENTS_LIST}/g, requirementList)
     .replace(/{PRIORITY}/g, data.priority)
     .replace(/{PHASE}/g, data.phase)
     .replace(/{POINTS}/g, data.points)

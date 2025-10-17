@@ -1,13 +1,16 @@
 #!/usr/bin/env node
+import { spawnSync } from "node:child_process";
 import fs from "node:fs/promises";
 import path from "node:path";
 import process from "node:process";
 import { fileURLToPath } from "node:url";
 
+const OWNER = "Alextorelli";
+const PROJECT_NUMBER = "5";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const repoRoot = path.resolve(__dirname, "..");
-const batchSource = path.join(repoRoot, "docs", "roadmap", "batch.json");
+const defaultBatchPath = path.join(repoRoot, "docs", "roadmap", "batch.json");
 const templatePath = path.join(
   repoRoot,
   "docs",
@@ -17,44 +20,53 @@ const templatePath = path.join(
 );
 const epicsDir = path.join(repoRoot, "docs", "roadmap", "epics");
 
-function padAcceptanceCriteria(entries) {
-  const padded = entries.slice(0, 3);
-  while (padded.length < 3) {
-    padded.push("TBD");
+function resolveBatchPath(args) {
+  const positional = args.find((arg) => !arg.startsWith("--"));
+  return positional
+    ? path.resolve(process.cwd(), positional)
+    : defaultBatchPath;
+}
+
+function hasFlag(args, flag) {
+  return args.includes(flag);
+}
+
+function slugify(input) {
+  return String(input || "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "")
+    .slice(0, 80);
+}
+
+function formatChecklist(items, prefix) {
+  const list = items.length > 0 ? items : ["TBD"];
+  return list.map((item) => `${prefix} ${item}`).join("\n");
+}
+
+function normalizeArray(value) {
+  if (Array.isArray(value)) {
+    return value.map((entry) => String(entry || "").trim()).filter(Boolean);
   }
-  return padded;
+  return [];
 }
 
-function fillTemplate(template, epic) {
-  return template
-    .replace(/{EMOJI}/g, epic.emoji || "📌")
-    .replace(/{TITLE}/g, epic.title || "Untitled Epic")
-    .replace(/{PROBLEM}/g, epic.problem || "TBD")
-    .replace(/{SOLUTION}/g, epic.solution || "TBD")
-    .replace(/{AC1}/g, epic.acceptance[0])
-    .replace(/{AC2}/g, epic.acceptance[1])
-    .replace(/{AC3}/g, epic.acceptance[2])
-    .replace(/{IMPACT}/g, epic.impact || "TBD")
-    .replace(/{REQ1}/g, epic.requirements[0])
-    .replace(/{REQ2}/g, epic.requirements[1])
-    .replace(/{PRIORITY}/g, epic.priority || "TBD")
-    .replace(/{PHASE}/g, epic.phase || "Backlog")
-    .replace(/{POINTS}/g, epic.points || "13")
-    .replace(/{LABELS}/g, epic.labels || "planning");
+async function loadTemplate() {
+  return fs.readFile(templatePath, "utf8");
 }
 
-async function loadBatch() {
+async function loadBatchFile(batchPath) {
   try {
-    const raw = await fs.readFile(batchSource, "utf8");
-    const parsed = JSON.parse(raw);
-    if (!Array.isArray(parsed)) {
-      throw new Error("Batch file must export an array of epic definitions.");
+    const raw = await fs.readFile(batchPath, "utf8");
+    const data = JSON.parse(raw);
+    if (!Array.isArray(data)) {
+      throw new Error("Batch file must contain an array of epic definitions.");
     }
-    return parsed;
+    return data;
   } catch (error) {
     if (error.code === "ENOENT") {
       console.log(
-        "No batch file found at docs/roadmap/batch.json. Create one with an array of epic definitions."
+        `No batch file found at ${path.relative(repoRoot, batchPath)}.`
       );
       return [];
     }
@@ -62,48 +74,43 @@ async function loadBatch() {
   }
 }
 
-function normalizeEpic(entry) {
-  if (!entry || typeof entry !== "object") {
-    return null;
-  }
-  const slug = typeof entry.slug === "string" ? entry.slug.trim() : "";
+function buildEpicData(entry) {
+  const title = entry.title || "Untitled Epic";
+  const slug = entry.slug ? slugify(entry.slug) : slugify(title);
   if (!slug) {
     return null;
   }
-  const acceptance = Array.isArray(entry.acceptance)
-    ? entry.acceptance.map((item) => String(item || "").trim()).filter(Boolean)
-    : [];
-  const requirements = Array.isArray(entry.requirements)
-    ? entry.requirements
-        .map((item) => String(item || "").trim())
-        .filter(Boolean)
-    : [];
-  while (requirements.length < 2) {
-    requirements.push("TBD");
-  }
+
+  const acceptance = normalizeArray(entry.acceptance);
+  const requirements = normalizeArray(entry.requirements);
+
   return {
     slug,
-    emoji: entry.emoji,
-    title: entry.title,
-    problem: entry.problem,
-    solution: entry.solution,
-    acceptance: padAcceptanceCriteria(acceptance),
-    impact: entry.impact,
+    emoji: entry.emoji || "📌",
+    title,
+    problem: entry.problem || "TBD",
+    solution: entry.solution || "TBD",
+    acceptance,
     requirements,
-    priority: entry.priority,
-    phase: entry.phase,
-    points: entry.points,
+    impact: entry.impact || "TBD",
+    priority: entry.priority || "TBD",
+    phase: entry.phase || "Backlog",
+    points: entry.points ? String(entry.points) : "13",
     labels: Array.isArray(entry.labels)
-      ? entry.labels.join(", ")
-      : entry.labels,
+      ? entry.labels
+          .map((label) => label.trim())
+          .filter(Boolean)
+          .join(", ") || "planning"
+      : String(entry.labels || "planning"),
+    addToProject: Boolean(entry.addToProject),
   };
 }
 
-async function ensureDirectories() {
+async function ensureOutputDir() {
   await fs.mkdir(epicsDir, { recursive: true });
 }
 
-async function epicExists(slug) {
+async function epicAlreadyExists(slug) {
   try {
     await fs.access(path.join(epicsDir, `${slug}.md`));
     return true;
@@ -112,37 +119,106 @@ async function epicExists(slug) {
   }
 }
 
-async function createEpicFile(template, epic) {
-  const content = fillTemplate(template, epic);
-  const destination = path.join(epicsDir, `${epic.slug}.md`);
-  await fs.writeFile(destination, content, "utf8");
-  console.log(`Created epic: docs/roadmap/epics/${epic.slug}.md`);
+function renderTemplate(template, epic) {
+  const acceptanceList = formatChecklist(epic.acceptance, "- [ ]");
+  const requirementsList = formatChecklist(epic.requirements, "-");
+
+  return template
+    .replace(/{EMOJI}/g, epic.emoji)
+    .replace(/{TITLE}/g, epic.title)
+    .replace(/{PROBLEM}/g, epic.problem)
+    .replace(/{SOLUTION}/g, epic.solution)
+    .replace(/{ACCEPTANCE_LIST}/g, acceptanceList)
+    .replace(/{IMPACT}/g, epic.impact)
+    .replace(/{REQUIREMENTS_LIST}/g, requirementsList)
+    .replace(/{PRIORITY}/g, epic.priority)
+    .replace(/{PHASE}/g, epic.phase)
+    .replace(/{POINTS}/g, epic.points)
+    .replace(/{LABELS}/g, epic.labels);
+}
+
+async function writeEpicFile(slug, contents) {
+  const destination = path.join(epicsDir, `${slug}.md`);
+  await fs.writeFile(destination, `${contents}\n`, "utf8");
+  console.log(`Created epic: docs/roadmap/epics/${slug}.md`);
+}
+
+function maybeAddToProject(epic, flags) {
+  if (!epic.addToProject || !hasFlag(flags, "--project")) {
+    return;
+  }
+
+  const ghCheck = spawnSync("gh", ["--version"], { encoding: "utf8" });
+  if (ghCheck.status !== 0) {
+    console.warn("GitHub CLI not available; skipping project addition.");
+    return;
+  }
+
+  const title = `${epic.emoji} Epic: ${epic.title}`.trim();
+  const acceptanceItems =
+    epic.acceptance.length > 0 ? epic.acceptance : ["TBD"];
+  const bodyLines = [
+    `Problem: ${epic.problem}`,
+    `Solution: ${epic.solution}`,
+    "Acceptance Criteria:",
+  ].concat(acceptanceItems.map((item) => `- [ ] ${item}`));
+
+  const result = spawnSync(
+    "gh",
+    [
+      "project",
+      "item-add",
+      "--owner",
+      OWNER,
+      "--number",
+      PROJECT_NUMBER,
+      "--title",
+      title,
+      "--body",
+      bodyLines.join("\n"),
+    ],
+    { stdio: "inherit" }
+  );
+
+  if (result.status !== 0) {
+    console.warn(`Failed to add ${epic.slug} to Project ${PROJECT_NUMBER}.`);
+  }
 }
 
 async function main() {
-  const batch = await loadBatch();
-  if (batch.length === 0) {
+  const args = process.argv.slice(2);
+  const batchPath = resolveBatchPath(args);
+  const flags = args.filter((arg) => arg.startsWith("--"));
+  const force = hasFlag(flags, "--force");
+
+  const entries = await loadBatchFile(batchPath);
+  if (entries.length === 0) {
     return;
   }
-  const template = await fs.readFile(templatePath, "utf8");
-  await ensureDirectories();
 
-  for (const entry of batch) {
-    const epic = normalizeEpic(entry);
+  const template = await loadTemplate();
+  await ensureOutputDir();
+
+  for (const entry of entries) {
+    const epic = buildEpicData(entry);
     if (!epic) {
-      console.warn("Skipping invalid epic entry in batch definition.");
+      console.warn("Skipping entry without slug/title.");
       continue;
     }
-    if (await epicExists(epic.slug)) {
+
+    if (!force && (await epicAlreadyExists(epic.slug))) {
       console.log(`Skipping existing epic: ${epic.slug}`);
       continue;
     }
-    await createEpicFile(template, epic);
+
+    const contents = renderTemplate(template, epic);
+    await writeEpicFile(epic.slug, contents);
+    maybeAddToProject(epic, flags);
   }
 }
 
 main().catch((error) => {
   console.error("Batch epic generation failed.");
-  console.error(error);
+  console.error(error.message || error);
   process.exitCode = 1;
 });

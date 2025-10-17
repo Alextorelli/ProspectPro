@@ -548,6 +548,14 @@ npm run supabase:test:functions
 # Database setup: run SQL directly in the Supabase dashboard
 ````
 
+**VS CODE TASKS REFERENCE**
+
+- **Complete Tasks Catalog** → `.vscode/TASKS_REFERENCE.md` (auto-generated from tasks.json)
+- **60+ Tasks** organized in 7 categories: Supabase & Database, Edge Functions, Testing, Build/Deploy, Docs, Roadmap, Misc
+- **Task Features**: Input prompts (functionName, migrationName, sessionJWT, epicKey), keyboard shortcuts (Ctrl+Shift+P), composite workflows with dependencies
+- **Regeneration**: Automatically updated by `npm run docs:update` when tasks.json changes
+- **Prefer Tasks over Scripts**: Use VS Code tasks for complex workflows - they handle dependencies, provide input prompts, and show execution status
+
 ### API Integration Stack (WORKING)
 
 - **Google Places API**: Business discovery integrated in Edge Functions

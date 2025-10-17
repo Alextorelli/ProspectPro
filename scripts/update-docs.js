@@ -685,6 +685,18 @@ npm run docs:update
 // MAIN EXECUTION
 // ============================================================================
 
+async function generateTasksReference() {
+  console.log("\n3️⃣ Generating VS Code Tasks Reference...");
+  const { spawnSync } = await import("child_process");
+  const result = spawnSync("node", ["scripts/generate-tasks-reference.js"], {
+    cwd: repoRoot,
+    stdio: "inherit",
+  });
+  if (result.status !== 0) {
+    throw new Error("Tasks reference generation failed");
+  }
+}
+
 async function main() {
   console.log("🔄 ProspectPro Documentation Update");
   console.log("=====================================");
@@ -693,6 +705,7 @@ async function main() {
   try {
     await generateCodebaseIndex();
     await generateSystemReference();
+    await generateTasksReference();
 
     console.log("");
     console.log("✅ Documentation updated successfully");

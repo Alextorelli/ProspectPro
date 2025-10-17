@@ -54,6 +54,7 @@
     "roadmap:dashboard": "node scripts/roadmap-dashboard.js",
     "roadmap:epic": "node scripts/roadmap-epic.js",
     "roadmap:open": "node scripts/roadmap-open.js",
+    "roadmap:pull": "node scripts/roadmap-pull.js",
     "roadmap:start": "bash ./scripts/start-epic.sh",
     "serve:local": "npm run preview",
     "session:wrap": "bash ./scripts/post-session.sh",

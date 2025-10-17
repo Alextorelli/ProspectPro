@@ -10,9 +10,7 @@
 
 ## Acceptance Criteria
 
-- [ ] {AC1}
-- [ ] {AC2}
-- [ ] {AC3}
+{ACCEPTANCE_LIST}
 
 ## Business Impact
 
@@ -20,8 +18,7 @@
 
 ## Technical Requirements
 
-- {REQ1}
-- {REQ2}
+{REQUIREMENTS_LIST}
 
 ## Epic Metadata
 
