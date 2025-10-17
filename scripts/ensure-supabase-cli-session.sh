@@ -1,6 +1,18 @@
 #!/bin/bash
 # ProspectPro v4.3 - Supabase CLI Authentication Guard
 # Usage: source scripts/ensure-supabase-cli-session.sh
+#
+# Behavior:
+# - Initializes Supabase CLI session once per Codespace and persists readiness.
+# - Subsequent invocations SKIP auth using a persistent marker file.
+# - Force a re-auth by exporting PROSPECTPRO_SUPABASE_FORCE_REAUTH=1 before running.
+#
+# Cache marker:
+#   ${XDG_CACHE_HOME:-$HOME/.cache}/prospectpro/supabase_session_ready
+#
+# Environment flags:
+#   PROSPECTPRO_SUPABASE_SESSION_READY=1   # (set by this script) indicates session initialized
+#   PROSPECTPRO_SUPABASE_FORCE_REAUTH=1    # force re-run of interactive/token auth flow
 
 if [[ -z "${_PP_SUPABASE_CLI_PREV_OPTS_CAPTURED:-}" ]]; then
   _PP_SUPABASE_CLI_PREV_OPTS_CAPTURED=1
@@ -23,6 +35,30 @@ if [[ -z "${_PP_SUPABASE_CLI_PREV_OPTS_CAPTURED:-}" ]]; then
 fi
 
 set -euo pipefail
+
+# ---------------------------------------------------------------------------
+# Fast path: if the session was already initialized in this Codespace, skip
+# all authentication checks. We persist a tiny cache marker so new shells/tasks
+# don't re-run the login flow repeatedly. Override with PROSPECTPRO_SUPABASE_FORCE_REAUTH=1.
+# ---------------------------------------------------------------------------
+
+# Determine cache directory (XDG first, then ~/.cache)
+_PP_XDG_CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}"
+_PP_CACHE_DIR="${_PP_XDG_CACHE_DIR%/}/prospectpro"
+_PP_CACHE_MARKER="${_PP_CACHE_DIR}/supabase_session_ready"
+
+# If caller already exported readiness and no reauth forced, short-circuit.
+if [[ "${PROSPECTPRO_SUPABASE_SESSION_READY:-}" = "1" && -z "${PROSPECTPRO_SUPABASE_FORCE_REAUTH:-}" ]]; then
+  echo "✅ Supabase CLI session already initialized (env cached). Skipping auth."
+  return 0 2>/dev/null || exit 0
+fi
+
+# If a persistent marker exists and no reauth forced, short-circuit.
+if [[ -z "${PROSPECTPRO_SUPABASE_FORCE_REAUTH:-}" && -f "${_PP_CACHE_MARKER}" ]]; then
+  echo "✅ Supabase CLI session already initialized (marker: ${_PP_CACHE_MARKER}). Skipping auth."
+  export PROSPECTPRO_SUPABASE_SESSION_READY=1
+  return 0 2>/dev/null || exit 0
+fi
 
 EXPECTED_REPO_ROOT=${EXPECTED_REPO_ROOT:-/workspaces/ProspectPro}
 
@@ -50,6 +86,10 @@ check_supabase_login() {
   local project_list_output
   if project_list_output=$(prospectpro_supabase_cli projects list --output json 2>&1); then
     echo "✅ Supabase CLI session authenticated."
+    # Create/update cache marker so future tasks short-circuit
+    mkdir -p "${_PP_CACHE_DIR}" || true
+    printf 'ready=1\nproject=%s\ntimestamp=%s\n' "sriycekxdqnesdsgwiuc" "$(date -Iseconds)" > "${_PP_CACHE_MARKER}" || true
+    export PROSPECTPRO_SUPABASE_SESSION_READY=1
     return 0
   fi
 
@@ -61,6 +101,10 @@ check_supabase_login() {
 
   if prospectpro_supabase_cli projects list --output json >/dev/null 2>&1; then
     echo "✅ Supabase CLI session authenticated after login."
+    # Create/update cache marker so future tasks short-circuit
+    mkdir -p "${_PP_CACHE_DIR}" || true
+    printf 'ready=1\nproject=%s\ntimestamp=%s\n' "sriycekxdqnesdsgwiuc" "$(date -Iseconds)" > "${_PP_CACHE_MARKER}" || true
+    export PROSPECTPRO_SUPABASE_SESSION_READY=1
     return 0
   fi
 
@@ -92,3 +136,7 @@ fi
 
 PROSPECTPRO_SUPABASE_SESSION_READY=1
 unset PROSPECTPRO_SUPABASE_SUPPRESS_SETUP
+
+# On success, also persist the cache marker if not already written.
+mkdir -p "${_PP_CACHE_DIR}" || true
+printf 'ready=1\nproject=%s\ntimestamp=%s\n' "sriycekxdqnesdsgwiuc" "$(date -Iseconds)" > "${_PP_CACHE_MARKER}" || true
