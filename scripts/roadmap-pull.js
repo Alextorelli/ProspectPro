@@ -5,7 +5,7 @@ import path from "node:path";
 import process from "node:process";
 import { fileURLToPath } from "node:url";
 
-const OWNER = "Alextorelli";
+const OWNER = "@me"; // Use current user by default
 const PROJECT_NUMBER = "5";
 
 // Use project-scoped token if available, fallback to GITHUB_TOKEN
@@ -45,12 +45,13 @@ function fetchProjectItems() {
     [
       "project",
       "item-list",
+      PROJECT_NUMBER, // positional project number per gh CLI
       "--owner",
       OWNER,
-      "--number",
-      PROJECT_NUMBER,
       "--format",
       "json",
+      "-L",
+      "100",
     ],
     {
       encoding: "utf8",
