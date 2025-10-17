@@ -10,6 +10,7 @@
     "start:development": "node development-server.js",
     "start:troubleshooting": "node supabase-troubleshooting-server.js",
     "start:all": "concurrently \"npm run start:production\" \"npm run start:development\" \"npm run start:troubleshooting\"",
+    "stop": "pkill -f 'mcp-servers' || true",
     "test": "node test-servers.js",
     "validate": "npm run test && echo '✅ All Supabase MCP servers validated successfully'",
     "install:deps": "npm install",
@@ -35,5 +36,8 @@
   ],
   "author": "Alex Torelli",
   "license": "MIT",
+  "engines": {
+    "node": ">=20.0.0"
+  },
   "_note": "This file mirrors package.json for clarity in code reviews; npm continues to use package.json."
 }

@@ -4,6 +4,8 @@
 
 This directory contains the **enhanced MCP server implementation** that provides AI assistants with comprehensive access to ProspectPro's complete email discovery & verification platform, enrichment APIs, background discovery jobs, contact validation, and **troubleshooting capabilities**. Version 3.1 adds tooling for the v4.3 background discovery pipeline (Census + Foursquare), Supabase session enforcement (auth.getUser), tier-aware cost tracking, and asynchronous job diagnostics.
 
+> Note: `MCP-package.json` mirrors the root `package.json` MCP scripts so reviewers can audit server dependencies without touching the primary manifest. Keep both files aligned when adding scripts or dependencies.
+
 **Architecture**: 3 specialized servers for enrichment production, development, and troubleshooting workflows  
 **Tools**: 42 tools total across all servers (6 troubleshooting + 36 enrichment tools)  
 **Status**: Production-ready with tier-aware background discovery + enrichment (v4.3)
