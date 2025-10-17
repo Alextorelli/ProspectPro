@@ -2,6 +2,19 @@
   "version": "2.0.0",
   "tasks": [
     {
+      "label": "Start Codespace",
+      "dependsOrder": "sequence",
+      "dependsOn": [
+        "Supabase: Ensure Session",
+        "Supabase: Link Project",
+        "Supabase: Pull Public Schema",
+        "Supabase: Generate Types",
+        "Supabase: List Migrations",
+        "MCP: Start All Servers"
+      ],
+      "problemMatcher": []
+    },
+    {
       "label": "Supabase: Ensure Session",
       "type": "shell",
       "command": "bash",

@@ -110,6 +110,7 @@ _Auto-generated from `.vscode/tasks.json` — Last updated: 2025-10-17_
 
 | Task Label | Command | Script/Config | Inputs | Description |
 |------------|---------|---------------|--------|-------------|
+| **Start Codespace** | `Sequential composite` | Multiple | None | Runs: Ensure Session → Link Project → Pull Public Schema → Generate Types → List Migrations → MCP: Start All Servers |
 | **Close Codespace** | `Sequential composite` | Multiple | None | Runs: Docs: Update All Documentation → MCP: Stop All Servers → Docs: Update Codebase Index (Legacy) → Git: Remind to Push Before Exit → Git: Commit and Push All |
 | **Git: Remind to Push Before Exit** | `bash git status && echo 'REMINDER: Commit and push your changes before closing Codespace!'` | CLI | None | No description available |
 | **Git: Commit and Push All** | `bash git add . && git commit -m 'Codespace close: doc update, MCP stop, codebase index' || echo 'No changes to commit.' && git push` | CLI | None | No description available |
