@@ -12,6 +12,8 @@
 │   ├── github-actions
 │   ├── mcp-servers-individual
 │   ├── migrations-backup-20251017-075138
+│   ├── migrations-backup-20251017-080316
+│   ├── migrations-backup-20251017-080326
 │   ├── production
 │   └── testing
 ├── CHANGELOG.md
@@ -624,10 +626,18 @@
 ├── test-optimization.js
 ├── test-progressive-enrichment.sh
 ├── test-vault-secrets.sh
+├── thunder-collection
+│   ├── ProspectPro-Auth.json
+│   ├── ProspectPro-Database.json
+│   ├── ProspectPro-Discovery.json
+│   ├── ProspectPro-Enrichment.json
+│   ├── ProspectPro-Export.json
+│   ├── README.md
+│   └── thunder-environment.json
 ├── tsconfig.json
 ├── tsconfig.node.json
 ├── update-edge-secrets.sh
 ├── vercel.json
 └── vite.config.ts
 
-477 directories, 154 files
+480 directories, 161 files
