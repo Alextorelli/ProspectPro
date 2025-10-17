@@ -7,9 +7,16 @@ select plan(12);
 
 -- Core structure tests
 SELECT has_table('public', 'leads', 'leads table should exist');
-SELECT row_security_on('public', 'leads', 'RLS should be enabled on leads');
+SELECT ok(
+    (SELECT relrowsecurity FROM pg_class WHERE relname = 'leads' AND relnamespace = 'public'::regnamespace),
+    'RLS should be enabled on leads'
+);
 
 -- RLS Policy Tests - Authenticated Lead Creation
+-- First create a test campaign
+INSERT INTO campaigns (id, business_type, location, user_id)
+VALUES ('test_campaign_001', 'coffee shop', 'Seattle, WA', auth.uid());
+
 PREPARE test_lead_insert AS
   INSERT INTO leads (campaign_id, business_name, address, user_id, session_user_id)
   VALUES ('test_campaign_001', 'Test Coffee Shop', '123 Main St, Seattle, WA', auth.uid(), 'test_session');
@@ -102,13 +109,10 @@ SELECT is_empty(
 RESET ROLE;
 
 -- Zero Fake Data Validation - Email Pattern Check
-PREPARE test_no_fake_emails AS
-  SELECT COUNT(*) FROM leads
-  WHERE email ~ '^(info|contact|hello|sales)@'
-  AND user_id = auth.uid();
-
 SELECT is(
-  'test_no_fake_emails',
+  (SELECT COUNT(*)::bigint FROM leads
+   WHERE email ~ '^(info|contact|hello|sales)@'
+   AND user_id = auth.uid()),
   0::bigint,
   'Leads should not contain pattern-generated fake emails'
 );
@@ -129,6 +133,10 @@ SELECT lives_ok(
 );
 
 -- Session-Only Lead Creation (Anonymous Users)
+-- First create a backing campaign to satisfy FK
+INSERT INTO campaigns (id, business_type, location)
+VALUES ('test_campaign_anon', 'coffee shop', 'Seattle, WA');
+
 PREPARE test_session_lead AS
   INSERT INTO leads (campaign_id, business_name, session_user_id)
   VALUES ('test_campaign_anon', 'Anonymous Lead Test', 'anon_session_456');
