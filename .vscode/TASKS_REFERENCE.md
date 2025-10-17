@@ -76,6 +76,7 @@ _Auto-generated from `.vscode/tasks.json` — Last updated: 2025-10-17_
 | Task Label | Command | Script/Config | Inputs | Description |
 |------------|---------|---------------|--------|-------------|
 | **MCP: Start All Servers** | `npm run mcp:start` | [`package.json`](../package.json) | None | Starts all MCP servers (background task) |
+| **MCP: Stop All Servers** | `npm run mcp:stop` | [`package.json`](../package.json) | None | No description available |
 | **Build: Frontend Production** | `npm run build` | [`package.json`](../package.json) | None | Builds React/Vite frontend to `/dist` |
 | **Deploy: Vercel Production** | `bash cd dist && npx --yes vercel@latest --prod` | Multiple | None | Runs: Build: Frontend Production |
 

@@ -47,6 +47,7 @@
     "mcp:install": "cd mcp-servers && npm install",
     "mcp:prod": "cd mcp-servers && npm run start:production",
     "mcp:start": "cd mcp-servers && npm run start:all",
+    "mcp:stop": "./scripts/stop-mcp.sh",
     "mcp:test": "cd mcp-servers && npm run test",
     "mcp:troubleshoot": "cd mcp-servers && npm run start:troubleshooting",
     "preview": "vite preview",

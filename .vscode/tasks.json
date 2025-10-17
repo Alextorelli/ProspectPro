@@ -517,6 +517,22 @@
       }
     },
     {
+      "label": "MCP: Stop All Servers",
+      "type": "shell",
+      "command": "npm",
+      "args": ["run", "mcp:stop"],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      }
+    },
+    {
       "label": "Build: Frontend Production",
       "type": "shell",
       "command": "npm",
