@@ -628,7 +628,10 @@
       "command": "npm",
       "args": ["run", "roadmap:batch", "--", "--project"],
       "options": {
-        "cwd": "${workspaceFolder}"
+        "cwd": "${workspaceFolder}",
+        "env": {
+          "GH_PROJECT_TOKEN": "${env:GH_PROJECT_TOKEN}"
+        }
       },
       "group": "build",
       "presentation": {
@@ -685,7 +688,28 @@
       "command": "npm",
       "args": ["run", "roadmap:pull"],
       "options": {
-        "cwd": "${workspaceFolder}"
+        "cwd": "${workspaceFolder}",
+        "env": {
+          "GH_PROJECT_TOKEN": "${env:GH_PROJECT_TOKEN}"
+        }
+      },
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Roadmap: Sync Epics to GitHub",
+      "type": "shell",
+      "command": "bash",
+      "args": ["${workspaceFolder}/scripts/roadmap/sync-epics-to-github.sh"],
+      "options": {
+        "cwd": "${workspaceFolder}",
+        "env": {
+          "GH_PROJECT_TOKEN": "${env:GH_PROJECT_TOKEN}"
+        }
       },
       "group": "build",
       "presentation": {

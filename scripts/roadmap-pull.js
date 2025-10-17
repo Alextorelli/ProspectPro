@@ -7,6 +7,10 @@ import { fileURLToPath } from "node:url";
 
 const OWNER = "Alextorelli";
 const PROJECT_NUMBER = "5";
+
+// Use project-scoped token if available, fallback to GITHUB_TOKEN
+const GITHUB_TOKEN = process.env.GH_PROJECT_TOKEN || process.env.GITHUB_TOKEN;
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const repoRoot = path.resolve(__dirname, "..");
@@ -21,6 +25,17 @@ function ensureGhAvailable() {
   const result = spawnSync("gh", ["--version"], { encoding: "utf8" });
   if (result.status !== 0) {
     throw new Error("GitHub CLI (gh) is required but not available in PATH.");
+  }
+
+  if (!GITHUB_TOKEN) {
+    console.error(
+      "⚠️  No GitHub token found (GH_PROJECT_TOKEN or GITHUB_TOKEN)."
+    );
+    console.error(
+      "   Generate PAT: https://github.com/settings/tokens?type=beta"
+    );
+    console.error("   Required scopes: repo, project (account permissions)");
+    throw new Error("GitHub token required for project access");
   }
 }
 
@@ -37,12 +52,27 @@ function fetchProjectItems() {
       "--format",
       "json",
     ],
-    { encoding: "utf8" }
+    {
+      encoding: "utf8",
+      env: { ...process.env, GITHUB_TOKEN },
+    }
   );
 
   if (result.status !== 0) {
     const errorOutput =
-      result.stderr || "Unknown error retrieving project items.";
+      result.stderr ||
+      result.stdout ||
+      "Unknown error retrieving project items.";
+
+    if (errorOutput.includes("Resource not accessible by integration")) {
+      throw new Error(
+        "Token lacks 'project' scope.\n" +
+          "   Generate PAT with account-level project permissions:\n" +
+          "   https://github.com/settings/tokens?type=beta\n" +
+          "   Set as: export GH_PROJECT_TOKEN=github_pat_..."
+      );
+    }
+
     throw new Error(errorOutput.trim());
   }
 

@@ -135,16 +135,26 @@ main() {
   require gh
   require jq
 
-  # Guard against env-provided tokens that often lack project scopes (Codespaces/GitHub Actions)
-  if [[ -n "${GITHUB_TOKEN:-}" || -n "${GH_TOKEN:-}" ]]; then
-    echo "WARNING: Detected GITHUB_TOKEN/GH_TOKEN in environment."
-    echo "These tokens frequently lack Projects v2 permissions and cause: 'Resource not accessible by integration'."
-    echo "Recommended:"
-    echo "  1) unset GITHUB_TOKEN GH_TOKEN"
-    echo "  2) gh auth login --web --scopes 'repo,project,read:org'"
-    echo "Then re-run this script."
+  # Prefer GH_PROJECT_TOKEN (project-scoped PAT) over environment tokens
+  if [[ -n "${GH_PROJECT_TOKEN:-}" ]]; then
+    export GITHUB_TOKEN="$GH_PROJECT_TOKEN"
+    echo "Using GH_PROJECT_TOKEN for GitHub API access"
+  elif [[ -n "${GITHUB_TOKEN:-}" ]]; then
+    echo "Using GITHUB_TOKEN from environment"
+  else
+    echo "ERROR: No GitHub token found."
+    echo "Set GH_PROJECT_TOKEN with project scope:"
+    echo "  export GH_PROJECT_TOKEN=github_pat_..."
     echo ""
-    echo "Alternatively, set DRY_RUN=true to preview actions without API calls."
+    echo "Generate at: https://github.com/settings/tokens?type=beta"
+    echo "Required scopes: repo, project (account permissions)"
+    exit 1
+  fi
+
+  # Verify token has project access (best-effort check)
+  if ! gh auth status 2>&1 | grep -q "Logged in"; then
+    echo "ERROR: GitHub CLI authentication failed"
+    echo "Run: gh auth login --with-token <<< \"\$GH_PROJECT_TOKEN\""
     exit 1
   fi
 

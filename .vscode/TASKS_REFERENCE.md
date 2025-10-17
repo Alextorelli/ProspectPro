@@ -97,11 +97,11 @@ _Auto-generated from `.vscode/tasks.json` — Last updated: 2025-10-17_
 |------------|---------|---------------|--------|-------------|
 | **🚀 Create Epic (Guided)** | `npm run roadmap:epic` | [`package.json`](../package.json) | Interactive prompts | Creates a new epic from template with guided prompts |
 | **🗂️ Batch Generate Epics** | `npm run roadmap:batch` | [`package.json`](../package.json) | None | Generates epics from [`docs/roadmap/batch.json`](../docs/roadmap/batch.json) |
-| **🗂️ Batch Generate Epics + Project** | `npm run roadmap:batch -- --project` | [`package.json`](../package.json) | None | Generates epics AND adds draft items to GitHub Project 5 |
+| **🗂️ Batch Generate Epics + Project** | `npm run roadmap:batch -- --project` | [`package.json`](../package.json) | None | Generates epics AND adds draft items to GitHub Project 5 (requires GH_PROJECT_TOKEN with project scope) |
 | **🌐 Open Project 5** | `npm run roadmap:open` | [`package.json`](../package.json) | None | Opens GitHub Project 5 board in browser |
-| **🔍 Project Dashboard** | `npm run roadmap:dashboard` | [`package.json`](../package.json) | None | Shows epic summary (priority, phase, points, labels) |
-| **🛠️ Start Epic Scaffolding** | `npm run roadmap:start -- ${input:epicKey}` | [`package.json`](../package.json) | `epicKey` | Scaffolds lib/, components/, Edge Function stubs for epic |
-| **📋 Roadmap: Pull Open Items** | `npm run roadmap:pull` | [`package.json`](../package.json) | None | Pulls open items from Project 5 → [`docs/roadmap/project-open-items.md`](../docs/roadmap/project-open-items.md) |
+| **🔍 Project Dashboard** | `npm run roadmap:dashboard` | [`package.json`](../package.json) | None | Displays local epic files with metadata (priority, phase, points) |
+| **🛠️ Start Epic Scaffolding** | `npm run roadmap:start -- ${input:epicKey}` | [`package.json`](../package.json) | `epicKey` | Creates feature stub, lib module, and Edge Function scaffold for epic |
+| **📋 Roadmap: Pull Open Items** | `npm run roadmap:pull` | [`package.json`](../package.json) | None | Fetches open items from GitHub Project 5 and saves to markdown (requires GH_PROJECT_TOKEN) |
 
 ---
 
@@ -109,6 +109,7 @@ _Auto-generated from `.vscode/tasks.json` — Last updated: 2025-10-17_
 
 | Task Label | Command | Script/Config | Inputs | Description |
 |------------|---------|---------------|--------|-------------|
+| **Roadmap: Sync Epics to GitHub** | `bash ${workspaceFolder}/scripts/roadmap/sync-epics-to-github.sh` | [`scripts/roadmap/sync-epics-to-github.sh`](../scripts/roadmap/sync-epics-to-github.sh) | None | Creates GitHub issues from local epic files and attaches them to Project 5 (requires GH_PROJECT_TOKEN) |
 | **Context: Fetch Repo Snapshot** | `node` | CLI | None | Captures current git branch, status, and diff summary to `.cache/agent/context/repo-context.json` |
 | **Context: Fetch Supabase Snapshot** | `node` | CLI | None | Summarizes Edge Function directories and verify_jwt settings to `.cache/agent/context/supabase-functions.json` |
 | **Context: Cache Session JWT** | `node` | CLI | `sessionJWT` | Stores the provided session JWT locally at `.cache/agent/context/session.json` |

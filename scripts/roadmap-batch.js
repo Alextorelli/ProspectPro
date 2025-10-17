@@ -7,6 +7,9 @@ import { fileURLToPath } from "node:url";
 
 const OWNER = "Alextorelli";
 const PROJECT_NUMBER = "5";
+
+// Use project-scoped token if available, fallback to GITHUB_TOKEN
+const GITHUB_TOKEN = process.env.GH_PROJECT_TOKEN || process.env.GITHUB_TOKEN;
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const repoRoot = path.resolve(__dirname, "..");
@@ -154,6 +157,17 @@ function maybeAddToProject(epic, flags) {
     return;
   }
 
+  if (!GITHUB_TOKEN) {
+    console.warn(
+      "⚠️  No GitHub token found (GH_PROJECT_TOKEN or GITHUB_TOKEN)."
+    );
+    console.warn(
+      "   Generate PAT: https://github.com/settings/tokens?type=beta"
+    );
+    console.warn("   Required scopes: repo, project (account permissions)");
+    return;
+  }
+
   const title = `${epic.emoji} Epic: ${epic.title}`.trim();
   const acceptanceItems =
     epic.acceptance.length > 0 ? epic.acceptance : ["TBD"];
@@ -177,11 +191,28 @@ function maybeAddToProject(epic, flags) {
       "--body",
       bodyLines.join("\n"),
     ],
-    { stdio: "inherit" }
+    {
+      stdio: ["inherit", "pipe", "pipe"],
+      encoding: "utf8",
+      env: { ...process.env, GITHUB_TOKEN },
+    }
   );
 
   if (result.status !== 0) {
-    console.warn(`Failed to add ${epic.slug} to Project ${PROJECT_NUMBER}.`);
+    const errorMsg = result.stderr || result.stdout || "";
+    if (errorMsg.includes("Resource not accessible by integration")) {
+      console.warn(
+        `⚠️  Token lacks 'project' scope. Create issues first via sync script, then add manually.`
+      );
+      console.warn(
+        `   Project URL: https://github.com/users/${OWNER}/projects/${PROJECT_NUMBER}`
+      );
+    } else {
+      console.warn(`Failed to add ${epic.slug} to Project ${PROJECT_NUMBER}.`);
+      if (errorMsg) console.warn(`   Error: ${errorMsg.trim()}`);
+    }
+  } else {
+    console.log(`✅ Added ${epic.slug} to Project ${PROJECT_NUMBER}`);
   }
 }
 

@@ -181,14 +181,16 @@ function sanitizeDescription(task) {
     "🗂️ Batch Generate Epics":
       "Generates epics from [`docs/roadmap/batch.json`](../docs/roadmap/batch.json)",
     "🗂️ Batch Generate Epics + Project":
-      "Generates epics AND adds draft items to GitHub Project 5",
+      "Generates epics AND adds draft items to GitHub Project 5 (requires GH_PROJECT_TOKEN with project scope)",
     "🌐 Open Project 5": "Opens GitHub Project 5 board in browser",
     "🔍 Project Dashboard":
-      "Shows epic summary (priority, phase, points, labels)",
+      "Displays local epic files with metadata (priority, phase, points)",
     "🛠️ Start Epic Scaffolding":
-      "Scaffolds lib/, components/, Edge Function stubs for epic",
+      "Creates feature stub, lib module, and Edge Function scaffold for epic",
     "📋 Roadmap: Pull Open Items":
-      "Pulls open items from Project 5 → [`docs/roadmap/project-open-items.md`](../docs/roadmap/project-open-items.md)",
+      "Fetches open items from GitHub Project 5 and saves to markdown (requires GH_PROJECT_TOKEN)",
+    "Roadmap: Sync Epics to GitHub":
+      "Creates GitHub issues from local epic files and attaches them to Project 5 (requires GH_PROJECT_TOKEN)",
     "Workspace: Validate Configuration":
       "Validates workspace config and environment setup",
     "Context: Fetch Repo Snapshot":
