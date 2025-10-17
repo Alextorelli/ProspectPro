@@ -13,46 +13,64 @@
 -- Fix 1: enrichment_cache_analytics view
 DROP VIEW IF EXISTS public.enrichment_cache_analytics CASCADE;
 
-CREATE VIEW public.enrichment_cache_analytics
-WITH (security_invoker = true) AS
-SELECT 
-  request_type,
-  COUNT(*) as total_entries,
-  SUM(hit_count) as total_hits,
-  AVG(confidence_score) as avg_confidence,
-  SUM(cost) as total_cost_saved,
-  ROUND(AVG(hit_count), 2) as avg_hit_count,
-  MIN(created_at) as oldest_entry,
-  MAX(last_accessed_at) as last_activity,
-  COUNT(*) FILTER (WHERE expires_at > NOW()) as active_entries,
-  COUNT(*) FILTER (WHERE expires_at <= NOW()) as expired_entries
-FROM enrichment_cache
-GROUP BY request_type
-ORDER BY total_hits DESC;
+DO $$
+BEGIN
+  IF to_regclass('public.enrichment_cache') IS NOT NULL THEN
+    EXECUTE $cv$
+      CREATE VIEW public.enrichment_cache_analytics
+      WITH (security_invoker = true) AS
+      SELECT 
+        request_type,
+        COUNT(*) as total_entries,
+        SUM(hit_count) as total_hits,
+        AVG(confidence_score) as avg_confidence,
+        SUM(cost) as total_cost_saved,
+        ROUND(AVG(hit_count), 2) as avg_hit_count,
+        MIN(created_at) as oldest_entry,
+        MAX(last_accessed_at) as last_activity,
+        COUNT(*) FILTER (WHERE expires_at > NOW()) as active_entries,
+        COUNT(*) FILTER (WHERE expires_at <= NOW()) as expired_entries
+      FROM enrichment_cache
+      GROUP BY request_type
+      ORDER BY total_hits DESC
+    $cv$;
+  ELSE
+    RAISE NOTICE 'Skipping enrichment_cache_analytics view recreation (enrichment_cache missing)';
+  END IF;
+END $$;
 
 -- Fix 2: cache_performance_summary view  
 DROP VIEW IF EXISTS public.cache_performance_summary CASCADE;
 
-CREATE VIEW public.cache_performance_summary
-WITH (security_invoker = true) AS
-SELECT 
-  date,
-  SUM(total_requests) as daily_requests,
-  SUM(cache_hits) as daily_hits,
-  SUM(cache_misses) as daily_misses,
-  ROUND(
-    CASE 
-      WHEN SUM(total_requests) > 0 
-      THEN SUM(cache_hits)::DECIMAL / SUM(total_requests) * 100 
-      ELSE 0 
-    END, 
-    2
-  ) as daily_hit_ratio,
-  SUM(cost_saved) as daily_cost_saved,
-  SUM(total_cost) as daily_total_cost
-FROM enrichment_cache_stats
-GROUP BY date
-ORDER BY date DESC;
+DO $$
+BEGIN
+  IF to_regclass('public.enrichment_cache_stats') IS NOT NULL THEN
+    EXECUTE $cps$
+      CREATE VIEW public.cache_performance_summary
+      WITH (security_invoker = true) AS
+      SELECT 
+        date,
+        SUM(total_requests) as daily_requests,
+        SUM(cache_hits) as daily_hits,
+        SUM(cache_misses) as daily_misses,
+        ROUND(
+          CASE 
+            WHEN SUM(total_requests) > 0 
+            THEN SUM(cache_hits)::DECIMAL / SUM(total_requests) * 100 
+            ELSE 0 
+          END, 
+          2
+        ) as daily_hit_ratio,
+        SUM(cost_saved) as daily_cost_saved,
+        SUM(total_cost) as daily_total_cost
+      FROM enrichment_cache_stats
+      GROUP BY date
+      ORDER BY date DESC
+    $cps$;
+  ELSE
+    RAISE NOTICE 'Skipping cache_performance_summary view recreation (enrichment_cache_stats missing)';
+  END IF;
+END $$;
 
 -- =============================================================================
 -- PART 2: Fix Function Search Path Warnings
@@ -80,100 +98,127 @@ END;
 $$ LANGUAGE plpgsql IMMUTABLE SECURITY DEFINER;
 
 -- Fix 2: get_cached_response function
-CREATE OR REPLACE FUNCTION public.get_cached_response(
-  p_request_type TEXT,
-  p_params JSONB
-) RETURNS JSONB 
-SET search_path = public
-AS $$
-DECLARE
-  v_cache_key TEXT;
-  v_response JSONB;
+DO $$
 BEGIN
-  v_cache_key := public.generate_cache_key(p_request_type, p_params);
-  
-  SELECT 
-    response_data 
-  INTO v_response
-  FROM public.enrichment_cache 
-  WHERE 
-    cache_key = v_cache_key 
-    AND expires_at > NOW()
-    AND request_type = p_request_type;
-  
-  -- Update hit count and last accessed
-  IF v_response IS NOT NULL THEN
-    UPDATE public.enrichment_cache 
-    SET 
-      hit_count = hit_count + 1,
-      last_accessed_at = NOW()
-    WHERE cache_key = v_cache_key;
+  IF to_regclass('public.enrichment_cache') IS NOT NULL THEN
+    EXECUTE $gcr$
+      CREATE OR REPLACE FUNCTION public.get_cached_response(
+        p_request_type TEXT,
+        p_params JSONB
+      ) RETURNS JSONB 
+      SET search_path = public
+      AS $gcr_body$
+      DECLARE
+        v_cache_key TEXT;
+        v_response JSONB;
+      BEGIN
+        v_cache_key := public.generate_cache_key(p_request_type, p_params);
+        
+        SELECT 
+          response_data 
+        INTO v_response
+        FROM public.enrichment_cache 
+        WHERE 
+          cache_key = v_cache_key 
+          AND expires_at > NOW()
+          AND request_type = p_request_type;
+        
+        -- Update hit count and last accessed
+        IF v_response IS NOT NULL THEN
+          UPDATE public.enrichment_cache 
+          SET 
+            hit_count = hit_count + 1,
+            last_accessed_at = NOW()
+          WHERE cache_key = v_cache_key;
+        END IF;
+        
+        RETURN v_response;
+      END;
+      $gcr_body$ LANGUAGE plpgsql SECURITY DEFINER;
+    $gcr$;
+  ELSE
+    RAISE NOTICE 'Skipping get_cached_response function hardening (enrichment_cache missing)';
   END IF;
-  
-  RETURN v_response;
-END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+END $$;
 
 -- Fix 3: store_cached_response function
-CREATE OR REPLACE FUNCTION public.store_cached_response(
-  p_request_type TEXT,
-  p_params JSONB,
-  p_response JSONB,
-  p_cost DECIMAL DEFAULT 0,
-  p_confidence_score INTEGER DEFAULT 0
-) RETURNS TEXT 
-SET search_path = public
-AS $$
-DECLARE
-  v_cache_key TEXT;
+DO $$
 BEGIN
-  v_cache_key := public.generate_cache_key(p_request_type, p_params);
-  
-  -- Store with 90-day expiration
-  INSERT INTO public.enrichment_cache (
-    cache_key,
-    request_type,
-    request_params,
-    response_data,
-    cost,
-    confidence_score,
-    expires_at
-  ) VALUES (
-    v_cache_key,
-    p_request_type,
-    p_params,
-    p_response,
-    p_cost,
-    p_confidence_score,
-    NOW() + INTERVAL '90 days'
-  ) ON CONFLICT (cache_key) 
-  DO UPDATE SET
-    response_data = EXCLUDED.response_data,
-    cost = EXCLUDED.cost,
-    confidence_score = EXCLUDED.confidence_score,
-    expires_at = EXCLUDED.expires_at,
-    updated_at = NOW();
-  
-  RETURN v_cache_key;
-END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+  IF to_regclass('public.enrichment_cache') IS NOT NULL THEN
+    EXECUTE $scr$
+      CREATE OR REPLACE FUNCTION public.store_cached_response(
+        p_request_type TEXT,
+        p_params JSONB,
+        p_response JSONB,
+        p_cost DECIMAL DEFAULT 0,
+        p_confidence_score INTEGER DEFAULT 0
+      ) RETURNS TEXT 
+      SET search_path = public
+      AS $scr_body$
+      DECLARE
+        v_cache_key TEXT;
+      BEGIN
+        v_cache_key := public.generate_cache_key(p_request_type, p_params);
+        
+        -- Store with 90-day expiration
+        INSERT INTO public.enrichment_cache (
+          cache_key,
+          request_type,
+          request_params,
+          response_data,
+          cost,
+          confidence_score,
+          expires_at
+        ) VALUES (
+          v_cache_key,
+          p_request_type,
+          p_params,
+          p_response,
+          p_cost,
+          p_confidence_score,
+          NOW() + INTERVAL '90 days'
+        ) ON CONFLICT (cache_key) 
+        DO UPDATE SET
+          response_data = EXCLUDED.response_data,
+          cost = EXCLUDED.cost,
+          confidence_score = EXCLUDED.confidence_score,
+          expires_at = EXCLUDED.expires_at,
+          updated_at = NOW();
+        
+        RETURN v_cache_key;
+      END;
+      $scr_body$ LANGUAGE plpgsql SECURITY DEFINER;
+    $scr$;
+  ELSE
+    RAISE NOTICE 'Skipping store_cached_response function hardening (enrichment_cache missing)';
+  END IF;
+END $$;
 
 -- Fix 4: cleanup_expired_cache function
-CREATE OR REPLACE FUNCTION public.cleanup_expired_cache() 
-RETURNS INTEGER 
-SET search_path = public
-AS $$
-DECLARE
-  v_deleted_count INTEGER;
+DO $$
 BEGIN
-  DELETE FROM public.enrichment_cache 
-  WHERE expires_at <= NOW();
-  
-  GET DIAGNOSTICS v_deleted_count = ROW_COUNT;
-  
-  RETURN v_deleted_count;
-END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+  IF to_regclass('public.enrichment_cache') IS NOT NULL THEN
+    EXECUTE $cec$
+      CREATE OR REPLACE FUNCTION public.cleanup_expired_cache() 
+      RETURNS INTEGER 
+      SET search_path = public
+      AS $cec_body$
+      DECLARE
+        v_deleted_count INTEGER;
+      BEGIN
+        DELETE FROM public.enrichment_cache 
+        WHERE expires_at <= NOW();
+        
+        GET DIAGNOSTICS v_deleted_count = ROW_COUNT;
+        
+        RETURN v_deleted_count;
+      END;
+      $cec_body$ LANGUAGE plpgsql SECURITY DEFINER;
+    $cec$;
+  ELSE
+    RAISE NOTICE 'Skipping cleanup_expired_cache function hardening (enrichment_cache missing)';
+  END IF;
+END $$;
 
 -- =============================================================================
 -- PART 3: Authentication & User Management Setup for Production
@@ -285,21 +330,32 @@ CREATE POLICY "Users can update own campaigns" ON public.campaigns
   FOR UPDATE USING (auth.uid() = user_id);
 
 -- Update leads policies for user-owned campaigns
-DROP POLICY IF EXISTS "Public read leads" ON public.leads;
-DROP POLICY IF EXISTS "Public insert leads" ON public.leads;
-DROP POLICY IF EXISTS "Public update leads" ON public.leads;
+DO $$
+BEGIN
+  IF to_regclass('public.leads') IS NOT NULL THEN
+    EXECUTE 'DROP POLICY IF EXISTS "Public read leads" ON public.leads';
+    EXECUTE 'DROP POLICY IF EXISTS "Public insert leads" ON public.leads';
+    EXECUTE 'DROP POLICY IF EXISTS "Public update leads" ON public.leads';
 
-CREATE POLICY "Users can view leads from own campaigns" ON public.leads
-  FOR SELECT USING (
-    EXISTS (
-      SELECT 1 FROM public.campaigns 
-      WHERE campaigns.id = leads.campaign_id 
-      AND (campaigns.user_id = auth.uid() OR campaigns.user_id IS NULL)
-    )
-  );
+    EXECUTE $lead_view$
+      CREATE POLICY "Users can view leads from own campaigns" ON public.leads
+        FOR SELECT USING (
+          EXISTS (
+            SELECT 1 FROM public.campaigns 
+            WHERE campaigns.id = leads.campaign_id 
+              AND (campaigns.user_id = auth.uid() OR campaigns.user_id IS NULL)
+          )
+        )
+    $lead_view$;
 
-CREATE POLICY "System can insert leads" ON public.leads
-  FOR INSERT WITH CHECK (true);
+    EXECUTE $lead_insert$
+      CREATE POLICY "System can insert leads" ON public.leads
+        FOR INSERT WITH CHECK (true)
+    $lead_insert$;
+  ELSE
+    RAISE NOTICE 'Skipping public.leads policy hardening (table missing)';
+  END IF;
+END $$;
 
 -- =============================================================================
 -- PART 5: User Management Functions
@@ -450,20 +506,54 @@ CREATE INDEX IF NOT EXISTS idx_user_subscriptions_status ON public.user_subscrip
 CREATE INDEX IF NOT EXISTS idx_usage_logs_user_id ON public.usage_logs(user_id);
 CREATE INDEX IF NOT EXISTS idx_usage_logs_timestamp ON public.usage_logs(timestamp);
 CREATE INDEX IF NOT EXISTS idx_campaigns_user_id ON public.campaigns(user_id);
-CREATE INDEX IF NOT EXISTS idx_enrichment_cache_request_type ON public.enrichment_cache(request_type);
-CREATE INDEX IF NOT EXISTS idx_enrichment_cache_expires_at ON public.enrichment_cache(expires_at);
+DO $$
+BEGIN
+  IF to_regclass('public.enrichment_cache') IS NOT NULL THEN
+    EXECUTE 'CREATE INDEX IF NOT EXISTS idx_enrichment_cache_request_type ON public.enrichment_cache(request_type)';
+    EXECUTE 'CREATE INDEX IF NOT EXISTS idx_enrichment_cache_expires_at ON public.enrichment_cache(expires_at)';
+  ELSE
+    RAISE NOTICE 'Skipping enrichment_cache index creation (table missing)';
+  END IF;
+END $$;
 
 -- =============================================================================
 -- PART 7: Production Security Comments & Documentation
 -- =============================================================================
 
-COMMENT ON VIEW public.enrichment_cache_analytics IS 'Cache analytics view with security_invoker for production safety';
-COMMENT ON VIEW public.cache_performance_summary IS 'Cache performance summary with security_invoker for production safety';
+DO $$
+BEGIN
+  IF to_regclass('public.enrichment_cache_analytics') IS NOT NULL THEN
+    EXECUTE $cmt1$COMMENT ON VIEW public.enrichment_cache_analytics IS 'Cache analytics view with security_invoker for production safety'$cmt1$;
+  ELSE
+    RAISE NOTICE 'Skipping comment for enrichment_cache_analytics (view missing)';
+  END IF;
 
-COMMENT ON FUNCTION public.generate_cache_key(TEXT, JSONB) IS 'Generate SHA-256 cache key with explicit search_path for security';
-COMMENT ON FUNCTION public.get_cached_response(TEXT, JSONB) IS 'Retrieve cached response with qualified schema references';
-COMMENT ON FUNCTION public.store_cached_response(TEXT, JSONB, JSONB, DECIMAL, INTEGER) IS 'Store cached response with security-hardened function';
-COMMENT ON FUNCTION public.cleanup_expired_cache() IS 'Cleanup expired cache entries with production security settings';
+  IF to_regclass('public.cache_performance_summary') IS NOT NULL THEN
+    EXECUTE $cmt2$COMMENT ON VIEW public.cache_performance_summary IS 'Cache performance summary with security_invoker for production safety'$cmt2$;
+  ELSE
+    RAISE NOTICE 'Skipping comment for cache_performance_summary (view missing)';
+  END IF;
+
+  EXECUTE $cmt3$COMMENT ON FUNCTION public.generate_cache_key(TEXT, JSONB) IS 'Generate SHA-256 cache key with explicit search_path for security'$cmt3$;
+
+  IF to_regprocedure('public.get_cached_response(text,jsonb)') IS NOT NULL THEN
+    EXECUTE $cmt4$COMMENT ON FUNCTION public.get_cached_response(TEXT, JSONB) IS 'Retrieve cached response with qualified schema references'$cmt4$;
+  ELSE
+    RAISE NOTICE 'Skipping comment for get_cached_response (function missing)';
+  END IF;
+
+  IF to_regprocedure('public.store_cached_response(text,jsonb,jsonb,numeric,integer)') IS NOT NULL THEN
+    EXECUTE $cmt5$COMMENT ON FUNCTION public.store_cached_response(TEXT, JSONB, JSONB, DECIMAL, INTEGER) IS 'Store cached response with security-hardened function'$cmt5$;
+  ELSE
+    RAISE NOTICE 'Skipping comment for store_cached_response (function missing)';
+  END IF;
+
+  IF to_regprocedure('public.cleanup_expired_cache()') IS NOT NULL THEN
+    EXECUTE $cmt6$COMMENT ON FUNCTION public.cleanup_expired_cache() IS 'Cleanup expired cache entries with production security settings'$cmt6$;
+  ELSE
+    RAISE NOTICE 'Skipping comment for cleanup_expired_cache (function missing)';
+  END IF;
+END $$;
 
 COMMENT ON FUNCTION public.check_usage_limit(UUID, TEXT) IS 'Check user subscription limits before API actions';
 COMMENT ON FUNCTION public.increment_usage(UUID, TEXT, TEXT, DECIMAL) IS 'Increment usage counters after successful API actions';
