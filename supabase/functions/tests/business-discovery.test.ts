@@ -3,100 +3,80 @@ import {
   assertExists,
 } from "https://deno.land/std@0.208.0/assert/mod.ts";
 
-const FUNCTION_BASE_URL =
+const BASE =
   Deno.env.get("SUPABASE_FUNCTION_BASE_URL") ??
-  "http://localhost:54321/functions/v1";
-
-// Get auth token for authenticated requests (if available)
-const SUPABASE_ANON_KEY =
+  "http://127.0.0.1:54321/functions/v1";
+const JWT = Deno.env.get("SUPABASE_SESSION_JWT") ?? "";
+const APIKEY =
   Deno.env.get("SUPABASE_ANON_KEY") ??
-  Deno.env.get("VITE_SUPABASE_ANON_KEY") ??
+  Deno.env.get("SUPABASE_PUBLISHABLE_KEY") ??
   "";
-const SUPABASE_SESSION_JWT = Deno.env.get("SUPABASE_SESSION_JWT") ?? "";
+const DEV_BYPASS = Deno.env.get("EDGE_AUTH_DEV_BYPASS") === "1";
 
-const serverAvailable = await (async () => {
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 1500);
-
-  try {
-    // Any response (even 404) means the server is reachable; connection errors fail the check.
-    await fetch(`${FUNCTION_BASE_URL}/__healthcheck`, {
-      method: "GET",
-      signal: controller.signal,
-    });
-    return true;
-  } catch (_error) {
-    console.warn(
-      `Skipping edge function tests because ${FUNCTION_BASE_URL} is not reachable. ` +
-        "Run 'npm run edge:serve -- <function-slug>' in another terminal or set SUPABASE_FUNCTION_BASE_URL to a deployed endpoint."
-    );
-    return false;
-  } finally {
-    clearTimeout(timeout);
-  }
-})();
-
-if (!SUPABASE_SESSION_JWT && serverAvailable) {
-  console.warn(
-    "⚠️  SUPABASE_SESSION_JWT not set. Authenticated tests will be skipped.\n" +
-      "   To run authenticated tests, set SUPABASE_SESSION_JWT environment variable.\n" +
-      "   Get a session token from the browser console after signing in to the app."
+if (!JWT) {
+  throw new Error(
+    "SUPABASE_SESSION_JWT is required for this test suite. Export it before running."
   );
 }
 
-Deno.test({
-  name: "Business Discovery Background - Basic Response",
-  ignore: !serverAvailable || !SUPABASE_SESSION_JWT,
-  fn: async () => {
-    const headers: Record<string, string> = {
-      "Content-Type": "application/json",
-    };
+if (!APIKEY) {
+  throw new Error(
+    "Supabase anon or publishable key is required. Source scripts/test-env.local.sh first."
+  );
+}
 
-    // Add authentication headers if available
-    if (SUPABASE_SESSION_JWT) {
-      headers["Authorization"] = `Bearer ${SUPABASE_SESSION_JWT}`;
-    }
-    if (SUPABASE_ANON_KEY) {
-      headers["apikey"] = SUPABASE_ANON_KEY;
-    }
+const resolveSessionUserId = (jwt: string): string => {
+  try {
+    const payload = jwt.split(".")[1];
+    if (!payload) return "";
+    const base64 = payload.replace(/-/g, "+").replace(/_/g, "/");
+    const padded = base64 + "=".repeat((4 - (base64.length % 4)) % 4);
+    const decoded = JSON.parse(atob(padded));
+    const sub = decoded?.sub;
+    return typeof sub === "string" ? sub : "";
+  } catch (_error) {
+    return "";
+  }
+};
 
-    const response = await fetch(
-      `${FUNCTION_BASE_URL}/business-discovery-background`,
-      {
-        method: "POST",
-        headers,
-        body: JSON.stringify({
-          businessType: "coffee shop",
-          location: "Seattle, WA",
-          maxResults: 1,
-          tierKey: "PROFESSIONAL",
-          sessionUserId: "test_session_deno",
-        }),
-      }
-    );
+const sessionUserId = resolveSessionUserId(JWT) || "test_session_123";
 
-    assertEquals(response.status, 200);
-    const data = await response.json();
-    assertExists(data);
-  },
+const authHeaders = {
+  "Content-Type": "application/json",
+  Authorization: `Bearer ${JWT}`,
+  apikey: APIKEY,
+  ...(DEV_BYPASS ? { "x-prospect-session": "dev" } : {}),
+};
+
+Deno.test("Business Discovery Background - Basic Response", async () => {
+  const res = await fetch(`${BASE}/business-discovery-background`, {
+    method: "POST",
+    headers: authHeaders,
+    body: JSON.stringify({
+      businessType: "coffee shop",
+      location: "Seattle, WA",
+      maxResults: 1,
+      tierKey: "BASE",
+      sessionUserId,
+    }),
+  });
+
+  assertEquals(res.status, 200);
+  const data = await res.json();
+  assertExists(data);
 });
 
-Deno.test({
-  name: "Enrichment Orchestrator - Auth Required",
-  ignore: !serverAvailable,
-  fn: async () => {
-    // Test without auth headers - should return 401
-    const response = await fetch(
-      `${FUNCTION_BASE_URL}/enrichment-orchestrator`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ campaign_id: "test" }),
-      }
-    );
+Deno.test("Enrichment Orchestrator - Auth Required", async () => {
+  const res = await fetch(`${BASE}/enrichment-orchestrator`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      apikey: APIKEY,
+    },
+    body: JSON.stringify({ email: "test@example.com" }),
+  });
 
-    // Consume the response body to avoid leak warnings
-    await response.text();
-    assertEquals(response.status, 401);
-  },
+  // Consume the response body to avoid leak warnings
+  await res.text();
+  assertEquals(res.status, 401);
 });

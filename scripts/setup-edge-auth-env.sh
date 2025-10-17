@@ -51,44 +51,101 @@ require_repo_root() {
   fi
 }
 
-resolve_publishable_key() {
-  local project_ref api_keys_json publishable_key
+resolve_project_api_keys_json() {
+  local project_ref cache_file
   project_ref="$1"
-  if ! api_keys_json=$(prospectpro_supabase_cli projects api-keys \
-    --project-ref "$project_ref" \
-    --output json); then
-    echo "❌ Failed to call supabase projects api-keys" >&2
-    return 1
+  cache_file="$HOME/.cache/prospectpro/api_keys_${project_ref}.json"
+  
+  # Try cached file first (24h TTL)
+  if [[ -f "$cache_file" ]]; then
+    local cache_age
+    cache_age=$(($(date +%s) - $(stat -c %Y "$cache_file" 2>/dev/null || echo 0)))
+    if [[ $cache_age -lt 86400 ]]; then
+      PP_EDGE_AUTH_API_KEYS_JSON=$(<"$cache_file")
+      printf '%s' "$PP_EDGE_AUTH_API_KEYS_JSON"
+      return 0
+    fi
+  fi
+  
+  # Fetch fresh keys and cache result
+  if [[ -z "${PP_EDGE_AUTH_API_KEYS_JSON:-}" ]]; then
+    export PROSPECTPRO_SUPABASE_SUPPRESS_SETUP=1
+    if ! PP_EDGE_AUTH_API_KEYS_JSON=$(cd "$EXPECTED_REPO_ROOT/supabase" && npx --yes supabase@latest projects api-keys \
+      --project-ref "$project_ref" \
+      --output json 2>/dev/null); then
+      echo "❌ Failed to call supabase projects api-keys" >&2
+      return 1
+    fi
+    unset PROSPECTPRO_SUPABASE_SUPPRESS_SETUP
+    
+    # Cache for next time
+    mkdir -p "$(dirname "$cache_file")"
+    printf '%s' "$PP_EDGE_AUTH_API_KEYS_JSON" > "$cache_file"
   fi
 
-  publishable_key=$(PP_API_KEYS_JSON="$api_keys_json" python <<'PY'
+  printf '%s' "$PP_EDGE_AUTH_API_KEYS_JSON"
+}
+
+resolve_project_api_key() {
+  local project_ref key_types api_keys_json resolved_key
+  project_ref="$1"
+  key_types="$2"
+
+  api_keys_json=$(resolve_project_api_keys_json "$project_ref") || return 1
+
+  resolved_key=$(PP_API_KEYS_JSON="$api_keys_json" KEY_TYPES="$key_types" python3 <<'PY'
 import json
 import os
 
 raw = os.environ.get("PP_API_KEYS_JSON", "[]")
+key_types_raw = os.environ.get("KEY_TYPES", "")
 try:
     data = json.loads(raw)
 except json.JSONDecodeError:
     raise SystemExit(0)
-for entry in data:
-    if entry.get("type") == "publishable":
-        key = entry.get("api_key")
-        if key:
-            print(key)
-        break
+key_types = [item.strip() for item in key_types_raw.split(",") if item.strip()]
+
+def iter_candidates():
+  for entry in data:
+    yield entry
+
+def match(entry, candidates):
+  entry_type = entry.get("type")
+  entry_name = entry.get("name")
+  entry_id = entry.get("id")
+  for candidate in candidates:
+    if candidate == "legacy":
+      if entry_type == "legacy" and entry_name == "service_role":
+        return True
+      continue
+    if entry_type == candidate:
+      return True
+    if entry_name == candidate:
+      return True
+    if entry_id == candidate:
+      return True
+  return False
+
+for entry in iter_candidates():
+  if key_types and not match(entry, key_types):
+    continue
+  key = entry.get("api_key")
+  if key:
+    print(key)
+    break
 PY
 )
 
-  if [ -z "$publishable_key" ]; then
-    echo "❌ Unable to retrieve publishable key via supabase projects api-keys" >&2
+  if [ -z "$resolved_key" ]; then
+  echo "❌ Unable to retrieve key via supabase projects api-keys (searched: $key_types)" >&2
     return 1
   fi
 
-  echo "$publishable_key"
+  echo "$resolved_key"
 }
 
 resolve_session_user() {
-  python <<'PY'
+  python3 <<'PY'
 import base64
 import json
 import os
@@ -111,14 +168,29 @@ PY
 
 require_repo_root || return 1
 
-# shellcheck source=/workspaces/ProspectPro/scripts/ensure-supabase-cli-session.sh
-source "$EXPECTED_REPO_ROOT"/scripts/ensure-supabase-cli-session.sh || return 1
+# Skip CLI session check when only fetching keys—rely on cached credentials
+# or manual `npm run supabase:auth` if needed
+if [[ "${PP_SKIP_SESSION_CHECK:-0}" != "1" ]]; then
+  # shellcheck source=/workspaces/ProspectPro/scripts/ensure-supabase-cli-session.sh
+  source "$EXPECTED_REPO_ROOT"/scripts/ensure-supabase-cli-session.sh || return 1
+fi
 
 export SUPABASE_URL="${SUPABASE_URL:-https://sriycekxdqnesdsgwiuc.supabase.co}"
 export SUPABASE_PROJECT_REF="${SUPABASE_PROJECT_REF:-sriycekxdqnesdsgwiuc}"
 
-PUBLISHABLE_KEY=$(resolve_publishable_key "$SUPABASE_PROJECT_REF") || return 1
+PUBLISHABLE_KEY=$(resolve_project_api_key "$SUPABASE_PROJECT_REF" "publishable") || return 1
 export SUPABASE_PUBLISHABLE_KEY="$PUBLISHABLE_KEY"
+
+# Align local automation with production headers; tests expect the anon key env
+# to be populated, so default it to the publishable key when unset.
+if [[ -z "${SUPABASE_ANON_KEY:-}" ]]; then
+  export SUPABASE_ANON_KEY="$SUPABASE_PUBLISHABLE_KEY"
+fi
+
+SERVICE_ROLE_KEY=$(resolve_project_api_key "$SUPABASE_PROJECT_REF" "secret,service_role,legacy") || return 1
+if [[ -z "${SUPABASE_SERVICE_ROLE_KEY:-}" ]]; then
+  export SUPABASE_SERVICE_ROLE_KEY="$SERVICE_ROLE_KEY"
+fi
 
 echo "🔐 Publishable key loaded: ${SUPABASE_PUBLISHABLE_KEY:0:24}…"
 
@@ -145,7 +217,7 @@ if command -v jq >/dev/null 2>&1; then
     --output json | jq '.[] | {slug: .slug, status: .status}'
 else
   prospectpro_supabase_cli functions list \
-    --output json | python <<'PY'
+    --output json | python3 <<'PY'
 import json
 import sys
 

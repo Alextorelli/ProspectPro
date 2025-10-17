@@ -28,6 +28,7 @@ _Auto-generated from `.vscode/tasks.json` — Last updated: 2025-10-17_
 | **Supabase: Push Database** | `npm run supabase:db:push` | [`package.json`](../package.json), Multiple | None | Runs: Ensure Session |
 | **Supabase: Generate Types** | `npm run supabase:types` | [`package.json`](../package.json), Multiple | None | Runs: Ensure Session |
 | **Supabase: Pull Public Schema** | `npm run supabase:db:pull` | [`package.json`](../package.json), Multiple | None | Runs: Ensure Session |
+| **Supabase: Start Local Stack** | `npm run supabase:start:local` | CLI | None | No description available |
 | **Supabase: Full Workflow** | `Sequential composite` | Multiple | None | Runs: Ensure Session → Link Project → List Migrations |
 | **Database: Create Migration** | `bash cd supabase && source ../scripts/ensure-supabase-cli-session.sh && npx --yes supabase@latest migration new ${input:migrationName}` | [`../scripts/ensure-supabase-cli-session.sh`](../../scripts/ensure-supabase-cli-session.sh) | `migrationName` | Creates a new migration file with descriptive name |
 | **Supabase: Serve Local Functions** | `npm run edge:serve` | [`package.json`](../package.json), Multiple | None | Runs: Ensure Session |
@@ -60,7 +61,7 @@ _Auto-generated from `.vscode/tasks.json` — Last updated: 2025-10-17_
 | Task Label | Command | Script/Config | Inputs | Description |
 |------------|---------|---------------|--------|-------------|
 | **Test: Run Database Tests** | `npm run supabase:test:db` | [`package.json`](../package.json), Multiple | None | Runs: Ensure Session |
-| **Test: Run Edge Function Tests** | `npm run supabase:test:functions` | [`package.json`](../package.json), Multiple | None | Runs: Ensure Session |
+| **Test: Run Edge Function Tests (Local, Auth Required)** | `bash export SUPABASE_SESSION_JWT='${input:sessionJWT}' && npm run supabase:test:functions` | Multiple | `sessionJWT` | Runs: Ensure Session |
 | **Test: Discovery Pipeline** | `bash cd ${workspaceFolder} && ./scripts/test-discovery-pipeline.sh` | [`./scripts/test-discovery-pipeline.sh`](.././scripts/test-discovery-pipeline.sh), Multiple | `sessionJWT` | Runs: Ensure Session |
 | **Test: Enrichment Chain** | `bash cd ${workspaceFolder} && ./scripts/test-enrichment-chain.sh` | [`./scripts/test-enrichment-chain.sh`](.././scripts/test-enrichment-chain.sh), Multiple | `sessionJWT` | Runs: Ensure Session |
 | **Test: Export Flow** | `bash cd ${workspaceFolder} && ./scripts/test-export-flow.sh` | [`./scripts/test-export-flow.sh`](.././scripts/test-export-flow.sh), Multiple | `sessionJWT` | Runs: Ensure Session |
@@ -126,6 +127,7 @@ _Auto-generated from `.vscode/tasks.json` — Last updated: 2025-10-17_
 | **Thunder: Run Database Tests** | `echo` | CLI | None | No description available |
 | **Thunder: Run Full Test Suite** | `Sequential composite` | Multiple | None | Runs: Thunder: Run Auth Tests → Thunder: Run Discovery Tests → Thunder: Run Enrichment Tests → Thunder: Run Export Tests → Thunder: Run Database Tests |
 | **Thunder: Sync Environment Variables** | `bash echo 'Syncing Thunder Client environment from Vercel/Supabase...' && vercel env pull .env.thunder --yes && echo 'Environment synced to .env.thunder'` | CLI | None | No description available |
+| **npm: mcp:prod** | `N/A` | CLI | None | No description available |
 
 ---
 
@@ -135,7 +137,7 @@ _Auto-generated from `.vscode/tasks.json` — Last updated: 2025-10-17_
 |----------|------|-------------|-----------------|
 | `functionName` | Dropdown | Supabase Edge Function | 16 functions (default: `business-discovery-background`) |
 | `migrationName` | Text | Database migration name | Freeform text |
-| `sessionJWT` | Text | Supabase session JWT (required for authenticated tests) | Freeform (obtain via `supabase.auth.getSession()`) |
+| `sessionJWT` | Text | Paste SUPABASE_SESSION_JWT (kept in memory only) | Freeform (obtain via `supabase.auth.getSession()`) |
 | `epicKey` | Text | Epic key (kebab-case) | Freeform kebab-case |
 
 ---

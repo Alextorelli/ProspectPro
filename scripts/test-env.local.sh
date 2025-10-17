@@ -1,0 +1,93 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Always test against local Supabase to avoid DNS/pooler freezes
+LOCAL_SUPABASE_URL="http://127.0.0.1:54321"
+export SUPABASE_URL="$LOCAL_SUPABASE_URL"
+export SUPABASE_FUNCTION_BASE_URL="${SUPABASE_URL}/functions/v1"
+
+# Ensure local stack is running; if not, start it
+if ! curl -sf "${SUPABASE_URL}/rest/v1/" >/dev/null 2>&1; then
+  echo "Starting local Supabase stack..."
+  (cd "$(git rev-parse --show-toplevel)/supabase" && npx --yes supabase@latest start)
+fi
+
+# Pull local anon/service keys from local status
+if ! command -v jq >/dev/null 2>&1; then
+  echo "ERROR: jq is required for local test env setup."
+  exit 1
+fi
+
+STATUS_JSON="$(cd "$(git rev-parse --show-toplevel)/supabase" && npx --yes supabase@latest status --output json)"
+
+export SUPABASE_ANON_KEY="$(echo "$STATUS_JSON" | jq -r '.ANON_KEY')"
+export SUPABASE_PUBLISHABLE_KEY="$(echo "$STATUS_JSON" | jq -r '.PUBLISHABLE_KEY')"
+export SUPABASE_SERVICE_ROLE_KEY="$(echo "$STATUS_JSON" | jq -r '.SERVICE_ROLE_KEY')"
+
+# Overwrite URLs with authoritative local values from status output when available
+STATUS_API_URL="$(echo "$STATUS_JSON" | jq -r '.API_URL')"
+if [ -n "${STATUS_API_URL:-}" ] && [ "$STATUS_API_URL" != "null" ]; then
+  export SUPABASE_URL="$STATUS_API_URL"
+  export SUPABASE_FUNCTION_BASE_URL="${SUPABASE_URL}/functions/v1"
+fi
+
+# Helper to confirm a session token works against the local stack
+validate_session_jwt() {
+  [ -z "${SUPABASE_SESSION_JWT:-}" ] && return 1
+  curl -sf \
+    -H "Authorization: Bearer ${SUPABASE_SESSION_JWT}" \
+    -H "apikey: ${SUPABASE_ANON_KEY}" \
+    "${SUPABASE_URL}/auth/v1/user" >/dev/null 2>&1
+}
+
+# Load cached token if caller did not provide one
+if [ -z "${SUPABASE_SESSION_JWT:-}" ] && [ -f /tmp/supabase_session_jwt ]; then
+  export SUPABASE_SESSION_JWT="$(cat /tmp/supabase_session_jwt)"
+fi
+# If caller provided a token, ensure it is valid; otherwise fall back to local generation
+if ! validate_session_jwt; then
+  [ -n "${SUPABASE_SESSION_JWT:-}" ] && echo "Provided SUPABASE_SESSION_JWT is invalid for local stack; generating a fresh session." >&2
+  unset SUPABASE_SESSION_JWT
+
+  TEST_EMAIL="${SUPABASE_TEST_EMAIL:-edge-tests@local.test}"
+  TEST_PASSWORD="${SUPABASE_TEST_PASSWORD:-LocalTest123!}"
+
+  echo "Generating local Supabase session for ${TEST_EMAIL}..."
+
+  create_payload=$(jq -cn --arg email "$TEST_EMAIL" --arg password "$TEST_PASSWORD" '{email: $email, password: $password, email_confirm: true, user_metadata: {edge_test: true}}')
+
+  # Ensure the test user exists (409 conflict means it is already present)
+  create_status=$(curl -s -o /dev/null -w "%{http_code}" \
+    -H "Content-Type: application/json" \
+    -H "apikey: ${SUPABASE_SERVICE_ROLE_KEY}" \
+    -H "Authorization: Bearer ${SUPABASE_SERVICE_ROLE_KEY}" \
+    -d "$create_payload" \
+    "${SUPABASE_URL}/auth/v1/admin/users")
+
+  if [ "$create_status" != "200" ] && [ "$create_status" != "201" ] && [ "$create_status" != "409" ]; then
+    echo "ERROR: Failed to ensure local test user (HTTP ${create_status})." >&2
+    exit 1
+  fi
+
+  token_response=$(curl -s \
+    -H "Content-Type: application/json" \
+    -H "apikey: ${SUPABASE_ANON_KEY}" \
+    -d "$(jq -cn --arg email "$TEST_EMAIL" --arg password "$TEST_PASSWORD" '{email: $email, password: $password}')" \
+    "${SUPABASE_URL}/auth/v1/token?grant_type=password")
+
+  SUPABASE_SESSION_JWT=$(echo "$token_response" | jq -r '.access_token // empty')
+
+  if [ -z "${SUPABASE_SESSION_JWT}" ]; then
+    echo "ERROR: Unable to obtain local session JWT. Raw response: $token_response" >&2
+    exit 1
+  fi
+
+  export SUPABASE_SESSION_JWT
+  printf '%s' "$SUPABASE_SESSION_JWT" > /tmp/supabase_session_jwt
+fi
+
+echo "Local test env ready:"
+echo "  SUPABASE_URL=$SUPABASE_URL"
+echo "  FUNCTIONS   =$SUPABASE_FUNCTION_BASE_URL"
+echo "  Anon key    =${SUPABASE_ANON_KEY:0:12}..."
+echo "  JWT prefix  =${SUPABASE_SESSION_JWT:0:16}..."

@@ -152,6 +152,21 @@
       }
     },
     {
+      "label": "Supabase: Start Local Stack",
+      "type": "shell",
+      "command": "npm run supabase:start:local",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
       "label": "Supabase: Full Workflow",
       "dependsOrder": "sequence",
       "dependsOn": [
@@ -423,10 +438,13 @@
       }
     },
     {
-      "label": "Test: Run Edge Function Tests",
+      "label": "Test: Run Edge Function Tests (Local, Auth Required)",
       "type": "shell",
-      "command": "npm",
-      "args": ["run", "supabase:test:functions"],
+      "command": "bash",
+      "args": [
+        "-lc",
+        "export SUPABASE_SESSION_JWT='${input:sessionJWT}' && npm run supabase:test:functions"
+      ],
       "options": {
         "cwd": "${workspaceFolder}"
       },
@@ -935,6 +953,13 @@
         "reveal": "always",
         "panel": "shared"
       }
+    },
+    {
+      "type": "npm",
+      "script": "mcp:prod",
+      "problemMatcher": [],
+      "label": "npm: mcp:prod",
+      "detail": "cd mcp-servers && npm run start:production"
     }
   ],
   "inputs": [
@@ -970,7 +995,7 @@
     {
       "id": "sessionJWT",
       "type": "promptString",
-      "description": "Supabase session JWT (required for authenticated tests)"
+      "description": "Paste SUPABASE_SESSION_JWT (kept in memory only)"
     },
     {
       "id": "epicKey",

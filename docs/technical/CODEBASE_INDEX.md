@@ -2,7 +2,7 @@
 
 > Primary #codebase reference. Regenerate with `npm run codebase:index` before audits or deployments.
 
-_Last generated: 2025-10-17T19:07:02.986Z_
+_Last generated: 2025-10-17T22:32:40.822Z_
 
 ## Supabase Edge Functions
 
@@ -61,6 +61,10 @@ _Last generated: 2025-10-17T19:07:02.986Z_
 - [src/lib/supabase.ts](src/lib/supabase.ts) — Frontend Supabase client + authenticated function invocation helper
 - [src/components/GeographicSelector.tsx](src/components/GeographicSelector.tsx) — Location selector used in campaign creation
 - [src/stores/campaignStore.ts](src/stores/campaignStore.ts) — React frontend module
+
+## Static Entry Points
+
+- [index.html](index.html) — Project file
 
 ## Database & Security Artifacts
 
