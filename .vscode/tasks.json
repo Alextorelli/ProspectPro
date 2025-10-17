@@ -14,6 +14,45 @@
         "echo": false,
         "reveal": "silent",
         "focus": false,
+    {
+      "label": "Close Codespace",
+      "dependsOrder": "sequence",
+      "dependsOn": [
+        "Docs: Update All Documentation",
+        "MCP: Stop All Servers",
+        "Docs: Update Codebase Index (Legacy)",
+        "Git: Remind to Push Before Exit",
+        "Git: Commit and Push All"
+      ]
+    },
+    {
+      "label": "Git: Remind to Push Before Exit",
+      "type": "shell",
+      "command": "bash",
+      "args": [
+        "-c",
+        "git status && echo 'REMINDER: Commit and push your changes before closing Codespace!'"
+      ],
+      "group": "build",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Git: Commit and Push All",
+      "type": "shell",
+      "command": "bash",
+      "args": [
+        "-c",
+        "git add . && git commit -m 'Codespace close: doc update, MCP stop, codebase index' || echo 'No changes to commit.' && git push"
+      ],
+      "group": "build",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      }
+    },
         "panel": "shared"
       }
     },
