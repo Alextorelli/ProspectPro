@@ -66,6 +66,42 @@
     "when": "!terminalFocus"
   },
   {
+    "key": "ctrl+alt+t",
+    "command": "workbench.action.tasks.runTask",
+    "args": "Thunder: Run Full Test Suite",
+    "when": "!terminalFocus"
+  },
+  {
+    "key": "ctrl+alt+a",
+    "command": "workbench.action.tasks.runTask",
+    "args": "Thunder: Run Auth Tests",
+    "when": "!terminalFocus"
+  },
+  {
+    "key": "ctrl+alt+d",
+    "command": "workbench.action.tasks.runTask",
+    "args": "Thunder: Run Discovery Tests",
+    "when": "!terminalFocus"
+  },
+  {
+    "key": "ctrl+alt+e",
+    "command": "workbench.action.tasks.runTask",
+    "args": "Thunder: Run Enrichment Tests",
+    "when": "!terminalFocus"
+  },
+  {
+    "key": "ctrl+alt+x",
+    "command": "workbench.action.tasks.runTask",
+    "args": "Thunder: Run Export Tests",
+    "when": "!terminalFocus"
+  },
+  {
+    "key": "ctrl+alt+s",
+    "command": "workbench.action.tasks.runTask",
+    "args": "Thunder: Sync Environment Variables",
+    "when": "!terminalFocus"
+  },
+  {
     "key": "f5",
     "command": "workbench.action.tasks.runTask",
     "args": "Supabase: Serve Local Functions",

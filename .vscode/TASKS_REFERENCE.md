@@ -115,6 +115,13 @@ _Auto-generated from `.vscode/tasks.json` — Last updated: 2025-10-17_
 | **Context: Fetch Supabase Snapshot** | `node` | CLI | None | Summarizes Edge Function directories and verify_jwt settings to `.cache/agent/context/supabase-functions.json` |
 | **Context: Cache Session JWT** | `node` | CLI | `sessionJWT` | Stores the provided session JWT locally at `.cache/agent/context/session.json` |
 | **Workspace: Validate Configuration** | `bash ${workspaceFolder}/.vscode/validate-workspace-config.sh` | [`.vscode/validate-workspace-config.sh`](../.vscode/validate-workspace-config.sh) | None | Validates workspace config and environment setup |
+| **Thunder: Run Auth Tests** | `echo` | CLI | None | No description available |
+| **Thunder: Run Discovery Tests** | `echo` | CLI | None | No description available |
+| **Thunder: Run Enrichment Tests** | `echo` | CLI | None | No description available |
+| **Thunder: Run Export Tests** | `echo` | CLI | None | No description available |
+| **Thunder: Run Database Tests** | `echo` | CLI | None | No description available |
+| **Thunder: Run Full Test Suite** | `Sequential composite` | Multiple | None | Runs: Thunder: Run Auth Tests → Thunder: Run Discovery Tests → Thunder: Run Enrichment Tests → Thunder: Run Export Tests → Thunder: Run Database Tests |
+| **Thunder: Sync Environment Variables** | `bash echo 'Syncing Thunder Client environment from Vercel/Supabase...' && vercel env pull .env.thunder --yes && echo 'Environment synced to .env.thunder'` | CLI | None | No description available |
 
 ---
 

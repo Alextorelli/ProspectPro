@@ -1,0 +1,212 @@
+{
+  "clientName": "Thunder Client",
+  "collectionName": "ProspectPro - Auth Tests",
+  "collectionId": "prospectpro-auth",
+  "dateExported": "2025-10-17T00:00:00.000Z",
+  "version": "1.2",
+  "folders": [
+    {
+      "id": "auth-diagnostics",
+      "name": "Auth Diagnostics",
+      "containerId": "",
+      "created": "2025-10-17T00:00:00.000Z",
+      "sortNum": 10000
+    },
+    {
+      "id": "auth-failures",
+      "name": "Auth Failure Modes",
+      "containerId": "",
+      "created": "2025-10-17T00:00:00.000Z",
+      "sortNum": 20000
+    }
+  ],
+  "requests": [
+    {
+      "id": "test-new-auth-success",
+      "name": "✅ Test New Auth - Valid Session",
+      "url": "{{SUPABASE_URL}}/functions/v1/test-new-auth",
+      "method": "POST",
+      "sortNum": 10000,
+      "created": "2025-10-17T00:00:00.000Z",
+      "modified": "2025-10-17T00:00:00.000Z",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{SUPABASE_SESSION_JWT}}"
+        },
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"diagnostics\": true\n}",
+        "form": []
+      },
+      "tests": [
+        {
+          "type": "res-code",
+          "value": "200"
+        },
+        {
+          "type": "json-query",
+          "value": "$.user",
+          "action": "istype object"
+        },
+        {
+          "type": "json-query",
+          "value": "$.user.id",
+          "action": "notequals null"
+        }
+      ],
+      "containerId": "auth-diagnostics"
+    },
+    {
+      "id": "test-official-auth-success",
+      "name": "✅ Test Official Auth - Supabase Reference",
+      "url": "{{SUPABASE_URL}}/functions/v1/test-official-auth",
+      "method": "POST",
+      "sortNum": 20000,
+      "created": "2025-10-17T00:00:00.000Z",
+      "modified": "2025-10-17T00:00:00.000Z",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{SUPABASE_SESSION_JWT}}"
+        },
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "body": {
+        "type": "json",
+        "raw": "{}",
+        "form": []
+      },
+      "tests": [
+        {
+          "type": "res-code",
+          "value": "200"
+        },
+        {
+          "type": "json-query",
+          "value": "$.user",
+          "action": "istype object"
+        }
+      ],
+      "containerId": "auth-diagnostics"
+    },
+    {
+      "id": "auth-missing-token",
+      "name": "❌ Missing Authorization Header",
+      "url": "{{SUPABASE_URL}}/functions/v1/test-new-auth",
+      "method": "POST",
+      "sortNum": 30000,
+      "created": "2025-10-17T00:00:00.000Z",
+      "modified": "2025-10-17T00:00:00.000Z",
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"diagnostics\": true\n}",
+        "form": []
+      },
+      "tests": [
+        {
+          "type": "res-code",
+          "value": "401"
+        },
+        {
+          "type": "json-query",
+          "value": "$.error",
+          "action": "contains Unauthorized"
+        }
+      ],
+      "containerId": "auth-failures"
+    },
+    {
+      "id": "auth-invalid-token",
+      "name": "❌ Invalid JWT Token",
+      "url": "{{SUPABASE_URL}}/functions/v1/test-new-auth",
+      "method": "POST",
+      "sortNum": 40000,
+      "created": "2025-10-17T00:00:00.000Z",
+      "modified": "2025-10-17T00:00:00.000Z",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer invalid_jwt_token_12345"
+        },
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"diagnostics\": true\n}",
+        "form": []
+      },
+      "tests": [
+        {
+          "type": "res-code",
+          "value": "401"
+        },
+        {
+          "type": "json-query",
+          "value": "$.error",
+          "action": "contains Invalid"
+        }
+      ],
+      "containerId": "auth-failures"
+    },
+    {
+      "id": "auth-expired-token",
+      "name": "❌ Expired Session Token",
+      "url": "{{SUPABASE_URL}}/functions/v1/test-new-auth",
+      "method": "POST",
+      "sortNum": 50000,
+      "created": "2025-10-17T00:00:00.000Z",
+      "modified": "2025-10-17T00:00:00.000Z",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{EXPIRED_SESSION_JWT}}"
+        },
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"diagnostics\": true\n}",
+        "form": []
+      },
+      "tests": [
+        {
+          "type": "res-code",
+          "value": "401"
+        },
+        {
+          "type": "json-query",
+          "value": "$.error",
+          "action": "contains expired"
+        }
+      ],
+      "containerId": "auth-failures"
+    }
+  ],
+  "settings": {
+    "options": {
+      "baseUrl": ""
+    },
+    "envId": "prospectpro-production"
+  }
+}

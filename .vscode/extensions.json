@@ -1,7 +1,8 @@
 {
   "recommendations": [
     // === CORE DEVELOPMENT (Keep Always) ===
-    "supabase.supabase",
+    "supabase.supabase", // Native DB/Edge management
+    "rangav.vscode-thunder-client", // Thunder Client: API test suite, integrates with Supabase for live Edge/DB debugging
     "denoland.vscode-deno",
     "github.copilot",
     "github.copilot-chat",

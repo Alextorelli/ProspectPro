@@ -793,6 +793,95 @@
         "reveal": "always",
         "panel": "shared"
       }
+    },
+    {
+      "label": "Thunder: Run Auth Tests",
+      "type": "shell",
+      "command": "echo",
+      "args": ["Run Thunder Client with ProspectPro-Auth.json collection"],
+      "group": "test",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Thunder: Run Discovery Tests",
+      "type": "shell",
+      "command": "echo",
+      "args": ["Run Thunder Client with ProspectPro-Discovery.json collection"],
+      "group": "test",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Thunder: Run Enrichment Tests",
+      "type": "shell",
+      "command": "echo",
+      "args": [
+        "Run Thunder Client with ProspectPro-Enrichment.json collection"
+      ],
+      "group": "test",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Thunder: Run Export Tests",
+      "type": "shell",
+      "command": "echo",
+      "args": ["Run Thunder Client with ProspectPro-Export.json collection"],
+      "group": "test",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Thunder: Run Database Tests",
+      "type": "shell",
+      "command": "echo",
+      "args": ["Run Thunder Client with ProspectPro-Database.json collection"],
+      "group": "test",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Thunder: Run Full Test Suite",
+      "dependsOrder": "sequence",
+      "dependsOn": [
+        "Thunder: Run Auth Tests",
+        "Thunder: Run Discovery Tests",
+        "Thunder: Run Enrichment Tests",
+        "Thunder: Run Export Tests",
+        "Thunder: Run Database Tests"
+      ],
+      "group": "test"
+    },
+    {
+      "label": "Thunder: Sync Environment Variables",
+      "type": "shell",
+      "command": "bash",
+      "args": [
+        "-c",
+        "echo 'Syncing Thunder Client environment from Vercel/Supabase...' && vercel env pull .env.thunder --yes && echo 'Environment synced to .env.thunder'"
+      ],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "panel": "shared"
+      }
     }
   ],
   "inputs": [

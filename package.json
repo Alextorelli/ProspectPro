@@ -90,7 +90,9 @@
     "test:verified-contacts": "echo 'Test verified contact discovery with zero fake data validation'",
     "test:watch": "vitest --exclude supabase/functions/tests/**",
     "type-check": "tsc --noEmit",
-    "supabase:test:db": "bash -lc 'cd supabase && source ../scripts/ensure-supabase-cli-session.sh && npx --yes supabase@latest test db'"
+    "supabase:test:db": "bash -lc 'cd supabase && source ../scripts/ensure-supabase-cli-session.sh && npx --yes supabase@latest test db'",
+    "thunder:test": "echo 'Run Thunder Client tests via VS Code extension (Thunder: Run Full Test Suite task)'",
+    "thunder:env:sync": "vercel env pull .env.thunder --yes && echo 'Thunder Client environment synced to .env.thunder'"
   },
   "keywords": [
     "verified-business-intelligence",

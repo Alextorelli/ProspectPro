@@ -1,0 +1,199 @@
+{
+  "clientName": "Thunder Client",
+  "collectionName": "ProspectPro - Database Tests",
+  "collectionId": "prospectpro-database",
+  "dateExported": "2025-10-17T00:00:00.000Z",
+  "version": "1.2",
+  "folders": [
+    {
+      "id": "database-rpc",
+      "name": "Database RPC Functions",
+      "containerId": "",
+      "created": "2025-10-17T00:00:00.000Z",
+      "sortNum": 10000
+    },
+    {
+      "id": "database-health",
+      "name": "Database Health Checks",
+      "containerId": "",
+      "created": "2025-10-17T00:00:00.000Z",
+      "sortNum": 20000
+    }
+  ],
+  "requests": [
+    {
+      "id": "rpc-reset-test-campaigns",
+      "name": "✅ RPC: Reset Test User Campaigns",
+      "url": "{{SUPABASE_URL}}/rest/v1/rpc/reset_test_user_campaigns",
+      "method": "POST",
+      "sortNum": 10000,
+      "created": "2025-10-17T00:00:00.000Z",
+      "modified": "2025-10-17T00:00:00.000Z",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{SUPABASE_SESSION_JWT}}"
+        },
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "apikey",
+          "value": "{{SUPABASE_ANON_KEY}}"
+        }
+      ],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"test_user_id\": \"thunder_test_cleanup\"\n}",
+        "form": []
+      },
+      "tests": [
+        {
+          "type": "res-code",
+          "value": "200,204"
+        }
+      ],
+      "containerId": "database-rpc"
+    },
+    {
+      "id": "rpc-get-campaign-stats",
+      "name": "✅ RPC: Get Campaign Statistics",
+      "url": "{{SUPABASE_URL}}/rest/v1/rpc/get_campaign_statistics",
+      "method": "POST",
+      "sortNum": 20000,
+      "created": "2025-10-17T00:00:00.000Z",
+      "modified": "2025-10-17T00:00:00.000Z",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{SUPABASE_SESSION_JWT}}"
+        },
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "apikey",
+          "value": "{{SUPABASE_ANON_KEY}}"
+        }
+      ],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"campaign_id\": \"{{TEST_CAMPAIGN_ID}}\"\n}",
+        "form": []
+      },
+      "tests": [
+        {
+          "type": "res-code",
+          "value": "200"
+        },
+        {
+          "type": "json-query",
+          "value": "$[0].total_leads",
+          "action": "istype number"
+        }
+      ],
+      "containerId": "database-rpc"
+    },
+    {
+      "id": "db-campaigns-health",
+      "name": "✅ Health: Campaigns Table",
+      "url": "{{SUPABASE_URL}}/rest/v1/campaigns?select=id,status,created_at&limit=1",
+      "method": "GET",
+      "sortNum": 30000,
+      "created": "2025-10-17T00:00:00.000Z",
+      "modified": "2025-10-17T00:00:00.000Z",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{SUPABASE_SESSION_JWT}}"
+        },
+        {
+          "name": "apikey",
+          "value": "{{SUPABASE_ANON_KEY}}"
+        }
+      ],
+      "tests": [
+        {
+          "type": "res-code",
+          "value": "200"
+        },
+        {
+          "type": "json-query",
+          "value": "$",
+          "action": "istype array"
+        }
+      ],
+      "containerId": "database-health"
+    },
+    {
+      "id": "db-leads-health",
+      "name": "✅ Health: Leads Table",
+      "url": "{{SUPABASE_URL}}/rest/v1/leads?select=id,business_name,created_at&limit=1",
+      "method": "GET",
+      "sortNum": 40000,
+      "created": "2025-10-17T00:00:00.000Z",
+      "modified": "2025-10-17T00:00:00.000Z",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{SUPABASE_SESSION_JWT}}"
+        },
+        {
+          "name": "apikey",
+          "value": "{{SUPABASE_ANON_KEY}}"
+        }
+      ],
+      "tests": [
+        {
+          "type": "res-code",
+          "value": "200"
+        },
+        {
+          "type": "json-query",
+          "value": "$",
+          "action": "istype array"
+        }
+      ],
+      "containerId": "database-health"
+    },
+    {
+      "id": "db-analytics-view",
+      "name": "✅ Health: Campaign Analytics View",
+      "url": "{{SUPABASE_URL}}/rest/v1/campaign_analytics?select=*&limit=1",
+      "method": "GET",
+      "sortNum": 50000,
+      "created": "2025-10-17T00:00:00.000Z",
+      "modified": "2025-10-17T00:00:00.000Z",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{SUPABASE_SESSION_JWT}}"
+        },
+        {
+          "name": "apikey",
+          "value": "{{SUPABASE_ANON_KEY}}"
+        }
+      ],
+      "tests": [
+        {
+          "type": "res-code",
+          "value": "200"
+        },
+        {
+          "type": "json-query",
+          "value": "$",
+          "action": "istype array"
+        }
+      ],
+      "containerId": "database-health"
+    }
+  ],
+  "settings": {
+    "options": {
+      "baseUrl": ""
+    },
+    "envId": "prospectpro-production"
+  }
+}
