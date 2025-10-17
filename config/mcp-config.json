@@ -7,7 +7,7 @@
       "lazyLoad": true,
       "maxMemory": "192MB",
       "priority": "high",
-      "description": "Production monitoring for tier-aware background discovery, enrichment, and session-enforced auth (32 tools)",
+  "description": "Production monitoring for tier-aware background discovery, enrichment, session-enforced auth, and Supabase CLI session caching (32 tools)",
       "tools": [
         "environment_health_check",
         "github_actions_monitor",
@@ -47,7 +47,7 @@
       "autoStart": false,
       "onDemand": true,
       "maxMemory": "96MB",
-      "priority": "medium",
+          "export supabase session jwt": "echo 'Run: export SUPABASE_SESSION_JWT=\"<paste session token from Supabase auth>\"'",
       "description": "Development tools for API integration testing, edge function deployment, documentation automation (12 tools)",
       "tools": [
         "test_new_api_integration",
@@ -168,7 +168,8 @@
       "verify repo root": "git rev-parse --show-toplevel && pwd",
       "pull vercel env": "vercel env pull .env.vercel",
       "run supabase db tests": "npm run supabase:test:db",
-      "run supabase function tests": "npm run supabase:test:functions",
+  "export supabase session jwt": "echo 'export SUPABASE_SESSION_JWT="\'<paste session token from Supabase auth\'>\'"'",
+  "run supabase function tests": "echo 'Requires SUPABASE_SESSION_JWT in environment' && npm run supabase:test:functions",
       "diagnose discovery logs": "./scripts/diagnose-campaign-failure.sh business-discovery",
       "diagnose enrichment logs": "./scripts/diagnose-campaign-failure.sh enrichment",
       "function report discovery": "source scripts/ensure-supabase-cli-session.sh && source scripts/lib/supabase_cli_helpers.sh && get_function_report business-discovery-background",

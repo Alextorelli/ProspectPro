@@ -51,7 +51,7 @@ Deno.test({
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
     };
-    
+
     // Add authentication headers if available
     if (SUPABASE_SESSION_JWT) {
       headers["Authorization"] = `Bearer ${SUPABASE_SESSION_JWT}`;

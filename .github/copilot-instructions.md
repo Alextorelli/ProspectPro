@@ -215,6 +215,7 @@ const BUSINESS_CATEGORIES = {
 - Use Thunder Client to run and automate API/Edge Function tests directly in VS Code, leveraging pre-built collections for all core flows (auth, discovery, enrichment, export, error cases).
 - Use the Supabase extension to inspect DB state, view logs, and validate RLS policies in real time while running Thunder tests.
 - Both extensions are required in this codespace for streamlined, zero-fake-data validation and rapid debugging.
+- Edge Function Deno tests (`npm run supabase:test:functions`) require `SUPABASE_SESSION_JWT` to be set; grab the token from the authenticated browser session or the Thunder environment file before running them.
 - Thunder Client collections should be kept in `thunder-collection/` and referenced in docs and tasks for reproducible, shareable test coverage.
 
 **WORKFLOW:**
@@ -295,9 +296,10 @@ ProspectPro includes comprehensive Thunder Client test collections covering all 
 
 1. Sync environment: `Ctrl+Alt+S` or `npm run thunder:env:sync`
 2. Extract session JWT from browser (Supabase auth) into Thunder environment
-3. Run test suite: `Ctrl+Alt+T` or individual collection shortcuts
-4. Monitor Supabase extension for DB changes and Edge Function logs
-5. Update collections when adding new Edge Functions or failure modes
+3. Export `SUPABASE_SESSION_JWT` in the terminal before running edge function Deno tests; without it, authenticated tests are skipped by design.
+4. Run test suite: `Ctrl+Alt+T` or individual collection shortcuts
+5. Monitor Supabase extension for DB changes and Edge Function logs
+6. Update collections when adding new Edge Functions or failure modes
 
 **Zero Fake Data Assertions:**
 
