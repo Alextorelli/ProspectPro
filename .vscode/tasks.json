@@ -593,6 +593,81 @@
       }
     },
     {
+      "label": "🚀 Create Epic (Guided)",
+      "type": "shell",
+      "command": "npm",
+      "args": ["run", "roadmap:epic"],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "🗂️ Batch Generate Epics",
+      "type": "shell",
+      "command": "npm",
+      "args": ["run", "roadmap:batch"],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "🌐 Open Project 5",
+      "type": "shell",
+      "command": "npm",
+      "args": ["run", "roadmap:open"],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "🔍 Project Dashboard",
+      "type": "shell",
+      "command": "npm",
+      "args": ["run", "roadmap:dashboard"],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "🛠️ Start Epic Scaffolding",
+      "type": "shell",
+      "command": "bash",
+      "args": [
+        "-lc",
+        "${workspaceFolder}/scripts/start-epic.sh ${input:epicKey}"
+      ],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "panel": "shared"
+      }
+    },
+    {
       "label": "Workspace: Validate Configuration",
       "type": "shell",
       "command": "bash",
@@ -642,6 +717,11 @@
       "id": "sessionJWT",
       "type": "promptString",
       "description": "Supabase session JWT (required for authenticated tests)"
+    },
+    {
+      "id": "epicKey",
+      "type": "promptString",
+      "description": "Epic key (kebab-case)"
     }
   ]
 }
