@@ -14,6 +14,9 @@
         "echo": false,
         "reveal": "silent",
         "focus": false,
+        "panel": "shared"
+      }
+    },
     {
       "label": "Close Codespace",
       "dependsOrder": "sequence",
@@ -50,9 +53,6 @@
       "group": "build",
       "presentation": {
         "reveal": "always",
-        "panel": "shared"
-      }
-    },
         "panel": "shared"
       }
     },

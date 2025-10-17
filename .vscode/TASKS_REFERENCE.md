@@ -110,6 +110,9 @@ _Auto-generated from `.vscode/tasks.json` — Last updated: 2025-10-17_
 
 | Task Label | Command | Script/Config | Inputs | Description |
 |------------|---------|---------------|--------|-------------|
+| **Close Codespace** | `Sequential composite` | Multiple | None | Runs: Docs: Update All Documentation → MCP: Stop All Servers → Docs: Update Codebase Index (Legacy) → Git: Remind to Push Before Exit → Git: Commit and Push All |
+| **Git: Remind to Push Before Exit** | `bash git status && echo 'REMINDER: Commit and push your changes before closing Codespace!'` | CLI | None | No description available |
+| **Git: Commit and Push All** | `bash git add . && git commit -m 'Codespace close: doc update, MCP stop, codebase index' || echo 'No changes to commit.' && git push` | CLI | None | No description available |
 | **Roadmap: Sync Epics to GitHub** | `bash ${workspaceFolder}/scripts/roadmap/sync-epics-to-github.sh` | [`scripts/roadmap/sync-epics-to-github.sh`](../scripts/roadmap/sync-epics-to-github.sh) | None | Creates GitHub issues from local epic files and attaches them to Project 5 (requires GH_PROJECT_TOKEN) |
 | **Context: Fetch Repo Snapshot** | `node` | CLI | None | Captures current git branch, status, and diff summary to `.cache/agent/context/repo-context.json` |
 | **Context: Fetch Supabase Snapshot** | `node` | CLI | None | Summarizes Edge Function directories and verify_jwt settings to `.cache/agent/context/supabase-functions.json` |
