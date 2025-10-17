@@ -48,8 +48,8 @@ add_issue_to_project() {
   local item_id
 
   item_id=$(gh project item-add \
+    "$PROJECT_NUMBER" \
     --owner "$OWNER" \
-    --project-number "$PROJECT_NUMBER" \
     --url "$issue_url" \
     --format json \
     --jq '.id' 2>/dev/null || true)
@@ -64,15 +64,15 @@ add_issue_to_project() {
 
   local status_field_id option_id
   status_field_id=$(gh project field-list \
+    "$PROJECT_NUMBER" \
     --owner "$OWNER" \
-    --project-number "$PROJECT_NUMBER" \
     --format json \
     --jq '.fields[] | select(.name=="Status") | .id' 2>/dev/null || true)
 
   if [[ -n "$status_field_id" ]]; then
     option_id=$(gh project field-list \
+      "$PROJECT_NUMBER" \
       --owner "$OWNER" \
-      --project-number "$PROJECT_NUMBER" \
       --format json \
       --jq '.fields[] | select(.name=="Status") | .options[] | select(.name=="Backlog" or .name=="Planned" or .name=="Todo" or .name=="To do") | .id' 2>/dev/null | head -n1 || true)
 

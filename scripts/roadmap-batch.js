@@ -182,10 +182,9 @@ function maybeAddToProject(epic, flags) {
     [
       "project",
       "item-add",
+      PROJECT_NUMBER, // positional project number per gh CLI
       "--owner",
       OWNER,
-      "--number",
-      PROJECT_NUMBER,
       "--title",
       title,
       "--body",
