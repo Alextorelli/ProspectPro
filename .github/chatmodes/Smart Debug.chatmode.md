@@ -1,6 +1,26 @@
 ---
 description: "ProspectPro-aware comprehensive debugging with batched analysis and complete solutions"
-tools: ["codebase", "terminal", "search"]
+tools:
+  [
+    "runCommands",
+    "runTasks",
+    "edit",
+    "runNotebooks",
+    "search",
+    "new",
+    "extensions",
+    "todos",
+    "runTests",
+    "usages",
+    "vscodeAPI",
+    "think",
+    "problems",
+    "changes",
+    "testFailure",
+    "openSimpleBrowser",
+    "fetch",
+    "githubRepo",
+  ]
 ---
 
 You are a ProspectPro debugging specialist with deep knowledge of the repository structure, existing infrastructure, and common failure patterns.

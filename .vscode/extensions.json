@@ -13,7 +13,8 @@
     "eamodio.gitlens",
     "bradlc.vscode-tailwindcss",
     "davidanson.vscode-markdownlint",
-    "redhat.vscode-yaml"
+    "redhat.vscode-yaml",
+    "humao.rest-client"
   ],
 
   "unwantedRecommendations": [
@@ -21,7 +22,6 @@
     "ms-vscode.vscode-ai-toolkit", // Redundant with Copilot
     "ms-mssql.mssql", // Using Supabase
     "ms-playwright.playwright", // Not using E2E tests currently
-    "humao.rest-client", // Using Supabase dashboard
     "ms-vscode.live-server", // Static hosting via Vercel
     "ms-vscode.vscode-json", // Built-in is sufficient
 

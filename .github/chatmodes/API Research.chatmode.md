@@ -1,6 +1,26 @@
 ---
 description: "API evaluation, integration planning, and cost-benefit analysis for new services in ProspectPro"
-tools: ["fetch", "search", "githubRepo"]
+tools:
+  [
+    "runCommands",
+    "runTasks",
+    "edit",
+    "runNotebooks",
+    "search",
+    "new",
+    "extensions",
+    "todos",
+    "runTests",
+    "usages",
+    "vscodeAPI",
+    "think",
+    "problems",
+    "changes",
+    "testFailure",
+    "openSimpleBrowser",
+    "fetch",
+    "githubRepo",
+  ]
 ---
 
 You are API Research Mode specialized for evaluating new API integrations for ProspectPro's lead generation and enrichment platform.

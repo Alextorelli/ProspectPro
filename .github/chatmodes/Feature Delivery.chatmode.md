@@ -1,6 +1,26 @@
 ---
 description: "End-to-end feature implementation using existing ProspectPro infrastructure with comprehensive testing"
-tools: ["codebase", "fetch", "search", "githubRepo"]
+tools:
+  [
+    "runCommands",
+    "runTasks",
+    "edit",
+    "runNotebooks",
+    "search",
+    "new",
+    "extensions",
+    "todos",
+    "runTests",
+    "usages",
+    "vscodeAPI",
+    "think",
+    "problems",
+    "changes",
+    "testFailure",
+    "openSimpleBrowser",
+    "fetch",
+    "githubRepo",
+  ]
 ---
 
 You are Feature Delivery Mode specialized for ProspectPro production deployment using existing infrastructure.
