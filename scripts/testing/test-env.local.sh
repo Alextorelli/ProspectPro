@@ -11,14 +11,29 @@ SCRIPT_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 REPO_ROOT=$(cd "$SCRIPT_ROOT/../.." && pwd)
 REPORTS_DIR="$REPO_ROOT/reports"
 DIAG_LOG="$REPORTS_DIR/edge-auth-diagnose.log"
-PINNED_CLI_VERSION="${SUPABASE_CLI_VERSION:-1.125.3}"
+PINNED_CLI_VERSION="${SUPABASE_CLI_VERSION:-2.51.0}"
+
+supabase_cli_exec() {
+  local cli_pkg="supabase@${PINNED_CLI_VERSION}"
+  (
+    cd "$REPO_ROOT/supabase" || exit 1
+    if ! npx --yes "$cli_pkg" "$@"; then
+      if [[ "$PINNED_CLI_VERSION" != "latest" ]]; then
+        echo "⚠️ Supabase CLI ${PINNED_CLI_VERSION} unavailable, retrying with latest..." >&2
+        npx --yes supabase@latest "$@"
+      else
+        exit 1
+      fi
+    fi
+  )
+}
 
 if (( PP_TEST_ENV_DIAGNOSE )); then
   mkdir -p "$REPORTS_DIR"
   {
     printf '[%s] test-env.local.sh diagnostics start\n' "$(date -Iseconds)"
     printf 'Pinned CLI version: %s\n' "$PINNED_CLI_VERSION"
-    printf 'Resolved pinned CLI version: %s\n' "$(npx --yes "supabase@${PINNED_CLI_VERSION}" --version 2>&1 | head -n1 || echo "unavailable")"
+    printf 'Resolved pinned CLI version: %s\n' "$(supabase_cli_exec --version 2>&1 | head -n1 || echo "unavailable")"
     printf 'Default npx supabase version: %s\n' "$(npx --yes supabase --version 2>&1 | head -n1 || echo "unavailable")"
   } >>"$DIAG_LOG"
 fi
@@ -31,9 +46,7 @@ export SUPABASE_FUNCTION_BASE_URL="${SUPABASE_URL}/functions/v1"
 # Ensure local stack is running; if not, start it
 if ! curl -sf "${SUPABASE_URL}/rest/v1/" >/dev/null 2>&1; then
   echo "Starting local Supabase stack..."
-  (
-    cd "$REPO_ROOT/supabase" && npx --yes "supabase@${PINNED_CLI_VERSION}" start
-  )
+  supabase_cli_exec start
 fi
 
 # Pull local anon/service keys from local status
@@ -42,7 +55,7 @@ if ! command -v jq >/dev/null 2>&1; then
   exit 1
 fi
 
-STATUS_JSON="$(cd "$REPO_ROOT/supabase" && npx --yes "supabase@${PINNED_CLI_VERSION}" status --output json)"
+STATUS_JSON="$(supabase_cli_exec status --output json)"
 
 export SUPABASE_ANON_KEY="$(echo "$STATUS_JSON" | jq -r '.ANON_KEY')"
 export SUPABASE_PUBLISHABLE_KEY="$(echo "$STATUS_JSON" | jq -r '.PUBLISHABLE_KEY')"

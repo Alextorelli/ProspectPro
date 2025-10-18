@@ -46,15 +46,26 @@ set -euo pipefail
 _PP_XDG_CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}"
 _PP_CACHE_DIR="${_PP_XDG_CACHE_DIR%/}/prospectpro"
 _PP_CACHE_MARKER="${_PP_CACHE_DIR}/supabase_session_ready"
+_PP_AUTH_MARKER="${_PP_CACHE_DIR}/supabase_auth_session_ready"
+
+if [[ -n "${PROSPECTPRO_SUPABASE_FORCE_REAUTH:-}" ]]; then
+  rm -f "${_PP_CACHE_MARKER}" "${_PP_AUTH_MARKER}" || true
+fi
 
 # If caller already exported readiness and no reauth forced, short-circuit.
 if [[ "${PROSPECTPRO_SUPABASE_SESSION_READY:-}" = "1" && -z "${PROSPECTPRO_SUPABASE_FORCE_REAUTH:-}" ]]; then
+  if [[ -f "${_PP_AUTH_MARKER}" ]]; then
+    export PROSPECTPRO_SUPABASE_AUTH_READY=1
+  fi
   echo "✅ Supabase CLI session already initialized (env cached). Skipping auth."
   return 0 2>/dev/null || exit 0
 fi
 
 # If a persistent marker exists and no reauth forced, short-circuit.
 if [[ -z "${PROSPECTPRO_SUPABASE_FORCE_REAUTH:-}" && -f "${_PP_CACHE_MARKER}" ]]; then
+  if [[ -f "${_PP_AUTH_MARKER}" ]]; then
+    export PROSPECTPRO_SUPABASE_AUTH_READY=1
+  fi
   echo "✅ Supabase CLI session already initialized (marker: ${_PP_CACHE_MARKER}). Skipping auth."
   export PROSPECTPRO_SUPABASE_SESSION_READY=1
   return 0 2>/dev/null || exit 0
@@ -64,7 +75,7 @@ EXPECTED_REPO_ROOT=${EXPECTED_REPO_ROOT:-/workspaces/ProspectPro}
 
 SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 # shellcheck source=/workspaces/ProspectPro/scripts/lib/supabase_cli_helpers.sh
-source "$SCRIPT_DIR/lib/supabase_cli_helpers.sh"
+source "$SCRIPT_DIR/../lib/supabase_cli_helpers.sh"
 
 export PROSPECTPRO_SUPABASE_SUPPRESS_SETUP=1
 
@@ -90,6 +101,7 @@ check_supabase_login() {
     mkdir -p "${_PP_CACHE_DIR}" || true
     printf 'ready=1\nproject=%s\ntimestamp=%s\n' "sriycekxdqnesdsgwiuc" "$(date -Iseconds)" > "${_PP_CACHE_MARKER}" || true
     export PROSPECTPRO_SUPABASE_SESSION_READY=1
+    ensure_supabase_cli_auth_login
     return 0
   fi
 
@@ -105,11 +117,69 @@ check_supabase_login() {
     mkdir -p "${_PP_CACHE_DIR}" || true
     printf 'ready=1\nproject=%s\ntimestamp=%s\n' "sriycekxdqnesdsgwiuc" "$(date -Iseconds)" > "${_PP_CACHE_MARKER}" || true
     export PROSPECTPRO_SUPABASE_SESSION_READY=1
+    ensure_supabase_cli_auth_login
     return 0
   fi
 
   echo "❌ Supabase CLI login still not authorized. Verify Alex approved the device code, then rerun this script." >&2
   return 1
+}
+
+ensure_supabase_cli_auth_login() {
+  if [[ "${PROSPECTPRO_SUPABASE_SKIP_AUTH_LOGIN:-}" = "1" ]]; then
+    return 0
+  fi
+
+  if [[ -z "${PROSPECTPRO_SUPABASE_FORCE_REAUTH:-}" ]]; then
+    if [[ "${PROSPECTPRO_SUPABASE_AUTH_READY:-}" = "1" && -f "${_PP_AUTH_MARKER}" ]]; then
+      return 0
+    fi
+  fi
+
+  if [[ -z "${PROSPECTPRO_SUPABASE_FORCE_REAUTH:-}" && -f "${_PP_AUTH_MARKER}" ]]; then
+    export PROSPECTPRO_SUPABASE_AUTH_READY=1
+    return 0
+  fi
+
+  local supabase_dir="${EXPECTED_REPO_ROOT}/supabase"
+  if [[ ! -d "$supabase_dir" ]]; then
+    echo "ℹ️ Supabase directory not found at $supabase_dir; skipping auth bypass login."
+    return 0
+  fi
+
+  echo "🔐 Ensuring Supabase Auth session via CLI (front-end bypass)..."
+  local login_output=""
+  local login_status=0
+
+  set +e
+  if command -v timeout >/dev/null 2>&1; then
+    login_output=$(cd "$supabase_dir" && printf '\n' | timeout 120s npx --yes supabase@latest auth login 2>&1)
+  else
+    login_output=$(cd "$supabase_dir" && printf '\n' | npx --yes supabase@latest auth login 2>&1)
+  fi
+  login_status=$?
+  set -e
+
+  if [[ $login_status -eq 0 ]]; then
+    echo "✅ Supabase CLI auth login completed."
+    mkdir -p "${_PP_CACHE_DIR}" || true
+    printf 'ready=1\ntimestamp=%s\n' "$(date -Iseconds)" > "${_PP_AUTH_MARKER}" || true
+    export PROSPECTPRO_SUPABASE_AUTH_READY=1
+  else
+    if [[ $login_status -eq 124 ]]; then
+      echo "⚠️ Supabase CLI auth login timed out (120s). Run manually: cd ${supabase_dir} && npx --yes supabase@latest auth login" >&2
+    elif grep -qi "unknown command" <<<"$login_output"; then
+      echo "ℹ️ Supabase CLI 'auth login' not supported in current build; skipping bypass step." >&2
+    else
+      echo "⚠️ Supabase CLI auth login failed (exit ${login_status}). Run manually: cd ${supabase_dir} && npx --yes supabase@latest auth login" >&2
+      if [[ -n "$login_output" ]]; then
+        printf '%s\n' "$login_output" >&2
+      fi
+    fi
+    rm -f "${_PP_AUTH_MARKER}" || true
+  fi
+
+  return 0
 }
 
 require_repo_root || return 1
@@ -125,6 +195,7 @@ if [[ -n "${SUPABASE_ACCESS_TOKEN:-}" ]]; then
   if prospectpro_supabase_cli projects list --output json >/dev/null 2>&1; then
     echo "✅ Supabase CLI session authenticated via SUPABASE_ACCESS_TOKEN."
     token_authenticated="true"
+    ensure_supabase_cli_auth_login
   else
     echo "⚠️ SUPABASE_ACCESS_TOKEN present but authentication failed. Falling back to interactive login."
   fi

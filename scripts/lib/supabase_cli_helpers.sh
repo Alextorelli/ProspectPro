@@ -15,7 +15,8 @@ readonly _PROSPECTPRO_SUPABASE_CLI_HELPERS_SOURCED=1
 PROSPECTPRO_REPO_ROOT=${PROSPECTPRO_REPO_ROOT:-/workspaces/ProspectPro}
 DEFAULT_SUPABASE_PROJECT_REF=${SUPABASE_PROJECT_REF:-sriycekxdqnesdsgwiuc}
 SUPABASE_DIR=${SUPABASE_DIR:-${PROSPECTPRO_REPO_ROOT}/supabase}
-SUPABASE_CLI_VERSION=${SUPABASE_CLI_VERSION:-1.125.3}
+SUPABASE_CLI_DEFAULT_VERSION=${SUPABASE_CLI_DEFAULT_VERSION:-2.51.0}
+SUPABASE_CLI_VERSION=${SUPABASE_CLI_VERSION:-$SUPABASE_CLI_DEFAULT_VERSION}
 
 # Guard variables to prevent recursive setup when the auth helper shells out
 : "${PROSPECTPRO_SUPABASE_SUPPRESS_SETUP:=0}"
@@ -82,7 +83,15 @@ _pp_invoke_supabase_cli() {
   fi
   (
     cd "$SUPABASE_DIR" || return 1
-    npx --yes "supabase@${SUPABASE_CLI_VERSION}" "$top_level" "${args[@]}"
+    local cli_pkg="supabase@${SUPABASE_CLI_VERSION}"
+    if ! npx --yes "$cli_pkg" "$top_level" "${args[@]}"; then
+      if [[ "$SUPABASE_CLI_VERSION" != "latest" ]]; then
+        echo "⚠️ Supabase CLI ${SUPABASE_CLI_VERSION} unavailable, retrying with latest..." >&2
+        npx --yes supabase@latest "$top_level" "${args[@]}"
+      else
+        return 1
+      fi
+    fi
   )
 }
 
