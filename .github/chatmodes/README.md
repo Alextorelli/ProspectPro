@@ -8,29 +8,29 @@ This directory contains custom GitHub Copilot chat modes optimized for ProspectP
 
 ### Available Modes
 
-1. **smart-debug.md** - Comprehensive debugging with automated log analysis, Run & Debug profiles, and MCP troubleshooting tools
+1. **smart-debug.md** - Comprehensive debugging with ProspectPro-specific diagnostic patterns
 
    - Use for: Authentication issues, migration conflicts, Edge Function errors, API failures
-   - Key features: Automated log collection/analysis, VS Code Run & Debug integration, MCP-powered diagnostics, Thunder Client testing
+   - Key features: One-shot solutions, existing script integration, automatic prevention measures
 
-2. **feature-delivery.md** - End-to-end feature implementation with Run & Debug testing and comprehensive validation
+2. **feature-delivery.md** - End-to-end feature implementation with testing and deployment
 
    - Use for: New feature development, API integrations, database schema changes
-   - Key features: Stepwise execution, Thunder Client test generation, local stack debugging, production deployment
+   - Key features: Stepwise execution, Thunder Client test generation, production deployment
 
-3. **production-support.md** - Production monitoring with automated triage and rapid issue resolution
+3. **production-support.md** - Production monitoring and rapid issue resolution
 
    - Use for: Service outages, performance degradation, integration failures
-   - Key features: MCP-powered log analysis, VS Code task diagnostics, incident classification, rollback procedures
+   - Key features: Incident classification, rollback procedures, post-mortem templates
 
-4. **api-research.md** - API evaluation with CLI guard validation and integration planning
+4. **api-research.md** - API evaluation and integration planning
 
    - Use for: New API provider evaluation, cost-benefit analysis, integration design
-   - Key features: Zero fake data compliance, cost optimization, CLI session management, Thunder Client testing
+   - Key features: Zero fake data compliance, cost optimization, production-ready code
 
-5. **cost-optimization.md** - Performance analysis with MCP monitoring and cost reduction strategies
+5. **cost-optimization.md** - Performance analysis and cost reduction strategies
    - Use for: API cost analysis, cache optimization, query performance, infrastructure efficiency
-   - Key features: Automated log analysis, MCP troubleshooting tools, ROI projections, monitoring dashboards
+   - Key features: ROI projections, implementation roadmaps, monitoring dashboards
 
 ## Activation Workflow
 
@@ -97,27 +97,12 @@ npm run mcp:dev               # Development tools
 npm run mcp:troubleshooting   # Diagnostic tools
 ```
 
-**MCP Troubleshooting Tools** (enhanced with automated log analysis):
+**MCP Troubleshooting Tools** (used by smart-debug mode):
 
-- `collect_and_summarize_logs` - One-click log analysis with markdown reports
-- `test_edge_function` - Test Edge Function connectivity and authentication
-- `validate_database_permissions` - Check RLS policies and permissions
-- `diagnose_anon_key_mismatch` - Compare publishable keys between frontend and Supabase
-- `run_rls_diagnostics` - Generate and execute RLS diagnostic queries
-
-### VS Code Tasks & Run & Debug Integration
-
-**New Debug Workflows:**
-
-```bash
-# Automated log analysis workflow
-# 1. "Supabase: Fetch Logs" - Collect recent Edge Function logs
-# 2. "Supabase: Analyze Logs" - Parse logs for patterns and generate reports
-
-# Local debugging with Run & Debug profiles
-# - "Local Supabase Stack" - Start local environment for testing
-# - "Debug Supabase Diagnostics" - Comprehensive diagnostics and debugging
-```
+- `test_edge_function` - Test Edge Function connectivity
+- `validate_database_permissions` - Check RLS policies
+- `diagnose_anon_key_mismatch` - Compare frontend/backend auth
+- `run_rls_diagnostics` - Generate RLS diagnostic queries
 
 ### Thunder Client Test Collections
 
