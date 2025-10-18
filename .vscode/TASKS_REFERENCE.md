@@ -35,6 +35,8 @@ _Auto-generated from `.vscode/tasks.json` — Last updated: 2025-10-18_
 | **Test: Run Database Tests** | `npm run supabase:test:db` | Multiple | None | Runs: Supabase: Ensure Session |
 | **Context: Fetch Supabase Snapshot** | `node scripts/context/fetch-supabase-context.js` | [`scripts/context/fetch-supabase-context.js`](../scripts/context/fetch-supabase-context.js) | None | No description available |
 | **Thunder: Run Database Tests** | `echo Run Thunder Client with ProspectPro-Database.json collection` | Multiple | None | No description available |
+| **Supabase: Fetch Logs** | `bash -lc mkdir -p reports/logs && source scripts/operations/ensure-supabase-cli-session.sh && npx --yes supabase@latest functions logs ${input:functionName} --since=${input:sinceTime} > reports/logs/supabase-logs-$(date +%Y%m%d-%H%M%S).log && echo 'Logs saved to reports/logs/supabase-logs-$(date +%Y%m%d-%H%M%S).log'` | Multiple | None | Runs: Supabase: Ensure Session |
+| **Supabase: Analyze Logs** | `bash -lc source scripts/operations/ensure-supabase-cli-session.sh && ./scripts/diagnostics/edge-function-diagnostics.sh ${input:logFile}` | Multiple | None | Runs: Supabase: Ensure Session |
 
 ## Edge Functions
 
@@ -118,5 +120,4 @@ _Auto-generated from `.vscode/tasks.json` — Last updated: 2025-10-18_
 | **Thunder: Sync Environment Variables** | `bash -lc echo 'Syncing Thunder Client environment from Vercel/Supabase...' && npx --yes vercel@latest env pull .env.thunder --yes && echo 'Environment synced to .env.thunder'` | Multiple | None | No description available |
 | **Workspace: Verify Toolchain** | `bash -lc ./scripts/diagnostics/verify-toolchain.sh` | [`scripts/diagnostics/verify-toolchain.sh`](../scripts/diagnostics/verify-toolchain.sh) | None | No description available |
 | **Git: Remind to Push Before Exit** | `bash -c git status && echo 'REMINDER: Commit and push your changes before closing Codespace!'` | Multiple | None | No description available |
-| **Git: Commit and Push All** | `bash -c git add . && git commit -m 'Codespace close: doc update, MCP stop, codebase index' || echo 'No changes to commit.' && git push` | Multiple | None | No description available |
 | **npm: mcp:prod** | `npm run mcp:prod` | [`package.json`](../package.json) | None | No description available |

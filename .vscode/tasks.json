@@ -1036,14 +1036,32 @@
       "problemMatcher": []
     },
     {
-      "label": "Git: Commit and Push All",
+      "label": "Supabase: Fetch Logs",
       "type": "shell",
       "command": "bash",
       "args": [
-        "-c",
-        "git add . && git commit -m 'Codespace close: doc update, MCP stop, codebase index' || echo 'No changes to commit.' && git push"
+        "-lc",
+        "mkdir -p reports/logs && source scripts/operations/ensure-supabase-cli-session.sh && npx --yes supabase@latest functions logs ${input:functionName} --since=${input:sinceTime} > reports/logs/supabase-logs-$(date +%Y%m%d-%H%M%S).log && echo 'Logs saved to reports/logs/supabase-logs-$(date +%Y%m%d-%H%M%S).log'"
       ],
       "group": "build",
+      "dependsOn": "Supabase: Ensure Session",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Supabase: Analyze Logs",
+      "type": "shell",
+      "command": "bash",
+      "args": [
+        "-lc",
+        "source scripts/operations/ensure-supabase-cli-session.sh && ./scripts/diagnostics/edge-function-diagnostics.sh ${input:logFile}"
+      ],
+      "group": "build",
+      "dependsOn": "Supabase: Ensure Session",
       "presentation": {
         "echo": true,
         "reveal": "always",
@@ -1095,9 +1113,16 @@
       "description": "Paste SUPABASE_SESSION_JWT (kept in memory only)"
     },
     {
-      "id": "epicKey",
+      "id": "sinceTime",
+      "type": "pickString",
+      "description": "Time period for logs (e.g., 1h, 24h)",
+      "options": ["1h", "6h", "24h", "7d"],
+      "default": "24h"
+    },
+    {
+      "id": "logFile",
       "type": "promptString",
-      "description": "Epic key (kebab-case)"
+      "description": "Path to log file to analyze (e.g., reports/logs/supabase-logs-20251018-020000.log)"
     }
   ]
 }

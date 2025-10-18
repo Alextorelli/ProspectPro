@@ -1,6 +1,6 @@
 #!/bin/bash
 # ProspectPro Edge Function Diagnostics
-# Usage: ./scripts/edge-function-diagnostics.sh [SESSION_JWT]
+# Usage: ./scripts/edge-function-diagnostics.sh [SESSION_JWT | LOG_FILE_PATH]
 
 set -euo pipefail
 
@@ -32,6 +32,102 @@ require_repo_root
 SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 # shellcheck source=/workspaces/ProspectPro/scripts/lib/supabase_cli_helpers.sh
 source "$SCRIPT_DIR/lib/supabase_cli_helpers.sh"
+
+# Check if first argument is a log file path
+if [ $# -gt 0 ] && [ -f "$1" ]; then
+  LOG_FILE="$1"
+  analyze_log_file "$LOG_FILE"
+  exit 0
+fi
+
+analyze_log_file() {
+  local log_file="$1"
+  local timestamp
+  timestamp=$(date --iso-8601=seconds)
+  local report_dir="reports/diagnostics"
+  local report_file="$report_dir/supabase-log-analysis-$timestamp.md"
+
+  mkdir -p "$report_dir"
+
+  if [ ! -f "$log_file" ]; then
+    echo "❌ Log file not found: $log_file" >&2
+    exit 1
+  fi
+
+  # Parse log file for errors and warnings
+  local error_count
+  local warning_count
+  local critical_count
+
+  error_count=$(grep -c -i "error\|exception\|failed" "$log_file" || echo "0")
+  warning_count=$(grep -c -i "warn\|warning" "$log_file" || echo "0")
+  critical_count=$(grep -c -i "critical\|fatal\|500\|401\|403" "$log_file" || echo "0")
+
+  local total_lines
+  total_lines=$(wc -l < "$log_file")
+
+  # Generate markdown report
+  cat > "$report_file" << EOF
+# Supabase Log Analysis Report
+
+**Generated:** $timestamp
+**Log File:** $log_file
+**Total Lines:** $total_lines
+
+## Summary
+
+- **Errors Found:** $error_count
+- **Warnings Found:** $warning_count
+- **Critical Issues:** $critical_count
+
+## Error Details
+
+EOF
+
+  if [ "$error_count" -gt 0 ]; then
+    echo "### Errors" >> "$report_file"
+    grep -n -i "error\|exception\|failed" "$log_file" | head -20 >> "$report_file"
+    echo "" >> "$report_file"
+  fi
+
+  if [ "$warning_count" -gt 0 ]; then
+    echo "### Warnings" >> "$report_file"
+    grep -n -i "warn\|warning" "$log_file" | head -20 >> "$report_file"
+    echo "" >> "$report_file"
+  fi
+
+  if [ "$critical_count" -gt 0 ]; then
+    echo "### Critical Issues" >> "$report_file"
+    grep -n -i "critical\|fatal\|500\|401\|403" "$log_file" | head -20 >> "$report_file"
+    echo "" >> "$report_file"
+  fi
+
+  echo "## Next Steps" >> "$report_file"
+  echo "" >> "$report_file"
+
+  if [ "$critical_count" -gt 0 ]; then
+    cat >> "$report_file" << EOF
+1. **Review critical errors above** - these may indicate authentication or deployment issues
+2. Check Supabase dashboard → Edge Functions → Logs for more context
+3. Verify API keys and environment variables
+4. Test affected functions manually via curl
+EOF
+  elif [ "$error_count" -gt 0 ]; then
+    cat >> "$report_file" << EOF
+1. **Review errors above** - these may indicate function runtime issues
+2. Check function-specific logs in Supabase dashboard
+3. Verify database connectivity and permissions
+4. Run function tests locally if possible
+EOF
+  else
+    cat >> "$report_file" << EOF
+✅ **No critical errors detected** - system appears healthy
+EOF
+  fi
+
+  echo "📊 Log analysis complete. Report saved to: $report_file"
+  echo "Summary: $error_count errors, $warning_count warnings, $critical_count critical issues"
+}
 
 SUPABASE_SERVE_PID=""
 

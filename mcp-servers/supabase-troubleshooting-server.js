@@ -148,7 +148,7 @@ class SupabaseTroubleshootingServer {
               },
               anonKey: {
                 type: "string",
-                description: "Current anon key",
+                description: "Supabase anon key",
               },
               vercelUrl: {
                 type: "string",
@@ -156,6 +156,27 @@ class SupabaseTroubleshootingServer {
               },
             },
             required: ["supabaseUrl", "anonKey"],
+          },
+        },
+        {
+          name: "collect_and_summarize_logs",
+          description:
+            "Fetch Supabase Edge Function logs and generate analysis summary",
+          inputSchema: {
+            type: "object",
+            properties: {
+              functionName: {
+                type: "string",
+                description: "Name of the Edge Function to fetch logs for",
+                default: "business-discovery-background",
+              },
+              sinceTime: {
+                type: "string",
+                description: "Time period for logs (e.g., 1h, 24h)",
+                default: "24h",
+              },
+            },
+            required: ["functionName"],
           },
         },
       ],
@@ -177,6 +198,8 @@ class SupabaseTroubleshootingServer {
           return await this.runRlsDiagnostics(request.params.arguments);
         case "generate_debugging_commands":
           return await this.generateDebuggingCommands(request.params.arguments);
+        case "collect_and_summarize_logs":
+          return await this.collectAndSummarizeLogs(request.params.arguments);
         default:
           throw new Error(`Unknown tool: ${request.params.name}`);
       }
@@ -567,8 +590,97 @@ Configuration Used:
 
 Save these commands for quick debugging!`,
         },
-      ],
-    };
+      ];
+    }
+  }
+
+  async collectAndSummarizeLogs({ functionName, sinceTime = "24h" }) {
+    try {
+      // Step 1: Fetch logs using Supabase CLI
+      const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
+      const logFile = `reports/logs/supabase-logs-${timestamp}.log`;
+
+      // Ensure reports directory exists
+      await fs.mkdir('reports/logs', { recursive: true });
+
+      const fetchCommand = `cd /workspaces/ProspectPro && source scripts/operations/ensure-supabase-cli-session.sh && npx --yes supabase@latest functions logs ${functionName} --since=${sinceTime} > ${logFile}`;
+
+      const { stdout: fetchStdout, stderr: fetchStderr } = await execAsync(fetchCommand);
+
+      if (fetchStderr && !fetchStderr.includes('ready=')) {
+        return {
+          content: [
+            {
+              type: "text",
+              text: `Error fetching logs: ${fetchStderr}`,
+            },
+          ],
+        };
+      }
+
+      // Step 2: Analyze logs using diagnostics script
+      const analyzeCommand = `cd /workspaces/ProspectPro && ./scripts/diagnostics/edge-function-diagnostics.sh ${logFile}`;
+
+      const { stdout: analyzeStdout, stderr: analyzeStderr } = await execAsync(analyzeCommand);
+
+      // Step 3: Read the generated report
+      const reportPath = logFile.replace('reports/logs/', 'reports/diagnostics/').replace('.log', '.md');
+      let reportContent = '';
+
+      try {
+        reportContent = await fs.readFile(reportPath, 'utf8');
+      } catch (readError) {
+        reportContent = `Could not read analysis report: ${readError.message}`;
+      }
+
+      return {
+        content: [
+          {
+            type: "text",
+            text: `## Supabase Log Collection & Analysis Complete
+
+**Function:** ${functionName}
+**Time Period:** ${sinceTime}
+**Log File:** ${logFile}
+**Analysis Report:** ${reportPath}
+
+### Fetch Results
+${fetchStdout || 'Logs fetched successfully'}
+
+### Analysis Summary
+${analyzeStdout || 'Analysis completed'}
+
+### Detailed Report
+${reportContent}
+
+### Next Steps
+1. Review the analysis report above for errors and warnings
+2. Check Supabase dashboard for additional context if needed
+3. Run specific function tests if issues are identified
+4. Consider redeploying functions if deployment errors are found`,
+          },
+        ],
+      };
+    } catch (error) {
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Error collecting and summarizing logs: ${error.message}
+
+This could indicate:
+1. Supabase CLI authentication issues
+2. Network connectivity problems
+3. Invalid function name or time period
+4. File system permissions issues
+
+Try running the commands manually:
+- source scripts/operations/ensure-supabase-cli-session.sh
+- npx --yes supabase@latest functions logs ${functionName} --since=${sinceTime}`,
+          },
+        ],
+      };
+    }
   }
 
   async run() {

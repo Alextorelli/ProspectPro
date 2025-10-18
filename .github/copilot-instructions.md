@@ -845,3 +845,20 @@ npm run start:troubleshooting
 - Serverless benefits (established)
 
 This instruction set prioritizes rapid problem resolution and eliminates repetitive context discussions to maximize premium request efficiency.
+
+## DEVELOPMENT WORKFLOW ENHANCEMENTS (v4.4)
+
+### CLI Auth Bypass Integration
+- **CLI-First Authentication**: Use `scripts/operations/ensure-supabase-cli-session.sh` for all Supabase CLI operations; no frontend token dependency required
+- **Session Persistence**: Auth markers persist across Codespace sessions; force reauth with `PROSPECTPRO_SUPABASE_FORCE_REAUTH=1` only when needed
+- **Version Compatibility**: CLI v2.51.0 with automatic fallback to latest; no manual version pinning required
+
+### Log Analysis Workflow
+- **Order of Operations**: Thunder tests → `Supabase: Fetch Logs` → `Supabase: Analyze Logs`
+- **Automated Collection**: Use MCP `collect_and_summarize_logs` tool for one-click log analysis
+- **Report Generation**: Markdown summaries saved to `reports/diagnostics/` with error counts and next steps
+
+### Run & Debug Preferences
+- **Edge Functions**: Prefer "Local Supabase Stack" launch config over manual `deno` commands
+- **Auth Variables**: All debug configs export `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` for seamless testing
+- **Pre-launch Tasks**: Local stack configs auto-start Supabase containers before debugging

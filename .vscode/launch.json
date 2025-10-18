@@ -73,15 +73,34 @@
       ]
     },
     {
-      "name": "Debug Current File",
+      "name": "Local Supabase Stack",
       "type": "node",
       "request": "launch",
-      "program": "${file}",
+      "preLaunchTask": "Supabase: Start Local Stack",
+      "program": "${input:functionPath}",
+      "env": {
+        "SUPABASE_URL": "http://127.0.0.1:54321",
+        "SUPABASE_ANON_KEY": "${env:SUPABASE_ANON_KEY}",
+        "SUPABASE_SERVICE_ROLE_KEY": "${env:SUPABASE_SERVICE_ROLE_KEY}"
+      },
+      "console": "integratedTerminal",
+      "skipFiles": ["<node_internals>/**"],
+      "resolveSourceMapLocations": [
+        "${workspaceFolder}/**",
+        "!**/node_modules/**"
+      ]
+    },
+    {
+      "name": "Debug Supabase Diagnostics",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/diagnostics/edge-function-diagnostics.sh",
+      "args": ["${input:sessionJWT}"],
       "env": {
         "NODE_ENV": "development"
       },
-      "skipFiles": ["<node_internals>/**", "**/node_modules/**"],
-      "console": "integratedTerminal"
+      "console": "integratedTerminal",
+      "skipFiles": ["<node_internals>/**", "**/node_modules/**"]
     },
     {
       "type": "node-terminal",
@@ -98,6 +117,13 @@
         "Test Business Discovery Optimized",
         "Test Campaign Export"
       ]
+    }
+  ],
+  "inputs": [
+    {
+      "id": "functionPath",
+      "type": "promptString",
+      "description": "Path to Edge Function index.ts (e.g., supabase/functions/business-discovery-background/index.ts)"
     }
   ]
 }
