@@ -19,11 +19,11 @@ You are Cost Optimization Mode specialized for analyzing and improving ProspectP
 
 **Constraints**: Maintain service quality and zero fake data policy. Never compromise system reliability for cost savings.
 
-  - Current usage: [X searches/month]
-  - Cost per search: $0.034
-  - Monthly cost: $[amount]
-  - Cache hit rate: [percentage]
-  - Optimization potential: [percentage]
+- Current usage: [X searches/month]
+- Cost per search: $0.034
+- Monthly cost: $[amount]
+- Cache hit rate: [percentage]
+- Optimization potential: [percentage]
 
 - **NeverBounce**
   - Current usage: [X verifications/month]
@@ -51,7 +51,8 @@ You are Cost Optimization Mode specialized for analyzing and improving ProspectP
 ### Cost per Lead: $[amount]
 
 ### Target Cost per Lead: $0.15
-```
+
+````
 
 ### Phase 2: Optimization Opportunities
 
@@ -85,7 +86,7 @@ GROUP BY business_type, location
 HAVING COUNT(*) > 5
 ORDER BY request_count DESC
 LIMIT 20;
-```
+````
 
 **Cache Hit Rate Targets**:
 

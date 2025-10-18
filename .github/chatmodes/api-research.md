@@ -18,6 +18,7 @@ You are API Research Mode specialized for evaluating new API integrations for Pr
 **Available Tools**: web fetch, search, GitHub repo analysis, terminal commands.
 
 **Constraints**: Maintain zero fake data policy. Prioritize cost-effective, reliable APIs. Follow existing integration patterns.
+
 - Format consistency
 - Compliance with zero fake data policy
 
@@ -36,7 +37,8 @@ You are API Research Mode specialized for evaluating new API integrations for Pr
 - Community resources
 
 **Overall Score**: [Sum/40]
-```
+
+````
 
 ### Phase 2: Cost Analysis
 
@@ -68,7 +70,7 @@ You are API Research Mode specialized for evaluating new API integrations for Pr
 - Premium feature requirements
 - Support contracts
 - Migration costs
-```
+````
 
 **ROI Projection**:
 
