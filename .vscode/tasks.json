@@ -46,6 +46,21 @@
       "args": ["-lc", "source scripts/operations/ensure-supabase-cli-session.sh"],
       "group": "build",
       "presentation": {
+        {
+          "label": "Supabase: Reset Auth Emulator",
+          "type": "shell",
+          "command": "bash",
+          "args": [
+            "-lc",
+            "./scripts/operations/reset-auth-emulator.sh"
+          ],
+          "group": "build",
+          "presentation": {
+            "reveal": "always",
+            "panel": "shared"
+          },
+          "problemMatcher": []
+        },
         "echo": false,
         "reveal": "silent",
         "panel": "shared"
@@ -431,6 +446,46 @@
       "args": [
         "-lc",
         "export SUPABASE_SESSION_JWT='${input:sessionJWT}' && npm run supabase:test:functions"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "group": "test",
+      "dependsOn": "Supabase: Ensure Session",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Test: Edge Functions (Force Bypass)",
+      "type": "shell",
+      "command": "bash",
+      "args": [
+        "-lc",
+        "./scripts/testing/run-edge-tests-force.sh"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "group": "test",
+      "dependsOn": "Supabase: Ensure Session",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Test: Edge Functions (Force Bypass)",
+      "type": "shell",
+      "command": "bash",
+      "args": [
+        "-lc",
+        "./scripts/testing/run-edge-tests-force.sh"
       ],
       "options": {
         "cwd": "${workspaceFolder}"

@@ -1,6 +1,28 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+PP_TEST_ENV_DIAGNOSE=0
+if [[ "${1:-}" == "--diagnose" ]]; then
+  PP_TEST_ENV_DIAGNOSE=1
+  shift || true
+fi
+
+SCRIPT_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+REPO_ROOT=$(cd "$SCRIPT_ROOT/../.." && pwd)
+REPORTS_DIR="$REPO_ROOT/reports"
+DIAG_LOG="$REPORTS_DIR/edge-auth-diagnose.log"
+PINNED_CLI_VERSION="${SUPABASE_CLI_VERSION:-1.125.3}"
+
+if (( PP_TEST_ENV_DIAGNOSE )); then
+  mkdir -p "$REPORTS_DIR"
+  {
+    printf '[%s] test-env.local.sh diagnostics start\n' "$(date -Iseconds)"
+    printf 'Pinned CLI version: %s\n' "$PINNED_CLI_VERSION"
+    printf 'Resolved pinned CLI version: %s\n' "$(npx --yes "supabase@${PINNED_CLI_VERSION}" --version 2>&1 | head -n1 || echo "unavailable")"
+    printf 'Default npx supabase version: %s\n' "$(npx --yes supabase --version 2>&1 | head -n1 || echo "unavailable")"
+  } >>"$DIAG_LOG"
+fi
+
 # Always test against local Supabase to avoid DNS/pooler freezes
 LOCAL_SUPABASE_URL="http://127.0.0.1:54321"
 export SUPABASE_URL="$LOCAL_SUPABASE_URL"
@@ -9,7 +31,9 @@ export SUPABASE_FUNCTION_BASE_URL="${SUPABASE_URL}/functions/v1"
 # Ensure local stack is running; if not, start it
 if ! curl -sf "${SUPABASE_URL}/rest/v1/" >/dev/null 2>&1; then
   echo "Starting local Supabase stack..."
-  (cd "$(git rev-parse --show-toplevel)/supabase" && npx --yes supabase@latest start)
+  (
+    cd "$REPO_ROOT/supabase" && npx --yes "supabase@${PINNED_CLI_VERSION}" start
+  )
 fi
 
 # Pull local anon/service keys from local status
@@ -18,7 +42,7 @@ if ! command -v jq >/dev/null 2>&1; then
   exit 1
 fi
 
-STATUS_JSON="$(cd "$(git rev-parse --show-toplevel)/supabase" && npx --yes supabase@latest status --output json)"
+STATUS_JSON="$(cd "$REPO_ROOT/supabase" && npx --yes "supabase@${PINNED_CLI_VERSION}" status --output json)"
 
 export SUPABASE_ANON_KEY="$(echo "$STATUS_JSON" | jq -r '.ANON_KEY')"
 export SUPABASE_PUBLISHABLE_KEY="$(echo "$STATUS_JSON" | jq -r '.PUBLISHABLE_KEY')"
@@ -67,6 +91,15 @@ if ! validate_session_jwt; then
   create_status="$(printf '%s\n' "$create_response" | head -n 1 | cut -d' ' -f2)"
   create_body="$(printf '%s\n' "$create_response" | sed '1,/^\r$/d')"
 
+  if (( PP_TEST_ENV_DIAGNOSE )); then
+    {
+      printf '[%s] admin/users response\n' "$(date -Iseconds)"
+      printf 'HTTP status: %s\n' "$create_status"
+      printf 'Response body: %s\n' "$create_body"
+      printf 'Fallback guidance: Run VS Code task "Supabase: Reset Auth Emulator" if issues persist.\n'
+    } >>"$DIAG_LOG"
+  fi
+
   if [ "$create_status" != "200" ] && [ "$create_status" != "201" ] && [ "$create_status" != "409" ] && [ "$create_status" != "422" ]; then
     if printf '%s' "$create_body" | jq -e . >/dev/null 2>&1; then
       echo "ERROR: Failed to ensure local test user (HTTP ${create_status}): $create_body" >&2
@@ -91,6 +124,12 @@ if ! validate_session_jwt; then
 
   export SUPABASE_SESSION_JWT
   printf '%s' "$SUPABASE_SESSION_JWT" > /tmp/supabase_session_jwt
+else
+  if (( PP_TEST_ENV_DIAGNOSE )); then
+    {
+      printf '[%s] Existing session token validated successfully\n' "$(date -Iseconds)"
+    } >>"$DIAG_LOG"
+  fi
 fi
 
 echo "Local test env ready:"
@@ -98,3 +137,8 @@ echo "  SUPABASE_URL=$SUPABASE_URL"
 echo "  FUNCTIONS   =$SUPABASE_FUNCTION_BASE_URL"
 echo "  Anon key    =${SUPABASE_ANON_KEY:0:12}..."
 echo "  JWT prefix  =${SUPABASE_SESSION_JWT:0:16}..."
+if (( PP_TEST_ENV_DIAGNOSE )); then
+  {
+    printf '[%s] Diagnostics complete. Session ready.\n\n' "$(date -Iseconds)"
+  } >>"$DIAG_LOG"
+fi

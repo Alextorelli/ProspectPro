@@ -15,6 +15,7 @@ readonly _PROSPECTPRO_SUPABASE_CLI_HELPERS_SOURCED=1
 PROSPECTPRO_REPO_ROOT=${PROSPECTPRO_REPO_ROOT:-/workspaces/ProspectPro}
 DEFAULT_SUPABASE_PROJECT_REF=${SUPABASE_PROJECT_REF:-sriycekxdqnesdsgwiuc}
 SUPABASE_DIR=${SUPABASE_DIR:-${PROSPECTPRO_REPO_ROOT}/supabase}
+SUPABASE_CLI_VERSION=${SUPABASE_CLI_VERSION:-1.125.3}
 
 # Guard variables to prevent recursive setup when the auth helper shells out
 : "${PROSPECTPRO_SUPABASE_SUPPRESS_SETUP:=0}"
@@ -81,7 +82,7 @@ _pp_invoke_supabase_cli() {
   fi
   (
     cd "$SUPABASE_DIR" || return 1
-    npx --yes supabase@latest "$top_level" "${args[@]}"
+    npx --yes "supabase@${SUPABASE_CLI_VERSION}" "$top_level" "${args[@]}"
   )
 }
 
@@ -123,7 +124,7 @@ supabase_setup() {
     export PROSPECTPRO_SUPABASE_SUPPRESS_SETUP=1
     (
       cd "$SUPABASE_DIR" || return 1
-      npx --yes supabase@latest link --project-ref "$project_ref" >/dev/null
+      npx --yes "supabase@${SUPABASE_CLI_VERSION}" link --project-ref "$project_ref" >/dev/null
     ) || return 1
     export PROSPECTPRO_SUPABASE_SUPPRESS_SETUP="$_prev_guard"
   fi
@@ -255,6 +256,24 @@ edge_functions_dev_workflow() {
   edge_functions_serve "$@" || return 1
 }
 
+supabase_cli_version_status() {
+  local pinned_version="$SUPABASE_CLI_VERSION"
+  local resolved_version
+  local default_version
+
+  if ! resolved_version=$(npx --yes "supabase@${SUPABASE_CLI_VERSION}" --version 2>&1 | head -n1); then
+    resolved_version="unavailable"
+  fi
+
+  if ! default_version=$(npx --yes supabase --version 2>&1 | head -n1); then
+    default_version="unavailable"
+  fi
+
+  printf 'Pinned CLI version: %s\n' "$pinned_version"
+  printf 'Resolved CLI version (supabase@%s): %s\n' "$pinned_version" "$resolved_version"
+  printf 'Default npx supabase version: %s\n' "$default_version"
+}
+
 run_database_tests() {
   supabase_setup || return 1
   prospectpro_supabase_cli test db "$@"
@@ -311,3 +330,16 @@ export -f edge_functions_list
 export -f edge_functions_dev_workflow
 export -f run_database_tests
 export -f get_function_report
+export -f supabase_cli_version_status
+
+if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
+  case "${1:-}" in
+    --status)
+      supabase_cli_version_status
+      ;;
+    *)
+      echo "Usage: $0 --status" >&2
+      exit 1
+      ;;
+  esac
+fi
