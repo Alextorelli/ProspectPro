@@ -38,14 +38,14 @@ REQUIRED_PATHS=(
   ".vscode/settings.json"
   ".vscode/keybindings.json"
   ".github/copilot-instructions.md"
-  "mcp-config.json"
+  "config/mcp-config.json"
   "package.json"
   "supabase/functions"
   "scripts/ensure-supabase-cli-session.sh"
   "scripts/campaign-validation.sh"
   "scripts/test-auth-patterns.sh"
   "scripts/edge-function-diagnostics.sh"
-  "CODEBASE_INDEX.md"
+  "docs/technical/CODEBASE_INDEX.md"
 )
 
 echo "\n📁 Checking critical file structure..."
@@ -69,8 +69,7 @@ if [[ -f ".vscode/tasks.json" ]]; then
       "Logs: Edge Function"
       "Test: Campaign Validation"
       "Test: Auth Patterns"
-      "Docs: Update Codebase Index"
-      "Docs: Update System Reference"
+      "Docs: Update All Documentation"
       "Workspace: Validate Configuration"
     )
 
@@ -154,32 +153,41 @@ else
 fi
 
 echo "\n🤖 Validating MCP configuration..."
-if [[ -f "mcp-config.json" ]]; then
-  if jq empty mcp-config.json >/dev/null 2>&1; then
-    log_success "mcp-config.json is valid JSON"
+MCP_CONFIG_CANDIDATES=(
+  "config/mcp-config.json"
+  ".vscode/mcp-config.json"
+  "mcp-config.json"
+)
+MCP_CONFIG_PATH=""
+for candidate in "${MCP_CONFIG_CANDIDATES[@]}"; do
+  if [[ -f "$candidate" ]]; then
+    MCP_CONFIG_PATH="$candidate"
+    break
+  fi
+done
 
-    if [[ -d "mcp-servers" ]]; then
-      log_success "mcp-servers directory detected"
-      MCP_REQUIRED_SERVERS=(
-        "production-server.js"
-        "development-server.js"
-        "supabase-troubleshooting-server.js"
-      )
-      for server in "${MCP_REQUIRED_SERVERS[@]}"; do
-        if [[ -f "mcp-servers/$server" ]]; then
-          log_success "MCP server registered: $server"
-        else
-          log_warning "MCP server missing: $server"
-        fi
-      done
-    else
-      log_error "mcp-servers directory missing"
-    fi
+if [[ -n "$MCP_CONFIG_PATH" ]]; then
+  log_success "MCP configuration found: ${MCP_CONFIG_PATH}"
+
+  if [[ -d "mcp-servers" ]]; then
+    log_success "mcp-servers directory detected"
+    MCP_REQUIRED_SERVERS=(
+      "production-server.js"
+      "development-server.js"
+      "supabase-troubleshooting-server.js"
+    )
+    for server in "${MCP_REQUIRED_SERVERS[@]}"; do
+      if [[ -f "mcp-servers/$server" ]]; then
+        log_success "MCP server registered: $server"
+      else
+        log_warning "MCP server missing: $server"
+      fi
+    done
   else
-    log_error "mcp-config.json is invalid JSON"
+    log_error "mcp-servers directory missing"
   fi
 else
-  log_error "mcp-config.json not found"
+  log_error "MCP configuration not found (checked: ${MCP_CONFIG_CANDIDATES[*]})"
 fi
 
 echo "\n🧪 Validating Edge Functions..."

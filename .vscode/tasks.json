@@ -7,28 +7,8 @@
       "dependsOn": [
         "Supabase: Ensure Session",
         "Supabase: Link Project",
-        "Supabase: Pull Public Schema",
-        "Supabase: Generate Types",
-        "Supabase: List Migrations",
         "MCP: Start All Servers"
-      ],
-      "problemMatcher": []
-    },
-    {
-      "label": "Supabase: Ensure Session",
-      "type": "shell",
-      "command": "bash",
-      "args": [
-        "-lc",
-        "cd supabase && source ../scripts/ensure-supabase-cli-session.sh"
-      ],
-      "group": "build",
-      "presentation": {
-        "echo": false,
-        "reveal": "silent",
-        "focus": false,
-        "panel": "shared"
-      }
+      ]
     },
     {
       "label": "Close Codespace",
@@ -39,36 +19,20 @@
         "Docs: Update Codebase Index (Legacy)",
         "Git: Remind to Push Before Exit",
         "Git: Commit and Push All"
-      ],
-      "problemMatcher": ["$deno-lint"]
+      ]
     },
     {
-      "label": "Git: Remind to Push Before Exit",
+      "label": "Supabase: Ensure Session",
       "type": "shell",
       "command": "bash",
-      "args": [
-        "-c",
-        "git status && echo 'REMINDER: Commit and push your changes before closing Codespace!'"
-      ],
+      "args": ["-lc", "source scripts/ensure-supabase-cli-session.sh"],
       "group": "build",
       "presentation": {
-        "reveal": "always",
+        "echo": false,
+        "reveal": "silent",
         "panel": "shared"
-      }
-    },
-    {
-      "label": "Git: Commit and Push All",
-      "type": "shell",
-      "command": "bash",
-      "args": [
-        "-c",
-        "git add . && git commit -m 'Codespace close: doc update, MCP stop, codebase index' || echo 'No changes to commit.' && git push"
-      ],
-      "group": "build",
-      "presentation": {
-        "reveal": "always",
-        "panel": "shared"
-      }
+      },
+      "problemMatcher": []
     },
     {
       "label": "Supabase: Link Project",
@@ -83,57 +47,9 @@
       "presentation": {
         "echo": true,
         "reveal": "always",
-        "focus": false,
         "panel": "shared"
-      }
-    },
-    {
-      "label": "Supabase: List Migrations",
-      "type": "shell",
-      "command": "npm",
-      "args": ["run", "supabase:migrations:list"],
-      "options": {
-        "cwd": "${workspaceFolder}"
       },
-      "group": "build",
-      "dependsOn": "Supabase: Ensure Session",
-      "presentation": {
-        "echo": true,
-        "reveal": "always",
-        "panel": "shared"
-      }
-    },
-    {
-      "label": "Supabase: Push Database",
-      "type": "shell",
-      "command": "npm",
-      "args": ["run", "supabase:db:push"],
-      "options": {
-        "cwd": "${workspaceFolder}"
-      },
-      "group": "build",
-      "dependsOn": "Supabase: Ensure Session",
-      "presentation": {
-        "echo": true,
-        "reveal": "always",
-        "panel": "shared"
-      }
-    },
-    {
-      "label": "Supabase: Generate Types",
-      "type": "shell",
-      "command": "npm",
-      "args": ["run", "supabase:types"],
-      "options": {
-        "cwd": "${workspaceFolder}"
-      },
-      "group": "build",
-      "dependsOn": "Supabase: Ensure Session",
-      "presentation": {
-        "echo": true,
-        "reveal": "always",
-        "panel": "shared"
-      }
+      "problemMatcher": []
     },
     {
       "label": "Supabase: Pull Public Schema",
@@ -149,12 +65,65 @@
         "echo": true,
         "reveal": "always",
         "panel": "shared"
-      }
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Supabase: Generate Types",
+      "type": "shell",
+      "command": "npm",
+      "args": ["run", "supabase:types"],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "group": "build",
+      "dependsOn": "Supabase: Ensure Session",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Supabase: List Migrations",
+      "type": "shell",
+      "command": "npm",
+      "args": ["run", "supabase:migrations:list"],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "group": "build",
+      "dependsOn": "Supabase: Ensure Session",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Supabase: Push Database",
+      "type": "shell",
+      "command": "npm",
+      "args": ["run", "supabase:db:push"],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "group": "build",
+      "dependsOn": "Supabase: Ensure Session",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": []
     },
     {
       "label": "Supabase: Start Local Stack",
       "type": "shell",
-      "command": "npm run supabase:start:local",
+      "command": "npm",
+      "args": ["run", "supabase:start:local"],
       "options": {
         "cwd": "${workspaceFolder}"
       },
@@ -165,15 +134,6 @@
         "panel": "shared"
       },
       "problemMatcher": []
-    },
-    {
-      "label": "Supabase: Full Workflow",
-      "dependsOrder": "sequence",
-      "dependsOn": [
-        "Supabase: Ensure Session",
-        "Supabase: Link Project",
-        "Supabase: List Migrations"
-      ]
     },
     {
       "label": "Database: Create Migration",
@@ -188,7 +148,8 @@
         "echo": true,
         "reveal": "always",
         "panel": "shared"
-      }
+      },
+      "problemMatcher": []
     },
     {
       "label": "Supabase: Serve Local Functions",
@@ -205,8 +166,7 @@
         "echo": true,
         "reveal": "always",
         "focus": false,
-        "panel": "dedicated",
-        "group": "edge-functions"
+        "panel": "dedicated"
       },
       "problemMatcher": []
     },
@@ -224,7 +184,8 @@
         "echo": true,
         "reveal": "always",
         "panel": "shared"
-      }
+      },
+      "problemMatcher": []
     },
     {
       "label": "Edge Functions: Deploy Critical Set",
@@ -240,7 +201,8 @@
         "echo": true,
         "reveal": "always",
         "panel": "shared"
-      }
+      },
+      "problemMatcher": []
     },
     {
       "label": "Edge Functions: Deploy Discovery Group",
@@ -256,7 +218,8 @@
         "echo": true,
         "reveal": "always",
         "panel": "shared"
-      }
+      },
+      "problemMatcher": []
     },
     {
       "label": "Edge Functions: Deploy Enrichment Group",
@@ -272,7 +235,8 @@
         "echo": true,
         "reveal": "always",
         "panel": "shared"
-      }
+      },
+      "problemMatcher": []
     },
     {
       "label": "Edge Functions: Deploy Export Functions",
@@ -288,7 +252,8 @@
         "echo": true,
         "reveal": "always",
         "panel": "shared"
-      }
+      },
+      "problemMatcher": []
     },
     {
       "label": "Edge Functions: Deploy Diagnostics",
@@ -304,7 +269,8 @@
         "echo": true,
         "reveal": "always",
         "panel": "shared"
-      }
+      },
+      "problemMatcher": []
     },
     {
       "label": "Edge Functions: Deploy All Functions",
@@ -330,7 +296,8 @@
         "echo": true,
         "reveal": "always",
         "panel": "shared"
-      }
+      },
+      "problemMatcher": []
     },
     {
       "label": "Edge Functions: Live Logs (All)",
@@ -340,15 +307,14 @@
       "options": {
         "cwd": "${workspaceFolder}"
       },
-      "isBackground": true,
       "group": "build",
+      "isBackground": true,
       "dependsOn": "Supabase: Ensure Session",
       "presentation": {
         "echo": true,
         "reveal": "always",
         "focus": false,
-        "panel": "dedicated",
-        "group": "logs"
+        "panel": "dedicated"
       },
       "problemMatcher": []
     },
@@ -360,14 +326,14 @@
       "options": {
         "cwd": "${workspaceFolder}"
       },
-      "isBackground": true,
       "group": "build",
+      "isBackground": true,
       "dependsOn": "Supabase: Ensure Session",
       "presentation": {
         "echo": true,
         "reveal": "always",
-        "panel": "dedicated",
-        "group": "logs"
+        "focus": false,
+        "panel": "dedicated"
       },
       "problemMatcher": []
     },
@@ -385,7 +351,8 @@
         "echo": true,
         "reveal": "always",
         "panel": "shared"
-      }
+      },
+      "problemMatcher": []
     },
     {
       "label": "Edge Functions: Test Business Discovery (Local)",
@@ -400,7 +367,8 @@
         "echo": true,
         "reveal": "always",
         "panel": "shared"
-      }
+      },
+      "problemMatcher": []
     },
     {
       "label": "Edge Functions: Full Development Workflow",
@@ -435,7 +403,8 @@
         "echo": true,
         "reveal": "always",
         "panel": "shared"
-      }
+      },
+      "problemMatcher": []
     },
     {
       "label": "Test: Run Edge Function Tests (Local, Auth Required)",
@@ -454,7 +423,8 @@
         "echo": true,
         "reveal": "always",
         "panel": "shared"
-      }
+      },
+      "problemMatcher": []
     },
     {
       "label": "Test: Discovery Pipeline",
@@ -475,7 +445,8 @@
         "echo": true,
         "reveal": "always",
         "panel": "shared"
-      }
+      },
+      "problemMatcher": []
     },
     {
       "label": "Test: Enrichment Chain",
@@ -496,7 +467,8 @@
         "echo": true,
         "reveal": "always",
         "panel": "shared"
-      }
+      },
+      "problemMatcher": []
     },
     {
       "label": "Test: Export Flow",
@@ -514,7 +486,8 @@
         "echo": true,
         "reveal": "always",
         "panel": "shared"
-      }
+      },
+      "problemMatcher": []
     },
     {
       "label": "Test: Full Stack Validation",
@@ -538,7 +511,8 @@
         "echo": true,
         "reveal": "always",
         "panel": "shared"
-      }
+      },
+      "problemMatcher": []
     },
     {
       "label": "Test: Auth Patterns",
@@ -553,7 +527,8 @@
         "echo": true,
         "reveal": "always",
         "panel": "shared"
-      }
+      },
+      "problemMatcher": []
     },
     {
       "label": "Diagnostics: Full Campaign",
@@ -568,7 +543,8 @@
         "echo": true,
         "reveal": "always",
         "panel": "shared"
-      }
+      },
+      "problemMatcher": []
     },
     {
       "label": "MCP: Start All Servers",
@@ -584,8 +560,9 @@
         "echo": true,
         "reveal": "always",
         "focus": false,
-        "panel": "new"
-      }
+        "panel": "dedicated"
+      },
+      "problemMatcher": []
     },
     {
       "label": "MCP: Stop All Servers",
@@ -599,9 +576,9 @@
       "presentation": {
         "echo": true,
         "reveal": "always",
-        "focus": false,
         "panel": "shared"
-      }
+      },
+      "problemMatcher": []
     },
     {
       "label": "Build: Frontend Production",
@@ -630,7 +607,8 @@
         "echo": true,
         "reveal": "always",
         "panel": "shared"
-      }
+      },
+      "problemMatcher": []
     },
     {
       "label": "Docs: Update All Documentation",
@@ -662,7 +640,8 @@
         "echo": true,
         "reveal": "always",
         "panel": "shared"
-      }
+      },
+      "problemMatcher": []
     },
     {
       "label": "Docs: Update Codebase Index (Legacy)",
@@ -677,7 +656,8 @@
         "echo": true,
         "reveal": "always",
         "panel": "shared"
-      }
+      },
+      "problemMatcher": []
     },
     {
       "label": "🚀 Create Epic (Guided)",
@@ -692,7 +672,8 @@
         "echo": true,
         "reveal": "always",
         "panel": "shared"
-      }
+      },
+      "problemMatcher": []
     },
     {
       "label": "🗂️ Batch Generate Epics",
@@ -707,7 +688,8 @@
         "echo": true,
         "reveal": "always",
         "panel": "shared"
-      }
+      },
+      "problemMatcher": []
     },
     {
       "label": "🗂️ Batch Generate Epics + Project",
@@ -725,7 +707,8 @@
         "echo": true,
         "reveal": "always",
         "panel": "shared"
-      }
+      },
+      "problemMatcher": []
     },
     {
       "label": "🌐 Open Project 5",
@@ -740,7 +723,8 @@
         "echo": true,
         "reveal": "always",
         "panel": "shared"
-      }
+      },
+      "problemMatcher": []
     },
     {
       "label": "🔍 Project Dashboard",
@@ -755,19 +739,24 @@
         "echo": true,
         "reveal": "always",
         "panel": "shared"
-      }
+      },
+      "problemMatcher": []
     },
     {
       "label": "🛠️ Start Epic Scaffolding",
       "type": "shell",
       "command": "npm",
       "args": ["run", "roadmap:start", "--", "${input:epicKey}"],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
       "group": "build",
       "presentation": {
         "echo": true,
         "reveal": "always",
         "panel": "shared"
-      }
+      },
+      "problemMatcher": []
     },
     {
       "label": "📋 Roadmap: Pull Open Items",
@@ -785,7 +774,8 @@
         "echo": true,
         "reveal": "always",
         "panel": "shared"
-      }
+      },
+      "problemMatcher": []
     },
     {
       "label": "Roadmap: Sync Epics to GitHub",
@@ -803,7 +793,8 @@
         "echo": true,
         "reveal": "always",
         "panel": "shared"
-      }
+      },
+      "problemMatcher": []
     },
     {
       "label": "Context: Fetch Repo Snapshot",
@@ -818,7 +809,8 @@
         "echo": true,
         "reveal": "always",
         "panel": "shared"
-      }
+      },
+      "problemMatcher": []
     },
     {
       "label": "Context: Fetch Supabase Snapshot",
@@ -833,7 +825,8 @@
         "echo": true,
         "reveal": "always",
         "panel": "shared"
-      }
+      },
+      "problemMatcher": []
     },
     {
       "label": "Context: Cache Session JWT",
@@ -848,7 +841,8 @@
         "echo": true,
         "reveal": "always",
         "panel": "shared"
-      }
+      },
+      "problemMatcher": []
     },
     {
       "label": "Workspace: Validate Configuration",
@@ -863,7 +857,8 @@
         "echo": true,
         "reveal": "always",
         "panel": "shared"
-      }
+      },
+      "problemMatcher": []
     },
     {
       "label": "Thunder: Run Auth Tests",
@@ -875,7 +870,8 @@
         "echo": true,
         "reveal": "always",
         "panel": "shared"
-      }
+      },
+      "problemMatcher": []
     },
     {
       "label": "Thunder: Run Discovery Tests",
@@ -887,7 +883,8 @@
         "echo": true,
         "reveal": "always",
         "panel": "shared"
-      }
+      },
+      "problemMatcher": []
     },
     {
       "label": "Thunder: Run Enrichment Tests",
@@ -901,7 +898,8 @@
         "echo": true,
         "reveal": "always",
         "panel": "shared"
-      }
+      },
+      "problemMatcher": []
     },
     {
       "label": "Thunder: Run Export Tests",
@@ -913,7 +911,8 @@
         "echo": true,
         "reveal": "always",
         "panel": "shared"
-      }
+      },
+      "problemMatcher": []
     },
     {
       "label": "Thunder: Run Database Tests",
@@ -925,7 +924,8 @@
         "echo": true,
         "reveal": "always",
         "panel": "shared"
-      }
+      },
+      "problemMatcher": []
     },
     {
       "label": "Thunder: Run Full Test Suite",
@@ -952,14 +952,47 @@
         "echo": true,
         "reveal": "always",
         "panel": "shared"
-      }
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Git: Remind to Push Before Exit",
+      "type": "shell",
+      "command": "bash",
+      "args": [
+        "-c",
+        "git status && echo 'REMINDER: Commit and push your changes before closing Codespace!'"
+      ],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Git: Commit and Push All",
+      "type": "shell",
+      "command": "bash",
+      "args": [
+        "-c",
+        "git add . && git commit -m 'Codespace close: doc update, MCP stop, codebase index' || echo 'No changes to commit.' && git push"
+      ],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": []
     },
     {
       "type": "npm",
       "script": "mcp:prod",
-      "problemMatcher": [],
       "label": "npm: mcp:prod",
-      "detail": "cd mcp-servers && npm run start:production"
+      "detail": "cd mcp-servers && npm run start:production",
+      "problemMatcher": []
     }
   ],
   "inputs": [
