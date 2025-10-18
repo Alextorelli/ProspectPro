@@ -5,7 +5,7 @@
   "description": "ProspectPro - Verified Business Intelligence Platform with Zero Fake Data Policy",
   "scripts": {
     "archive:legacy": "mkdir -p archive/legacy-server && mv server.js api/ modules/ docker/ archive/legacy-server/ 2>/dev/null || echo 'Legacy files managed separately'",
-  "build": "tsc -p config/tsconfig.json && vite build && echo '{\"version\":2,\"rewrites\":[{\"source\":\"/(.*)\",\"destination\":\"/index.html\"}],\"headers\":[{\"source\":\"/(.*)\",\"headers\":[{\"key\":\"Cache-Control\",\"value\":\"public, max-age=0, s-maxage=0, must-revalidate\"}]},{\"source\":\"/assets/(.*)\",\"headers\":[{\"key\":\"Cache-Control\",\"value\":\"public, max-age=31536000, immutable\"}]}]}' > dist/vercel.json",
+    "build": "tsc -p config/tsconfig.json && vite build && echo '{\"version\":2,\"rewrites\":[{\"source\":\"/(.*)\",\"destination\":\"/index.html\"}],\"headers\":[{\"source\":\"/(.*)\",\"headers\":[{\"key\":\"Cache-Control\",\"value\":\"public, max-age=0, s-maxage=0, must-revalidate\"}]},{\"source\":\"/assets/(.*)\",\"headers\":[{\"key\":\"Cache-Control\",\"value\":\"public, max-age=31536000, immutable\"}]}]}' > dist/vercel.json",
     "build:static": "npm run build",
     "clean": "rm -rf dist/ node_modules/ && echo 'Cleaned build artifacts'",
     "codebase:index": "node scripts/generate-codebase-index.js",
@@ -92,7 +92,7 @@
     "test:edge-functions": "bash -lc 'cd supabase && source ../scripts/ensure-supabase-cli-session.sh && npx --yes supabase@latest functions serve'",
     "test:verified-contacts": "echo 'Test verified contact discovery with zero fake data validation'",
     "test:watch": "vitest --exclude supabase/functions/tests/**",
-  "type-check": "tsc -p config/tsconfig.json --noEmit",
+    "type-check": "tsc -p config/tsconfig.json --noEmit",
     "supabase:test:db": "bash -lc 'cd supabase && source ../scripts/ensure-supabase-cli-session.sh && npx --yes supabase@latest test db'",
     "thunder:test": "echo 'Run Thunder Client tests via VS Code extension (Thunder: Run Full Test Suite task)'",
     "thunder:env:sync": "vercel env pull .env.thunder --yes && echo 'Thunder Client environment synced to .env.thunder'"
