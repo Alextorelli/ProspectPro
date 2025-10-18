@@ -689,44 +689,56 @@ npm run docs:update
 
 async function generateTasksReference() {
   console.log("📋 Generating VS Code Tasks Reference...");
-  
+
   const tasksPath = path.join(repoRoot, ".vscode", "tasks.json");
   const tasksContent = await fs.readFile(tasksPath, "utf8");
   const tasksConfig = JSON.parse(tasksContent);
-  
+
   const timestamp = new Date().toISOString();
   const lines = [];
-  
+
   lines.push("# ProspectPro VS Code Tasks Reference");
   lines.push("");
-  lines.push(`_Auto-generated from \`.vscode/tasks.json\` — Last updated: ${timestamp.split('T')[0]}_`);
+  lines.push(
+    `_Auto-generated from \`.vscode/tasks.json\` — Last updated: ${
+      timestamp.split("T")[0]
+    }_`
+  );
   lines.push("");
-  lines.push("**Quick Access**: Press `Ctrl+Shift+P` → \"Tasks: Run Task\" → Select from list below");
+  lines.push(
+    '**Quick Access**: Press `Ctrl+Shift+P` → "Tasks: Run Task" → Select from list below'
+  );
   lines.push("");
   lines.push("---");
   lines.push("");
-  
+
   // Group tasks by category
   const categories = {
     "Supabase & Database": [],
     "Edge Functions": [],
     "Testing & Diagnostics": [],
     "Build & Deployment": [],
-    "Documentation": [],
+    Documentation: [],
     "Roadmap Management": [],
-    "Miscellaneous": []
+    Miscellaneous: [],
   };
-  
+
   // Categorize tasks
   for (const task of tasksConfig.tasks) {
     if (!task.label) continue;
-    
+
     let category = "Miscellaneous";
     if (task.label.includes("Supabase") || task.label.includes("Database")) {
       category = "Supabase & Database";
-    } else if (task.label.includes("Edge Function") || task.label.includes("Function")) {
+    } else if (
+      task.label.includes("Edge Function") ||
+      task.label.includes("Function")
+    ) {
       category = "Edge Functions";
-    } else if (task.label.includes("Test") || task.label.includes("Diagnostic")) {
+    } else if (
+      task.label.includes("Test") ||
+      task.label.includes("Diagnostic")
+    ) {
       category = "Testing & Diagnostics";
     } else if (task.label.includes("Build") || task.label.includes("Deploy")) {
       category = "Build & Deployment";
@@ -735,49 +747,60 @@ async function generateTasksReference() {
     } else if (task.label.includes("Roadmap") || task.label.includes("Epic")) {
       category = "Roadmap Management";
     }
-    
+
     categories[category].push(task);
   }
-  
+
   // Generate navigation
   lines.push("## 🗂️ Task Categories");
   lines.push("");
   const navItems = [];
   for (const cat of Object.keys(categories)) {
     if (categories[cat].length > 0) {
-      navItems.push(`- [${cat}](#${cat.toLowerCase().replace(/[^a-z0-9]+/g, '-')})`);
+      navItems.push(
+        `- [${cat}](#${cat.toLowerCase().replace(/[^a-z0-9]+/g, "-")})`
+      );
     }
   }
   lines.push(navItems.join("\n"));
   lines.push("");
   lines.push("---");
   lines.push("");
-  
+
   // Generate each category section
   for (const [categoryName, tasks] of Object.entries(categories)) {
     if (tasks.length === 0) continue;
-    
+
     lines.push(`## ${categoryName}`);
     lines.push("");
-    lines.push("| Task Label | Command | Script/Config | Inputs | Description |");
-    lines.push("|------------|---------|---------------|--------|-------------|");
-    
+    lines.push(
+      "| Task Label | Command | Script/Config | Inputs | Description |"
+    );
+    lines.push(
+      "|------------|---------|---------------|--------|-------------|"
+    );
+
     for (const task of tasks) {
       const label = `**${task.label}**`;
-      
+
       let command = "";
       if (task.type === "shell") {
         if (task.command) {
-          command = `\`${task.command}${task.args ? " " + task.args.join(" ") : ""}\``;
+          command = `\`${task.command}${
+            task.args ? " " + task.args.join(" ") : ""
+          }\``;
         } else if (task.args) {
           command = `\`${task.args.join(" ")}\``;
         }
       } else if (task.type === "npm") {
         command = `\`npm run ${task.script}\``;
       } else if (task.dependsOn) {
-        command = task.dependsOrder === "sequence" ? "`Sequential composite`" : "`Parallel composite`";
+        command =
+          task.dependsOrder === "sequence"
+            ? "`Sequential composite`"
+            : "`Parallel composite`";
       }
-      
+
       let scriptConfig = "";
       const scripts = [];
       if (task.options?.cwd && task.options.cwd !== "${workspaceFolder}") {
@@ -792,27 +815,45 @@ async function generateTasksReference() {
         for (const arg of task.args) {
           if (arg.includes("scripts/")) {
             const scriptPath = arg.replace("../", "").replace("./", "");
-            scripts.push(`[\`${scriptPath}\`](${scriptPath.startsWith("scripts/") ? `../${scriptPath}` : `../scripts/${scriptPath}`})`);
+            scripts.push(
+              `[\`${scriptPath}\`](${
+                scriptPath.startsWith("scripts/")
+                  ? `../${scriptPath}`
+                  : `../scripts/${scriptPath}`
+              })`
+            );
           }
         }
         if (scripts.length === 0) scripts.push("Multiple");
       }
       scriptConfig = scripts.join(", ");
-      
-      const inputs = task.dependsOn ? "None" : 
-                    (task.args && task.args.some(arg => arg.includes("${input:"))) ? 
-                    task.args.find(arg => arg.includes("${input:"))?.match(/\$\{input:([^}]+)\}/)?.[1] || "None" : "None";
-      
-      const description = task.dependsOn ? 
-                         `Runs: ${Array.isArray(task.dependsOn) ? task.dependsOn.join(" → ") : task.dependsOn}` : 
-                         (task.problemMatcher ? "No description available" : "No description available");
-      
-      lines.push(`| ${label} | ${command} | ${scriptConfig} | ${inputs} | ${description} |`);
+
+      const inputs = task.dependsOn
+        ? "None"
+        : task.args && task.args.some((arg) => arg.includes("${input:"))
+        ? task.args
+            .find((arg) => arg.includes("${input:"))
+            ?.match(/\$\{input:([^}]+)\}/)?.[1] || "None"
+        : "None";
+
+      const description = task.dependsOn
+        ? `Runs: ${
+            Array.isArray(task.dependsOn)
+              ? task.dependsOn.join(" → ")
+              : task.dependsOn
+          }`
+        : task.problemMatcher
+        ? "No description available"
+        : "No description available";
+
+      lines.push(
+        `| ${label} | ${command} | ${scriptConfig} | ${inputs} | ${description} |`
+      );
     }
-    
+
     lines.push("");
   }
-  
+
   const outputPath = path.join(repoRoot, ".vscode", "TASKS_REFERENCE.md");
   await fs.writeFile(outputPath, lines.join("\n"));
   console.log(`   ✅ .vscode/TASKS_REFERENCE.md updated`);
