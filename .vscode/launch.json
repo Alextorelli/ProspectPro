@@ -1,8 +1,6 @@
 {
   "version": "0.2.0",
   "configurations": [
-    
-
     {
       "name": "Test Business Discovery Optimized",
       "type": "node",
@@ -84,6 +82,13 @@
       },
       "skipFiles": ["<node_internals>/**", "**/node_modules/**"],
       "console": "integratedTerminal"
+    },
+    {
+      "type": "node-terminal",
+      "name": "Run Script: start:production (mcp-servers)",
+      "request": "launch",
+      "command": "npm run start:production",
+      "cwd": "${workspaceFolder}/mcp-servers"
     }
   ],
   "compounds": [

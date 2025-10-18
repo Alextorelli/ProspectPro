@@ -23,6 +23,7 @@ _Auto-generated from `.vscode/tasks.json` — Last updated: 2025-10-18_
 | Task Label | Command | Script/Config | Inputs | Description |
 |------------|---------|---------------|--------|-------------|
 | **Supabase: Ensure Session** | `bash -lc source scripts/operations/ensure-supabase-cli-session.sh` | [`source scripts/operations/ensure-supabase-cli-session.sh`](../scripts/source scripts/operations/ensure-supabase-cli-session.sh) | None | No description available |
+| **Supabase: Reset Auth Emulator** | `bash -lc ./scripts/operations/reset-auth-emulator.sh` | [`scripts/operations/reset-auth-emulator.sh`](../scripts/operations/reset-auth-emulator.sh) | None | No description available |
 | **Supabase: Link Project** | `npm run supabase:link` | Multiple | None | Runs: Supabase: Ensure Session |
 | **Supabase: Pull Public Schema** | `npm run supabase:db:pull` | Multiple | None | Runs: Supabase: Ensure Session |
 | **Supabase: Generate Types** | `npm run supabase:types` | Multiple | None | Runs: Supabase: Ensure Session |
@@ -54,6 +55,7 @@ _Auto-generated from `.vscode/tasks.json` — Last updated: 2025-10-18_
 | **Edge Functions: Full Development Workflow** | `Sequential composite` | Multiple | None | Runs: Supabase: Ensure Session → Supabase: Link Project → Edge Functions: List Functions → Supabase: Serve Local Functions |
 | **Edge Functions: Production Deploy Workflow** | `Sequential composite` | Multiple | None | Runs: Supabase: Ensure Session → Edge Functions: Deploy Critical Set → Edge Functions: Live Logs (All) |
 | **Test: Run Edge Function Tests (Local, Auth Required)** | `bash -lc export SUPABASE_SESSION_JWT='${input:sessionJWT}' && npm run supabase:test:functions` | Multiple | None | Runs: Supabase: Ensure Session |
+| **Test: Edge Functions (Force Bypass)** | `bash -lc ./scripts/testing/run-edge-tests-force.sh` | Multiple | None | Runs: Supabase: Ensure Session |
 
 ## Testing & Diagnostics
 
@@ -111,6 +113,7 @@ _Auto-generated from `.vscode/tasks.json` — Last updated: 2025-10-18_
 | **🔍 Project Dashboard** | `npm run roadmap:dashboard` | Multiple | None | No description available |
 | **Context: Fetch Repo Snapshot** | `node scripts/context/fetch-repo-context.js` | [`scripts/context/fetch-repo-context.js`](../scripts/context/fetch-repo-context.js) | None | No description available |
 | **Context: Cache Session JWT** | `node scripts/context/cache-session.js ${input:sessionJWT}` | [`scripts/context/cache-session.js`](../scripts/context/cache-session.js) | sessionJWT | No description available |
+| **Workspace: Validate Configuration** | `bash -lc ${workspaceFolder}/.vscode/validate-workspace-config.sh` | Multiple | None | No description available |
 | **Workspace: Validate Configuration** | `bash -lc ${workspaceFolder}/.vscode/validate-workspace-config.sh` | Multiple | None | No description available |
 | **Thunder: Sync Environment Variables** | `bash -lc echo 'Syncing Thunder Client environment from Vercel/Supabase...' && npx --yes vercel@latest env pull .env.thunder --yes && echo 'Environment synced to .env.thunder'` | Multiple | None | No description available |
 | **Workspace: Verify Toolchain** | `bash -lc ./scripts/diagnostics/verify-toolchain.sh` | [`scripts/diagnostics/verify-toolchain.sh`](../scripts/diagnostics/verify-toolchain.sh) | None | No description available |
