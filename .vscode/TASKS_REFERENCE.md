@@ -110,8 +110,9 @@ _Auto-generated from `.vscode/tasks.json` — Last updated: 2025-10-18_
 
 | Task Label | Command | Script/Config | Inputs | Description |
 |------------|---------|---------------|--------|-------------|
-| **Start Codespace** | `Sequential composite` | Multiple | None | Runs: Ensure Session → Link Project → MCP: Start All Servers |
-| **Close Codespace** | `Sequential composite` | Multiple | None | Runs: Docs: Update All Documentation → MCP: Stop All Servers → Docs: Update Codebase Index (Legacy) → Git: Remind to Push Before Exit → Git: Commit and Push All |
+| **Start Codespace** | `Sequential composite` | Multiple | None | Runs: Ensure Session → Link Project → GitHub: Ensure Auth (Non-blocking) → MCP: Start All Servers |
+| **Close Codespace** | `Sequential composite` | Multiple | None | Runs: MCP: Stop All Servers → Docs: Update All Documentation → Workspace: Validate Configuration → Git: Remind to Push Before Exit |
+| **GitHub: Ensure Auth (Non-blocking)** | `bash if command -v gh >/dev/null 2>&1; then gh auth status || echo '⚠️ GitHub CLI not authenticated. Run: gh auth login'; else echo '⚠️ GitHub CLI not installed'; fi` | CLI | None | No description available |
 | **Roadmap: Sync Epics to GitHub** | `bash ${workspaceFolder}/scripts/roadmap/sync-epics-to-github.sh` | [`scripts/roadmap/sync-epics-to-github.sh`](../scripts/roadmap/sync-epics-to-github.sh) | None | Creates GitHub issues from local epic files and attaches them to Project 5 (requires GH_PROJECT_TOKEN) |
 | **Context: Fetch Repo Snapshot** | `node` | CLI | None | Captures current git branch, status, and diff summary to `.cache/agent/context/repo-context.json` |
 | **Context: Fetch Supabase Snapshot** | `node` | CLI | None | Summarizes Edge Function directories and verify_jwt settings to `.cache/agent/context/supabase-functions.json` |
@@ -123,7 +124,8 @@ _Auto-generated from `.vscode/tasks.json` — Last updated: 2025-10-18_
 | **Thunder: Run Export Tests** | `echo` | CLI | None | No description available |
 | **Thunder: Run Database Tests** | `echo` | CLI | None | No description available |
 | **Thunder: Run Full Test Suite** | `Sequential composite` | Multiple | None | Runs: Thunder: Run Auth Tests → Thunder: Run Discovery Tests → Thunder: Run Enrichment Tests → Thunder: Run Export Tests → Thunder: Run Database Tests |
-| **Thunder: Sync Environment Variables** | `bash echo 'Syncing Thunder Client environment from Vercel/Supabase...' && vercel env pull .env.thunder --yes && echo 'Environment synced to .env.thunder'` | CLI | None | No description available |
+| **Thunder: Sync Environment Variables** | `bash echo 'Syncing Thunder Client environment from Vercel/Supabase...' && npx --yes vercel@latest env pull .env.thunder --yes && echo 'Environment synced to .env.thunder'` | CLI | None | No description available |
+| **Workspace: Verify Toolchain** | `bash ./scripts/verify-toolchain.sh` | [`./scripts/verify-toolchain.sh`](.././scripts/verify-toolchain.sh) | None | No description available |
 | **Git: Remind to Push Before Exit** | `bash git status && echo 'REMINDER: Commit and push your changes before closing Codespace!'` | CLI | None | No description available |
 | **Git: Commit and Push All** | `bash git add . && git commit -m 'Codespace close: doc update, MCP stop, codebase index' || echo 'No changes to commit.' && git push` | CLI | None | No description available |
 | **npm: mcp:prod** | `N/A` | CLI | None | No description available |

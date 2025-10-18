@@ -7,6 +7,7 @@
       "dependsOn": [
         "Supabase: Ensure Session",
         "Supabase: Link Project",
+          "GitHub: Ensure Auth (Non-blocking)",
         "MCP: Start All Servers"
       ],
       "problemMatcher": []
@@ -15,13 +16,29 @@
       "label": "Close Codespace",
       "dependsOrder": "sequence",
       "dependsOn": [
-        "Docs: Update All Documentation",
         "MCP: Stop All Servers",
-        "Docs: Update Codebase Index (Legacy)",
-        "Git: Remind to Push Before Exit",
-        "Git: Commit and Push All"
-      ]
+        "Docs: Update All Documentation",
+          "Workspace: Validate Configuration",
+          "Git: Remind to Push Before Exit"
+      ],
+      "problemMatcher": []
     },
+      {
+        "label": "GitHub: Ensure Auth (Non-blocking)",
+        "type": "shell",
+        "command": "bash",
+        "args": [
+          "-lc",
+          "if command -v gh >/dev/null 2>&1; then gh auth status || echo '⚠️ GitHub CLI not authenticated. Run: gh auth login'; else echo '⚠️ GitHub CLI not installed'; fi"
+        ],
+        "group": "build",
+        "presentation": {
+          "echo": false,
+          "reveal": "silent",
+          "panel": "shared"
+        },
+        "problemMatcher": []
+      },
     {
       "label": "Supabase: Ensure Session",
       "type": "shell",
@@ -552,17 +569,7 @@
       "type": "shell",
       "command": "npm",
       "args": ["run", "mcp:start"],
-      "options": {
-        "cwd": "${workspaceFolder}"
-      },
-      "group": "build",
-      "isBackground": true,
-      "presentation": {
-        "echo": true,
-        "reveal": "always",
-        "focus": false,
-        "panel": "dedicated"
-      },
+      "options": { "cwd": "${workspaceFolder}" },
       "problemMatcher": []
     },
     {
@@ -570,15 +577,7 @@
       "type": "shell",
       "command": "npm",
       "args": ["run", "mcp:stop"],
-      "options": {
-        "cwd": "${workspaceFolder}"
-      },
-      "group": "build",
-      "presentation": {
-        "echo": true,
-        "reveal": "always",
-        "panel": "shared"
-      },
+      "options": { "cwd": "${workspaceFolder}" },
       "problemMatcher": []
     },
     {
@@ -945,8 +944,8 @@
       "type": "shell",
       "command": "bash",
       "args": [
-        "-c",
-        "echo 'Syncing Thunder Client environment from Vercel/Supabase...' && vercel env pull .env.thunder --yes && echo 'Environment synced to .env.thunder'"
+          "-lc",
+          "echo 'Syncing Thunder Client environment from Vercel/Supabase...' && npx --yes vercel@latest env pull .env.thunder --yes && echo 'Environment synced to .env.thunder'"
       ],
       "group": "build",
       "presentation": {
@@ -956,6 +955,22 @@
       },
       "problemMatcher": []
     },
+      {
+        "label": "Workspace: Verify Toolchain",
+        "type": "shell",
+        "command": "bash",
+        "args": [
+          "-lc",
+          "./scripts/verify-toolchain.sh"
+        ],
+        "group": "build",
+        "presentation": {
+          "echo": true,
+          "reveal": "always",
+          "panel": "shared"
+        },
+        "problemMatcher": []
+      },
     {
       "label": "Git: Remind to Push Before Exit",
       "type": "shell",
