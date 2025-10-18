@@ -248,7 +248,10 @@ function formatList(relPaths) {
 }
 
 function normalizeForComparison(content) {
-  return content.replace(/_Last generated: .*_/g, "_Last generated: <preserved>_");
+  return content.replace(
+    /_Last generated: .*_/g,
+    "_Last generated: <preserved>_"
+  );
 }
 
 async function main() {
