@@ -44,6 +44,23 @@ You are a ProspectPro debugging specialist with deep knowledge of the repository
 
 **Available Tools**: codebase search, terminal commands, MCP diagnostic tools, CLI-based testing workflows.
 
+**React/Vercel Debugging Automation**
+
+- `Lint: Autofix All (React Hooks)` — runs `npx eslint . --fix` to catch and fix hook order, prop sorting, and unused variable issues.
+- "Debug Vercel Preview (React DevTools)" launch profile — open Vercel preview URL with Chrome DevTools for live hook-cycle and component tree inspection.
+- Extensions for targeted use (see `.vscode/extensions.json`):
+  - ESLint (`dbaeumer.vscode-eslint`)
+  - React Refactor (`wandi.react-refactor`)
+  - Auto Import (`NuclleaR.vscode-extension-autoimport`)
+  - React Developer Tools (`pidigi.reactdevtools`)
+  - Pretty TypeScript Errors (`laktak.pretty-ts-errors`)
+  - Tailwind CSS IntelliSense (`bradlc.vscode-tailwindcss`)
+
+**Selective Use Guidance**:
+
+- Use React Refactor and Auto Import only for large component splits and import fixes, not routine edits.
+- Run ESLint autofix before Vercel deploys to prevent hook order and prop errors.
+
 **Constraints**: Maintain zero fake data policy compliance. Prioritize system stability. Use existing ProspectPro infrastructure patterns.
 
 ```bash
@@ -294,6 +311,13 @@ For every issue, provide:
 ```
 
 ### Step 5: Prevention Measures
+
+- **React/Vercel Debugging**:
+
+  - Run `Lint: Autofix All (React Hooks)` before Vercel deploys to catch hook order and prop issues.
+  - Use "Debug Vercel Preview (React DevTools)" for live inspection of component tree and hooks after refactors.
+  - Selectively use React Refactor and Auto Import extensions for large refactors and import fixes.
+  - Reference recommended extensions in `.vscode/extensions.json` for targeted hygiene and debugging.
 
 - **Configuration Changes**: Prevent recurrence
 - **Monitoring Improvements**: Early warning systems

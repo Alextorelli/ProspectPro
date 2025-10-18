@@ -39,6 +39,26 @@ class SupabaseTroubleshootingServer {
     this.server.setRequestHandler(ListToolsRequestSchema, async () => ({
       tools: [
         {
+          name: "collect_react_runtime_logs",
+          description: "Tail Vercel build output or local dev server logs for React hook violations and runtime errors.",
+          inputSchema: {
+            type: "object",
+            properties: {
+              logPath: {
+                type: "string",
+                description: "Path to Vercel build or dev server log file.",
+                default: "/workspaces/ProspectPro/reports/logs/vercel-build.log",
+              },
+              lines: {
+                type: "integer",
+                description: "Number of lines to tail.",
+                default: 100,
+              },
+            },
+            required: ["logPath"],
+          },
+        },
+        {
           name: "test_edge_function",
           description:
             "Test Supabase Edge Function connectivity and authentication",
@@ -184,6 +204,37 @@ class SupabaseTroubleshootingServer {
 
     this.server.setRequestHandler(CallToolRequestSchema, async (request) => {
       switch (request.params.name) {
+        case "collect_react_runtime_logs": {
+          // Tail Vercel build/dev logs for React hook violations
+          const { logPath, lines = 100 } = request.params.arguments;
+          try {
+            const logContent = await fs.readFile(logPath, "utf8");
+            const logLines = logContent.split("\n").slice(-lines);
+            // Filter for React hook/runtime errors
+            const reactErrors = logLines.filter(
+              (line) =>
+                /React(\s+)?(Hook|Error|Violation|Warning)/i.test(line) ||
+                /Invalid hook call|Hooks must be called/i.test(line)
+            );
+            return {
+              content: [
+                {
+                  type: "text",
+                  text: `React Runtime Errors (last ${lines} lines):\n\n${reactErrors.join("\n") || "No React errors found."}`,
+                },
+              ],
+            };
+          } catch (error) {
+            return {
+              content: [
+                {
+                  type: "text",
+                  text: `Error reading log file: ${error.message}`,
+                },
+              ],
+            };
+          }
+        }
         case "test_edge_function":
           return await this.testEdgeFunction(request.params.arguments);
         case "validate_database_permissions":
@@ -633,6 +684,12 @@ Save these commands for quick debugging!`,
         reportContent = `Could not read analysis report: ${readError.message}`;
       }
 
+      // Tag ESLint/react-hook errors in the report
+      const reactErrorMatches = reportContent.match(/(React(\s+)?(Hook|Error|Violation|Warning)|Invalid hook call|Hooks must be called|react-hooks\/rules-of-hooks|jsx-sort-props)/gi);
+      const reactErrorSummary = reactErrorMatches && reactErrorMatches.length > 0
+        ? `\n**React/ESLint Errors Detected:**\n${reactErrorMatches.join("\n")}`
+        : "\nNo React/ESLint errors detected.";
+
       return {
         content: [
           {
@@ -652,6 +709,7 @@ ${analyzeStdout || 'Analysis completed'}
 
 ### Detailed Report
 ${reportContent}
+${reactErrorSummary}
 
 ### Next Steps
 1. Review the analysis report above for errors and warnings

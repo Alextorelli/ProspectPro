@@ -73,9 +73,9 @@ export const AccountPage: React.FC = () => {
               <div className="relative flex h-16 w-16 items-center justify-center overflow-hidden rounded-full border-2 border-blue-200 bg-blue-100 text-xl font-bold text-blue-700 shadow-sm dark:border-sky-500/60 dark:bg-sky-500/10 dark:text-sky-200">
                 {avatarUrl ? (
                   <img
-                    src={avatarUrl}
                     alt={displayName}
                     className="absolute inset-0 h-full w-full object-cover"
+                    src={avatarUrl}
                   />
                 ) : (
                   initials || "PP"
@@ -142,8 +142,8 @@ export const AccountPage: React.FC = () => {
             </h3>
             <div className="space-y-3">
               <button
-                type="button"
                 className="w-full rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+                type="button"
                 onClick={() => {
                   // TODO: Implement profile editing
                   alert(
@@ -154,8 +154,8 @@ export const AccountPage: React.FC = () => {
                 Edit Profile
               </button>
               <button
-                type="button"
                 className="w-full rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+                type="button"
                 onClick={() => {
                   // TODO: Implement password change
                   alert(
@@ -166,8 +166,8 @@ export const AccountPage: React.FC = () => {
                 Change Password
               </button>
               <button
-                type="button"
                 className="w-full rounded-md border border-red-300 bg-white px-4 py-2 text-sm font-medium text-red-600 transition-colors hover:bg-red-50 dark:border-red-600 dark:bg-slate-800 dark:text-red-400 dark:hover:bg-red-900/20"
+                type="button"
                 onClick={() => {
                   // TODO: Implement account deletion
                   if (
@@ -214,13 +214,13 @@ export const AccountPage: React.FC = () => {
             <div className="flex-shrink-0">
               <svg
                 className="h-5 w-5 text-blue-400"
-                viewBox="0 0 20 20"
                 fill="currentColor"
+                viewBox="0 0 20 20"
               >
                 <path
-                  fillRule="evenodd"
-                  d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
                   clipRule="evenodd"
+                  d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                  fillRule="evenodd"
                 />
               </svg>
             </div>

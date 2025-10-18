@@ -17,18 +17,18 @@ function App() {
       <ErrorBoundary>
         <Layout>
           <Routes>
-            <Route path="/" element={<BusinessDiscovery />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/discovery" element={<BusinessDiscovery />} />
-            <Route path="/campaign" element={<Campaign />} />
+            <Route element={<BusinessDiscovery />} path="/" />
+            <Route element={<Dashboard />} path="/dashboard" />
+            <Route element={<BusinessDiscovery />} path="/discovery" />
+            <Route element={<Campaign />} path="/campaign" />
             <Route
-              path="/campaign/:campaignId/progress"
               element={<CampaignProgress />}
+              path="/campaign/:campaignId/progress"
             />
-            <Route path="/results" element={<Results />} />
-            <Route path="/account" element={<AccountPage />} />
-            <Route path="/admin" element={<AdminPanel />} />
-            <Route path="/auth/callback" element={<AuthCallback />} />
+            <Route element={<Results />} path="/results" />
+            <Route element={<AccountPage />} path="/account" />
+            <Route element={<AdminPanel />} path="/admin" />
+            <Route element={<AuthCallback />} path="/auth/callback" />
           </Routes>
         </Layout>
       </ErrorBoundary>

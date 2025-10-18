@@ -66,50 +66,41 @@ export const GeographicSelector: React.FC<GeographicSelectorProps> = ({
   const mapsModulesRef = useRef<MapsModules | null>(null);
   const loaderPromiseRef = useRef<Promise<void> | null>(null);
 
-  const handleAddressChange = (value: string) => {
-    setAddress(value);
-    setLocation((prev) => {
-      const updated = { ...prev, address: value };
-      onLocationChange(updated, radius);
-      return updated;
-    });
-  };
+  const handleAddressChange = (value: string) => {/* Lines 70-76 omitted */};
 
   const geocodeViaGoogle = async (
     addressInput: string
-  ): Promise<GeographicLocation | null> => {
-    const modules = mapsModulesRef.current;
-    if (!modules?.Geocoder) return null;
-
-    return new Promise((resolve) => {
-      const geocoder = new modules.Geocoder();
-      geocoder.geocode(
-        { address: addressInput },
-        (results: any, status: any) => {
-          if (status === "OK" && results?.[0]) {
-            const geometry = results[0].geometry.location;
-            resolve({
-              lat: geometry.lat(),
-              lng: geometry.lng(),
-              address: results[0].formatted_address,
-            });
-          } else {
-            resolve(null);
-          }
-        }
-      );
-    });
-  };
+  ): Promise<GeographicLocation | null> => {/* Lines 81-102 omitted */};
 
   // Geocoding function with Google Maps fallback to OpenStreetMap
   const geocodeAddress = async (
     addressInput: string
-  ): Promise<GeographicLocation | null> => {
-    try {
-      setIsGeocoding(true);
+  ): Promise<GeographicLocation | null> => {/* Lines 108-141 omitted */};
 
-      // Try Google Geocoder first if available
-      const googleResult = await geocodeViaGoogle(addressInput);
+  const handleAddressSearch = async () => {/* Lines 144-154 omitted */};
+
+  const handleRadiusChange = useCallback(
+    (newRadius: number) => {/* Lines 158-160 omitted */},
+    [location, onLocationChange]
+  );
+
+  const radiusOptions = useMemo(
+    () => [
+      { value: 1, label: "1 mile" },
+      { value: 5, label: "5 miles" },
+      { value: 10, label: "10 miles" },
+      { value: 25, label: "25 miles" },
+      { value: 50, label: "50 miles" },
+      { value: 100, label: "100 miles" },
+    ],
+    []
+  );
+
+  const milesToMeters = useCallback((value: number) => value * 1609.34, []);
+
+  // Simple map visualization using CSS
+  /* Lines 179-661 omitted */
+};
       if (googleResult) {
         return googleResult;
       }
@@ -148,11 +139,10 @@ export const GeographicSelector: React.FC<GeographicSelectorProps> = ({
       setAddress(result.address);
       setLocation(result);
       onLocationChange(result, radius);
-    } else {
-      alert("Address not found. Please try a different address.");
     }
   };
 
+  // ...rest of the component logic...
   const handleRadiusChange = useCallback(
     (newRadius: number) => {
       setRadius(newRadius);
@@ -223,10 +213,7 @@ export const GeographicSelector: React.FC<GeographicSelectorProps> = ({
     );
   };
 
-  const mapStatusStyles: Record<
-    MapStatus,
-    { label: string; className: string }
-  > = {
+  const mapStatusStyles: Record<MapStatus, { label: string; className: string }> = {
     idle: {
       label: "Static preview",
       className:

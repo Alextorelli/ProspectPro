@@ -26,13 +26,12 @@ export const LeadExplorerGrid: React.FC<LeadExplorerGridProps> = ({
   isLoading = false,
   pageSize = 24,
 }) => {
+  // Hoist all hooks to top-level before any early returns
   const [sortField, setSortField] = useState<SortableField>("confidence_score");
   const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
   const [currentPage, setCurrentPage] = useState(0);
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
   const [showFilters, setShowFilters] = useState(false);
-
-  // Filter states for sidebar
   const [confidenceRange, setConfidenceRange] = useState<[number, number]>([
     0, 100,
   ]);
@@ -183,9 +182,9 @@ export const LeadExplorerGrid: React.FC<LeadExplorerGridProps> = ({
   const FiltersContent = () => (
     <>
       <CollapsibleCard
-        title="Confidence Score"
-        persistKey="lead-explorer-confidence-filter"
         defaultOpen
+        persistKey="lead-explorer-confidence-filter"
+        title="Confidence Score"
       >
         <div className="space-y-4">
           <div>
@@ -194,9 +193,10 @@ export const LeadExplorerGrid: React.FC<LeadExplorerGridProps> = ({
             </label>
             <div className="space-y-2">
               <input
-                type="range"
-                min="0"
+                className="w-full"
                 max="100"
+                min="0"
+                type="range"
                 value={confidenceRange[0]}
                 onChange={(e) =>
                   setConfidenceRange([
@@ -204,12 +204,12 @@ export const LeadExplorerGrid: React.FC<LeadExplorerGridProps> = ({
                     confidenceRange[1],
                   ])
                 }
-                className="w-full"
               />
               <input
-                type="range"
-                min="0"
+                className="w-full"
                 max="100"
+                min="0"
+                type="range"
                 value={confidenceRange[1]}
                 onChange={(e) =>
                   setConfidenceRange([
@@ -217,7 +217,6 @@ export const LeadExplorerGrid: React.FC<LeadExplorerGridProps> = ({
                     parseInt(e.target.value),
                   ])
                 }
-                className="w-full"
               />
             </div>
           </div>
@@ -225,22 +224,22 @@ export const LeadExplorerGrid: React.FC<LeadExplorerGridProps> = ({
       </CollapsibleCard>
 
       <CollapsibleCard
-        title="Enrichment Tier"
-        persistKey="lead-explorer-tier-filter"
         defaultOpen
+        persistKey="lead-explorer-tier-filter"
         subtitle={
           selectedTiers.size > 0 ? `${selectedTiers.size} selected` : undefined
         }
+        title="Enrichment Tier"
       >
         <div className="space-y-2">
           {["ESSENTIAL", "PROFESSIONAL", "BUSINESS", "ENTERPRISE"].map(
             (tier) => (
               <label key={tier} className="flex items-center gap-2 text-sm">
                 <input
-                  type="checkbox"
                   checked={selectedTiers.has(tier)}
-                  onChange={() => handleTierToggle(tier)}
                   className="rounded border-gray-300 dark:border-gray-600"
+                  type="checkbox"
+                  onChange={() => handleTierToggle(tier)}
                 />
                 <span className="text-gray-700 dark:text-gray-300">{tier}</span>
               </label>
@@ -250,9 +249,8 @@ export const LeadExplorerGrid: React.FC<LeadExplorerGridProps> = ({
       </CollapsibleCard>
 
       <CollapsibleCard
-        title="Contact Data"
-        persistKey="lead-explorer-contact-filter"
         defaultOpen
+        persistKey="lead-explorer-contact-filter"
         subtitle={
           (hasEmail !== null ? 1 : 0) + (hasPhone !== null ? 1 : 0) > 0
             ? `${
@@ -260,6 +258,7 @@ export const LeadExplorerGrid: React.FC<LeadExplorerGridProps> = ({
               } filters active`
             : undefined
         }
+        title="Contact Data"
       >
         <div className="space-y-3">
           <div>
@@ -268,24 +267,24 @@ export const LeadExplorerGrid: React.FC<LeadExplorerGridProps> = ({
             </span>
             <div className="flex gap-2">
               <button
-                type="button"
-                onClick={() => setHasEmail(hasEmail === true ? null : true)}
                 className={`px-3 py-1 text-xs rounded ${
                   hasEmail === true
                     ? "bg-blue-600 text-white"
                     : "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300"
                 }`}
+                type="button"
+                onClick={() => setHasEmail(hasEmail === true ? null : true)}
               >
                 Yes
               </button>
               <button
-                type="button"
-                onClick={() => setHasEmail(hasEmail === false ? null : false)}
                 className={`px-3 py-1 text-xs rounded ${
                   hasEmail === false
                     ? "bg-blue-600 text-white"
                     : "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300"
                 }`}
+                type="button"
+                onClick={() => setHasEmail(hasEmail === false ? null : false)}
               >
                 No
               </button>
@@ -297,24 +296,24 @@ export const LeadExplorerGrid: React.FC<LeadExplorerGridProps> = ({
             </span>
             <div className="flex gap-2">
               <button
-                type="button"
-                onClick={() => setHasPhone(hasPhone === true ? null : true)}
                 className={`px-3 py-1 text-xs rounded ${
                   hasPhone === true
                     ? "bg-blue-600 text-white"
                     : "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300"
                 }`}
+                type="button"
+                onClick={() => setHasPhone(hasPhone === true ? null : true)}
               >
                 Yes
               </button>
               <button
-                type="button"
-                onClick={() => setHasPhone(hasPhone === false ? null : false)}
                 className={`px-3 py-1 text-xs rounded ${
                   hasPhone === false
                     ? "bg-blue-600 text-white"
                     : "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300"
                 }`}
+                type="button"
+                onClick={() => setHasPhone(hasPhone === false ? null : false)}
               >
                 No
               </button>
@@ -325,9 +324,9 @@ export const LeadExplorerGrid: React.FC<LeadExplorerGridProps> = ({
 
       {activeFilterCount > 0 && (
         <button
+          className="w-full px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700"
           type="button"
           onClick={handleClearFilters}
-          className="w-full px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700"
         >
           Clear All Filters ({activeFilterCount})
         </button>
@@ -353,9 +352,9 @@ export const LeadExplorerGrid: React.FC<LeadExplorerGridProps> = ({
                 Sort by:
               </label>
               <select
+                className="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
                 value={sortField}
                 onChange={(e) => setSortField(e.target.value as SortableField)}
-                className="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
               >
                 {Object.entries(SORT_LABELS).map(([field, label]) => (
                   <option key={field} value={field}>
@@ -364,14 +363,14 @@ export const LeadExplorerGrid: React.FC<LeadExplorerGridProps> = ({
                 ))}
               </select>
               <button
+                aria-label={`Sort ${
+                  sortDirection === "asc" ? "ascending" : "descending"
+                }`}
+                className="p-1.5 rounded border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700"
                 type="button"
                 onClick={() =>
                   setSortDirection((d) => (d === "asc" ? "desc" : "asc"))
                 }
-                className="p-1.5 rounded border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700"
-                aria-label={`Sort ${
-                  sortDirection === "asc" ? "ascending" : "descending"
-                }`}
               >
                 <span className="text-gray-600 dark:text-gray-400">
                   {sortDirection === "asc" ? "↑" : "↓"}
@@ -382,10 +381,10 @@ export const LeadExplorerGrid: React.FC<LeadExplorerGridProps> = ({
             {/* Mobile Filters Button */}
             <div className="md:hidden">
               <button
+                aria-label="Open filters"
+                className="inline-flex items-center gap-2 px-3 py-1.5 text-sm rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700"
                 type="button"
                 onClick={() => setShowFilters(true)}
-                className="inline-flex items-center gap-2 px-3 py-1.5 text-sm rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700"
-                aria-label="Open filters"
               >
                 <svg
                   className="w-4 h-4"
@@ -394,10 +393,10 @@ export const LeadExplorerGrid: React.FC<LeadExplorerGridProps> = ({
                   viewBox="0 0 24 24"
                 >
                   <path
+                    d="M3 4h18M6 8h12M9 12h6M11 16h2"
                     strokeLinecap="round"
                     strokeLinejoin="round"
                     strokeWidth={2}
-                    d="M3 4h18M6 8h12M9 12h6M11 16h2"
                   />
                 </svg>
                 <span>Filters</span>
@@ -412,14 +411,14 @@ export const LeadExplorerGrid: React.FC<LeadExplorerGridProps> = ({
             {/* View Mode Toggle */}
             <div className="flex items-center gap-1 p-1 bg-gray-100 dark:bg-gray-800 rounded-lg">
               <button
-                type="button"
-                onClick={() => setViewMode("grid")}
+                aria-label="Grid view"
                 className={`p-1.5 rounded ${
                   viewMode === "grid"
                     ? "bg-white dark:bg-gray-700 shadow"
                     : "hover:bg-gray-200 dark:hover:bg-gray-700"
                 }`}
-                aria-label="Grid view"
+                type="button"
+                onClick={() => setViewMode("grid")}
               >
                 <svg
                   className="w-4 h-4"
@@ -430,14 +429,14 @@ export const LeadExplorerGrid: React.FC<LeadExplorerGridProps> = ({
                 </svg>
               </button>
               <button
-                type="button"
-                onClick={() => setViewMode("list")}
+                aria-label="List view"
                 className={`p-1.5 rounded ${
                   viewMode === "list"
                     ? "bg-white dark:bg-gray-700 shadow"
                     : "hover:bg-gray-200 dark:hover:bg-gray-700"
                 }`}
-                aria-label="List view"
+                type="button"
+                onClick={() => setViewMode("list")}
               >
                 <svg
                   className="w-4 h-4"
@@ -445,9 +444,9 @@ export const LeadExplorerGrid: React.FC<LeadExplorerGridProps> = ({
                   viewBox="0 0 20 20"
                 >
                   <path
-                    fillRule="evenodd"
-                    d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z"
                     clipRule="evenodd"
+                    d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z"
+                    fillRule="evenodd"
                   />
                 </svg>
               </button>
@@ -477,14 +476,14 @@ export const LeadExplorerGrid: React.FC<LeadExplorerGridProps> = ({
             <svg
               className="mx-auto h-12 w-12 text-gray-400"
               fill="none"
-              viewBox="0 0 24 24"
               stroke="currentColor"
+              viewBox="0 0 24 24"
             >
               <path
+                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 strokeWidth={2}
-                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
               />
             </svg>
             <h3 className="mt-4 text-sm font-medium text-gray-900 dark:text-gray-100">
@@ -497,9 +496,9 @@ export const LeadExplorerGrid: React.FC<LeadExplorerGridProps> = ({
             </p>
             {activeFilterCount > 0 && (
               <button
+                className="mt-4 px-4 py-2 text-sm font-medium text-blue-600 hover:text-blue-700"
                 type="button"
                 onClick={handleClearFilters}
-                className="mt-4 px-4 py-2 text-sm font-medium text-blue-600 hover:text-blue-700"
               >
                 Clear all filters
               </button>
@@ -510,30 +509,30 @@ export const LeadExplorerGrid: React.FC<LeadExplorerGridProps> = ({
             {/* Mobile Filters Drawer */}
             {showFilters && (
               <div
+                aria-labelledby="filters-title"
+                aria-modal="true"
                 className="fixed inset-0 z-40"
                 role="dialog"
-                aria-modal="true"
-                aria-labelledby="filters-title"
               >
                 <div
+                  aria-hidden="true"
                   className="fixed inset-0 bg-black/40"
                   onClick={() => setShowFilters(false)}
-                  aria-hidden="true"
                 />
                 <div className="fixed inset-y-0 right-0 w-full max-w-sm bg-white dark:bg-gray-900 shadow-xl p-4 overflow-y-auto">
                   <div className="flex items-center justify-between mb-3">
                     <h2
-                      id="filters-title"
                       className="text-base font-semibold text-gray-900 dark:text-gray-100"
+                      id="filters-title"
                     >
                       Filters
                     </h2>
                     <button
+                      autoFocus
+                      aria-label="Close filters"
+                      className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800"
                       type="button"
                       onClick={() => setShowFilters(false)}
-                      className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800"
-                      aria-label="Close filters"
-                      autoFocus
                     >
                       <svg
                         className="w-4 h-4"
@@ -542,10 +541,10 @@ export const LeadExplorerGrid: React.FC<LeadExplorerGridProps> = ({
                         viewBox="0 0 24 24"
                       >
                         <path
+                          d="M6 18L18 6M6 6l12 12"
                           strokeLinecap="round"
                           strokeLinejoin="round"
                           strokeWidth={2}
-                          d="M6 18L18 6M6 6l12 12"
                         />
                       </svg>
                     </button>
@@ -578,12 +577,12 @@ export const LeadExplorerGrid: React.FC<LeadExplorerGridProps> = ({
             {totalPages > 1 && (
               <div className="mt-6 flex items-center justify-between">
                 <button
+                  className="px-4 py-2 text-sm font-medium rounded-lg border border-gray-300 dark:border-gray-600 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100 dark:hover:bg-gray-800"
+                  disabled={currentPage === 0}
                   type="button"
                   onClick={() =>
                     setCurrentPage((page) => Math.max(0, page - 1))
                   }
-                  disabled={currentPage === 0}
-                  className="px-4 py-2 text-sm font-medium rounded-lg border border-gray-300 dark:border-gray-600 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100 dark:hover:bg-gray-800"
                 >
                   Previous
                 </button>
@@ -591,12 +590,12 @@ export const LeadExplorerGrid: React.FC<LeadExplorerGridProps> = ({
                   Page {currentPage + 1} of {totalPages}
                 </span>
                 <button
+                  className="px-4 py-2 text-sm font-medium rounded-lg border border-gray-300 dark:border-gray-600 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100 dark:hover:bg-gray-800"
+                  disabled={currentPage >= totalPages - 1}
                   type="button"
                   onClick={() =>
                     setCurrentPage((page) => Math.min(totalPages - 1, page + 1))
                   }
-                  disabled={currentPage >= totalPages - 1}
-                  className="px-4 py-2 text-sm font-medium rounded-lg border border-gray-300 dark:border-gray-600 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100 dark:hover:bg-gray-800"
                 >
                   Next
                 </button>

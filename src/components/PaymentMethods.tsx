@@ -1,84 +1,62 @@
-import { User } from "@supabase/supabase-js";
-import React, { useEffect, useState } from "react";
-import { supabase } from "../lib/supabase";
+import React, { useState } from "react";
 
 interface PaymentMethodsProps {
-  user: User | null;
+  methods: Array<{ id: string; type: string; details: string }>;
+  onSelect: (id: string) => void;
+  selectedMethodId?: string;
+  isLoading?: boolean;
 }
 
-interface PaymentMethod {
-  id: string;
-  stripe_payment_method_id: string;
-  type: string;
-  last_four: string;
-  brand: string;
-  exp_month: number;
-  exp_year: number;
-  is_default: boolean;
-}
+export const PaymentMethods: React.FC<PaymentMethodsProps> = ({
+  methods,
+  onSelect,
+  selectedMethodId,
+  isLoading = false,
+}) => {
+  const [expanded, setExpanded] = useState<string | null>(null);
 
-interface UserProfile {
-  id: string;
-  email: string;
-  full_name: string;
-  subscription_tier: string;
-  total_spent: number;
-  monthly_budget: number;
-}
-
-export const PaymentMethods: React.FC<PaymentMethodsProps> = ({ user }) => {
-  const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
-  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [showAddCard, setShowAddCard] = useState(false);
-
-  useEffect(() => {
-    if (user) {
-      loadUserData();
-    } else {
-      setLoading(false);
-    }
-  }, [user]);
-
-  const loadUserData = async () => {
-    if (!user) return;
-
-    try {
-      setLoading(true);
-
-      // Load user profile
-      const { data: profile, error: profileError } = await supabase
-        .from("user_profiles")
-        .select("*")
-        .eq("id", user.id)
-        .single();
-
-      if (profileError && profileError.code !== "PGRST116") {
-        throw profileError;
-      }
-
-      setUserProfile(profile);
-
-      // Load payment methods
-      const { data: methods, error: methodsError } = await supabase
-        .from("payment_methods")
-        .select("*")
-        .eq("user_id", user.id)
-        .order("created_at", { ascending: false });
-
-      if (methodsError) {
-        throw methodsError;
-      }
-
-      setPaymentMethods(methods || []);
-    } catch (err: any) {
-      console.error("Error loading user data:", err);
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
+  const handleExpand = (id: string) => {
+    setExpanded((prev) => (prev === id ? null : id));
   };
+
+  return (
+    <div className="space-y-2">
+      {isLoading ? (
+        <div className="text-center text-gray-500">Loading payment methods...</div>
+      ) : (
+        methods.map((method) => (
+          <div
+            key={method.id}
+            className={`border rounded-lg p-4 cursor-pointer transition-colors ${
+              selectedMethodId === method.id
+                ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20"
+                : "border-gray-200 dark:border-gray-700"
+            }`}
+            onClick={() => onSelect(method.id)}
+          >
+            <div className="flex items-center justify-between">
+              <div className="font-medium">{method.type}</div>
+              <button
+                className="text-xs text-blue-600 hover:underline"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleExpand(method.id);
+                }}
+              >
+                {expanded === method.id ? "Hide Details" : "Show Details"}
+              </button>
+            </div>
+            {expanded === method.id && (
+              <div className="mt-2 text-sm text-gray-600 dark:text-gray-300">
+                {method.details}
+              </div>
+            )}
+          </div>
+        ))
+      )}
+    </div>
+  );
+};
 
   const handleSetDefaultPayment = async (paymentMethodId: string) => {
     if (!user) return;

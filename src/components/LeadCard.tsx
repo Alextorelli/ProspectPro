@@ -116,10 +116,6 @@ export const LeadCard: React.FC<LeadCardProps> = ({
 
   return (
     <article
-      role="button"
-      tabIndex={onClick ? 0 : undefined}
-      onClick={handleCardClick}
-      onKeyDown={handleKeyDown}
       aria-label={`Lead: ${lead.business_name}`}
       className={`relative bg-white dark:bg-slate-800 rounded-lg border-2 transition-all ${
         isSelected
@@ -131,12 +127,16 @@ export const LeadCard: React.FC<LeadCardProps> = ({
       } ${
         onClick ? "cursor-pointer" : ""
       } focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2`}
+      role="button"
+      tabIndex={onClick ? 0 : undefined}
+      onClick={handleCardClick}
+      onKeyDown={handleKeyDown}
     >
       {/* Tier Badge */}
       <div className="absolute -top-3 -right-3">
         <span
-          className={`inline-flex items-center gap-1.5 px-3 py-1 ${tierColors.badge} text-white text-xs font-bold rounded-full shadow-md`}
           aria-label={`${tierKey} tier lead`}
+          className={`inline-flex items-center gap-1.5 px-3 py-1 ${tierColors.badge} text-white text-xs font-bold rounded-full shadow-md`}
         >
           {tierKey === "ENTERPRISE" && (
             <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
@@ -155,15 +155,15 @@ export const LeadCard: React.FC<LeadCardProps> = ({
           </h3>
           {hasVerifiedData && (
             <span
-              className="inline-flex items-center gap-1 px-2 py-0.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-xs font-medium rounded"
               aria-label="Verified contact data"
+              className="inline-flex items-center gap-1 px-2 py-0.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-xs font-medium rounded"
               title={`Verified via: ${dataSources.join(", ")}`}
             >
               <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
                 <path
-                  fillRule="evenodd"
-                  d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
                   clipRule="evenodd"
+                  d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                  fillRule="evenodd"
                 />
               </svg>
               Verified
@@ -182,16 +182,16 @@ export const LeadCard: React.FC<LeadCardProps> = ({
                 viewBox="0 0 24 24"
               >
                 <path
+                  d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
                   strokeLinecap="round"
                   strokeLinejoin="round"
                   strokeWidth={2}
-                  d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
                 />
                 <path
+                  d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
                   strokeLinecap="round"
                   strokeLinejoin="round"
                   strokeWidth={2}
-                  d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
                 />
               </svg>
               <span className="flex-1">{lead.address}</span>
@@ -207,10 +207,10 @@ export const LeadCard: React.FC<LeadCardProps> = ({
                 viewBox="0 0 24 24"
               >
                 <path
+                  d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
                   strokeLinecap="round"
                   strokeLinejoin="round"
                   strokeWidth={2}
-                  d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
                 />
               </svg>
               <span>{lead.phone}</span>
@@ -226,10 +226,10 @@ export const LeadCard: React.FC<LeadCardProps> = ({
                 viewBox="0 0 24 24"
               >
                 <path
+                  d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
                   strokeLinecap="round"
                   strokeLinejoin="round"
                   strokeWidth={2}
-                  d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
                 />
               </svg>
               <span className="flex-1 truncate">{verifiedEmail.email}</span>
@@ -240,9 +240,9 @@ export const LeadCard: React.FC<LeadCardProps> = ({
                   viewBox="0 0 20 20"
                 >
                   <path
-                    fillRule="evenodd"
-                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
                     clipRule="evenodd"
+                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                    fillRule="evenodd"
                   />
                 </svg>
                 Verified
@@ -259,17 +259,17 @@ export const LeadCard: React.FC<LeadCardProps> = ({
                 viewBox="0 0 24 24"
               >
                 <path
+                  d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"
                   strokeLinecap="round"
                   strokeLinejoin="round"
                   strokeWidth={2}
-                  d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"
                 />
               </svg>
               <a
-                href={lead.website}
-                target="_blank"
-                rel="noopener noreferrer"
                 className="flex-1 truncate hover:text-blue-600 dark:hover:text-blue-400 hover:underline"
+                href={lead.website}
+                rel="noopener noreferrer"
+                target="_blank"
                 onClick={(e) => e.stopPropagation()}
               >
                 {lead.website}
@@ -295,6 +295,10 @@ export const LeadCard: React.FC<LeadCardProps> = ({
           </div>
           <div className="w-full h-2 bg-gray-200 dark:bg-slate-700 rounded-full overflow-hidden">
             <div
+              aria-label={`Confidence score: ${confidencePercentage}%`}
+              aria-valuemax={100}
+              aria-valuemin={0}
+              aria-valuenow={confidencePercentage}
               className={`h-full transition-all ${
                 confidencePercentage >= 75
                   ? "bg-green-500 dark:bg-green-400"
@@ -302,12 +306,8 @@ export const LeadCard: React.FC<LeadCardProps> = ({
                   ? "bg-blue-500 dark:bg-blue-400"
                   : "bg-orange-500 dark:bg-orange-400"
               }`}
-              style={{ width: `${Math.max(confidencePercentage, 5)}%` }}
               role="progressbar"
-              aria-valuenow={confidencePercentage}
-              aria-valuemin={0}
-              aria-valuemax={100}
-              aria-label={`Confidence score: ${confidencePercentage}%`}
+              style={{ width: `${Math.max(confidencePercentage, 5)}%` }}
             />
           </div>
         </div>
@@ -332,25 +332,25 @@ export const LeadCard: React.FC<LeadCardProps> = ({
           <div className="flex gap-2 pt-2">
             {onViewDetails && (
               <button
+                className="flex-1 px-3 py-2 bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white text-sm font-medium rounded transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
                 type="button"
                 onClick={(e) => {
                   e.stopPropagation();
                   onViewDetails(lead);
                 }}
-                className="flex-1 px-3 py-2 bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white text-sm font-medium rounded transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
               >
                 View Details
               </button>
             )}
             {onExport && (
               <button
+                aria-label="Export lead"
+                className="px-3 py-2 bg-gray-100 hover:bg-gray-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-gray-700 dark:text-slate-300 text-sm font-medium rounded transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 focus-visible:ring-offset-2"
                 type="button"
                 onClick={(e) => {
                   e.stopPropagation();
                   onExport(lead);
                 }}
-                className="px-3 py-2 bg-gray-100 hover:bg-gray-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-gray-700 dark:text-slate-300 text-sm font-medium rounded transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 focus-visible:ring-offset-2"
-                aria-label="Export lead"
               >
                 <svg
                   className="w-4 h-4"
@@ -359,10 +359,10 @@ export const LeadCard: React.FC<LeadCardProps> = ({
                   viewBox="0 0 24 24"
                 >
                   <path
+                    d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
                     strokeLinecap="round"
                     strokeLinejoin="round"
                     strokeWidth={2}
-                    d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
                   />
                 </svg>
               </button>
@@ -380,9 +380,9 @@ export const LeadCard: React.FC<LeadCardProps> = ({
             viewBox="0 0 20 20"
           >
             <path
-              fillRule="evenodd"
-              d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
               clipRule="evenodd"
+              d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+              fillRule="evenodd"
             />
           </svg>
           <span>

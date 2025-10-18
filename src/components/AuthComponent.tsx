@@ -1,6 +1,5 @@
 import { User } from "@supabase/supabase-js";
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { Link } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { supabase } from "../lib/supabase";
 
@@ -19,12 +18,41 @@ declare global {
   }
 }
 
+const createUserProfile = async (user: User) => {
+  try {
+    // Check if profile exists
+    const { data: existingProfile } = await supabase
+      .from("user_profiles")
+      .select("id")
+      .eq("id", user.id)
+      .single();
+
+    if (!existingProfile) {
+      // Create profile if it doesn't exist
+      const { error } = await supabase.from("user_profiles").insert({
+        id: user.id,
+        email: user.email,
+        full_name: user.user_metadata?.full_name || null,
+        avatar_url: user.user_metadata?.avatar_url || null,
+      });
+
+      if (error) {
+        console.error("Error creating user profile:", error);
+      }
+    }
+  } catch (error) {
+    console.error("Error in createUserProfile:", error);
+  }
+};
+
 export const AuthComponent: React.FC<AuthComponentProps> = ({
   onAuthChange,
 }) => {
   const {
     user: authUser,
     loading: authLoading,
+    signIn,
+    signUp,
     signOut: contextSignOut,
   } = useAuth();
   const [localLoading, setLocalLoading] = useState(false);
@@ -103,543 +131,208 @@ export const AuthComponent: React.FC<AuthComponentProps> = ({
 
     document.addEventListener("mousedown", handleClickOutside);
     document.addEventListener("keydown", handleEscape);
-
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
       document.removeEventListener("keydown", handleEscape);
     };
   }, [isMenuOpen, resetForm]);
 
-  const initializeCaptcha = useCallback(() => {
-    if (!showEmailForm || !isSignUp) {
-      return;
-    }
-
-    if (!window.hcaptcha || captchaWidgetIdRef.current) {
-      return;
-    }
-
-    try {
-      const widgetId = window.hcaptcha.render("auth-hcaptcha-container", {
-        sitekey: import.meta.env.VITE_HCAPTCHA_SITE_KEY,
-        size: "invisible",
-        callback: () => undefined,
-      });
-      captchaWidgetIdRef.current = widgetId;
-    } catch (err) {
-      console.warn("Unable to initialize hCaptcha", err);
-    }
-  }, [isSignUp, showEmailForm]);
-
-  const executeCaptcha = useCallback(async () => {
-    if (!window.hcaptcha || !captchaWidgetIdRef.current) {
-      return null;
-    }
-
-    try {
-      const result = await window.hcaptcha.execute(captchaWidgetIdRef.current);
-      return result.response;
-    } catch (err) {
-      console.warn("Unable to complete hCaptcha", err);
-      return null;
-    }
-  }, []);
-
-  useEffect(() => {
-    if (showEmailForm && isSignUp) {
-      initializeCaptcha();
-    }
-  }, [showEmailForm, isSignUp, initializeCaptcha]);
-
-  const createUserProfile = async (user: User) => {
-    try {
-      const { error } = await supabase.from("user_profiles").upsert([
-        {
-          id: user.id,
-          email: user.email,
-          full_name: user.user_metadata?.full_name || fullName || "",
-          avatar_url: user.user_metadata?.avatar_url || "",
-          subscription_tier: "free",
-          total_spent: 0,
-          monthly_budget: 100.0,
-        },
-      ]);
-
-      if (error && error.code !== "23505") {
-        console.error("Error creating user profile:", error);
-      }
-    } catch (err) {
-      console.error("Error creating user profile:", err);
-    }
-  };
-
-  const validatePassword = (password: string): string | null => {
-    if (password.length < 8) {
-      return "Password must be at least 8 characters";
-    }
-    if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(password)) {
-      return "Password must contain uppercase, lowercase, and number";
-    }
-    return null;
-  };
-
-  const getRedirectTo = () => {
-    const defaultCallbackPath = "/auth/callback";
-
-    const ensureCallbackPath = (rawUrl: string | undefined | null) => {
-      if (!rawUrl) return null;
-
-      const trimmed = rawUrl.trim();
-      if (!trimmed) return null;
-
-      try {
-        const parsed = new URL(trimmed);
-
-        if (
-          parsed.pathname === "/" ||
-          parsed.pathname === "" ||
-          parsed.pathname === "//"
-        ) {
-          parsed.pathname = defaultCallbackPath;
-        }
-
-        return parsed.toString();
-      } catch {
-        const sanitized = trimmed.replace(/\/+$/, "");
-        return `${sanitized}${defaultCallbackPath}`;
-      }
-    };
-
-    const configuredRedirect = ensureCallbackPath(
-      import.meta.env.VITE_AUTH_REDIRECT_URL
-    );
-
-    if (configuredRedirect) {
-      return configuredRedirect;
-    }
-
-    if (typeof window !== "undefined" && window.location?.origin) {
-      const origin = window.location.origin.replace(/\/+$/, "");
-      return `${origin}${defaultCallbackPath}`;
-    }
-
-    return defaultCallbackPath;
-  };
-
-  const handleEmailAuth = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setError(null);
-    setSuccess(null);
-    setLocalLoading(true);
-
-    try {
-      if (isSignUp) {
-        if (password !== confirmPassword) {
-          setError("Passwords do not match");
-          setLocalLoading(false);
-          return;
-        }
-
-        const passwordValidationError = validatePassword(password);
-        if (passwordValidationError) {
-          setError(passwordValidationError);
-          setLocalLoading(false);
-          return;
-        }
-
-        if (window.hcaptcha) {
-          const token = await executeCaptcha();
-          if (!token) {
-            setError("Captcha verification failed. Please try again.");
-            setLocalLoading(false);
-            return;
-          }
-        }
-
-        const { error: signUpError } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            emailRedirectTo: getRedirectTo(),
-            data: {
-              full_name: fullName.trim(),
-            },
-          },
-        });
-
-        if (signUpError) {
-          throw signUpError;
-        }
-
-        setSuccess(
-          "Check your email to confirm your account. Once confirmed, sign in to continue."
-        );
-        resetForm();
-        setShowEmailForm(false);
-        setIsMenuOpen(false);
-      } else {
-        const { error: signInError } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
-
-        if (signInError) {
-          throw signInError;
-        }
-
-        resetForm();
-        setShowEmailForm(false);
-        setIsMenuOpen(false);
-      }
-    } catch (err) {
-      const message =
-        err instanceof Error ? err.message : "Authentication failed.";
-      setError(message);
-    } finally {
-      setLocalLoading(false);
-    }
-  };
-
-  const handleGoogleAuth = async () => {
-    setError(null);
-    setSuccess(null);
-    setLocalLoading(true);
-
-    try {
-      const { error: oauthError } = await supabase.auth.signInWithOAuth({
-        provider: "google",
-        options: {
-          redirectTo: getRedirectTo(),
-          queryParams: {
-            access_type: "offline",
-            prompt: "consent",
-          },
-        },
-      });
-
-      if (oauthError) {
-        throw oauthError;
-      }
-    } catch (err) {
-      const message =
-        err instanceof Error ? err.message : "Google sign-in failed.";
-      setError(message);
-    } finally {
-      setLocalLoading(false);
-    }
-  };
-
-  const handleSignOut = async () => {
-    setLocalLoading(true);
-    setError(null);
-
-    try {
-      await contextSignOut();
-      resetForm();
-      setIsMenuOpen(false);
-    } catch (err) {
-      const message =
-        err instanceof Error ? err.message : "Unable to sign out right now.";
-      setError(message);
-    } finally {
-      setLocalLoading(false);
-    }
-  };
-
-  if (combinedLoading && !authUser) {
+  if (combinedLoading) {
     return (
-      <div className="flex items-center space-x-2">
-        <div className="h-4 w-4 animate-spin rounded-full border-2 border-gray-500 border-t-blue-600"></div>
-        <span className="text-sm font-medium text-gray-800">Loading…</span>
-      </div>
-    );
-  }
-
-  if (authUser) {
-    const displayName = authUser.user_metadata?.full_name || "ProspectPro user";
-    const emailLabel = authUser.email || "Authenticated";
-    const initials = displayName
-      .split(" ")
-      .map((segment: string) => segment.charAt(0))
-      .join("")
-      .slice(0, 2)
-      .toUpperCase();
-
-    return (
-      <div className="relative" ref={menuContainerRef}>
-        <button
-          type="button"
-          onClick={() => setIsMenuOpen((prev) => !prev)}
-          className="inline-flex items-center gap-3 rounded-full border border-transparent bg-white/80 px-3 py-1.5 text-left text-sm font-medium text-gray-900 shadow-sm transition-colors hover:border-blue-600 hover:bg-white dark:bg-slate-900/70 dark:text-slate-100"
-          aria-haspopup="menu"
-          aria-expanded={isMenuOpen}
-        >
-          <span className="relative flex h-9 w-9 items-center justify-center overflow-hidden rounded-full border border-blue-200 bg-blue-100 text-base font-semibold text-blue-700 shadow-sm dark:border-sky-500/60 dark:bg-sky-500/10 dark:text-sky-200">
-            {authUser.user_metadata?.avatar_url ? (
-              <img
-                src={authUser.user_metadata.avatar_url}
-                alt={displayName}
-                className="absolute inset-0 h-full w-full object-cover"
-              />
-            ) : (
-              initials || "PP"
-            )}
-          </span>
-          <span className="flex flex-col items-start">
-            <span className="text-sm font-semibold leading-tight">
-              {displayName}
-            </span>
-            <span className="text-xs text-gray-600 leading-tight dark:text-slate-300">
-              {emailLabel}
-            </span>
-          </span>
-          <svg
-            className={`h-4 w-4 text-gray-500 transition-transform dark:text-slate-300 ${
-              isMenuOpen ? "rotate-180" : ""
-            }`}
-            viewBox="0 0 20 20"
-            fill="currentColor"
-            aria-hidden="true"
-          >
-            <path
-              fillRule="evenodd"
-              d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 011.08 1.04l-4.25 4.25a.75.75 0 01-1.08 0L5.21 8.27a.75.75 0 01.02-1.06z"
-              clipRule="evenodd"
-            />
-          </svg>
-        </button>
-
-        {isMenuOpen && (
-          <div
-            className="absolute right-0 z-50 mt-2 w-64 rounded-lg border border-gray-200 bg-white p-3 text-sm shadow-xl dark:border-slate-700 dark:bg-slate-900"
-            role="menu"
-            aria-label="Account menu"
-          >
-            <div className="mb-3 rounded-md border border-gray-100 bg-gray-50 px-3 py-2 dark:border-slate-700 dark:bg-slate-800">
-              <p className="text-xs uppercase tracking-wide text-gray-500 dark:text-slate-400">
-                Signed in as
-              </p>
-              <p className="truncate text-sm font-semibold text-gray-900 dark:text-slate-100">
-                {displayName}
-              </p>
-              <p className="truncate text-xs text-gray-600 dark:text-slate-300">
-                {emailLabel}
-              </p>
-            </div>
-
-            <div className="flex flex-col gap-1" role="none">
-              <Link
-                to="/account"
-                className="rounded-md px-3 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-blue-50 hover:text-blue-700 dark:text-slate-200 dark:hover:bg-slate-800"
-                role="menuitem"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Account settings
-              </Link>
-              <button
-                type="button"
-                onClick={handleSignOut}
-                disabled={combinedLoading}
-                className="rounded-md px-3 py-2 text-sm font-semibold text-red-600 transition-colors hover:bg-red-50 disabled:opacity-60 dark:text-rose-400 dark:hover:bg-rose-500/10"
-                role="menuitem"
-              >
-                Sign out
-              </button>
-            </div>
-          </div>
-        )}
+      <div className="flex items-center justify-center p-4">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-2 text-sm text-gray-600">Loading...</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="relative" ref={menuContainerRef}>
-      <button
-        type="button"
-        onClick={() =>
-          setIsMenuOpen((prev) => {
-            const next = !prev;
-            if (!next) {
-              setShowEmailForm(false);
-              resetForm();
-            }
-            return next;
-          })
-        }
-        className="inline-flex items-center gap-2 rounded-full border border-blue-200 bg-white/80 px-4 py-1.5 text-sm font-semibold text-blue-700 shadow-sm transition-colors hover:border-blue-400 hover:bg-white dark:border-sky-500/40 dark:bg-slate-900/70 dark:text-sky-200"
-        aria-haspopup="menu"
-        aria-expanded={isMenuOpen}
-      >
-        <span>Sign in / Sign up</span>
-        <svg
-          className={`h-4 w-4 text-blue-500 transition-transform dark:text-sky-300 ${
-            isMenuOpen ? "rotate-180" : ""
-          }`}
-          viewBox="0 0 20 20"
-          fill="currentColor"
-          aria-hidden="true"
-        >
-          <path
-            fillRule="evenodd"
-            d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 011.08 1.04l-4.25 4.25a.75.75 0 01-1.08 0L5.21 8.27a.75.75 0 01.02-1.06z"
-            clipRule="evenodd"
-          />
-        </svg>
-      </button>
-
-      {isMenuOpen && (
-        <div
-          className="absolute right-0 z-50 mt-2 w-80 rounded-lg border border-gray-200 bg-white p-4 text-sm shadow-xl dark:border-slate-700 dark:bg-slate-900"
-          role="menu"
-          aria-label="Authentication menu"
-        >
-          <div className="space-y-4" role="none">
-            <button
-              type="button"
-              onClick={handleGoogleAuth}
-              disabled={combinedLoading}
-              className="flex w-full items-center justify-center gap-2 rounded-md border border-gray-300 bg-white px-4 py-2 font-medium text-gray-800 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700"
-              role="menuitem"
+    <div ref={menuContainerRef} className="relative">
+      {authUser ? (
+        <div className="flex items-center space-x-4">
+          <button
+            className="flex items-center space-x-2 text-sm font-medium text-gray-700 hover:text-gray-900"
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+          >
+            <span>{authUser.email}</span>
+            <svg
+              className="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
             >
-              <svg className="h-4 w-4" viewBox="0 0 24 24">
-                <path
-                  fill="#4285f4"
-                  d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-                />
-                <path
-                  fill="#34a853"
-                  d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                />
-                <path
-                  fill="#fbbc05"
-                  d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-                />
-                <path
-                  fill="#ea4335"
-                  d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-                />
-              </svg>
-              <span>Continue with Google</span>
-            </button>
+              <path
+                d="M19 9l-7 7-7-7"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+              />
+            </svg>
+          </button>
 
-            <div className="flex items-center gap-3 text-xs uppercase tracking-wide text-gray-400 dark:text-slate-500">
-              <span className="h-px flex-1 bg-gray-200 dark:bg-slate-700" />
-              <span>or</span>
-              <span className="h-px flex-1 bg-gray-200 dark:bg-slate-700" />
+          {isMenuOpen && (
+            <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-50">
+              <div className="py-1">
+                <button
+                  className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  onClick={() => {
+                    contextSignOut();
+                    setIsMenuOpen(false);
+                  }}
+                >
+                  Sign Out
+                </button>
+              </div>
             </div>
+          )}
+        </div>
+      ) : (
+        <button
+          className="bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-700"
+          onClick={() => setShowEmailForm(true)}
+        >
+          Sign In
+        </button>
+      )}
 
-            <button
-              type="button"
-              onClick={() => {
-                const next = !showEmailForm;
-                setShowEmailForm(next);
-                setError(null);
-                setSuccess(null);
+      {showEmailForm && !authUser && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg max-w-md w-full mx-4">
+            <h2 className="text-xl font-semibold mb-4">
+              {isSignUp ? "Create Account" : "Sign In"}
+            </h2>
 
-                if (!next) {
-                  resetForm();
-                }
-              }}
-              className="w-full rounded-md border border-transparent bg-blue-50 px-4 py-2 text-sm font-semibold text-blue-700 transition-colors hover:bg-blue-100 dark:bg-sky-500/10 dark:text-sky-200 dark:hover:bg-sky-500/20"
-              role="menuitem"
-            >
-              {showEmailForm ? "Hide email options" : "Continue with email"}
-            </button>
-
-            {showEmailForm && (
-              <div className="rounded-md border border-gray-200 bg-gray-50 p-4 dark:border-slate-700 dark:bg-slate-800">
-                <div className="mb-3 flex items-center justify-between">
-                  <p className="text-sm font-semibold text-gray-700 dark:text-slate-200">
-                    {isSignUp ? "Create an account" : "Sign in with email"}
-                  </p>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setIsSignUp((prev) => !prev);
-                      setError(null);
-                      setSuccess(null);
-                    }}
-                    className="text-xs font-medium text-blue-600 transition-colors hover:text-blue-700 dark:text-sky-300 dark:hover:text-sky-200"
-                  >
-                    {isSignUp
-                      ? "Have an account? Sign in"
-                      : "New user? Create account"}
-                  </button>
-                </div>
-
-                <form onSubmit={handleEmailAuth} className="space-y-3">
-                  {isSignUp && (
-                    <input
-                      type="text"
-                      placeholder="Full name"
-                      value={fullName}
-                      onChange={(event) => setFullName(event.target.value)}
-                      className="w-full rounded border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
-                      required
-                    />
-                  )}
-
-                  <input
-                    type="email"
-                    placeholder="Email"
-                    value={email}
-                    onChange={(event) => setEmail(event.target.value)}
-                    className="w-full rounded border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
-                    required
-                  />
-
-                  <input
-                    type="password"
-                    placeholder="Password"
-                    value={password}
-                    onChange={(event) => setPassword(event.target.value)}
-                    className="w-full rounded border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
-                    required
-                  />
-
-                  {isSignUp && (
-                    <input
-                      type="password"
-                      placeholder="Confirm password"
-                      value={confirmPassword}
-                      onChange={(event) =>
-                        setConfirmPassword(event.target.value)
-                      }
-                      className="w-full rounded border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
-                      required
-                    />
-                  )}
-
-                  <button
-                    type="submit"
-                    disabled={combinedLoading}
-                    className="w-full rounded bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-sky-500 dark:hover:bg-sky-600"
-                  >
-                    {combinedLoading ? (
-                      <span>Processing…</span>
-                    ) : isSignUp ? (
-                      "Create account"
-                    ) : (
-                      "Sign in"
-                    )}
-                  </button>
-                </form>
-
-                {error && (
-                  <div className="mt-3 rounded border border-red-200 bg-red-50 p-2 text-xs text-red-600 dark:border-rose-500/40 dark:bg-rose-500/10 dark:text-rose-200">
-                    {error}
-                  </div>
-                )}
-
-                {success && (
-                  <div className="mt-3 rounded border border-green-200 bg-green-50 p-2 text-xs text-green-700 dark:border-emerald-500/40 dark:bg-emerald-500/10 dark:text-emerald-200">
-                    {success}
-                  </div>
-                )}
-
-                <div id="auth-hcaptcha-container" className="hidden" />
+            {error && (
+              <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+                {error}
               </div>
             )}
+
+            {success && (
+              <div className="mb-4 p-3 bg-green-100 border border-green-400 text-green-700 rounded">
+                {success}
+              </div>
+            )}
+
+            <form
+              onSubmit={async (e) => {
+                e.preventDefault();
+                setLocalLoading(true);
+                setError(null);
+
+                try {
+                  if (isSignUp) {
+                    if (password !== confirmPassword) {
+                      throw new Error("Passwords don't match");
+                    }
+                    await signUp(email, password);
+                    setSuccess("Check your email for confirmation!");
+                  } else {
+                    await signIn(email, password);
+                  }
+                } catch (err) {
+                  setError(
+                    err instanceof Error ? err.message : "An error occurred"
+                  );
+                } finally {
+                  setLocalLoading(false);
+                }
+              }}
+            >
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Email
+                </label>
+                <input
+                  required
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+              </div>
+
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Password
+                </label>
+                <input
+                  required
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+              </div>
+
+              {isSignUp && (
+                <>
+                  <div className="mb-4">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Confirm Password
+                    </label>
+                    <input
+                      required
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      type="password"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                    />
+                  </div>
+
+                  <div className="mb-4">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Full Name
+                    </label>
+                    <input
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      type="text"
+                      value={fullName}
+                      onChange={(e) => setFullName(e.target.value)}
+                    />
+                  </div>
+                </>
+              )}
+
+              <div className="flex justify-between items-center mb-4">
+                <button
+                  className="text-sm text-blue-600 hover:text-blue-800"
+                  type="button"
+                  onClick={() => {
+                    setIsSignUp(!isSignUp);
+                    resetForm();
+                  }}
+                >
+                  {isSignUp ? "Already have an account?" : "Need an account?"}
+                </button>
+              </div>
+
+              <div className="flex space-x-3">
+                <button
+                  className="flex-1 px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200"
+                  type="button"
+                  onClick={() => {
+                    setShowEmailForm(false);
+                    resetForm();
+                  }}
+                >
+                  Cancel
+                </button>
+                <button
+                  className="flex-1 px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 disabled:opacity-50"
+                  disabled={localLoading}
+                  type="submit"
+                >
+                  {localLoading
+                    ? "Loading..."
+                    : isSignUp
+                    ? "Sign Up"
+                    : "Sign In"}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

@@ -22,6 +22,7 @@ export const EnrichmentButton: React.FC<EnrichmentButtonProps> = ({
     reset,
   } = useLeadEnrichment();
 
+  // Hoist useState to top-level before any early returns
   const [showProgress, setShowProgress] = useState(false);
 
   const campaignLeads = leads.filter((lead) => lead.campaign_id === campaignId);
@@ -120,21 +121,21 @@ export const EnrichmentButton: React.FC<EnrichmentButtonProps> = ({
   return (
     <div className="space-y-3">
       <button
-        onClick={handleEnrich}
-        disabled={isEnriching}
         className={`px-6 py-3 rounded-lg font-semibold transition-all ${
           isEnriching
             ? "bg-blue-400 cursor-wait"
             : "bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
         } text-white shadow-md`}
+        disabled={isEnriching}
+        onClick={handleEnrich}
       >
         {isEnriching ? (
           <span className="flex items-center gap-2">
             <svg
               className="animate-spin h-5 w-5"
-              xmlns="http://www.w3.org/2000/svg"
               fill="none"
               viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
             >
               <circle
                 className="opacity-25"
@@ -146,8 +147,8 @@ export const EnrichmentButton: React.FC<EnrichmentButtonProps> = ({
               />
               <path
                 className="opacity-75"
-                fill="currentColor"
                 d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                fill="currentColor"
               />
             </svg>
             Enriching...

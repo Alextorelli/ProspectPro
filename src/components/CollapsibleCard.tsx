@@ -62,29 +62,21 @@ export const CollapsibleCard: React.FC<CollapsibleCardProps> = ({
 }) => {
   const cardId = useId();
   const isControlled = controlledIsOpen !== undefined;
-
-  // Initialize state from localStorage if persistKey is provided
-  const getInitialState = (): boolean => {
-    if (isControlled) return controlledIsOpen;
-
-    if (persistKey && typeof window !== "undefined") {
-      try {
-        const stored = localStorage.getItem(`collapsible-${persistKey}`);
-        if (stored !== null) {
-          return JSON.parse(stored);
-        }
-      } catch (error) {
-        console.warn(
-          "Failed to load collapsed state from localStorage:",
-          error
-        );
+  // Hoist getInitialState logic to top-level, but not as a hook
+  let initialOpen = defaultOpen;
+  if (isControlled) {
+    initialOpen = controlledIsOpen as boolean;
+  } else if (persistKey && typeof window !== "undefined") {
+    try {
+      const stored = localStorage.getItem(`collapsible-${persistKey}`);
+      if (stored !== null) {
+        initialOpen = JSON.parse(stored);
       }
+    } catch (error) {
+      console.warn("Failed to load collapsed state from localStorage:", error);
     }
-
-    return defaultOpen;
-  };
-
-  const [internalOpen, setInternalOpen] = useState(getInitialState);
+  }
+  const [internalOpen, setInternalOpen] = useState(initialOpen);
   const isOpen = isControlled ? controlledIsOpen : internalOpen;
 
   // Persist state to localStorage when it changes
@@ -128,25 +120,25 @@ export const CollapsibleCard: React.FC<CollapsibleCardProps> = ({
       className={`bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 shadow-sm transition-shadow hover:shadow-md ${className}`}
     >
       <button
-        id={headerId}
-        type="button"
-        onClick={handleToggle}
-        onKeyDown={handleKeyDown}
-        disabled={disabled}
-        aria-expanded={isOpen}
         aria-controls={contentId}
         aria-disabled={disabled}
+        aria-expanded={isOpen}
         className={`w-full flex items-center justify-between px-4 py-3 text-left transition-colors ${
           disabled
             ? "cursor-not-allowed opacity-50"
             : "hover:bg-gray-50 dark:hover:bg-slate-700/50 cursor-pointer"
         } focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-inset dark:focus-visible:ring-sky-400`}
+        disabled={disabled}
+        id={headerId}
+        type="button"
+        onClick={handleToggle}
+        onKeyDown={handleKeyDown}
       >
         <div className="flex items-center gap-3 flex-1 min-w-0">
           {icon && (
             <span
-              className="flex-shrink-0 text-gray-500 dark:text-slate-400"
               aria-hidden="true"
+              className="flex-shrink-0 text-gray-500 dark:text-slate-400"
             >
               {icon}
             </span>
@@ -164,29 +156,29 @@ export const CollapsibleCard: React.FC<CollapsibleCardProps> = ({
         </div>
 
         <svg
+          aria-hidden="true"
           className={`flex-shrink-0 w-5 h-5 text-gray-500 dark:text-slate-400 transition-transform ${
             isOpen ? "rotate-180" : ""
           }`}
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
-          aria-hidden="true"
         >
           <path
+            d="M19 9l-7 7-7-7"
             strokeLinecap="round"
             strokeLinejoin="round"
             strokeWidth={2}
-            d="M19 9l-7 7-7-7"
           />
         </svg>
       </button>
 
       {isOpen && (
         <div
-          id={contentId}
-          role="region"
           aria-labelledby={headerId}
           className="px-4 pb-4 pt-2"
+          id={contentId}
+          role="region"
         >
           {isLoading ? (
             <div className="flex items-center justify-center py-8">
@@ -233,10 +225,10 @@ export const FilterAccordion: React.FC<
       viewBox="0 0 24 24"
     >
       <path
+        d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"
         strokeLinecap="round"
         strokeLinejoin="round"
         strokeWidth={2}
-        d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"
       />
     </svg>
   );
@@ -244,7 +236,7 @@ export const FilterAccordion: React.FC<
   const displayTitle =
     activeCount && activeCount > 0 ? `${title} (${activeCount})` : title;
 
-  return <CollapsibleCard {...props} title={displayTitle} icon={filterIcon} />;
+  return <CollapsibleCard {...props} icon={filterIcon} title={displayTitle} />;
 };
 
 export default CollapsibleCard;

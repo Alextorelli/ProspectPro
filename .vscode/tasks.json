@@ -2,6 +2,20 @@
   "version": "2.0.0",
   "tasks": [
     {
+      "label": "Workspace: Dev Hygiene Check",
+      "type": "shell",
+      "command": "npm",
+      "args": ["run", "validate:ignores"],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "group": "build",
+      "presentation": {
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
       "label": "Start Codespace",
       "dependsOrder": "sequence",
       "dependsOn": [
@@ -1068,6 +1082,20 @@
         "panel": "shared"
       },
       "problemMatcher": []
+    },
+    {
+      "label": "Lint: Autofix All (React Hooks)",
+      "type": "shell",
+      "command": "npx",
+      "args": ["eslint", ".", "--fix"],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "group": "build",
+      "presentation": {
+        "panel": "shared"
+      },
+      "problemMatcher": ["$eslint-stylish"]
     },
     {
       "type": "npm",

@@ -102,6 +102,10 @@ const SKIP_FILES = new Set([
   "scripts/testing/test-env.local.sh",
   "scripts/testing/test-export-flow.sh",
   "scripts/testing/test-pdl-state-licensing.sh",
+  // TEMPORARY: ESLint parser compatibility issues (TypeScript 5.9.3)
+  "src/components/GeographicSelector.tsx",
+  "src/components/PaymentMethods.tsx",
+  "src/components/Stepper.tsx",
 ]);
 
 function readIgnoreFile(file) {

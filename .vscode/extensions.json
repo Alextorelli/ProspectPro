@@ -14,7 +14,12 @@
     "bradlc.vscode-tailwindcss",
     "davidanson.vscode-markdownlint",
     "redhat.vscode-yaml",
-    "humao.rest-client"
+    "humao.rest-client",
+    // === REACT DEBUGGING/REFACTORING (Selective Use) ===
+    "wandi.react-refactor",
+    "NuclleaR.vscode-extension-autoimport",
+    "pidigi.reactdevtools",
+    "laktak.pretty-ts-errors"
   ],
 
   "unwantedRecommendations": [

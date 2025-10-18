@@ -358,20 +358,22 @@ export const BusinessDiscovery: React.FC = () => {
       {/* Active Filter Chips */}
       {activeFilterChips.length > 0 && (
         <SelectedChips
-          chips={activeFilterChips}
-          onRemove={handleRemoveFilterChip}
-          onClearAll={handleClearAllFilters}
-          maxVisible={6}
           showTooltips
           ariaLabel="Active discovery filters"
+          chips={activeFilterChips}
+          maxVisible={6}
+          onClearAll={handleClearAllFilters}
+          onRemove={handleRemoveFilterChip}
         />
       )}
 
       <div className="rounded-lg border border-gray-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900">
         <div className="border-b border-gray-200 px-6 py-4 dark:border-slate-700">
           <Stepper
-            steps={stepsWithStatus}
+            allowBackNavigation
+            keyboardNavigation
             activeStep={currentStepIndex}
+            steps={stepsWithStatus}
             onStepChange={(index) => {
               // Only allow navigation to step 2 if targeting is valid
               if (index === 1 && !isTargetingValid) {
@@ -380,15 +382,13 @@ export const BusinessDiscovery: React.FC = () => {
               }
               setActiveStep((index + 1) as 1 | 2 | 3);
             }}
-            keyboardNavigation
-            allowBackNavigation
           />
         </div>
 
         <div className="p-6 space-y-8">
           <section
-            className={`space-y-6 ${activeStep === 1 ? "" : "hidden"}`}
             aria-hidden={activeStep !== 1}
+            className={`space-y-6 ${activeStep === 1 ? "" : "hidden"}`}
           >
             <header>
               <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
@@ -401,13 +401,6 @@ export const BusinessDiscovery: React.FC = () => {
             </header>
 
             <CollapsibleCard
-              title="Business Categories & Types"
-              subtitle={`${selectedBusinessTypes.length} business type${
-                selectedBusinessTypes.length !== 1 ? "s" : ""
-              } selected from ${selectedCategories.length} categor${
-                selectedCategories.length !== 1 ? "ies" : "y"
-              }`}
-              persistKey="discovery-business-types"
               defaultOpen={true}
               icon={
                 <svg
@@ -417,26 +410,30 @@ export const BusinessDiscovery: React.FC = () => {
                   viewBox="0 0 24 24"
                 >
                   <path
+                    d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
                     strokeLinecap="round"
                     strokeLinejoin="round"
                     strokeWidth={2}
-                    d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
                   />
                 </svg>
               }
+              persistKey="discovery-business-types"
+              subtitle={`${selectedBusinessTypes.length} business type${
+                selectedBusinessTypes.length !== 1 ? "s" : ""
+              } selected from ${selectedCategories.length} categor${
+                selectedCategories.length !== 1 ? "ies" : "y"
+              }`}
+              title="Business Categories & Types"
             >
               <MultiSelectBusinessTypes
-                selectedCategories={selectedCategories}
                 selectedBusinessTypes={selectedBusinessTypes}
-                onCategoriesChange={setSelectedCategories}
+                selectedCategories={selectedCategories}
                 onBusinessTypesChange={setSelectedBusinessTypes}
+                onCategoriesChange={setSelectedCategories}
               />
             </CollapsibleCard>
 
             <CollapsibleCard
-              title="Keywords & Refinements"
-              subtitle="Optional filters to narrow your search"
-              persistKey="discovery-keywords"
               defaultOpen={false}
               icon={
                 <svg
@@ -446,24 +443,27 @@ export const BusinessDiscovery: React.FC = () => {
                   viewBox="0 0 24 24"
                 >
                   <path
+                    d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"
                     strokeLinecap="round"
                     strokeLinejoin="round"
                     strokeWidth={2}
-                    d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"
                   />
                 </svg>
               }
+              persistKey="discovery-keywords"
+              subtitle="Optional filters to narrow your search"
+              title="Keywords & Refinements"
             >
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Additional Keywords (Optional)
                 </label>
                 <input
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
+                  placeholder="e.g., luxury, organic, 24-hour (comma-separated)"
                   type="text"
                   value={keywords}
                   onChange={(e) => setKeywords(e.target.value)}
-                  placeholder="e.g., luxury, organic, 24-hour (comma-separated)"
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
                 />
                 <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                   Add comma-separated keywords to refine your search.
@@ -472,9 +472,6 @@ export const BusinessDiscovery: React.FC = () => {
             </CollapsibleCard>
 
             <CollapsibleCard
-              title="Geographic Targeting"
-              subtitle={`${location.address} • ${searchRadius} mile radius`}
-              persistKey="discovery-geography"
               defaultOpen={true}
               icon={
                 <svg
@@ -484,38 +481,41 @@ export const BusinessDiscovery: React.FC = () => {
                   viewBox="0 0 24 24"
                 >
                   <path
+                    d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
                     strokeLinecap="round"
                     strokeLinejoin="round"
                     strokeWidth={2}
-                    d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
                   />
                   <path
+                    d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
                     strokeLinecap="round"
                     strokeLinejoin="round"
                     strokeWidth={2}
-                    d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
                   />
                 </svg>
               }
+              persistKey="discovery-geography"
+              subtitle={`${location.address} • ${searchRadius} mile radius`}
+              title="Geographic Targeting"
             >
               <div className="space-y-4">
                 <GeographicSelector
-                  onLocationChange={handleGeographicChange}
                   initialLocation={location}
                   initialRadius={searchRadius}
+                  onLocationChange={handleGeographicChange}
                 />
 
                 <div className="flex items-center">
                   <input
-                    type="checkbox"
-                    id="expandGeography"
                     checked={expandGeography}
-                    onChange={(e) => setExpandGeography(e.target.checked)}
                     className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700"
+                    id="expandGeography"
+                    type="checkbox"
+                    onChange={(e) => setExpandGeography(e.target.checked)}
                   />
                   <label
-                    htmlFor="expandGeography"
                     className="ml-2 text-sm text-gray-700 dark:text-gray-300"
+                    htmlFor="expandGeography"
                   >
                     Expand geography automatically if initial results are
                     limited
@@ -526,10 +526,10 @@ export const BusinessDiscovery: React.FC = () => {
 
             <div className="flex justify-end">
               <button
-                type="button"
-                onClick={handleContinue}
                 className="px-5 py-2 rounded-md bg-blue-600 text-white font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
                 disabled={!isTargetingValid}
+                type="button"
+                onClick={handleContinue}
               >
                 Continue to Campaign Setup
               </button>
@@ -537,8 +537,8 @@ export const BusinessDiscovery: React.FC = () => {
           </section>
 
           <section
-            className={`space-y-6 ${activeStep === 2 ? "" : "hidden"}`}
             aria-hidden={activeStep !== 2}
+            className={`space-y-6 ${activeStep === 2 ? "" : "hidden"}`}
           >
             <header className="flex items-center justify-between">
               <div>
@@ -551,9 +551,9 @@ export const BusinessDiscovery: React.FC = () => {
                 </p>
               </div>
               <button
+                className="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-300"
                 type="button"
                 onClick={handleBackToTargeting}
-                className="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-300"
               >
                 ← Edit targeting
               </button>
@@ -578,9 +578,9 @@ export const BusinessDiscovery: React.FC = () => {
             </div>
 
             <TierSelector
+              numberOfLeads={numberOfLeads}
               selectedTier={selectedTier}
               onTierChange={setSelectedTier}
-              numberOfLeads={numberOfLeads}
             />
 
             <div>
@@ -589,18 +589,18 @@ export const BusinessDiscovery: React.FC = () => {
               </label>
               <div className="flex items-center gap-4">
                 <input
-                  type="range"
-                  min="1"
-                  max="10"
-                  value={numberOfLeads}
-                  onChange={(e) =>
-                    setNumberOfLeads(parseInt(e.target.value, 10))
-                  }
                   className="h-2 flex-1 cursor-pointer appearance-none rounded-full bg-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  max="10"
+                  min="1"
                   style={{
                     background: `linear-gradient(90deg, #2563eb 0%, #2563eb ${sliderPercent}%, #d1d5db ${sliderPercent}%, #d1d5db 100%)`,
                     accentColor: "#2563eb",
                   }}
+                  type="range"
+                  value={numberOfLeads}
+                  onChange={(e) =>
+                    setNumberOfLeads(parseInt(e.target.value, 10))
+                  }
                 />
                 <div className="min-w-fit rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-sm font-medium text-blue-700 dark:border-sky-400 dark:bg-slate-900 dark:text-sky-300">
                   {numberOfLeads} leads
@@ -630,18 +630,18 @@ export const BusinessDiscovery: React.FC = () => {
                       {currentTierConfig.name}
                     </span>
                     <button
+                      className="inline-flex items-center justify-center rounded-md bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-sky-500 dark:hover:bg-sky-600"
+                      disabled={isDiscovering}
                       type="button"
                       onClick={handleSearch}
-                      disabled={isDiscovering}
-                      className="inline-flex items-center justify-center rounded-md bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-sky-500 dark:hover:bg-sky-600"
                     >
                       {isDiscovering ? (
                         <>
                           <svg
                             className="-ml-1 mr-2 h-4 w-4 animate-spin text-white"
-                            xmlns="http://www.w3.org/2000/svg"
                             fill="none"
                             viewBox="0 0 24 24"
+                            xmlns="http://www.w3.org/2000/svg"
                           >
                             <circle
                               className="opacity-25"
@@ -653,8 +653,8 @@ export const BusinessDiscovery: React.FC = () => {
                             ></circle>
                             <path
                               className="opacity-75"
-                              fill="currentColor"
                               d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                              fill="currentColor"
                             ></path>
                           </svg>
                           Running…
@@ -669,16 +669,16 @@ export const BusinessDiscovery: React.FC = () => {
             </div>
 
             <ProgressDisplay
+              cacheStats={cacheStats}
+              currentStage={currentStage}
               isDiscovering={isDiscovering}
               progress={progress}
-              currentStage={currentStage}
-              cacheStats={cacheStats}
             />
           </section>
 
           <section
-            className={`space-y-6 ${activeStep === 3 ? "" : "hidden"}`}
             aria-hidden={activeStep !== 3}
+            className={`space-y-6 ${activeStep === 3 ? "" : "hidden"}`}
           >
             <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
@@ -696,18 +696,18 @@ export const BusinessDiscovery: React.FC = () => {
               <div className="flex flex-wrap gap-3">
                 {currentCampaign && (
                   <button
+                    className="inline-flex items-center gap-2 rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 dark:border-slate-600 dark:bg-transparent dark:text-slate-200 dark:hover:border-sky-400"
                     type="button"
                     onClick={handleViewCampaign}
-                    className="inline-flex items-center gap-2 rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 dark:border-slate-600 dark:bg-transparent dark:text-slate-200 dark:hover:border-sky-400"
                   >
                     View full campaign
                   </button>
                 )}
                 {hasResultsForCurrentCampaign && (
                   <button
+                    className="inline-flex items-center gap-2 rounded-md border border-emerald-400 px-4 py-2 text-sm font-semibold text-emerald-700 transition-colors hover:bg-emerald-50 dark:border-emerald-400 dark:text-emerald-300 dark:hover:bg-transparent"
                     type="button"
                     onClick={handleExportResults}
-                    className="inline-flex items-center gap-2 rounded-md border border-emerald-400 px-4 py-2 text-sm font-semibold text-emerald-700 transition-colors hover:bg-emerald-50 dark:border-emerald-400 dark:text-emerald-300 dark:hover:bg-transparent"
                   >
                     📊 Export CSV
                   </button>
@@ -828,10 +828,10 @@ export const BusinessDiscovery: React.FC = () => {
                                 <div>
                                   🌐{" "}
                                   <a
-                                    href={lead.website}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
                                     className="text-blue-600 dark:text-blue-400 hover:underline"
+                                    href={lead.website}
+                                    rel="noopener noreferrer"
+                                    target="_blank"
                                   >
                                     {lead.website.replace(/^https?:\/\//, "")}
                                   </a>
@@ -888,13 +888,13 @@ export const BusinessDiscovery: React.FC = () => {
                 <div className="flex-shrink-0">
                   <svg
                     className="h-5 w-5 text-red-400 dark:text-red-500"
-                    viewBox="0 0 20 20"
                     fill="currentColor"
+                    viewBox="0 0 20 20"
                   >
                     <path
-                      fillRule="evenodd"
-                      d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
                       clipRule="evenodd"
+                      d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                      fillRule="evenodd"
                     />
                   </svg>
                 </div>

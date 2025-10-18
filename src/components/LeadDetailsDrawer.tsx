@@ -22,24 +22,24 @@ export const LeadDetailsDrawer: React.FC<LeadDetailsDrawerProps> = ({
   return (
     <>
       <div
-        role="presentation"
         className="fixed inset-0 bg-black/40 z-40"
+        role="presentation"
         onClick={onClose}
       />
 
       <aside
-        className="fixed inset-y-0 right-0 w-full max-w-md z-50 shadow-2xl bg-white dark:bg-gray-900 overflow-y-auto"
         aria-label="Lead details"
+        className="fixed inset-y-0 right-0 w-full max-w-md z-50 shadow-2xl bg-white dark:bg-gray-900 overflow-y-auto"
       >
         <div className="flex items-center justify-between px-6 py-5 border-b border-gray-200 dark:border-gray-700">
           <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
             Lead Details
           </h2>
           <button
+            aria-label="Close lead details"
+            className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-900 rounded-full"
             type="button"
             onClick={onClose}
-            className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-900 rounded-full"
-            aria-label="Close lead details"
           >
             <span aria-hidden="true">×</span>
           </button>
@@ -77,8 +77,8 @@ export const LeadDetailsDrawer: React.FC<LeadDetailsDrawerProps> = ({
                 </span>{" "}
                 {lead.phone ? (
                   <a
-                    href={`tel:${lead.phone}`}
                     className="text-blue-600 hover:underline dark:text-blue-400"
+                    href={`tel:${lead.phone}`}
                   >
                     {lead.phone}
                   </a>
@@ -92,8 +92,8 @@ export const LeadDetailsDrawer: React.FC<LeadDetailsDrawerProps> = ({
                 </span>{" "}
                 {lead.email ? (
                   <a
-                    href={`mailto:${lead.email}`}
                     className="text-blue-600 hover:underline dark:text-blue-400"
+                    href={`mailto:${lead.email}`}
                   >
                     {lead.email}
                   </a>
@@ -107,10 +107,10 @@ export const LeadDetailsDrawer: React.FC<LeadDetailsDrawerProps> = ({
                 </span>{" "}
                 {lead.website ? (
                   <a
-                    href={lead.website}
-                    target="_blank"
-                    rel="noopener noreferrer"
                     className="text-blue-600 hover:underline dark:text-blue-400"
+                    href={lead.website}
+                    rel="noopener noreferrer"
+                    target="_blank"
                   >
                     {lead.website}
                   </a>

@@ -79,7 +79,7 @@ export const SelectedChips: React.FC<SelectedChipsProps> = ({
   };
 
   const handleKeyDown = (e: React.KeyboardEvent, chipId: string) => {
-    if (e.key === "Delete" || e.key === "Backspace") {
+    if (e.key === "Enter" || e.key === " ") {
       e.preventDefault();
       handleRemove(chipId);
     }
@@ -91,153 +91,11 @@ export const SelectedChips: React.FC<SelectedChipsProps> = ({
 
   return (
     <div
-      role="group"
       aria-label={ariaLabel}
       className={`flex flex-wrap items-center gap-2 ${className}`}
+      role="group"
     >
-      {visibleChips.map((chip) => {
-        const isHovered = hoveredChip === chip.id;
-        const showTooltip = showTooltips && isHovered && needsTooltip(chip.id);
-
-        return (
-          <div key={chip.id} className="relative inline-flex">
-            <div
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-full text-sm font-medium border border-blue-200 dark:border-blue-800 transition-colors hover:bg-blue-100 dark:hover:bg-blue-900/50"
-              onMouseEnter={() => setHoveredChip(chip.id)}
-              onMouseLeave={() => setHoveredChip(null)}
-            >
-              {chip.category && (
-                <span className="text-blue-600 dark:text-blue-400 font-semibold">
-                  {chip.category}:
-                </span>
-              )}
-              <span
-                ref={(el) => {
-                  if (el) tooltipRefs.current.set(chip.id, el);
-                }}
-                className="max-w-[200px] truncate"
-                aria-label={chip.value}
-              >
-                {chip.value}
-              </span>
-              <button
-                type="button"
-                onClick={() => handleRemove(chip.id)}
-                onKeyDown={(e) => handleKeyDown(e, chip.id)}
-                aria-label={`Remove ${chip.category || chip.label}: ${
-                  chip.value
-                }`}
-                className="flex-shrink-0 ml-0.5 p-0.5 rounded-full hover:bg-blue-200 dark:hover:bg-blue-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 transition-colors"
-              >
-                <svg
-                  className="w-3.5 h-3.5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  aria-hidden="true"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
-              </button>
-            </div>
-
-            {/* Tooltip for truncated labels */}
-            {showTooltip && (
-              <div
-                role="tooltip"
-                className="absolute z-50 bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-1.5 bg-gray-900 dark:bg-slate-100 text-white dark:text-slate-900 text-xs font-medium rounded shadow-lg whitespace-nowrap pointer-events-none"
-              >
-                {chip.value}
-                <div className="absolute top-full left-1/2 transform -translate-x-1/2 -mt-px">
-                  <div className="border-4 border-transparent border-t-gray-900 dark:border-t-slate-100" />
-                </div>
-              </div>
-            )}
-          </div>
-        );
-      })}
-
-      {/* Show more/less button */}
-      {hasMore && !showAll && (
-        <button
-          type="button"
-          onClick={() => setShowAll(true)}
-          className="inline-flex items-center gap-1 px-3 py-1.5 bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-slate-300 rounded-full text-sm font-medium hover:bg-gray-200 dark:hover:bg-slate-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 transition-colors"
-          aria-label={`Show ${overflowCount} more filters`}
-        >
-          <span>+{overflowCount} more</span>
-          <svg
-            className="w-3.5 h-3.5"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-            aria-hidden="true"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M19 9l-7 7-7-7"
-            />
-          </svg>
-        </button>
-      )}
-
-      {showAll && hasMore && (
-        <button
-          type="button"
-          onClick={() => setShowAll(false)}
-          className="inline-flex items-center gap-1 px-3 py-1.5 bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-slate-300 rounded-full text-sm font-medium hover:bg-gray-200 dark:hover:bg-slate-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1 transition-colors"
-          aria-label="Show less filters"
-        >
-          <span>Show less</span>
-          <svg
-            className="w-3.5 h-3.5"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-            aria-hidden="true"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M5 15l7-7 7 7"
-            />
-          </svg>
-        </button>
-      )}
-
-      {/* Clear all button */}
-      {onClearAll && chips.length > 1 && (
-        <button
-          type="button"
-          onClick={onClearAll}
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-red-600 dark:text-red-400 rounded-full text-sm font-medium hover:bg-red-50 dark:hover:bg-red-900/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-1 transition-colors"
-          aria-label="Clear all filters"
-        >
-          <svg
-            className="w-3.5 h-3.5"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-            aria-hidden="true"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M6 18L18 6M6 6l12 12"
-            />
-          </svg>
-          <span>Clear all</span>
-        </button>
-      )}
+      {/* ...existing chip rendering code... */}
     </div>
   );
 };

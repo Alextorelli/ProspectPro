@@ -470,10 +470,10 @@ const Dashboard: React.FC = () => {
           viewBox="0 0 24 24"
         >
           <path
+            d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
             strokeLinecap="round"
             strokeLinejoin="round"
             strokeWidth={2}
-            d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
           />
         </svg>
       ),
@@ -509,26 +509,26 @@ const Dashboard: React.FC = () => {
               {DATE_PRESETS.map((preset) => (
                 <button
                   key={preset.value}
+                  className={`px-3 py-2 text-xs font-medium rounded-md border transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-900 ${
+                    activeDatePreset === preset.value
+                      ? "border-blue-500 bg-blue-50 text-blue-700 dark:border-blue-400 dark:bg-blue-900/40 dark:text-blue-200"
+                      : "border-gray-300 text-gray-600 hover:bg-gray-100 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-800"
+                  }`}
                   type="button"
                   onClick={() =>
                     activeDatePreset === preset.value
                       ? removeDatePresetFilter()
                       : applyDatePresetFilter(preset)
                   }
-                  className={`px-3 py-2 text-xs font-medium rounded-md border transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-900 ${
-                    activeDatePreset === preset.value
-                      ? "border-blue-500 bg-blue-50 text-blue-700 dark:border-blue-400 dark:bg-blue-900/40 dark:text-blue-200"
-                      : "border-gray-300 text-gray-600 hover:bg-gray-100 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-800"
-                  }`}
                 >
                   {preset.label}
                 </button>
               ))}
 
               <button
+                className="ml-auto px-3 py-2 text-xs font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
                 type="button"
                 onClick={handleClearFilters}
-                className="ml-auto px-3 py-2 text-xs font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
               >
                 Clear filters
               </button>
@@ -536,9 +536,9 @@ const Dashboard: React.FC = () => {
           </div>
 
           <LeadExplorerGrid
+            isLoading={leadsLoading}
             leads={filteredLeads}
             onRowClick={(lead) => setSelectedLead(lead)}
-            isLoading={leadsLoading}
           />
         </div>
       ),
@@ -555,10 +555,10 @@ const Dashboard: React.FC = () => {
           viewBox="0 0 24 24"
         >
           <path
+            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"
             strokeLinecap="round"
             strokeLinejoin="round"
             strokeWidth={2}
-            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"
           />
         </svg>
       ),
@@ -599,6 +599,7 @@ const Dashboard: React.FC = () => {
                 </span>
                 <select
                   className="block w-44 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-900 text-sm"
+                  disabled={campaignTierOptions.length === 0}
                   value={campaignFilters.tier || ""}
                   onChange={(event) =>
                     setCampaignFilters((current) => ({
@@ -606,7 +607,6 @@ const Dashboard: React.FC = () => {
                       tier: event.target.value || undefined,
                     }))
                   }
-                  disabled={campaignTierOptions.length === 0}
                 >
                   <option value="">All tiers</option>
                   {campaignTierOptions.map((tier) => (
@@ -622,26 +622,26 @@ const Dashboard: React.FC = () => {
               {DATE_PRESETS.map((preset) => (
                 <button
                   key={preset.value}
+                  className={`px-3 py-2 text-xs font-medium rounded-md border transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-900 ${
+                    activeCampaignDatePreset === preset.value
+                      ? "border-blue-500 bg-blue-50 text-blue-700 dark:border-blue-400 dark:bg-blue-900/40 dark:text-blue-200"
+                      : "border-gray-300 text-gray-600 hover:bg-gray-100 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-800"
+                  }`}
                   type="button"
                   onClick={() =>
                     activeCampaignDatePreset === preset.value
                       ? removeCampaignDatePreset()
                       : applyCampaignDatePreset(preset)
                   }
-                  className={`px-3 py-2 text-xs font-medium rounded-md border transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-900 ${
-                    activeCampaignDatePreset === preset.value
-                      ? "border-blue-500 bg-blue-50 text-blue-700 dark:border-blue-400 dark:bg-blue-900/40 dark:text-blue-200"
-                      : "border-gray-300 text-gray-600 hover:bg-gray-100 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-800"
-                  }`}
                 >
                   {preset.label}
                 </button>
               ))}
 
               <button
+                className="ml-auto px-3 py-2 text-xs font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
                 type="button"
                 onClick={handleClearCampaignFilters}
-                className="ml-auto px-3 py-2 text-xs font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
               >
                 Clear filters
               </button>
@@ -650,10 +650,10 @@ const Dashboard: React.FC = () => {
 
           <CampaignsTable
             campaigns={filteredCampaigns}
+            isLoading={campaignsLoading}
             onRowClick={(campaign: CampaignResult) =>
               navigate(`/campaign?id=${campaign.campaign_id}`)
             }
-            isLoading={campaignsLoading}
           />
         </div>
       ),
@@ -729,9 +729,9 @@ const Dashboard: React.FC = () => {
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <button
+          className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-5 text-left hover:shadow transition-shadow"
           type="button"
           onClick={() => handleStatsCardClick("leads")}
-          className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-5 text-left hover:shadow transition-shadow"
         >
           <div className="text-sm text-gray-500 dark:text-gray-400">
             Total Leads
@@ -745,9 +745,9 @@ const Dashboard: React.FC = () => {
         </button>
 
         <button
+          className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-5 text-left hover:shadow transition-shadow"
           type="button"
           onClick={() => handleStatsCardClick("qualified")}
-          className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-5 text-left hover:shadow transition-shadow"
         >
           <div className="text-sm text-gray-500 dark:text-gray-400">
             Qualified Leads
@@ -761,9 +761,9 @@ const Dashboard: React.FC = () => {
         </button>
 
         <button
+          className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-5 text-left hover:shadow transition-shadow"
           type="button"
           onClick={() => handleStatsCardClick("campaigns")}
-          className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-5 text-left hover:shadow transition-shadow"
         >
           <div className="text-sm text-gray-500 dark:text-gray-400">
             Active Campaigns
@@ -778,16 +778,16 @@ const Dashboard: React.FC = () => {
       </div>
 
       <Tabs
-        tabs={tabs}
-        activeTab={activeTab}
-        onChange={setActiveTab}
         keyboardNavigation
+        activeTab={activeTab}
         ariaLabel="Dashboard navigation tabs"
+        tabs={tabs}
+        onChange={setActiveTab}
       />
 
       <LeadDetailsDrawer
-        lead={selectedLead}
         isOpen={Boolean(selectedLead)}
+        lead={selectedLead}
         onClose={() => setSelectedLead(null)}
       />
     </div>

@@ -24,16 +24,15 @@ export const LeadExplorerTable: React.FC<LeadExplorerTableProps> = ({
   isLoading = false,
   pageSize = 25,
 }) => {
+  // Hoist all hooks to top-level before any early returns
   const [sortField, setSortField] = useState<SortableField>("confidence_score");
   const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
   const [currentPage, setCurrentPage] = useState(0);
-
   const sortedLeads = useMemo(() => {
     const entries = [...leads];
     entries.sort((a, b) => {
       const aValue = a[sortField];
       const bValue = b[sortField];
-
       if (sortField === "business_name" || sortField === "enrichment_tier") {
         const aText = (
           sortField === "enrichment_tier"
@@ -45,13 +44,11 @@ export const LeadExplorerTable: React.FC<LeadExplorerTableProps> = ({
             ? b.enrichment_tier || b.enrichment_data?.enrichmentTier || ""
             : (bValue as string | undefined) || ""
         ).toLowerCase();
-
         if (aText === bText) return 0;
         return sortDirection === "asc"
           ? aText.localeCompare(bText)
           : bText.localeCompare(aText);
       }
-
       const aNumber = typeof aValue === "number" ? aValue : 0;
       const bNumber = typeof bValue === "number" ? bValue : 0;
       if (aNumber === bNumber) return 0;
@@ -59,30 +56,24 @@ export const LeadExplorerTable: React.FC<LeadExplorerTableProps> = ({
     });
     return entries;
   }, [leads, sortField, sortDirection]);
-
   const totalPages =
     sortedLeads.length === 0 ? 0 : Math.ceil(sortedLeads.length / pageSize);
-
   useEffect(() => {
     setCurrentPage(0);
   }, [sortedLeads.length, pageSize]);
-
   useEffect(() => {
     if (totalPages === 0) {
       setCurrentPage(0);
       return;
     }
-
     if (currentPage > totalPages - 1) {
       setCurrentPage(totalPages - 1);
     }
   }, [currentPage, totalPages]);
-
   const pagedLeads = useMemo(() => {
     if (totalPages === 0) {
       return [];
     }
-
     const startIndex = currentPage * pageSize;
     return sortedLeads.slice(startIndex, startIndex + pageSize);
   }, [sortedLeads, currentPage, pageSize, totalPages]);
@@ -111,13 +102,13 @@ export const LeadExplorerTable: React.FC<LeadExplorerTableProps> = ({
             {Object.entries(SORT_LABELS).map(([field, label]) => (
               <th
                 key={field}
-                scope="col"
                 className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400"
+                scope="col"
               >
                 <button
+                  className="flex items-center space-x-1 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100"
                   type="button"
                   onClick={() => toggleSort(field as SortableField)}
-                  className="flex items-center space-x-1 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100"
                 >
                   <span>{label}</span>
                   {sortField === field ? (
@@ -126,8 +117,8 @@ export const LeadExplorerTable: React.FC<LeadExplorerTableProps> = ({
                     </span>
                   ) : (
                     <span
-                      className="text-gray-400 dark:text-gray-500"
                       aria-hidden="true"
+                      className="text-gray-400 dark:text-gray-500"
                     >
                       ⇅
                     </span>
@@ -147,8 +138,8 @@ export const LeadExplorerTable: React.FC<LeadExplorerTableProps> = ({
           {isLoading ? (
             <tr>
               <td
-                colSpan={5}
                 className="px-6 py-6 text-center text-sm text-gray-500 dark:text-gray-400"
+                colSpan={5}
               >
                 Loading leads...
               </td>
@@ -156,8 +147,8 @@ export const LeadExplorerTable: React.FC<LeadExplorerTableProps> = ({
           ) : sortedLeads.length === 0 ? (
             <tr>
               <td
-                colSpan={5}
                 className="px-6 py-6 text-center text-sm text-gray-500 dark:text-gray-400"
+                colSpan={5}
               >
                 No leads found. Adjust your filters or start a new campaign.
               </td>
@@ -197,8 +188,8 @@ export const LeadExplorerTable: React.FC<LeadExplorerTableProps> = ({
                           onClick={(event) => event.stopPropagation()}
                         >
                           <a
-                            href={`mailto:${lead.email}`}
                             className="text-blue-600 hover:underline dark:text-blue-400"
+                            href={`mailto:${lead.email}`}
                           >
                             {lead.email}
                           </a>
@@ -208,10 +199,10 @@ export const LeadExplorerTable: React.FC<LeadExplorerTableProps> = ({
                       {lead.website && (
                         <div onClick={(event) => event.stopPropagation()}>
                           <a
-                            href={lead.website}
-                            target="_blank"
-                            rel="noopener noreferrer"
                             className="text-blue-600 hover:underline dark:text-blue-400"
+                            href={lead.website}
+                            rel="noopener noreferrer"
+                            target="_blank"
                           >
                             Website
                           </a>
@@ -227,9 +218,9 @@ export const LeadExplorerTable: React.FC<LeadExplorerTableProps> = ({
                   <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-300">
                     {lead.campaign_id ? (
                       <a
+                        className="text-blue-600 hover:underline dark:text-blue-400"
                         href={`/campaign?id=${lead.campaign_id}`}
                         onClick={(event) => event.stopPropagation()}
-                        className="text-blue-600 hover:underline dark:text-blue-400"
                       >
                         View campaign
                       </a>
@@ -250,10 +241,10 @@ export const LeadExplorerTable: React.FC<LeadExplorerTableProps> = ({
         </span>
         <div className="flex items-center gap-2">
           <button
+            className="px-2 py-1 rounded border border-gray-300 dark:border-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled={currentPage === 0 || totalPages === 0}
             type="button"
             onClick={() => setCurrentPage((page) => Math.max(0, page - 1))}
-            disabled={currentPage === 0 || totalPages === 0}
-            className="px-2 py-1 rounded border border-gray-300 dark:border-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Previous
           </button>
@@ -261,6 +252,8 @@ export const LeadExplorerTable: React.FC<LeadExplorerTableProps> = ({
             Page {totalPages === 0 ? 0 : currentPage + 1} of {totalPages}
           </span>
           <button
+            className="px-2 py-1 rounded border border-gray-300 dark:border-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled={totalPages === 0 || currentPage >= totalPages - 1}
             type="button"
             onClick={() =>
               setCurrentPage((page) =>
@@ -270,8 +263,6 @@ export const LeadExplorerTable: React.FC<LeadExplorerTableProps> = ({
                 )
               )
             }
-            disabled={totalPages === 0 || currentPage >= totalPages - 1}
-            className="px-2 py-1 rounded border border-gray-300 dark:border-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Next
           </button>

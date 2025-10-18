@@ -251,8 +251,8 @@ export const Results: React.FC = () => {
           {error instanceof Error ? error.message : "Unknown error"}
         </p>
         <button
-          onClick={() => refetch()}
           className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
+          onClick={() => refetch()}
         >
           Retry
         </button>
@@ -274,14 +274,14 @@ export const Results: React.FC = () => {
         {displayLeads.length > 0 && (
           <div className="flex space-x-3">
             <button
-              onClick={() => handleExport("csv")}
               className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              onClick={() => handleExport("csv")}
             >
               📊 Export CSV
             </button>
             <button
-              onClick={() => handleExport("json")}
               className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              onClick={() => handleExport("json")}
             >
               📄 Export JSON
             </button>
@@ -435,10 +435,10 @@ export const Results: React.FC = () => {
                           <div>
                             🌐{" "}
                             <a
-                              href={lead.website}
-                              target="_blank"
-                              rel="noopener noreferrer"
                               className="text-blue-600 hover:underline"
+                              href={lead.website}
+                              rel="noopener noreferrer"
+                              target="_blank"
                             >
                               {lead.website.replace(/^https?:\/\//, "")}
                             </a>
@@ -494,16 +494,16 @@ export const Results: React.FC = () => {
             </div>
             <div className="space-x-3">
               <button
-                onClick={() => handlePageChange("prev")}
-                disabled={page === 0}
                 className="px-4 py-2 text-sm bg-white border border-gray-300 rounded-md disabled:opacity-40"
+                disabled={page === 0}
+                onClick={() => handlePageChange("prev")}
               >
                 ← Previous
               </button>
               <button
-                onClick={() => handlePageChange("next")}
-                disabled={page + 1 >= totalPages}
                 className="px-4 py-2 text-sm bg-white border border-gray-300 rounded-md disabled:opacity-40"
+                disabled={page + 1 >= totalPages}
+                onClick={() => handlePageChange("next")}
               >
                 Next →
               </button>

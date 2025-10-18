@@ -46,6 +46,36 @@ class DevelopmentMCPServer {
   setupTools() {
     this.server.setRequestHandler(CallToolRequestSchema, async (request) => {
       switch (request.params.name) {
+        // === REACT/VERCEL DEBUGGING TOOLS ===
+        case "run_eslint_autofix": {
+          // Runs ESLint autofix for React Hooks and prop order
+          const { stdout, stderr } = await this.runWorkspaceCommand(
+            "npx eslint . --fix"
+          );
+          return this.createTextResponse(
+            `ESLint Autofix Results:\n\n${stdout}\n${
+              stderr ? `\nErrors:\n${stderr}` : ""
+            }`
+          );
+        }
+        case "react_component_health": {
+          // Summarizes ESLint results for React components
+          const { stdout, stderr } = await this.runWorkspaceCommand(
+            "npx eslint . --format=stylish"
+          );
+          return this.createTextResponse(
+            `React Component Health Report:\n\n${stdout}\n${
+              stderr ? `\nErrors:\n${stderr}` : ""
+            }`
+          );
+        }
+        case "launch_react_devtools": {
+          // Echoes launch config for React DevTools debugging
+          return this.createTextResponse(
+            `To debug React components live, use the VS Code launch profile:\n\nDebug Vercel Preview (React DevTools)\n\nThis opens your Vercel preview URL with Chrome DevTools. Ensure the 'pidigi.reactdevtools' extension is installed.`
+          );
+        }
+
         // === NEW API INTEGRATION TOOLS ===
         case "test_new_api_integration":
           return await this.testNewAPIIntegration(request.params.arguments);

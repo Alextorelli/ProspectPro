@@ -54,16 +54,16 @@ export class ErrorBoundary extends React.Component<
         )}
         <div className="mt-6 flex gap-3">
           <button
+            className="rounded-md bg-white px-4 py-2 text-sm font-medium text-red-700 shadow-sm ring-1 ring-red-200 hover:bg-red-100"
             type="button"
             onClick={this.handleReset}
-            className="rounded-md bg-white px-4 py-2 text-sm font-medium text-red-700 shadow-sm ring-1 ring-red-200 hover:bg-red-100"
           >
             Dismiss
           </button>
           <button
+            className="rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-red-700"
             type="button"
             onClick={() => window.location.reload()}
-            className="rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-red-700"
           >
             Reload
           </button>

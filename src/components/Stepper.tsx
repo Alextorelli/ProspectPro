@@ -67,12 +67,7 @@ export const Stepper: React.FC<StepperProps> = ({
 
   const handleStepClick = (index: number) => {
     if (!onStepChange) return;
-
-    // Allow clicking on active step or completed steps if back navigation is enabled
-    const isClickable =
-      index === activeStep || (allowBackNavigation && index < activeStep);
-
-    if (isClickable) {
+    if (allowBackNavigation || index > activeStep) {
       onStepChange(index);
     }
   };
@@ -83,22 +78,14 @@ export const Stepper: React.FC<StepperProps> = ({
     let targetIndex: number | null = null;
 
     switch (e.key) {
-      case "ArrowRight":
-      case "ArrowDown":
+      case "ArrowLeft":
         e.preventDefault();
-        // Move to next step if not at the end
-        if (index < steps.length - 1) {
-          targetIndex = index + 1;
-        }
+        targetIndex = Math.max(0, index - 1);
         break;
 
-      case "ArrowLeft":
-      case "ArrowUp":
+      case "ArrowRight":
         e.preventDefault();
-        // Move to previous step if not at the beginning
-        if (index > 0) {
-          targetIndex = index - 1;
-        }
+        targetIndex = Math.min(steps.length - 1, index + 1);
         break;
 
       case "Home":
@@ -203,8 +190,8 @@ export const Stepper: React.FC<StepperProps> = ({
                   {status === "completed" ? (
                     <svg
                       className="w-5 h-5"
-                      fill="currentColor"
                       viewBox="0 0 20 20"
+                      fill="currentColor"
                       aria-hidden="true"
                     >
                       <path
@@ -213,47 +200,38 @@ export const Stepper: React.FC<StepperProps> = ({
                         clipRule="evenodd"
                       />
                     </svg>
-                  ) : status === "error" ? (
-                    <svg
-                      className="w-5 h-5"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                      aria-hidden="true"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
+                  ) : status === "active" ? (
+                    <span className="text-sm font-semibold">{index + 1}</span>
                   ) : (
-                    <span>{index + 1}</span>
+                    <span className="text-sm font-semibold text-gray-400 dark:text-gray-500">
+                      {index + 1}
+                    </span>
                   )}
                 </button>
 
-                <div className="mt-2 text-center">
-                  <p
-                    className={`text-sm font-medium ${
-                      status === "active"
-                        ? "text-blue-600 dark:text-sky-400"
-                        : status === "completed"
-                        ? "text-gray-900 dark:text-slate-100"
-                        : "text-gray-500 dark:text-slate-400"
-                    }`}
-                  >
-                    {step.label}
-                  </p>
-                  {step.description && (
-                    <p className="text-xs text-gray-500 dark:text-slate-500 mt-0.5 max-w-[120px]">
-                      {step.description}
-                    </p>
-                  )}
-                </div>
+                {step.label && (
+                  <div className="mt-2 text-center">
+                    <div
+                      className={`text-xs font-medium ${
+                        status === "active"
+                          ? "text-blue-600 dark:text-sky-400"
+                          : status === "completed"
+                          ? "text-gray-900 dark:text-gray-100"
+                          : "text-gray-500 dark:text-gray-400"
+                      }`}
+                    >
+                      {step.label}
+                    </div>
+                    {step.description && (
+                      <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                        {step.description}
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
 
-              {!isLast && (
-                <div className={getConnectorStyles(index)} aria-hidden="true" />
-              )}
+              {!isLast && <div className={getConnectorStyles(index)} />}
             </React.Fragment>
           );
         })}
@@ -261,37 +239,3 @@ export const Stepper: React.FC<StepperProps> = ({
     </div>
   );
 };
-
-/**
- * Discovery workflow steps configuration
- * Matches the discovery pipeline in SYSTEM_REFERENCE.md
- */
-export const DISCOVERY_WORKFLOW_STEPS: StepConfig[] = [
-  {
-    id: "select-business",
-    label: "Business Type",
-    description: "Choose industry",
-  },
-  {
-    id: "set-location",
-    label: "Location",
-    description: "Set target area",
-  },
-  {
-    id: "configure",
-    label: "Configure",
-    description: "Set parameters",
-  },
-  {
-    id: "review",
-    label: "Review",
-    description: "Confirm settings",
-  },
-  {
-    id: "processing",
-    label: "Processing",
-    description: "Discovering leads",
-  },
-];
-
-export default Stepper;

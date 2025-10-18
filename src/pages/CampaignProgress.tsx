@@ -268,8 +268,8 @@ export const CampaignProgress: React.FC = () => {
             Missing job or campaign information.
           </p>
           <button
-            onClick={() => navigate("/")}
             className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+            onClick={() => navigate("/")}
           >
             Return Home
           </button>
@@ -287,8 +287,8 @@ export const CampaignProgress: React.FC = () => {
           </h1>
           <p className="text-gray-600 mb-4">{error}</p>
           <button
-            onClick={() => navigate("/")}
             className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+            onClick={() => navigate("/")}
           >
             Start New Campaign
           </button>
@@ -331,8 +331,8 @@ export const CampaignProgress: React.FC = () => {
           <div className="font-semibold">Unable to load campaign results</div>
           <p className="mt-1">{resultFetchError}</p>
           <button
-            onClick={handleRetryFetch}
             className="mt-3 inline-flex items-center rounded border border-red-300 bg-white px-3 py-1.5 text-xs font-medium text-red-700 shadow-sm transition hover:bg-red-100"
+            onClick={handleRetryFetch}
           >
             Retry syncing results
           </button>
@@ -341,10 +341,10 @@ export const CampaignProgress: React.FC = () => {
 
       {/* Progress Display */}
       <ProgressDisplay
+        cacheStats={null} // Real-time updates don't include cache stats
+        currentStage={displayStage}
         isDiscovering={isProcessing}
         progress={displayProgress}
-        currentStage={displayStage}
-        cacheStats={null} // Real-time updates don't include cache stats
       />
 
       {/* Real-time Metrics */}
@@ -436,15 +436,15 @@ export const CampaignProgress: React.FC = () => {
       {/* Action Buttons */}
       <div className="mt-8 text-center space-x-4">
         <button
-          onClick={() => navigate("/")}
           className="px-4 py-2 text-gray-600 bg-gray-100 rounded hover:bg-gray-200"
+          onClick={() => navigate("/")}
         >
           Start New Campaign
         </button>
         {!isProcessing && (
           <button
-            onClick={() => navigate("/results", { state: { campaignId } })}
             className="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+            onClick={() => navigate("/results", { state: { campaignId } })}
           >
             View Complete Results
           </button>

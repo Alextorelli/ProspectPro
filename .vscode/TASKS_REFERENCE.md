@@ -106,6 +106,7 @@ _Auto-generated from `.vscode/tasks.json` — Last updated: 2025-10-18_
 
 | Task Label | Command | Script/Config | Inputs | Description |
 |------------|---------|---------------|--------|-------------|
+| **Workspace: Dev Hygiene Check** | `npm run validate:ignores` | Multiple | None | No description available |
 | **Start Codespace** | `Sequential composite` | Multiple | None | Runs: Supabase: Ensure Session → Supabase: Link Project → GitHub: Ensure Auth (Non-blocking) → MCP: Start All Servers |
 | **Close Codespace** | `Sequential composite` | Multiple | None | Runs: MCP: Stop All Servers → Docs: Update All Documentation → Workspace: Validate Configuration → Git: Remind to Push Before Exit |
 | **GitHub: Ensure Auth (Non-blocking)** | `bash -lc if command -v gh >/dev/null 2>&1; then gh auth status || echo "⚠️ GitHub CLI not authenticated. Run: gh auth login"; else echo "⚠️ GitHub CLI not installed"; fi` | Multiple | None | No description available |

@@ -82,10 +82,10 @@ export const ApiUsageChart: React.FC<ApiUsageChartProps> = ({
   if (isLoading) {
     return (
       <div
+        aria-busy="true"
+        aria-live="polite"
         className={`space-y-6 ${className}`}
         role="status"
-        aria-live="polite"
-        aria-busy="true"
       >
         <div className="rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-6">
           <div className="animate-pulse space-y-4">
@@ -121,10 +121,10 @@ export const ApiUsageChart: React.FC<ApiUsageChartProps> = ({
               viewBox="0 0 24 24"
             >
               <path
+                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 strokeWidth={1.5}
-                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
               />
             </svg>
             <h3 className="text-lg font-semibold text-gray-900 dark:text-slate-100 mb-2">
@@ -136,8 +136,8 @@ export const ApiUsageChart: React.FC<ApiUsageChartProps> = ({
               opportunities.
             </p>
             <a
-              href="/discovery"
               className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white font-medium rounded-lg transition-colors"
+              href="/discovery"
             >
               <svg
                 className="w-5 h-5"
@@ -146,10 +146,10 @@ export const ApiUsageChart: React.FC<ApiUsageChartProps> = ({
                 viewBox="0 0 24 24"
               >
                 <path
+                  d="M12 4v16m8-8H4"
                   strokeLinecap="round"
                   strokeLinejoin="round"
                   strokeWidth={2}
-                  d="M12 4v16m8-8H4"
                 />
               </svg>
               Start Discovery Campaign
@@ -192,6 +192,12 @@ export const ApiUsageChart: React.FC<ApiUsageChartProps> = ({
                   </div>
                   <div className="relative h-8 bg-gray-100 dark:bg-slate-700 rounded-lg overflow-hidden">
                     <div
+                      aria-label={`${
+                        service.service
+                      }: ${service.percentage.toFixed(1)}%`}
+                      aria-valuemax={100}
+                      aria-valuemin={0}
+                      aria-valuenow={service.percentage}
                       className={`absolute inset-y-0 left-0 rounded-lg transition-all ${
                         index === 0
                           ? "bg-blue-500 dark:bg-blue-400"
@@ -201,14 +207,8 @@ export const ApiUsageChart: React.FC<ApiUsageChartProps> = ({
                           ? "bg-green-500 dark:bg-green-400"
                           : "bg-orange-500 dark:bg-orange-400"
                       }`}
-                      style={{ width: `${Math.max(service.percentage, 2)}%` }}
                       role="progressbar"
-                      aria-valuenow={service.percentage}
-                      aria-valuemin={0}
-                      aria-valuemax={100}
-                      aria-label={`${
-                        service.service
-                      }: ${service.percentage.toFixed(1)}%`}
+                      style={{ width: `${Math.max(service.percentage, 2)}%` }}
                     >
                       {service.percentage > 10 && (
                         <span className="absolute inset-0 flex items-center px-3 text-xs font-semibold text-white">
@@ -253,16 +253,16 @@ export const ApiUsageChart: React.FC<ApiUsageChartProps> = ({
                   >
                     <div className="relative w-full flex flex-col justify-end h-40">
                       <div
+                        aria-label={`${day.date}: ${formatCurrency(day.spend)}`}
                         className={`w-full rounded-t-lg transition-all ${
                           isHighest
                             ? "bg-blue-600 dark:bg-blue-500"
                             : "bg-blue-400 dark:bg-blue-600"
                         } hover:opacity-80 cursor-pointer`}
+                        role="img"
                         style={{
                           height: `${Math.max(heightPercentage, 5)}%`,
                         }}
-                        role="img"
-                        aria-label={`${day.date}: ${formatCurrency(day.spend)}`}
                         title={formatCurrency(day.spend)}
                       />
                       {isHighest && (
