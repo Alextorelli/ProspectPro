@@ -29,7 +29,7 @@
       "command": "bash",
       "args": [
         "-lc",
-        "if command -v gh >/dev/null 2>&1; then gh auth status || echo '⚠️ GitHub CLI not authenticated. Run: gh auth login'; else echo '⚠️ GitHub CLI not installed'; fi"
+        "if command -v gh >/dev/null 2>&1; then gh auth status || echo \"⚠️ GitHub CLI not authenticated. Run: gh auth login\"; else echo \"⚠️ GitHub CLI not installed\"; fi"
       ],
       "group": "build",
       "presentation": {

@@ -112,7 +112,7 @@ _Auto-generated from `.vscode/tasks.json` — Last updated: 2025-10-18_
 |------------|---------|---------------|--------|-------------|
 | **Start Codespace** | `Sequential composite` | Multiple | None | Runs: Ensure Session → Link Project → GitHub: Ensure Auth (Non-blocking) → MCP: Start All Servers |
 | **Close Codespace** | `Sequential composite` | Multiple | None | Runs: MCP: Stop All Servers → Docs: Update All Documentation → Workspace: Validate Configuration → Git: Remind to Push Before Exit |
-| **GitHub: Ensure Auth (Non-blocking)** | `bash if command -v gh >/dev/null 2>&1; then gh auth status || echo '⚠️ GitHub CLI not authenticated. Run: gh auth login'; else echo '⚠️ GitHub CLI not installed'; fi` | CLI | None | No description available |
+| **GitHub: Ensure Auth (Non-blocking)** | `bash if command -v gh >/dev/null 2>&1; then gh auth status || echo "⚠️ GitHub CLI not authenticated. Run: gh auth login"; else echo "⚠️ GitHub CLI not installed"; fi` | CLI | None | No description available |
 | **Roadmap: Sync Epics to GitHub** | `bash ${workspaceFolder}/scripts/roadmap/sync-epics-to-github.sh` | [`scripts/roadmap/sync-epics-to-github.sh`](../scripts/roadmap/sync-epics-to-github.sh) | None | Creates GitHub issues from local epic files and attaches them to Project 5 (requires GH_PROJECT_TOKEN) |
 | **Context: Fetch Repo Snapshot** | `node` | CLI | None | Captures current git branch, status, and diff summary to `.cache/agent/context/repo-context.json` |
 | **Context: Fetch Supabase Snapshot** | `node` | CLI | None | Summarizes Edge Function directories and verify_jwt settings to `.cache/agent/context/supabase-functions.json` |
