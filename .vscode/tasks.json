@@ -43,26 +43,26 @@
       "label": "Supabase: Ensure Session",
       "type": "shell",
       "command": "bash",
-      "args": ["-lc", "source scripts/operations/ensure-supabase-cli-session.sh"],
+      "args": [
+        "-lc",
+        "source scripts/operations/ensure-supabase-cli-session.sh"
+      ],
       "group": "build",
       "presentation": {
-        {
-          "label": "Supabase: Reset Auth Emulator",
-          "type": "shell",
-          "command": "bash",
-          "args": [
-            "-lc",
-            "./scripts/operations/reset-auth-emulator.sh"
-          ],
-          "group": "build",
-          "presentation": {
-            "reveal": "always",
-            "panel": "shared"
-          },
-          "problemMatcher": []
-        },
         "echo": false,
         "reveal": "silent",
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Supabase: Reset Auth Emulator",
+      "type": "shell",
+      "command": "bash",
+      "args": ["-lc", "./scripts/operations/reset-auth-emulator.sh"],
+      "group": "build",
+      "presentation": {
+        "reveal": "always",
         "panel": "shared"
       },
       "problemMatcher": []
@@ -463,30 +463,7 @@
       "label": "Test: Edge Functions (Force Bypass)",
       "type": "shell",
       "command": "bash",
-      "args": [
-        "-lc",
-        "./scripts/testing/run-edge-tests-force.sh"
-      ],
-      "options": {
-        "cwd": "${workspaceFolder}"
-      },
-      "group": "test",
-      "dependsOn": "Supabase: Ensure Session",
-      "presentation": {
-        "echo": true,
-        "reveal": "always",
-        "panel": "shared"
-      },
-      "problemMatcher": []
-    },
-    {
-      "label": "Test: Edge Functions (Force Bypass)",
-      "type": "shell",
-      "command": "bash",
-      "args": [
-        "-lc",
-        "./scripts/testing/run-edge-tests-force.sh"
-      ],
+      "args": ["-lc", "./scripts/testing/run-edge-tests-force.sh"],
       "options": {
         "cwd": "${workspaceFolder}"
       },
@@ -547,7 +524,10 @@
       "label": "Test: Export Flow",
       "type": "shell",
       "command": "bash",
-      "args": ["-lc", "cd ${workspaceFolder} && ./scripts/testing/test-export-flow.sh"],
+      "args": [
+        "-lc",
+        "cd ${workspaceFolder} && ./scripts/testing/test-export-flow.sh"
+      ],
       "group": "test",
       "dependsOn": "Supabase: Ensure Session",
       "options": {
@@ -892,6 +872,22 @@
         "cwd": "${workspaceFolder}"
       },
       "group": "none",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Workspace: Validate Configuration",
+      "type": "shell",
+      "command": "bash",
+      "args": [
+        "-lc",
+        "${workspaceFolder}/.vscode/validate-workspace-config.sh"
+      ],
+      "group": "build",
       "presentation": {
         "echo": true,
         "reveal": "always",

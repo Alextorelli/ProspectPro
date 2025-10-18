@@ -151,3 +151,35 @@ Dependency errors: 0
 - AI-enhanced workflows with Copilot integration
 
 **Status**: VS Code configuration is now optimized, conflict-free, and production-ready! 🚀
+
+---
+
+## October 18, 2025 — Tasks Configuration Repair
+
+### Issue
+
+- Attempting to run the "Close Codespace" task produced errors:
+  - "Error: a task must provide a label property. The task will be ignored. 'problemMatcher'"
+  - Dependent tasks could not be resolved (e.g., "MCP: Stop All Servers", "Docs: Update All Documentation").
+- Root cause: A task object was accidentally nested inside the `presentation` block of `Supabase: Ensure Session`, corrupting the JSON structure. There was also a duplicate definition of the "Test: Edge Functions (Force Bypass)" task.
+
+### Fix
+
+- Cleaned `.vscode/tasks.json`:
+  - Removed the nested task object from `presentation`.
+  - Added `"Supabase: Reset Auth Emulator"` as a standalone task.
+  - Deduplicated `"Test: Edge Functions (Force Bypass)"` task entries.
+  - Verified that all dependencies for `"Close Codespace"` exist and have proper `label` fields.
+
+### Validation
+
+- Ran tasks:
+  - `Close Codespace` → PASS
+  - `Start Codespace` → PASS
+  - `Workspace: Validate Configuration` → PASS
+
+### Guidance
+
+- Do not nest task objects inside other object properties like `presentation`.
+- Ensure every task object includes a top-level `label` property.
+- Prefer adding new tasks as standalone entries and reference them via `dependsOn`.
