@@ -247,6 +247,10 @@ function formatList(relPaths) {
     .join("\n");
 }
 
+function normalizeForComparison(content) {
+  return content.replace(/_Last generated: .*_/g, "_Last generated: <preserved>_");
+}
+
 async function main() {
   console.time("codebase:index");
   const timestamp = new Date().toISOString();
@@ -368,7 +372,25 @@ async function main() {
   lines.push("");
 
   const destination = path.join(repoRoot, "docs/technical/CODEBASE_INDEX.md");
-  await fs.writeFile(destination, lines.join("\n"));
+  const newContent = lines.join("\n");
+
+  try {
+    const existingContent = await fs.readFile(destination, "utf8");
+    if (
+      normalizeForComparison(existingContent) ===
+      normalizeForComparison(newContent)
+    ) {
+      console.timeEnd("codebase:index");
+      console.log(
+        "ℹ️ docs/technical/CODEBASE_INDEX.md already current; preserving existing timestamp."
+      );
+      return;
+    }
+  } catch {
+    // File missing or unreadable; proceed with fresh write.
+  }
+
+  await fs.writeFile(destination, newContent);
   console.timeEnd("codebase:index");
   console.log(`✅ docs/technical/CODEBASE_INDEX.md updated at ${destination}`);
 }

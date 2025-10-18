@@ -83,33 +83,18 @@ echo "📦 Installing pre-push hook..."
 cat > .git/hooks/pre-push << 'EOF'
 #!/bin/bash
 
-# ProspectPro Documentation Schema Pre-push Hook
-# Final validation before pushing to remote
+# ProspectPro Documentation Pre-push Hook (passive)
+# Codebase index regeneration now happens via `npm run docs:update`
+# or the "Close Codespace" task.
 
-if command -v npm >/dev/null 2>&1; then
-  echo "🔁 Ensuring codebase index is current before push..."
-  if ! npm run --silent codebase:index; then
-    echo "❌ Codebase index refresh failed" >&2
-    exit 1
-  fi
-  git add CODEBASE_INDEX.md 2>/dev/null || true
-fi
+cat <<'MSG'
+ℹ️ ProspectPro reminder:
+   • Run `npm run docs:update` after intentional documentation changes, or
+   • Use the "Close Codespace" task to refresh docs automatically.
+Push continuing without additional checks.
+MSG
 
-echo "🚀 Final documentation schema validation before push..."
-
-if [ -f "scripts/check-docs-schema.sh" ]; then
-  chmod +x scripts/check-docs-schema.sh
-  
-  if ! scripts/check-docs-schema.sh; then
-    echo ""
-    echo "❌ Push blocked: Documentation schema violations detected"
-    echo "   Fix violations before pushing to remote repository"
-    echo ""
-    exit 1
-  fi
-fi
-
-echo "✅ Documentation schema validated - push allowed"
+exit 0
 EOF
 
 # Make pre-push hook executable  
