@@ -35,7 +35,7 @@ EXPECTED_REPO_ROOT=${EXPECTED_REPO_ROOT:-/workspaces/ProspectPro}
 
 SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 # shellcheck source=/workspaces/ProspectPro/scripts/lib/supabase_cli_helpers.sh
-source "$SCRIPT_DIR/lib/supabase_cli_helpers.sh"
+source "$SCRIPT_DIR/../lib/supabase_cli_helpers.sh"
 
 require_repo_root() {
   local repo_root

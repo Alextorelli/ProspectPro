@@ -66,6 +66,7 @@
         "npm:eslint-plugin-react-refresh@~0.4.5",
         "npm:eslint-plugin-react@^7.37.5",
         "npm:eslint@^8.55.0",
+        "npm:ignore@^7.0.5",
         "npm:jsdom@27",
         "npm:lucide-react@0.294",
         "npm:postcss@^8.4.32",

@@ -4,7 +4,7 @@
 set -euo pipefail
 
 SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
-REPO_ROOT=$(cd "$SCRIPT_DIR/.." && pwd)
+REPO_ROOT=$(cd "$SCRIPT_DIR/../.." && pwd)
 EXPECTED_REPO_ROOT=${EXPECTED_REPO_ROOT:-/workspaces/ProspectPro}
 ARTIFACT_DIR="$REPO_ROOT/scripts/test-artifacts"
 ARTIFACT_PATH="$ARTIFACT_DIR/latest-discovery.json"
@@ -81,8 +81,8 @@ fi
 
 if [[ -z "${SUPABASE_PUBLISHABLE_KEY:-}" ]]; then
   echo "ℹ️  Resolving Supabase publishable key via setup-edge-auth-env.sh"
-  # shellcheck source=/workspaces/ProspectPro/scripts/setup-edge-auth-env.sh
-  source "$REPO_ROOT/scripts/setup-edge-auth-env.sh"
+  # shellcheck source=/workspaces/ProspectPro/scripts/operations/setup-edge-auth-env.sh
+  source "$REPO_ROOT/scripts/operations/setup-edge-auth-env.sh"
 fi
 
 SUPABASE_URL=$(trim_trailing_slash "${SUPABASE_URL:-https://sriycekxdqnesdsgwiuc.supabase.co}")
@@ -153,7 +153,7 @@ printf '   Campaign ID: %s\n' "$campaign_id"
 printf '\n'
 
 rest_base="$SUPABASE_URL/rest/v1"
-job_url="$rest_base/discovery_jobs?id=eq.$job_id&select=status,progress,current_stage,metrics,stage_history"
+job_url="$rest_base/discovery_jobs?id=eq.$job_id&select=status,progress,current_stage,metrics"
 campaign_url="$rest_base/campaigns?id=eq.$campaign_id&select=*"
 leads_url="$rest_base/leads?campaign_id=eq.$campaign_id&select=business_name,website,email,confidence_score,address,phone"
 

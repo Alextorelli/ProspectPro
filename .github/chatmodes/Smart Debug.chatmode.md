@@ -4,6 +4,7 @@ tools:
   [
     "runCommands",
     "runTasks",
+    "playwright/*",
     "edit",
     "runNotebooks",
     "search",
@@ -20,6 +21,9 @@ tools:
     "openSimpleBrowser",
     "fetch",
     "githubRepo",
+    "github.vscode-pull-request-github/copilotCodingAgent",
+    "github.vscode-pull-request-github/activePullRequest",
+    "github.vscode-pull-request-github/openPullRequest",
   ]
 ---
 

@@ -57,16 +57,23 @@ if ! validate_session_jwt; then
   create_payload=$(jq -cn --arg email "$TEST_EMAIL" --arg password "$TEST_PASSWORD" '{email: $email, password: $password, email_confirm: true, user_metadata: {edge_test: true}}')
 
   # Ensure the test user exists (409 conflict means it is already present)
-  create_status=$(curl -s -o /dev/null -w "%{http_code}" \
+  create_response="$(curl -s -D - \
     -H "Content-Type: application/json" \
     -H "apikey: ${SUPABASE_SERVICE_ROLE_KEY}" \
     -H "Authorization: Bearer ${SUPABASE_SERVICE_ROLE_KEY}" \
     -d "$create_payload" \
-    "${SUPABASE_URL}/auth/v1/admin/users")
+    "${SUPABASE_URL}/auth/v1/admin/users")"
 
-  if [ "$create_status" != "200" ] && [ "$create_status" != "201" ] && [ "$create_status" != "409" ]; then
-    echo "ERROR: Failed to ensure local test user (HTTP ${create_status})." >&2
-    exit 1
+  create_status="$(printf '%s\n' "$create_response" | head -n 1 | cut -d' ' -f2)"
+  create_body="$(printf '%s\n' "$create_response" | sed '1,/^\r$/d')"
+
+  if [ "$create_status" != "200" ] && [ "$create_status" != "201" ] && [ "$create_status" != "409" ] && [ "$create_status" != "422" ]; then
+    if printf '%s' "$create_body" | jq -e . >/dev/null 2>&1; then
+      echo "ERROR: Failed to ensure local test user (HTTP ${create_status}): $create_body" >&2
+      exit 1
+    else
+      echo "WARN: admin/users returned non-JSON body; skipping ensure-user (likely CLI regression)." >&2
+    fi
   fi
 
   token_response=$(curl -s \
