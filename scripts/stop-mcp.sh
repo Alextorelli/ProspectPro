@@ -1,41 +1,26 @@
 #!/bin/bash
-# ProspectPro helper script to stop active MCP servers.
-# Usage: ./scripts/stop-mcp.sh
+# ProspectPro MCP server shutdown helper
 
 set -euo pipefail
 
-EXPECTED_REPO_ROOT=${EXPECTED_REPO_ROOT:-/workspaces/ProspectPro}
+REPO_ROOT="/workspaces/ProspectPro"
+PID_FILE="$REPO_ROOT/.mcp-pids"
 
-require_repo_root() {
-  local repo_root
-  if ! repo_root=$(git rev-parse --show-toplevel 2>/dev/null); then
-    echo "❌ Run this script from inside the ProspectPro repo" >&2
-    exit 1
+cd "$REPO_ROOT" || exit 1
+
+if [[ ! -f "$PID_FILE" ]]; then
+  echo "⚠️ No MCP PID file found; servers may not be running."
+  exit 0
+fi
+
+echo "🛑 Stopping ProspectPro MCP servers"
+
+while read -r pid; do
+  if [[ -n "$pid" ]] && kill -0 "$pid" 2>/dev/null; then
+    kill "$pid" 2>/dev/null || true
+    echo "   Stopped PID $pid"
   fi
+done < "$PID_FILE"
 
-  if [ "$repo_root" != "$EXPECTED_REPO_ROOT" ]; then
-    echo "❌ Wrong directory. Expected repo root: $EXPECTED_REPO_ROOT" >&2
-    echo "   Current directory: $repo_root" >&2
-    exit 1
-  fi
-}
-
-stop_server() {
-  local pattern="$1"
-  local label="$2"
-  if pids=$(pgrep -f "$pattern" 2>/dev/null); then
-    echo "🛑 Stopping $label (PID: $pids)"
-    pkill -f "$pattern"
-    echo "✅ $label stopped"
-  else
-    echo "ℹ️ $label not running"
-  fi
-}
-
-require_repo_root
-
-stop_server "mcp-servers/production-server.js" "production MCP server"
-stop_server "mcp-servers/development-server.js" "development MCP server"
-stop_server "mcp-servers/supabase-troubleshooting-server.js" "troubleshooting MCP server"
-
-echo "🏁 MCP stop command completed."
+rm -f "$PID_FILE"
+echo "✅ MCP servers stopped"

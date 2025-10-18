@@ -1,6 +1,6 @@
 # ProspectPro VS Code Tasks Reference
 
-_Auto-generated from `.vscode/tasks.json` — Last updated: 2025-10-17_
+_Auto-generated from `.vscode/tasks.json` — Last updated: 2025-10-18_
 
 **Quick Access**: Press `Ctrl+Shift+P` → "Tasks: Run Task" → Select from list below
 
@@ -22,14 +22,13 @@ _Auto-generated from `.vscode/tasks.json` — Last updated: 2025-10-17_
 
 | Task Label | Command | Script/Config | Inputs | Description |
 |------------|---------|---------------|--------|-------------|
-| **Supabase: Ensure Session** | `bash cd supabase && source ../scripts/ensure-supabase-cli-session.sh` | [`../scripts/ensure-supabase-cli-session.sh`](../../scripts/ensure-supabase-cli-session.sh) | None | Authenticates Supabase CLI session (prerequisite for most tasks) |
+| **Supabase: Ensure Session** | `bash source scripts/ensure-supabase-cli-session.sh` | [`scripts/ensure-supabase-cli-session.sh`](../scripts/ensure-supabase-cli-session.sh) | None | Authenticates Supabase CLI session (prerequisite for most tasks) |
 | **Supabase: Link Project** | `npm run supabase:link` | [`package.json`](../package.json), Multiple | None | Runs: Ensure Session |
+| **Supabase: Pull Public Schema** | `npm run supabase:db:pull` | [`package.json`](../package.json), Multiple | None | Runs: Ensure Session |
+| **Supabase: Generate Types** | `npm run supabase:types` | [`package.json`](../package.json), Multiple | None | Runs: Ensure Session |
 | **Supabase: List Migrations** | `npm run supabase:migrations:list` | [`package.json`](../package.json), Multiple | None | Runs: Ensure Session |
 | **Supabase: Push Database** | `npm run supabase:db:push` | [`package.json`](../package.json), Multiple | None | Runs: Ensure Session |
-| **Supabase: Generate Types** | `npm run supabase:types` | [`package.json`](../package.json), Multiple | None | Runs: Ensure Session |
-| **Supabase: Pull Public Schema** | `npm run supabase:db:pull` | [`package.json`](../package.json), Multiple | None | Runs: Ensure Session |
-| **Supabase: Start Local Stack** | `npm run supabase:start:local` | CLI | None | No description available |
-| **Supabase: Full Workflow** | `Sequential composite` | Multiple | None | Runs: Ensure Session → Link Project → List Migrations |
+| **Supabase: Start Local Stack** | `npm run supabase:start:local` | [`package.json`](../package.json) | None | No description available |
 | **Database: Create Migration** | `bash cd supabase && source ../scripts/ensure-supabase-cli-session.sh && npx --yes supabase@latest migration new ${input:migrationName}` | [`../scripts/ensure-supabase-cli-session.sh`](../../scripts/ensure-supabase-cli-session.sh) | `migrationName` | Creates a new migration file with descriptive name |
 | **Supabase: Serve Local Functions** | `npm run edge:serve` | [`package.json`](../package.json), Multiple | None | Runs: Ensure Session |
 
@@ -111,10 +110,8 @@ _Auto-generated from `.vscode/tasks.json` — Last updated: 2025-10-17_
 
 | Task Label | Command | Script/Config | Inputs | Description |
 |------------|---------|---------------|--------|-------------|
-| **Start Codespace** | `Sequential composite` | Multiple | None | Runs: Ensure Session → Link Project → Pull Public Schema → Generate Types → List Migrations → MCP: Start All Servers |
+| **Start Codespace** | `Sequential composite` | Multiple | None | Runs: Ensure Session → Link Project → MCP: Start All Servers |
 | **Close Codespace** | `Sequential composite` | Multiple | None | Runs: Docs: Update All Documentation → MCP: Stop All Servers → Docs: Update Codebase Index (Legacy) → Git: Remind to Push Before Exit → Git: Commit and Push All |
-| **Git: Remind to Push Before Exit** | `bash git status && echo 'REMINDER: Commit and push your changes before closing Codespace!'` | CLI | None | No description available |
-| **Git: Commit and Push All** | `bash git add . && git commit -m 'Codespace close: doc update, MCP stop, codebase index' || echo 'No changes to commit.' && git push` | CLI | None | No description available |
 | **Roadmap: Sync Epics to GitHub** | `bash ${workspaceFolder}/scripts/roadmap/sync-epics-to-github.sh` | [`scripts/roadmap/sync-epics-to-github.sh`](../scripts/roadmap/sync-epics-to-github.sh) | None | Creates GitHub issues from local epic files and attaches them to Project 5 (requires GH_PROJECT_TOKEN) |
 | **Context: Fetch Repo Snapshot** | `node` | CLI | None | Captures current git branch, status, and diff summary to `.cache/agent/context/repo-context.json` |
 | **Context: Fetch Supabase Snapshot** | `node` | CLI | None | Summarizes Edge Function directories and verify_jwt settings to `.cache/agent/context/supabase-functions.json` |
@@ -127,6 +124,8 @@ _Auto-generated from `.vscode/tasks.json` — Last updated: 2025-10-17_
 | **Thunder: Run Database Tests** | `echo` | CLI | None | No description available |
 | **Thunder: Run Full Test Suite** | `Sequential composite` | Multiple | None | Runs: Thunder: Run Auth Tests → Thunder: Run Discovery Tests → Thunder: Run Enrichment Tests → Thunder: Run Export Tests → Thunder: Run Database Tests |
 | **Thunder: Sync Environment Variables** | `bash echo 'Syncing Thunder Client environment from Vercel/Supabase...' && vercel env pull .env.thunder --yes && echo 'Environment synced to .env.thunder'` | CLI | None | No description available |
+| **Git: Remind to Push Before Exit** | `bash git status && echo 'REMINDER: Commit and push your changes before closing Codespace!'` | CLI | None | No description available |
+| **Git: Commit and Push All** | `bash git add . && git commit -m 'Codespace close: doc update, MCP stop, codebase index' || echo 'No changes to commit.' && git push` | CLI | None | No description available |
 | **npm: mcp:prod** | `N/A` | CLI | None | No description available |
 
 ---
