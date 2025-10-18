@@ -12,6 +12,7 @@ This package provides **5 specialized AI agent modes** and **comprehensive promp
 - **Batching-Optimized**: Transform 10-15 sequential requests into 1-2 comprehensive solutions
 - **Production-Focused**: Direct integration with existing Vercel/Supabase deployment patterns
 - **Cost-Efficient**: Minimize premium usage while maximizing development velocity
+- **Debug-Enhanced**: Integrated with automated log analysis, Run & Debug profiles, and MCP troubleshooting tools
 
 ---
 
@@ -19,9 +20,9 @@ This package provides **5 specialized AI agent modes** and **comprehensive promp
 
 ```
 .vscode/chat-modes/
-├── smart-debug.md              # Comprehensive debugging & issue resolution
-├── feature-delivery.md         # End-to-end feature implementation
-├── production-support.md       # Production monitoring & troubleshooting
-├── api-research.md            # API evaluation & integration planning
-└── cost-optimization.md       # Performance & cost analysis
+├── smart-debug.md              # Comprehensive debugging with automated log analysis & MCP tools
+├── feature-delivery.md         # End-to-end feature implementation with Run & Debug testing
+├── production-support.md       # Production monitoring with automated triage
+├── api-research.md            # API evaluation with CLI guard validation
+└── cost-optimization.md       # Performance & cost analysis with MCP monitoring
 ```

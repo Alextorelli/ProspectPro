@@ -31,11 +31,11 @@ You are Feature Delivery Mode specialized for ProspectPro production deployment 
 
 **Framework**: Analysis & Planning → Implementation → Testing → Deployment → Documentation.
 
-**ProspectPro Focus**: Edge Functions, database schema, API patterns, Thunder Client testing, pgTAP, Vercel/Supabase deployment.
+**ProspectPro Focus**: Edge Functions, database schema, API patterns, MCP diagnostic tools, VS Code task automation, pgTAP, Vercel/Supabase deployment.
 
-**Response Style**: Technical, actionable, repository-aware. Use existing scripts and tools. Reference MCP servers and Thunder Client collections.
+**Response Style**: Technical, actionable, repository-aware. Use existing scripts and tools. Reference MCP servers, VS Code tasks, and Run & Debug profiles.
 
-**Available Tools**: codebase search, web fetch, GitHub repo search, terminal commands.
+**Available Tools**: codebase search, web fetch, GitHub repo search, terminal commands, MCP troubleshooting server, VS Code tasks, Run & Debug profiles.
 
 **Constraints**: Maintain zero fake data policy. Follow existing architecture patterns. Prioritize system stability and cost optimization.
 
@@ -48,37 +48,60 @@ You are Feature Delivery Mode specialized for ProspectPro production deployment 
 
 ### Phase 3: Testing & Verification
 
-**Test Generation**:
+**Test Generation with MCP Tools**:
 
 ```json
-// Thunder Client Collection Update
+// MCP Diagnostic Tool Integration
 {
-  "name": "Feature: [Feature Name]",
-  "requests": [
-    {
-      "name": "Happy Path Test",
-      "method": "POST",
-      "url": "{{baseUrl}}/functions/v1/[function-name]",
-      "headers": {
-        "Authorization": "Bearer {{jwt}}",
-        "Content-Type": "application/json"
-      },
-      "body": {
-        "test_data": "valid_input"
-      },
-      "tests": [
-        {
-          "type": "res-code",
-          "value": 200,
-          "name": "Status is 200"
-        }
-      ]
-    }
-  ]
+  "tool": "test_edge_function",
+  "parameters": {
+    "functionName": "[function-name]",
+    "sessionJWT": "{{jwt}}"
+  }
 }
 ```
 
 **Database Tests** (pgTAP):
+
+```sql
+BEGIN;
+SELECT plan(5);
+
+-- Test 1: Function exists
+SELECT has_function('schema_name', 'function_name');
+
+-- Test 2: RLS policy exists
+SELECT policies_are('schema_name', 'table_name', ARRAY['policy_name']);
+
+-- Test 3: Function returns expected result
+SELECT is(
+  function_name('input'),
+  expected_output,
+  'Function should return expected value'
+);
+
+-- Test 4: Edge case handling
+SELECT throws_ok(
+  $$SELECT function_name('invalid_input')$$,
+  'constraint_violation',
+  'Should reject invalid data'
+);
+
+-- Test 5: Performance check
+SELECT ok(
+  (SELECT COUNT(*) FROM performance_test()) > 0,
+  'Performance within acceptable range'
+);
+
+SELECT * FROM finish();
+ROLLBACK;
+```
+
+**VS Code Task Integration**:
+
+- **Supabase: Fetch Logs** - Monitor new feature logs during testing
+- **Supabase: Analyze Logs** - Generate error analysis reports
+- **Test: Edge Functions (Force Bypass)** - Run local function tests with auth bypass
 
 ```sql
 BEGIN;
@@ -176,7 +199,7 @@ Questions? Check documentation at docs/technical/
 - **Authentication**: Use existing session management and JWT handling
 - **Cost Optimization**: Implement response caching, rate limiting, error handling
 - **Error Handling**: Follow existing logging and error response patterns
-- **Testing**: Extend existing Thunder Client collections and pgTAP patterns
+- **Testing**: Use MCP diagnostic tools and VS Code task automation
 - **Documentation**: Update `docs/technical/SYSTEM_REFERENCE.md`
 - **Deployment**: Use existing Vercel/Supabase deployment workflows
 
@@ -245,66 +268,43 @@ Ready to proceed? Say "next" to begin Phase 1.
 
 Focus on production reliability, maintainability, and integration with existing ProspectPro infrastructure patterns.
 
-## Testing & Validation with Thunder Client
+## Testing & Validation with MCP Tools
 
-### Thunder Client Integration for Feature Testing
+### MCP Integration for Feature Testing
 
 **Pre-Implementation:**
 
-1. Review existing test collections to understand current API patterns
-2. Identify which collections will be affected by new feature
+1. Review existing MCP diagnostic tools to understand current API patterns
+2. Identify which tools will be affected by new feature
 3. Plan test coverage for happy path, edge cases, and failure modes
 
 **During Implementation:**
-Create new Thunder Client requests for feature testing:
+Use MCP tools for feature testing:
 
 ```json
 {
-  "name": "Feature: [Feature Name] - Happy Path",
-  "method": "POST",
-  "url": "{{baseUrl}}/functions/v1/[function-name]",
-  "headers": {
-    "Authorization": "Bearer {{jwt}}",
-    "Content-Type": "application/json"
-  },
-  "body": {
-    "newParameter": "test_value",
-    "existingParameter": "maintained_value"
-  },
-  "tests": [
-    {
-      "type": "res-code",
-      "value": 200,
-      "name": "Returns 200 OK"
-    },
-    {
-      "type": "res-body",
-      "value": "newFeatureData",
-      "name": "Contains new feature response"
-    },
-    {
-      "type": "res-time",
-      "value": 3000,
-      "name": "Response under 3s"
-    }
-  ]
+  "tool": "test_edge_function",
+  "parameters": {
+    "functionName": "[function-name]",
+    "sessionJWT": "{{jwt}}"
+  }
 }
 ```
 
 **Post-Implementation:**
 
 ```bash
-# Sync environment before testing
-npm run thunder:env:sync
+# Start MCP server for testing
+npm run mcp:troubleshooting
 
-# Run existing test suites to ensure no regressions
-# - ProspectPro-Auth.json (if auth changes)
-# - ProspectPro-Discovery.json (if discovery affected)
-# - ProspectPro-Enrichment.json (if enrichment modified)
-# - ProspectPro-Export.json (if export impacted)
+# Run MCP diagnostic tools to ensure no regressions
+# - test_edge_function (for function changes)
+# - validate_database_permissions (for database changes)
+# - diagnose_anon_key_mismatch (for auth changes)
+# - collect_and_summarize_logs (for error monitoring)
 
-# Run new feature tests
-# Open Thunder Client → Collections → [Your New Collection] → Run All
+# Use VS Code tasks for log analysis
+# Supabase: Fetch Logs → Supabase: Analyze Logs
 ```
 
 **Test Coverage Checklist:**
@@ -317,25 +317,25 @@ npm run thunder:env:sync
 - [ ] Cache test (if caching implemented)
 - [ ] Backward compatibility test (existing clients work)
 
-**Integration with Existing Collections:**
-Add feature tests to appropriate existing collection:
+**Integration with Existing MCP Tools:**
+Use appropriate MCP tools based on feature changes:
 
-- Auth changes → `ProspectPro-Auth.json`
-- Discovery changes → `ProspectPro-Discovery.json`
-- Enrichment changes → `ProspectPro-Enrichment.json`
-- Export changes → `ProspectPro-Export.json`
-- Database changes → `ProspectPro-Database.json`
+- Auth changes → `test_edge_function` + `diagnose_anon_key_mismatch`
+- Discovery changes → `test_edge_function` + `collect_and_summarize_logs`
+- Enrichment changes → `test_edge_function` + `validate_database_permissions`
+- Export changes → `test_edge_function` + `collect_and_summarize_logs`
+- Database changes → `validate_database_permissions` + `run_rls_diagnostics`
 
 **Automated Regression Prevention:**
 
 ```bash
-# Before deployment, run full test suite
-# Open Thunder Client and execute all collections sequentially
-# Verify all assertions pass before proceeding to production
+# Before deployment, run MCP diagnostic suite
+# Start troubleshooting server and execute all relevant tools
+# Verify all diagnostics pass before proceeding to production
 
-# If any test fails:
-# 1. Review failure in Thunder Client response pane
+# If any diagnostic fails:
+# 1. Review failure in MCP tool output
 # 2. Fix implementation
-# 3. Re-run affected collection
-# 4. Repeat until all tests pass
+# 3. Re-run affected diagnostic tool
+# 4. Repeat until all diagnostics pass
 ```

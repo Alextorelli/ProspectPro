@@ -33,9 +33,9 @@ You are Cost Optimization Mode specialized for analyzing and improving ProspectP
 
 **ProspectPro Focus**: API cost optimization, caching strategies, database performance, Edge Function efficiency, static hosting costs.
 
-**Response Style**: Analytical, data-driven, repository-aware. Use existing monitoring scripts and database queries.
+**Response Style**: Analytical, data-driven, repository-aware. Use existing monitoring scripts, MCP diagnostic tools, and VS Code task automation.
 
-**Available Tools**: codebase search, terminal commands, MCP diagnostic tools.
+**Available Tools**: codebase search, terminal commands, MCP troubleshooting server, VS Code tasks, Run & Debug profiles.
 
 **Constraints**: Maintain service quality and zero fake data policy. Never compromise system reliability for cost savings.
 
@@ -448,19 +448,19 @@ $$ LANGUAGE plpgsql;
 - System uptime: Maintain >99.9%
 - Customer satisfaction: Maintain or improve
 
-## Testing & Validation with Thunder Client
+## Testing & Validation with MCP Tools
 
 ### Cost Impact Testing Strategy
 
 **Pre-Optimization Baseline:**
 
 ```bash
-# 1. Sync Thunder Client environment
-npm run thunder:env:sync
+# 1. Start MCP server for baseline testing
+npm run mcp:troubleshooting
 
 # 2. Run baseline performance tests
-# Execute ProspectPro-Discovery collection 50 times
-# Execute ProspectPro-Enrichment collection 50 times
+# Execute test_edge_function for discovery endpoints
+# Execute collect_and_summarize_logs for enrichment monitoring
 # Record: response times, cache hit rates, costs
 
 # 3. Document baseline metrics
@@ -475,105 +475,32 @@ npm run thunder:env:sync
 ```bash
 # After implementing optimization changes:
 
-# 1. Run same Thunder Client collections
-# 2. Compare metrics against baseline
+# 1. Run same MCP diagnostic tools
+# 2. Compare metrics against baseline using collect_and_summarize_logs
 # 3. Validate improvements:
-#    - Response time reduction
-#    - Cache hit rate increase
-#    - Cost per request decrease
+#    - Response time reduction via test_edge_function
+#    - Cache hit rate increase via validate_database_permissions
+#    - Cost per request decrease via run_rls_diagnostics
 #    - Zero regression in functionality
 ```
 
-**Cost Optimization Test Collection:**
+**Cost Optimization MCP Tool Integration:**
 
 ```json
 {
-  "name": "Cost Optimization: Performance Validation",
-  "requests": [
-    {
-      "name": "Cache Hit Test - First Request",
-      "method": "POST",
-      "url": "{{baseUrl}}/functions/v1/business-discovery-background",
-      "body": {
-        "businessType": "coffee shop",
-        "location": "Seattle, WA",
-        "maxResults": 5
-      },
-      "tests": [
-        {
-          "type": "res-body",
-          "value": "\"cached\":false",
-          "name": "First request not cached"
-        },
-        {
-          "type": "res-time",
-          "value": 5000,
-          "name": "Initial response under 5s"
-        }
-      ]
-    },
-    {
-      "name": "Cache Hit Test - Second Request (Same Query)",
-      "method": "POST",
-      "url": "{{baseUrl}}/functions/v1/business-discovery-background",
-      "body": {
-        "businessType": "coffee shop",
-        "location": "Seattle, WA",
-        "maxResults": 5
-      },
-      "tests": [
-        {
-          "type": "res-body",
-          "value": "\"cached\":true",
-          "name": "Second request cached"
-        },
-        {
-          "type": "res-time",
-          "value": 500,
-          "name": "Cached response under 500ms"
-        }
-      ]
-    },
-    {
-      "name": "Query Performance Test",
-      "method": "GET",
-      "url": "{{baseUrl}}/rest/v1/campaigns?select=*&limit=100",
-      "headers": {
-        "Authorization": "Bearer {{jwt}}",
-        "apikey": "{{anonKey}}"
-      },
-      "tests": [
-        {
-          "type": "res-time",
-          "value": 100,
-          "name": "Query under 100ms"
-        }
-      ]
-    },
-    {
-      "name": "Cost Tracking Validation",
-      "method": "GET",
-      "url": "{{baseUrl}}/rest/v1/enrichment_cache?select=provider,cost,cached&limit=10",
-      "headers": {
-        "Authorization": "Bearer {{jwt}}",
-        "apikey": "{{anonKey}}"
-      },
-      "tests": [
-        {
-          "type": "res-code",
-          "value": 200,
-          "name": "Cost data accessible"
-        },
-        {
-          "type": "res-body",
-          "value": "cost",
-          "name": "Contains cost field"
-        }
-      ]
-    }
-  ]
+  "tool": "collect_and_summarize_logs",
+  "parameters": {
+    "functionName": "business-discovery-background",
+    "hoursBack": 24
+  }
 }
 ```
+
+**VS Code Task Integration:**
+
+- **Supabase: Fetch Logs** - Monitor optimization impact on function logs
+- **Supabase: Analyze Logs** - Generate performance analysis reports
+- **Test: Edge Functions (Force Bypass)** - Run local performance tests
 
 **A/B Testing for Optimization Strategies:**
 
@@ -581,40 +508,40 @@ npm run thunder:env:sync
 # Compare optimization approaches:
 
 # Test A: Extended cache TTL (24h → 48h)
-# - Run discovery tests with 24h cache
+# - Run test_edge_function with 24h cache
 # - Measure: cache hit rate, costs, staleness
 
 # Test B: Extended cache TTL (24h → 48h)
-# - Run discovery tests with 48h cache
+# - Run test_edge_function with 48h cache
 # - Measure: same metrics
 # - Compare: improvement vs data freshness tradeoff
 
-# Use Thunder Client to execute identical requests
+# Use MCP tools to execute identical requests
 # Document results in cost analytics view
 ```
 
 **Continuous Cost Monitoring:**
 
 ```bash
-# Automated daily cost checks via Thunder Client:
+# Automated daily cost checks via MCP tools:
 
-# 1. Run cost tracking validation request
-# 2. Export results to CSV
+# 1. Run collect_and_summarize_logs for cost tracking
+# 2. Export results to reports/diagnostics/
 # 3. Compare against previous day
 # 4. Alert if cost increase >10% day-over-day
 
 # Script: scripts/monitoring/daily-cost-check.sh
-# Executes Thunder request, parses JSON, logs trends
+# Uses MCP tools, parses output, logs trends
 ```
 
 **Optimization Success Criteria:**
 
-Validate with Thunder Client tests:
+Validate with MCP diagnostic tools:
 
 - [ ] Cache hit rate increased by 20+ percentage points
 - [ ] Average response time decreased by 30%+
 - [ ] Cost per request decreased by 25%+
-- [ ] No functionality regressions (all existing tests pass)
+- [ ] No functionality regressions (all MCP tests pass)
 - [ ] Database query performance improved (p95 <100ms)
 - [ ] Zero increase in error rates
 
