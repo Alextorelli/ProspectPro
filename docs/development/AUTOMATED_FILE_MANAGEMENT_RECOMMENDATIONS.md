@@ -100,7 +100,7 @@ tmp/
 
 ## 🎯 Repository Context
 
-This is ProspectPro v3.1.0, a production-grade lead generation platform with zero-fake-data policy.
+This is ProspectPro v4.3, a production-grade lead generation platform with zero-fake-data policy.
 
 ## 📁 Relevant Files for AI Review
 

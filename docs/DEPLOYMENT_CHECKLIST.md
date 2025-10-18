@@ -54,12 +54,10 @@
 
 - [ ] Hit the production origin with a warm-up request: `curl -I https://prospect-fyhedobh1-appsmithery.vercel.app`.
 - [ ] Validate the Supabase session flow in the browser (login, discovery start, export download).
-- [ ] Tail function logs for regressions while triggering discovery:
+- [ ] Monitor function logs in the Supabase dashboard:
 
-  ```bash
-  # CLI log streaming is deprecated. Use the Supabase dashboard:
-  # Edge Functions → business-discovery-background → Logs
-  ```
+  - Navigate to: Edge Functions → business-discovery-background → Logs
+  - Filter by error level if investigating failures
 
 - [ ] Trigger a background discovery via UI and confirm campaign + leads rows appear in Supabase tables.
 - [ ] Run the export flow and verify `dashboard_exports` records update with `completed` status.

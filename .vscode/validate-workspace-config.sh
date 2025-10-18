@@ -41,10 +41,10 @@ REQUIRED_PATHS=(
   "config/mcp-config.json"
   "package.json"
   "supabase/functions"
-  "scripts/ensure-supabase-cli-session.sh"
-  "scripts/campaign-validation.sh"
-  "scripts/test-auth-patterns.sh"
-  "scripts/edge-function-diagnostics.sh"
+  "scripts/operations/ensure-supabase-cli-session.sh"
+  "scripts/testing/campaign-validation.sh"
+  "scripts/testing/test-auth-patterns.sh"
+  "scripts/diagnostics/edge-function-diagnostics.sh"
   "docs/technical/CODEBASE_INDEX.md"
 )
 
@@ -224,10 +224,10 @@ fi
 
 echo "\n📜 Validating scripts..."
 SCRIPT_PATHS=(
-  "scripts/ensure-supabase-cli-session.sh"
-  "scripts/campaign-validation.sh"
-  "scripts/test-auth-patterns.sh"
-  "scripts/edge-function-diagnostics.sh"
+  "scripts/operations/ensure-supabase-cli-session.sh"
+  "scripts/testing/campaign-validation.sh"
+  "scripts/testing/test-auth-patterns.sh"
+  "scripts/diagnostics/edge-function-diagnostics.sh"
 )
 
 for script in "${SCRIPT_PATHS[@]}"; do

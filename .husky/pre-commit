@@ -1,0 +1,4 @@
+#!/bin/sh
+# husky pre-commit hook — enforce ignore hygiene
+node scripts/tooling/validate-ignore-config.cjs || exit 1
+# Add other pre-commit checks below

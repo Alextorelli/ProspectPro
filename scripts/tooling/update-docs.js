@@ -12,7 +12,7 @@ import { fileURLToPath } from "url";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const repoRoot = path.resolve(__dirname, "..");
+const repoRoot = path.resolve(__dirname, "../..");
 
 // ============================================================================
 // CODEBASE INDEX CONFIGURATION
@@ -302,6 +302,8 @@ async function filterExisting(paths) {
 
 async function collectEdgeFunctions() {
   const baseDir = path.join(repoRoot, "supabase", "functions");
+  console.log("[DEBUG] repoRoot:", repoRoot);
+  console.log("[DEBUG] baseDir:", baseDir);
   const entries = await fs.readdir(baseDir, { withFileTypes: true });
   const items = [];
   for (const entry of entries) {
@@ -687,6 +689,19 @@ npm run docs:update
 
 async function generateTasksReference() {
   console.log("\n3️⃣ Generating VS Code Tasks Reference...");
+  const tasksScript = path.join(
+    repoRoot,
+    "scripts",
+    "generate-tasks-reference.js"
+  );
+  try {
+    await fs.access(tasksScript);
+  } catch {
+    console.warn(
+      "[WARN] generate-tasks-reference.js not found, skipping tasks reference generation."
+    );
+    return;
+  }
   const { spawnSync } = await import("child_process");
   const result = spawnSync("node", ["scripts/generate-tasks-reference.js"], {
     cwd: repoRoot,

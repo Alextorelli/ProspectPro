@@ -44,11 +44,11 @@ const result = await client.searchBusiness({
 
 The provider is registered in `modules/registry-engines/providers/index.js` under the key `"cobalt-sos"`. Existing discovery/enrichment workflows can opt-in by requesting this provider via the registry engine factory.
 
-## Migration Notes
+## Migration Notes (v4.3)
 
-- The legacy `california-sos` and `newyork-sos` providers remain available for backward compatibility but should be considered deprecated.
-- When targeting nationwide owner verification, prefer the Cobalt provider to leverage the universal cache-first strategy described in `08-universal-cache-first-sos-strategy.md`.
-- Ensure Supabase Edge Functions have the `COBALT_INTELLIGENCE_API_KEY` secret configured before deploying discovery or enrichment updates that rely on the new provider.
+- The `cobalt-sos` provider is the primary SOS integration for all nationwide owner verification workflows.
+- Legacy state-specific providers (`california-sos`, `newyork-sos`) are no longer active in v4.3; all SOS queries route through the Cobalt provider.
+- Ensure Supabase Edge Functions have the `COBALT_INTELLIGENCE_API_KEY` secret configured before deploying discovery or enrichment updates that rely on this provider.
 
 ## Testing Checklist
 

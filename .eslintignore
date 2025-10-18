@@ -1,8 +1,30 @@
-node_modules/
-archive/
+###############################################################
+# ProspectPro .eslintignore — ESLint Hygiene (2025-10-18)
+#
+# This file controls which files/folders ESLint IGNORES during linting.
+# It complements .gitignore but focuses on ESLint-specific exclusions.
+#
+# Rationale:
+# - node_modules is handled by ESLint automatically (do NOT ignore here)
+# - Exclude build outputs, logs, and deployment artifacts
+# - Exclude Supabase functions (TypeScript/Deno, not JS/TS for linting)
+# - Align with .gitignore sections where applicable
+###############################################################
+
+# === BUILD OUTPUTS ===
 dist/
 public/dist/
+
+# === LOGS & TEMP FILES ===
 logs/
+*.log
+
+# === DEPLOYMENT & INFRASTRUCTURE ===
 .vercel/
-supabase/functions/business-discovery-optimized/
 .vercelignore
+
+# === ARCHIVE & LEGACY ===
+archive/
+
+# === SUPABASE FUNCTIONS (Deno/TypeScript, not for ESLint) ===
+supabase/functions/

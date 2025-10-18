@@ -91,8 +91,8 @@ npm run roadmap:pull                # Requires GH_PROJECT_TOKEN
 ```bash
 bash scripts/roadmap/sync-epics-to-github.sh  # Requires GH_PROJECT_TOKEN
 bash scripts/seed-roadmap.sh                  # Requires GH_PROJECT_TOKEN
-node scripts/roadmap-batch.js --project       # Requires GH_PROJECT_TOKEN
-node scripts/roadmap-pull.js                  # Requires GH_PROJECT_TOKEN
+node scripts/roadmap/roadmap-batch.js --project       # Requires GH_PROJECT_TOKEN
+node scripts/roadmap/roadmap-pull.js                  # Requires GH_PROJECT_TOKEN
 ```
 
 ## Token Precedence

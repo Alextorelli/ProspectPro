@@ -165,11 +165,11 @@ npm run build
 ## 🗓️ Release Timeline
 
 - **v4.4** – User-aware deduplication, campaign hashing, billing-ready analytics
-- **v4.3** – Tier-aware background discovery, lint tooling alignment, legacy asset removal
-- **v4.2** – Authenticated user-aware discovery (deprecated backend retained only for exports)
+- **v4.3** – Tier-aware background discovery, lint tooling alignment, legacy asset removal (current baseline)
+- **v4.2** – Authenticated user-aware discovery with session JWT enforcement
 - **v4.1** – Verification-first enrichment pipeline
 
-For historical artifacts see `/archive/`.
+For historical artifacts see `docs/archive/` and subdirectory archives.
 
 ### Key URLs
 

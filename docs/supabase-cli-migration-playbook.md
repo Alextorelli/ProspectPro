@@ -1,6 +1,6 @@
-# Supabase CLI Migration Playbook (v2.51)
+# Supabase CLI Migration Playbook (v2.51+)
 
-ProspectPro aligns with Supabase's 2025 migration workflow. Use the commands below to manage schema changes without relying on deprecated `db execute` or `supabase logs` shortcuts.
+ProspectPro follows Supabase's current migration workflow. Use the commands below to manage schema changes with the supported CLI interface (dashboard logs and `npx` invocations).
 
 ## Quick Reference
 

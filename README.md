@@ -178,6 +178,9 @@ cd ProspectPro
 # Install dependencies
 npm install
 
+# Validate ignore hygiene (run after any ignore file change)
+node scripts/tooling/validate-ignore-config.cjs
+
 # Start Supabase (local development)
 supabase start
 
@@ -221,6 +224,20 @@ curl -X POST 'https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/test-new-aut
 ## 🛠️ Troubleshooting
 
 - **Blank screen after campaign completes** – Indicates the browser hit an old build where the campaign store could not process undefined lead batches. Pull the latest `main`, run `npm install && npm run build`, and redeploy the `/dist` bundle. If the issue persists, open dev tools and confirm there are no React error #185 stacks; the null-safe store shipping in v4.3.1 should keep results rendering once Supabase returns data.
+
+### Ignore Hygiene & Automation (2025-10-18)
+
+- `.vercelignore` refactored to remove redundant rules and align with `.gitignore`
+- `.eslintignore` normalized with section headers mirroring `.gitignore` structure
+- Validation script (`scripts/tooling/validate-ignore-config.cjs`) checks for unwanted files after ignore changes
+- Integrate validation into Husky pre-commit, Codespace startup, and Vercel build workflows
+- If validation flags files, update ignore rules and rerun
+
+#### Ignore Strategy Responsibilities
+
+- **`.gitignore` (root)**: Source of truth for repository-wide exclusions (dependencies, env, builds, logs, archives, IDE files, secrets)
+- **`.vercelignore`**: Frontend build exclusions (build outputs, logs, archives, MCP servers, test files, Supabase functions, large docs)
+- **`.eslintignore`**: ESLint-specific exclusions (build outputs, logs, deployment artifacts, archives, Supabase functions)
 
 ### ✅ Completed (v4.3)
 

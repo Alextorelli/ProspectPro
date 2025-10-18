@@ -43,7 +43,7 @@
       "label": "Supabase: Ensure Session",
       "type": "shell",
       "command": "bash",
-      "args": ["-lc", "source scripts/ensure-supabase-cli-session.sh"],
+      "args": ["-lc", "source scripts/operations/ensure-supabase-cli-session.sh"],
       "group": "build",
       "presentation": {
         "echo": false,
@@ -159,7 +159,7 @@
       "command": "bash",
       "args": [
         "-lc",
-        "cd supabase && source ../scripts/ensure-supabase-cli-session.sh && npx --yes supabase@latest migration new ${input:migrationName}"
+        "cd supabase && source ../scripts/operations/ensure-supabase-cli-session.sh && npx --yes supabase@latest migration new ${input:migrationName}"
       ],
       "group": "build",
       "presentation": {
@@ -194,7 +194,7 @@
       "command": "bash",
       "args": [
         "-lc",
-        "cd supabase && source ../scripts/ensure-supabase-cli-session.sh && npx --yes supabase@latest functions deploy ${input:functionName} --no-verify-jwt"
+        "cd supabase && source ../scripts/operations/ensure-supabase-cli-session.sh && npx --yes supabase@latest functions deploy ${input:functionName} --no-verify-jwt"
       ],
       "group": "build",
       "dependsOn": "Supabase: Ensure Session",
@@ -279,7 +279,7 @@
       "command": "bash",
       "args": [
         "-lc",
-        "cd supabase && source ../scripts/ensure-supabase-cli-session.sh && npx --yes supabase@latest functions deploy test-google-places --no-verify-jwt && npx --yes supabase@latest functions deploy test-new-auth --no-verify-jwt && npx --yes supabase@latest functions deploy auth-diagnostics --no-verify-jwt"
+        "cd supabase && source ../scripts/operations/ensure-supabase-cli-session.sh && npx --yes supabase@latest functions deploy test-google-places --no-verify-jwt && npx --yes supabase@latest functions deploy test-new-auth --no-verify-jwt && npx --yes supabase@latest functions deploy auth-diagnostics --no-verify-jwt"
       ],
       "group": "build",
       "dependsOn": "Supabase: Ensure Session",
@@ -361,7 +361,7 @@
       "command": "bash",
       "args": [
         "-lc",
-        "cd supabase && source ../scripts/ensure-supabase-cli-session.sh && npx --yes supabase@latest functions logs ${input:functionName} --follow"
+        "cd supabase && source ../scripts/operations/ensure-supabase-cli-session.sh && npx --yes supabase@latest functions logs ${input:functionName} --follow"
       ],
       "group": "build",
       "dependsOn": "Supabase: Ensure Session",
@@ -450,7 +450,7 @@
       "command": "bash",
       "args": [
         "-lc",
-        "cd ${workspaceFolder} && ./scripts/test-discovery-pipeline.sh"
+        "cd ${workspaceFolder} && ./scripts/testing/test-discovery-pipeline.sh"
       ],
       "group": "test",
       "dependsOn": "Supabase: Ensure Session",
@@ -472,7 +472,7 @@
       "command": "bash",
       "args": [
         "-lc",
-        "cd ${workspaceFolder} && ./scripts/test-enrichment-chain.sh"
+        "cd ${workspaceFolder} && ./scripts/testing/test-enrichment-chain.sh"
       ],
       "group": "test",
       "dependsOn": "Supabase: Ensure Session",
@@ -492,7 +492,7 @@
       "label": "Test: Export Flow",
       "type": "shell",
       "command": "bash",
-      "args": ["-lc", "cd ${workspaceFolder} && ./scripts/test-export-flow.sh"],
+      "args": ["-lc", "cd ${workspaceFolder} && ./scripts/testing/test-export-flow.sh"],
       "group": "test",
       "dependsOn": "Supabase: Ensure Session",
       "options": {
@@ -522,7 +522,7 @@
       "command": "bash",
       "args": [
         "-lc",
-        "${workspaceFolder}/scripts/campaign-validation.sh ${input:sessionJWT}"
+        "${workspaceFolder}/scripts/testing/campaign-validation.sh ${input:sessionJWT}"
       ],
       "group": "test",
       "presentation": {
@@ -538,7 +538,7 @@
       "command": "bash",
       "args": [
         "-lc",
-        "${workspaceFolder}/scripts/test-auth-patterns.sh ${input:sessionJWT}"
+        "${workspaceFolder}/scripts/testing/test-auth-patterns.sh ${input:sessionJWT}"
       ],
       "group": "test",
       "presentation": {
@@ -554,7 +554,7 @@
       "command": "bash",
       "args": [
         "-lc",
-        "${workspaceFolder}/scripts/edge-function-diagnostics.sh ${input:sessionJWT}"
+        "${workspaceFolder}/scripts/diagnostics/edge-function-diagnostics.sh ${input:sessionJWT}"
       ],
       "group": "test",
       "presentation": {
@@ -959,7 +959,7 @@
       "label": "Workspace: Verify Toolchain",
       "type": "shell",
       "command": "bash",
-      "args": ["-lc", "./scripts/verify-toolchain.sh"],
+      "args": ["-lc", "./scripts/diagnostics/verify-toolchain.sh"],
       "group": "build",
       "presentation": {
         "echo": true,

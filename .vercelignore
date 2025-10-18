@@ -1,14 +1,28 @@
-# Build outputs (handled by vercel.json)
+###############################################################
+# ProspectPro .vercelignore — Frontend Build Hygiene (2025-10-18)
+#
+# This file controls which files/folders are EXCLUDED from Vercel frontend builds.
+# It is aligned with .gitignore and workspace hygiene goals.
+#
+# Rationale:
+# - Only static frontend assets and required configs should be deployed
+# - All backend, test, dev, and archive files must be excluded
+# - node_modules is handled by Vercel automatically (do NOT ignore here)
+# - Supabase Edge Functions are deployed separately
+# - Redundant/legacy rules removed for clarity
+###############################################################
+
+# === Build Outputs (handled by vercel.json) ===
 dist
 build
 
-# Development files
+# === Environment & Development Files ===
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
 
-# Archive and legacy files
+# === Archive & Legacy Files ===
 archive/
 api-legacy/
 docker/
@@ -17,31 +31,39 @@ docker-compose*.yml
 Dockerfile
 cloudbuild*.yaml
 
-# Logs and temp files
+# === Logs & Temp Files ===
 logs/
 *.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# MCP servers (not needed for frontend build)
+# === MCP Servers (not needed for frontend build) ===
 mcp-servers/
 
-# Development configs that aren't needed for build
+# === Codespaces/Dev Configs (not needed for build) ===
 .codespaces/
 
-# Database files (not needed for frontend)
+# === Database Files (not needed for frontend) ===
 database/
 
-# Test files
+# === Test Files ===
 test-*.sh
 test-*.js
 
-# Supabase functions (separate deployment)
+# === Supabase Functions (deployed separately) ===
 supabase/functions/
 
-# Large documentation files not needed for build
+# === Large Documentation Files (not needed for build) ===
 VERCEL_NATIVE_OPTIMIZATIONS.md
 COST_OPTIMIZATION_SUMMARY.md
 CI_CD_DEPLOYMENT_GUIDE.md
 TECHNICAL_SUMMARY_*.md
+
+# === Node Modules ===
+# DO NOT ignore node_modules here — Vercel handles dependencies automatically
+# If you see node_modules/* flagged by validation, check .gitignore instead
+
+# === Workspace Hygiene ===
+# All rules above are reviewed and deduplicated as of 2025-10-18
+# For future changes, update both .vercelignore and .gitignore as needed

@@ -1,8 +1,8 @@
 # ProspectPro Codebase Index
 
-> Primary #codebase reference. Regenerate with `npm run codebase:index` before audits or deployments.
+> Primary #codebase reference. Regenerate with `npm run docs:update` before audits or deployments.
 
-_Last generated: 2025-10-18T01:48:29.799Z_
+_Last generated: 2025-10-18T03:12:05.792Z_
 
 ## Supabase Edge Functions
 
@@ -73,17 +73,6 @@ _Last generated: 2025-10-18T01:48:29.799Z_
 - [supabase/schema-sql/003_deduplication.sql](supabase/schema-sql/003_deduplication.sql) — Deduplication ledger plus hash/filter routines
 - [supabase/schema-sql/004_enrichment_cache.sql](supabase/schema-sql/004_enrichment_cache.sql) — Enrichment cache tables, views, and maintenance helpers
 
-## Automation & Scripts
-
-- [scripts/generate-codebase-index.js](scripts/generate-codebase-index.js) — Project maintenance script
-- [scripts/campaign-validation.sh](scripts/campaign-validation.sh) — Project maintenance script
-- [scripts/deploy-background-tasks.sh](scripts/deploy-background-tasks.sh) — Project maintenance script
-- [scripts/start-mcp.sh](scripts/start-mcp.sh) — Project maintenance script
-- [scripts/post-session.sh](scripts/post-session.sh) — Project maintenance script
-- [scripts/ensure-supabase-cli-session.sh](scripts/ensure-supabase-cli-session.sh) — Project maintenance script
-- [scripts/setup-edge-auth-env.sh](scripts/setup-edge-auth-env.sh) — Project maintenance script
-- [scripts/stop-mcp.sh](scripts/stop-mcp.sh) — Project maintenance script
-
 ## Configuration & Policies
 
 - [docs/technical/CODEBASE_INDEX.md](docs/technical/CODEBASE_INDEX.md) — Auto-generated index consumed by #codebase command
@@ -95,6 +84,6 @@ _Last generated: 2025-10-18T01:48:29.799Z_
 
 ## Update Procedure
 
-1. Run `npm run codebase:index` after modifying edge functions, frontend workflow, or security policies.
+1. Run `npm run docs:update` after modifying edge functions, frontend workflow, or security policies.
 2. Commit the refreshed `docs/technical/CODEBASE_INDEX.md` alongside your changes so #codebase stays current.
 3. Legacy documentation referencing the codebase is archived—treat this file as the single source of truth.
