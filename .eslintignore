@@ -33,3 +33,9 @@ supabase/functions/
 src/components/GeographicSelector.tsx
 src/components/PaymentMethods.tsx
 src/components/Stepper.tsx
+
+# === TEMPORARY: CommonJS modules pending ESM migration ===
+config/**/*.js
+modules/**/*.js
+mcp-servers/**/*.js
+scripts/**/*.js

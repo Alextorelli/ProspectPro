@@ -121,4 +121,5 @@ _Auto-generated from `.vscode/tasks.json` — Last updated: 2025-10-18_
 | **Thunder: Sync Environment Variables** | `bash -lc echo 'Syncing Thunder Client environment from Vercel/Supabase...' && npx --yes vercel@latest env pull .env.thunder --yes && echo 'Environment synced to .env.thunder'` | Multiple | None | No description available |
 | **Workspace: Verify Toolchain** | `bash -lc ./scripts/diagnostics/verify-toolchain.sh` | [`scripts/diagnostics/verify-toolchain.sh`](../scripts/diagnostics/verify-toolchain.sh) | None | No description available |
 | **Git: Remind to Push Before Exit** | `bash -c git status && echo 'REMINDER: Commit and push your changes before closing Codespace!'` | Multiple | None | No description available |
+| **Lint: Autofix All (React Hooks)** | `npx eslint . --fix` | Multiple | None | No description available |
 | **npm: mcp:prod** | `npm run mcp:prod` | [`package.json`](../package.json) | None | No description available |

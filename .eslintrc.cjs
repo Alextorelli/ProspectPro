@@ -14,9 +14,22 @@ module.exports = {
   extends: ["eslint:recommended", "plugin:@typescript-eslint/recommended"],
   overrides: [
     {
-      files: ["**/*.js"],
+      files: [
+        "config/**/*.js",
+        "modules/**/*.js",
+        "scripts/**/*.js",
+        "mcp-servers/**/*.js",
+      ],
+      parser: "@typescript-eslint/parser",
+      parserOptions: {
+        ecmaVersion: "latest",
+        sourceType: "commonjs",
+      },
+      env: {
+        node: true,
+      },
       rules: {
-        "@typescript-eslint/no-require-imports": "off",
+        "@typescript-eslint/no-require-imports": 0,
       },
     },
     {
@@ -70,11 +83,11 @@ module.exports = {
         "prefer-const": "off",
       },
     },
-    // You can add more overrides for other .js folders as needed
   ],
   rules: {
     "@typescript-eslint/no-unused-vars": "off",
     "@typescript-eslint/no-explicit-any": "off",
+    "@typescript-eslint/no-require-imports": 0,
   },
 };
 module.exports = {
