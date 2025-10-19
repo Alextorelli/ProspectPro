@@ -1,0 +1,40 @@
+{
+  "name": "production",
+  "description": "Live ProspectPro environment with verified customer data",
+  "supabase": {
+    "projectRef": "sriycekxdqnesdsgwiuc",
+    "apiUrl": "https://sriycekxdqnesdsgwiuc.supabase.co",
+    "anonKey": null,
+    "serviceRoleKey": null
+  },
+  "vercel": {
+    "deploymentUrl": "https://prospect-fyhedobh1-appsmithery.vercel.app",
+    "projectName": "prospect-pro"
+  },
+  "apiRateLimits": {
+    "hunter_io": { "monthlyLimit": 500, "alertThreshold": 400, "unit": "searches" },
+    "neverbounce": { "monthlyLimit": 10000, "alertThreshold": 8000, "unit": "verifications" },
+    "google_places": { "monthlyLimit": 40000, "alertThreshold": 32000, "unit": "requests" }
+  },
+  "featureFlags": {
+    "enableAsyncDiscovery": true,
+    "enableZeroFakeDataAudits": true,
+    "enableRealtimeCampaigns": true
+  },
+  "monitoring": {
+    "otelEndpoint": "https://otel.prospectpro.app/v1/traces",
+    "jaegerUrl": "https://jaeger.prospectpro.app",
+    "logDashboard": "https://supabase.com/dashboard/project/sriycekxdqnesdsgwiuc/logs"
+  },
+  "permissions": {
+    "writeOperations": false,
+    "canDeploy": false,
+    "canFetchLogs": true,
+    "canRunTests": false,
+    "requiresApproval": true
+  },
+  "constraints": {
+    "maxScratchpadEntries": 50,
+    "maxTaskConcurrency": 2
+  }
+}

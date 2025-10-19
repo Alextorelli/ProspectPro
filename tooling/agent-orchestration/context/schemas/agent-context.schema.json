@@ -1,0 +1,99 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://prospectpro.app/context/agent-context.schema.json",
+  "title": "AgentContext",
+  "type": "object",
+  "required": ["agentId", "scratchpad", "longTermMemory", "metadata"],
+  "properties": {
+    "agentId": {
+      "type": "string",
+      "description": "Identifier for the agent (e.g., system-architect, development-workflow)."
+    },
+    "scratchpad": {
+      "type": "object",
+      "required": ["currentTask", "notes", "lastUpdated"],
+      "properties": {
+        "currentTask": {
+          "type": ["string", "null"],
+          "description": "Current focus area for the agent."
+        },
+        "notes": {
+          "type": "array",
+          "description": "High-frequency working memory entries (auto-compressed over time).",
+          "items": {
+            "type": "object",
+            "required": ["timestamp", "content"],
+            "properties": {
+              "timestamp": { "type": "string", "format": "date-time" },
+              "content": { "type": "string" },
+              "tags": {
+                "type": "array",
+                "items": { "type": "string" }
+              }
+            }
+          }
+        },
+        "lastUpdated": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO timestamp of the last scratchpad mutation."
+        },
+        "summary": {
+          "type": ["string", "null"],
+          "description": "Auto-generated synopsis used when scratchpad is compressed."
+        }
+      }
+    },
+    "longTermMemory": {
+      "type": "array",
+      "description": "Stable knowledge that should persist across sessions (API limits, configs, playbooks).",
+      "items": {
+        "type": "object",
+        "required": ["id", "topic", "payload", "createdAt", "lastAccessed"],
+        "properties": {
+          "id": { "type": "string" },
+          "topic": { "type": "string" },
+          "payload": { "type": "object" },
+          "createdAt": { "type": "string", "format": "date-time" },
+          "lastAccessed": { "type": "string", "format": "date-time" },
+          "environment": {
+            "type": ["string", "null"],
+            "enum": ["production", "staging", "development", null]
+          },
+          "tags": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "derivedFrom": {
+            "type": ["array", "null"],
+            "items": { "type": "string" },
+            "description": "IDs of raw entries used to produce this summary payload."
+          }
+        }
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "required": ["environment", "version"],
+      "properties": {
+        "environment": {
+          "type": "string",
+          "enum": ["production", "staging", "development"]
+        },
+        "version": {
+          "type": "string",
+          "description": "Semantic version of the agent context schema applied to this record."
+        },
+        "lastCheckpoint": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp of the last persisted checkpoint."
+        },
+        "checksum": {
+          "type": ["string", "null"],
+          "description": "Checksum of the persisted file used for corruption detection."
+        }
+      }
+    }
+  }
+}

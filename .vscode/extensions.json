@@ -13,18 +13,12 @@
     "bradlc.vscode-tailwindcss",
     "davidanson.vscode-markdownlint",
     "redhat.vscode-yaml",
-    "humao.rest-client",
     // === REACT DEBUGGING/REFACTORING (Selective Use) ===
-    "wandi.react-refactor",
-    "NuclleaR.vscode-extension-autoimport",
-    "pidigi.reactdevtools",
-    "laktak.pretty-ts-errors",
     "ms-windows-ai-studio.windows-ai-studio"
   ],
 
   "unwantedRecommendations": [
     // === REMOVE FOR COST OPTIMIZATION ===
-    "ms-vscode.vscode-ai-toolkit", // Redundant with Copilot
     "ms-mssql.mssql", // Using Supabase
     "ms-playwright.playwright", // Not using E2E tests currently
     "ms-vscode.live-server", // Static hosting via Vercel

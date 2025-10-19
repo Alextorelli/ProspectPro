@@ -1,0 +1,41 @@
+{
+  "name": "development",
+  "description": "Local development sandbox with unrestricted access for rapid iteration",
+  "supabase": {
+    "projectRef": "dev-sriycekxdqnesdsgwiuc",
+    "apiUrl": "http://localhost:54321",
+    "anonKey": "sb_publishable_your_key_here",
+    "serviceRoleKey": null
+  },
+  "vercel": {
+    "deploymentUrl": "http://localhost:5173",
+    "projectName": "prospect-pro-dev"
+  },
+  "apiRateLimits": {
+    "hunter_io": { "monthlyLimit": 100, "alertThreshold": 80, "unit": "searches" },
+    "neverbounce": { "monthlyLimit": 1000, "alertThreshold": 750, "unit": "verifications" },
+    "google_places": { "monthlyLimit": 10000, "alertThreshold": 8000, "unit": "requests" }
+  },
+  "featureFlags": {
+    "enableAsyncDiscovery": true,
+    "enableZeroFakeDataAudits": true,
+    "enableRealtimeCampaigns": true,
+    "enableExperimentalMcpTools": true
+  },
+  "monitoring": {
+    "otelEndpoint": "http://localhost:4318/v1/traces",
+    "jaegerUrl": "http://localhost:16686",
+    "logDashboard": "http://localhost:3000/logs"
+  },
+  "permissions": {
+    "writeOperations": true,
+    "canDeploy": true,
+    "canFetchLogs": true,
+    "canRunTests": true,
+    "requiresApproval": false
+  },
+  "constraints": {
+    "maxScratchpadEntries": 100,
+    "maxTaskConcurrency": 6
+  }
+}

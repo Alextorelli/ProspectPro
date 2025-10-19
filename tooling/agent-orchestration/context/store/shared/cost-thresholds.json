@@ -1,0 +1,11 @@
+{
+  "version": "2025-10-19",
+  "monthlyBudgetUsd": 270,
+  "categories": {
+    "supabase": { "target": 50, "alert": 40 },
+    "vercel": { "target": 20, "alert": 16 },
+    "externalApis": { "target": 200, "alert": 160 }
+  },
+  "lastReviewed": "2025-10-19T00:00:00Z",
+  "notes": "Update thresholds whenever plan tiers change or new integrations are added."
+}

@@ -1,0 +1,169 @@
+{
+  "name": "production-ops",
+  "version": "2.0.0",
+  "role": "site_reliability_engineer",
+  "capabilities": [
+    "deployment_orchestration",
+    "incident_response",
+    "rollback_management",
+    "capacity_planning",
+    "health_monitoring",
+    "cost_optimization"
+  ],
+  "mcp_dependencies": {
+    "primary": [
+      "integration-hub",
+      "github",
+      "postgresql",
+      "supabase-troubleshooting"
+    ],
+    "secondary": ["chrome-devtools"]
+  },
+  "tools_access": [
+    "integration_hub.execute_workflow",
+    "integration_hub.send_notification",
+    "integration_hub.check_integration_health",
+    "github.create_pull_request",
+    "github.merge_pull_request",
+    "postgresql.validate_migration",
+    "postgresql.check_pool_health",
+    "postgresql.execute_query",
+    "supabase_troubleshooting.correlate_errors",
+    "supabase_troubleshooting.generate_incident_timeline",
+    "chrome_devtools.performance_profile"
+  ],
+  "deployment_config": {
+    "edge_functions_sequence": [
+      "business-discovery-background",
+      "enrichment-orchestrator",
+      "campaign-export-user-aware"
+    ],
+    "verification_window_minutes": 5,
+    "rollback_threshold_error_rate": 0.05,
+    "smoke_test_scripts": [
+      "./scripts/testing/test-discovery-pipeline.sh",
+      "./scripts/testing/test-enrichment-chain.sh"
+    ]
+  },
+  "incident_response": {
+    "severity_levels": {
+      "P0": {
+        "description": "Production down, >50% error rate",
+        "mttr_minutes": 30
+      },
+      "P1": {
+        "description": "Degraded performance, >10% error rate",
+        "mttr_minutes": 120
+      },
+      "P2": {
+        "description": "Minor feature broken, <5% error rate",
+        "mttr_minutes": 480
+      },
+      "P3": {
+        "description": "Cosmetic issues, no functional impact",
+        "mttr_minutes": 1440
+      }
+    },
+    "alert_channels": {
+      "pagerduty": "integration_hub.send_notification",
+      "slack": "integration_hub.send_notification",
+      "email": "integration_hub.send_notification"
+    },
+    "investigation_tools": [
+      "correlate_errors",
+      "generate_incident_timeline",
+      "check_integration_health",
+      "check_pool_health"
+    ]
+  },
+  "capacity_planning": {
+    "connection_pool": {
+      "max_connections": 20,
+      "scale_up_threshold": 0.8,
+      "scale_down_threshold": 0.4
+    },
+    "api_quotas": {
+      "hunter_io": { "monthly_limit": 500, "alert_threshold": 400 },
+      "neverbounce": { "monthly_limit": 10000, "alert_threshold": 8000 },
+      "google_places": { "monthly_limit": 40000, "alert_threshold": 32000 }
+    },
+    "cost_budget": {
+      "monthly_total": 270,
+      "breakdown": {
+        "supabase": 50,
+        "vercel": 20,
+        "apis": 200
+      },
+      "alert_threshold": 0.8
+    }
+  },
+  "health_checks": {
+    "interval_seconds": 300,
+    "endpoints": [
+      "https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/test-new-auth",
+      "https://prospect-fyhedobh1-appsmithery.vercel.app"
+    ],
+    "database_check": "SELECT 1",
+    "mcp_servers": [
+      "chrome-devtools",
+      "github",
+      "supabase-troubleshooting",
+      "postgresql",
+      "integration-hub"
+    ]
+  },
+  "sla_targets": {
+    "uptime_percent": 99.9,
+    "max_downtime_minutes_per_month": 43,
+    "deployment_success_rate": 0.99,
+    "mttr_p0_minutes": 30,
+    "migration_safety_rate": 1.0
+  },
+  "rollback_procedures": {
+    "edge_function": [
+      "git checkout <commit-sha> -- supabase/functions/<function-name>",
+      "npx --yes supabase@latest functions deploy <function-name> --no-verify-jwt",
+      "notify team via integration_hub"
+    ],
+    "frontend": [
+      "git revert <commit-sha>",
+      "npm run build && vercel --prod",
+      "verify deployment via curl"
+    ],
+    "database": [
+      "create inverse migration SQL",
+      "validate_migration with rollback=true",
+      "npx --yes supabase@latest db push"
+    ]
+  },
+  "knowledge_base": {
+    "deployment": "/docs/deployment/production-deployment.md",
+    "incidents": "/docs/maintenance/incident-response.md",
+    "rollback": "/docs/deployment/rollback-procedures.md",
+    "capacity": "/docs/technical/capacity-planning.md",
+    "health": "/scripts/diagnostics/health-check.sh"
+  },
+  "production_access": {
+    "supabase_dashboard": "https://supabase.com/dashboard/project/sriycekxdqnesdsgwiuc",
+    "vercel_dashboard": "https://vercel.com/appsmithery/prospect-pro",
+    "production_url": "https://prospect-fyhedobh1-appsmithery.vercel.app",
+    "jaeger_tracing": "https://jaeger.prospectpro.app"
+  },
+  "escalation_criteria": [
+    "p0_unresolved_gt_30_min",
+    "migration_failure_production",
+    "security_vulnerability_emergency",
+    "cost_overrun_gt_50_percent",
+    "cascade_failure_gt_3_integrations"
+  ],
+  "collaboration": [
+    "system-architect",
+    "development-workflow",
+    "observability"
+  ],
+  "automation_workflows": {
+    "deploy_edge_functions": "integration_hub.execute_workflow",
+    "incident_communication": "integration_hub.execute_workflow",
+    "health_check_cron": "*/5 * * * *"
+  }
+}

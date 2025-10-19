@@ -1,0 +1,100 @@
+{
+  "name": "observability",
+  "version": "2.0.0",
+  "role": "monitoring_engineer",
+  "capabilities": [
+    "log_analysis",
+    "trace_correlation",
+    "performance_monitoring",
+    "incident_detection",
+    "anomaly_detection",
+    "compliance_monitoring"
+  ],
+  "mcp_dependencies": {
+    "primary": ["supabase-troubleshooting", "postgresql", "integration-hub"],
+    "secondary": ["chrome-devtools"]
+  },
+  "tools_access": [
+    "supabase_troubleshooting.correlate_errors",
+    "supabase_troubleshooting.generate_incident_timeline",
+    "postgresql.analyze_slow_queries",
+    "postgresql.check_pool_health",
+    "integration_hub.check_integration_health",
+    "integration_hub.send_notification"
+  ],
+  "monitoring_config": {
+    "collection_interval_seconds": 300,
+    "retention_days": 30,
+    "trace_sampling_rate": 0.1,
+    "critical_paths": ["business-discovery", "enrichment", "export", "auth"]
+  },
+  "alerting_thresholds": {
+    "edge_function_error_rate_percent": 5,
+    "pool_utilization_percent": 80,
+    "mcp_latency_p95_ms": 1000,
+    "circuit_breaker_open_count": 1,
+    "api_rate_limit_consumed_percent": 90
+  },
+  "otel_config": {
+    "service_name": "prospectpro",
+    "service_version": "4.3.0",
+    "trace_exporter": "otlp_http",
+    "endpoint": "http://localhost:4318/v1/traces",
+    "span_attributes": ["user.id", "session.id", "campaign.id", "tier.key"]
+  },
+  "jaeger_config": {
+    "ui_url_local": "http://localhost:16686",
+    "ui_url_production": "https://jaeger.prospectpro.app",
+    "query_patterns": {
+      "slow_discovery": "service=prospectpro operation=business-discovery duration>2s",
+      "enrichment_failures": "service=prospectpro operation=enrichment-orchestrator error=true"
+    }
+  },
+  "performance_targets": {
+    "mttd_minutes": 5,
+    "mttr_minutes": 30,
+    "false_positive_rate_percent": 5,
+    "trace_coverage_percent": 90,
+    "zero_fake_data_violations_per_month": 0
+  },
+  "zero_fake_data_monitoring": {
+    "email_patterns": [
+      "info@",
+      "contact@",
+      "hello@",
+      "sales@",
+      "test@example.com"
+    ],
+    "phone_patterns": ["555-\\d{4}"],
+    "audit_frequency": "per_campaign",
+    "violation_severity": "critical"
+  },
+  "escalation_criteria": [
+    "error_rate_gt_5_percent_5_min",
+    "pool_utilization_gt_95_percent",
+    "circuit_breaker_open_gt_1_min",
+    "trace_latency_p99_gt_5s",
+    "zero_fake_data_violation"
+  ],
+  "knowledge_base": {
+    "monitoring": "/docs/technical/observability.md",
+    "otel_config": "/tooling/monitoring/otel/otel-config.js",
+    "jaeger": "/tooling/monitoring/jaeger/docker-compose.yml",
+    "incident_runbooks": "/docs/maintenance/incident-response.md",
+    "baselines": "/mcp-servers/registry.json"
+  },
+  "dashboard_access": {
+    "supabase_logs": "https://supabase.com/dashboard/project/sriycekxdqnesdsgwiuc/logs",
+    "jaeger_local": "http://localhost:16686",
+    "vercel_analytics": "https://vercel.com/appsmithery/prospect-pro/analytics"
+  },
+  "collaboration": [
+    "system-architect",
+    "development-workflow",
+    "production-ops"
+  ],
+  "notification_channels": {
+    "slack": "integration_hub.send_notification",
+    "pagerduty": "integration_hub.execute_workflow"
+  }
+}

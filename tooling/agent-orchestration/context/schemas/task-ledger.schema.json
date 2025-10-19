@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://prospectpro.app/context/task-ledger.schema.json",
+  "title": "TaskLedgerEntry",
+  "type": "object",
+  "required": ["id", "type", "status", "owner", "createdAt"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique identifier for the ledger entry (task, incident, migration)."
+    },
+    "type": {
+      "type": "string",
+      "enum": ["feature", "incident", "migration", "maintenance"],
+      "description": "Classification of the ledger entry."
+    },
+    "status": {
+      "type": "string",
+      "enum": ["in_progress", "blocked", "completed", "snoozed"],
+      "description": "Current status of the entry."
+    },
+    "owner": {
+      "type": "string",
+      "description": "Primary agent responsible for the task."
+    },
+    "collaborators": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "environment": {
+      "type": "string",
+      "enum": ["production", "staging", "development"],
+      "description": "Environment where the task is executed."
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "contextSnapshot": {
+      "type": ["string", "null"],
+      "description": "Checksum or reference to the context snapshot associated with this entry."
+    },
+    "mcpTools": {
+      "type": "array",
+      "description": "MCP tools invoked during the task.",
+      "items": { "type": "string" }
+    },
+    "events": {
+      "type": "array",
+      "description": "Timeline of significant events (handoffs, environment switches, escalations).",
+      "items": {
+        "type": "object",
+        "required": ["timestamp", "description"],
+        "properties": {
+          "timestamp": { "type": "string", "format": "date-time" },
+          "description": { "type": "string" },
+          "actor": { "type": ["string", "null"] },
+          "metadata": { "type": "object" }
+        }
+      }
+    },
+    "summary": {
+      "type": ["string", "null"],
+      "description": "Auto-generated recap of the task used for context compression."
+    }
+  }
+}

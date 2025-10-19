@@ -1,0 +1,92 @@
+{
+  "name": "development-workflow",
+  "version": "2.0.0",
+  "role": "feature_developer",
+  "capabilities": [
+    "frontend_development",
+    "edge_function_development",
+    "testing_automation",
+    "code_review",
+    "ci_cd_orchestration",
+    "debugging"
+  ],
+  "mcp_dependencies": {
+    "primary": ["chrome-devtools", "github", "postgresql", "integration-hub"],
+    "secondary": ["supabase-troubleshooting"]
+  },
+  "tools_access": [
+    "chrome_devtools.screenshot_capture",
+    "chrome_devtools.performance_profile",
+    "chrome_devtools.trace_analysis",
+    "github.create_pull_request",
+    "github.request_copilot_review",
+    "github.add_labels",
+    "github.merge_pull_request",
+    "postgresql.execute_query",
+    "postgresql.validate_migration",
+    "integration_hub.execute_workflow",
+    "integration_hub.send_notification",
+    "supabase_troubleshooting.correlate_errors"
+  ],
+  "knowledge_base": {
+    "frontend": "/docs/frontend/architecture.md",
+    "testing": "/docs/development/testing-strategy.md",
+    "edge_functions": "/docs/technical/edge-functions.md",
+    "ci_cd": "/docs/deployment/ci-cd-workflow.md",
+    "thunder_collections": "/thunder-collection/"
+  },
+  "testing_config": {
+    "unit_coverage_target": 80,
+    "integration_coverage_target": 100,
+    "e2e_critical_paths": ["discovery", "enrichment", "export", "auth"],
+    "test_frameworks": ["vitest", "deno", "pgTAP", "thunder-client"]
+  },
+  "code_quality": {
+    "eslint_max_warnings": 10,
+    "typescript_strict_mode": true,
+    "pre_commit_hooks": ["lint:fix", "zero-fake-data-check"],
+    "pre_push_hooks": ["test", "supabase:test:db", "supabase:test:functions"]
+  },
+  "automation_tasks": {
+    "daily_start": "Start Codespace",
+    "test_suite": "Test: Full Stack Validation",
+    "deploy_prod": "Deploy: Full Automated Frontend",
+    "edge_deploy": "Edge Functions: Production Deploy Workflow"
+  },
+  "performance_targets": {
+    "pr_merge_time_hours": 24,
+    "build_success_rate_percent": 95,
+    "mcp_adoption_percent": 70,
+    "test_execution_time_seconds": 300
+  },
+  "escalation_criteria": [
+    "database_schema_change",
+    "new_api_integration",
+    "performance_regression_gt_50_percent",
+    "security_vulnerability",
+    "ci_cd_broken_gt_2_hours"
+  ],
+  "communication_channels": {
+    "pr_template": ".github/pull_request_template.md",
+    "collaboration": ["system-architect", "observability", "production-ops"],
+    "notification": "integration_hub.send_notification"
+  },
+  "debugging_playbook": {
+    "frontend_runtime_errors": [
+      "chrome_devtools",
+      "vercel_logs",
+      "env_validation"
+    ],
+    "edge_function_401": ["correlate_errors", "rls_check", "auth_test"],
+    "performance_degradation": [
+      "analyze_slow_queries",
+      "pool_health",
+      "edge_logs"
+    ],
+    "integration_failures": [
+      "integration_health",
+      "circuit_breaker_state",
+      "api_keys"
+    ]
+  }
+}

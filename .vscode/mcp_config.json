@@ -1,0 +1,89 @@
+{
+  "mcpServers": {
+    "chrome-devtools": {
+      "command": "npx",
+      "args": ["-y", "chrome-devtools-mcp@latest"],
+      "env": {},
+      "metadata": {
+        "purpose": "Browser automation, performance profiling, visual regression testing",
+        "optimizations": {
+          "batch_operations": true,
+          "performance_thresholds": {
+            "first_contentful_paint": "< 1.5s",
+            "largest_contentful_paint": "< 2.5s",
+            "cumulative_layout_shift": "< 0.1",
+            "first_input_delay": "< 100ms"
+          }
+        }
+      }
+    },
+    "github": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_TOKEN}"
+      },
+      "metadata": {
+        "purpose": "Code repository management, CI/CD integration, issue tracking",
+        "optimizations": {
+          "pr_automation": true,
+          "security_scanning": true,
+          "test_orchestration": true
+        }
+      }
+    },
+    "supabase-troubleshooting": {
+      "command": "node",
+      "args": [
+        "${workspaceFolder}/mcp-servers/supabase-troubleshooting-server.js"
+      ],
+      "env": {
+        "SUPABASE_URL": "${SUPABASE_URL}",
+        "SUPABASE_SERVICE_KEY": "${SUPABASE_SERVICE_KEY}",
+        "LOG_RETENTION_HOURS": "168"
+      },
+      "metadata": {
+        "purpose": "Log aggregation, error correlation, real-time monitoring",
+        "optimizations": {
+          "log_correlation": true,
+          "real_time_monitoring": true,
+          "intelligent_filtering": true
+        }
+      }
+    },
+    "postgresql": {
+      "command": "node",
+      "args": ["${workspaceFolder}/mcp-servers/postgresql-server.js"],
+      "env": {
+        "DATABASE_URL": "${DATABASE_URL}",
+        "QUERY_TIMEOUT_MS": "30000",
+        "CONNECTION_POOL_SIZE": "10"
+      },
+      "metadata": {
+        "purpose": "Database operations, query optimization, schema management",
+        "optimizations": {
+          "query_analysis": true,
+          "index_recommendations": true,
+          "migration_validation": true
+        }
+      }
+    },
+    "integration-hub": {
+      "command": "node",
+      "args": ["${workspaceFolder}/mcp-servers/integration-hub-server.js"],
+      "env": {
+        "ZAPIER_API_KEY": "${ZAPIER_API_KEY}",
+        "STRIPE_SECRET_KEY": "${STRIPE_SECRET_KEY}",
+        "SLACK_BOT_TOKEN": "${SLACK_BOT_TOKEN}"
+      },
+      "metadata": {
+        "purpose": "Third-party service integration (Zapier, Stripe, notifications)",
+        "optimizations": {
+          "webhook_management": true,
+          "payload_validation": true,
+          "notification_routing": true
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,63 @@
+{
+  "name": "system-architect",
+  "version": "2.0.0",
+  "role": "technical_architect",
+  "capabilities": [
+    "schema_design",
+    "migration_validation",
+    "performance_optimization",
+    "integration_architecture",
+    "resilience_patterns",
+    "observability_design"
+  ],
+  "mcp_dependencies": {
+    "primary": ["postgresql", "supabase-troubleshooting", "integration-hub"],
+    "secondary": ["chrome-devtools", "github"]
+  },
+  "tools_access": [
+    "postgresql.execute_query",
+    "postgresql.explain_query",
+    "postgresql.validate_migration",
+    "postgresql.check_pool_health",
+    "postgresql.analyze_slow_queries",
+    "supabase_troubleshooting.correlate_errors",
+    "supabase_troubleshooting.generate_incident_timeline",
+    "integration_hub.check_integration_health",
+    "integration_hub.execute_workflow"
+  ],
+  "knowledge_base": {
+    "architecture": "/docs/technical/SYSTEM_REFERENCE.md",
+    "database": "/supabase/schema-sql/",
+    "edge_functions": "/supabase/functions/",
+    "mcp_registry": "/mcp-servers/registry.json",
+    "instructions": ".github/copilot-instructions.md"
+  },
+  "performance_targets": {
+    "migration_validation_time_ms": 5000,
+    "query_explanation_time_ms": 3000,
+    "architecture_review_time_min": 15
+  },
+  "escalation_criteria": [
+    "zero_fake_data_violation",
+    "budget_threshold_exceeded",
+    "critical_table_migration",
+    "security_vulnerability",
+    "performance_degradation_gt_50_percent"
+  ],
+  "communication_channels": {
+    "adr_location": "/docs/technical/architecture/",
+    "collaboration": [
+      "development-workflow",
+      "observability",
+      "production-ops"
+    ],
+    "review_frequency": "per_feature"
+  },
+  "validation_rules": {
+    "require_migration_validation": true,
+    "require_query_explanation": true,
+    "require_circuit_breaker": true,
+    "require_otel_tracing": true,
+    "require_rls_policies": true
+  }
+}
