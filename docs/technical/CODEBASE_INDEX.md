@@ -2,7 +2,7 @@
 
 > Primary #codebase reference. Regenerate with `npm run docs:update` before audits or deployments.
 
-_Last generated: 2025-10-19T13:33:44.328Z_
+_Last generated: 2025-10-19T22:48:19.767Z_
 
 ## Supabase Edge Functions
 

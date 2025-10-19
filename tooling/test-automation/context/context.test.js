@@ -1,6 +1,6 @@
 const {
   ContextManager,
-} = require("../../../agent-orchestration/context/context-manager");
+} = require("../../../agent-orchestration/context/context-manager.cjs");
 const dataset = require("./fixture-dataset.json");
 
 describe("ContextManager integration", () => {
