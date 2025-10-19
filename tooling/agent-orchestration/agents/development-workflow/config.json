@@ -33,13 +33,13 @@
     "testing": "/docs/development/testing-strategy.md",
     "edge_functions": "/docs/technical/edge-functions.md",
     "ci_cd": "/docs/deployment/ci-cd-workflow.md",
-    "thunder_collections": "/thunder-collection/"
+    "validation_runner": "/scripts/node/validation-runner.js"
   },
   "testing_config": {
     "unit_coverage_target": 80,
     "integration_coverage_target": 100,
     "e2e_critical_paths": ["discovery", "enrichment", "export", "auth"],
-    "test_frameworks": ["vitest", "deno", "pgTAP", "thunder-client"]
+    "test_frameworks": ["vitest", "deno", "pgTAP", "mcp-validation"]
   },
   "code_quality": {
     "eslint_max_warnings": 10,

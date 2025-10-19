@@ -94,6 +94,8 @@ const SKIP_FILES = new Set([
   // Workflow/config files
   ".github/workflows/deploy.yml",
   ".vercelignore",
+  // Observability stack
+  "tooling/observability/docker-compose.jaeger.yml",
   // Test scripts (all .sh in scripts/testing)
   "scripts/testing/test-auth-patterns.sh",
   "scripts/testing/test-background-tasks.sh",

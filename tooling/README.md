@@ -2,7 +2,14 @@
 
 This `/tooling/` directory contains the complete development toolchain for ProspectPro, organized for maximum productivity and AI agent integration.
 
-## Directory Structure  
+## Tool Suite Layout
+
+- **Agent Orchestration** (`/agent-orchestration/`): AI agent templates, context management, and workflow engines for automated development tasks.
+- **Scripts** (`/scripts/`): Shell and Node.js automation for deployment, testing, diagnostics, and operations.
+- **Monitoring** (`/monitoring/`): Observability stack configuration (Jaeger, Prometheus, Grafana) and OTel collectors.
+- **CI** (`/ci/`): Continuous integration pipelines and automated PR reviews.
+
+## Directory Structure
 
 ### `/scripts/`
 

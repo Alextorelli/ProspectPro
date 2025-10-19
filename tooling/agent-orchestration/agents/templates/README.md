@@ -290,7 +290,7 @@ process.on("SIGINT", () => {
 ### 5. Testing Workflow Template
 
 **Use Case**: Development Workflow agent for comprehensive testing
-**Key Sections**: Unit tests, integration tests, E2E tests, Thunder Client
+**Key Sections**: Unit tests, integration tests, E2E tests, MCP Validation Runner
 
 **Template Structure** (`/scripts/testing/test-new-feature.sh`):
 

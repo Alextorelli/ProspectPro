@@ -56,7 +56,7 @@ await mcp.postgresql.check_pool_health();
 
 **Pre-Deployment Checklist**:
 
-- [ ] All tests passing (Deno test suite, Thunder Client)
+- [ ] All tests passing (Deno test suite, MCP Validation Runner)
 - [ ] Code review approved (GitHub Copilot or human reviewer)
 - [ ] Migration validated if database changes required
 - [ ] Rollback plan documented

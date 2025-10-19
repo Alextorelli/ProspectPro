@@ -8,7 +8,7 @@
 
 - React/TypeScript frontend development (Vite, Zustand, TanStack Query)
 - Supabase Edge Functions (Deno runtime, TypeScript)
-- Testing strategies (Vitest, Thunder Client, pgTAP, Deno tests)
+- Testing strategies (Vitest, MCP Validation Runner, pgTAP, Deno tests)
 - CI/CD automation (GitHub Actions, Vercel deployments)
 - Code quality enforcement (ESLint, TypeScript strict mode)
 
@@ -57,7 +57,7 @@ await mcp.postgresql.execute_query({ query: seedSQL, params });
 ### Testing Hierarchy (Pyramid Approach)
 
 ```
-         E2E Tests (Thunder Client, Chrome DevTools MCP)
+         E2E Tests (MCP Validation Runner, Chrome DevTools MCP)
               Integration Tests (Deno Edge Function tests)
                     Unit Tests (Vitest, pgTAP)
 ```
@@ -113,11 +113,11 @@ await mcp.integration_hub.execute_workflow({
 });
 ```
 
-### Testing Workflow with Thunder Client + MCP
+### Testing Workflow with MCP Validation Runner + MCP
 
 ```javascript
-// 1. Execute Thunder Client collection
-npm run thunder:test
+// 1. Execute MCP Validation Runner collection
+npm run validate:full
 
 // 2. Fetch and analyze Edge Function logs
 await mcp.supabase_troubleshooting.correlate_errors({
@@ -146,7 +146,7 @@ npm run dev  # Start Vite dev server
 
 ```bash
 # VS Code Task: "Test: Full Stack Validation"
-npm run test:all  # Runs Vitest, pgTAP, Deno, Thunder
+npm run test:all  # Runs Vitest, pgTAP, Deno, MCP Validation
 ```
 
 **Deploy to Production**:
@@ -274,8 +274,8 @@ await mcp.github.add_labels({ owner, repo, issueNumber: pullNumber, labels });
 
 - **Tasks**: `.vscode/tasks.json` - 60+ automated tasks
 - **Launch Configs**: `.vscode/launch.json` - Debugging presets
-- **Keybindings**: Ctrl+Alt+T (Thunder tests), Ctrl+Alt+D (Deploy)
-- **Extensions**: Thunder Client, Supabase, ESLint, Vite
+- **Keybindings**: Ctrl+Alt+V (Validation Runner), Ctrl+Alt+D (Deploy)
+- **Extensions**: MCP Validation Runner, Supabase, ESLint, Vite
 
 ## Success Metrics
 
