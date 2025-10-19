@@ -66,11 +66,18 @@ function recordFailure(service) {
   }
 }
 
-// Initialize Supabase client for webhook storage
-const supabase = createClient(
-  process.env.SUPABASE_URL || "",
-  process.env.SUPABASE_SERVICE_KEY || ""
-);
+// Initialize Supabase client for webhook storage (only if env vars available)
+let supabase = null;
+try {
+  if (process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_KEY) {
+    supabase = createClient(
+      process.env.SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_KEY
+    );
+  }
+} catch (error) {
+  console.warn("Supabase client not initialized - webhook features disabled:", error.message);
+}
 
 class IntegrationHubServer {
   constructor() {
@@ -430,18 +437,254 @@ class IntegrationHubServer {
   async executeWorkflowSteps(workflowId, input, dryRun) {
     // Workflow definitions (would be stored in DB in production)
     const workflows = {
-      "campaign-export": [
-        { step: "validate_campaign", service: "supabase" },
-        { step: "generate_csv", service: "internal" },
-        { step: "upload_storage", service: "supabase" },
-        { step: "notify_completion", service: "notification" },
-      ],
-      "lead-enrichment": [
-        { step: "fetch_lead", service: "supabase" },
-        { step: "hunter_lookup", service: "hunter" },
-        { step: "neverbounce_verify", service: "neverbounce" },
-        { step: "update_lead", service: "supabase" },
-      ],
+      "test-discovery-pipeline": {
+        name: "test-discovery-pipeline",
+        description:
+          "Test business discovery pipeline with background processing",
+        steps: [
+          {
+            name: "initiate-discovery",
+            description: "Start background business discovery",
+            action: "call-function",
+            function: "business-discovery-background",
+            params: {
+              businessType: input.businessType,
+              location: input.location,
+              maxResults: input.maxResults,
+              tierKey: input.tierKey,
+              sessionUserId: input.sessionUserId,
+            },
+          },
+          {
+            name: "monitor-progress",
+            description: "Monitor discovery job progress",
+            action: "monitor-job",
+            jobId: "${jobId}",
+            timeout: "60s",
+            pollInterval: "5s",
+          },
+          {
+            name: "validate-results",
+            description: "Validate discovery results",
+            action: "query-database",
+            table: "leads",
+            where: { campaign_id: "${campaignId}" },
+            validate: {
+              minCount: 1,
+              hasRequiredFields: ["business_name", "address", "phone"],
+            },
+          },
+          {
+            name: "generate-report",
+            description: "Generate discovery test report",
+            action: "create-report",
+            includeMetrics: true,
+            includeArtifacts: true,
+          },
+        ],
+      },
+
+      "enrichment-chain": {
+        name: "enrichment-chain",
+        description:
+          "Execute enrichment chain for lead data (Hunter.io, NeverBounce, business license, chamber verification)",
+        steps: [
+          {
+            name: "validate-input",
+            description: "Validate enrichment input parameters",
+            action: "validate",
+            required: ["campaignId", "leadId", "businessName"],
+          },
+          {
+            name: "hunter-discovery",
+            description: "Discover professional emails via Hunter.io",
+            action: "call-function",
+            function: "enrichment-hunter",
+            params: {
+              domain: "${businessName}.com", // Extract domain from business name
+              firstName: "extracted", // Would be extracted from lead data
+              lastName: "extracted",
+            },
+          },
+          {
+            name: "neverbounce-verify",
+            description: "Verify email deliverability via NeverBounce",
+            action: "call-function",
+            function: "enrichment-neverbounce",
+            params: {
+              email: input.email,
+              campaignId: input.campaignId,
+              leadId: input.leadId,
+            },
+          },
+          {
+            name: "business-license",
+            description: "Lookup business license information",
+            action: "call-function",
+            function: "enrichment-business-license",
+            params: {
+              businessName: input.businessName,
+              campaignId: input.campaignId,
+              leadId: input.leadId,
+            },
+          },
+          {
+            name: "chamber-verification",
+            description: "Verify chamber of commerce membership",
+            action: "call-function",
+            function: "enrichment-pdl",
+            params: {
+              businessName: input.businessName,
+              campaignId: input.campaignId,
+              leadId: input.leadId,
+            },
+          },
+          {
+            name: "update-confidence",
+            description:
+              "Update lead confidence score based on enrichment results",
+            action: "update-database",
+            table: "leads",
+            where: { id: input.leadId },
+            data: {
+              confidence_score: "calculated", // Would be calculated from enrichment results
+              enrichment_data: "merged", // Would merge all enrichment results
+            },
+          },
+        ],
+      },
+
+      "export-flow": {
+        name: "export-flow",
+        description: "Execute campaign export with filtering and formatting",
+        steps: [
+          {
+            name: "validate-campaign",
+            description: "Validate campaign exists and has data",
+            action: "validate",
+            required: ["campaignId"],
+          },
+          {
+            name: "filter-leads",
+            description: "Filter leads by confidence score and other criteria",
+            action: "query-database",
+            table: "leads",
+            where: {
+              campaign_id: input.campaignId,
+              confidence_score: { gte: input.minConfidence || 50 },
+            },
+            select: [
+              "id",
+              "business_name",
+              "address",
+              "phone",
+              "website",
+              "email",
+              "confidence_score",
+              "enrichment_data",
+            ],
+          },
+          {
+            name: "format-data",
+            description: "Format data according to export format (CSV, JSON)",
+            action: "transform",
+            format: input.format,
+            includeMetadata: true,
+            filterDuplicates: true,
+          },
+          {
+            name: "generate-export",
+            description: "Generate export file and store in database",
+            action: "call-function",
+            function: "campaign-export-user-aware",
+            params: {
+              campaignId: input.campaignId,
+              format: input.format,
+              minConfidence: input.minConfidence || 50,
+              options: {
+                includeMetadata: true,
+                filterDuplicates: true,
+              },
+            },
+          },
+          {
+            name: "create-download-url",
+            description: "Create secure download URL for export",
+            action: "generate-url",
+            exportId: "${exportId}",
+            expiresIn: "24h",
+          },
+        ],
+      },
+
+      "full-stack-validation": {
+        name: "full-stack-validation",
+        description:
+          "Complete pipeline validation: discovery → enrichment → export",
+        steps: [
+          {
+            name: "execute-discovery",
+            description: "Run discovery pipeline",
+            action: "execute-workflow",
+            workflow: "test-discovery-pipeline",
+            params: {
+              businessType: input.businessType,
+              location: input.location,
+              tierKey: input.tierKey,
+              maxResults: input.maxResults,
+            },
+          },
+          {
+            name: "wait-discovery",
+            description: "Wait for discovery to complete",
+            action: "wait",
+            condition: "job_completed",
+            jobId: "${jobId}",
+            timeout: "120s",
+          },
+          {
+            name: "execute-enrichment",
+            description: "Run enrichment chain on discovered leads",
+            action: "execute-workflow",
+            workflow: "enrichment-chain",
+            params: {
+              campaignId: "${campaignId}",
+              leadId: "first_lead", // Would be extracted from discovery results
+              businessName: "extracted",
+              email: "extracted",
+            },
+          },
+          {
+            name: "execute-export",
+            description: "Run export flow",
+            action: "execute-workflow",
+            workflow: "export-flow",
+            params: {
+              campaignId: "${campaignId}",
+              format: input.exportFormat,
+              minConfidence: 50,
+            },
+          },
+          {
+            name: "validate-results",
+            description: "Validate complete pipeline results",
+            action: "validate",
+            checks: [
+              "campaign_created",
+              "leads_discovered",
+              "enrichment_completed",
+              "export_generated",
+            ],
+          },
+          {
+            name: "generate-report",
+            description: "Generate validation report",
+            action: "create-report",
+            includeArtifacts: true,
+            metrics: ["duration", "cost", "success_rate"],
+          },
+        ],
+      },
     };
 
     const workflow = workflows[workflowId];
@@ -450,24 +693,37 @@ class IntegrationHubServer {
     }
 
     const results = [];
-    for (const step of workflow) {
+    for (const step of workflow.steps) {
       const stepResult = {
-        step: step.step,
-        service: step.service,
+        step: step.name,
+        description: step.description,
+        action: step.action,
         status: dryRun ? "simulated" : "pending",
         timestamp: new Date().toISOString(),
       };
 
       if (!dryRun) {
         try {
-          checkCircuitBreaker(step.service);
-          // Execute step (simulated)
+          // Determine service for circuit breaker
+          const service =
+            step.action === "call-function"
+              ? step.function.split("-")[1] || "supabase"
+              : step.action === "query-database" ||
+                step.action === "update-database"
+              ? "supabase"
+              : "internal";
+
+          checkCircuitBreaker(service);
+
+          // Execute step (simulated for now)
           stepResult.status = "completed";
-          recordSuccess(step.service);
+          stepResult.output = `Executed ${step.action} for ${step.name}`;
+
+          recordSuccess(service);
         } catch (error) {
           stepResult.status = "failed";
           stepResult.error = error.message;
-          recordFailure(step.service);
+          recordFailure(service);
           break; // Stop workflow on failure
         }
       }
@@ -477,6 +733,8 @@ class IntegrationHubServer {
 
     return {
       workflowId,
+      workflowName: workflow.name,
+      description: workflow.description,
       input,
       dryRun,
       steps: results,
@@ -485,6 +743,7 @@ class IntegrationHubServer {
       )
         ? "success"
         : "failed",
+      completedAt: new Date().toISOString(),
     };
   }
 

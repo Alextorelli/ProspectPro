@@ -20,8 +20,8 @@ This directory contains the source materials for the ProspectPro AI agent and MC
 **Completed:**
 
 - [x] Workspace staging
-- [x] Dependency alignment
-- [x] MCP configuration
+- [ ] Dependency alignment
+- [ ] MCP configuration
 - [ ] MCP server scaffolding
 - [ ] Agent suite creation
 - [ ] Script/task sync
