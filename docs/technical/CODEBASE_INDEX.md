@@ -2,7 +2,7 @@
 
 > Primary #codebase reference. Regenerate with `npm run docs:update` before audits or deployments.
 
-_Last generated: 2025-10-19T12:46:53.694Z_
+_Last generated: 2025-10-19T13:04:36.107Z_
 
 ## Supabase Edge Functions
 
@@ -80,7 +80,6 @@ _Last generated: 2025-10-19T12:46:53.694Z_
 - [.vscode/settings.json](.vscode/settings.json) — Workspace defaults for Supabase + Copilot context
 - [.vscode/prospectpro-supabase.code-workspace](.vscode/prospectpro-supabase.code-workspace) — Workspace file bundling tasks and recommendations
 - [.devcontainer/devcontainer.json](.devcontainer/devcontainer.json) — Codespace image settings + post-create automation
-- [.vscode/mcp-config.json](.vscode/mcp-config.json) — VS Code MCP wiring
 
 ## Update Procedure
 

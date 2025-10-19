@@ -121,5 +121,7 @@ _Auto-generated from `.vscode/tasks.json` — Last updated: 2025-10-19_
 | **Workspace: Validate Configuration** | `bash -lc ${workspaceFolder}/.vscode/validate-workspace-config.sh` | Multiple | None | No description available |
 | **Workspace: Verify Toolchain** | `bash -lc ./scripts/diagnostics/verify-toolchain.sh` | [`scripts/diagnostics/verify-toolchain.sh`](../scripts/diagnostics/verify-toolchain.sh) | None | No description available |
 | **Git: Remind to Push Before Exit** | `bash -c git status && echo 'REMINDER: Commit and push your changes before closing Codespace!'` | Multiple | None | No description available |
-| **DevTools: Start React DevTools** | `npm run devtools:react` | Multiple | None | No description available |
+| **DevTools: Start React DevTools** | `npm run devtools:react` |  | None | No description available |
+| **MCP: Start Suite** | `./tooling/scripts/shell/start-mcp.sh` |  | None | No description available |
+| **MCP: Stop Suite** | `./tooling/scripts/shell/stop-mcp.sh` |  | None | No description available |
 | **npm: mcp:prod** | `npm run mcp:prod` | [`package.json`](../package.json) | None | No description available |
