@@ -37,7 +37,22 @@ This runbook describes how to operate, monitor, and troubleshoot the observabili
 - Inspect logs with `docker-compose -f tooling/observability/docker-compose.jaeger.yml logs <service>`.
 - For OTel Collector config issues, review `monitoring/otel/collector-config.yaml`.
 
-## Exit Validation
+## Redis Adapter Test Strategy
+
+- **Default (CI/local):** Uses `ioredis-mock` for all Redis adapter tests, enabling Dockerless runs and fast feedback.
+- **Switch to Real Redis:** To test against a live Redis instance, set the adapter to use `redis://localhost:6379` and ensure Docker is running with Redis exposed. Update the test setup accordingly.
+
+Example:
+
+```typescript
+// In redis-adapter.test.ts
+// For real Redis:
+adapter = new RedisAdapter("redis://localhost:6379");
+// For mock:
+adapter = Object.assign(new RedisAdapter("mock://"), {
+  client: new RedisMock(),
+});
+```
 
 - Run `verify-observability.sh` and confirm all probes pass.
 - Validate OTel trace sampled through MCP validation harness.

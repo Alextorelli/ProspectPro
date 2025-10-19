@@ -1,15 +1,18 @@
+import RedisMock from "ioredis-mock";
+
 import { RedisAdapter } from "./redis-adapter";
 
-describe("RedisAdapter", () => {
-  const redisUrl = "redis://localhost:6379";
+describe("RedisAdapter (mocked)", () => {
   let adapter: RedisAdapter;
+  let redisMock: any;
 
   beforeAll(() => {
-    adapter = new RedisAdapter(redisUrl);
+    redisMock = new RedisMock();
+    adapter = new RedisAdapter("mock://", redisMock);
   });
 
   afterAll(async () => {
-    await adapter.disconnect();
+    // ioredis-mock does not need disconnect
   });
 
   it("should set and get a value", async () => {

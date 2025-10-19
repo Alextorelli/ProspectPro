@@ -143,6 +143,7 @@
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.5",
     "ignore": "^7.0.5",
+    "ioredis-mock": "^8.13.0",
     "jsdom": "^27.0.0",
     "p-retry": "^6.2.1",
     "p-timeout": "^6.1.3",
