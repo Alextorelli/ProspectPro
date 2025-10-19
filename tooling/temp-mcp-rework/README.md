@@ -25,7 +25,7 @@ This directory contains the source materials for the ProspectPro AI agent and MC
 - [x] MCP server scaffolding
 - [x] Agent suite creation
 - [x] Script/task sync (4/10+ scripts refactored)
-- [x] Observability setup
+- [ ] Observability setup
 - [ ] Validation harness
 - [ ] Documentation cleanup
 

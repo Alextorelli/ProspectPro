@@ -113,6 +113,12 @@ _Auto-generated from `.vscode/tasks.json` — Last updated: 2025-10-19_
 | **GitHub: Ensure Auth (Non-blocking)** | `bash -lc if command -v gh >/dev/null 2>&1; then gh auth status || echo "⚠️ GitHub CLI not authenticated. Run: gh auth login"; else echo "⚠️ GitHub CLI not installed"; fi` | Multiple | None | No description available |
 | **MCP: Start All Servers** | `npm run mcp:start` | Multiple | None | No description available |
 | **MCP: Stop All Servers** | `npm run mcp:stop` | Multiple | None | No description available |
+| **Observability: Start Stack** | `bash -lc cd tooling/observability && docker-compose -f docker-compose.jaeger.yml up -d` | Multiple | None | No description available |
+| **Observability: Stop Stack** | `bash -lc cd tooling/observability && docker-compose -f docker-compose.jaeger.yml down` | Multiple | None | No description available |
+| **Observability: View Jaeger UI** | `echo Open Jaeger UI at: http://localhost:16686` | Multiple | None | No description available |
+| **Observability: View Prometheus** | `echo Open Prometheus at: http://localhost:9090` | Multiple | None | No description available |
+| **Observability: View Grafana** | `echo Open Grafana at: http://localhost:3000 (admin/admin)` | Multiple | None | No description available |
+| **Observability: MCP Server** | `npm run start:observability` | `${workspaceFolder}/mcp-servers` | None | No description available |
 | **🌐 Open Project 5** | `npm run roadmap:open` | Multiple | None | No description available |
 | **🔍 Project Dashboard** | `npm run roadmap:dashboard` | Multiple | None | No description available |
 | **Context: Fetch Repo Snapshot** | `node scripts/context/fetch-repo-context.js` | [`scripts/context/fetch-repo-context.js`](../scripts/context/fetch-repo-context.js) | None | No description available |

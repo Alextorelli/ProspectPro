@@ -2,7 +2,7 @@
 
 This `/tooling/` directory contains the complete development toolchain for ProspectPro, organized for maximum productivity and AI agent integration.
 
-## Directory Structure
+## Directory Structure  
 
 ### `/scripts/`
 
