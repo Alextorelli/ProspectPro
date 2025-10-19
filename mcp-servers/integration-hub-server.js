@@ -76,7 +76,10 @@ try {
     );
   }
 } catch (error) {
-  console.warn("Supabase client not initialized - webhook features disabled:", error.message);
+  console.warn(
+    "Supabase client not initialized - webhook features disabled:",
+    error.message
+  );
 }
 
 class IntegrationHubServer {
