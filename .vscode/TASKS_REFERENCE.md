@@ -34,7 +34,6 @@ _Auto-generated from `.vscode/tasks.json` — Last updated: 2025-10-19_
 | **Supabase: Serve Local Functions** | `npm run edge:serve` | Multiple | None | Runs: Supabase: Ensure Session |
 | **Test: Run Database Tests** | `npm run supabase:test:db` | Multiple | None | Runs: Supabase: Ensure Session |
 | **Context: Fetch Supabase Snapshot** | `node scripts/context/fetch-supabase-context.js` | [`scripts/context/fetch-supabase-context.js`](../scripts/context/fetch-supabase-context.js) | None | No description available |
-| **Thunder: Run Database Tests** | `echo Run Thunder Client with ProspectPro-Database.json collection` | Multiple | None | No description available |
 | **Supabase: Fetch Logs** | `bash -lc mkdir -p reports/logs && source scripts/operations/ensure-supabase-cli-session.sh && npx --yes supabase@latest functions logs ${input:functionName} --since=${input:sinceTime} > reports/logs/supabase-logs-$(date +%Y%m%d-%H%M%S).log && echo 'Logs saved to reports/logs/supabase-logs-$(date +%Y%m%d-%H%M%S).log'` | Multiple | None | Runs: Supabase: Ensure Session |
 | **Supabase: Analyze Logs** | `bash -lc source scripts/operations/ensure-supabase-cli-session.sh && ./scripts/diagnostics/edge-function-diagnostics.sh ${input:logFile}` | Multiple | None | Runs: Supabase: Ensure Session |
 
@@ -70,11 +69,6 @@ _Auto-generated from `.vscode/tasks.json` — Last updated: 2025-10-19_
 | **Test: Campaign Validation** | `bash -lc ${workspaceFolder}/scripts/testing/campaign-validation.sh ${input:sessionJWT}` | [`${workspaceFolder}/scripts/testing/campaign-validation.sh ${input:sessionJWT}`](../scripts/${workspaceFolder}/scripts/testing/campaign-validation.sh ${input:sessionJWT}) | sessionJWT | No description available |
 | **Test: Auth Patterns** | `bash -lc ${workspaceFolder}/scripts/testing/test-auth-patterns.sh ${input:sessionJWT}` | [`${workspaceFolder}/scripts/testing/test-auth-patterns.sh ${input:sessionJWT}`](../scripts/${workspaceFolder}/scripts/testing/test-auth-patterns.sh ${input:sessionJWT}) | sessionJWT | No description available |
 | **Diagnostics: Full Campaign** | `bash -lc ${workspaceFolder}/scripts/diagnostics/edge-function-diagnostics.sh ${input:sessionJWT}` | [`${workspaceFolder}/scripts/diagnostics/edge-function-diagnostics.sh ${input:sessionJWT}`](../scripts/${workspaceFolder}/scripts/diagnostics/edge-function-diagnostics.sh ${input:sessionJWT}) | sessionJWT | No description available |
-| **Thunder: Run Auth Tests** | `echo Run Thunder Client with ProspectPro-Auth.json collection` | Multiple | None | No description available |
-| **Thunder: Run Discovery Tests** | `echo Run Thunder Client with ProspectPro-Discovery.json collection` | Multiple | None | No description available |
-| **Thunder: Run Enrichment Tests** | `echo Run Thunder Client with ProspectPro-Enrichment.json collection` | Multiple | None | No description available |
-| **Thunder: Run Export Tests** | `echo Run Thunder Client with ProspectPro-Export.json collection` | Multiple | None | No description available |
-| **Thunder: Run Full Test Suite** | `Sequential composite` | Multiple | None | Runs: Thunder: Run Auth Tests → Thunder: Run Discovery Tests → Thunder: Run Enrichment Tests → Thunder: Run Export Tests → Thunder: Run Database Tests |
 
 ## Build & Deployment
 
@@ -125,8 +119,7 @@ _Auto-generated from `.vscode/tasks.json` — Last updated: 2025-10-19_
 | **Context: Cache Session JWT** | `node scripts/context/cache-session.js ${input:sessionJWT}` | [`scripts/context/cache-session.js`](../scripts/context/cache-session.js) | sessionJWT | No description available |
 | **Workspace: Validate Configuration** | `bash -lc ${workspaceFolder}/.vscode/validate-workspace-config.sh` | Multiple | None | No description available |
 | **Workspace: Validate Configuration** | `bash -lc ${workspaceFolder}/.vscode/validate-workspace-config.sh` | Multiple | None | No description available |
-| **Thunder: Sync Environment Variables** | `bash -lc echo 'Syncing Thunder Client environment from Vercel/Supabase...' && npx --yes vercel@latest env pull .env.thunder --yes && echo 'Environment synced to .env.thunder'` | Multiple | None | No description available |
 | **Workspace: Verify Toolchain** | `bash -lc ./scripts/diagnostics/verify-toolchain.sh` | [`scripts/diagnostics/verify-toolchain.sh`](../scripts/diagnostics/verify-toolchain.sh) | None | No description available |
 | **Git: Remind to Push Before Exit** | `bash -c git status && echo 'REMINDER: Commit and push your changes before closing Codespace!'` | Multiple | None | No description available |
-| **Lint: Autofix All (React Hooks)** | `npx eslint . --fix` | Multiple | None | No description available |
+| **DevTools: Start React DevTools** | `npm run devtools:react` | Multiple | None | No description available |
 | **npm: mcp:prod** | `npm run mcp:prod` | [`package.json`](../package.json) | None | No description available |
