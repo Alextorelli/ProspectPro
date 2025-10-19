@@ -1,0 +1,7 @@
+{
+  "role": "troubleshooting-agent",
+  "server": "supabase-troubleshooting-server.js",
+  "tools": ["supabase-troubleshooting-server-tools.js"],
+  "errorDiagnostics": true,
+  "rlsValidation": true
+}

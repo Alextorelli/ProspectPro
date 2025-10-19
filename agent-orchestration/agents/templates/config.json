@@ -1,0 +1,8 @@
+{
+  "strategyVersion": "2.0",
+  "responsibilities": [],
+  "inputSchema": {},
+  "outputSchema": {},
+  "integrationPoints": [],
+  "circuitBreaker": false
+}

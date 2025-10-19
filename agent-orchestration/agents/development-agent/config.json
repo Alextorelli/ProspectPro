@@ -1,0 +1,7 @@
+{
+  "role": "development-agent",
+  "server": "development-server.js",
+  "tools": ["development-server-tools.js"],
+  "healthCheck": true,
+  "testAutomation": true
+}

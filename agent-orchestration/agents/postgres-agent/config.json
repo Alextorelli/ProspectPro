@@ -1,0 +1,7 @@
+{
+  "role": "postgres-agent",
+  "server": "postgresql-server.js",
+  "tools": ["postgresql-server-tools.js"],
+  "dbHealth": true,
+  "migrationChecks": true
+}

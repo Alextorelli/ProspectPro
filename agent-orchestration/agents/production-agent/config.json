@@ -1,0 +1,7 @@
+{
+  "role": "production-agent",
+  "server": "production-server.js",
+  "tools": ["production-server-tools.js"],
+  "healthCheck": true,
+  "diagnostics": true
+}
