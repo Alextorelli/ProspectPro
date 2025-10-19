@@ -11,6 +11,15 @@ if (typeof window !== "undefined") {
     supabase;
 }
 
+if (import.meta.env.DEV) {
+  import("react-devtools-core").then(({ connectToDevTools }) => {
+    connectToDevTools({
+      host: window.location.hostname,
+      port: 8097,
+    });
+  });
+}
+
 // Create a client
 const queryClient = new QueryClient({
   defaultOptions: {

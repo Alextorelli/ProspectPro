@@ -1095,6 +1095,7 @@
       "label": "Thunder: Run Full Test Suite",
       "dependsOrder": "sequence",
       "dependsOn": [
+        "DevTools: Start React DevTools",
         "Thunder: Run Auth Tests",
         "Thunder: Run Discovery Tests",
         "Thunder: Run Enrichment Tests",
@@ -1183,18 +1184,22 @@
       "problemMatcher": []
     },
     {
-      "label": "Lint: Autofix All (React Hooks)",
+      "label": "DevTools: Start React DevTools",
       "type": "shell",
-      "command": "npx",
-      "args": ["eslint", ".", "--fix"],
+      "command": "npm",
+      "args": ["run", "devtools:react"],
       "options": {
         "cwd": "${workspaceFolder}"
       },
       "group": "build",
+      "isBackground": true,
       "presentation": {
-        "panel": "shared"
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "dedicated"
       },
-      "problemMatcher": ["$eslint-stylish"]
+      "problemMatcher": []
     },
     {
       "type": "npm",
