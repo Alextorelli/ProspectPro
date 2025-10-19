@@ -17,7 +17,8 @@
     "ms-windows-ai-studio.windows-ai-studio",
     "github.remotehub",
     "ms-vscode.remote-repositories",
-    "vira.vsc-vira-theme"
+    "vira.vsc-vira-theme",
+    "tomoyukim.vscode-mermaid-editor"
   ],
 
   "unwantedRecommendations": [
