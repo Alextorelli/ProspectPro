@@ -84,6 +84,23 @@
           "notification_routing": true
         }
       }
+    },
+    "observability": {
+      "command": "node",
+      "args": ["${workspaceFolder}/mcp-servers/observability-server.js"],
+      "env": {
+        "JAEGER_ENDPOINT": "http://localhost:14268/api/traces",
+        "OTLP_ENDPOINT": "${OTLP_ENDPOINT}",
+        "OTLP_AUTH_TOKEN": "${OTLP_AUTH_TOKEN}"
+      },
+      "metadata": {
+        "purpose": "Distributed tracing, performance monitoring, workflow observability",
+        "optimizations": {
+          "distributed_tracing": true,
+          "performance_monitoring": true,
+          "error_correlation": true
+        }
+      }
     }
   }
 }

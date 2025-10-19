@@ -221,6 +221,53 @@ curl -X POST 'https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/test-new-aut
 
 ## 🎯 Roadmap
 
+### 🔄 MCP Rework Implementation (70% Complete)
+
+**Goal:** Establish AI agent automation with 70-80% script reduction through MCP-first architecture
+
+#### ✅ Completed Phases
+
+- **Phase 1: Workspace Staging** - Dependency alignment and MCP configuration
+- **Phase 2: MCP Server Scaffolding** - 6 specialized MCP servers created
+- **Phase 3: Agent Suite Creation** - AI agent orchestration framework
+- **Phase 4: Script/Task Sync** - 4/10+ scripts migrated to MCP workflows
+- **Phase 5: Observability Setup** - Distributed tracing infrastructure established
+
+#### 🔄 Current Phase: Validation Harness (Next Priority)
+
+- MCP server health checks and smoke tests
+- Full-stack validation with tracing enabled
+- Documentation cleanup and usage patterns
+
+#### 📋 Remaining Work
+
+- **Script Migration** - Complete refactoring of remaining 6+ test scripts
+- **VS Code Integration** - Update tasks.json to invoke MCP tools
+- **Documentation** - Update technical docs with observability patterns
+- **Testing Integration** - Automated validation with distributed tracing
+
+#### 🏗️ Infrastructure Status
+
+- **MCP Servers:** 6 servers operational (production, development, troubleshooting, postgresql, integration-hub, observability)
+- **Observability Stack:** Jaeger + Prometheus + Grafana configured for distributed tracing
+- **Agent Orchestration:** Ready for AI workflow automation
+- **Script Reduction:** 40% achieved, targeting 70-80% total reduction
+
+#### 🔍 Observability Features
+
+- **Distributed Tracing:** OpenTelemetry with Jaeger visualization
+- **Performance Monitoring:** Request duration and error tracking
+- **Workflow Correlation:** Trace correlation across MCP server interactions
+- **Health Checks:** System diagnostics and connectivity validation
+- **Metrics Collection:** Prometheus integration with custom dashboards
+
+**Access Points:**
+
+- Jaeger UI: http://localhost:16686
+- Prometheus: http://localhost:9090
+- Grafana: http://localhost:3000
+- MCP Observability Server: `npm run start:observability`
+
 ## 🛠️ Troubleshooting
 
 - **Blank screen after campaign completes** – Indicates the browser hit an old build where the campaign store could not process undefined lead batches. Pull the latest `main`, run `npm install && npm run build`, and redeploy the `/dist` bundle. If the issue persists, open dev tools and confirm there are no React error #185 stacks; the null-safe store shipping in v4.3.1 should keep results rendering once Supabase returns data.

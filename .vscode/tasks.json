@@ -642,6 +642,93 @@
       "problemMatcher": []
     },
     {
+      "label": "Observability: Start Stack",
+      "type": "shell",
+      "command": "bash",
+      "args": [
+        "-lc",
+        "cd tooling/observability && docker-compose -f docker-compose.jaeger.yml up -d"
+      ],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Observability: Stop Stack",
+      "type": "shell",
+      "command": "bash",
+      "args": [
+        "-lc",
+        "cd tooling/observability && docker-compose -f docker-compose.jaeger.yml down"
+      ],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Observability: View Jaeger UI",
+      "type": "shell",
+      "command": "echo",
+      "args": ["Open Jaeger UI at: http://localhost:16686"],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Observability: View Prometheus",
+      "type": "shell",
+      "command": "echo",
+      "args": ["Open Prometheus at: http://localhost:9090"],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Observability: View Grafana",
+      "type": "shell",
+      "command": "echo",
+      "args": ["Open Grafana at: http://localhost:3000 (admin/admin)"],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Observability: MCP Server",
+      "type": "shell",
+      "command": "npm",
+      "args": ["run", "start:observability"],
+      "options": { "cwd": "${workspaceFolder}/mcp-servers" },
+      "isBackground": true,
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "dedicated"
+      },
+      "problemMatcher": []
+    },
+    {
       "label": "Build: Frontend Production",
       "type": "shell",
       "command": "npm",

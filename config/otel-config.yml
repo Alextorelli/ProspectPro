@@ -1,0 +1,177 @@
+# OpenTelemetry Configuration for ProspectPro MCP Servers
+# This configuration enables distributed tracing across all MCP servers
+
+# Global OpenTelemetry settings
+otel:
+  service:
+    name: "prospectpro-mcp"
+    version: "1.0.0"
+    namespace: "prospectpro"
+
+  # Resource attributes applied to all spans
+  resource:
+    attributes:
+      - service.name: "prospectpro-mcp"
+      - service.version: "1.0.0"
+      - service.namespace: "prospectpro"
+      - deployment.environment: "development"
+      - host.name: "${HOSTNAME}"
+
+  # Tracer provider configuration
+  tracer_provider:
+    # Batch span processor for efficient export
+    processors:
+      - batch:
+          schedule_delay_millis: 5000
+          max_export_batch_size: 512
+          export_timeout_millis: 30000
+          max_queue_size: 2048
+
+    # Sampler configuration (sample all traces in development)
+    sampler:
+      always_on: {}
+
+  # Exporters configuration
+  exporters:
+    # Jaeger exporter for trace visualization
+    jaeger:
+      endpoint: "${JAEGER_ENDPOINT:http://localhost:14268/api/traces}"
+      tls:
+        insecure: true # For local development
+
+    # Console exporter for debugging (development only)
+    console:
+      - debug: true
+      - pretty_print: true
+
+    # OTLP gRPC exporter (for production)
+    otlp:
+      endpoint: "${OTLP_ENDPOINT}"
+      headers:
+        authorization: "Bearer ${OTLP_AUTH_TOKEN}"
+      tls:
+        insecure: false
+
+  # Metrics configuration (future enhancement)
+  metrics:
+    readers:
+      - periodic:
+          interval: 60000 # 1 minute
+          timeout: 10000 # 10 seconds
+
+    views:
+      - instrument_name: "mcp_*"
+        aggregation: "histogram"
+        bucket_boundaries:
+          [
+            0.005,
+            0.01,
+            0.025,
+            0.05,
+            0.075,
+            0.1,
+            0.25,
+            0.5,
+            0.75,
+            1.0,
+            2.5,
+            5.0,
+            7.5,
+            10.0,
+          ]
+
+# Service-specific configurations
+services:
+  integration-hub:
+    name: "prospectpro-integration-hub"
+    attributes:
+      - component: "workflow-orchestration"
+      - capabilities: "webhooks,notifications,workflows"
+
+  postgresql:
+    name: "prospectpro-postgresql"
+    attributes:
+      - component: "database-proxy"
+      - capabilities: "query-optimization,connection-pooling"
+
+  supabase-troubleshooting:
+    name: "prospectpro-supabase-troubleshooting"
+    attributes:
+      - component: "diagnostics"
+      - capabilities: "health-checks,debugging,validation"
+
+  observability:
+    name: "prospectpro-observability"
+    attributes:
+      - component: "tracing"
+      - capabilities: "distributed-tracing,performance-monitoring"
+
+# Workflow-specific trace configurations
+workflows:
+  test-discovery-pipeline:
+    name: "discovery-pipeline"
+    attributes:
+      - workflow.type: "business-discovery"
+      - workflow.tier: "${TIER_KEY}"
+      - workflow.max_results: "${MAX_RESULTS}"
+
+  enrichment-chain:
+    name: "enrichment-chain"
+    attributes:
+      - workflow.type: "data-enrichment"
+      - workflow.services: "hunter,neverbounce,license,chamber"
+
+  export-flow:
+    name: "export-flow"
+    attributes:
+      - workflow.type: "data-export"
+      - workflow.format: "${EXPORT_FORMAT}"
+      - workflow.min_confidence: "${MIN_CONFIDENCE}"
+
+  full-stack-validation:
+    name: "full-stack-validation"
+    attributes:
+      - workflow.type: "pipeline-validation"
+      - workflow.components: "discovery,enrichment,export"
+
+# Environment-specific overrides
+environments:
+  development:
+    exporters:
+      - jaeger
+      - console
+    sampler:
+      always_on: {}
+
+  staging:
+    exporters:
+      - jaeger
+      - otlp
+    sampler:
+      trace_id_ratio:
+        ratio: 0.1 # 10% sampling
+
+  production:
+    exporters:
+      - otlp
+    sampler:
+      trace_id_ratio:
+        ratio: 0.05 # 5% sampling
+
+# Alerting rules (for future integration with monitoring systems)
+alerting:
+  rules:
+    - name: "high_error_rate"
+      condition: "rate(mcp_request_errors_total[5m]) > 0.1"
+      severity: "critical"
+      description: "MCP server error rate above 10%"
+
+    - name: "slow_requests"
+      condition: "histogram_quantile(0.95, rate(mcp_request_duration_seconds_bucket[5m])) > 5"
+      severity: "warning"
+      description: "95th percentile request duration above 5 seconds"
+
+    - name: "circuit_breaker_open"
+      condition: "mcp_circuit_breaker_state{state='open'} > 0"
+      severity: "warning"
+      description: "Circuit breaker is open for external service"
