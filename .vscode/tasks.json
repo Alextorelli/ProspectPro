@@ -1118,6 +1118,30 @@
   ],
   "inputs": [
     {
+      "label": "Context: Integration Tests",
+      "type": "shell",
+      "command": "npm",
+      "args": [
+        "run",
+        "test",
+        "--",
+        "tooling/test-automation/context/context.test.js"
+      ],
+      "group": "test",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": [],
+      "postRun": [
+        {
+          "type": "shell",
+          "command": "npx nyc --reporter=markdown --report-dir=reports/context -- temp tooling/test-automation/context/context.test.js && mv reports/context/coverage.md reports/context/phase-02-report.md"
+        }
+      ]
+    },
+    {
       "id": "functionName",
       "type": "pickString",
       "description": "Supabase Edge Function",

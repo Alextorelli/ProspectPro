@@ -1,0 +1,4 @@
+[
+  { "key": "user-1", "value": { "name": "Alice", "role": "admin" } },
+  { "key": "user-2", "value": { "name": "Bob", "role": "agent" } }
+]
