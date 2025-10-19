@@ -15,7 +15,7 @@ services:
     networks:
       - prospectpro-tracing
 
-  # Optional: Prometheus for metrics
+  # Prometheus for metrics
   prometheus:
     image: prom/prometheus:latest
     ports:
@@ -26,6 +26,21 @@ services:
       - prospectpro-tracing
     depends_on:
       - jaeger
+
+  # OpenTelemetry Collector for trace/metrics routing
+  otel-collector:
+    image: otel/opentelemetry-collector:latest
+    command: ["--config", "/etc/otel/config.yaml"]
+    volumes:
+      - ../monitoring/otel/collector-config.yaml:/etc/otel/config.yaml
+    ports:
+      - "4317:4317" # OTLP gRPC
+      - "4318:4318" # OTLP HTTP
+    networks:
+      - prospectpro-tracing
+    depends_on:
+      - jaeger
+      - prometheus
 
   # Optional: Grafana for dashboards
   grafana:
