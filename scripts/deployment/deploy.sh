@@ -47,7 +47,7 @@ check_directory() {
 if check_directory "dist" "index.html" && [ -f "package.json" ] && grep -q "vite" package.json; then
     echo "📦 Detected built React/Vite app..."
     echo "📂 Deploying from: dist/"
-    cd dist && vercel --prod
+    npx --yes vercel@latest --prod --confirm --scope appsmithery --project prospect-pro --cwd dist
     
 elif [ -f "package.json" ] && grep -q "vite" package.json; then
     echo "📦 Detected React/Vite app - building first..."
@@ -56,7 +56,7 @@ elif [ -f "package.json" ] && grep -q "vite" package.json; then
     
     if [ $? -eq 0 ] && [ -d "dist" ]; then
         echo "✅ Build successful - deploying..."
-        cd dist && vercel --prod
+    npx --yes vercel@latest --prod --confirm --scope appsmithery --project prospect-pro --cwd dist
     else
         echo "❌ Build failed - check build process"
         exit 1
@@ -65,7 +65,7 @@ elif [ -f "package.json" ] && grep -q "vite" package.json; then
 elif check_directory "public" "index.html"; then
     echo "📄 Detected static frontend..."
     echo "📂 Deploying from: public/"
-    cd public && vercel --prod
+    npx --yes vercel@latest --prod --confirm --scope appsmithery --project prospect-pro --cwd public
     
 else
     echo "❌ No deployable frontend found!"
