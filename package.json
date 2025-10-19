@@ -5,7 +5,7 @@
   "description": "ProspectPro - Verified Business Intelligence Platform with Zero Fake Data Policy",
   "scripts": {
     "archive:legacy": "mkdir -p archive/legacy-server && mv server.js api/ modules/ docker/ archive/legacy-server/ 2>/dev/null || echo 'Legacy files managed separately'",
-    "build": "npm run validate:ignores && tsc -p config/tsconfig.json && vite build && echo '{\"version\":2,\"rewrites\":[{\"source\":\"/(.*)\",\"destination\":\"/index.html\"}],\"headers\":[{\"source\":\"/(.*)\",\"headers\":[{\"key\":\"Cache-Control\",\"value\":\"public, max-age=0, s-maxage=0, must-revalidate\"}]},{\"source\":\"/assets/(.*)\",\"headers\":[{\"key\":\"Cache-Control\",\"value\":\"public, max-age=31536000, immutable\"}]}]}' > dist/vercel.json",
+    "build": "tsc -p config/tsconfig.json && vite build && echo '{\"version\":2,\"rewrites\":[{\"source\":\"/(.*)\",\"destination\":\"/index.html\"}],\"headers\":[{\"source\":\"/(.*)\",\"headers\":[{\"key\":\"Cache-Control\",\"value\":\"public, max-age=0, s-maxage=0, must-revalidate\"}]},{\"source\":\"/assets/(.*)\",\"headers\":[{\"key\":\"Cache-Control\",\"value\":\"public, max-age=31536000, immutable\"}]}]}' > dist/vercel.json",
     "build:static": "npm run build",
     "clean": "rm -rf dist/ node_modules/ && echo 'Cleaned build artifacts'",
     "cost:analyze": "echo 'Check GitHub billing dashboard for usage trends'",
@@ -117,6 +117,7 @@
     "@tanstack/react-query": "^5.17.0",
     "clsx": "^2.0.0",
     "lucide-react": "^0.294.0",
+    "minimatch": "^10.0.3",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.20.1",

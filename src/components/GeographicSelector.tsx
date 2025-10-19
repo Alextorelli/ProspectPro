@@ -66,21 +66,31 @@ export const GeographicSelector: React.FC<GeographicSelectorProps> = ({
   const mapsModulesRef = useRef<MapsModules | null>(null);
   const loaderPromiseRef = useRef<Promise<void> | null>(null);
 
-  const handleAddressChange = (value: string) => {/* Lines 70-76 omitted */};
+  const handleAddressChange = (value: string) => {
+    /* Lines 70-76 omitted */
+  };
 
   const geocodeViaGoogle = async (
     addressInput: string
-  ): Promise<GeographicLocation | null> => {/* Lines 81-102 omitted */};
+  ): Promise<GeographicLocation | null> => {
+    /* Lines 81-102 omitted */
+  };
 
   // Geocoding function with Google Maps fallback to OpenStreetMap
   const geocodeAddress = async (
     addressInput: string
-  ): Promise<GeographicLocation | null> => {/* Lines 108-141 omitted */};
+  ): Promise<GeographicLocation | null> => {
+    /* Lines 108-141 omitted */
+  };
 
-  const handleAddressSearch = async () => {/* Lines 144-154 omitted */};
+  const handleAddressSearch = async () => {
+    /* Lines 144-154 omitted */
+  };
 
   const handleRadiusChange = useCallback(
-    (newRadius: number) => {/* Lines 158-160 omitted */},
+    (newRadius: number) => {
+      /* Lines 158-160 omitted */
+    },
     [location, onLocationChange]
   );
 
@@ -99,71 +109,6 @@ export const GeographicSelector: React.FC<GeographicSelectorProps> = ({
   const milesToMeters = useCallback((value: number) => value * 1609.34, []);
 
   // Simple map visualization using CSS
-  /* Lines 179-661 omitted */
-};
-      if (googleResult) {
-        return googleResult;
-      }
-
-      const response = await fetch(
-        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
-          addressInput
-        )}&limit=1`
-      );
-
-      const data = await response.json();
-
-      if (data && data.length > 0) {
-        const result = data[0];
-        return {
-          lat: parseFloat(result.lat),
-          lng: parseFloat(result.lon),
-          address: result.display_name,
-        };
-      }
-
-      return null;
-    } catch (error) {
-      console.error("Geocoding error:", error);
-      return null;
-    } finally {
-      setIsGeocoding(false);
-    }
-  };
-
-  const handleAddressSearch = async () => {
-    if (!address.trim()) return;
-
-    const result = await geocodeAddress(address);
-    if (result) {
-      setAddress(result.address);
-      setLocation(result);
-      onLocationChange(result, radius);
-    }
-  };
-
-  // ...rest of the component logic...
-  const handleRadiusChange = useCallback(
-    (newRadius: number) => {
-      setRadius(newRadius);
-      onLocationChange(location, newRadius);
-    },
-    [location, onLocationChange]
-  );
-
-  const radiusOptions = useMemo(
-    () => [
-      { value: 1, label: "1 mile" },
-      { value: 5, label: "5 miles" },
-      { value: 10, label: "10 miles" },
-      { value: 25, label: "25 miles" },
-      { value: 50, label: "50 miles" },
-      { value: 100, label: "100 miles" },
-    ],
-    []
-  );
-
-  const milesToMeters = useCallback((value: number) => value * 1609.34, []);
 
   // Simple map visualization using CSS
   const SimpleMapView: React.FC = () => {
@@ -213,7 +158,10 @@ export const GeographicSelector: React.FC<GeographicSelectorProps> = ({
     );
   };
 
-  const mapStatusStyles: Record<MapStatus, { label: string; className: string }> = {
+  const mapStatusStyles: Record<
+    MapStatus,
+    { label: string; className: string }
+  > = {
     idle: {
       label: "Static preview",
       className:

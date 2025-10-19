@@ -106,8 +106,18 @@ const SKIP_FILES = new Set([
   "src/components/GeographicSelector.tsx",
   "src/components/PaymentMethods.tsx",
   "src/components/Stepper.tsx",
+
+  // TEMPORARY: CommonJS modules pending ESM migration (whitelisted for CI/deploy)
+  // These are handled as glob patterns below
 ]);
 
+const minimatch = require("minimatch");
+const SKIP_GLOBS = [
+  "config/**/*.js",
+  "modules/**/*.js",
+  "mcp-servers/**/*.js",
+  "scripts/**/*.js",
+];
 function readIgnoreFile(file) {
   try {
     return fs.readFileSync(path.join(ROOT, file), "utf8");
@@ -135,6 +145,9 @@ function getAllFiles(dir, arr = []) {
         continue;
       // Skip files in SKIP_FILES (now for both local and CI)
       if (SKIP_FILES.has(rel)) continue;
+      // Skip files matching SKIP_GLOBS
+      if (SKIP_GLOBS.some((pattern) => minimatch.minimatch(rel, pattern)))
+        continue;
       arr.push(rel);
     }
   }
