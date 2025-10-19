@@ -24,6 +24,17 @@
 - ❌ NO generated contact information
 - ❌ NO speculative data points
 
+## CRITICAL: AI-ASSISTED WORKFLOW
+
+- **Chat Modes** (see `.github/chatmodes/`):
+  - `Smart Debug` (incident response + CI/CD validation toolkit)
+  - `Feature Delivery` (stepwise implementation with pipeline guardrails)
+  - `Production Support` (uptime + rapid rollback playbooks)
+  - `API Research`, `Cost Optimization` (comparative analysis + ops)
+- **VS Code Tasks**: `CI/CD: Validate Workspace Pipeline`, `Thunder: Run Full Test Suite`, `Supabase: Fetch Logs`, `Supabase: Analyze Logs`.
+- **MCP Tools**: `ci_cd_validation_suite`, `thunder_suite_report`, `vercel_status_check`, `supabase_cli_healthcheck`.
+- **Zero Fake Data Touchpoints**: every chat mode, MCP tool, and task emphasizes verified data sourcing; escalate any suspicious patterns via `checkFakeDataViolations` (MCP production server).
+
 **VERIFICATION SOURCES**
 
 - **Google Place Details API**: Complete phone/website verification (100% coverage)

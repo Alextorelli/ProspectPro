@@ -2,7 +2,6 @@
   "recommendations": [
     // === CORE DEVELOPMENT (Keep Always) ===
     "supabase.supabase", // Native DB/Edge management
-    "rangav.vscode-thunder-client", // Thunder Client: API test suite, integrates with Supabase for live Edge/DB debugging
     "denoland.vscode-deno",
     "github.copilot",
     "github.copilot-chat",
@@ -19,7 +18,8 @@
     "wandi.react-refactor",
     "NuclleaR.vscode-extension-autoimport",
     "pidigi.reactdevtools",
-    "laktak.pretty-ts-errors"
+    "laktak.pretty-ts-errors",
+    "ms-windows-ai-studio.windows-ai-studio"
   ],
 
   "unwantedRecommendations": [

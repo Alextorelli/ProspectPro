@@ -17,6 +17,7 @@ import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { CallToolRequestSchema } from "@modelcontextprotocol/sdk/types.js";
 import { createClient } from "@supabase/supabase-js";
+import { execSync } from "child_process";
 import fs from "fs";
 import https from "https";
 import path from "path";
@@ -66,6 +67,14 @@ class ProductionMCPServer {
           return await this.productionStartupValidator();
         case "github_workflow_optimizer":
           return await this.githubWorkflowOptimizer();
+        case "ci_cd_validation_suite":
+          return await this.ciCdValidationSuite(request.params.arguments);
+        case "thunder_suite_report":
+          return await this.thunderSuiteReport(request.params.arguments);
+        case "vercel_status_check":
+          return await this.vercelStatusCheck(request.params.arguments);
+        case "supabase_cli_healthcheck":
+          return await this.supabaseCliHealthcheck(request.params.arguments);
 
         // === SYSTEM DIAGNOSTICS TOOLS (from monitoring-server) ===
         case "get_system_health":
@@ -1304,6 +1313,291 @@ class ProductionMCPServer {
     }
   }
 
+  async ciCdValidationSuite({
+    skipBuild = false,
+    includeSupabase = true,
+  } = {}) {
+    const steps = [
+      {
+        name: "Lint",
+        command: "npm run lint",
+      },
+      {
+        name: "Unit Tests",
+        command: "npm test",
+      },
+    ];
+
+    if (!skipBuild) {
+      steps.push({
+        name: "Build",
+        command: "npm run build",
+      });
+    }
+
+    const results = [];
+
+    for (const step of steps) {
+      const result = this.runShellCommand(step.command);
+      results.push({
+        step: step.name,
+        command: step.command,
+        success: result.success,
+        output: this.truncateOutput(result.output),
+        stderr: this.truncateOutput(result.stderr),
+        error: result.error || null,
+      });
+    }
+
+    let supabaseResult = null;
+
+    if (includeSupabase) {
+      supabaseResult = this.runShellCommand(
+        "bash -lc 'cd supabase && source ../scripts/operations/ensure-supabase-cli-session.sh >/dev/null 2>&1 && npx --yes supabase@latest functions list'"
+      );
+    }
+
+    const summary = {
+      executed_at: new Date().toISOString(),
+      workspace: this.workspaceRoot,
+      steps: results,
+      supabase_functions: includeSupabase
+        ? {
+            success: supabaseResult?.success ?? false,
+            output: this.truncateOutput(supabaseResult?.output || ""),
+            stderr: this.truncateOutput(supabaseResult?.stderr || ""),
+            error: supabaseResult?.error || null,
+          }
+        : null,
+      recommendations: [],
+    };
+
+    if (results.some((item) => !item.success)) {
+      summary.recommendations.push(
+        "One or more pipeline steps failed. Re-run via VS Code task CI/CD: Validate Workspace Pipeline after resolving errors."
+      );
+    }
+
+    if (includeSupabase && !supabaseResult?.success) {
+      summary.recommendations.push(
+        "Supabase CLI call failed. Run task Supabase: Ensure Session or source scripts/operations/ensure-supabase-cli-session.sh before retrying."
+      );
+    }
+
+    if (!summary.recommendations.length) {
+      summary.recommendations.push(
+        "CI/CD pipeline healthy. Proceed with deployment (npm run build && cd dist && vercel --prod)."
+      );
+    }
+
+    return {
+      content: [
+        {
+          type: "text",
+          text: `🧪 **CI/CD Validation Suite**\n\n${JSON.stringify(
+            summary,
+            null,
+            2
+          )}`,
+        },
+      ],
+    };
+  }
+
+  async thunderSuiteReport({
+    collectionDir = "thunder-collection",
+    envPath = ".env.thunder",
+  } = {}) {
+    const collectionPath = path.join(this.workspaceRoot, collectionDir);
+    const envFile = path.join(this.workspaceRoot, envPath);
+
+    const report = {
+      generated_at: new Date().toISOString(),
+      collection_dir: collectionPath,
+      env_file: envFile,
+      env_present: fs.existsSync(envFile),
+      collections: [],
+      recommendations: [],
+    };
+
+    if (fs.existsSync(collectionPath)) {
+      const files = fs
+        .readdirSync(collectionPath)
+        .filter((file) => file.toLowerCase().endsWith(".json"));
+
+      report.collections = files.map((file) => {
+        const filePath = path.join(collectionPath, file);
+        const stats = fs.statSync(filePath);
+        return {
+          file,
+          size_bytes: stats.size,
+          modified: stats.mtime,
+        };
+      });
+
+      if (!files.length) {
+        report.recommendations.push(
+          "No Thunder Client collections detected. Restore thunder-collection/*.json from main branch."
+        );
+      }
+    } else {
+      report.recommendations.push(
+        `Thunder collection directory missing: ${collectionPath}`
+      );
+    }
+
+    if (!report.env_present) {
+      report.recommendations.push(
+        "Thunder environment missing. Run npm run thunder:env:sync before executing collections."
+      );
+    }
+
+    if (!report.recommendations.length) {
+      report.recommendations.push(
+        "Run VS Code task Thunder: Run Full Test Suite to validate discovery, enrichment, and export flows."
+      );
+    }
+
+    return {
+      content: [
+        {
+          type: "text",
+          text: `⚡ **Thunder Suite Report**\n\n${JSON.stringify(
+            report,
+            null,
+            2
+          )}`,
+        },
+      ],
+    };
+  }
+
+  async vercelStatusCheck({
+    url = "https://prospect-fyhedobh1-appsmithery.vercel.app",
+  } = {}) {
+    const started = Date.now();
+
+    return await new Promise((resolve) => {
+      const request = https.request(url, { method: "GET" }, (response) => {
+        const latencyMs = Date.now() - started;
+        const payload = {
+          checked_at: new Date().toISOString(),
+          url,
+          status_code: response.statusCode,
+          latency_ms: latencyMs,
+          cache_control: response.headers["cache-control"] || null,
+          s_maxage: response.headers["s-maxage"] || null,
+          last_modified: response.headers["last-modified"] || null,
+          server: response.headers.server || null,
+        };
+
+        response.resume();
+        response.on("end", () => {
+          if (payload.status_code !== 200) {
+            payload.recommendation =
+              "Non-200 response. Check Deploy: Full Automated Frontend task output and vercel --prod logs.";
+          } else {
+            payload.recommendation =
+              "Production healthy. Confirm cache headers match public, max-age=0, s-maxage=0, must-revalidate.";
+          }
+
+          resolve({
+            content: [
+              {
+                type: "text",
+                text: `🌐 **Vercel Status Check**\n\n${JSON.stringify(
+                  payload,
+                  null,
+                  2
+                )}`,
+              },
+            ],
+          });
+        });
+      });
+
+      request.on("error", (error) => {
+        resolve({
+          content: [
+            {
+              type: "text",
+              text: `❌ Vercel status check failed: ${error.message}`,
+            },
+          ],
+        });
+      });
+
+      request.end();
+    });
+  }
+
+  async supabaseCliHealthcheck({
+    includeMigrations = true,
+    includeFunctions = true,
+  } = {}) {
+    const commands = [];
+
+    commands.push({
+      name: "Supabase Status",
+      command:
+        "bash -lc 'cd supabase && source ../scripts/operations/ensure-supabase-cli-session.sh >/dev/null 2>&1 && npx --yes supabase@latest status'",
+    });
+
+    if (includeFunctions) {
+      commands.push({
+        name: "Functions List",
+        command:
+          "bash -lc 'cd supabase && source ../scripts/operations/ensure-supabase-cli-session.sh >/dev/null 2>&1 && npx --yes supabase@latest functions list'",
+      });
+    }
+
+    if (includeMigrations) {
+      commands.push({
+        name: "Migration List",
+        command:
+          "bash -lc 'cd supabase && source ../scripts/operations/ensure-supabase-cli-session.sh >/dev/null 2>&1 && npx --yes supabase@latest migration list'",
+      });
+    }
+
+    const results = commands.map((item) => {
+      const result = this.runShellCommand(item.command);
+      return {
+        step: item.name,
+        success: result.success,
+        output: this.truncateOutput(result.output),
+        stderr: this.truncateOutput(result.stderr),
+        error: result.error || null,
+      };
+    });
+
+    const failures = results.filter((item) => !item.success);
+
+    const recommendations = failures.length
+      ? [
+          "Supabase CLI operations failed. Ensure Supabase: Ensure Session task ran, then retry healthcheck.",
+        ]
+      : [
+          "Supabase CLI healthy. Proceed with supabase functions deploy <name> as needed.",
+        ];
+
+    return {
+      content: [
+        {
+          type: "text",
+          text: `🛠️ **Supabase CLI Healthcheck**\n\n${JSON.stringify(
+            {
+              executed_at: new Date().toISOString(),
+              checks: results,
+              recommendations,
+            },
+            null,
+            2
+          )}`,
+        },
+      ],
+    };
+  }
+
   // === SYSTEM DIAGNOSTICS METHODS (from monitoring-server) ===
 
   async getSystemHealth(args = {}) {
@@ -2223,6 +2517,44 @@ class ProductionMCPServer {
   }
 
   // === HELPER METHODS ===
+
+  runShellCommand(command, options = {}) {
+    try {
+      const output = execSync(command, {
+        cwd: options.cwd || this.workspaceRoot,
+        encoding: "utf8",
+        stdio: ["ignore", "pipe", "pipe"],
+        shell: true,
+        env: { ...process.env, ...(options.env || {}) },
+      });
+
+      return {
+        success: true,
+        output: output.trim(),
+        stderr: "",
+        error: null,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        output: (error.stdout || "").toString().trim(),
+        stderr: (error.stderr || "").toString().trim(),
+        error: error.message,
+      };
+    }
+  }
+
+  truncateOutput(value, maxLength = 1200) {
+    if (!value) {
+      return value;
+    }
+
+    if (value.length <= maxLength) {
+      return value;
+    }
+
+    return `${value.slice(0, maxLength)}\n… (truncated)`;
+  }
 
   async checkFile(relativePath) {
     try {

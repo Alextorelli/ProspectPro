@@ -18,25 +18,25 @@ All custom GitHub Copilot chat modes have been successfully implemented, tested,
    - Response optimization patterns
    - Maintenance procedures
 
-2. **smart-debug.md** (2.1 KB)
+2. **smart-debug.md** (2.3 KB)
 
    - ProspectPro-specific diagnostic patterns (auth, migrations, Edge Functions, Thunder Client, MCP)
-   - MCP troubleshooting integration (6 automated diagnostic tools)
+   - MCP troubleshooting integration (CI/CD validation suite, Thunder env report, Vercel status, Supabase health)
    - Thunder Client test suite integration (5 collections)
    - Complete solution framework (diagnosis → fix → verification → prevention)
 
-3. **feature-delivery.md** (1.8 KB)
+3. **feature-delivery.md** (2.0 KB)
 
    - Stepwise feature implementation (5 phases with user gates)
-   - Thunder Client test generation templates
+   - Thunder Client test generation templates + automated pipeline guardrails
    - Database testing (pgTAP) integration
    - Production deployment checklist
    - Backward compatibility validation
 
-4. **production-support.md** (2.0 KB)
+4. **production-support.md** (2.2 KB)
 
    - Incident classification (Critical/High/Medium with SLA targets)
-   - Thunder Client health check workflows
+   - Thunder Client health check workflows + CI/CD drift detection
    - Rollback procedures for Edge Functions, database, frontend
    - Post-incident procedures and templates
    - Load testing and performance validation
@@ -91,6 +91,13 @@ All custom GitHub Copilot chat modes have been successfully implemented, tested,
 
 **Setup Command:** `npm run thunder:env:sync`
 
+### CI/CD & Operations Automation
+
+- Added VS Code task **`CI/CD: Validate Workspace Pipeline`** (lint → vitest → vite build) with chatmode references.
+- New MCP tools surfaced across modes: `ci_cd_validation_suite`, `thunder_suite_report`, `vercel_status_check`, `supabase_cli_healthcheck`.
+- Chat modes direct production ops to combine VS Code tasks, MCP tools, and Thunder Client validation for consistent releases.
+- Launch configuration updated to point at `supabase-troubleshooting-server.js` for quick MCP debugging.
+
 ### Supabase CLI Integration
 
 All modes leverage existing Supabase CLI patterns:
@@ -144,6 +151,7 @@ All modes understand:
 - **Production issues** → production-support
 - **API evaluation** → api-research
 - **Cost/performance** → cost-optimization
+- **CI/CD drift or deployment validation** → smart-debug (CI/CD toolkit) or production-support (Rapid CI/CD Health Checks)
 
 ## ✅ Quality Checks Completed
 
@@ -162,7 +170,7 @@ All modes understand:
 ### Updating Chat Modes
 
 ```bash
-# After modifying any mode:
+# After modifying any mode or related tasks:
 npm run docs:update
 
 # Verify no regressions:

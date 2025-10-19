@@ -40,14 +40,16 @@ class SupabaseTroubleshootingServer {
       tools: [
         {
           name: "collect_react_runtime_logs",
-          description: "Tail Vercel build output or local dev server logs for React hook violations and runtime errors.",
+          description:
+            "Tail Vercel build output or local dev server logs for React hook violations and runtime errors.",
           inputSchema: {
             type: "object",
             properties: {
               logPath: {
                 type: "string",
                 description: "Path to Vercel build or dev server log file.",
-                default: "/workspaces/ProspectPro/reports/logs/vercel-build.log",
+                default:
+                  "/workspaces/ProspectPro/reports/logs/vercel-build.log",
               },
               lines: {
                 type: "integer",
@@ -199,6 +201,79 @@ class SupabaseTroubleshootingServer {
             required: ["functionName"],
           },
         },
+        {
+          name: "validate_ci_cd_suite",
+          description:
+            "Run lint, unit tests, build, and optional Supabase CLI checks to validate workspace pipeline",
+          inputSchema: {
+            type: "object",
+            properties: {
+              skipBuild: {
+                type: "boolean",
+                description: "Skip build step for faster feedback",
+                default: false,
+              },
+              includeSupabase: {
+                type: "boolean",
+                description: "Also run Supabase CLI status/functions list",
+                default: true,
+              },
+            },
+          },
+        },
+        {
+          name: "thunder_suite_report",
+          description:
+            "Validate Thunder Client environment sync and list available collections",
+          inputSchema: {
+            type: "object",
+            properties: {
+              collectionDir: {
+                type: "string",
+                description: "Directory containing Thunder collections",
+                default: "thunder-collection",
+              },
+              envPath: {
+                type: "string",
+                description: "Thunder environment file path",
+                default: ".env.thunder",
+              },
+            },
+          },
+        },
+        {
+          name: "vercel_status_check",
+          description:
+            "Check production Vercel deployment status code, latency, and cache headers",
+          inputSchema: {
+            type: "object",
+            properties: {
+              url: {
+                type: "string",
+                description: "Deployment URL to check",
+                default: "https://prospect-fyhedobh1-appsmithery.vercel.app",
+              },
+            },
+          },
+        },
+        {
+          name: "supabase_cli_healthcheck",
+          description:
+            "Run Supabase CLI status, functions list, and migration list to catch drift",
+          inputSchema: {
+            type: "object",
+            properties: {
+              includeMigrations: {
+                type: "boolean",
+                default: true,
+              },
+              includeFunctions: {
+                type: "boolean",
+                default: true,
+              },
+            },
+          },
+        },
       ],
     }));
 
@@ -220,7 +295,9 @@ class SupabaseTroubleshootingServer {
               content: [
                 {
                   type: "text",
-                  text: `React Runtime Errors (last ${lines} lines):\n\n${reactErrors.join("\n") || "No React errors found."}`,
+                  text: `React Runtime Errors (last ${lines} lines):\n\n${
+                    reactErrors.join("\n") || "No React errors found."
+                  }`,
                 },
               ],
             };
@@ -251,6 +328,14 @@ class SupabaseTroubleshootingServer {
           return await this.generateDebuggingCommands(request.params.arguments);
         case "collect_and_summarize_logs":
           return await this.collectAndSummarizeLogs(request.params.arguments);
+        case "validate_ci_cd_suite":
+          return await this.validateCiCdSuite(request.params.arguments);
+        case "thunder_suite_report":
+          return await this.thunderSuiteReport(request.params.arguments);
+        case "vercel_status_check":
+          return await this.vercelStatusCheck(request.params.arguments);
+        case "supabase_cli_healthcheck":
+          return await this.supabaseCliHealthcheck(request.params.arguments);
         default:
           throw new Error(`Unknown tool: ${request.params.name}`);
       }
@@ -641,24 +726,299 @@ Configuration Used:
 
 Save these commands for quick debugging!`,
         },
-      ];
+      ],
+    };
+  }
+
+  async validateCiCdSuite({ skipBuild = false, includeSupabase = true } = {}) {
+    const workspace = "/workspaces/ProspectPro";
+    const steps = [
+      { name: "Lint", command: "npm run lint" },
+      { name: "Unit Tests", command: "npm test" },
+    ];
+
+    if (!skipBuild) {
+      steps.push({ name: "Build", command: "npm run build" });
     }
+
+    const results = [];
+
+    for (const step of steps) {
+      const outcome = await this.runCommand(step.command, { cwd: workspace });
+      results.push({
+        step: step.name,
+        success: outcome.success,
+        stdout: this.truncateOutput(outcome.stdout),
+        stderr: this.truncateOutput(outcome.stderr),
+        error: outcome.error,
+      });
+    }
+
+    let supabase = null;
+
+    if (includeSupabase) {
+      supabase = await this.runCommand(
+        "bash -lc 'cd supabase && source ../scripts/operations/ensure-supabase-cli-session.sh >/dev/null 2>&1 && npx --yes supabase@latest functions list'",
+        { cwd: workspace }
+      );
+    }
+
+    const recommendations = [];
+
+    if (results.some((item) => !item.success)) {
+      recommendations.push(
+        "Pipeline step failed. Resolve errors, then rerun VS Code task CI/CD: Validate Workspace Pipeline."
+      );
+    }
+
+    if (includeSupabase && supabase && !supabase.success) {
+      recommendations.push(
+        "Supabase CLI call failed. Run Supabase: Ensure Session task before retrying."
+      );
+    }
+
+    if (!recommendations.length) {
+      recommendations.push(
+        "CI/CD pipeline healthy. Proceed with deployment (Deploy: Full Automated Frontend)."
+      );
+    }
+
+    return {
+      content: [
+        {
+          type: "text",
+          text: `🧪 CI/CD Validation Results\n\n${JSON.stringify(
+            {
+              executed_at: new Date().toISOString(),
+              steps: results,
+              supabase: includeSupabase
+                ? {
+                    success: supabase.success,
+                    stdout: this.truncateOutput(supabase.stdout),
+                    stderr: this.truncateOutput(supabase.stderr),
+                    error: supabase.error,
+                  }
+                : null,
+              recommendations,
+            },
+            null,
+            2
+          )}`,
+        },
+      ],
+    };
+  }
+
+  async thunderSuiteReport({
+    collectionDir = "thunder-collection",
+    envPath = ".env.thunder",
+  } = {}) {
+    const workspace = "/workspaces/ProspectPro";
+    const collectionPath = `${workspace}/${collectionDir}`;
+    const envFile = `${workspace}/${envPath}`;
+
+    const report = {
+      generated_at: new Date().toISOString(),
+      collection_dir: collectionPath,
+      env_file: envFile,
+      env_present: false,
+      collections: [],
+      recommendations: [],
+    };
+
+    try {
+      await fs.access(envFile);
+      report.env_present = true;
+    } catch {
+      report.recommendations.push(
+        "Thunder environment missing. Run npm run thunder:env:sync before executing collections."
+      );
+    }
+
+    try {
+      const files = await fs.readdir(collectionPath);
+      const jsonFiles = files.filter((file) => file.endsWith(".json"));
+
+      for (const file of jsonFiles) {
+        const stats = await fs.stat(`${collectionPath}/${file}`);
+        report.collections.push({
+          file,
+          size_bytes: stats.size,
+          modified: stats.mtime,
+        });
+      }
+
+      if (!jsonFiles.length) {
+        report.recommendations.push(
+          "No Thunder collections detected. Restore thunder-collection/*.json from main branch."
+        );
+      }
+    } catch {
+      report.recommendations.push(
+        `Thunder collection directory missing: ${collectionPath}`
+      );
+    }
+
+    if (!report.recommendations.length) {
+      report.recommendations.push(
+        "Run Thunder: Run Full Test Suite task to validate discovery, enrichment, and export flows."
+      );
+    }
+
+    return {
+      content: [
+        {
+          type: "text",
+          text: `⚡ Thunder Suite Report\n\n${JSON.stringify(report, null, 2)}`,
+        },
+      ],
+    };
+  }
+
+  async vercelStatusCheck({
+    url = "https://prospect-fyhedobh1-appsmithery.vercel.app",
+  } = {}) {
+    const started = Date.now();
+
+    return await new Promise((resolve) => {
+      const request = https.request(url, { method: "GET" }, (response) => {
+        const latencyMs = Date.now() - started;
+        const payload = {
+          checked_at: new Date().toISOString(),
+          url,
+          status_code: response.statusCode,
+          latency_ms: latencyMs,
+          cache_control: response.headers["cache-control"] || null,
+          s_maxage: response.headers["s-maxage"] || null,
+          last_modified: response.headers["last-modified"] || null,
+        };
+
+        response.resume();
+        response.on("end", () => {
+          payload.recommendation =
+            payload.status_code !== 200
+              ? "Non-200 response. Review Deploy: Full Automated Frontend task logs and vercel --prod output."
+              : "Production healthy. Confirm cache headers stay at public, max-age=0, s-maxage=0, must-revalidate.";
+
+          resolve({
+            content: [
+              {
+                type: "text",
+                text: `🌐 Vercel Status Check\n\n${JSON.stringify(
+                  payload,
+                  null,
+                  2
+                )}`,
+              },
+            ],
+          });
+        });
+      });
+
+      request.on("error", (error) => {
+        resolve({
+          content: [
+            {
+              type: "text",
+              text: `❌ Vercel status check failed: ${error.message}`,
+            },
+          ],
+        });
+      });
+
+      request.end();
+    });
+  }
+
+  async supabaseCliHealthcheck({
+    includeMigrations = true,
+    includeFunctions = true,
+  } = {}) {
+    const workspace = "/workspaces/ProspectPro";
+    const commands = [
+      {
+        name: "Supabase Status",
+        command:
+          "bash -lc 'cd supabase && source ../scripts/operations/ensure-supabase-cli-session.sh >/dev/null 2>&1 && npx --yes supabase@latest status'",
+      },
+    ];
+
+    if (includeFunctions) {
+      commands.push({
+        name: "Functions List",
+        command:
+          "bash -lc 'cd supabase && source ../scripts/operations/ensure-supabase-cli-session.sh >/dev/null 2>&1 && npx --yes supabase@latest functions list'",
+      });
+    }
+
+    if (includeMigrations) {
+      commands.push({
+        name: "Migration List",
+        command:
+          "bash -lc 'cd supabase && source ../scripts/operations/ensure-supabase-cli-session.sh >/dev/null 2>&1 && npx --yes supabase@latest migration list'",
+      });
+    }
+
+    const results = [];
+
+    for (const command of commands) {
+      const outcome = await this.runCommand(command.command, {
+        cwd: workspace,
+      });
+      results.push({
+        step: command.name,
+        success: outcome.success,
+        stdout: this.truncateOutput(outcome.stdout),
+        stderr: this.truncateOutput(outcome.stderr),
+        error: outcome.error,
+      });
+    }
+
+    const recommendations = results.some((item) => !item.success)
+      ? [
+          "Supabase CLI reported errors. Run Supabase: Ensure Session task, then repeat healthcheck.",
+        ]
+      : [
+          "Supabase CLI healthy. Continue with supabase functions deploy or supabase db push as needed.",
+        ];
+
+    return {
+      content: [
+        {
+          type: "text",
+          text: `🛠️ Supabase CLI Healthcheck\n\n${JSON.stringify(
+            {
+              executed_at: new Date().toISOString(),
+              checks: results,
+              recommendations,
+            },
+            null,
+            2
+          )}`,
+        },
+      ],
+    };
   }
 
   async collectAndSummarizeLogs({ functionName, sinceTime = "24h" }) {
     try {
       // Step 1: Fetch logs using Supabase CLI
-      const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
+      const timestamp = new Date()
+        .toISOString()
+        .replace(/[:.]/g, "-")
+        .slice(0, -5);
       const logFile = `reports/logs/supabase-logs-${timestamp}.log`;
 
       // Ensure reports directory exists
-      await fs.mkdir('reports/logs', { recursive: true });
+      await fs.mkdir("reports/logs", { recursive: true });
 
       const fetchCommand = `cd /workspaces/ProspectPro && source scripts/operations/ensure-supabase-cli-session.sh && npx --yes supabase@latest functions logs ${functionName} --since=${sinceTime} > ${logFile}`;
 
-      const { stdout: fetchStdout, stderr: fetchStderr } = await execAsync(fetchCommand);
+      const { stdout: fetchStdout, stderr: fetchStderr } = await execAsync(
+        fetchCommand
+      );
 
-      if (fetchStderr && !fetchStderr.includes('ready=')) {
+      if (fetchStderr && !fetchStderr.includes("ready=")) {
         return {
           content: [
             {
@@ -672,23 +1032,32 @@ Save these commands for quick debugging!`,
       // Step 2: Analyze logs using diagnostics script
       const analyzeCommand = `cd /workspaces/ProspectPro && ./scripts/diagnostics/edge-function-diagnostics.sh ${logFile}`;
 
-      const { stdout: analyzeStdout, stderr: analyzeStderr } = await execAsync(analyzeCommand);
+      const { stdout: analyzeStdout, stderr: analyzeStderr } = await execAsync(
+        analyzeCommand
+      );
 
       // Step 3: Read the generated report
-      const reportPath = logFile.replace('reports/logs/', 'reports/diagnostics/').replace('.log', '.md');
-      let reportContent = '';
+      const reportPath = logFile
+        .replace("reports/logs/", "reports/diagnostics/")
+        .replace(".log", ".md");
+      let reportContent = "";
 
       try {
-        reportContent = await fs.readFile(reportPath, 'utf8');
+        reportContent = await fs.readFile(reportPath, "utf8");
       } catch (readError) {
         reportContent = `Could not read analysis report: ${readError.message}`;
       }
 
       // Tag ESLint/react-hook errors in the report
-      const reactErrorMatches = reportContent.match(/(React(\s+)?(Hook|Error|Violation|Warning)|Invalid hook call|Hooks must be called|react-hooks\/rules-of-hooks|jsx-sort-props)/gi);
-      const reactErrorSummary = reactErrorMatches && reactErrorMatches.length > 0
-        ? `\n**React/ESLint Errors Detected:**\n${reactErrorMatches.join("\n")}`
-        : "\nNo React/ESLint errors detected.";
+      const reactErrorMatches = reportContent.match(
+        /(React(\s+)?(Hook|Error|Violation|Warning)|Invalid hook call|Hooks must be called|react-hooks\/rules-of-hooks|jsx-sort-props)/gi
+      );
+      const reactErrorSummary =
+        reactErrorMatches && reactErrorMatches.length > 0
+          ? `\n**React/ESLint Errors Detected:**\n${reactErrorMatches.join(
+              "\n"
+            )}`
+          : "\nNo React/ESLint errors detected.";
 
       return {
         content: [
@@ -702,10 +1071,10 @@ Save these commands for quick debugging!`,
 **Analysis Report:** ${reportPath}
 
 ### Fetch Results
-${fetchStdout || 'Logs fetched successfully'}
+${fetchStdout || "Logs fetched successfully"}
 
 ### Analysis Summary
-${analyzeStdout || 'Analysis completed'}
+${analyzeStdout || "Analysis completed"}
 
 ### Detailed Report
 ${reportContent}
