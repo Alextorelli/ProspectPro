@@ -1,0 +1,83 @@
+{
+  "name": "ProspectPro",
+  "description": "Real business lead generation platform with verified contact data. Zero fake data tolerance.",
+  "website": "https://prospectpro-demo.railway.app",
+  "repository": "https://github.com/your-username/ProspectPro",
+  "logo": "https://raw.githubusercontent.com/your-username/ProspectPro/main/public/assets/logo-192.png",
+  "success_url": "/",
+  "keywords": [
+    "lead-generation",
+    "business-data", 
+    "api-integration",
+    "supabase",
+    "real-data"
+  ],
+  "stack": "heroku-22",
+  "buildpacks": [
+    {
+      "url": "heroku/nodejs"
+    }
+  ],
+  "env": {
+    "NODE_ENV": {
+      "description": "Node environment",
+      "value": "production",
+      "required": true
+    },
+    "SUPABASE_URL": {
+      "description": "Your Supabase project URL (https://your-project-id.supabase.co)",
+      "required": true
+    },
+    "SUPABASE_ANON_KEY": {
+      "description": "Supabase anonymous/public key from Settings > API", 
+      "required": true
+    },
+    "SUPABASE_SERVICE_ROLE_KEY": {
+      "description": "Supabase service role key (keep secret!)",
+      "required": true
+    },
+    "GOOGLE_PLACES_API_KEY": {
+      "description": "Google Cloud Console Places API key",
+      "required": true
+    },
+    "SCRAPINGDOG_API_KEY": {
+      "description": "ScrapingDog API key for website scraping",
+      "required": true
+    },
+    "HUNTER_IO_API_KEY": {
+      "description": "Hunter.io API key for email discovery", 
+      "required": true
+    },
+    "NEVERBOUNCE_API_KEY": {
+      "description": "NeverBounce API key for email validation",
+      "required": true
+    },
+    "PERSONAL_ACCESS_TOKEN": {
+      "description": "Secure token for API access (generate with crypto.randomBytes)",
+      "generator": "secret"
+    },
+    "PERSONAL_USER_ID": {
+      "description": "Your unique user identifier",
+      "value": "heroku-user"
+    },
+    "PERSONAL_EMAIL": {
+      "description": "Your email address",
+      "required": true
+    }
+  },
+  "formation": {
+    "web": {
+      "quantity": 1,
+      "size": "basic"
+    }
+  },
+  "addons": [
+    {
+      "plan": "papertrail:choklad",
+      "as": "LOGGING"
+    }
+  ],
+  "scripts": {
+    "postdeploy": "echo 'ProspectPro deployed! Visit /health to verify configuration.'"
+  }
+}

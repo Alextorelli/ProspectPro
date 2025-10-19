@@ -43,5 +43,28 @@ Converge ProspectPro to a hybrid mono-repo structure optimized for AI agent work
 ## Notes
 
 - Supabase-first architecture and RLS policies must remain intact
-- Thunder Client and MCP integrations must be updated to new paths
+- MCP integrations must be updated to new paths
 - All changes staged and verified before cutover
+
+## Ignore File Policy
+
+- All ignore files (.gitignore, .eslintignore, .vercelignore) are maintained at the repository root for clarity and single-source-of-truth enforcement.
+- No per-folder ignore files are permitted unless required by CI/CD or build tooling; any such exceptions must be documented here.
+- .gitignore: VCS scope, excludes build outputs, logs, environment files, node_modules, and all non-MECE root files. No per-folder .gitignore files allowed.
+- .eslintignore: Linting scope, excludes build outputs, logs, Supabase functions, and legacy modules/scripts. No per-folder .eslintignore files allowed.
+- .vercelignore: Frontend build scope, excludes everything except static frontend assets and required configs. No per-folder .vercelignore files allowed.
+- Any exception (e.g., for CI/CD or build tooling) must be documented here and justified.
+
+## Root Directory Hygiene
+
+- Only the following root folders and files are permitted:
+  - app/
+  - tooling/
+  - docs/
+  - config/
+  - reports/
+  - .gitignore, .eslintignore, .vercelignore
+  - README.md, LICENSE, package.json, package-lock.json, yarn.lock, CHANGELOG.md
+  - .github/, .vscode/, .devcontainer/, .husky/, .nvmrc, .npmrc
+- All other files/folders must be moved into the appropriate namespace or archived before deletion.
+- The folder archive/loose-root-assets/ is used as a temporary quarantine for legacy or loose files pending review or deletion.
