@@ -69,6 +69,18 @@ Document the immediate plan for consolidating DevOps AI agent workflows, includi
 
 ---
 
+## Phase 3 Progress (2025-10-20)
+
+- [x] Automation scripts bundle scaffolded in `/scripts/automation/`:
+  - `supabase-pull-logs.sh`, `vercel-status-check.sh`, `context-snapshot.sh`
+- [x] Usage documented in platform-playbooks.md and devops-agent-runbook.md
+- [x] All scripts enforce repo root/guard checks and output to `reports/`
+- [x] Guardrails reiterated: no .vscode/.github edits; proposals staged in settings-staging.md
+
+**Phase 3 complete. Ready for Phase 4 (MCP integration).**
+
+---
+
 ## Progress Checkpoint (2025-10-20)
 
 - Platform playbooks for Supabase, Vercel, and MCP are now documented and cross-linked from FAST_README.md.

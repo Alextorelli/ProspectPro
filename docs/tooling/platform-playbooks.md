@@ -67,3 +67,18 @@
 ---
 
 _Last updated: 2025-10-20_
+
+---
+
+## Automation Scripts Bundle (Phase 3)
+
+> All scripts: `/scripts/automation/` (see README for guard policy)
+
+- **Supabase Log Pull:** [`supabase-pull-logs.sh`](../../scripts/automation/supabase-pull-logs.sh)
+  - Usage: `./supabase-pull-logs.sh <function-slug> <since-time>`
+- **Vercel Status Check:** [`vercel-status-check.sh`](../../scripts/automation/vercel-status-check.sh)
+  - Usage: `./vercel-status-check.sh`
+- **Context Snapshot:** [`context-snapshot.sh`](../../scripts/automation/context-snapshot.sh)
+  - Usage: `./context-snapshot.sh <function-slug> <since-time>`
+
+Each script enforces top-level directory checks and outputs to `reports/`.

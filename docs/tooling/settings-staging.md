@@ -1,5 +1,12 @@
 # Workspace Configuration Safeguard Staging
 
+---
+
+## Phase 3 (2025-10-20): Automation Scripts
+
+- All new automation scripts are staged in `/scripts/automation/` and documented in platform-playbooks.md.
+- No .vscode or .github edits permitted; any new task/config proposals must be added here for review.
+
 ### React DevTools Command Sequence (staged)
 
 1. `npm run dev -- --host 0.0.0.0 --port 5173`

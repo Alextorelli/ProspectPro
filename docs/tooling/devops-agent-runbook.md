@@ -1,5 +1,13 @@
 # DevOps Agent Runbook – Stepwise Automation
 
+## Automation Scripts Quick Start (Phase 3)
+
+- **Supabase Log Pull:** `./scripts/automation/supabase-pull-logs.sh <function-slug> <since-time>`
+- **Vercel Status Check:** `./scripts/automation/vercel-status-check.sh`
+- **Context Snapshot:** `./scripts/automation/context-snapshot.sh <function-slug> <since-time>`
+
+All scripts output to `reports/` and enforce guardrails. See platform-playbooks.md for details.
+
 ## DevOps Agent Checklist Runbook
 
 ### 1. Pre-flight
