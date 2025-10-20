@@ -312,12 +312,11 @@ done
 
 ### Critical Documentation
 
-- **Dev Tools FAST_README**: `/docs/dev-tools/FAST_README.md`
-- **Deployment Workflow Script**: `/dev-tools/scripts/shell/deployment-validation-workflow.sh`
-- **Edge Diagnostics**: `/dev-tools/scripts/shell/edge-function-diagnostics.sh`
-- **Production Health Check**: `/dev-tools/scripts/shell/production-health-check.sh`
-- **Context Store Guide**: `/dev-tools/agent-orchestration/context/README.md`
-- **MCP Registry**: `/dev-tools/mcp-servers/registry.json`
+- **Deployment Guide**: `/docs/deployment/production-deployment.md`
+- **Incident Runbooks**: `/docs/maintenance/incident-response.md`
+- **Rollback Procedures**: `/docs/deployment/rollback-procedures.md`
+- **Capacity Planning**: `/docs/technical/capacity-planning.md`
+- **Health Checks**: `/scripts/diagnostics/health-check.sh`
 
 ### Production Access
 

@@ -108,13 +108,11 @@ async function callExternalAPI(service, params) {
 
 ### Critical Documentation
 
-- **App System Reference**: `/docs/app/SYSTEM_REFERENCE.md`
-- **Technical System Reference**: `/docs/technical/SYSTEM_REFERENCE.md`
-- **Documentation Standards**: `/docs/technical/DOCUMENTATION_STANDARDS.md`
+- **Architecture**: `/docs/technical/SYSTEM_REFERENCE.md`
+- **Deployment**: `/docs/deployment/edge-functions.md`
 - **Database**: `/supabase/schema-sql/` (001-004 sequential migrations)
+- **MCP Registry**: `/mcp-servers/registry.json`
 - **Edge Functions**: `/supabase/functions/` (business-discovery-background, enrichment-orchestrator, campaign-export-user-aware)
-- **MCP Registry**: `/dev-tools/mcp-servers/registry.json`
-- **Context Store Guide**: `/dev-tools/agent-orchestration/context/README.md`
 
 ### Performance Targets (from registry.json)
 

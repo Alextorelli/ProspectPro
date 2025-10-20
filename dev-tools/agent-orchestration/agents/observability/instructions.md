@@ -195,11 +195,11 @@ Always audit enrichment results for zero-fake-data compliance using MCP tools. U
 
 ### Critical Documentation
 
-- **Dev Tools FAST_README**: `/docs/dev-tools/FAST_README.md`
-- **OTEL Configuration**: `/config/otel-config.yml`
-- **Observability Stack**: `/dev-tools/observability/docker-compose.jaeger.yml`
-- **Context Store Guide**: `/dev-tools/agent-orchestration/context/README.md`
-- **MCP Registry**: `/dev-tools/mcp-servers/registry.json` (monitoring section)
+- **Monitoring Setup**: `/docs/technical/observability.md`
+- **OTEL Configuration**: `/tooling/monitoring/otel/otel-config.js`
+- **Jaeger Deployment**: `/tooling/monitoring/jaeger/docker-compose.yml`
+- **Incident Runbooks**: `/docs/maintenance/incident-response.md`
+- **Performance Baselines**: `/mcp-servers/registry.json` (monitoring section)
 
 ### Dashboard Access
 
