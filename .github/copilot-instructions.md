@@ -36,6 +36,13 @@
 - **MCP Tools**: `ci_cd_validation_suite`, `thunder_suite_report`, `vercel_status_check`, `supabase_cli_healthcheck`.
 - **Zero Fake Data Touchpoints**: every chat mode, MCP tool, and task emphasizes verified data sourcing; escalate any suspicious patterns via `checkFakeDataViolations` (MCP production server).
 
+## RECENT TOOLING & END-STATE DIRECTION (2025-10-20)
+
+- **Telemetry Cleanup**: All Thunder/Jaeger references were replaced by the MCP log-forwarder + Supabase logs pipeline. See `docs/tooling/TELEMETRY_LEGACY_CLEANUP_REPORT_2025-10-20.md` for the audit trail, validation checkpoints, and rollback notes.
+- **DevOps Agent Roadmap**: `docs/tooling/TEMP_DEVOPS_AGENT_PLAN.md` tracks the staged rollout toward the end-state objective—a fully automated suite of DevOps AI agents covering development, observability, testing, debugging, documentation, deployment, and platform integrations across Supabase, Vercel, React, and VS Code/GitHub.
+- **React Debugging Integration**: Adopt the browser React Developer Tools extension or the `npx react-devtools` bridge described in the temporary plan. Do not change `.vscode/` tasks or settings until a staged configuration update is explicitly approved.
+- **Configuration Safeguards**: Treat `.vscode/` and `.github/` as locked directories during refactors or repo reorganizations. Stage any proposed workspace configuration changes in guard docs (e.g., `docs/tooling/settings-staging.md`) and obtain approval before editing the live copies.
+
 **VERIFICATION SOURCES**
 
 - **Google Place Details API**: Complete phone/website verification (100% coverage)
