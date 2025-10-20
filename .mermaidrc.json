@@ -1,0 +1,14 @@
+{
+  "theme": "dark",
+  "fontFamily": "Inter, Arial, sans-serif",
+  "backgroundColor": "transparent",
+  "sequence": {
+    "actorMargin": 50
+  },
+  "class": {
+    "defaultRenderer": "dagre"
+  },
+  "architecture": {
+    "iconPack": "logos"
+  }
+}
