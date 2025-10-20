@@ -1,3 +1,5 @@
+# DEPRECATED: This report is superseded by `reports/context/coverage.md` as of 2025-10-20. Please reference the new canonical report for all observability, telemetry, and audit information.
+
 # Telemetry & Legacy Reference Cleanup Report
 
 **Date:** 2025-10-20

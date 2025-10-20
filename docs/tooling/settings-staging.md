@@ -56,20 +56,18 @@
   "type": "shell",
   "command": "npm run devtools:react"
 }
-```
 
 ## Manual Command Sequence
 
-1. Start the React app: `npm run dev`
-2. In a new terminal, launch React DevTools: `npx react-devtools`
-3. (Optional) Use browser extension for React state inspection
 
 See `docs/tooling/agent-debug-playbooks.md` for full workflow and guard policy.
+
 
 ---
 
 # Applied: Phase 02 Coverage Output Update (2025-10-20)
 
 - VS Code task `Phase 02` now leaves the markdown report at `reports/context/coverage.md` (rename step removed from `.vscode/tasks.json`).
-- Legacy artifact `reports/context/phase-02-report.md` can be deleted; downstream tools should consume `coverage.md`.
+- Legacy artifact `reports/context/phase-02-report.md` is fully deprecated; all downstream tools and automation must consume `reports/context/coverage.md` as the canonical output.
 - Rollback: restore the previous `mv` command in `.vscode/tasks.json` if consumers expect the historical filename.
+```

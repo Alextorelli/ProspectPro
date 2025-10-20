@@ -6,7 +6,7 @@
 - **Frontend**: React/Vite app deployed to Vercel (`prospect-fyhedobh1-appsmithery.vercel.app`) with build outputs in `/dist`
 - **Backend**: Supabase Edge Functions for discovery, enrichment, export, diagnostics (global edge network, <100ms cold starts)
 - **Data Layer**: Supabase Postgres with Row Level Security, campaign ownership, and authenticated exports
-- **Observability**: MCP log-forwarder + Supabase logs (see `docs/tooling/TELEMETRY_LEGACY_CLEANUP_REPORT_2025-10-20.md`)
+- **Observability**: MCP log-forwarder + Supabase logs (see `reports/context/coverage.md`)
 - **Authentication**: Supabase Auth (anonymous + authenticated sessions) enforced through shared helpers across functions and frontend
 - **Configuration Guard**: Stage all `.vscode/` and `.github/` changes in `docs/tooling/settings-staging.md` before updating live files
 
@@ -94,11 +94,11 @@ Data quality focuses on auditing live responses, preserving attribution, and doc
 
 ## Remaining Dependencies & Follow-up
 
-- **Telemetry report**: `docs/tooling/TELEMETRY_LEGACY_CLEANUP_REPORT_2025-10-20.md` remains the authoritative audit; keep linked from this file until a newer report supersedes it
+- **Telemetry report**: `reports/context/coverage.md` is now the authoritative audit; keep linked from this file for all future reference
 - **Restructure plan**: `docs/app/REPO_RESTRUCTURE_PLAN.md` is the canonical migration roadmap and is referenced by README.md; update in lockstep with structural changes
 - **Validation template**: `dev-tools/reports/reports/validation/template.md` is required by validation runners and VS Code tasks; retain path integrity
 - **MCP status**: See `docs/tooling/devops-agent-runbook.md` (MCP Production Status Snapshot) for the current production server inventory; update that section when tool counts change
 - **Audit artifacts**: `dev-tools/reports/reports/refactor/docs-audit.txt` and `dev-tools/reports/reports/refactor/structure-gap.md` track the ongoing cleanup; keep until the restructure backlog closes
-- **Coverage output**: `dev-tools/reports/reports/context/phase-02-report.md` is populated by the “Phase 02” task; preserve filename
+- **Coverage output**: `reports/context/coverage.md` is populated by the “Phase 02” task; this is the new standard output location
 - **Historical sizes**: `CODEBASE_SIZES_BEFORE.txt` has no active references and can be deleted if the snapshot is no longer needed (delete and document in changelog if you remove it)
 - After each removal or replacement, re-run `npm run docs:update` and refresh cross-references in the FAST README and platform playbooks

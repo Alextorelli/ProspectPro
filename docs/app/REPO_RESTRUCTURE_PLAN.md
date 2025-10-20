@@ -48,10 +48,10 @@ Converge ProspectPro to a hybrid mono-repo structure optimized for AI agent work
 
 ## Progress Update (2025-10-20)
 
-- Thunder/Jaeger telemetry footprint eliminated; MCP log-forwarder + Supabase logs are the sole observability pipeline (see `docs/tooling/TELEMETRY_LEGACY_CLEANUP_REPORT_2025-10-20.md`).
+- Thunder/Jaeger telemetry footprint eliminated; MCP log-forwarder + Supabase logs are the sole observability pipeline (see `reports/context/coverage.md`).
 - Automation scripts consolidated under `/scripts/automation/` with guardrails; VS Code Phase 02 task now emits coverage to `reports/context/coverage.md` without legacy rename.
 - MCP production status snapshot migrated into `docs/tooling/devops-agent-runbook.md`, removing the standalone status file.
-- Legacy audit artifacts (`docs-audit.txt`, `structure-gap.md`, `phase-02-report.md`, `CODEBASE_SIZES_BEFORE.txt`) retired after dependency unwind.
+- Legacy audit artifacts (`docs-audit.txt`, `structure-gap.md`, `CODEBASE_SIZES_BEFORE.txt`) retired after dependency unwind. Coverage output is now standardized at `reports/context/coverage.md`.
 - Copilot instructions refreshed to point at live runbooks and staging guardrails.
 
 ## Next Actions
