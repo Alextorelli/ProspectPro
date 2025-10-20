@@ -1,7 +1,6 @@
 {
   "recommendations": [
-    // === CORE DEVELOPMENT (Workspace Only) ===
-    "supabase.supabase", // Native DB/Edge management
+    "supabase.supabase",
     "denoland.vscode-deno",
     "github.copilot",
     "github.copilot-chat",
@@ -11,14 +10,11 @@
     "bradlc.vscode-tailwindcss",
     "davidanson.vscode-markdownlint",
     "redhat.vscode-yaml",
-    // Mermaid visualization (replace Mermaid Editor with these two)
-    "GraphBook.mermaid-chart", // Mermaid Chart (preview/diagram)
-    "vstirbu.vscode-mermaid-preview", // Mermaid Preview (SVG/PNG export)
-    "bierner.mermaid-markdown-syntax-highlighting" // Mermaid syntax highlighting
+    "GraphBook.mermaid-chart",
+    "vstirbu.vscode-mermaid-preview",
+    "bierner.mermaid-markdown-syntax-highlighting"
   ],
-
   "unwantedRecommendations": [
-    // === REMOVE FOR COST OPTIMIZATION & SERVERLESS ===
     "ms-mssql.mssql",
     "ms-playwright.playwright",
     "ms-vscode.live-server",
