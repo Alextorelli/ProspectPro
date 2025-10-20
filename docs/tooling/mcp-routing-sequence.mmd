@@ -1,29 +1,29 @@
 ---
 id: mcp-routing-sequence
-intent: "Show the sequence of routing from ingress through ContextManager, ZeroFakeData validation, MCP servers, and telemetry."
+intent: "MCP Routing Sequence: Ingress → ContextManager → MCP → Telemetry with ZeroFakeData validation."
 context: |
-  This sequence diagram highlights the validation and routing steps, referencing stable node IDs and reusable snippets.
+  Sequence diagram showing the stepwise flow from ingress through context validation, routing, MCP invocation, and telemetry emission. Highlights the ZeroFakeData checkpoint and all major agentic handoffs.
 ---
-
 sequenceDiagram
-    participant Ingress as Ingress Gateway
-    participant Router as Context Router
-    participant ZeroFake as ZeroFakeData Checkpoint
-    participant CtxMgr as ContextManager
-    participant MCPProd as MCP Production
-    participant MCPDev as MCP Development
-    participant MCPTrouble as MCP Troubleshooting
-    participant Thunder as Thunder Reports
-    participant Supabase as Supabase Logs
+    participant INGRESS as Ingress Gateway\n(scripts/shell/ingress-gateway.sh)
+    participant ROUTER as Context Router\n(scripts/shell/context-router.sh)
+    participant ZFD as ZeroFakeData Checkpoint\n(scripts/shell/zero-fake-data-check.sh)
+    participant CTX_MGR as ContextManager\n(dev-tools/context/context-manager.ts)
+    participant MCP_PROD as MCP Production\n(mcp-servers/production-server.js)
+    participant MCP_DEV as MCP Development\n(mcp-servers/development-server.js)
+    participant MCP_TROUBLE as MCP Troubleshooting\n(mcp-servers/troubleshooting-server.js)
+    participant THUNDER as Thunder Reports\n(dev-tools/monitoring/jaeger/)
+    participant SUPABASE as Supabase Logs\n(supabase/functions/)
 
-    Ingress->>Router: receive()
-    Router->>ZeroFake: validate()
-    ZeroFake-->>CtxMgr: pass
-    CtxMgr->>MCPProd: route:prod
-    CtxMgr->>MCPDev: route:dev
-    CtxMgr->>MCPTrouble: route:trouble
-    MCPProd->>Thunder: emit:thunder
-    MCPProd->>Supabase: emit:logs
-    MCPDev->>Thunder: emit:thunder
-    MCPTrouble->>Supabase: emit:logs
-    MCPProd-->>MCPTrouble: escalate
+    INGRESS->>ROUTER: receive request
+    ROUTER->>ZFD: validate (ZeroFakeData)
+    ZFD-->>ROUTER: pass/fail
+    ROUTER->>CTX_MGR: forward if pass
+    CTX_MGR->>MCP_PROD: route:prod
+    CTX_MGR->>MCP_DEV: route:dev
+    CTX_MGR->>MCP_TROUBLE: route:trouble
+    MCP_PROD->>THUNDER: emit:thunder
+    MCP_PROD->>SUPABASE: emit:logs
+    MCP_DEV->>THUNDER: emit:thunder
+    MCP_TROUBLE->>SUPABASE: emit:logs
+    MCP_PROD-->>MCP_TROUBLE: escalate (on error)
