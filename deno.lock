@@ -53,6 +53,7 @@
     "packageJson": {
       "dependencies": [
         "npm:@googlemaps/js-api-loader@^2.0.1",
+        "npm:@mermaid-js/mermaid-cli@^11.12.0",
         "npm:@modelcontextprotocol/sdk@^1.20.1",
         "npm:@opentelemetry/api@^1.9.0",
         "npm:@opentelemetry/exporter-trace-otlp-http@0.54",
