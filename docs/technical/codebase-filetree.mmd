@@ -1,1 +1,34 @@
-# moved from diagrams/technical/codebase-filetree.mmd
+---
+id: codebase-filetree
+intent: Codebase File Tree (modular, agentic, with stable node IDs)
+context: |
+  This diagram visualizes the file tree for the codebase in the ProspectPro system. Each node uses a stable, descriptive ID and is linked to the relevant script or function path. Modular and ready for agentic automation.
+---
+flowchart TD
+    ROOT["/ (repo root)"]:::dir
+    APP["app/"]:::dir
+    CONFIG["config/"]:::dir
+    DEVTOOLS["dev-tools/"]:::dir
+    DOCS["docs/"]:::dir
+    MCP["mcp-servers/"]:::dir
+    SCRIPTS["scripts/"]:::dir
+    SUPABASE["supabase/"]:::dir
+    
+    ROOT --> APP
+    ROOT --> CONFIG
+    ROOT --> DEVTOOLS
+    ROOT --> DOCS
+    ROOT --> MCP
+    ROOT --> SCRIPTS
+    ROOT --> SUPABASE
+    
+    classDef dir fill:#64748b,color:#fff;
+    class ROOT,APP,CONFIG,DEVTOOLS,DOCS,MCP,SCRIPTS,SUPABASE dir;
+    
+    %% Legend
+    subgraph Legend["Legend"]
+        direction LR
+        L1["Directory"]
+        style Legend fill:#fff,stroke:#888,stroke-width:1px
+        style L1 fill:#64748b,color:#fff
+    end

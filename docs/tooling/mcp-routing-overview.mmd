@@ -8,27 +8,27 @@ context: |
 flowchart TD
   subgraph AccessLayer["Access"]
     direction LR
-    INGRESS_GATEWAY["Ingress Gateway\\n(scripts/shell/ingress-gateway.sh)"]:::access
+    INGRESS_GATEWAY["Ingress Gateway\n(scripts/shell/ingress-gateway.sh)"]:::access
   end
 
   subgraph RoutingLayer["Routing"]
     direction LR
-    CONTEXT_ROUTER["Context Router\\n(scripts/shell/context-router.sh)"]:::router
-    ZERO_FAKE_DATA_CHECK["ZeroFakeData Checkpoint\\n(scripts/shell/zero-fake-data-check.sh)"]:::validate
-    CONTEXT_MANAGER["ContextManager\\n(dev-tools/context/context-manager.ts)"]:::context
+    CONTEXT_ROUTER["Context Router\n(scripts/shell/context-router.sh)"]:::router
+    ZERO_FAKE_DATA_CHECK["ZeroFakeData Checkpoint\n(scripts/shell/zero-fake-data-check.sh)"]:::validate
+    CONTEXT_MANAGER["ContextManager\n(dev-tools/context/context-manager.ts)"]:::context
   end
 
   subgraph MCPLayer["MCP Servers"]
     direction LR
-    MCP_PROD["Production\\n(mcp-servers/production-server.js)"]:::mcp
-    MCP_DEV["Development\\n(mcp-servers/development-server.js)"]:::mcp
-    MCP_TROUBLE["Troubleshooting\\n(mcp-servers/troubleshooting-server.js)"]:::mcp
+    MCP_PROD["Production\n(mcp-servers/production-server.js)"]:::mcp
+    MCP_DEV["Development\n(mcp-servers/development-server.js)"]:::mcp
+    MCP_TROUBLE["Troubleshooting\n(mcp-servers/troubleshooting-server.js)"]:::mcp
   end
 
   subgraph TelemetryLayer["Telemetry"]
     direction LR
-    THUNDER_REPORTS["Thunder Reports\\n(dev-tools/monitoring/jaeger/)"]:::telemetry
-    SUPABASE_LOGS["Supabase Logs\\n(supabase/functions/)"]:::telemetry
+    THUNDER_REPORTS["Thunder Reports\n(dev-tools/monitoring/jaeger/)"]:::telemetry
+    SUPABASE_LOGS["Supabase Logs\n(supabase/functions/)"]:::telemetry
   end
 
   INGRESS_GATEWAY -- "receive" --> CONTEXT_ROUTER
@@ -41,7 +41,7 @@ flowchart TD
   MCP_PROD -- "emit:logs" --> SUPABASE_LOGS
   MCP_DEV -- "emit:thunder" --> THUNDER_REPORTS
   MCP_TROUBLE -- "emit:logs" --> SUPABASE_LOGS
-  MCP_PROD -.-> "escalate" --> MCP_TROUBLE
+  MCP_PROD -. "escalate" .-> MCP_TROUBLE
 
   classDef access fill:#f97316,color:#fff;
   classDef router fill:#64748b,color:#fff;
