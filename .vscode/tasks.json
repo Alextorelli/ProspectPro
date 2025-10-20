@@ -674,19 +674,6 @@
       "problemMatcher": []
     },
     {
-      "label": "Observability: View Jaeger UI",
-      "type": "shell",
-      "command": "echo",
-      "args": ["Open Jaeger UI at: http://localhost:16686"],
-      "group": "build",
-      "presentation": {
-        "echo": true,
-        "reveal": "always",
-        "panel": "shared"
-      },
-      "problemMatcher": []
-    },
-    {
       "label": "Observability: View Prometheus",
       "type": "shell",
       "command": "echo",

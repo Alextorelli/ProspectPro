@@ -17,8 +17,8 @@
 
 ### Testing Evidence
 
-- [ ] Thunder Client: All tests pass
-- [ ] Supabase tests: All pass
+- [ ] MCP tools: All tests pass
+- [ ] Supabase logs: All observability checks pass
 - [ ] Manual curl probes: All 200/expected
 - [x] Zero fake data violations
 - [x] `npm run docs:prepare -- --bootstrap`

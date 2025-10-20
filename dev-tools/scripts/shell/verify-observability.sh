@@ -2,8 +2,7 @@
 # Verify Observability Stack Health
 set -euo pipefail
 
-JAEGER_URL="http://localhost:16686"
-PROM_URL="http://localhost:9090"
+PROMETHEUS_URL="http://localhost:9090"
 GRAFANA_URL="http://localhost:3000"
 
 function check_url() {
@@ -16,7 +15,6 @@ function check_url() {
   fi
 }
 
-check_url "$JAEGER_URL" "Jaeger UI"
-check_url "$PROM_URL" "Prometheus"
-check_url "$GRAFANA_URL" "Grafana"
+check_url "$PROMETHEUS_URL" "Prometheus UI"
+check_url "$GRAFANA_URL" "Grafana UI"
 echo "Observability stack health verified."

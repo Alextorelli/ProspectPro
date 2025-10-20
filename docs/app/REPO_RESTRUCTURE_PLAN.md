@@ -36,7 +36,7 @@ Converge ProspectPro to a hybrid mono-repo structure optimized for AI agent work
 1. Tag and plan migration for legacy folders
 2. Move src, public, supabase/functions into /app (phased)
 3. Relocate dev tooling into /tooling subtrees
-4. Update build scripts, npm scripts, VS Code tasks, Thunder collections
+4. Update build scripts, npm scripts, VS Code tasks, and MCP validation collections. All Thunder/Jaeger references are deprecated; use MCP tools and Supabase logs for observability.
 5. Regenerate documentation and codebase index
 6. Validate agent readiness and zero-fake-data compliance
 

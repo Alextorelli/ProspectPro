@@ -21,3 +21,4 @@
 - **Validation/Testing:** All validation and test tasks (e.g., `npm run supabase:test:db`) must reference the root-level `scripts/operations/` path for CLI session scripts.
 - **Script Consolidation:** Remove redundant copies/symlinks from `supabase/scripts/operations/` and `dev-tools/scripts/shell/` in future cleanups. Reference only the canonical path in all documentation and tasks.
 - **Thunder Client:** All Thunder Client references have been removed. Use MCP tools and CLI scripts for all validation and API testing.
+- **Telemetry:** Use MCP log-forwarder and Supabase logs for all observability and tracing. Jaeger references are deprecated.

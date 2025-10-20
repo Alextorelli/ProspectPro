@@ -106,58 +106,7 @@ const alerts = {
 }
 ```
 
-### Jaeger Query Patterns
-
-```bash
-# Find slow discovery operations
-service=prospectpro operation=business-discovery duration>2s
-
-# Trace enrichment failures
-service=prospectpro operation=enrichment-orchestrator error=true
-
-# Correlation by user session
-service=prospectpro tags={"session.id":"sess_123"}
-
-# Campaign-specific traces
-service=prospectpro tags={"campaign.id":"camp_abc"}
-```
-
-## Performance Optimization Playbook
-
-### Database Query Optimization
-
-**Workflow**:
-
-1. Identify slow queries: `analyze_slow_queries({ thresholdMs: 500 })`
-2. Explain query plan: `explain_query({ query, analyze: true })`
-3. Collaborate with system-architect for index design
-4. Validate migration: `validate_migration({ migrationSql, rollback: true })`
-5. Monitor post-deployment impact
-
-**Common Optimizations**:
-
-- Add indexes for frequent WHERE clauses
-- Implement partial indexes for tier-specific queries
-- Use EXPLAIN ANALYZE to verify query planner choices
-- Consider materialized views for analytics queries
-
-### Edge Function Performance Tuning
-
-**Cold Start Reduction**:
-
-- Minimize external dependencies in Edge Functions
-- Use connection pooling for database clients
-- Implement lazy loading for heavy modules
-- Cache static data (MECE taxonomy, tier configs)
-
-**Runtime Optimization**:
-
-- Circuit breakers prevent cascade failures
-- p-retry with exponential backoff for transient errors
-- p-timeout enforces SLA boundaries (30s max for discovery)
-- Connection pool health monitoring prevents exhaustion
-
-## Log Analysis Workflows
+### Log Analysis Workflows
 
 ### Error Correlation Analysis
 
@@ -197,15 +146,12 @@ Always audit enrichment results for zero-fake-data compliance using MCP tools. U
 
 - **Monitoring Setup**: `/docs/technical/observability.md`
 - **OTEL Configuration**: `/tooling/monitoring/otel/otel-config.js`
-- **Jaeger Deployment**: `/tooling/monitoring/jaeger/docker-compose.yml`
 - **Incident Runbooks**: `/docs/maintenance/incident-response.md`
 - **Performance Baselines**: `/mcp-servers/registry.json` (monitoring section)
 
 ### Dashboard Access
 
 - **Supabase Logs**: https://supabase.com/dashboard/project/sriycekxdqnesdsgwiuc/logs
-- **Jaeger UI**: http://localhost:16686 (local), https://jaeger.prospectpro.app (production)
-- **Vercel Analytics**: https://vercel.com/appsmithery/prospect-pro/analytics
 
 ## Success Metrics
 

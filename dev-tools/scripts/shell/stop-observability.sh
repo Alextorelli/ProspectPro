@@ -1,6 +1,6 @@
 #!/bin/bash
-# Stop Observability Stack: Jaeger, Prometheus, OTel Collector, Grafana
+# Stop Observability Stack: MCP log-forwarder, Prometheus, OTel Collector, Grafana
 set -euo pipefail
 cd "$(dirname "$0")/../observability"
-docker-compose -f docker-compose.jaeger.yml down
+docker-compose -f docker-compose.prometheus.yml down
 echo "Observability stack stopped."

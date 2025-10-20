@@ -27,7 +27,7 @@ flowchart TD
 
   subgraph TelemetryLayer["Telemetry"]
     direction LR
-    THUNDER_REPORTS["Thunder Reports\n(dev-tools/monitoring/jaeger/)"]:::telemetry
+    TELEMETRY_STREAM["Telemetry Stream\n(dev-tools/monitoring/log-forwarder.ts)"]:::telemetry
     SUPABASE_LOGS["Supabase Logs\n(supabase/functions/)"]:::telemetry
   end
 
@@ -37,9 +37,9 @@ flowchart TD
   CONTEXT_MANAGER -- "route:prod" --> MCP_PROD
   CONTEXT_MANAGER -- "route:dev" --> MCP_DEV
   CONTEXT_MANAGER -- "route:trouble" --> MCP_TROUBLE
-  MCP_PROD -- "emit:thunder" --> THUNDER_REPORTS
+  MCP_PROD -- "emit:telemetry" --> TELEMETRY_STREAM
   MCP_PROD -- "emit:logs" --> SUPABASE_LOGS
-  MCP_DEV -- "emit:thunder" --> THUNDER_REPORTS
+  MCP_DEV -- "emit:telemetry" --> TELEMETRY_STREAM
   MCP_TROUBLE -- "emit:logs" --> SUPABASE_LOGS
   MCP_PROD -. "escalate" .-> MCP_TROUBLE
 

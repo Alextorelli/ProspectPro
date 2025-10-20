@@ -94,7 +94,7 @@ set -euo pipefail
 # Test script for [Feature Name]
 # Invoked by: Development Workflow Agent
 # MCP Tools: chrome-devtools, github, postgresql, integration-hub
-# Zero-fake-data: Always audit enrichment results for compliance using MCP tools. Never use Thunder Client or manual scripts for production validation.
+# Zero-fake-data: Always audit enrichment results for compliance using MCP tools. Never use manual scripts for production validation.
 # Environment: Use ContextManager to switch environments. Always export SUPABASE_SESSION_JWT for authenticated calls.
 
 FEATURE_NAME="$1"
@@ -118,9 +118,9 @@ else
   echo "Skipping Edge Function tests (SUPABASE_SESSION_JWT not set)"
 fi
 
-# 4. MCP API/E2E tests (replace Thunder Client)
-3. Service restoration timeline
-# Example: Use integration_hub.execute_workflow or other MCP-first tools here
+# 4. MCP API/E2E tests (replace legacy Thunder Client)
+
+# MCP tools and Supabase logs are the standard for API/E2E tests and observability.
 
 # 5. Chrome DevTools visual regression (if frontend changes)
 if [[ "${TEST_ENV}" == "production" ]]; then
@@ -325,9 +325,9 @@ else
   echo "Skipping Edge Function tests (SUPABASE_SESSION_JWT not set)"
 fi
 
-# 4. Thunder Client API tests
-echo "Running Thunder Client tests..."
-npm run thunder:test
+# 4. MCP API/E2E tests (replace legacy Thunder Client)
+
+# MCP tools and Supabase logs are the standard for API/E2E tests and observability.
 
 # 5. Chrome DevTools visual regression (if frontend changes)
 if [[ "${TEST_ENV}" == "production" ]]; then

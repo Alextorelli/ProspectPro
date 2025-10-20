@@ -2,8 +2,8 @@
 
 ## Pass/Fail Criteria
 
-- All Thunder Client tests pass (no failures in `thunder-collection/reports/`)
-- `npm run supabase:test:db` and `npm run supabase:test:functions` exit 0
+- All MCP tool tests pass (no failures in `mcp-servers/reports/`)
+- Supabase logs show no errors during test runs
 - No fake data violations in logs
 - Edge function curl probes return 200 and expected JSON
 

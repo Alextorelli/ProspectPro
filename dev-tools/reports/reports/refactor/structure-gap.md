@@ -17,7 +17,6 @@
 - modules
 - config
 - context
-- thunder-collection
 - workflow
 - backups
 - api
@@ -75,3 +74,5 @@
 - Tag legacy folders for migration/archive
 - Plan phased move of src, public, supabase/functions into /app/
 - Update documentation index after migration
+
+- MCP tools and Supabase logs are the standard for validation and observability. All Thunder/Jaeger references are deprecated.

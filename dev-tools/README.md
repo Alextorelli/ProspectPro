@@ -6,7 +6,7 @@ This `/tooling/` directory contains the complete development toolchain for Prosp
 
 - **Agent Orchestration** (`/agent-orchestration/`): AI agent templates, context management, and workflow engines for automated development tasks.
 - **Scripts** (`/scripts/`): Shell and Node.js automation for deployment, testing, diagnostics, and operations.
-- **Monitoring** (`/monitoring/`): Observability stack configuration (Jaeger, Prometheus, Grafana) and OTel collectors.
+- **Monitoring** (`/monitoring/`): Observability stack configuration (MCP log-forwarder, Supabase logs, Prometheus, Grafana) and OTel collectors.
 - **CI** (`/ci/`): Continuous integration pipelines and automated PR reviews.
 
 ## Directory Structure
@@ -44,7 +44,6 @@ This `/tooling/` directory contains the complete development toolchain for Prosp
 **Observability and tracing infrastructure**
 
 - `otel/` - OpenTelemetry configuration for tracing agents/app
-- `jaeger/` - Jaeger container for trace visualization
 
 ### `/supabase/`
 
@@ -110,7 +109,7 @@ This structure replaces the previous `dev-tools-suite/` organization with a more
 - **Unified scripts location** under `/scripts/` instead of scattered locations
 - **Agent orchestration** centralized for multi-agent workflow coordination
 - **Third-party integrations** isolated for security and maintenance
-- **Observability first** with OpenTelemetry and Jaeger integration
+- **Observability first** with OpenTelemetry integration
 - **CI/CD consolidation** with unified pipeline configuration
 
 ## Requirements
