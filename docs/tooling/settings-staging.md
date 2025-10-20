@@ -1,5 +1,14 @@
 # Workspace Configuration Safeguard Staging
 
+### React DevTools Command Sequence (staged)
+
+1. `npm run dev -- --host 0.0.0.0 --port 5173`
+2. New shell: `npx react-devtools`
+3. Optional sanity check: `lsof -i :8097`
+4. Shutdown: `pkill -f react-devtools` after debugging
+5. VS Code reference: `Ctrl+Shift+P` → “Tasks: Run Task” → `CI/CD: Validate Workspace Pipeline` after session
+6. Guard status: no `.vscode` edits permitted until plan approval
+
 > Purpose: Document guarded configuration surfaces and the staging process for any prospective changes. Do **not** edit the protected paths directly without explicit approval.
 
 ## Guarded Directories

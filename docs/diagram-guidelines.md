@@ -1,5 +1,3 @@
-# Diagram Guidelines – Configuration Guard
+# Diagram Guidelines
 
-> **IMPORTANT:** All configuration changes to `.vscode/` and `.github/` are guarded. Do not edit these directories directly. Stage any proposed changes in `docs/tooling/settings-staging.md` and reference the guard in all diagrams and documentation. See TEMP_DEVOPS_AGENT_PLAN.md for the current policy.
-
-...existing content...
+> **Configuration Guard Reminder:** Do not commit direct changes to `.vscode/` or `.github/`. Document proposals in `docs/tooling/settings-staging.md` and wait for approval before touching guarded directories.

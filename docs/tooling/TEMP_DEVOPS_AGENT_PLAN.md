@@ -16,29 +16,29 @@ Document the immediate plan for consolidating DevOps AI agent workflows, includi
 
 ## Task Breakdown & Status
 
-- [ ] **Guardrail Documentation**
+- [x] **Guardrail Documentation**
 
   - [x] Confirm/update `docs/tooling/settings-staging.md` with explicit `.vscode`/`.github` freeze instructions.
-  - [ ] Ensure FAST_README/diagram guidelines reference the configuration guard.
+  - [x] Ensure FAST_README/diagram guidelines reference the configuration guard.
 
-- [ ] **React Debugging Integration**
+- [x] **React Debugging Integration**
 
-  - [ ] Draft React DevTools usage section (browser extension + `npx react-devtools`) in `docs/tooling/agent-debug-playbooks.md` (or new doc).
-  - [ ] Create supporting notes for launching `react-devtools-core` via CLI/MCP while avoiding `.vscode` edits.
+  - [x] Draft React DevTools usage section (browser extension + `npx react-devtools`) in `docs/tooling/agent-debug-playbooks.md` (or new doc).
+  - [x] Create supporting notes for launching `react-devtools-core` via CLI/MCP while avoiding `.vscode` edits.
 
-- [ ] **Agent Workflow Consolidation**
+- [x] **Agent Workflow Consolidation**
 
-  - [ ] Expand documentation to map end-to-end agent handoffs (discovery → telemetry → debugging).
-  - [ ] Verify diagrams align with current telemetry targets; re-run Mermaid validation.
+  - [x] Expand documentation to map end-to-end agent handoffs (discovery → telemetry → debugging).
+  - [x] Verify diagrams align with current telemetry targets; re-run Mermaid validation.
 
-- [ ] **Automation Enhancements**
+- [x] **Automation Enhancements**
 
-  - [ ] Author a checklist/runbook summarizing scripted workflows (`supabase logs`, MCP diagnostics, React DevTools attach, docs update pipeline).
-  - [ ] Identify existing scripts/tasks leveraged in each step to avoid duplication.
+  - [x] Author a checklist/runbook summarizing scripted workflows (`supabase logs`, MCP diagnostics, React DevTools attach, docs update pipeline).
+  - [x] Identify existing scripts/tasks leveraged in each step to avoid duplication.
 
-- [ ] **Verification & Reporting**
-  - [ ] Execute documented commands/tests; capture outputs where necessary.
-  - [ ] Update this checklist as tasks complete and prepare final report for merge.
+- [x] **Verification & Reporting**
+  - [x] Execute documented commands/tests; capture outputs where necessary.
+  - [x] Update this checklist as tasks complete and prepare final report for merge.
 
 ## Notes
 
