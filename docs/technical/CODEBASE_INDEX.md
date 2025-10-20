@@ -2,52 +2,52 @@
 
 > Primary #codebase reference. Regenerate with `npm run docs:update` before audits or deployments.
 
-_Last generated: 2025-10-20T01:03:39.631Z_
+_Last generated: 2025-10-20T01:14:29.617Z_
 
 ## Supabase Edge Functions
 
-- [supabase/functions/auth-diagnostics/index.ts](supabase/functions/auth-diagnostics/index.ts) — Supabase Edge Function module
-- [supabase/functions/business-discovery-background/index.ts](supabase/functions/business-discovery-background/index.ts) — Primary asynchronous, tier-aware discovery pipeline
-- [supabase/functions/business-discovery-optimized/index.ts](supabase/functions/business-discovery-optimized/index.ts) — Session-aware synchronous discovery path for validation campaigns
-- [supabase/functions/business-discovery-user-aware/index.ts](supabase/functions/business-discovery-user-aware/index.ts) — Legacy synchronous discovery retained for backward compatibility
-- [supabase/functions/campaign-export-user-aware/index.ts](supabase/functions/campaign-export-user-aware/index.ts) — Authenticated campaign export handler
-- [supabase/functions/campaign-export/index.ts](supabase/functions/campaign-export/index.ts) — Supabase Edge Function module
-- [supabase/functions/enrichment-business-license/index.ts](supabase/functions/enrichment-business-license/index.ts) — Professional licensing enrichment module
-- [supabase/functions/enrichment-cobalt/index.ts](supabase/functions/enrichment-cobalt/index.ts) — Supabase Edge Function module
-- [supabase/functions/enrichment-hunter/index.ts](supabase/functions/enrichment-hunter/index.ts) — Hunter.io email discovery wrapper with caching
-- [supabase/functions/enrichment-neverbounce/index.ts](supabase/functions/enrichment-neverbounce/index.ts) — NeverBounce verification helper
-- [supabase/functions/enrichment-orchestrator/index.ts](supabase/functions/enrichment-orchestrator/index.ts) — Central enrichment coordinator calling Hunter, NeverBounce, licensing
-- [supabase/functions/enrichment-pdl/index.ts](supabase/functions/enrichment-pdl/index.ts) — PDL enrichment logic for enterprise compliance
-- [supabase/functions/test-google-places/index.ts](supabase/functions/test-google-places/index.ts) — Standalone Google Places API test harness
-- [supabase/functions/test-new-auth/index.ts](supabase/functions/test-new-auth/index.ts) — Supabase Edge Function module
-- [supabase/functions/test-user-deduplication/index.ts](supabase/functions/test-user-deduplication/index.ts) — Supabase Edge Function module
+- [app/backend/supabase/functions/auth-diagnostics/index.ts](app/backend/supabase/functions/auth-diagnostics/index.ts) — Supabase Edge Function module
+- [app/backend/supabase/functions/business-discovery-background/index.ts](app/backend/supabase/functions/business-discovery-background/index.ts) — Primary asynchronous, tier-aware discovery pipeline
+- [app/backend/supabase/functions/business-discovery-optimized/index.ts](app/backend/supabase/functions/business-discovery-optimized/index.ts) — Session-aware synchronous discovery path for validation campaigns
+- [app/backend/supabase/functions/business-discovery-user-aware/index.ts](app/backend/supabase/functions/business-discovery-user-aware/index.ts) — Legacy synchronous discovery retained for backward compatibility
+- [app/backend/supabase/functions/campaign-export-user-aware/index.ts](app/backend/supabase/functions/campaign-export-user-aware/index.ts) — Authenticated campaign export handler
+- [app/backend/supabase/functions/campaign-export/index.ts](app/backend/supabase/functions/campaign-export/index.ts) — Supabase Edge Function module
+- [app/backend/supabase/functions/enrichment-business-license/index.ts](app/backend/supabase/functions/enrichment-business-license/index.ts) — Professional licensing enrichment module
+- [app/backend/supabase/functions/enrichment-cobalt/index.ts](app/backend/supabase/functions/enrichment-cobalt/index.ts) — Supabase Edge Function module
+- [app/backend/supabase/functions/enrichment-hunter/index.ts](app/backend/supabase/functions/enrichment-hunter/index.ts) — Hunter.io email discovery wrapper with caching
+- [app/backend/supabase/functions/enrichment-neverbounce/index.ts](app/backend/supabase/functions/enrichment-neverbounce/index.ts) — NeverBounce verification helper
+- [app/backend/supabase/functions/enrichment-orchestrator/index.ts](app/backend/supabase/functions/enrichment-orchestrator/index.ts) — Central enrichment coordinator calling Hunter, NeverBounce, licensing
+- [app/backend/supabase/functions/enrichment-pdl/index.ts](app/backend/supabase/functions/enrichment-pdl/index.ts) — PDL enrichment logic for enterprise compliance
+- [app/backend/supabase/functions/test-google-places/index.ts](app/backend/supabase/functions/test-google-places/index.ts) — Standalone Google Places API test harness
+- [app/backend/supabase/functions/test-new-auth/index.ts](app/backend/supabase/functions/test-new-auth/index.ts) — Supabase Edge Function module
+- [app/backend/supabase/functions/test-user-deduplication/index.ts](app/backend/supabase/functions/test-user-deduplication/index.ts) — Supabase Edge Function module
 
 ## Edge Function Configuration
 
-- [supabase/functions/auth-diagnostics/function.toml](supabase/functions/auth-diagnostics/function.toml) — Supabase function configuration
-- [supabase/functions/business-discovery-background/function.toml](supabase/functions/business-discovery-background/function.toml) — Supabase function configuration
-- [supabase/functions/business-discovery-optimized/function.toml](supabase/functions/business-discovery-optimized/function.toml) — Supabase function configuration
-- [supabase/functions/business-discovery-user-aware/function.toml](supabase/functions/business-discovery-user-aware/function.toml) — Supabase function configuration
-- [supabase/functions/campaign-export-user-aware/function.toml](supabase/functions/campaign-export-user-aware/function.toml) — Supabase function configuration
-- [supabase/functions/campaign-export/function.toml](supabase/functions/campaign-export/function.toml) — Supabase function configuration
-- [supabase/functions/enrichment-business-license/function.toml](supabase/functions/enrichment-business-license/function.toml) — Supabase function configuration
-- [supabase/functions/enrichment-cobalt/function.toml](supabase/functions/enrichment-cobalt/function.toml) — Supabase function configuration
-- [supabase/functions/enrichment-hunter/function.toml](supabase/functions/enrichment-hunter/function.toml) — Supabase function configuration
-- [supabase/functions/enrichment-neverbounce/function.toml](supabase/functions/enrichment-neverbounce/function.toml) — Supabase function configuration
-- [supabase/functions/enrichment-orchestrator/function.toml](supabase/functions/enrichment-orchestrator/function.toml) — Supabase function configuration
-- [supabase/functions/enrichment-pdl/function.toml](supabase/functions/enrichment-pdl/function.toml) — Supabase function configuration
-- [supabase/functions/test-google-places/function.toml](supabase/functions/test-google-places/function.toml) — Supabase function configuration
-- [supabase/functions/test-new-auth/function.toml](supabase/functions/test-new-auth/function.toml) — Supabase function configuration
-- [supabase/functions/test-user-deduplication/function.toml](supabase/functions/test-user-deduplication/function.toml) — Supabase function configuration
+- [app/backend/supabase/functions/auth-diagnostics/function.toml](app/backend/supabase/functions/auth-diagnostics/function.toml) — Supabase function configuration
+- [app/backend/supabase/functions/business-discovery-background/function.toml](app/backend/supabase/functions/business-discovery-background/function.toml) — Supabase function configuration
+- [app/backend/supabase/functions/business-discovery-optimized/function.toml](app/backend/supabase/functions/business-discovery-optimized/function.toml) — Supabase function configuration
+- [app/backend/supabase/functions/business-discovery-user-aware/function.toml](app/backend/supabase/functions/business-discovery-user-aware/function.toml) — Supabase function configuration
+- [app/backend/supabase/functions/campaign-export-user-aware/function.toml](app/backend/supabase/functions/campaign-export-user-aware/function.toml) — Supabase function configuration
+- [app/backend/supabase/functions/campaign-export/function.toml](app/backend/supabase/functions/campaign-export/function.toml) — Supabase function configuration
+- [app/backend/supabase/functions/enrichment-business-license/function.toml](app/backend/supabase/functions/enrichment-business-license/function.toml) — Supabase function configuration
+- [app/backend/supabase/functions/enrichment-cobalt/function.toml](app/backend/supabase/functions/enrichment-cobalt/function.toml) — Supabase function configuration
+- [app/backend/supabase/functions/enrichment-hunter/function.toml](app/backend/supabase/functions/enrichment-hunter/function.toml) — Supabase function configuration
+- [app/backend/supabase/functions/enrichment-neverbounce/function.toml](app/backend/supabase/functions/enrichment-neverbounce/function.toml) — Supabase function configuration
+- [app/backend/supabase/functions/enrichment-orchestrator/function.toml](app/backend/supabase/functions/enrichment-orchestrator/function.toml) — Supabase function configuration
+- [app/backend/supabase/functions/enrichment-pdl/function.toml](app/backend/supabase/functions/enrichment-pdl/function.toml) — Supabase function configuration
+- [app/backend/supabase/functions/test-google-places/function.toml](app/backend/supabase/functions/test-google-places/function.toml) — Supabase function configuration
+- [app/backend/supabase/functions/test-new-auth/function.toml](app/backend/supabase/functions/test-new-auth/function.toml) — Supabase function configuration
+- [app/backend/supabase/functions/test-user-deduplication/function.toml](app/backend/supabase/functions/test-user-deduplication/function.toml) — Supabase function configuration
 
 ## Shared Edge Utilities
 
-- [supabase/functions/_shared/api-usage.ts](supabase/functions/_shared/api-usage.ts) — Usage logging helper for third-party API consumption
-- [supabase/functions/_shared/cache-manager.ts](supabase/functions/_shared/cache-manager.ts) — Supabase Edge Function module
-- [supabase/functions/_shared/cobalt-cache.ts](supabase/functions/_shared/cobalt-cache.ts) — Supabase Edge Function module
-- [supabase/functions/_shared/edge-auth-simplified.ts](supabase/functions/_shared/edge-auth-simplified.ts) — Supabase Edge Function module
-- [supabase/functions/_shared/edge-auth.ts](supabase/functions/_shared/edge-auth.ts) — Shared Supabase session validator for edge functions
-- [supabase/functions/_shared/vault-client.ts](supabase/functions/_shared/vault-client.ts) — Supabase Edge Function module
+- [app/backend/supabase/functions/_shared/api-usage.ts](app/backend/supabase/functions/_shared/api-usage.ts) — Usage logging helper for third-party API consumption
+- [app/backend/supabase/functions/_shared/cache-manager.ts](app/backend/supabase/functions/_shared/cache-manager.ts) — Supabase Edge Function module
+- [app/backend/supabase/functions/_shared/cobalt-cache.ts](app/backend/supabase/functions/_shared/cobalt-cache.ts) — Supabase Edge Function module
+- [app/backend/supabase/functions/_shared/edge-auth-simplified.ts](app/backend/supabase/functions/_shared/edge-auth-simplified.ts) — Supabase Edge Function module
+- [app/backend/supabase/functions/_shared/edge-auth.ts](app/backend/supabase/functions/_shared/edge-auth.ts) — Shared Supabase session validator for edge functions
+- [app/backend/supabase/functions/_shared/vault-client.ts](app/backend/supabase/functions/_shared/vault-client.ts) — Supabase Edge Function module
 
 ## Database & Security Artifacts
 
@@ -58,7 +58,6 @@ _Last generated: 2025-10-20T01:03:39.631Z_
 
 ## Configuration & Policies
 
-- [docs/technical/CODEBASE_INDEX.md](docs/technical/CODEBASE_INDEX.md) — Auto-generated index consumed by #codebase command
 - [.github/copilot-instructions.md](.github/copilot-instructions.md) — AI assistant operating instructions (keep in sync)
 - [.vscode/settings.json](.vscode/settings.json) — Workspace defaults for Supabase + Copilot context
 - [.vscode/prospectpro-supabase.code-workspace](.vscode/prospectpro-supabase.code-workspace) — Workspace file bundling tasks and recommendations

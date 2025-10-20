@@ -110,7 +110,7 @@
   },
   "ai.contextFiles": [
     "supabase/functions/*/index.ts",
-    "CODEBASE_INDEX.md",
+    "docs/app/CODEBASE_INDEX.md",
     "src/lib/supabase.ts",
     "TECHNICAL_SUMMARY_v4.3.md",
     "PROSPECTPRO_V4.3_RELEASE_NOTES.md",

@@ -1,0 +1,8 @@
+%% Context Pipeline
+flowchart LR
+    Input[Input: Code/Docs/Config]
+    Parse[Parse & Normalize]
+    Store[Context Store]
+    Query[Query Engine]
+    Output[Contextual Output]
+    Input --> Parse --> Store --> Query --> Output

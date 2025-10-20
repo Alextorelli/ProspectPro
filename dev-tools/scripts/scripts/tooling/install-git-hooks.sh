@@ -50,7 +50,7 @@ if command -v npm >/dev/null 2>&1; then
     echo "❌ Failed to refresh CODEBASE_INDEX.md" >&2
     exit 1
   fi
-  git add CODEBASE_INDEX.md 2>/dev/null || true
+    git add docs/app/CODEBASE_INDEX.md 2>/dev/null || true
 fi
 
 # Check if the documentation schema validation script exists

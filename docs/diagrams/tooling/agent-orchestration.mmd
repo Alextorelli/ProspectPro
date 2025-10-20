@@ -1,0 +1,12 @@
+%% Agent Orchestration Workflow
+flowchart TD
+    Dev[Developer/AI Request]
+    Orchestrator[Agent Orchestrator]
+    Context[Context Manager]
+    Agents[Agent Pool]
+    Output[Result/PR/Script]
+    Dev --> Orchestrator
+    Orchestrator --> Context
+    Context --> Agents
+    Agents --> Orchestrator
+    Orchestrator --> Output

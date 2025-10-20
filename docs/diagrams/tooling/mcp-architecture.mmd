@@ -1,0 +1,9 @@
+%% MCP Server Architecture
+flowchart TB
+    User[User/Agent]
+    API[API Layer]
+    Router[Request Router]
+    Servers[Specialized MCP Servers]
+    DB[Database/Cache]
+    User --> API --> Router --> Servers
+    Servers --> DB

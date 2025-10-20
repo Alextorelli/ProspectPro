@@ -1114,6 +1114,18 @@
       "label": "npm: mcp:prod",
       "detail": "cd mcp-servers && npm run start:production",
       "problemMatcher": []
+    },
+    {
+      "label": "Docs: Bootstrap Tooling Diagrams",
+      "type": "shell",
+      "command": "npm run docs:bootstrap",
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": []
     }
   ],
   "inputs": [

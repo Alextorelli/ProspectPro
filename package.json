@@ -6,6 +6,8 @@
   "scripts": {
     "archive:legacy": "mkdir -p archive/legacy-server && mv server.js api/ modules/ docker/ archive/legacy-server/ 2>/dev/null || echo 'Legacy files managed separately'",
     "build": "tsc -p config/tsconfig.json && vite build && echo '{\"version\":2,\"rewrites\":[{\"source\":\"/(.*)\",\"destination\":\"/index.html\"}],\"headers\":[{\"source\":\"/(.*)\",\"headers\":[{\"key\":\"Cache-Control\",\"value\":\"public, max-age=0, s-maxage=0, must-revalidate\"}]},{\"source\":\"/assets/(.*)\",\"headers\":[{\"key\":\"Cache-Control\",\"value\":\"public, max-age=31536000, immutable\"}]}]}' > dist/vercel.json",
+    "docs:prepare": "node dev-tools/scripts/docs/generate-diagrams.mjs",
+    "docs:bootstrap": "node dev-tools/scripts/docs/generate-diagrams.mjs --bootstrap",
     "build:static": "npm run build",
     "clean": "rm -rf dist/ node_modules/ && echo 'Cleaned build artifacts'",
     "cost:analyze": "echo 'Check GitHub billing dashboard for usage trends'",
@@ -127,6 +129,7 @@
     "zustand": "^4.4.7"
   },
   "devDependencies": {
+    "@mermaid-js/mermaid-cli": "^11.12.0",
     "@modelcontextprotocol/sdk": "^1.20.1",
     "@opentelemetry/api": "^1.9.0",
     "@opentelemetry/exporter-trace-otlp-http": "^0.54.0",

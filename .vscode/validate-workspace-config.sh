@@ -45,7 +45,7 @@ REQUIRED_PATHS=(
   "scripts/testing/campaign-validation.sh"
   "scripts/testing/test-auth-patterns.sh"
   "scripts/diagnostics/edge-function-diagnostics.sh"
-  "docs/technical/CODEBASE_INDEX.md"
+  "docs/app/CODEBASE_INDEX.md"
 )
 
 echo "\n📁 Checking critical file structure..."
