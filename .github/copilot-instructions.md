@@ -31,7 +31,8 @@
   - `Feature Delivery` (stepwise implementation with pipeline guardrails)
   - `Production Support` (uptime + rapid rollback playbooks)
   - `API Research`, `Cost Optimization` (comparative analysis + ops)
-- **VS Code Tasks**: `CI/CD: Validate Workspace Pipeline`, `Thunder: Run Full Test Suite`, `Supabase: Fetch Logs`, `Supabase: Analyze Logs`.
+- **VS Code Tasks**: `CI/CD: Validate Workspace Pipeline`, `Thunder: Run Full Test Suite`, `Supabase: Fetch Logs`, `Supabase: Analyze Logs`, `Docs: Prepare` (Mermaid diagram validation).
+- **Mermaid Workflow**: All diagrams use `.mmd` sources, previewable in VS Code with `Ctrl+Alt+P` (Mermaid Editor). No SVGs committed; FAST_README in `docs/tooling/` references all diagrams/tables and accessibility guidelines. Run `npm run docs:prepare` to validate and update diagram manifests.
 - **MCP Tools**: `ci_cd_validation_suite`, `thunder_suite_report`, `vercel_status_check`, `supabase_cli_healthcheck`.
 - **Zero Fake Data Touchpoints**: every chat mode, MCP tool, and task emphasizes verified data sourcing; escalate any suspicious patterns via `checkFakeDataViolations` (MCP production server).
 

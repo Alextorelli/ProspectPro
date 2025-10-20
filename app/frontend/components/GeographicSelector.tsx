@@ -420,35 +420,35 @@ export const GeographicSelector: React.FC<GeographicSelectorProps> = ({
               <div className="mt-3 flex flex-col gap-3 sm:flex-row">
                 <div className="flex flex-1 items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 shadow-sm transition focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500 dark:border-slate-600 dark:bg-slate-900">
                   <svg
-                    className="h-5 w-5 text-blue-500 dark:text-sky-300"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
                     aria-hidden="true"
+                    className="h-5 w-5 text-blue-500 dark:text-sky-300"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
                   >
                     <path
-                      fillRule="evenodd"
-                      d="M10 2a6 6 0 00-6 6c0 4.08 4.2 9.07 5.36 10.47a.84.84 0 001.28 0C11.8 17.07 16 12.08 16 8a6 6 0 00-6-6zm0 8.5a2.5 2.5 0 110-5 2.5 2.5 0 010 5z"
                       clipRule="evenodd"
+                      d="M10 2a6 6 0 00-6 6c0 4.08 4.2 9.07 5.36 10.47a.84.84 0 001.28 0C11.8 17.07 16 12.08 16 8a6 6 0 00-6-6zm0 8.5a2.5 2.5 0 110-5 2.5 2.5 0 010 5z"
+                      fillRule="evenodd"
                     />
                   </svg>
                   <input
+                    aria-label="Location search input"
+                    className="flex-1 border-none bg-transparent text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:ring-0 dark:text-slate-100 dark:placeholder:text-slate-500"
+                    placeholder="Enter city, state, or address"
                     type="text"
                     value={address}
+                    onBlur={handleAddressSearch}
                     onChange={(e) => handleAddressChange(e.target.value)}
-                    placeholder="Enter city, state, or address"
-                    className="flex-1 border-none bg-transparent text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:ring-0 dark:text-slate-100 dark:placeholder:text-slate-500"
                     onKeyPress={(e) =>
                       e.key === "Enter" && handleAddressSearch()
                     }
-                    onBlur={handleAddressSearch}
-                    aria-label="Location search input"
                   />
                 </div>
                 <button
+                  className="inline-flex items-center justify-center rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-sky-500 dark:hover:bg-sky-600"
+                  disabled={isGeocoding}
                   type="button"
                   onClick={handleAddressSearch}
-                  disabled={isGeocoding}
-                  className="inline-flex items-center justify-center rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-sky-500 dark:hover:bg-sky-600"
                 >
                   {isGeocoding ? "Searching…" : "Search"}
                 </button>
@@ -467,24 +467,24 @@ export const GeographicSelector: React.FC<GeographicSelectorProps> = ({
                 How wide should we scan?
               </label>
               <div
+                aria-label="Search radius in miles"
                 className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3"
                 role="radiogroup"
-                aria-label="Search radius in miles"
               >
                 {radiusOptions.map((option) => {
                   const isSelected = radius === option.value;
                   return (
                     <button
                       key={option.value}
-                      type="button"
-                      role="radio"
                       aria-checked={isSelected}
-                      onClick={() => handleRadiusChange(option.value)}
                       className={`flex items-center justify-center rounded-lg border px-3 py-2 text-sm font-medium transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-slate-900 ${
                         isSelected
                           ? "border-blue-600 bg-blue-600 text-white shadow-sm dark:border-sky-400 dark:bg-sky-500"
                           : "border-slate-200 bg-white text-slate-600 hover:border-blue-400 hover:text-blue-600 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-200 dark:hover:border-sky-400"
                       }`}
+                      role="radio"
+                      type="button"
+                      onClick={() => handleRadiusChange(option.value)}
                     >
                       {option.label}
                     </button>
@@ -566,8 +566,8 @@ export const GeographicSelector: React.FC<GeographicSelectorProps> = ({
                       {mapError ??
                         "Check API key, Map ID, and browser extensions."}
                       <button
-                        type="button"
                         className="mt-3 rounded-md border border-red-300 px-3 py-1 text-xs font-semibold text-red-600 transition hover:bg-red-100"
+                        type="button"
                         onClick={() => {
                           setMapError(null);
                           setMapStatus("loading");

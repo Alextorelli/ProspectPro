@@ -56,7 +56,7 @@ class CensusAPIClient {
       return cached.data;
     }
 
-    let url = `${this.baseURL}/2023/cbp?get=ESTAB,EMP,NAICS2017_LABEL&for=state:${state}&NAICS2017=${naics}&key=${this.apiKey}`;
+    const url = `${this.baseURL}/2023/cbp?get=ESTAB,EMP,NAICS2017_LABEL&for=state:${state}&NAICS2017=${naics}&key=${this.apiKey}`;
 
     const response = await fetch(url);
 

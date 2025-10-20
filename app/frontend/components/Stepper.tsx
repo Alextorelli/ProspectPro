@@ -157,9 +157,9 @@ export const Stepper: React.FC<StepperProps> = ({
     <div className={`w-full ${className}`}>
       <nav
         ref={containerRef}
-        role="group"
         aria-label="Progress steps"
         className="flex items-center justify-between"
+        role="group"
       >
         {steps.map((step, index) => {
           const status = getStepStatus(index);
@@ -173,12 +173,6 @@ export const Stepper: React.FC<StepperProps> = ({
               <div className="flex flex-col items-center flex-shrink-0">
                 <button
                   ref={(el) => (stepRefs.current[index] = el)}
-                  id={stepId}
-                  type="button"
-                  onClick={() => handleStepClick(index)}
-                  onKeyDown={(e) => handleKeyDown(e, index)}
-                  disabled={!isClickable && !keyboardNavigation}
-                  tabIndex={index === activeStep ? 0 : -1}
                   aria-current={status === "active" ? "step" : undefined}
                   aria-label={`${step.label}${
                     step.description ? `: ${step.description}` : ""
@@ -186,18 +180,24 @@ export const Stepper: React.FC<StepperProps> = ({
                   className={`${getStepStyles(
                     index
                   )} focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900`}
+                  disabled={!isClickable && !keyboardNavigation}
+                  id={stepId}
+                  tabIndex={index === activeStep ? 0 : -1}
+                  type="button"
+                  onClick={() => handleStepClick(index)}
+                  onKeyDown={(e) => handleKeyDown(e, index)}
                 >
                   {status === "completed" ? (
                     <svg
-                      className="w-5 h-5"
-                      viewBox="0 0 20 20"
-                      fill="currentColor"
                       aria-hidden="true"
+                      className="w-5 h-5"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
                     >
                       <path
-                        fillRule="evenodd"
-                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
                         clipRule="evenodd"
+                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                        fillRule="evenodd"
                       />
                     </svg>
                   ) : status === "active" ? (
