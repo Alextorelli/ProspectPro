@@ -56,6 +56,19 @@ Document the immediate plan for consolidating DevOps AI agent workflows, includi
 - [x] DevOps agent automation checklist composed in devops-agent-runbook.md
 - [x] This plan summarized and changelog notes to be added to FAST_README.md
 
+---
+
+## Phase 2 Progress (2025-10-20)
+
+- [x] Platform playbooks created: [docs/tooling/platform-playbooks.md](platform-playbooks.md)
+  - Supabase: logs, CLI, auth guard, edge deploy, troubleshooting
+  - Vercel: build, deploy, validation, troubleshooting
+  - MCP: diagnostics, troubleshooting, reports
+- [x] FAST_README.md cross-linked to platform playbooks and Phase 2 expansion noted
+- [x] Guardrails reiterated: all config/task proposals staged in settings-staging.md
+
+**Phase 2 complete. Ready for Phase 3 (automation scripts bundle).**
+
 **All steps complete. Guardrails enforced.**
 
 ---
