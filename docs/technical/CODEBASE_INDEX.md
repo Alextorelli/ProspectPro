@@ -1,32 +1,8 @@
 # ProspectPro Codebase Index
 
-## Codebase Structure (Summary Visual Aid)
-
-> This is a summary-level, human-friendly filetree for orientation only. For the authoritative, up-to-date file index, see the sections below.
-
-```
-ProspectPro/
-├── app/
-│   ├── frontend/
-│   └── backend/
-├── dev-tools/
-│   ├── agent-orchestration/
-│   ├── mcp-servers/
-│   └── scripts/
-├── docs/
-│   ├── diagrams/
-│   ├── technical/
-│   └── tooling/
-├── config/
-├── reports/
-├── package.json
-├── README.md
-└── ...
-```
-
 > Primary #codebase reference. Regenerate with `npm run docs:update` before audits or deployments.
 
-_Last generated: 2025-10-20T02:56:20.980Z_
+_Last generated: 2025-10-20T03:15:36.787Z_
 
 ## Supabase Edge Functions
 
@@ -66,12 +42,12 @@ _Last generated: 2025-10-20T02:56:20.980Z_
 
 ## Shared Edge Utilities
 
-- [app/backend/supabase/functions/\_shared/api-usage.ts](app/backend/supabase/functions/_shared/api-usage.ts) — Usage logging helper for third-party API consumption
-- [app/backend/supabase/functions/\_shared/cache-manager.ts](app/backend/supabase/functions/_shared/cache-manager.ts) — Supabase Edge Function module
-- [app/backend/supabase/functions/\_shared/cobalt-cache.ts](app/backend/supabase/functions/_shared/cobalt-cache.ts) — Supabase Edge Function module
-- [app/backend/supabase/functions/\_shared/edge-auth-simplified.ts](app/backend/supabase/functions/_shared/edge-auth-simplified.ts) — Supabase Edge Function module
-- [app/backend/supabase/functions/\_shared/edge-auth.ts](app/backend/supabase/functions/_shared/edge-auth.ts) — Shared Supabase session validator for edge functions
-- [app/backend/supabase/functions/\_shared/vault-client.ts](app/backend/supabase/functions/_shared/vault-client.ts) — Supabase Edge Function module
+- [app/backend/supabase/functions/_shared/api-usage.ts](app/backend/supabase/functions/_shared/api-usage.ts) — Usage logging helper for third-party API consumption
+- [app/backend/supabase/functions/_shared/cache-manager.ts](app/backend/supabase/functions/_shared/cache-manager.ts) — Supabase Edge Function module
+- [app/backend/supabase/functions/_shared/cobalt-cache.ts](app/backend/supabase/functions/_shared/cobalt-cache.ts) — Supabase Edge Function module
+- [app/backend/supabase/functions/_shared/edge-auth-simplified.ts](app/backend/supabase/functions/_shared/edge-auth-simplified.ts) — Supabase Edge Function module
+- [app/backend/supabase/functions/_shared/edge-auth.ts](app/backend/supabase/functions/_shared/edge-auth.ts) — Shared Supabase session validator for edge functions
+- [app/backend/supabase/functions/_shared/vault-client.ts](app/backend/supabase/functions/_shared/vault-client.ts) — Supabase Edge Function module
 
 ## Database & Security Artifacts
 
