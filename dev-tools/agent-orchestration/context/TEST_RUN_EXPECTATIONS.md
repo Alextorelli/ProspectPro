@@ -1,6 +1,7 @@
 # Test Run Expectations & Curl Templates
 
 ## Pass/Fail Criteria
+
 - All Thunder Client tests pass (no failures in `thunder-collection/reports/`)
 - `npm run supabase:test:db` and `npm run supabase:test:functions` exit 0
 - No fake data violations in logs
@@ -9,6 +10,7 @@
 ## Curl Templates
 
 ### Edge Function (Background Discovery)
+
 ```
 curl -X POST 'https://<SUPABASE_PROJECT>.supabase.co/functions/v1/business-discovery-background' \
   -H 'Authorization: Bearer <SUPABASE_SESSION_JWT>' \
@@ -17,6 +19,7 @@ curl -X POST 'https://<SUPABASE_PROJECT>.supabase.co/functions/v1/business-disco
 ```
 
 ### Edge Function (Export)
+
 ```
 curl -X POST 'https://<SUPABASE_PROJECT>.supabase.co/functions/v1/campaign-export-user-aware' \
   -H 'Authorization: Bearer <SUPABASE_SESSION_JWT>' \
@@ -24,4 +27,4 @@ curl -X POST 'https://<SUPABASE_PROJECT>.supabase.co/functions/v1/campaign-expor
   -d '{"campaignId": "<CAMPAIGN_ID>", "format": "csv", "sessionUserId": "test_session_123"}'
 ```
 
-*Replace `<SUPABASE_SESSION_JWT>`, `<SUPABASE_PROJECT>`, and `<CAMPAIGN_ID>` as needed.*
+_Replace `<SUPABASE_SESSION_JWT>`, `<SUPABASE_PROJECT>`, and `<CAMPAIGN_ID>` as needed._

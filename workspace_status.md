@@ -1,6 +1,7 @@
 # Workspace Status Checklist
 
 ## Automated Setup/Config
+
 - [ ] `git pull` run
 - [ ] `npm install` run
 - [ ] `npm run codebase:index` run
@@ -10,6 +11,7 @@
 - [ ] `npm run docs:prepare` run
 
 ## Manual Setup
+
 - [ ] Agent mode selected in VS Code Agent menu
 - [ ] MCP servers started (`npm run start:production`/`start:development`/`start:troubleshooting`)
 - [ ] MCP sockets visible in VS Code MCP panel
@@ -17,6 +19,7 @@
 - [ ] Environment switched via `EnvironmentContextManager.switchEnvironment(...)` if required
 
 ## Manual Testing & Config
+
 - [ ] `SUPABASE_SESSION_JWT` exported in terminal
 - [ ] `npm run supabase:test:db` run
 - [ ] `npm run supabase:test:functions` run
@@ -28,6 +31,7 @@
 - [ ] `npm run build` and (optional) `npm run preview` run
 
 ## Automated Revised Integration, Testing, Deployment
+
 - [ ] `npm run docs:update` run
 - [ ] CI/CD tasks run as needed
 - [ ] Edge functions deployed (`npm run edge:deploy -- <slug>`)
@@ -35,4 +39,5 @@
 - [ ] SYSTEM_REFERENCE.md checklist signed off
 
 ---
-*Check off each item as you proceed. Update this file as needed for your workflow.*
+
+_Check off each item as you proceed. Update this file as needed for your workflow._
