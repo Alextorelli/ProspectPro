@@ -4,6 +4,13 @@
 
 ## Phase 3 (2025-10-20): Automation Scripts
 
+---
+
+## Phase 4 (2025-10-20): MCP Integration
+
+- MCP task automation proposals (e.g., VS Code task for `npm run mcp:start:troubleshooting`) must be staged here for review.
+- No .vscode or .github edits permitted; all MCP config/task changes require explicit approval.
+
 - All new automation scripts are staged in `/scripts/automation/` and documented in platform-playbooks.md.
 - No .vscode or .github edits permitted; any new task/config proposals must be added here for review.
 

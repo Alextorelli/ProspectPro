@@ -49,16 +49,32 @@
 
 ## MCP Playbook
 
-### Tooling & Diagnostics
+### MCP Server Types
 
-- **Start Troubleshooting Server:** `npm run mcp:start:troubleshooting`
-- **Diagnostics Sequence:**
-  1. `test_edge_function`
-  2. `validate_database_permissions`
-  3. `collect_and_summarize_logs`
-- **Reports:**
-  - Outputs in `reports/diagnostics/`
-- **Reference:** See `mcp-servers/` and `scripts/operations/`
+- **Production Server:**
+
+  - Start: `npm run mcp:start:production`
+  - Tools: full diagnostics, edge function analytics, log-forwarder
+  - Guard: no direct config edits; all changes staged
+
+- **Development Server:**
+
+  - Start: `npm run mcp:start:development`
+  - Tools: agent onboarding, integration tests, context manager
+
+- **Troubleshooting Server:**
+  - Start: `npm run mcp:start:troubleshooting`
+  - Tools: `test_edge_function`, `validate_database_permissions`, `collect_and_summarize_logs`
+  - Output: `reports/diagnostics/`
+
+### Diagnostic Workflow
+
+1. Start troubleshooting server: `npm run mcp:start:troubleshooting`
+2. Run tools in order:
+   - `test_edge_function`
+   - `validate_database_permissions`
+   - `collect_and_summarize_logs`
+3. Review outputs in `reports/diagnostics/`
 
 ### Guard Note
 

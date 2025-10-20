@@ -81,6 +81,17 @@ Document the immediate plan for consolidating DevOps AI agent workflows, includi
 
 ---
 
+## Phase 4 Progress (2025-10-20)
+
+- [x] MCP server types and diagnostic workflows documented in platform-playbooks.md and devops-agent-runbook.md
+- [x] Stepwise troubleshooting sequence and output destinations clarified
+- [x] Automation scripts (context snapshot) now reference MCP outputs
+- [x] Guardrails reiterated: all config/task proposals staged in settings-staging.md
+
+**Phase 4 complete. Ready for Phase 5 (Docs & Diagram Refresh).**
+
+---
+
 ## Progress Checkpoint (2025-10-20)
 
 - Platform playbooks for Supabase, Vercel, and MCP are now documented and cross-linked from FAST_README.md.

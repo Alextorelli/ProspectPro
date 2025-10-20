@@ -2,6 +2,28 @@
 
 ## Automation Scripts Quick Start (Phase 3)
 
+## MCP Diagnostic Workflow (Phase 4)
+
+### MCP Server Types
+
+- Production: `npm run mcp:start:production`
+- Development: `npm run mcp:start:development`
+- Troubleshooting: `npm run mcp:start:troubleshooting`
+
+### Stepwise Diagnostics
+
+1. Start troubleshooting server: `npm run mcp:start:troubleshooting`
+2. Run tools in order:
+   - `test_edge_function`
+   - `validate_database_permissions`
+   - `collect_and_summarize_logs`
+3. Outputs: `reports/diagnostics/`
+
+### Automation Integration
+
+- Use `./scripts/automation/context-snapshot.sh <function-slug> <since-time>` to aggregate MCP, Supabase, and Vercel diagnostics.
+- Ensure all outputs are referenced in incident/debug notes and staged per guard policy.
+
 - **Supabase Log Pull:** `./scripts/automation/supabase-pull-logs.sh <function-slug> <since-time>`
 - **Vercel Status Check:** `./scripts/automation/vercel-status-check.sh`
 - **Context Snapshot:** `./scripts/automation/context-snapshot.sh <function-slug> <since-time>`
