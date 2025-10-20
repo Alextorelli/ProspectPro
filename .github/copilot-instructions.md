@@ -215,7 +215,6 @@ const BUSINESS_CATEGORIES = {
 
 **CLEAN SUPABASE-FIRST STRUCTURE**
 
-
 - ✅ Core production files: Edge Functions, static frontend, database schema
 - ✅ `/supabase/functions/` - Background discovery, enrichment, export, and diagnostics only
 - ✅ `/public/` - Static frontend with MECE taxonomy integration
