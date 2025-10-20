@@ -216,5 +216,9 @@
     "windsurf": true
   },
   "chat.tools.terminal.autoReplyToPrompts": true,
-  "chat.useNestedAgentsMdFiles": true
+  "chat.useNestedAgentsMdFiles": true,
+  "mermaidChart.enableLivePreview": true,
+  "mermaidChart.exportOnSave": false,
+  "mermaidChart.defaultTheme": "dark",
+  "mermaidChart.externalSnippets": ["docs/tooling/snippets/mermaid.json"]
 }
