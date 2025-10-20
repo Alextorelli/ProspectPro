@@ -4,7 +4,7 @@
 
 1. FAST_README.md per domain (≤1 screen, links to deep dives)
 2. Detail sheets in docs/app/** or docs/tooling/**
-3. Diagrams: All .mmd/.mermaid sources live in docs/diagrams/{app,tooling}/. Tooling diagrams and tables (keybindings, tasks, shortcuts) must be referenced from docs/tooling/FAST_README.md. Rendered SVGs are cached in .docs-cache and ignored by git.
+3. Diagrams: All .mmd/.mermaid sources live in docs/diagrams/{app,tooling}/. Tooling diagrams must be referenced from docs/tooling/FAST_README.md. Rendered SVGs are cached in .docs-cache and ignored by git.
 4. Auto-generated manifest (.docs-cache/manifest.json) tracks hashes for all diagram sources.
 
 ## Structure
@@ -22,14 +22,13 @@
 
 ## Diagram Accessibility & Meta Guidelines
 
-- All diagrams and tables must use descriptive node labels (e.g., "Context Store (Redis)", not just "Context Store").
-- Add Mermaid accessibility meta-comments to each diagram and table:
+- All diagrams must use descriptive node labels (e.g., "Context Store (Redis)", not just "Context Store").
+- Add Mermaid accessibility meta-comments to each diagram:
   - `%% accTitle: <Short Title>`
   - `%% accDescr: <1-2 sentence description>`
 - Use `%%{init: {"theme": "forest"}}%%` or similar for visual clarity.
 - Prefer subgraphs for logical grouping (e.g., "MCP Fleet", "Context Hub").
 - Keep diagrams agent-parseable but human-friendly.
-- Reference all tables (keybindings, tasks, shortcuts) from FAST_README.md for quick access.
 
 ## Automation
 
