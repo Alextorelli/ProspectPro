@@ -1,0 +1,52 @@
+%% MCP Server Matrix (Detail)
+%% accTitle: MCP Server Matrix
+%% accDescr: Detailed mapping of MCP servers to agent workflows, tools, and context store paths with color coding
+%% Palette: prod #2563eb, dev #16a34a, trouble #f97316, docs #16a34a, reports #facc15
+graph TD
+	%% Top: MCP Servers
+	Prod["Production"]:::mcp
+	Dev["Development"]:::mcp
+	Trouble["Troubleshooting"]:::mcp
+
+	%% Middle: Workflows & Agents (condensed)
+	FD["Feature Delivery"]:::agent
+	SD["Smart Debug"]:::agent
+	PS["Production Support"]:::agent
+	CI["CI / CD Workflow"]:::workflow
+
+	%% Next: Tasks (condensed)
+	ProdTools["ci_cd_validation_suite\nContext: campaigns"]:::task
+	DevTools["thunder_suite_report\nContext: test_fixtures"]:::task
+	TroubleTools["test_edge_function\nContext: traces"]:::task
+
+	%% Flows
+	Prod --> FD
+	Prod --> PS
+	Prod --> CI
+	Dev --> FD
+	Dev --> CI
+	Trouble --> SD
+
+	FD --> ProdTools
+	CI --> DevTools
+	SD --> TroubleTools
+
+	classDef mcp fill:#2563eb,color:#fff;
+	classDef agent fill:#f97316,color:#fff;
+	classDef workflow fill:#64748b,color:#fff;
+	classDef task fill:#16a34a,color:#fff;
+
+	%% Legend at bottom
+	subgraph LEGEND["Legend: Layer Categories"]
+		direction LR
+		L1["MCP Server"]
+		L2["Agent"]
+		L3["Workflow"]
+		L4["Task"]
+		style LEGEND fill:#fff,stroke:#888,stroke-width:1px
+		style L1 fill:#2563eb,color:#fff
+		style L2 fill:#f97316,color:#fff
+		style L3 fill:#64748b,color:#fff
+		style L4 fill:#16a34a,color:#fff
+	end
+

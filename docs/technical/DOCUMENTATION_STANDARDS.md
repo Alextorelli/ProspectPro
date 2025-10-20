@@ -4,14 +4,14 @@
 
 1. FAST_README.md per domain (≤1 screen, links to deep dives)
 2. Detail sheets in docs/app/** or docs/tooling/**
-3. Diagrams: All .mmd/.mermaid sources live in docs/diagrams/{app,tooling}/. Tooling diagrams must be referenced from docs/tooling/FAST_README.md. Rendered SVGs are cached in .docs-cache and ignored by git.
+3. Diagrams: All .mmd/.mermaid sources live in docs/{app,tooling,technical}/. Tooling diagrams must be referenced from docs/tooling/FAST_README.md. Rendered SVGs are cached in .docs-cache and ignored by git.
 4. Auto-generated manifest (.docs-cache/manifest.json) tracks hashes for all diagram sources.
 
 ## Structure
 
 - app/: frontend, Supabase functions, data models
 - docs/tooling/: MCP, scripts, CI
-- docs/diagrams/{app,tooling}/: diagrams only, no rendered assets; sources only
+- docs/{app,tooling,technical}/: diagrams only, no rendered assets; sources only
 - .docs-cache/: cached SVGs and manifest (not committed)
 
 ## Change Control

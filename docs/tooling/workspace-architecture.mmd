@@ -1,0 +1,72 @@
+%% Workspace Architecture (Merged)
+%% accTitle: Workspace Architecture
+%% accDescr: Top-down flow from agent intake through context, MCP fleet, automation, and feedback loops
+%% Palette: agent #f97316, context #64748b, mcp #2563eb, automation #16a34a, feedback #facc15
+flowchart TD
+	subgraph AgentsLayer["Agent Intake"]
+		direction LR
+		AgentEntry["Developer / AI Agent"]:::agent
+	end
+
+	subgraph ContextLayer["Context Hub"]
+		direction LR
+		ContextStore["Context Store"]:::context
+		KnowledgeIndex["Knowledge Index"]:::context
+	end
+
+	subgraph MCPLayer["MCP Fleet"]
+		direction LR
+		ProductionMCP["Production"]:::mcp
+		DevelopmentMCP["Development"]:::mcp
+		TroubleshootingMCP["Troubleshooting"]:::mcp
+	end
+
+	subgraph AutomationLayer["Automation"]
+		direction LR
+		CICD["CI/CD Pipeline"]:::automation
+		EdgeFunctions["Supabase Edge Functions"]:::automation
+	end
+
+	subgraph FeedbackLayer["Feedback"]
+		direction LR
+		ThunderTasks["Thunder Tasks"]:::feedback
+		SupabaseLogs["Supabase Logs"]:::feedback
+		DocsUpdate["Docs Update"]:::feedback
+	end
+
+	AgentEntry --> ContextStore
+	ContextStore -->|"hydrate"| KnowledgeIndex
+	KnowledgeIndex -->|"query"| ProductionMCP
+	KnowledgeIndex -->|"query"| DevelopmentMCP
+	KnowledgeIndex -->|"query"| TroubleshootingMCP
+	ProductionMCP -->|"deploy"| CICD
+	DevelopmentMCP -->|"execute"| EdgeFunctions
+	CICD -->|"metrics"| ThunderTasks
+	EdgeFunctions -->|"logs"| SupabaseLogs
+	ThunderTasks -->|"update"| ContextStore
+	SupabaseLogs -->|"telemetry"| ContextStore
+	DocsUpdate -->|"refresh"| KnowledgeIndex
+	ThunderTasks -.->|"feedback"| AgentEntry
+	SupabaseLogs -.->|"feedback"| AgentEntry
+
+	classDef agent fill:#f97316,color:#fff;
+	classDef context fill:#64748b,color:#fff;
+	classDef mcp fill:#2563eb,color:#fff;
+	classDef automation fill:#16a34a,color:#fff;
+	classDef feedback fill:#facc15,color:#222;
+
+	subgraph Legend["Legend"]
+		direction LR
+		L1["Agent"]
+		L2["Context"]
+		L3["MCP"]
+		L4["Automation"]
+		L5["Feedback"]
+		style Legend fill:#fff,stroke:#888,stroke-width:1px
+		style L1 fill:#f97316,color:#fff
+		style L2 fill:#64748b,color:#fff
+		style L3 fill:#2563eb,color:#fff
+		style L4 fill:#16a34a,color:#fff
+		style L5 fill:#facc15,color:#222
+	end
+

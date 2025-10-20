@@ -1,0 +1,37 @@
+%% Keybindings Table
+%%{init: {"theme": "neutral"} }%%
+%% accTitle: VS Code Keybindings Table
+%% accDescr: Table of key shortcuts for Mermaid and dev-tools workflows.
+classDiagram
+	class Keybinding {
+		Shortcut
+		Command
+		Context
+		Description
+	}
+	Keybinding <|-- MermaidPreview
+	Keybinding <|-- MermaidGenerateImage
+	Keybinding <|-- MermaidZoomIn
+	Keybinding <|-- MermaidZoomOut
+	Keybinding <|-- MermaidResetZoom
+	MermaidPreview : Ctrl+Alt+P
+	MermaidPreview : mermaid-editor.preview
+	MermaidPreview : mermaid
+	MermaidPreview : Preview Mermaid diagram
+	MermaidGenerateImage : Ctrl+Alt+]
+	MermaidGenerateImage : mermaid-editor.generate.file
+	MermaidGenerateImage : mermaid
+	MermaidGenerateImage : Export diagram as image
+	MermaidZoomIn : Ctrl+Alt+=
+	MermaidZoomIn : mermaid-editor.preview.zoomin
+	MermaidZoomIn : mermaid
+	MermaidZoomIn : Zoom in diagram
+	MermaidZoomOut : Ctrl+Alt+-
+	MermaidZoomOut : mermaid-editor.preview.zoomout
+	MermaidZoomOut : mermaid
+	MermaidZoomOut : Zoom out diagram
+	MermaidResetZoom : Ctrl+Alt+0
+	MermaidResetZoom : mermaid-editor.preview.zoomreset
+	MermaidResetZoom : mermaid
+	MermaidResetZoom : Reset diagram zoom
+

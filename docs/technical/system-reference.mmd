@@ -1,0 +1,26 @@
+%% System Reference Diagram
+%% accTitle: System Reference
+%% accDescr: High-level system reference for ProspectPro
+flowchart TD
+  subgraph Frontend["Frontend"]
+    direction LR
+    ReactApp["React/Vite App"]
+  end
+  subgraph Backend["Backend"]
+    direction LR
+    SupabaseEdge["Supabase Edge Functions"]
+    SupabaseDB["Supabase Database"]
+  end
+  subgraph External["External APIs"]
+    direction LR
+    GooglePlaces["Google Places"]
+    HunterIO["Hunter.io"]
+    NeverBounce["NeverBounce"]
+    CobaltSOS["Cobalt SOS"]
+  end
+  ReactApp -->|"API Calls"| SupabaseEdge
+  SupabaseEdge -->|"DB Access"| SupabaseDB
+  SupabaseEdge -->|"API Calls"| GooglePlaces
+  SupabaseEdge -->|"API Calls"| HunterIO
+  SupabaseEdge -->|"API Calls"| NeverBounce
+  SupabaseEdge -->|"API Calls"| CobaltSOS

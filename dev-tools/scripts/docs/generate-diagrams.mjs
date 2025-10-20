@@ -5,11 +5,7 @@ import { execSync } from "child_process";
 import fs from "fs";
 import path from "path";
 
-const DIAGRAM_SRC_DIRS = [
-  "docs/diagrams/app",
-  "docs/diagrams/tooling",
-  "docs/diagrams/technical",
-];
+const DIAGRAM_SRC_DIRS = ["docs/app", "docs/tooling", "docs/technical"];
 const CACHE_DIR = ".docs-cache";
 const MANIFEST = path.join(CACHE_DIR, "manifest.json");
 

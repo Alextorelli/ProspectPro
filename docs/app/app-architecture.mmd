@@ -1,0 +1,15 @@
+%% App Architecture Diagram
+%% accTitle: App Architecture
+%% accDescr: High-level architecture for the ProspectPro app
+flowchart TD
+  subgraph Frontend["Frontend"]
+    direction LR
+    ReactApp["React/Vite App"]
+  end
+  subgraph Backend["Backend"]
+    direction LR
+    SupabaseEdge["Supabase Edge Functions"]
+    SupabaseDB["Supabase Database"]
+  end
+  ReactApp -->|"API Calls"| SupabaseEdge
+  SupabaseEdge -->|"DB Access"| SupabaseDB

@@ -1,0 +1,56 @@
+%% MCP Routing Overview
+%% accTitle: MCP Routing Overview
+%% accDescr: Top-down routing from ingress through context router to MCP servers and telemetry sinks
+%% Palette: access #f97316, router #64748b, mcp #2563eb, telemetry #facc15
+flowchart TD
+	subgraph AccessLayer["Access"]
+		direction LR
+		Ingress["Ingress / Gateway"]:::access
+	end
+
+	subgraph RoutingLayer["Routing"]
+		direction LR
+		Router["Context Router"]:::router
+	end
+
+	subgraph MCPLayer["MCP Servers"]
+		direction LR
+		Production["Production"]:::mcp
+		Development["Development"]:::mcp
+		Troubleshooting["Troubleshooting"]:::mcp
+	end
+
+	subgraph TelemetryLayer["Telemetry"]
+		direction LR
+		ThunderReports["Thunder Reports"]:::telemetry
+		SupabaseLogs["Supabase Logs"]:::telemetry
+	end
+
+	Ingress -->|"receive"| Router
+	Router -->|"route"| Production
+	Router -->|"route"| Development
+	Router -->|"route"| Troubleshooting
+	Production -->|"emit"| ThunderReports
+	Production -->|"emit"| SupabaseLogs
+	Development -->|"emit"| ThunderReports
+	Troubleshooting -->|"emit"| SupabaseLogs
+	Production -.->|"escalate"| Troubleshooting
+
+	classDef access fill:#f97316,color:#fff;
+	classDef router fill:#64748b,color:#fff;
+	classDef mcp fill:#2563eb,color:#fff;
+	classDef telemetry fill:#facc15,color:#222;
+
+	subgraph Legend["Legend"]
+		direction LR
+		L1["Access"]
+		L2["Router"]
+		L3["MCP"]
+		L4["Telemetry"]
+		style Legend fill:#fff,stroke:#888,stroke-width:1px
+		style L1 fill:#f97316,color:#fff
+		style L2 fill:#64748b,color:#fff
+		style L3 fill:#2563eb,color:#fff
+		style L4 fill:#facc15,color:#222
+	end
+
