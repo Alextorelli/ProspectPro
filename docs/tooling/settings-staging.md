@@ -20,3 +20,25 @@
 - The staging workflow applies during refactors, repository reorganizations, or any operation that could impact workspace stability.
 - Extend this document as new guardrails or staging procedures are introduced.
 - Remove temporary drafts once their corresponding changes have been approved and applied.
+
+# Staged: React DevTools Task Reference (2025-10-20)
+
+## Proposed VS Code Task (Reference Only)
+
+**Do not add to .vscode/tasks.json without explicit approval.**
+
+```json
+{
+  "label": "DevTools: Start React DevTools",
+  "type": "shell",
+  "command": "npm run devtools:react"
+}
+```
+
+## Manual Command Sequence
+
+1. Start the React app: `npm run dev`
+2. In a new terminal, launch React DevTools: `npx react-devtools`
+3. (Optional) Use browser extension for React state inspection
+
+See `docs/tooling/agent-debug-playbooks.md` for full workflow and guard policy.
