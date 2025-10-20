@@ -8,9 +8,9 @@ graph TD
   Root --> Docs[/"docs/"/]
   Root --> Config[/"config/"/]
   Root --> Reports[/"reports/"/]
-  App --> Frontend["frontend/"]
-  App --> Backend["backend/"]
-  DevTools --> Agents["agent-orchestration/"]
-  DevTools --> MCPServers["mcp-servers/"]
-  Docs --> AppDocs["app/**"]
-  Docs --> ToolDocs["dev-tools/**"]
+  App --> AppFrontend
+  App --> AppBackend
+  DevTools --> Agents
+  DevTools --> Servers
+  Docs --> DocsApp
+  Docs --> DocsTool

@@ -26,13 +26,19 @@
 - Add Mermaid accessibility meta-comments to each diagram:
   - `%% accTitle: <Short Title>`
   - `%% accDescr: <1-2 sentence description>`
-- Use `%%{init: {"theme": "forest"}}%%` or similar for visual clarity.
+- Use `%%{init: {"theme": "forest"}}%%` or similar for visual clarity and apply the shared color palette:
+  - App: `#2563eb` (blue)
+  - Dev-Tools: `#f97316` (orange)
+  - Docs: `#16a34a` (green)
+  - Config: `#64748b` (slate)
+  - Reports: `#facc15` (yellow)
 - Prefer subgraphs for logical grouping (e.g., "MCP Fleet", "Context Hub").
 - Keep diagrams agent-parseable but human-friendly.
 
-## Automation
+- Automation
 
 - Use generate-diagrams.mjs for differential diagram rendering
-- npm run docs:prepare validates structure, diagrams, and manifests
-- npm run docs:bootstrap or VS Code task "Docs: Bootstrap Tooling Diagrams" will force initial render and manifest seeding for new diagrams
+- `npm run docs:prepare` validates structure, diagrams, and manifests
+- `npm run docs:bootstrap` or VS Code task "Docs: Bootstrap Tooling Diagrams" will force initial render and manifest seeding for new diagrams
 - VS Code task: Docs: Refresh Differential Diagrams (runs docs:prepare)
+- Keyboard shortcut: `Ctrl+Alt+P` previews Mermaid diagrams in VS Code

@@ -5,8 +5,16 @@ flowchart TD
     Context[Context Manager]
     Agents[Agent Pool]
     Output[Result/PR/Script]
-    Dev --> Orchestrator
-    Orchestrator --> Context
-    Context --> Agents
-    Agents --> Orchestrator
-    Orchestrator --> Output
+    Dev --> Planner
+    Planner --> Ledger
+    Ledger --> ContextMgr
+    ContextMgr --> SkillRouter
+    SkillRouter --> AgentPool
+    AgentPool --> MCPBridge
+    MCPBridge --> Ledger
+    Ledger --> Outputs
+    Outputs --> Dev
+    class Dev,Planner,Ledger,AgentPool agent
+    class ContextMgr,SkillRouter context
+    class MCPBridge tools
+    class Outputs output
