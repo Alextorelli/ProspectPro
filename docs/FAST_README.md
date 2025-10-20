@@ -12,3 +12,14 @@
   - MCP: diagnostics, troubleshooting, reports
 
 > **Phase 2:** Platform playbooks expanded. All automation/config proposals must be staged in `docs/tooling/settings-staging.md` per configuration guard.
+
+---
+
+## Key Diagrams (Phase 5)
+
+- [Agent Orchestration Sequence](docs/tooling/agent-orchestration.mmd)
+- [Context Orchestration Sequence](docs/tooling/context-orchestration.mmd)
+- [MCP Routing Sequence](docs/tooling/mcp-routing-sequence.mmd)
+- [Workspace Architecture](docs/tooling/workspace-architecture.mmd)
+
+> All diagrams include guardrails, validation checkpoints, and ZeroFakeData enforcement. See `diagram-guidelines.md` for details.

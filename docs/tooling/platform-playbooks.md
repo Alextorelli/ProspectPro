@@ -86,6 +86,17 @@ _Last updated: 2025-10-20_
 
 ---
 
+## Key Diagrams (Phase 5)
+
+- [Agent Orchestration Sequence](agent-orchestration.mmd)
+- [Context Orchestration Sequence](context-orchestration.mmd)
+- [MCP Routing Sequence](mcp-routing-sequence.mmd)
+- [Workspace Architecture](workspace-architecture.mmd)
+
+> Diagrams reflect current MCP, Supabase, Vercel, and automation flows. See `diagram-guidelines.md` for guard and validation details.
+
+---
+
 ## Automation Scripts Bundle (Phase 3)
 
 > All scripts: `/scripts/automation/` (see README for guard policy)
