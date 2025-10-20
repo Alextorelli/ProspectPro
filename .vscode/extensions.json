@@ -11,8 +11,10 @@
     "bradlc.vscode-tailwindcss",
     "davidanson.vscode-markdownlint",
     "redhat.vscode-yaml",
-    "GraphBook.mermaid-chart",
-    "bierner.mermaid-markdown-syntax-highlighting"
+    // Mermaid visualization (replace Mermaid Editor with these two)
+    "GraphBook.mermaid-chart", // Mermaid Chart (preview/diagram)
+    "vstirbu.vscode-mermaid-preview", // Mermaid Preview (SVG/PNG export)
+    "bierner.mermaid-markdown-syntax-highlighting" // Mermaid syntax highlighting
   ],
 
   "unwantedRecommendations": [
