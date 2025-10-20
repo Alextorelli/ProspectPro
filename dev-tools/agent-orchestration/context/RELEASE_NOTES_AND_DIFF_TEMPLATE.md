@@ -1,24 +1,28 @@
 # Release Notes Skeleton
 
-## Release Version: <vX.Y.Z>
+## Release Version: <pending>
 
 ### Summary
 
-- Brief description of changes, features, or fixes.
+- Purged stale Mermaid manifest entries to align with new diagram set.
+- Regenerated documentation assets after tooling diagram refactor.
+- Updated workspace checklist to reflect completed documentation tasks.
 
 ### Key Changes
 
 - [ ] Feature additions
-- [ ] Bug fixes
-- [ ] Refactoring
-- [ ] Documentation updates
+- [x] Bug fixes
+- [x] Refactoring
+- [x] Documentation updates
 
 ### Testing Evidence
 
 - [ ] Thunder Client: All tests pass
 - [ ] Supabase tests: All pass
 - [ ] Manual curl probes: All 200/expected
-- [ ] Zero fake data violations
+- [x] Zero fake data violations
+- [x] `npm run docs:prepare -- --bootstrap`
+- [x] `npm run docs:update`
 
 ### Deployment
 
@@ -32,15 +36,16 @@
 
 ## Files Changed
 
-- List of files/paths
+- dev-tools/scripts/docs/generate-diagrams.mjs
+- workspace_status.md
 
 ## Description
 
-- What was changed and why
+- Manifest generation now prunes deleted diagrams and documentation checklist reflects completed doc tasks for this iteration.
 
 ## Impact
 
-- Any breaking changes, migrations, or manual steps
+- No breaking changes; rerun `npm run docs:prepare -- --bootstrap` whenever diagrams are removed to refresh the manifest.
 
 ---
 

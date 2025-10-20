@@ -64,13 +64,20 @@ function main() {
   if (!fs.existsSync(CACHE_DIR)) fs.mkdirSync(CACHE_DIR);
   const args = process.argv.slice(2);
   const bootstrap = args.includes("--bootstrap");
-  let files = bootstrap ? getAllMermaidFiles() : getChangedMermaidFiles();
+  const currentFiles = new Set(getAllMermaidFiles());
+  let files = bootstrap ? Array.from(currentFiles) : getChangedMermaidFiles();
   let manifest = loadManifest();
   for (const file of files) {
     const hash = hashFile(file);
     manifest[file] = hash;
     renderDiagram(file);
     console.log(`Tracked: ${file} [${hash}]`);
+  }
+  for (const entry of Object.keys(manifest)) {
+    if (!currentFiles.has(entry)) {
+      delete manifest[entry];
+      console.log(`Removed stale entry: ${entry}`);
+    }
   }
   saveManifest(manifest);
 }

@@ -11,7 +11,8 @@
     "bradlc.vscode-tailwindcss",
     "davidanson.vscode-markdownlint",
     "redhat.vscode-yaml",
-    "tomoyukim.vscode-mermaid-editor"
+    "GraphBook.mermaid-chart",
+    "bierner.mermaid-markdown-syntax-highlighting"
   ],
 
   "unwantedRecommendations": [

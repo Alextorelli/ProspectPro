@@ -2,11 +2,11 @@
 
 - Purpose: Quick reference for MCP, scripts, CI, and dev tools.
 - Diagrams:
-  - [Intelligent Workspace](../diagrams/tooling/intelligent-workspace.mmd)
+  - [Workspace Architecture](../diagrams/tooling/workspace-architecture.mmd)
   - [Agent Orchestration](../diagrams/tooling/agent-orchestration.mmd)
-  - [Context Pipeline](../diagrams/tooling/context-pipeline.mmd)
-  - [Dev-Tools Architecture](../diagrams/tooling/dev-tools-architecture.mmd)
-  - [MCP Architecture](../diagrams/tooling/mcp-architecture.mmd)
-  - [Repo Filetree](../diagrams/tooling/repo-filetree.mmd)
+  - [Context Orchestration](../diagrams/tooling/context-orchestration.mmd)
+  - [MCP Routing Overview](../diagrams/tooling/mcp-routing-overview.mmd)
+  - [MCP Server Matrix](../diagrams/tooling/mcp-server-matrix.mmd)
+  - [Repo File Tree](../diagrams/tooling/repo-filetree.mmd)
 - [Detailed docs](./)
 - Update this file with every major PR touching dev-tools/.

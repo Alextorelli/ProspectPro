@@ -1,68 +1,71 @@
 %% Workspace Architecture (Merged)
 %% accTitle: Workspace Architecture
-%% accDescr: AI agent entry through context hub, MCP fleet, repo automation, and feedback loops with directional annotations
-%% Palette: app #2563eb, dev-tools #f97316, docs #16a34a, config #64748b, reports #facc15
+%% accDescr: Top-down flow from agent intake through context, MCP fleet, automation, and feedback loops
+%% Palette: agent #f97316, context #64748b, mcp #2563eb, automation #16a34a, feedback #facc15
 flowchart TD
-  subgraph AGENTS["Agent Entry"]
-    A1["Developer Prompt / AI Agent"]
-    style AGENTS fill:#f97316
-  end
-  subgraph CONTEXT["Context Hub 🔁"]
-    C1["Context Store"]
-    C2["Knowledge Index (Docs + Code)"]
-    style CONTEXT fill:#64748b
-  end
-  subgraph MCP["MCP Fleet"]
-    M1["Production MCP"]
-    M2["Development MCP"]
-    M3["Troubleshooting MCP"]
-    style MCP fill:#2563eb
-  end
-  subgraph REPO["Repo Automation"]
-    R1["CI/CD Pipeline"]
-    R2["Supabase Edge Functions"]
-    style REPO fill:#16a34a
-  end
-  subgraph FEEDBACK["Feedback Loops"]
-    F1["Thunder Tasks"]
-    F2["Supabase Logs"]
-    F3["Docs Update"]
-    style FEEDBACK fill:#facc15
-  end
-  A1 --> C1
-  C1 -->|"context hydrate"| C2
-  C2 -->|"lookup"| M1
-  C2 -->|"lookup"| M2
-  C2 -->|"lookup"| M3
-  M1 -->|"deploy"| R1
-  M2 -->|"execute"| R2
-  R1 -->|"metrics"| F1
-  R2 -->|"logs"| F2
-  F1 -->|"update"| C1
-  F2 -->|"telemetry"| C1
-  F3 -->|"regenerate"| C2
-  F1 -.->|"feedback"| AGENTS
-  F2 -.->|"feedback"| AGENTS
-  classDef app fill:#2563eb;
-  classDef devtools fill:#f97316;
-  classDef docs fill:#16a34a;
-  classDef config fill:#64748b;
-  classDef reports fill:#facc15;
-  %% Legend
-  subgraph LEGEND["Legend"]
+  subgraph AgentsLayer["Agent Intake"]
     direction LR
-    L1["App"]
-    L2["Dev-Tools"]
-    L3["Docs"]
-    L4["Config"]
-    L5["Reports"]
-    style LEGEND fill:#fff,stroke:#888,stroke-width:1px
-    style L1 fill:#2563eb,color:#fff
-    style L2 fill:#f97316,color:#fff
-    style L3 fill:#16a34a,color:#fff
-    style L4 fill:#64748b,color:#fff
+    AgentEntry["Developer / AI Agent"]:::agent
+  end
+
+  subgraph ContextLayer["Context Hub"]
+    direction LR
+    ContextStore["Context Store"]:::context
+    KnowledgeIndex["Knowledge Index"]:::context
+  end
+
+  subgraph MCPLayer["MCP Fleet"]
+    direction LR
+    ProductionMCP["Production"]:::mcp
+    DevelopmentMCP["Development"]:::mcp
+    TroubleshootingMCP["Troubleshooting"]:::mcp
+  end
+
+  subgraph AutomationLayer["Automation"]
+    direction LR
+    CICD["CI/CD Pipeline"]:::automation
+    EdgeFunctions["Supabase Edge Functions"]:::automation
+  end
+
+  subgraph FeedbackLayer["Feedback"]
+    direction LR
+    ThunderTasks["Thunder Tasks"]:::feedback
+    SupabaseLogs["Supabase Logs"]:::feedback
+    DocsUpdate["Docs Update"]:::feedback
+  end
+
+  AgentEntry --> ContextStore
+  ContextStore -->|"hydrate"| KnowledgeIndex
+  KnowledgeIndex -->|"query"| ProductionMCP
+  KnowledgeIndex -->|"query"| DevelopmentMCP
+  KnowledgeIndex -->|"query"| TroubleshootingMCP
+  ProductionMCP -->|"deploy"| CICD
+  DevelopmentMCP -->|"execute"| EdgeFunctions
+  CICD -->|"metrics"| ThunderTasks
+  EdgeFunctions -->|"logs"| SupabaseLogs
+  ThunderTasks -->|"update"| ContextStore
+  SupabaseLogs -->|"telemetry"| ContextStore
+  DocsUpdate -->|"refresh"| KnowledgeIndex
+  ThunderTasks -.->|"feedback"| AgentEntry
+  SupabaseLogs -.->|"feedback"| AgentEntry
+
+  classDef agent fill:#f97316,color:#fff;
+  classDef context fill:#64748b,color:#fff;
+  classDef mcp fill:#2563eb,color:#fff;
+  classDef automation fill:#16a34a,color:#fff;
+  classDef feedback fill:#facc15,color:#222;
+
+  subgraph Legend["Legend"]
+    direction LR
+    L1["Agent"]
+    L2["Context"]
+    L3["MCP"]
+    L4["Automation"]
+    L5["Feedback"]
+    style Legend fill:#fff,stroke:#888,stroke-width:1px
+    style L1 fill:#f97316,color:#fff
+    style L2 fill:#64748b,color:#fff
+    style L3 fill:#2563eb,color:#fff
+    style L4 fill:#16a34a,color:#fff
     style L5 fill:#facc15,color:#222
   end
-  %% Callout
-  CALLOUT["ℹ️ MCP servers align with agent modes in MCP_MODE_TOOL_MATRIX.md"]
-  style CALLOUT fill:#ffffcc,color:#333,stroke:#f97316,stroke-width:2px

@@ -1,50 +1,55 @@
 %% MCP Routing Overview
 %% accTitle: MCP Routing Overview
-%% accDescr: Request ingress through router to MCP servers with telemetry sinks and escalation flow
-%% Palette: ingress #2563eb, router #64748b, telemetry #facc15
-flowchart TB
-  Ingress["Ingress/Gateway"]:::ingress
-  Router["Request Router (ContextManager)"]:::router
-  subgraph PROD["Production MCP"]
-    P1["ci_cd_validation_suite"]
-    P2["supabase_cli_healthcheck"]
-    style PROD fill:#2563eb
-  end
-  subgraph DEV["Development MCP"]
-    D1["Thunder Suite Report"]
-    D2["API Research Tools"]
-    style DEV fill:#16a34a
-  end
-  subgraph TROUBLE["Troubleshooting MCP"]
-    T1["test_edge_function"]
-    T2["run_rls_diagnostics"]
-    style TROUBLE fill:#f97316
-  end
-  subgraph TELEM["Telemetry Sinks"]
-    TR["Thunder Reports"]:::telemetry
-    SL["Supabase Logs"]:::telemetry
-  end
-  Ingress --> Router
-  Router --> PROD
-  Router --> DEV
-  Router --> TROUBLE
-  PROD --> TR
-  PROD --> SL
-  DEV --> TR
-  TROUBLE --> SL
-  %% Escalation flow
-  PROD -.->|"on failure"| TROUBLE
-  %% Legend
-  subgraph LEGEND["Legend"]
+%% accDescr: Top-down routing from ingress through context router to MCP servers and telemetry sinks
+%% Palette: access #f97316, router #64748b, mcp #2563eb, telemetry #facc15
+flowchart TD
+  subgraph AccessLayer["Access"]
     direction LR
-    L1["Ingress"]
-    L2["Router"]
-    L3["Telemetry"]
-    style LEGEND fill:#fff,stroke:#888,stroke-width:1px
-    style L1 fill:#2563eb,color:#fff
-    style L2 fill:#64748b,color:#fff
-    style L3 fill:#facc15,color:#222
+    Ingress["Ingress / Gateway"]:::access
   end
-  classDef ingress fill:#2563eb,color:#fff;
+
+  subgraph RoutingLayer["Routing"]
+    direction LR
+    Router["Context Router"]:::router
+  end
+
+  subgraph MCPLayer["MCP Servers"]
+    direction LR
+    Production["Production"]:::mcp
+    Development["Development"]:::mcp
+    Troubleshooting["Troubleshooting"]:::mcp
+  end
+
+  subgraph TelemetryLayer["Telemetry"]
+    direction LR
+    ThunderReports["Thunder Reports"]:::telemetry
+    SupabaseLogs["Supabase Logs"]:::telemetry
+  end
+
+  Ingress -->|"receive"| Router
+  Router -->|"route"| Production
+  Router -->|"route"| Development
+  Router -->|"route"| Troubleshooting
+  Production -->|"emit"| ThunderReports
+  Production -->|"emit"| SupabaseLogs
+  Development -->|"emit"| ThunderReports
+  Troubleshooting -->|"emit"| SupabaseLogs
+  Production -.->|"escalate"| Troubleshooting
+
+  classDef access fill:#f97316,color:#fff;
   classDef router fill:#64748b,color:#fff;
+  classDef mcp fill:#2563eb,color:#fff;
   classDef telemetry fill:#facc15,color:#222;
+
+  subgraph Legend["Legend"]
+    direction LR
+    L1["Access"]
+    L2["Router"]
+    L3["MCP"]
+    L4["Telemetry"]
+    style Legend fill:#fff,stroke:#888,stroke-width:1px
+    style L1 fill:#f97316,color:#fff
+    style L2 fill:#64748b,color:#fff
+    style L3 fill:#2563eb,color:#fff
+    style L4 fill:#facc15,color:#222
+  end

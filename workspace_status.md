@@ -8,7 +8,7 @@
 - [ ] `source scripts/ensure-supabase-cli-session.sh` run
 - [ ] `vercel env pull .env.vercel` run
 - [ ] `npm run thunder:env:sync` run
-- [ ] `npm run docs:prepare` run
+- [x] `npm run docs:prepare` run
 
 ## Manual Setup
 
@@ -32,7 +32,7 @@
 
 ## Automated Revised Integration, Testing, Deployment
 
-- [ ] `npm run docs:update` run
+- [x] `npm run docs:update` run
 - [ ] CI/CD tasks run as needed
 - [ ] Edge functions deployed (`npm run edge:deploy -- <slug>`)
 - [ ] Frontend deployed (`npm run build && cd dist && vercel --prod`)
