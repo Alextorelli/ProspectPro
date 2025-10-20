@@ -1,0 +1,1 @@
+../dev-tools/scripts/scripts/operations/ensure-supabase-cli-session.sh
