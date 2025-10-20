@@ -110,7 +110,6 @@ _Auto-generated from `.vscode/tasks.json` — Last updated: 2025-10-20_
 | **MCP: Stop All Servers** | `npm run mcp:stop` | Multiple | None | No description available |
 | **Observability: Start Stack** | `bash -lc cd tooling/observability && docker-compose -f docker-compose.jaeger.yml up -d` | Multiple | None | No description available |
 | **Observability: Stop Stack** | `bash -lc cd tooling/observability && docker-compose -f docker-compose.jaeger.yml down` | Multiple | None | No description available |
-| **Observability: View Jaeger UI** | `echo Open Jaeger UI at: http://localhost:16686` | Multiple | None | No description available |
 | **Observability: View Prometheus** | `echo Open Prometheus at: http://localhost:9090` | Multiple | None | No description available |
 | **Observability: View Grafana** | `echo Open Grafana at: http://localhost:3000 (admin/admin)` | Multiple | None | No description available |
 | **Observability: MCP Server** | `npm run start:observability` | `${workspaceFolder}/mcp-servers` | None | No description available |
