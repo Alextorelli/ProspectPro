@@ -46,6 +46,21 @@ Converge ProspectPro to a hybrid mono-repo structure optimized for AI agent work
 - MCP integrations must be updated to new paths
 - All changes staged and verified before cutover
 
+## Progress Update (2025-10-20)
+
+- Thunder/Jaeger telemetry footprint eliminated; MCP log-forwarder + Supabase logs are the sole observability pipeline (see `docs/tooling/TELEMETRY_LEGACY_CLEANUP_REPORT_2025-10-20.md`).
+- Automation scripts consolidated under `/scripts/automation/` with guardrails; VS Code Phase 02 task now emits coverage to `reports/context/coverage.md` without legacy rename.
+- MCP production status snapshot migrated into `docs/tooling/devops-agent-runbook.md`, removing the standalone status file.
+- Legacy audit artifacts (`docs-audit.txt`, `structure-gap.md`, `phase-02-report.md`, `CODEBASE_SIZES_BEFORE.txt`) retired after dependency unwind.
+- Copilot instructions refreshed to point at live runbooks and staging guardrails.
+
+## Next Actions
+
+1. Re-run workspace inventory and document the current directory state in a new telemetry update before deprecating the 2025-10-20 report.
+2. Plan phased relocation of `/app/frontend`, `/supabase/functions`, and supporting tooling into the target `/app` and `/tooling` hierarchy (capture blockers in `settings-staging.md`).
+3. Align automation outputs (coverage, diagnostics, context snapshots) with the future folder layout to avoid path churn during migration.
+4. Update VS Code tasks and npm scripts once directories move—stage proposals in `docs/tooling/settings-staging.md` prior to editing guarded configs.
+
 ## Ignore File Policy
 
 - All ignore files (.gitignore, .eslintignore, .vercelignore) are maintained at the repository root for clarity and single-source-of-truth enforcement.
