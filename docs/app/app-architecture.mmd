@@ -1,15 +1,20 @@
-%% App Architecture Diagram
-%% accTitle: App Architecture
-%% accDescr: High-level architecture for the ProspectPro app
-flowchart TD
-  subgraph Frontend["Frontend"]
-    direction LR
-    ReactApp["React/Vite App"]
-  end
-  subgraph Backend["Backend"]
-    direction LR
-    SupabaseEdge["Supabase Edge Functions"]
-    SupabaseDB["Supabase Database"]
-  end
-  ReactApp -->|"API Calls"| SupabaseEdge
-  SupabaseEdge -->|"DB Access"| SupabaseDB
+---
+id: app-architecture
+intent: App Architecture (architecture-beta, modular, grouped)
+context: |
+  architecture-beta diagram grouped by app, dev-tools, supabase, telemetry. Uses shared icon and theme settings. Modular and ready for automation.
+---
+architecture-beta
+  group app(folder)[App]
+  group devtools(folder)[Dev Tools]
+  group supabase(cloud)[Supabase]
+  group telemetry(database)[Telemetry]
+  service frontend(app)[Frontend] in app
+  service backend(server)[Backend] in app
+  service edgefn(server)[Edge Functions] in supabase
+  service db(database)[Database] in supabase
+  service logs(database)[Logs] in telemetry
+  frontend:R -- L:backend
+  backend:R -- L:edgefn
+  edgefn:R -- L:db
+  db:R -- L:logs

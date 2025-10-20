@@ -1,64 +1,21 @@
 ---
 id: workspace-architecture
-intent: Workspace Architecture (modular, agentic, with stable node IDs)
+intent: Workspace Architecture (architecture-beta, modular, grouped)
 context: |
-  This diagram visualizes the workspace architecture in the MCP/ProspectPro system. Each node uses a stable, descriptive ID and is linked to the relevant script or function path. Edges are annotated with conditions or triggers. Modular and ready for agentic automation.
+  architecture-beta diagram grouped by app, dev-tools, supabase, telemetry. Uses shared icon and theme settings. Modular and ready for automation.
 ---
-flowchart TD
-    %% Stable node IDs and descriptive labels
-    AGENT_ENTRY["Developer / AI Agent\n(src/agent-orchestration/request.ts)"]:::agent
-    CONTEXT_STORE["Context Store\n(dev-tools/context/context-store.ts)"]:::context
-    KNOWLEDGE_INDEX["Knowledge Index\n(dev-tools/context/knowledge-index.ts)"]:::context
-    PRODUCTION_MCP["Production\n(mcp-servers/production-server.js)"]:::mcp
-    DEVELOPMENT_MCP["Development\n(mcp-servers/development-server.js)"]:::mcp
-    TROUBLESHOOTING_MCP["Troubleshooting\n(mcp-servers/troubleshooting-server.js)"]:::mcp
-    CICD["CI/CD Pipeline\n(dev-tools/ci/pipeline.yml)"]:::automation
-    EDGE_FUNCTIONS["Supabase Edge Functions\n(supabase/functions/)"]:::automation
-    THUNDER_TASKS["Thunder Tasks\n(dev-tools/monitoring/jaeger/)"]:::feedback
-    SUPABASE_LOGS["Supabase Logs\n(supabase/functions/)"]:::feedback
-    DOCS_UPDATE["Docs Update\n(scripts/docs/update.sh)"]:::feedback
-
-    %% Flow
-    AGENT_ENTRY --> CONTEXT_STORE
-    CONTEXT_STORE -->|"hydrate"| KNOWLEDGE_INDEX
-    KNOWLEDGE_INDEX -->|"query"| PRODUCTION_MCP
-    KNOWLEDGE_INDEX -->|"query"| DEVELOPMENT_MCP
-    KNOWLEDGE_INDEX -->|"query"| TROUBLESHOOTING_MCP
-    PRODUCTION_MCP -->|"deploy"| CICD
-    DEVELOPMENT_MCP -->|"execute"| EDGE_FUNCTIONS
-    CICD -->|"metrics"| THUNDER_TASKS
-    EDGE_FUNCTIONS -->|"logs"| SUPABASE_LOGS
-    THUNDER_TASKS -->|"update"| CONTEXT_STORE
-    SUPABASE_LOGS -->|"telemetry"| CONTEXT_STORE
-    DOCS_UPDATE -->|"refresh"| KNOWLEDGE_INDEX
-    THUNDER_TASKS -.->|"feedback"| AGENT_ENTRY
-    SUPABASE_LOGS -.->|"feedback"| AGENT_ENTRY
-
-    %% Styles
-    classDef agent fill:#f97316,color:#fff;
-    classDef context fill:#64748b,color:#fff;
-    classDef mcp fill:#2563eb,color:#fff;
-    classDef automation fill:#16a34a,color:#fff;
-    classDef feedback fill:#facc15,color:#222;
-    class AGENT_ENTRY agent;
-    class CONTEXT_STORE,KNOWLEDGE_INDEX context;
-    class PRODUCTION_MCP,DEVELOPMENT_MCP,TROUBLESHOOTING_MCP mcp;
-    class CICD,EDGE_FUNCTIONS automation;
-    class THUNDER_TASKS,SUPABASE_LOGS,DOCS_UPDATE feedback;
-
-    %% Legend
-    subgraph Legend["Legend"]
-        direction LR
-        L1["Agent"]
-        L2["Context"]
-        L3["MCP"]
-        L4["Automation"]
-        L5["Feedback"]
-        style Legend fill:#fff,stroke:#888,stroke-width:1px
-        style L1 fill:#f97316,color:#fff
-        style L2 fill:#64748b,color:#fff
-        style L3 fill:#2563eb,color:#fff
-        style L4 fill:#16a34a,color:#fff
-        style L5 fill:#facc15,color:#222
-    end
+architecture-beta
+  group app(folder)[App]
+  group devtools(folder)[Dev Tools]
+  group supabase(cloud)[Supabase]
+  group telemetry(database)[Telemetry]
+  service frontend(app)[Frontend] in app
+  service backend(server)[Backend] in app
+  service edgefn(server)[Edge Functions] in supabase
+  service db(database)[Database] in supabase
+  service logs(database)[Logs] in telemetry
+  frontend:R -- L:backend
+  backend:R -- L:edgefn
+  edgefn:R -- L:db
+  db:R -- L:logs
 

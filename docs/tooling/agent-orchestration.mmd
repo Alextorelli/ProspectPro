@@ -1,56 +1,29 @@
 ---
 id: agent-orchestration
-intent: Agent Orchestration Workflow (modular, agentic, with stable node IDs)
+intent: Agent Orchestration Sequence (modular, agentic, with stable node IDs)
 context: |
-  This diagram visualizes the agent orchestration workflow in the MCP/ProspectPro system. Each node uses a stable, descriptive ID and is linked to the relevant script or function path. Edges are annotated with conditions or triggers. Modular and ready for agentic automation.
+  Sequence diagram showing agent orchestration: request intake, planning, context management, skill routing, execution, and feedback. Uses shared snippet blocks for node consistency.
 ---
-flowchart TD
-    %% Stable node IDs and descriptive labels
-    REQUEST["Developer / AI Request\n(src/agent-orchestration/request.ts)"]:::agent
-    PLAN["Plan Tasks\n(src/agent-orchestration/plan.ts)"]:::workflow
-    LEDGER["Update Ledger\n(src/agent-orchestration/ledger.ts)"]:::context
-    CONTEXT_MGR["Manage Context\n(scripts/context/event-bus.ts)"]:::context
-    SKILL_ROUTER["Route Skills\n(src/agent-orchestration/skill-router.ts)"]:::agent
-    AGENT_POOL["Agent Pool\n(dev-tools/agent-orchestration/agents/)"]:::agent
-    MCP_BRIDGE["Invoke MCP\n(mcp-servers/production-server.js)"]:::mcp
-    DELIVERABLE["Deliver Result\n(src/agent-orchestration/deliverable.ts)"]:::output
+sequenceDiagram
+    participant REQUEST as Developer / AI Request\n(src/agent-orchestration/request.ts)
+    participant PLAN as Plan Tasks\n(src/agent-orchestration/plan.ts)
+    participant LEDGER as Update Ledger\n(src/agent-orchestration/ledger.ts)
+    participant CONTEXT_MGR as Context Manager\n(scripts/context/event-bus.ts)
+    participant SKILL_ROUTER as Route Skills\n(src/agent-orchestration/skill-router.ts)
+    participant AGENT_POOL as Agent Pool\n(dev-tools/agent-orchestration/agents/)
+    participant MCP_BRIDGE as Invoke MCP\n(mcp-servers/production-server.js)
+    participant DELIVERABLE as Deliver Result\n(src/agent-orchestration/deliverable.ts)
 
-    %% Flow
-    REQUEST --> PLAN
-    PLAN --> LEDGER
-    LEDGER --> CONTEXT_MGR
-    CONTEXT_MGR --> SKILL_ROUTER
-    SKILL_ROUTER --> AGENT_POOL
-    AGENT_POOL --> MCP_BRIDGE
-    MCP_BRIDGE --> DELIVERABLE
-    DELIVERABLE -.->|"feedback"| REQUEST
-    MCP_BRIDGE --> LEDGER
+    REQUEST->>PLAN: submit request
+    PLAN->>LEDGER: plan tasks
+    LEDGER->>CONTEXT_MGR: update context
+    CONTEXT_MGR->>SKILL_ROUTER: manage context
+    SKILL_ROUTER->>AGENT_POOL: route skills
+    AGENT_POOL->>MCP_BRIDGE: execute
+    MCP_BRIDGE->>DELIVERABLE: deliver result
+    DELIVERABLE-->>REQUEST: feedback
+    MCP_BRIDGE->>LEDGER: update ledger
 
-    %% Styles
-    classDef mcp fill:#2563eb,color:#fff;
-    classDef agent fill:#f97316,color:#fff;
-    classDef workflow fill:#16a34a,color:#fff;
-    classDef context fill:#64748b,color:#fff;
-    classDef output fill:#facc15,color:#222;
-    class REQUEST,SKILL_ROUTER,AGENT_POOL agent;
-    class PLAN workflow;
-    class LEDGER,CONTEXT_MGR context;
-    class MCP_BRIDGE mcp;
-    class DELIVERABLE output;
-
-    %% Legend
-    subgraph Legend["Legend"]
-        direction LR
-        L1["MCP"]
-        L2["Agent"]
-        L3["Workflow"]
-        L4["Context"]
-        L5["Output"]
-        style Legend fill:#fff,stroke:#888,stroke-width:1px
-        style L1 fill:#2563eb,color:#fff
-        style L2 fill:#f97316,color:#fff
-        style L3 fill:#16a34a,color:#fff
-        style L4 fill:#64748b,color:#fff
-        style L5 fill:#facc15,color:#222
-    end
+    %% Validation checkpoint
+    Note over MCP_BRIDGE,LEDGER: Validation & Checkpoints\n- Validate: agent state\n- Log: orchestration diagnostics
 

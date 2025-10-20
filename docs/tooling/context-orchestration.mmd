@@ -1,51 +1,27 @@
 ---
 id: context-orchestration
-intent: Context Orchestration Flowchart (modular, agentic, with stable node IDs)
+intent: Context Orchestration Sequence (modular, agentic, with stable node IDs)
 context: |
-  This diagram visualizes the orchestration of context management in the MCP/ProspectPro system. Each node uses a stable, descriptive ID and is linked to the relevant script or function path. Edges are annotated with conditions or triggers. This version is modular and ready for agentic automation.
+  Sequence diagram showing context update flow: agent triggers, validation, orchestration, and checkpointing. Uses shared snippet blocks for node consistency.
 ---
-flowchart TD
-    %% Stable node IDs and descriptive labels
-    CMGR["Context Manager\n(scripts/context/event-bus.ts)"]:::core
-    AGENT["Agent Orchestrator\n(dev-tools/agent-orchestration/agents/)"]:::core
-    MCP["MCP Server\n(mcp-servers/production-server.js)"]:::core
-    DB["Supabase DB\n(supabase/schema-sql/001_core_schema.sql)"]:::external
-    FN["Edge Function\n(supabase/functions/context-orchestration)"]:::external
-    API["External API\n(Google Places, Hunter.io, etc.)"]:::external
-    CACHE["Cache Layer\n(scripts/context/cache-session.js)"]:::infra
-    LOG["Diagnostics Logger\n(scripts/diagnostics/edge-function-diagnostics.sh)"]:::infra
-    
-    %% Flow
-    CMGR -- "dispatch: contextUpdate" --> AGENT
-    AGENT -- "trigger: orchestrateContext" --> MCP
-    MCP -- "invoke: contextOrchestration" --> FN
-    FN -- "read/write: contextState" --> DB
-    FN -- "cache: sessionContext" --> CACHE
-    FN -- "log: orchestrationEvent" --> LOG
-    FN -- "fetch: enrichmentData" --> API
-    API -- "return: enrichmentData" --> FN
-    CACHE -- "return: sessionContext" --> FN
-    DB -- "return: contextState" --> FN
-    LOG -- "return: diagnostics" --> FN
-    FN -- "return: orchestrationResult" --> MCP
-    MCP -- "update: orchestratorState" --> AGENT
-    AGENT -- "update: agentContext" --> CMGR
-    
+sequenceDiagram
+    participant AGENT as Agent Orchestrator\n(dev-tools/agent-orchestration/agents/)
+    participant CMGR as Context Manager\n(scripts/context/event-bus.ts)
+    participant ZFD as ZeroFakeData Checkpoint\n(scripts/shell/zero-fake-data-check.sh)
+    participant FN as Edge Function\n(supabase/functions/context-orchestration)
+    participant DB as Supabase DB\n(supabase/schema-sql/001_core_schema.sql)
+    participant CACHE as Cache Layer\n(scripts/context/cache-session.js)
+    participant LOG as Diagnostics Logger\n(scripts/diagnostics/edge-function-diagnostics.sh)
+
+    AGENT->>CMGR: dispatch: contextUpdate
+    CMGR->>ZFD: validate (ZeroFakeData)
+    ZFD-->>CMGR: pass/fail
+    CMGR->>FN: orchestrateContext
+    FN->>DB: read/write: contextState
+    FN->>CACHE: cache: sessionContext
+    FN->>LOG: log: orchestrationEvent
+    FN-->>AGENT: orchestrationResult
+
     %% Validation checkpoint
-    subgraph VALIDATION ["Validation & Checkpoints"]
-      V1["Validate: contextState schema"]
-      V2["Check: cache/session consistency"]
-      V3["Log: orchestration diagnostics"]
-    end
-    FN -.-> V1
-    FN -.-> V2
-    FN -.-> V3
-    
-    %% Styles
-    classDef core fill:#dbeafe,stroke:#2563eb,stroke-width:2px;
-    classDef external fill:#fef9c3,stroke:#eab308,stroke-width:2px;
-    classDef infra fill:#f1f5f9,stroke:#64748b,stroke-width:2px;
-    class CMGR,AGENT,MCP core;
-    class DB,FN,API external;
-    class CACHE,LOG infra;
+    Note over FN,LOG: Validation & Checkpoints\n- Validate: contextState schema\n- Check: cache/session consistency\n- Log: orchestration diagnostics
 
