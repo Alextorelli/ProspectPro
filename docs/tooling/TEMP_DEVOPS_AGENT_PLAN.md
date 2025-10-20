@@ -67,6 +67,15 @@ Document the immediate plan for consolidating DevOps AI agent workflows, includi
 - [x] FAST_README.md cross-linked to platform playbooks and Phase 2 expansion noted
 - [x] Guardrails reiterated: all config/task proposals staged in settings-staging.md
 
+---
+
+## Progress Checkpoint (2025-10-20)
+
+- Platform playbooks for Supabase, Vercel, and MCP are now documented and cross-linked from FAST_README.md.
+- All configuration/task proposals remain staged in `docs/tooling/settings-staging.md` per guard policy.
+- Documentation and manifest updates validated (`npm run docs:prepare`, `npm run docs:update`).
+- Ready to proceed to Phase 3 (automation scripts bundle) or address further requests.
+
 **Phase 2 complete. Ready for Phase 3 (automation scripts bundle).**
 
 **All steps complete. Guardrails enforced.**
