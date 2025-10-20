@@ -1136,7 +1136,7 @@
       "postRun": [
         {
           "type": "shell",
-          "command": "npx nyc --reporter=markdown --report-dir=reports/context -- temp tooling/test-automation/context/context.test.js && mv reports/context/coverage.md reports/context/phase-02-report.md"
+          "command": "npx nyc --reporter=markdown --report-dir=reports/context -- temp tooling/test-automation/context/context.test.js"
         }
       ]
     },

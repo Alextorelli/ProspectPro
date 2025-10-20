@@ -97,7 +97,7 @@ Data quality focuses on auditing live responses, preserving attribution, and doc
 - **Telemetry report**: `docs/tooling/TELEMETRY_LEGACY_CLEANUP_REPORT_2025-10-20.md` remains the authoritative audit; keep linked from this file until a newer report supersedes it
 - **Restructure plan**: `docs/app/REPO_RESTRUCTURE_PLAN.md` is the canonical migration roadmap and is referenced by README.md; update in lockstep with structural changes
 - **Validation template**: `dev-tools/reports/reports/validation/template.md` is required by validation runners and VS Code tasks; retain path integrity
-- **MCP status**: `dev-tools/mcp-servers/PRODUCTION_MCP_INITIALIZED.md` records the live production MCP state; replace only if you publish a new status doc and update operations notes
+- **MCP status**: See `docs/tooling/devops-agent-runbook.md` (MCP Production Status Snapshot) for the current production server inventory; update that section when tool counts change
 - **Audit artifacts**: `dev-tools/reports/reports/refactor/docs-audit.txt` and `dev-tools/reports/reports/refactor/structure-gap.md` track the ongoing cleanup; keep until the restructure backlog closes
 - **Coverage output**: `dev-tools/reports/reports/context/phase-02-report.md` is populated by the “Phase 02” task; preserve filename
 - **Historical sizes**: `CODEBASE_SIZES_BEFORE.txt` has no active references and can be deleted if the snapshot is no longer needed (delete and document in changelog if you remove it)

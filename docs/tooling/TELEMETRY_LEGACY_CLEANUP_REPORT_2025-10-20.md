@@ -20,7 +20,7 @@ All Thunder/Jaeger references have been removed from the codebase. Observability
 
 - `/docs/tooling/FAST_README.md`: Clarified that all Thunder Client references are deprecated; MCP tools and Supabase logs are the new standard.
 - `/docs/app/REPO_RESTRUCTURE_PLAN.md`: Removed Thunder collections from checklist; clarified deprecation.
-- `/dev-tools/reports/reports/refactor/structure-gap.md`: Removed Thunder references; updated to MCP/Supabase.
+- Workspace inventory and restructure backlog revalidated to confirm all remaining Thunder/Jaeger traces were replaced with MCP log-forwarder and Supabase logging references.
 - `/dev-tools/agent-orchestration/context/RELEASE_NOTES_AND_DIFF_TEMPLATE.md`: Updated test/validation to MCP tools and Supabase logs.
 - `/dev-tools/agent-orchestration/agents/observability/instructions.md`: Removed all Jaeger references; updated to MCP log-forwarder and Supabase logs.
 - `/dev-tools/agent-orchestration/agents/templates/README.md`: Removed all Thunder Client references; updated to MCP tools and Supabase logs.

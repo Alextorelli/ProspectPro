@@ -30,6 +30,19 @@
 
 All scripts output to `reports/` and enforce guardrails. See platform-playbooks.md for details.
 
+## MCP Production Status Snapshot (2025-10-20)
+
+- **Server state**: Production MCP server active via stdio transport (version 4.1.0 Post-Cleanup Enhanced)
+- **Tool inventory**: 28 production tools spanning monitoring, diagnostics, analytics, API testing, and filesystem analysis
+- **Key categories**:
+  - Monitoring (environment health, CI/CD, budget tracking)
+  - System diagnostics (logs, configuration, performance)
+  - Database analytics (campaign and lead insights)
+  - API validation (Google Places, Foursquare, Hunter.io, NeverBounce)
+  - Filesystem analysis (project structure, pattern search, zero-fake-data guard)
+- **Operational usage**: Launch with `npm run mcp:start:production`; run diagnostics via Start/Stop tasks or CLI scripts in `mcp-servers/`
+- **Status logging**: Capture notable findings in `reports/diagnostics/` alongside incident notes
+
 ## DevOps Agent Checklist Runbook
 
 ### 1. Pre-flight
