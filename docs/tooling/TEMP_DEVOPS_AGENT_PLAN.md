@@ -55,3 +55,50 @@ Document the immediate plan for consolidating DevOps AI agent workflows, includi
 - Automated tests run (core logic + DB)
 - Critical configs backed up to `archive/config-backup/`
 - Ready for next phase
+
+---
+
+## Current Agent & Debug Tooling
+
+- MCP suite: production/dev/troubleshooting servers active; scripts under operations + mcp-servers provide CLI-driven diagnostics.
+- Docs/diagram system: `.mmd` sources with front-matter, snippet library (mermaid.json), guidelines, and CLI rendering disabled by guard.
+- Telemetry cleanup done; routing diagrams now target `log-forwarder`.
+- React debugging: no integrated React DevTools yet; workflow still browser-extension based (Chrome/Firefox). Adoption will require documenting install steps, not .vscode edits.
+
+### Task 1 – Audit (progress vs gaps)
+
+| Area | Status | Noted Gaps |
+| --- | --- | --- |
+| **Application Source (app, supabase)** | Supabase-first architecture intact; edge-function/tests scripts untouched. | Lacks automated React state inspection; React DevTools not integrated/documented. |
+| **Dev-Tools (dev-tools, scripts)** | ContextManager orchestration diagrams, log-forwarder references, CLI guards, MCP tooling in place. | Need composed workflows for agent-onboarding (React debugging, Vercel, Supabase) and staging docs for future settings/tasks. |
+| **Docs** | Diagram guidelines, cleanup report, FAST_README changelog updated. | Missing “Telemetry Targets & Legacy Cleanup” guard details? (Check final doc). Need React DevTools setup guidance + agent workflow playbooks. |
+| **Automation** | npm/CLI tasks validated (`docs:prepare`, `docs:update`, lint). | React/front-end debugging still manual; no task to launch devtools-core; React DevTools usage not standardized. |
+| **Configuration Guard** | .vscode freeze noted; guard text present. | Need staging doc (`docs/tooling/settings-staging.md`) for future settings changes (if not already created). |
+
+### Task 2 – Streamlined Strategy (guard-aware)
+
+1. **Guard & Context Prep**
+   - Document the .vscode freeze explicitly in `docs/tooling/settings-staging.md` (no live edits).
+   - Update `diagram-guidelines.md` / `FAST_README.md` with guard note if missing.
+
+2. **React Debugging Integration**
+   - Author “React DevTools Usage” section in `docs/tooling/agent-debug-playbooks.md` (new or existing) referencing browser extension + `react-devtools-core` CLI (`npx react-devtools`).
+   - Add VS Code task *references only* (document command sequence) without touching .vscode.
+   - Provide MCP script or shell helper in `scripts/devtools/launch-react-devtools.sh` (optional future step, staged via doc).
+
+3. **Agent Workflow Consolidation**
+  - Expand diagram-guidelines.md / new doc to map agent handoffs (discovery → telemetry → debugging).
+  - Ensure each `.mmd` cites live scripts; re-validate via Mermaid preview.
+
+4. **Automation Enhancements**
+   - Compose a checklist runbook (`docs/tooling/devops-agent-runbook.md`):
+     1. Supabase log fetch (existing tasks)
+     2. React DevTools attach
+     3. MCP troubleshooting sequence
+     4. Docs update pipeline (`npm run docs:prepare`, `npm run docs:update`, `npm run lint`).
+   - Use existing shell scripts/VS Code tasks (no new .vscode edits).
+
+5. **Verification**
+   - Execute audit commands documented in checklist (no automation change).
+   - Capture outputs in `reports/` if needed.
+   - Confirm diagrams + docs updated; run validation pipeline.
