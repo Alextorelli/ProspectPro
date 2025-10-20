@@ -87,12 +87,20 @@ export const GeographicSelector: React.FC<GeographicSelectorProps> = ({
     /* Lines 144-154 omitted */
   };
 
-  const handleRadiusChange = useCallback(
-    (newRadius: number) => {
-      /* Lines 158-160 omitted */
-    },
-    [location, onLocationChange]
-  );
+  const handleRadiusChange = (newRadius: number) => {
+    setRadius(newRadius);
+
+    const radiusInMeters = newRadius * 1609.34;
+
+    if (circleRef.current) {
+      circleRef.current.setRadius(radiusInMeters);
+      if (typeof circleRef.current.setCenter === "function") {
+        circleRef.current.setCenter({ lat: location.lat, lng: location.lng });
+      }
+    }
+
+    onLocationChange(location, newRadius);
+  };
 
   const radiusOptions = useMemo(
     () => [
@@ -257,7 +265,7 @@ export const GeographicSelector: React.FC<GeographicSelectorProps> = ({
     return () => {
       didCancel = true;
     };
-  }, [googleMapsApiKey, suppressMapsTelemetry]);
+  }, [googleMapsApiKey, suppressMapsTelemetry, googleMapId]);
 
   const getZoomFromRadius = useCallback((radiusInMiles: number) => {
     if (radiusInMiles <= 1) return 14;

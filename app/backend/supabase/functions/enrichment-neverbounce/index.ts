@@ -92,57 +92,53 @@ class NeverBounceClient {
       return { ...cached.data, cost: 0 };
     }
 
-    try {
-      const url = `${this.baseURL}/single/check`;
-      const body = {
-        key: this.apiKey,
-        email: email,
-        address_info: 1,
-        credits_info: 1,
-        timeout: 15,
-      };
+    const url = `${this.baseURL}/single/check`;
+    const body = {
+      key: this.apiKey,
+      email: email,
+      address_info: 1,
+      credits_info: 1,
+      timeout: 15,
+    };
 
-      const response = await fetch(url, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(body),
-      });
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(body),
+    });
 
-      const data = await response.json();
+    const data = await response.json();
 
-      if (data.status !== "success") {
-        throw new Error(data.message || "Email verification failed");
-      }
-
-      const result: NeverBounceResponse = {
-        success: true,
-        action: "verify",
-        data: {
-          email,
-          result: data.result,
-          flags: data.flags,
-          suggested_correction: data.suggested_correction,
-          address_info: data.address_info,
-          execution_time: data.execution_time,
-        },
-        cost: this.costPerVerification,
-        confidence: this.calculateConfidence(data.result),
-        quotaUsed: data.credits_info?.paid_credits_used || 0,
-        quotaRemaining: data.credits_info?.free_credits_remaining || 0,
-      };
-
-      // Cache the result
-      this.cache.set(cacheKey, {
-        data: result,
-        timestamp: Date.now(),
-      });
-
-      return result;
-    } catch (error) {
-      throw error;
+    if (data.status !== "success") {
+      throw new Error(data.message || "Email verification failed");
     }
+
+    const result: NeverBounceResponse = {
+      success: true,
+      action: "verify",
+      data: {
+        email,
+        result: data.result,
+        flags: data.flags,
+        suggested_correction: data.suggested_correction,
+        address_info: data.address_info,
+        execution_time: data.execution_time,
+      },
+      cost: this.costPerVerification,
+      confidence: this.calculateConfidence(data.result),
+      quotaUsed: data.credits_info?.paid_credits_used || 0,
+      quotaRemaining: data.credits_info?.free_credits_remaining || 0,
+    };
+
+    // Cache the result
+    this.cache.set(cacheKey, {
+      data: result,
+      timestamp: Date.now(),
+    });
+
+    return result;
   }
 
   /**
@@ -197,46 +193,42 @@ class NeverBounceClient {
    * Get account information and quota status
    */
   async getAccountInfo(): Promise<NeverBounceResponse> {
-    try {
-      const url = `${this.baseURL}/account/info`;
-      const body = {
-        key: this.apiKey,
-      };
+    const url = `${this.baseURL}/account/info`;
+    const body = {
+      key: this.apiKey,
+    };
 
-      const response = await fetch(url, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(body),
-      });
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(body),
+    });
 
-      const data = await response.json();
+    const data = await response.json();
 
-      if (data.status !== "success") {
-        throw new Error(data.message || "Failed to get account info");
-      }
-
-      return {
-        success: true,
-        action: "account-info",
-        data: {
-          credits_info: {
-            free_credits_remaining:
-              data.credits_info?.free_credits_remaining || 0,
-            free_credits_used: data.credits_info?.free_credits_used || 0,
-            paid_credits_remaining:
-              data.credits_info?.paid_credits_remaining || 0,
-            paid_credits_used: data.credits_info?.paid_credits_used || 0,
-          },
-          job_counts: data.job_counts,
-        },
-        cost: 0,
-        quotaRemaining: data.credits_info?.free_credits_remaining || 0,
-      };
-    } catch (error) {
-      throw error;
+    if (data.status !== "success") {
+      throw new Error(data.message || "Failed to get account info");
     }
+
+    return {
+      success: true,
+      action: "account-info",
+      data: {
+        credits_info: {
+          free_credits_remaining:
+            data.credits_info?.free_credits_remaining || 0,
+          free_credits_used: data.credits_info?.free_credits_used || 0,
+          paid_credits_remaining:
+            data.credits_info?.paid_credits_remaining || 0,
+          paid_credits_used: data.credits_info?.paid_credits_used || 0,
+        },
+        job_counts: data.job_counts,
+      },
+      cost: 0,
+      quotaRemaining: data.credits_info?.free_credits_remaining || 0,
+    };
   }
 
   /**

@@ -1,3 +1,4 @@
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-nocheck
 // deno-lint-ignore-file
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
@@ -536,7 +537,7 @@ class BatchEnhancementProcessor {
                 }
               }
               break;
-            case "chamber":
+            case "chamber": {
               const chamberResult = await this.processChamberVerification(
                 business
               );
@@ -545,6 +546,7 @@ class BatchEnhancementProcessor {
                 totalConfidenceBoost += 15;
               }
               break;
+            }
             case "apollo":
               if (business.website) {
                 const apolloResult = await this.processApolloEnrichment(

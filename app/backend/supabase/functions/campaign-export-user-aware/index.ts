@@ -147,39 +147,35 @@ async function getCampaignData(
   supabaseClient: SupabaseClient,
   campaignId: string
 ): Promise<{ campaign: CampaignRow; leads: LeadRow[] }> {
-  try {
-    // Get campaign with user authorization - RLS policies will handle access control
-    const { data: campaignData, error: campaignError } = await supabaseClient
-      .from("campaigns")
-      .select("*")
-      .eq("id", campaignId)
-      .single();
+  // Get campaign with user authorization - RLS policies will handle access control
+  const { data: campaignData, error: campaignError } = await supabaseClient
+    .from("campaigns")
+    .select("*")
+    .eq("id", campaignId)
+    .single();
 
-    if (campaignError || !campaignData) {
-      throw new Error(
-        `Campaign not found or access denied: ${
-          campaignError?.message ?? "unknown error"
-        }`
-      );
-    }
-
-    // Get leads for the campaign
-    const { data: leadsData, error: leadsError } = await supabaseClient
-      .from("leads")
-      .select("*")
-      .eq("campaign_id", campaignId);
-
-    if (leadsError) {
-      throw new Error(`Could not fetch leads: ${leadsError.message}`);
-    }
-
-    const campaign = campaignData as CampaignRow;
-    const leads = (leadsData ?? []) as LeadRow[];
-
-    return { campaign, leads };
-  } catch (error) {
-    throw error;
+  if (campaignError || !campaignData) {
+    throw new Error(
+      `Campaign not found or access denied: ${
+        campaignError?.message ?? "unknown error"
+      }`
+    );
   }
+
+  // Get leads for the campaign
+  const { data: leadsData, error: leadsError } = await supabaseClient
+    .from("leads")
+    .select("*")
+    .eq("campaign_id", campaignId);
+
+  if (leadsError) {
+    throw new Error(`Could not fetch leads: ${leadsError.message}`);
+  }
+
+  const campaign = campaignData as CampaignRow;
+  const leads = (leadsData ?? []) as LeadRow[];
+
+  return { campaign, leads };
 }
 
 serve(async (req) => {
