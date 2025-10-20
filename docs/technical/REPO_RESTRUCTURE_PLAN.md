@@ -2,7 +2,7 @@
 
 ## Objective
 
-Converge ProspectPro to a hybrid mono-repo structure optimized for AI agent workflows, separating application source code (/app) from dev tooling (/tooling), while preserving Supabase-first, Thunder, and MCP integrations.
+Converge ProspectPro to a hybrid mono-repo structure optimized for AI agent workflows, separating application source code (/app) from dev tooling (/tooling), while preserving Supabase-first architecture and MCP integrations.
 
 ## Target Directory Layout
 
@@ -51,7 +51,7 @@ Converge ProspectPro to a hybrid mono-repo structure optimized for AI agent work
 - All ignore files (.gitignore, .eslintignore, .vercelignore) are maintained at the repository root for clarity and single-source-of-truth enforcement.
 - No per-folder ignore files are permitted unless required by CI/CD or build tooling; any such exceptions must be documented here.
 - .gitignore: VCS scope, excludes build outputs, logs, environment files, node_modules, and all non-MECE root files. No per-folder .gitignore files allowed.
-- .eslintignore: Linting scope, excludes build outputs, logs, Supabase functions, and legacy modules/scripts. No per-folder .eslintignore files allowed.
+- .eslintignore: Linting scope, excludes build outputs, logs, Supabase functions, and automation scripts under tooling/. No per-folder .eslintignore files allowed.
 - .vercelignore: Frontend build scope, excludes everything except static frontend assets and required configs. No per-folder .vercelignore files allowed.
 - Any exception (e.g., for CI/CD or build tooling) must be documented here and justified.
 
@@ -68,3 +68,10 @@ Converge ProspectPro to a hybrid mono-repo structure optimized for AI agent work
   - .github/, .vscode/, .devcontainer/, .husky/, .nvmrc, .npmrc
 - All other files/folders must be moved into the appropriate namespace or archived before deletion.
 - The folder archive/loose-root-assets/ is used as a temporary quarantine for legacy or loose files pending review or deletion.
+
+### Config Folder Layout
+
+- `config/README.md` records MECE ownership for configuration artifacts.
+- `tailwind.config.js`, `postcss.config.js`, `tsconfig*.json`, and `vercel.json` belong to the **app** surface and should only reference files under `app/frontend`.
+- `environment-loader.js`, `package-supabase.json`, `supabase.js`, `supabase-ca-2021.crt`, and `otel-config.yml` are **shared** resources consumed by both frontend and Supabase functions.
+- `mcp-config.json` and `ignore-validator.allowlists.json` are **tooling** assets used by MCP servers and hygiene scripts.

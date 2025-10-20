@@ -12,12 +12,20 @@
 const path = require("path");
 const fs = require("fs");
 
-// Import Supabase Vault Loader for API key management
-let vaultLoader;
-try {
-  vaultLoader = require("../modules/utils/supabase-vault-loader");
-} catch (error) {
-  console.warn("⚠️ Supabase Vault Loader not available:", error.message);
+// Optional Supabase Vault loader (legacy module removed during refactor)
+let vaultLoader = null;
+const vaultLoaderPath = path.resolve(
+  process.cwd(),
+  "tooling/supabase/supabase-vault-loader.js"
+);
+
+if (fs.existsSync(vaultLoaderPath)) {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    vaultLoader = require(vaultLoaderPath);
+  } catch (error) {
+    console.warn("⚠️ Supabase Vault loader failed to initialise:", error);
+  }
 }
 
 class EnvironmentLoader {

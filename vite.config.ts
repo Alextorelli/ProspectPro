@@ -2,31 +2,35 @@ import react from "@vitejs/plugin-react";
 import path from "path";
 import { defineConfig } from "vitest/config";
 
+const frontendRoot = path.resolve(__dirname, "app/frontend");
+
 // https://vitejs.dev/config/
 export default defineConfig({
+  root: frontendRoot,
   plugins: [react()],
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "./src"),
+      "@": frontendRoot,
     },
   },
-  // Allow environment variables with Vite and Vercel prefixes (NEXT_PUBLIC_/SUPABASE_)
+  publicDir: path.resolve(frontendRoot, "public"),
   envPrefix: ["VITE_", "NEXT_PUBLIC_", "SUPABASE_", "PUBLIC_"],
   server: {
     port: 5173,
-    host: true, // Allow external connections
+    host: true,
   },
   build: {
-    outDir: "dist",
+    outDir: path.resolve(__dirname, "dist"),
     sourcemap: true,
+    emptyOutDir: true,
   },
   define: {
-    // Ensure environment variables are available at build time
     "process.env.NODE_ENV": JSON.stringify(
       process.env.NODE_ENV || "development"
     ),
   },
   test: {
+    root: frontendRoot,
     environment: "jsdom",
     globals: true,
     css: true,

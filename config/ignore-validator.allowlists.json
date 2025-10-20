@@ -31,7 +31,6 @@
     "mcp-servers/test-troubleshooting-server.js",
     "supabase/functions/business-discovery-user-aware/index.ts.backup",
     "scripts/tooling/validate-ignore-config.js",
-    "modules/registry-engines/registry-validation-core-engine.js",
     ".github/workflows/deploy.yml",
     ".vercelignore",
     "scripts/testing/test-auth-patterns.sh",

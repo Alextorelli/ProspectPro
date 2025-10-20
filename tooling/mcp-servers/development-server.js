@@ -403,9 +403,9 @@ class DevelopmentMCPServer {
 
     // Simplified analysis - in real implementation, would scan actual files
     const keyFiles = [
-      "server.js",
-      "api/business-discovery.js",
-      "modules/enhanced-lead-discovery.js",
+      "supabase/functions/business-discovery-background/index.ts",
+      "supabase/functions/enrichment-orchestrator/index.ts",
+      "app/frontend/lib/supabase.ts",
     ];
 
     keyFiles.forEach((file) => {
@@ -616,7 +616,7 @@ module.exports = ${apiName.replace(/[^a-zA-Z0-9]/g, "")}Client;
               template_generated: true,
               file_content: template,
               next_steps: [
-                `Save as modules/api-clients/${apiName
+                `Save as tooling/api/clients/${apiName
                   .toLowerCase()
                   .replace(/[^a-zA-Z0-9]/g, "-")}-client.js`,
                 "Update the baseUrl and endpoint paths",

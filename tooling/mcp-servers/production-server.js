@@ -661,26 +661,10 @@ class ProductionMCPServer {
 
   async initializeAPIClients() {
     if (Object.keys(this.apiClients).length === 0) {
-      try {
-        const GooglePlacesClient = require("../modules/api-clients/google-places-client");
-        const FoursquareClient = require("../modules/api-clients/foursquare-places-client");
-        const HunterIOClient = require("../modules/api-clients/hunter-io-client");
-        const NeverBounceClient = require("../modules/api-clients/neverbounce-client");
-
-        this.apiClients = {
-          googlePlaces: new GooglePlacesClient(
-            process.env.GOOGLE_PLACES_API_KEY
-          ),
-          foursquare: new FoursquareClient(process.env.FOURSQUARE_API_KEY),
-          hunterIO: new HunterIOClient(process.env.HUNTER_IO_API_KEY),
-          neverBounce: new NeverBounceClient(process.env.NEVERBOUNCE_API_KEY),
-        };
-      } catch (error) {
-        console.error(
-          "Warning: Some API clients could not be loaded:",
-          error.message
-        );
-      }
+      console.warn(
+        "ℹ️  Legacy API client modules removed. Using Supabase Edge functions for live enrichment."
+      );
+      this.apiClients = {};
     }
   }
 
@@ -2411,12 +2395,36 @@ class ProductionMCPServer {
     const { detailed = false } = args;
     const apiClientsPath = path.join(
       this.workspaceRoot,
-      "modules",
-      "api-clients"
+      "tooling",
+      "api",
+      "clients"
     );
 
+    if (!fs.existsSync(apiClientsPath)) {
+      return {
+        content: [
+          {
+            type: "text",
+            text: JSON.stringify(
+              {
+                clients: [],
+                summary: {
+                  total_clients: 0,
+                  total_methods: 0,
+                  clients_with_caching: 0,
+                },
+                note: `API client directory not found at ${apiClientsPath}`,
+              },
+              null,
+              2
+            ),
+          },
+        ],
+      };
+    }
+
     try {
-      const files = await fs.readdirSync(apiClientsPath);
+      const files = fs.readdirSync(apiClientsPath);
       const analysis = { clients: [], summary: {} };
 
       for (const file of files) {

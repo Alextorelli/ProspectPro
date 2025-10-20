@@ -90,7 +90,6 @@ const SKIP_FILES = new Set([
   // Scripts/tools
   "scripts/tooling/validate-ignore-config.js",
   // Build artifacts
-  "modules/registry-engines/registry-validation-core-engine.js",
   // Workflow/config files
   ".github/workflows/deploy.yml",
   ".vercelignore",
@@ -103,21 +102,16 @@ const SKIP_FILES = new Set([
   "scripts/testing/test-export-flow.sh",
   "scripts/testing/test-pdl-state-licensing.sh",
   // TEMPORARY: ESLint parser compatibility issues (TypeScript 5.9.3)
-  "src/components/GeographicSelector.tsx",
-  "src/components/PaymentMethods.tsx",
-  "src/components/Stepper.tsx",
+  "app/frontend/components/GeographicSelector.tsx",
+  "app/frontend/components/PaymentMethods.tsx",
+  "app/frontend/components/Stepper.tsx",
 
   // TEMPORARY: CommonJS modules pending ESM migration (whitelisted for CI/deploy)
   // These are handled as glob patterns below
 ]);
 
 const minimatch = require("minimatch");
-const SKIP_GLOBS = [
-  "config/**/*.js",
-  "modules/**/*.js",
-  "mcp-servers/**/*.js",
-  "scripts/**/*.js",
-];
+const SKIP_GLOBS = ["config/**/*.js", "mcp-servers/**/*.js", "scripts/**/*.js"];
 function readIgnoreFile(file) {
   try {
     return fs.readFileSync(path.join(ROOT, file), "utf8");

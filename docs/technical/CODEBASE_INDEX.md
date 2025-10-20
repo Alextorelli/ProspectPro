@@ -2,7 +2,7 @@
 
 > Primary #codebase reference. Regenerate with `npm run docs:update` before audits or deployments.
 
-_Last generated: 2025-10-19T23:40:24.851Z_
+_Last generated: 2025-10-20T00:40:30.843Z_
 
 ## Supabase Edge Functions
 
@@ -48,23 +48,6 @@ _Last generated: 2025-10-19T23:40:24.851Z_
 - [supabase/functions/_shared/edge-auth-simplified.ts](supabase/functions/_shared/edge-auth-simplified.ts) — Supabase Edge Function module
 - [supabase/functions/_shared/edge-auth.ts](supabase/functions/_shared/edge-auth.ts) — Shared Supabase session validator for edge functions
 - [supabase/functions/_shared/vault-client.ts](supabase/functions/_shared/vault-client.ts) — Supabase Edge Function module
-
-## Frontend Core
-
-- [src/App.tsx](src/App.tsx) — React frontend module
-- [src/main.tsx](src/main.tsx) — React frontend module
-- [src/hooks/useBusinessDiscovery.ts](src/hooks/useBusinessDiscovery.ts) — Primary frontend hook orchestrating discovery workflow
-- [src/hooks/useJobProgress.tsx](src/hooks/useJobProgress.tsx) — Hook tracking asynchronous discovery job progress
-- [src/contexts/AuthContext.tsx](src/contexts/AuthContext.tsx) — React context handling Supabase auth state transitions
-- [src/pages/Dashboard.tsx](src/pages/Dashboard.tsx) — Dashboard page retrieving campaigns and showing status
-- [src/pages/BusinessDiscovery.tsx](src/pages/BusinessDiscovery.tsx) — Campaign launch UI orchestrating discovery workflow
-- [src/lib/supabase.ts](src/lib/supabase.ts) — Frontend Supabase client + authenticated function invocation helper
-- [src/components/GeographicSelector.tsx](src/components/GeographicSelector.tsx) — Location selector used in campaign creation
-- [src/stores/campaignStore.ts](src/stores/campaignStore.ts) — React frontend module
-
-## Static Entry Points
-
-- [index.html](index.html) — Project file
 
 ## Database & Security Artifacts
 

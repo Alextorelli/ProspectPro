@@ -70,7 +70,7 @@
     "supabase:migrations:new": "bash -lc 'cd supabase && source ../scripts/operations/ensure-supabase-cli-session.sh && read -p \"Migration name: \" name && npx --yes supabase@latest migration new \"$name\"'",
     "supabase:status": "bash -lc 'cd supabase && source ../scripts/operations/ensure-supabase-cli-session.sh && npx --yes supabase@latest status'",
     "supabase:start:local": "bash -lc 'cd supabase && npx --yes supabase@latest start'",
-    "supabase:types": "bash -lc 'cd supabase && source ../scripts/operations/ensure-supabase-cli-session.sh && npx --yes supabase@latest gen types --lang typescript > ../src/types/supabase.ts'",
+    "supabase:types": "bash -lc 'cd supabase && source ../scripts/operations/ensure-supabase-cli-session.sh && npx --yes supabase@latest gen types --lang typescript > ../app/frontend/types/supabase.ts'",
     "supabase:test:functions": "bash -lc 'source scripts/testing/test-env.local.sh && deno test --allow-all supabase/functions/tests/'",
     "supabase:workflow": "npm run supabase:auth && npm run supabase:link && npm run supabase:migrations:list",
     "edge:serve": "bash -lc 'cd supabase && source ../scripts/operations/ensure-supabase-cli-session.sh && npx --yes supabase@latest functions serve --no-verify-jwt --debug'",
