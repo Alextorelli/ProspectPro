@@ -1,5 +1,7 @@
 # Diagram Guidelines for ProspectPro
 
+> **Configuration Guard:** All changes to `.vscode/` and `.github/` must be staged and approved via `docs/tooling/settings-staging.md`. Do not edit these directories directly during refactors or automation.
+
 ## Prompts & Snippet Reuse
 
 - Use snippet blocks from `docs/tooling/snippets/mermaid.json` for all common nodes (e.g., ContextManager, ZeroFakeData, architecture-beta skeleton).

@@ -1,5 +1,7 @@
 # ProspectPro Tooling FAST_README
 
+> **Configuration Guard:** All changes to `.vscode/` and `.github/` must be staged and approved via `docs/tooling/settings-staging.md`. Do not edit these directories directly during refactors or automation.
+
 - Purpose: Quick reference for MCP, scripts, CI, and dev tools.
 - Diagrams:
   - [Workspace Architecture](workspace-architecture.mmd)
