@@ -38,7 +38,7 @@ This directory contains reusable agent configuration patterns and templates for 
 
 **Template Structure**:
 
-```markdown
+````markdown
 # ADR-XXX: [Decision Title]
 
 ## Status: [Proposed|Accepted|Deprecated]
@@ -75,61 +75,62 @@ Which MCP servers/tools are affected?
 1. Schema changes (validate with postgresql.validate_migration)
 2. Edge Function updates
 3. MCP tool modifications
-4. Testing & validation steps
-5. Deployment sequence
-6. Rollback procedure
-```
 
-### 3. Incident Response Template
+4. Integration health: `mcp.integration_hub.check_integration_health`
 
-**Use Case**: Production Ops and Observability agents for P0/P1 incidents
-**Key Sections**: Detection, investigation, mitigation, communication
-
-**Template Structure**:
-
-```markdown
-# Incident: [INC-YYYY-MM-DD-NNN]
-
-## Severity: [P0|P1|P2|P3]
-
-## Status: [Investigating|Mitigating|Resolved|Post-Mortem]
-
-## Detection (Timestamp)
-
-How was the incident detected?
-
-- Automated alert from observability agent
-- User report
-- Monitoring dashboard
-
-## Impact Assessment
-
-- Affected services: [business-discovery, enrichment, export, auth]
-- Error rate: [percentage]
-- Users impacted: [number or "all"]
-- Data integrity: [compromised|intact]
-
-## Investigation (MCP Tools Used)
-
-1. Error correlation: `mcp.supabase_troubleshooting.correlate_errors`
-2. Incident timeline: `mcp.supabase_troubleshooting.generate_incident_timeline`
-3. Integration health: `mcp.integration_hub.check_integration_health`
-4. Database health: `mcp.postgresql.check_pool_health`
-
-## Root Cause Analysis
-
-What caused the incident?
-
-- Technical failure point
-- Code changes involved (git commit SHA)
 - Configuration issues
-- External dependency failure
 
+# 5. Testing Workflow Template
+
+**Use Case**: Development Workflow agent for comprehensive testing
+**Key Sections**: Unit tests, integration tests, E2E tests, MCP Validation Runner
+
+**Template Structure** (`/scripts/testing/test-new-feature.sh`):
+
+```bash
+#!/bin/bash
+set -euo pipefail
+
+# Test script for [Feature Name]
+# Invoked by: Development Workflow Agent
+# MCP Tools: chrome-devtools, github, postgresql, integration-hub
+# Zero-fake-data: Always audit enrichment results for compliance using MCP tools. Never use Thunder Client or manual scripts for production validation.
+# Environment: Use ContextManager to switch environments. Always export SUPABASE_SESSION_JWT for authenticated calls.
+
+FEATURE_NAME="$1"
+TEST_ENV="${2:-local}"
+
+
+
+# 1. Unit tests
 ## Mitigation Steps
 
+
+# 2. Database integration tests
 1. Immediate actions taken (rollback, circuit breaker activation)
 2. MCP workflows executed
+
+# 3. Edge Function tests (requires session JWT)
+if [[ -n "${SUPABASE_SESSION_JWT:-}" ]]; then
+  echo "Running Edge Function tests..."
+  npm run supabase:test:functions
+else
+  echo "Skipping Edge Function tests (SUPABASE_SESSION_JWT not set)"
+fi
+
+# 4. MCP API/E2E tests (replace Thunder Client)
 3. Service restoration timeline
+# Example: Use integration_hub.execute_workflow or other MCP-first tools here
+
+# 5. Chrome DevTools visual regression (if frontend changes)
+if [[ "${TEST_ENV}" == "production" ]]; then
+  echo "Running visual regression tests..."
+  # MCP call to chrome-devtools server
+  mcp chrome_devtools screenshot_capture --url=https://prospect-fyhedobh1-appsmithery.vercel.app
+fi
+
+```
+````
 
 ## Communication Log
 
@@ -149,7 +150,8 @@ What caused the incident?
 - Engineering review scheduled: [Date]
 - Action items created: [GitHub issue links]
 - Documentation updated: [File paths]
-```
+
+````
 
 ### 4. MCP Server Implementation Template
 
@@ -285,7 +287,7 @@ process.on("SIGINT", () => {
   console.error("Shutting down...");
   process.exit(0);
 });
-```
+````
 
 ### 5. Testing Workflow Template
 

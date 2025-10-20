@@ -39,10 +39,11 @@ await mcp.integration_hub.check_integration_health();
 ### Architecture Principles (Non-Negotiable)
 
 1. **Supabase-First**: All backend logic in Edge Functions, no Express/Node.js containers
-2. **Zero Fake Data**: Verified contacts only (Hunter.io, NeverBounce, licensing boards)
-3. **MCP-Native Workflows**: Replace custom scripts with MCP tools (70-80% reduction target)
+2. **Zero Fake Data**: Verified contacts only (Hunter.io, NeverBounce, licensing boards). **Always audit enrichment results for zero-fake-data compliance using MCP tools.**
+3. **MCP-First Workflows**: Replace custom scripts with MCP tools (target 80%+ reduction). Never use Thunder Client or manual scripts for production validation.
 4. **OpenTelemetry Observability**: All critical paths instrumented with trace spans
 5. **Circuit Breaker Resilience**: All external API calls protected (5 failures = OPEN state)
+6. **Environment Switch Guidance**: Use ContextManager to switch between local, staging, and production. Always export `SUPABASE_SESSION_JWT` for authenticated calls. Validate environment with `supabase:link` and `supabase:ensure-session` tasks.
 
 ### Design Review Checklist
 

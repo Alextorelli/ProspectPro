@@ -74,7 +74,13 @@ await mcp.postgresql.execute_query({ query: seedSQL, params });
 
 - ESLint autofix (`npm run lint:fix`)
 - TypeScript strict mode validation
-- Zero-fake-data pattern detection
+- Zero-fake-data pattern detection (always audit enrichment results for compliance using MCP tools; never use Thunder Client or manual scripts for production validation)
+
+**Environment Switch Guidance**:
+
+- Use ContextManager to switch between local, staging, and production.
+- Always export `SUPABASE_SESSION_JWT` for authenticated Edge Function and MCP tool calls.
+- Validate environment with `supabase:link` and `supabase:ensure-session` tasks.
 
 **Pre-Push**:
 

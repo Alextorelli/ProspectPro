@@ -183,37 +183,13 @@ for (const pattern of patterns.slice(0, 3)) {
 
 **Detection Rules**:
 
-```javascript
-const fakeDataPatterns = [
-  /info@|contact@|hello@|sales@/i, // Generic email patterns
-  /test@example\.com/i, // Test emails
-  /555-\d{4}/, // Fake phone numbers
-];
+Always audit enrichment results for zero-fake-data compliance using MCP tools. Use `postgresql.execute_query` to scan for generic/fake patterns and `integration_hub.send_notification` to alert on violations. Never use Thunder Client or manual scripts for compliance checks.
 
-// Flag suspicious enrichment results
-async function auditEnrichmentData(campaignId) {
-  const leads = await mcp.postgresql.execute_query({
-    query: "SELECT email, phone FROM leads WHERE campaign_id = $1",
-    params: [campaignId],
-  });
+**Environment Switch Guidance**:
 
-  const violations = leads.rows.filter((lead) =>
-    fakeDataPatterns.some(
-      (pattern) => pattern.test(lead.email) || pattern.test(lead.phone)
-    )
-  );
-
-  if (violations.length > 0) {
-    await mcp.integration_hub.send_notification({
-      channel: "slack",
-      recipient: process.env.ALERT_WEBHOOK_URL,
-      message: `Zero-fake-data violation detected in campaign ${campaignId}`,
-      severity: "critical",
-      metadata: { violations },
-    });
-  }
-}
-```
+- Use ContextManager to switch between local, staging, and production.
+- Always export `SUPABASE_SESSION_JWT` for authenticated MCP tool calls.
+- Validate environment with `supabase:link` and `supabase:ensure-session` tasks.
 
 ## Knowledge Base References
 
