@@ -1,0 +1,29 @@
+---
+id: mcp-routing-sequence
+intent: "Show the sequence of routing from ingress through ContextManager, ZeroFakeData validation, MCP servers, and telemetry."
+context: |
+  This sequence diagram highlights the validation and routing steps, referencing stable node IDs and reusable snippets.
+---
+
+sequenceDiagram
+    participant Ingress as Ingress Gateway
+    participant Router as Context Router
+    participant ZeroFake as ZeroFakeData Checkpoint
+    participant CtxMgr as ContextManager
+    participant MCPProd as MCP Production
+    participant MCPDev as MCP Development
+    participant MCPTrouble as MCP Troubleshooting
+    participant Thunder as Thunder Reports
+    participant Supabase as Supabase Logs
+
+    Ingress->>Router: receive()
+    Router->>ZeroFake: validate()
+    ZeroFake-->>CtxMgr: pass
+    CtxMgr->>MCPProd: route:prod
+    CtxMgr->>MCPDev: route:dev
+    CtxMgr->>MCPTrouble: route:trouble
+    MCPProd->>Thunder: emit:thunder
+    MCPProd->>Supabase: emit:logs
+    MCPDev->>Thunder: emit:thunder
+    MCPTrouble->>Supabase: emit:logs
+    MCPProd-->>MCPTrouble: escalate

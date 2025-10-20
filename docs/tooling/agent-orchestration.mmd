@@ -1,64 +1,56 @@
-%% Agent Orchestration Workflow
-%% accTitle: Agent Orchestration Workflow
-%% accDescr: Top-down flow from request intake through planning, routing, execution, and feedback outputs
-%% Palette: mcp #2563eb, agent #f97316, workflow #16a34a, context #64748b, output #facc15
+---
+id: agent-orchestration
+intent: Agent Orchestration Workflow (modular, agentic, with stable node IDs)
+context: |
+  This diagram visualizes the agent orchestration workflow in the MCP/ProspectPro system. Each node uses a stable, descriptive ID and is linked to the relevant script or function path. Edges are annotated with conditions or triggers. Modular and ready for agentic automation.
+---
 flowchart TD
-	subgraph Intake["Intake"]
-		direction LR
-		Request["Developer / AI Request"]:::agent
-	end
+    %% Stable node IDs and descriptive labels
+    REQUEST["Developer / AI Request\n(src/agent-orchestration/request.ts)"]:::agent
+    PLAN["Plan Tasks\n(src/agent-orchestration/plan.ts)"]:::workflow
+    LEDGER["Update Ledger\n(src/agent-orchestration/ledger.ts)"]:::context
+    CONTEXT_MGR["Manage Context\n(scripts/context/event-bus.ts)"]:::context
+    SKILL_ROUTER["Route Skills\n(src/agent-orchestration/skill-router.ts)"]:::agent
+    AGENT_POOL["Agent Pool\n(dev-tools/agent-orchestration/agents/)"]:::agent
+    MCP_BRIDGE["Invoke MCP\n(mcp-servers/production-server.js)"]:::mcp
+    DELIVERABLE["Deliver Result\n(src/agent-orchestration/deliverable.ts)"]:::output
 
-	subgraph Orchestration["Orchestrate"]
-		direction LR
-		Plan["Plan Tasks"]:::workflow
-		Ledger["Update Ledger"]:::context
-		ContextMgr["Manage Context"]:::context
-	end
+    %% Flow
+    REQUEST --> PLAN
+    PLAN --> LEDGER
+    LEDGER --> CONTEXT_MGR
+    CONTEXT_MGR --> SKILL_ROUTER
+    SKILL_ROUTER --> AGENT_POOL
+    AGENT_POOL --> MCP_BRIDGE
+    MCP_BRIDGE --> DELIVERABLE
+    DELIVERABLE -.->|"feedback"| REQUEST
+    MCP_BRIDGE --> LEDGER
 
-	subgraph Routing["Route"]
-		direction LR
-		SkillRouter["Route Skills"]:::agent
-	end
+    %% Styles
+    classDef mcp fill:#2563eb,color:#fff;
+    classDef agent fill:#f97316,color:#fff;
+    classDef workflow fill:#16a34a,color:#fff;
+    classDef context fill:#64748b,color:#fff;
+    classDef output fill:#facc15,color:#222;
+    class REQUEST,SKILL_ROUTER,AGENT_POOL agent;
+    class PLAN workflow;
+    class LEDGER,CONTEXT_MGR context;
+    class MCP_BRIDGE mcp;
+    class DELIVERABLE output;
 
-	subgraph Execution["Execute"]
-		direction LR
-		AgentPool["Agent Pool"]:::agent
-		MCPBridge["Invoke MCP"]:::mcp
-	end
-
-	subgraph Outcomes["Outcome"]
-		direction LR
-		Deliverable["Deliver Result"]:::output
-	end
-
-	Request --> Plan
-	Plan --> Ledger
-	Ledger --> ContextMgr
-	ContextMgr --> SkillRouter
-	SkillRouter --> AgentPool
-	AgentPool --> MCPBridge
-	MCPBridge --> Deliverable
-	Deliverable -.->|"feedback"| Request
-	MCPBridge --> Ledger
-
-	classDef mcp fill:#2563eb,color:#fff;
-	classDef agent fill:#f97316,color:#fff;
-	classDef workflow fill:#16a34a,color:#fff;
-	classDef context fill:#64748b,color:#fff;
-	classDef output fill:#facc15,color:#222;
-
-	subgraph Legend["Legend"]
-		direction LR
-		L1["MCP"]
-		L2["Agent"]
-		L3["Workflow"]
-		L4["Context"]
-		L5["Output"]
-		style Legend fill:#fff,stroke:#888,stroke-width:1px
-		style L1 fill:#2563eb,color:#fff
-		style L2 fill:#f97316,color:#fff
-		style L3 fill:#16a34a,color:#fff
-		style L4 fill:#64748b,color:#fff
-		style L5 fill:#facc15,color:#222
-	end
+    %% Legend
+    subgraph Legend["Legend"]
+        direction LR
+        L1["MCP"]
+        L2["Agent"]
+        L3["Workflow"]
+        L4["Context"]
+        L5["Output"]
+        style Legend fill:#fff,stroke:#888,stroke-width:1px
+        style L1 fill:#2563eb,color:#fff
+        style L2 fill:#f97316,color:#fff
+        style L3 fill:#16a34a,color:#fff
+        style L4 fill:#64748b,color:#fff
+        style L5 fill:#facc15,color:#222
+    end
 

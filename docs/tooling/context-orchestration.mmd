@@ -1,77 +1,51 @@
-%% Context Orchestration Pipeline
-%% accTitle: Context Orchestration Pipeline
-%% accDescr: Top-down context flow from intake through normalization, storage, routing, execution, and reporting
-%% Palette: context #64748b, agent #f97316, workflow #16a34a, mcp #2563eb, report #facc15
+---
+id: context-orchestration
+intent: Context Orchestration Flowchart (modular, agentic, with stable node IDs)
+context: |
+  This diagram visualizes the orchestration of context management in the MCP/ProspectPro system. Each node uses a stable, descriptive ID and is linked to the relevant script or function path. Edges are annotated with conditions or triggers. This version is modular and ready for agentic automation.
+---
 flowchart TD
-	subgraph IntakeLayer["Intake"]
-		direction LR
-		Intake["Receive Input"]:::agent
-	end
-
-	subgraph NormalizeLayer["Normalize & Store"]
-		direction LR
-		Normalize["Normalize Context"]:::context
-		Write["Write Snapshot"]:::context
-		Compress["Compress Snapshot"]:::context
-	end
-
-	subgraph RetrieveLayer["Retrieve & Route"]
-		direction LR
-		Retrieve["Select Context"]:::context
-		Route["Route Agent"]:::workflow
-	end
-
-	subgraph ExecuteLayer["Execute"]
-		direction LR
-		SmartDebug["Smart Debug"]:::agent
-		FeatureDelivery["Feature Delivery"]:::agent
-		ExecMCP["Invoke MCP"]:::mcp
-	end
-
-	subgraph ReportLayer["Report & Adjust"]
-		direction LR
-		Ledger["Update Ledger"]:::report
-		Env["Mode Switch"]:::config
-	end
-
-	Intake --> Normalize
-	Normalize --> Write
-	Write --> Compress
-	Compress --> Retrieve
-	Retrieve --> Route
-	Route --> SmartDebug
-	Route --> FeatureDelivery
-	SmartDebug --> ExecMCP
-	FeatureDelivery --> ExecMCP
-	ExecMCP --> Ledger
-	Ledger -.->|"iterative compression"| Normalize
-	Env -.->|"mode switch"| Intake
-	Env -.->|"mode switch"| ExecMCP
-
-	Write -- "checkpoint()" --> Retrieve
-	Compress -- "compress()" --> Retrieve
-
-	classDef context fill:#64748b,color:#fff;
-	classDef agent fill:#f97316,color:#fff;
-	classDef workflow fill:#16a34a,color:#fff;
-	classDef mcp fill:#2563eb,color:#fff;
-	classDef report fill:#facc15,color:#222;
-	classDef config fill:#2563eb,color:#fff;
-
-	subgraph Legend["Legend"]
-		direction LR
-		L1["Context"]
-		L2["Agent"]
-		L3["Workflow"]
-		L4["MCP"]
-		L5["Report"]
-		L6["Config"]
-		style Legend fill:#fff,stroke:#888,stroke-width:1px
-		style L1 fill:#64748b,color:#fff
-		style L2 fill:#f97316,color:#fff
-		style L3 fill:#16a34a,color:#fff
-		style L4 fill:#2563eb,color:#fff
-		style L5 fill:#facc15,color:#222
-		style L6 fill:#2563eb,color:#fff
-	end
+    %% Stable node IDs and descriptive labels
+    CMGR["Context Manager\n(scripts/context/event-bus.ts)"]:::core
+    AGENT["Agent Orchestrator\n(dev-tools/agent-orchestration/agents/)"]:::core
+    MCP["MCP Server\n(mcp-servers/production-server.js)"]:::core
+    DB["Supabase DB\n(supabase/schema-sql/001_core_schema.sql)"]:::external
+    FN["Edge Function\n(supabase/functions/context-orchestration)"]:::external
+    API["External API\n(Google Places, Hunter.io, etc.)"]:::external
+    CACHE["Cache Layer\n(scripts/context/cache-session.js)"]:::infra
+    LOG["Diagnostics Logger\n(scripts/diagnostics/edge-function-diagnostics.sh)"]:::infra
+    
+    %% Flow
+    CMGR -- "dispatch: contextUpdate" --> AGENT
+    AGENT -- "trigger: orchestrateContext" --> MCP
+    MCP -- "invoke: contextOrchestration" --> FN
+    FN -- "read/write: contextState" --> DB
+    FN -- "cache: sessionContext" --> CACHE
+    FN -- "log: orchestrationEvent" --> LOG
+    FN -- "fetch: enrichmentData" --> API
+    API -- "return: enrichmentData" --> FN
+    CACHE -- "return: sessionContext" --> FN
+    DB -- "return: contextState" --> FN
+    LOG -- "return: diagnostics" --> FN
+    FN -- "return: orchestrationResult" --> MCP
+    MCP -- "update: orchestratorState" --> AGENT
+    AGENT -- "update: agentContext" --> CMGR
+    
+    %% Validation checkpoint
+    subgraph VALIDATION ["Validation & Checkpoints"]
+      V1["Validate: contextState schema"]
+      V2["Check: cache/session consistency"]
+      V3["Log: orchestration diagnostics"]
+    end
+    FN -.-> V1
+    FN -.-> V2
+    FN -.-> V3
+    
+    %% Styles
+    classDef core fill:#dbeafe,stroke:#2563eb,stroke-width:2px;
+    classDef external fill:#fef9c3,stroke:#eab308,stroke-width:2px;
+    classDef infra fill:#f1f5f9,stroke:#64748b,stroke-width:2px;
+    class CMGR,AGENT,MCP core;
+    class DB,FN,API external;
+    class CACHE,LOG infra;
 
