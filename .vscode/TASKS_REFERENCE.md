@@ -85,6 +85,7 @@ _Auto-generated from `.vscode/tasks.json` — Last updated: 2025-10-20_
 | **Docs: Update All Documentation** | `npm run docs:update` | Multiple | None | No description available |
 | **Docs: Update System Reference (Legacy)** | `npm run system:reference` | Multiple | None | No description available |
 | **Docs: Update Codebase Index (Legacy)** | `npm run codebase:index` | Multiple | None | No description available |
+| **Docs: Bootstrap Tooling Diagrams** | `npm run docs:bootstrap` |  | None | No description available |
 
 ## Roadmap Management
 

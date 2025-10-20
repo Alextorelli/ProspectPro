@@ -2,7 +2,7 @@
 
 > Primary #codebase reference. Regenerate with `npm run docs:update` before audits or deployments.
 
-_Last generated: 2025-10-20T01:14:29.617Z_
+_Last generated: 2025-10-20T01:55:07.253Z_
 
 ## Supabase Edge Functions
 
@@ -58,6 +58,7 @@ _Last generated: 2025-10-20T01:14:29.617Z_
 
 ## Configuration & Policies
 
+- [docs/technical/CODEBASE_INDEX.md](docs/technical/CODEBASE_INDEX.md) — Auto-generated index consumed by #codebase command
 - [.github/copilot-instructions.md](.github/copilot-instructions.md) — AI assistant operating instructions (keep in sync)
 - [.vscode/settings.json](.vscode/settings.json) — Workspace defaults for Supabase + Copilot context
 - [.vscode/prospectpro-supabase.code-workspace](.vscode/prospectpro-supabase.code-workspace) — Workspace file bundling tasks and recommendations
