@@ -40,7 +40,7 @@ await mcp.integration_hub.check_integration_health();
 
 1. **Supabase-First**: All backend logic in Edge Functions, no Express/Node.js containers
 2. **Zero Fake Data**: Verified contacts only (Hunter.io, NeverBounce, licensing boards). **Always audit enrichment results for zero-fake-data compliance using MCP tools.**
-3. **MCP-First Workflows**: Replace custom scripts with MCP tools (target 80%+ reduction). Never use Thunder Client or manual scripts for production validation.
+3. **MCP-First Workflows**: Replace custom scripts with MCP tools (target 80%+ reduction). Never rely on manual API clients or ad-hoc scripts for production validation.
 4. **OpenTelemetry Observability**: All critical paths instrumented with trace spans
 5. **Circuit Breaker Resilience**: All external API calls protected (5 failures = OPEN state)
 6. **Environment Switch Guidance**: Use ContextManager to switch between local, staging, and production. Always export `SUPABASE_SESSION_JWT` for authenticated calls. Validate environment with `supabase:link` and `supabase:ensure-session` tasks.
@@ -108,11 +108,13 @@ async function callExternalAPI(service, params) {
 
 ### Critical Documentation
 
-- **Architecture**: `/docs/technical/SYSTEM_REFERENCE.md`
-- **Deployment**: `/docs/deployment/edge-functions.md`
+- **App System Reference**: `/docs/app/SYSTEM_REFERENCE.md`
+- **Technical System Reference**: `/docs/technical/SYSTEM_REFERENCE.md`
+- **Documentation Standards**: `/docs/technical/DOCUMENTATION_STANDARDS.md`
 - **Database**: `/supabase/schema-sql/` (001-004 sequential migrations)
-- **MCP Registry**: `/mcp-servers/registry.json`
 - **Edge Functions**: `/supabase/functions/` (business-discovery-background, enrichment-orchestrator, campaign-export-user-aware)
+- **MCP Registry**: `/dev-tools/mcp-servers/registry.json`
+- **Context Store Guide**: `/dev-tools/agent-orchestration/context/README.md`
 
 ### Performance Targets (from registry.json)
 

@@ -18,7 +18,7 @@
 
 ## Quick Reference
 
-- **MCP-First**: Prefer MCP tools over custom scripts or Thunder Client.
+- **MCP-First**: Prefer MCP tools over custom scripts or manual API clients.
 - **Zero-Fake-Data**: Always audit enrichment results for compliance.
 - **Escalation**: Follow agent escalation triggers in instructions.md.
 - **Collaboration**: Reference agent collaboration patterns in templates/README.md.

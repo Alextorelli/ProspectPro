@@ -4,7 +4,7 @@ This `/tooling/` directory contains the complete development toolchain for Prosp
 
 ## Tool Suite Layout
 
-- **Agent Orchestration** (`/agent-orchestration/`): AI agent templates, context management, and workflow engines for automated development tasks.
+- **Agent Orchestration** (`/agent-orchestration/`): Agent configs, `ContextManager` APIs, and zero-fake-data workflows for coordinating MCP-first automation.
 - **Scripts** (`/scripts/`): Shell and Node.js automation for deployment, testing, diagnostics, and operations.
 - **Monitoring** (`/monitoring/`): Observability stack configuration (Jaeger, Prometheus, Grafana) and OTel collectors.
 - **CI** (`/ci/`): Continuous integration pipelines and automated PR reviews.
@@ -25,12 +25,13 @@ This `/tooling/` directory contains the complete development toolchain for Prosp
 - `pipeline.yml` - Unified CI/CD pipeline configuration (GitHub Actions/others)
 - `pr-review.js` - Automated PR review triggers for Development Agent
 
-### `/docker/`
+### `/phase-blueprints/`
 
-**Containerization and local development**
+**Multi-phase MCP optimization playbooks**
 
-- `Dockerfile.dev` - Development environment setup
-- `Dockerfile.ci` - Build/test container image
+- `optimized_mcp_configuration.json` - Canonical MCP server layout for current release
+- `phase-0X-*.md` - Stepwise plans for alignment, context workflow, observability, validation, and documentation
+- `README.md` - Overview of blueprint lifecycle and adoption guidelines
 
 ### `/vercel/`
 
@@ -64,9 +65,10 @@ This `/tooling/` directory contains the complete development toolchain for Prosp
 
 **Multi-agent workflow coordination**
 
-- `context-manager.js` - Redis-based shared context store for agent workflows
-- `workflow-engine.js` - Event-driven workflow orchestration (multi-agent)
-- `event-bus.js` - Async MCP event integration, message passing
+- `agents/` - Role configurations (`config.json`) and instructions aligned with zero-fake-data and MCP-first policies
+- `agents/templates/README.md` - Shared templates documenting validation and documentation workflows
+- `context/` - `context-manager.ts`, environment schemas, quick references, and README describing the context store strategy
+- `context/store/` - Persisted scratchpads and memories managed via `ContextManager.checkpoint()`
 
 ### `/integration/third-party/`
 
@@ -85,6 +87,14 @@ This `/tooling/` directory contains the complete development toolchain for Prosp
 - **Observability baked in:** All agent calls traced via OpenTelemetry, with correlation and aggregation for debugging, compliance, and ML baseline comparison.
 - **Automated error handling + rollback:** Circuit breaker logic and incident response workflows are implemented per the MCP prompt specs.
 - **Easy extension and audit:** Suite can be migrated to new projects; simply drop `/tooling/` (and `/config/`) into another mono-repo.
+
+## Documentation Strategy
+
+- `docs/app/SYSTEM_REFERENCE.md` – canonical system map for app + edge functions
+- `docs/dev-tools/FAST_README.md` – quick reference for scripts, MCP servers, and validation flows
+- `docs/technical/DOCUMENTATION_STANDARDS.md` – source of truth for writing and updating docs
+- `dev-tools/agent-orchestration/context/README.md` – context store operations and `ContextManager` APIs
+- Agent instructions reference these paths directly to enforce consistent updates during refactors
 
 ## Usage
 

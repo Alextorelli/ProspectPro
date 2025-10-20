@@ -61,7 +61,7 @@ await mcp.postgresql.check_pool_health();
 - [ ] Migration validated if database changes required
 - [ ] Rollback plan documented
 - [ ] Monitoring dashboards ready (Jaeger, Supabase logs)
-- [ ] Zero-fake-data audit: Always audit enrichment results for compliance using MCP tools. Never use Thunder Client or manual scripts for production validation.
+- [ ] Zero-fake-data audit: Always audit enrichment results for compliance using MCP tools. Avoid manual API clients or ad-hoc scripts for production validation.
 - [ ] MCP-First: Prefer MCP tools for all validation, deployment, and incident workflows.
 - [ ] Environment Switch Guidance: Use ContextManager to switch between local, staging, and production. Always export `SUPABASE_SESSION_JWT` for authenticated calls. Validate environment with `supabase:link` and `supabase:ensure-session` tasks.
 
@@ -312,11 +312,12 @@ done
 
 ### Critical Documentation
 
-- **Deployment Guide**: `/docs/deployment/production-deployment.md`
-- **Incident Runbooks**: `/docs/maintenance/incident-response.md`
-- **Rollback Procedures**: `/docs/deployment/rollback-procedures.md`
-- **Capacity Planning**: `/docs/technical/capacity-planning.md`
-- **Health Checks**: `/scripts/diagnostics/health-check.sh`
+- **Dev Tools FAST_README**: `/docs/dev-tools/FAST_README.md`
+- **Deployment Workflow Script**: `/dev-tools/scripts/shell/deployment-validation-workflow.sh`
+- **Edge Diagnostics**: `/dev-tools/scripts/shell/edge-function-diagnostics.sh`
+- **Production Health Check**: `/dev-tools/scripts/shell/production-health-check.sh`
+- **Context Store Guide**: `/dev-tools/agent-orchestration/context/README.md`
+- **MCP Registry**: `/dev-tools/mcp-servers/registry.json`
 
 ### Production Access
 

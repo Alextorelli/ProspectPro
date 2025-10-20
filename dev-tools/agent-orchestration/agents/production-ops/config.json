@@ -137,11 +137,12 @@
     ]
   },
   "knowledge_base": {
-    "deployment": "/docs/deployment/production-deployment.md",
-    "incidents": "/docs/maintenance/incident-response.md",
-    "rollback": "/docs/deployment/rollback-procedures.md",
-    "capacity": "/docs/technical/capacity-planning.md",
-    "health": "/scripts/diagnostics/health-check.sh"
+    "ops_fast_readme": "/docs/dev-tools/FAST_README.md",
+    "deployment_workflow": "/dev-tools/scripts/shell/deployment-validation-workflow.sh",
+    "edge_diagnostics": "/dev-tools/scripts/shell/edge-function-diagnostics.sh",
+    "production_health": "/dev-tools/scripts/shell/production-health-check.sh",
+    "context_store": "/dev-tools/agent-orchestration/context/README.md",
+    "mcp_registry": "/dev-tools/mcp-servers/registry.json"
   },
   "production_access": {
     "supabase_dashboard": "https://supabase.com/dashboard/project/sriycekxdqnesdsgwiuc",

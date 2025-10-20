@@ -17,7 +17,7 @@
 
 ### Testing Evidence
 
-- [ ] Thunder Client: All tests pass
+- [ ] MCP validation suite (`npm run validate:full`)
 - [ ] Supabase tests: All pass
 - [ ] Manual curl probes: All 200/expected
 - [x] Zero fake data violations

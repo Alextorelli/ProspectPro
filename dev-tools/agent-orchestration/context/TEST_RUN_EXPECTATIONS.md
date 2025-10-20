@@ -2,7 +2,7 @@
 
 ## Pass/Fail Criteria
 
-- All Thunder Client tests pass (no failures in `thunder-collection/reports/`)
+- MCP validation suite (`npm run validate:full`) completes with no failures
 - `npm run supabase:test:db` and `npm run supabase:test:functions` exit 0
 - No fake data violations in logs
 - Edge function curl probes return 200 and expected JSON

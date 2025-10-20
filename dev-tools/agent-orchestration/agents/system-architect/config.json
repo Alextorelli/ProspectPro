@@ -26,10 +26,11 @@
     "integration_hub.execute_workflow"
   ],
   "knowledge_base": {
-    "architecture": "/docs/technical/SYSTEM_REFERENCE.md",
+    "app_system_reference": "/docs/app/SYSTEM_REFERENCE.md",
+    "technical_reference": "/docs/technical/SYSTEM_REFERENCE.md",
     "database": "/supabase/schema-sql/",
     "edge_functions": "/supabase/functions/",
-    "mcp_registry": "/mcp-servers/registry.json",
+    "mcp_registry": "/dev-tools/mcp-servers/registry.json",
     "instructions": ".github/copilot-instructions.md"
   },
   "performance_targets": {

@@ -94,7 +94,7 @@ set -euo pipefail
 # Test script for [Feature Name]
 # Invoked by: Development Workflow Agent
 # MCP Tools: chrome-devtools, github, postgresql, integration-hub
-# Zero-fake-data: Always audit enrichment results for compliance using MCP tools. Never use Thunder Client or manual scripts for production validation.
+# Zero-fake-data: Always audit enrichment results for compliance using MCP tools. Avoid manual API clients or ad-hoc scripts for production validation.
 # Environment: Use ContextManager to switch environments. Always export SUPABASE_SESSION_JWT for authenticated calls.
 
 FEATURE_NAME="$1"
@@ -118,7 +118,7 @@ else
   echo "Skipping Edge Function tests (SUPABASE_SESSION_JWT not set)"
 fi
 
-# 4. MCP API/E2E tests (replace Thunder Client)
+# 4. MCP API/E2E tests (MCP-first workflows)
 3. Service restoration timeline
 # Example: Use integration_hub.execute_workflow or other MCP-first tools here
 
@@ -325,9 +325,9 @@ else
   echo "Skipping Edge Function tests (SUPABASE_SESSION_JWT not set)"
 fi
 
-# 4. Thunder Client API tests
-echo "Running Thunder Client tests..."
-npm run thunder:test
+# 4. MCP validation suite
+echo "Running MCP validation suite..."
+npm run validate:full
 
 # 5. Chrome DevTools visual regression (if frontend changes)
 if [[ "${TEST_ENV}" == "production" ]]; then
@@ -338,6 +338,13 @@ fi
 
 echo "All tests passed for ${FEATURE_NAME}!"
 ```
+
+## Documentation & Validation Workflow Expectations
+
+- Always run the MCP validation suite (`npm run validate:full`) alongside `npm run supabase:test:db` and `npm run supabase:test:functions`.
+- Regenerate documentation with `npm run docs:update` after configuration or template changes.
+- Use `ContextManager.checkpoint()` to persist agent scratchpads and environment transitions.
+- Switch environments through `EnvironmentContextManager.switchEnvironment()` before production deploys.
 
 ## Agent Collaboration Patterns
 

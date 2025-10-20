@@ -209,5 +209,12 @@
     "editor.wordWrap": "on"
   },
   "chat.edits2.enabled": true,
-  "chat.todoListTool.descriptionField": true
+  "chat.todoListTool.descriptionField": true,
+  "chat.emptyState.history.enabled": true,
+  "chat.mcp.gallery.enabled": true,
+  "chat.mcp.discovery.enabled": {
+    "windsurf": true
+  },
+  "chat.tools.terminal.autoReplyToPrompts": true,
+  "chat.useNestedAgentsMdFiles": true
 }

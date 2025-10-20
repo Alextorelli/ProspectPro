@@ -29,11 +29,11 @@
     "supabase_troubleshooting.correlate_errors"
   ],
   "knowledge_base": {
-    "frontend": "/docs/frontend/architecture.md",
-    "testing": "/docs/development/testing-strategy.md",
-    "edge_functions": "/docs/technical/edge-functions.md",
-    "ci_cd": "/docs/deployment/ci-cd-workflow.md",
-    "validation_runner": "/scripts/node/validation-runner.js"
+    "app_system_reference": "/docs/app/SYSTEM_REFERENCE.md",
+    "dev_tools_fast_readme": "/docs/dev-tools/FAST_README.md",
+    "documentation_standards": "/docs/technical/DOCUMENTATION_STANDARDS.md",
+    "context_store": "/dev-tools/agent-orchestration/context/README.md",
+    "validation_runner": "/dev-tools/scripts/scripts/node/validation-runner.js"
   },
   "testing_config": {
     "unit_coverage_target": 80,

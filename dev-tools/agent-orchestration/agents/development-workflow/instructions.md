@@ -74,7 +74,7 @@ await mcp.postgresql.execute_query({ query: seedSQL, params });
 
 - ESLint autofix (`npm run lint:fix`)
 - TypeScript strict mode validation
-- Zero-fake-data pattern detection (always audit enrichment results for compliance using MCP tools; never use Thunder Client or manual scripts for production validation)
+- Zero-fake-data pattern detection (always audit enrichment results for compliance using MCP tools; never rely on manual API clients or ad-hoc scripts for production validation)
 
 **Environment Switch Guidance**:
 
@@ -93,7 +93,7 @@ await mcp.postgresql.execute_query({ query: seedSQL, params });
 - Lint validation (`npm run lint`)
 - Full test suite (`npm run test:all`)
 - Build verification (`npm run build`)
-- Thunder Client API tests
+- MCP validation suite (`npm run validate:full`)
 
 ## MCP-First Development Patterns
 
@@ -270,11 +270,11 @@ await mcp.github.add_labels({ owner, repo, issueNumber: pullNumber, labels });
 
 ### Critical Documentation
 
-- **Frontend Architecture**: `/docs/frontend/architecture.md`
-- **Testing Guide**: `/docs/development/testing-strategy.md`
-- **Edge Functions**: `/docs/technical/edge-functions.md`
-- **CI/CD Pipeline**: `/docs/deployment/ci-cd-workflow.md`
-- **Thunder Client Collections**: `/thunder-collection/`
+- **App System Reference**: `/docs/app/SYSTEM_REFERENCE.md`
+- **Dev Tools FAST_README**: `/docs/dev-tools/FAST_README.md`
+- **Documentation Standards**: `/docs/technical/DOCUMENTATION_STANDARDS.md`
+- **Context Store Guide**: `/dev-tools/agent-orchestration/context/README.md`
+- **Validation Runner Script**: `/dev-tools/scripts/scripts/node/validation-runner.js`
 
 ### VS Code Integration
 

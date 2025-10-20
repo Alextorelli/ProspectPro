@@ -183,7 +183,7 @@ for (const pattern of patterns.slice(0, 3)) {
 
 **Detection Rules**:
 
-Always audit enrichment results for zero-fake-data compliance using MCP tools. Use `postgresql.execute_query` to scan for generic/fake patterns and `integration_hub.send_notification` to alert on violations. Never use Thunder Client or manual scripts for compliance checks.
+Always audit enrichment results for zero-fake-data compliance using MCP tools. Use `postgresql.execute_query` to scan for generic/fake patterns and `integration_hub.send_notification` to alert on violations. Avoid manual API clients or other ad-hoc tools for compliance checks.
 
 **Environment Switch Guidance**:
 
@@ -195,11 +195,11 @@ Always audit enrichment results for zero-fake-data compliance using MCP tools. U
 
 ### Critical Documentation
 
-- **Monitoring Setup**: `/docs/technical/observability.md`
-- **OTEL Configuration**: `/tooling/monitoring/otel/otel-config.js`
-- **Jaeger Deployment**: `/tooling/monitoring/jaeger/docker-compose.yml`
-- **Incident Runbooks**: `/docs/maintenance/incident-response.md`
-- **Performance Baselines**: `/mcp-servers/registry.json` (monitoring section)
+- **Dev Tools FAST_README**: `/docs/dev-tools/FAST_README.md`
+- **OTEL Configuration**: `/config/otel-config.yml`
+- **Observability Stack**: `/dev-tools/observability/docker-compose.jaeger.yml`
+- **Context Store Guide**: `/dev-tools/agent-orchestration/context/README.md`
+- **MCP Registry**: `/dev-tools/mcp-servers/registry.json` (monitoring section)
 
 ### Dashboard Access
 

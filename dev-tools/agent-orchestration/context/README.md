@@ -62,7 +62,7 @@ await context.updateScratchpad({
   agentId: "development-workflow",
   data: {
     currentTask: "implement-campaign-export",
-    notes: ["Thunder tests pass"],
+    notes: ["MCP validation suite passes in staging"],
   },
 });
 
