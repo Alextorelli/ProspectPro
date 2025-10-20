@@ -1,39 +1,29 @@
 {
   "recommendations": [
-    // === CORE DEVELOPMENT (Keep Always) ===
+    // === CORE DEVELOPMENT (Workspace Only) ===
     "supabase.supabase", // Native DB/Edge management
     "denoland.vscode-deno",
     "github.copilot",
     "github.copilot-chat",
     "esbenp.prettier-vscode",
     "dbaeumer.vscode-eslint",
-
-    // === ESSENTIAL TOOLS ===
     "eamodio.gitlens",
     "bradlc.vscode-tailwindcss",
     "davidanson.vscode-markdownlint",
     "redhat.vscode-yaml",
-    // === REACT DEBUGGING/REFACTORING (Selective Use) ===
-    "ms-windows-ai-studio.windows-ai-studio",
     "tomoyukim.vscode-mermaid-editor"
   ],
 
   "unwantedRecommendations": [
-    // === REMOVE FOR COST OPTIMIZATION ===
-    "ms-mssql.mssql", // Using Supabase
-    "ms-playwright.playwright", // Not using E2E tests currently
-    "ms-vscode.live-server", // Static hosting via Vercel
-    "ms-vscode.vscode-json", // Built-in is sufficient
-
-    // === CONTAINER TOOLS (Serverless Architecture) ===
+    // === REMOVE FOR COST OPTIMIZATION & SERVERLESS ===
+    "ms-mssql.mssql",
+    "ms-playwright.playwright",
+    "ms-vscode.live-server",
+    "ms-vscode.vscode-json",
     "ms-azuretools.vscode-docker",
     "ms-kubernetes-tools.vscode-kubernetes-tools",
-
-    // === SERVER-SIDE TOOLS (Edge Functions Only) ===
     "ms-vscode.js-debug-nightly",
     "ms-vscode.node-debug2",
-
-    // === REDUNDANT TOOLS ===
     "hookyqr.beautify",
     "vscjava.vscode-java-debug",
     "ms-python.python",
