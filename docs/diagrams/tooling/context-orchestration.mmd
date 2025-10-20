@@ -1,0 +1,68 @@
+%% Context Orchestration Pipeline
+%% accTitle: Context Orchestration Pipeline
+%% accDescr: Intake through normalization, storage/retrieval, agent routing, execution, and ledger updates with iterative compression
+%% Palette: context #64748b, agent #f97316, report #facc15
+flowchart TD
+  subgraph "Intake & Normalization"
+    direction LR
+    Intake["Intake (Code/Docs/Config)"]:::agent
+    Normalize["Context Normalization"]:::context
+  end
+  subgraph "Storage & Retrieval"
+    direction LR
+    Write["Storage (Write)"]:::context
+    Compress["Storage (Compress)"]:::context
+    Retrieve["Retrieval (Select)"]:::context
+  end
+  subgraph "Agent Routing & Execution"
+    direction TB
+    Route["Agent Router (Isolate)"]:::agent
+    subgraph Touchpoints["MCP-Aware Touchpoints"]
+      T1["Smart Debug"]:::agent
+      T2["Feature Delivery"]:::agent
+    end
+    Exec["Execution MCP"]:::agent
+  end
+  subgraph "Reporting & Environment"
+    direction LR
+    Ledger["Ledger Update"]:::report
+    Env["Environment Overlay (prod/staging/dev)"]:::config
+  end
+
+  Intake --> Normalize
+  Normalize --> Write
+  Write --> Compress
+  Compress --> Retrieve
+  Retrieve --> Route
+  Route --> T1
+  Route --> T2
+  T1 --> Exec
+  T2 --> Exec
+  Exec --> Ledger
+  Ledger -.->|"iterative compression"| Normalize
+  
+  Env -.->|"mode switch"| Intake
+  Env -.->|"mode switch"| Exec
+
+  %% API callouts
+  Write -- "checkpoint()" --> Retrieve
+  Compress -- "compress()" --> Retrieve
+
+  classDef context fill:#64748b,color:#fff;
+  classDef agent fill:#f97316,color:#fff;
+  classDef report fill:#facc15,color:#222;
+  classDef config fill:#2563eb,color:#fff;
+
+  %% Legend
+  subgraph LEGEND["Legend"]
+    direction LR
+    L1["Context"]
+    L2["Agent"]
+    L3["Report"]
+    L4["Config"]
+    style LEGEND fill:#fff,stroke:#888,stroke-width:1px
+    style L1 fill:#64748b,color:#fff
+    style L2 fill:#f97316,color:#fff
+    style L3 fill:#facc15,color:#222
+    style L4 fill:#2563eb,color:#fff
+  end

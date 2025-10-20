@@ -1,0 +1,50 @@
+%% MCP Routing Overview
+%% accTitle: MCP Routing Overview
+%% accDescr: Request ingress through router to MCP servers with telemetry sinks and escalation flow
+%% Palette: ingress #2563eb, router #64748b, telemetry #facc15
+flowchart TB
+  Ingress["Ingress/Gateway"]:::ingress
+  Router["Request Router (ContextManager)"]:::router
+  subgraph PROD["Production MCP"]
+    P1["ci_cd_validation_suite"]
+    P2["supabase_cli_healthcheck"]
+    style PROD fill:#2563eb
+  end
+  subgraph DEV["Development MCP"]
+    D1["Thunder Suite Report"]
+    D2["API Research Tools"]
+    style DEV fill:#16a34a
+  end
+  subgraph TROUBLE["Troubleshooting MCP"]
+    T1["test_edge_function"]
+    T2["run_rls_diagnostics"]
+    style TROUBLE fill:#f97316
+  end
+  subgraph TELEM["Telemetry Sinks"]
+    TR["Thunder Reports"]:::telemetry
+    SL["Supabase Logs"]:::telemetry
+  end
+  Ingress --> Router
+  Router --> PROD
+  Router --> DEV
+  Router --> TROUBLE
+  PROD --> TR
+  PROD --> SL
+  DEV --> TR
+  TROUBLE --> SL
+  %% Escalation flow
+  PROD -.->|"on failure"| TROUBLE
+  %% Legend
+  subgraph LEGEND["Legend"]
+    direction LR
+    L1["Ingress"]
+    L2["Router"]
+    L3["Telemetry"]
+    style LEGEND fill:#fff,stroke:#888,stroke-width:1px
+    style L1 fill:#2563eb,color:#fff
+    style L2 fill:#64748b,color:#fff
+    style L3 fill:#facc15,color:#222
+  end
+  classDef ingress fill:#2563eb,color:#fff;
+  classDef router fill:#64748b,color:#fff;
+  classDef telemetry fill:#facc15,color:#222;
