@@ -106,3 +106,53 @@ Document the immediate plan for consolidating DevOps AI agent workflows, includi
    - Execute audit commands documented in checklist (no automation change).
    - Capture outputs in `reports/` if needed.
    - Confirm diagrams + docs updated; run validation pipeline.
+
+---
+
+# Temporary Refactoring Guide – DevOps Agent Automation (Guarded)
+
+### Phase 0 – Guard & Snapshot
+
+- Record intent + guard reminder in TEMP_DEVOPS_AGENT_PLAN.md.
+- Stage any future .vscode / .github edits in settings-staging.md.
+- Run `npm run codebase:index`, `npm run docs:prepare`, `npm run docs:update`, `npm run lint` for baseline.
+
+### Phase 1 – React Debugging Automation
+
+- Extend agent-debug-playbooks.md with a “React DevTools Automation” runbook referencing browser extension, `npx react-devtools`, and guardrails.
+- Implement `scripts/devtools/start-react-dev-session.sh` to launch `npm run dev` + `npx react-devtools` (reuse existing shell helpers).
+- Add optional validation script `scripts/devtools/check-react-devtools-port.sh` to confirm port 8097 availability.
+- Document command sequence (no VS Code task edits) in settings-staging.md.
+
+### Phase 2 – Platform Playbooks & Context
+
+- Expand agent playbooks with Supabase, Vercel, MCP runbooks (existing scripts + commands).
+- Update README.md and FAST_README.md to cross-link new playbooks and note configuration guard.
+- Capture any future tool/task proposals in settings-staging.md.
+
+### Phase 3 – Automation Scripts Bundle
+
+- Add scripts under devtools or operations:
+  - `supabase-pull-logs.sh` (wrap existing CLI).
+  - `vercel-status-check.sh` (call Vercel CLI/API).
+  - `context-snapshot.sh` (collect MCP/context artifacts).
+- Ensure scripts honour environment guards (`set -euo pipefail`, top-level directory checks).
+- Add documentation pointers in playbooks.
+
+### Phase 4 – MCP Integration
+
+- Create/extend MCP manifests linking new scripts + context stores (`mcp-servers/*`).
+- Update agent-orchestration.mmd, context-orchestration.mmd, mcp-routing-sequence.mmd with new nodes and validation checkpoints via snippet library.
+- Validate diagrams in Mermaid preview.
+
+### Phase 5 – Docs & Diagram Refresh
+
+- Add end-to-end orchestration diagram (React debugging → telemetry → Supabase logs) using architecture-beta + sequence templates.
+- Update diagram-guidelines.md with “Telemetry Targets & Legacy Cleanup” plus React DevTools checkpoints.
+- Ensure workspace-architecture.mmd, system-reference.mmd reflect new agents/flows.
+
+### Phase 6 – Validation & Reporting
+
+- Run `npm run docs:prepare`, `npm run docs:update`, `npm run lint`, `npm test`, `npm run supabase:test:db`.
+- Execute new automation scripts once to verify output (capture logs in reports/).
+- Summarize completion + guard status in TEMP_DEVOPS_AGENT_PLAN.md; add changelog notes to FAST_README.md.
