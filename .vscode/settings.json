@@ -78,7 +78,8 @@
     "*.mdx": "markdown",
     ".env*": "dotenv",
     "mcp-config.json": "jsonc",
-    "copilot-instructions.md": "markdown"
+    "copilot-instructions.md": "markdown",
+    "*.mmd": "mermaid"
   },
   "explorer.fileNesting.enabled": true,
   "explorer.fileNesting.expand": false,

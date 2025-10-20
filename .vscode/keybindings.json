@@ -106,5 +106,10 @@
     "command": "workbench.action.tasks.runTask",
     "args": "Supabase: Serve Local Functions",
     "when": "!inDebugMode && !terminalFocus"
+  },
+  {
+    "key": "ctrl+alt+p",
+    "command": "mermaid-editor.preview",
+    "when": "editorLangId == mermaid"
   }
 ]

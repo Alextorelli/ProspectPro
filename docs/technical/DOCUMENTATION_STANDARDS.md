@@ -20,6 +20,16 @@
 - Checklist enforced in PR template
 - Diagrams must be bootstrapped with the VS Code task or npm run docs:bootstrap on first add
 
+## Diagram Accessibility & Meta Guidelines
+
+- All diagrams must use descriptive node labels (e.g., "Context Store (Redis)", not just "Context Store").
+- Add Mermaid accessibility meta-comments to each diagram:
+  - `%% accTitle: <Short Title>`
+  - `%% accDescr: <1-2 sentence description>`
+- Use `%%{init: {"theme": "forest"}}%%` or similar for visual clarity.
+- Prefer subgraphs for logical grouping (e.g., "MCP Fleet", "Context Hub").
+- Keep diagrams agent-parseable but human-friendly.
+
 ## Automation
 
 - Use generate-diagrams.mjs for differential diagram rendering

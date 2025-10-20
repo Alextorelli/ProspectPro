@@ -1,0 +1,25 @@
+%%{init: {"theme": "neutral"} }%%
+%% accTitle: Application Source Architecture
+%% accDescr: Frontend (Vite/React) communicating with Supabase Edge Functions and database.
+flowchart LR
+  subgraph Frontend["Frontend (Vite/React, Vercel)"]
+    UI["UI Modules"]
+    Stores["Zustand Stores"]
+    Hooks["Hooks & API Clients"]
+  end
+  subgraph Edge["Supabase Edge Functions"]
+    Discovery["Discovery Functions"]
+    Enrichment["Enrichment Functions"]
+    Export["Export Functions"]
+  end
+  subgraph DB["Supabase Database & RLS"]
+    Tables["Campaigns / Leads / Exports"]
+    Policies["Row-Level Security"]
+  end
+  UI -->|"RPC + REST"| Discovery
+  Stores -->|"fetch leads"| Enrichment
+  Hooks -->|"export requests"| Export
+  Discovery -->|"tier-aware writes"| Tables
+  Enrichment -->|"verified data"| Tables
+  Export -->|"authorized exports"| Tables
+  Tables -->|"Policy enforcement"| Policies

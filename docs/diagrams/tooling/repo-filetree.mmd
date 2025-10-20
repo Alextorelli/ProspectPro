@@ -1,0 +1,16 @@
+%%{init: {"theme": "forest"} }%%
+%% accTitle: Hybrid Mono-Repo File Tree
+%% accDescr: High-level layout for app, dev tools, documentation, and configs.
+graph TD
+  Root[/"ProspectPro"/]
+  Root --> App[/"app/"/]
+  Root --> DevTools[/"dev-tools/"/]
+  Root --> Docs[/"docs/"/]
+  Root --> Config[/"config/"/]
+  Root --> Reports[/"reports/"/]
+  App --> Frontend["frontend/"]
+  App --> Backend["backend/"]
+  DevTools --> Agents["agent-orchestration/"]
+  DevTools --> MCPServers["mcp-servers/"]
+  Docs --> AppDocs["app/**"]
+  Docs --> ToolDocs["dev-tools/**"]
