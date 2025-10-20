@@ -33,7 +33,7 @@
     "dev_tools_fast_readme": "/docs/tooling/FAST_README.md",
     "documentation_standards": "/docs/technical/DOCUMENTATION_STANDARDS.md",
     "context_store": "/dev-tools/agent-orchestration/context/README.md",
-    "validation_runner": "/dev-tools/scripts/scripts/node/validation-runner.js"
+    "validation_runner": "/dev-tools/scripts/node/validation-runner.js"
   },
   "testing_config": {
     "unit_coverage_target": 80,
