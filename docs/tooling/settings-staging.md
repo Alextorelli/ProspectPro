@@ -69,5 +69,70 @@ See `docs/tooling/agent-debug-playbooks.md` for full workflow and guard policy.
 
 - VS Code task `Phase 02` now leaves the markdown report at `reports/context/coverage.md` (rename step removed from `.vscode/tasks.json`).
 - Legacy artifact `reports/context/phase-02-report.md` is fully deprecated; all downstream tools and automation must consume `reports/context/coverage.md` as the canonical output.
-- Rollback: restore the previous `mv` command in `.vscode/tasks.json` if consumers expect the historical filename.
+
+# Staged: App/Tooling Directory Migration (2025-10-20)
+
+## Migration Plan
+
+- Begin phased relocation of `/app/frontend`, `/supabase/functions`, and supporting tooling into the target `/app` and `/tooling` hierarchy as described in `docs/app/REPO_RESTRUCTURE_PLAN.md`.
+- All changes to `.vscode/` and `.github/` must be staged here before being applied.
+- Capture blockers, risks, and required sequencing for each move.
+
+## Known Blockers
+
+- Some VS Code tasks and npm scripts reference absolute or legacy paths; these must be updated in lockstep with directory moves.
+- MCP validation and automation scripts may require path updates; coordinate with platform-playbooks.md.
+- Documentation and codebase index regeneration must be sequenced after each major move.
+
+## Next Steps
+
+- Inventory all scripts, tasks, and documentation that reference `/app/frontend`, `/supabase/functions`, or legacy tooling paths.
+- Draft proposed directory moves and update plans here for review.
+- Stage all config and automation changes in this file before touching guarded directories.
+
+
+# App/Tooling Migration – Inventory (2025-10-20)
+
+## 1. Script & Task Sweep
+
+- Searched scripts, .vscode, .github, and package.json for `/app/frontend`, `/supabase/functions`, `legacy`, `frontend`, `public`, and `tooling`.
+- **Result:** No direct hardcoded path references found in scripts, tasks, or configs. All npm scripts and VS Code tasks use relative or variable-based paths.
+
+## 2. Documentation Audit
+
+- Searched docs and reports (including FAST_README.md, platform-playbooks.md, devops-agent-runbook.md) for the same path markers.
+- **Result:** No direct hardcoded path references found in documentation.
+
+## 3. Automation Impact Matrix
+
+- Reviewed automation scripts in scripts/automation/ for hardcoded directories. All outputs are written to `reports/diagnostics/` or `reports/deployments/` and do not reference frontend or supabase/functions directly.
+- **Result:** No changes required for context snapshot, supabase log pull, or vercel status scripts.
+
+## 4. Draft Directory Moves
+
+- **Frontend:**
+  - Source: `app/frontend/` → Destination: `app/frontend/` (no move needed, already compliant)
+  - Validation: `npm run build`, `npm run lint`, `npm test`
+  - Rollback: Restore from git if issues arise
+- **Supabase Functions:**
+  - Source: `supabase/functions/` → Destination: `app/backend/functions/` (proposed)
+  - Update scripts and tasks to use new path if moved
+  - Validation: `npm run supabase:types`, `npm run supabase:test:functions`, `npm run deploy:all`
+  - Rollback: Move back and revert path changes
+- **Tooling Bundles:**
+  - Source: `dev-tools/`, `scripts/automation/` → Destination: `tooling/` (proposed)
+  - Update references in docs and scripts as needed
+  - Validation: `npm run docs:prepare`, `npm run docs:update`, `npm run lint`
+  - Rollback: Move back and revert references
+
+## 5. Config Change Proposals
+
+- Stage any .vscode task path updates and .github doc link rewrites here before editing live files.
+- Testing instructions: `npm run docs:prepare`, `npm run lint`, `npm test`, `npm run supabase:test:db` after each move.
+
+## 6. Validation Pipeline Scheduling
+
+- Pre-move: Run `npm run docs:prepare`, `npm run lint`, `npm test`, `npm run supabase:test:db` and snapshot outputs.
+- Post-move: Repeat all validation commands and compare outputs.
+- Document results and any issues in this file before requesting approval for live changes.
 ```
