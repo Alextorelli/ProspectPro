@@ -32,7 +32,7 @@
     "deploy:gcs": "npm run build && gsutil -m rsync -r -d ./dist/ gs://prospectpro-static-frontend/",
     "deploy:netlify": "netlify deploy --prod --dir=dist",
     "deploy:vercel": "npx --yes vercel@latest --prod",
-    "validate:ignores": "node scripts/tooling/validate-ignore-config.cjs",
+  "validate:ignores": "node dev-tools/scripts/node/validate-ignore-config.cjs",
     "dev": "vite",
     "devtools:react": "npx react-devtools --port 8097 --host 0.0.0.0",
     "dev:supabase": "bash -lc 'cd supabase && source ../scripts/operations/ensure-supabase-cli-session.sh && npx --yes supabase@latest functions serve --no-verify-jwt --debug'",

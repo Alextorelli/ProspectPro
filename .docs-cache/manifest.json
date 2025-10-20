@@ -1,5 +1,12 @@
 {
   "docs/diagrams/tooling/agent-orchestration.mmd": "8e1031cdaf7fdadcd79046ccd711fb3165264ae26a08e5e04ed3d37f6c25cd00",
   "docs/diagrams/tooling/context-pipeline.mmd": "f56c95b413bf93412061fbfafb45af26628c12915a7af3d00ffc947c27bae430",
-  "docs/diagrams/tooling/mcp-architecture.mmd": "5fd9469399096701fa8355d903c9ce6bf921958f0904aa8b312f7fcf2173b9c9"
+  "docs/diagrams/tooling/mcp-architecture.mmd": "5fd9469399096701fa8355d903c9ce6bf921958f0904aa8b312f7fcf2173b9c9",
+  "docs/diagrams/app/source-architecture.mmd": "2ae0a9532c39487175da7f48f8711d206018ee59772b1c9817e739a299cbdb01",
+  "docs/diagrams/tooling/dev-tools-architecture.mmd": "f2f5d6d7ad95de7ff3d983a1d128b3a4f99301c3ec8d5416b7c8717ea512a610",
+  "docs/diagrams/tooling/intelligent-workspace.mmd": "bab3d2c81c8abfd869434867562d6bcb4c13a219d767208343bf896442620602",
+  "docs/diagrams/tooling/repo-filetree.mmd": "60586bd330e977772b0295eab91d996209373dc2ef69870f295138019935f30a",
+  "docs/diagrams/tooling/keybindings-table.mmd": "aeda5a513cb90f0dd26d7b16bbdc630207bf8279936ff67f649484a789098e54",
+  "docs/diagrams/tooling/shortcuts-table.mmd": "22e8e801ac79a5b34a6c002764e9633a927cabb49b8f3ad1b48c944b91475c49",
+  "docs/diagrams/tooling/tasks-table.mmd": "fce9a4dde4b27d14181025fd6199d32a0ae8260b4d1154904552abce743e2db3"
 }

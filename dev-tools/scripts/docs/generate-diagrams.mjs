@@ -38,10 +38,9 @@ function hashFile(filePath) {
   return crypto.createHash("sha256").update(data).digest("hex");
 }
 
-function renderDiagram(src, out) {
-  execSync(
-    `npx -y @mermaid-js/mermaid-cli -i ${src} -o ${out} -p dev-tools/scripts/docs/puppeteer-config.json`
-  );
+// No SVG rendering needed; workspace uses Mermaid Editor for preview.
+function renderDiagram(src) {
+  // No-op: preview handled by VS Code extension.
 }
 
 function loadManifest() {
@@ -65,11 +64,9 @@ function main() {
   let manifest = loadManifest();
   for (const file of files) {
     const hash = hashFile(file);
-    const cachePath = path.join(CACHE_DIR, hash + ".svg");
-    if (!bootstrap && fs.existsSync(cachePath)) continue;
-    renderDiagram(file, cachePath);
     manifest[file] = hash;
-    console.log(`Rendered: ${file} -> ${cachePath}`);
+    renderDiagram(file);
+    console.log(`Tracked: ${file} [${hash}]`);
   }
   saveManifest(manifest);
 }

@@ -110,6 +110,6 @@
   {
     "key": "ctrl+alt+p",
     "command": "mermaid-editor.preview",
-    "when": "editorLangId == mermaid"
+    "when": "editorLangId == mermaid || editorLangId == mmd"
   }
 ]
