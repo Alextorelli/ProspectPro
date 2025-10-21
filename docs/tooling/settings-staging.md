@@ -120,6 +120,7 @@ See `docs/tooling/agent-debug-playbooks.md` for full workflow and guard policy.
 - Generated `.github/chatmodes/chatmode-manifest.json` via `mcp:chat:sync`; manifest enumerates all chatmodes, affirms MCP integration, and references task labels.
 - Validation script enforces manifest/task alignment and frontmatter health so chatmodes remain extension-free while leveraging native tasks.
 - Validation pipeline post-change: `npm run docs:update`, `npm run lint`, `npm test`, `npm run supabase:test:db` (NOTESTS) — all successful (logged 2025-10-21T06:18Z).
+- Archived execution summary: `reports/context/archive/chatmode-automation-2025-10-21.md`.
 - Rollback: remove new npm scripts + automation files, delete manifest, revert task/keybinding entries; rerun validation.
 
 ### Pending Automation/Documentation Updates
