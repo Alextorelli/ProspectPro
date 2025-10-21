@@ -42,7 +42,8 @@ async function basicUsageExample() {
     console.log("📋 Initializing MCP Client Manager...");
 
     // Mock a config file for this example
-    const mockFs = require("fs");
+    import fs from "fs";
+    const mockFs = fs;
     jest.spyOn(mockFs, "existsSync").mockReturnValue(true);
     jest.spyOn(mockFs, "readFileSync").mockReturnValue(
       JSON.stringify({

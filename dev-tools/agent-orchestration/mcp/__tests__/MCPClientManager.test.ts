@@ -119,11 +119,9 @@ describe("MCPClientManager", () => {
 
     it("should return client for valid server", async () => {
       const result = await clientManager.getClient("test");
-
-      expect(result).toEqual({
-        serverName: "test",
-        config: { command: "test" },
-      });
+      expect(result.serverName).toBe("test");
+      expect(result.config).toEqual({ command: "test" });
+      expect(result.isConnected).toBe(true);
     });
 
     it("should throw error for unknown server", async () => {
@@ -230,9 +228,12 @@ describe("MCPClientManager", () => {
 
     it("should destroy all clients", async () => {
       await clientManager.destroyAll();
-
       expect(mockTelemetrySink.info).toHaveBeenCalledWith(
-        "All MCP clients destroyed"
+        "All MCP clients destroyed",
+        expect.objectContaining({
+          disposedCount: expect.any(Number),
+          serverNames: expect.any(Array),
+        })
       );
     });
   });
