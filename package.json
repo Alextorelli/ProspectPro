@@ -9,6 +9,7 @@
     "docs:prepare": "npm run docs:render:diagrams && npm run docs:update",
     "docs:bootstrap": "node dev-tools/scripts/docs/generate-diagrams.mjs --bootstrap",
     "docs:render:diagrams": "bash scripts/docs/render-diagrams.sh",
+    "docs:patch:diagrams": "bash scripts/docs/patch-diagrams.sh",
     "build:static": "npm run build",
     "clean": "rm -rf dist/ node_modules/ && echo 'Cleaned build artifacts'",
     "cost:analyze": "echo 'Check GitHub billing dashboard for usage trends'",
