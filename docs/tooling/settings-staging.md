@@ -110,18 +110,21 @@ See `docs/tooling/agent-debug-playbooks.md` for full workflow and guard policy.
 - Document rationale, risk, and rollback for any automation or documentation update.
 - No direct edits to guarded directories until approval and validation pipeline completion.
 
-## Applied Automation/Documentation Updates
 
 ### Applied: MCP Chatmode Integration Automation (2025-10-21)
 
-- Added npm scripts `mcp:chat:sync` (`scripts/automation/mcp-chat-sync.js`) and `mcp:chat:validate` (`scripts/automation/mcp-chat-validate.js`).
-- Registered VS Code tasks `MCP: Run Chat Validation` (test group) and `MCP: Sync Chat Participants` (build group) in `.vscode/tasks.json`.
-- Introduced keybinding `ctrl+alt+m` → `mermaid-diagram.preview` to standardize diagram validation without relying on extension wiring.
-- Generated `.github/chatmodes/chatmode-manifest.json` via `mcp:chat:sync`; manifest enumerates all chatmodes, affirms MCP integration, and references task labels.
-- Validation script enforces manifest/task alignment and frontmatter health so chatmodes remain extension-free while leveraging native tasks.
-- Validation pipeline post-change: `npm run docs:update`, `npm run lint`, `npm test`, `npm run supabase:test:db` (NOTESTS) — all successful (logged 2025-10-21T06:18Z).
-- Archived execution summary: `reports/context/archive/chatmode-automation-2025-10-21.md`.
-- Rollback: remove new npm scripts + automation files, delete manifest, revert task/keybinding entries; rerun validation.
+- All chatmode Markdown files validated and manifest generated (2025-10-21)
+- Automation scripts (`mcp-chat-sync.js`, `mcp-chat-validate.js`) staged, tested, and confirmed linked to VS Code tasks
+- VS Code tasks and keybindings updated for chatmode/MCP workflows
+- Validation pipeline run: `docs:update`, `lint`, `test`, `supabase:test:db` (all passed, `NOTESTS` for db as expected)
+- MCP chatmode validation and Copilot Chat switching tested: **passed**
+- Archive created: `reports/context/archive/chatmode-automation-2025-10-21.md`
+
+**Traceability:**
+- All results, logs, and manifest snapshots are archived in `reports/context/archive/chatmode-automation-2025-10-21.md`
+- Stepwise todo list governs integration and activation
+
+**Next:** Proceed to production activation and post-activation monitoring
 
 ### Pending Automation/Documentation Updates
 
