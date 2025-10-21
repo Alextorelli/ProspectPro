@@ -85,7 +85,47 @@ See `docs/tooling/agent-debug-playbooks.md` for full workflow and guard policy.
 - Documentation and codebase index regeneration must be sequenced after each major move.
 
 ## Next Steps
+# Chatmode Migration Audit & Governance (2025-10-21)
 
+## Audit Findings
+
+- All chat participant logic is now Markdown-based; no extension code remains in `.github/chatmodes/`.
+- Chatmode files (Smart Debug, Feature Delivery, Production Support, API Research, Cost Optimization) are present, validated, and contain required metadata (description, tools).
+- MCP tooling, Thunder Client, and Supabase CLI integration are referenced and standardized across all modes.
+- README and IMPLEMENTATION_SUMMARY.md document activation workflow, usage, and maintenance procedures.
+- Pre-refactor snapshot archived in `reports/context/archive/chatmodes-pre-refactor-2025-10-21.md`.
+- All prompt files validated by `npm run test:devtools` (see TELEMETRY_LEGACY_CLEANUP_REPORT_2025-10-20.md).
+
+## Governance & Guardrails
+
+- All changes to `.github/` and `.vscode/` must be staged here before being applied.
+- Document rationale, risk, and rollback for any automation or documentation update.
+- No direct edits to guarded directories until approval and validation pipeline completion.
+
+## Staged Automation/Documentation Updates
+
+- [Staged] Chatmode audit findings and governance documented above.
+- [Staged] Any future automation scripts or doc updates must be proposed here before live changes.
+- [Pending] If new MCP tool references or VS Code tasks are required, draft proposals in this section.
+
+## Validation Pipeline Instructions
+
+After any approved change to chatmodes, automation, or documentation:
+
+1. Run: `npm run docs:update`
+2. Run: `npm run lint`
+3. Run: `npm test`
+4. Run: `npm run supabase:test:db` (if database changes)
+5. Run: `npm run supabase:test:functions` (if edge function changes)
+6. Document results in this file before requesting approval for live changes.
+
+## Next Steps (Chatmode Migration)
+
+- [x] Document findings and audit results in settings-staging.md for governance
+- [x] Stage any automation or documentation updates before modifying .github or .vscode
+- [ ] Run full validation pipeline after any changes
+
+---
 
 # Migration Execution (2025-10-21)
 
