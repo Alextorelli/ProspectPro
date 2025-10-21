@@ -140,8 +140,16 @@ See `docs/tooling/agent-debug-playbooks.md` for full workflow and guard policy.
 - Conduct final governance review and close out integration plan
 
 ### Pending Automation/Documentation Updates
-
 - None at this time.
+
+# Staged: MCP Config Refactor (2025-10-21)
+
+- **Proposal**: Rewrite `config/mcp-config.json` using the Option A scaffolding outlined in `docs/tooling/end-state/mcp-config-scaffolding.md`, adding participant metadata (`ux`, `platform`, `devops`, `secops`, optional `integrations`) and branch-based routing rules.
+- **Rationale**: Align MCP routing with the new chat participant taxonomy and environment model, ensuring each participant triggers the correct server cluster.
+- **Risk**: Medium – misconfigured routing could block automation or expose production tooling. Mitigate with staged reviews, `npm run mcp:chat:validate`, and targeted MCP startup smoke tests.
+- **Rollback**: Restore previous `config/mcp-config.json` and related registry entries from git.
+- **Validation Plan**: `npm run mcp:chat:validate`, `npm run docs:patch:diagrams`, and `npm run mcp:start:production` / `npm run mcp:start:development`; log outcomes here and in `reports/context/coverage.md`.
+
 
 # Staged: CI Workflow Gate for Diagram Patch & MCP Validation (2025-10-21)
 
