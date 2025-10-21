@@ -1,0 +1,146 @@
+erDiagram
+    VS_CODE_EXTENSION ||--|| AGENT_ORCHESTRATOR : contains
+    AGENT_ORCHESTRATOR ||--|| MCP_CLIENT_MANAGER : uses
+    AGENT_ORCHESTRATOR ||--|| CHAT_MODE_EXECUTOR : uses
+    AGENT_ORCHESTRATOR ||--|| COORDINATION_MANAGER : uses
+    
+    AGENT_ORCHESTRATOR ||--o{ AGENT_PARTICIPANT : manages
+    
+    AGENT_PARTICIPANT {
+        string id PK
+        string chatMode
+        string[] mcpServers
+        string[] automationScripts
+        CoordinationType[] coordinationCapabilities
+        string iconTheme
+        string fullName
+        string description
+    }
+    
+    AGENT_PARTICIPANT ||--|| DEBUG_AGENT : implements
+    AGENT_PARTICIPANT ||--|| DELIVER_AGENT : implements
+    AGENT_PARTICIPANT ||--|| SUPPORT_AGENT : implements
+    AGENT_PARTICIPANT ||--|| RESEARCH_AGENT : implements
+    AGENT_PARTICIPANT ||--|| OPTIMIZE_AGENT : implements
+    
+    MCP_CLIENT_MANAGER ||--o{ MCP_SERVER : connects_to
+    
+    MCP_SERVER {
+        string name PK
+        string command
+        string[] args
+        object env
+        string transport_type
+        string status
+        datetime last_connected
+    }
+    
+    MCP_SERVER ||--|| SUPABASE_TROUBLESHOOTING : instance
+    MCP_SERVER ||--|| POSTGRESQL : instance
+    MCP_SERVER ||--|| CHROME_DEVTOOLS : instance
+    MCP_SERVER ||--|| GITHUB : instance
+    MCP_SERVER ||--|| INTEGRATION_HUB : instance
+    MCP_SERVER ||--|| OBSERVABILITY : instance
+    
+    CHAT_MODE_EXECUTOR ||--o{ CHAT_MODE : loads
+    
+    CHAT_MODE {
+        string id PK
+        string title
+        string description
+        string[] tools
+        string model
+        string instructions
+        object frontmatter
+        string filepath
+    }
+    
+    CHAT_MODE ||--|| SMART_DEBUG_MODE : instance
+    CHAT_MODE ||--|| FEATURE_DELIVERY_MODE : instance
+    CHAT_MODE ||--|| PRODUCTION_SUPPORT_MODE : instance
+    CHAT_MODE ||--|| API_RESEARCH_MODE : instance
+    CHAT_MODE ||--|| COST_OPTIMIZATION_MODE : instance
+    
+    COORDINATION_MANAGER ||--o{ COORDINATION_SESSION : manages
+    
+    COORDINATION_SESSION {
+        string id PK
+        string initiator
+        string[] participants
+        CoordinationType type
+        object context
+        string status
+        datetime created_at
+        datetime completed_at
+        object results
+    }
+    
+    COORDINATION_SESSION ||--|| SINGLE_EXECUTION : type
+    COORDINATION_SESSION ||--|| CHAIN_EXECUTION : type
+    COORDINATION_SESSION ||--|| SWARM_EXECUTION : type
+    COORDINATION_SESSION ||--|| ESCALATION_EXECUTION : type
+    
+    AGENT_PARTICIPANT }o--o{ AUTOMATION_SCRIPT : executes
+    
+    AUTOMATION_SCRIPT {
+        string name PK
+        string path
+        string description
+        string[] required_env
+        string[] outputs
+        string execution_context
+    }
+    
+    AUTOMATION_SCRIPT ||--|| SUPABASE_PULL_LOGS : instance
+    AUTOMATION_SCRIPT ||--|| CONTEXT_SNAPSHOT : instance
+    AUTOMATION_SCRIPT ||--|| VERCEL_STATUS_CHECK : instance
+    
+    DEBUG_AGENT ||--o{ DIAGNOSTIC_TYPE : handles
+    DELIVER_AGENT ||--o{ FEATURE_SPEC : processes
+    SUPPORT_AGENT ||--o{ INCIDENT_TYPE : manages
+    RESEARCH_AGENT ||--o{ INTEGRATION_ANALYSIS : performs
+    OPTIMIZE_AGENT ||--o{ PERFORMANCE_METRIC : analyzes
+    
+    DIAGNOSTIC_TYPE {
+        string category PK
+        string severity
+        string[] required_mcps
+        string[] automation_scripts
+        boolean escalation_required
+    }
+    
+    FEATURE_SPEC {
+        string id PK
+        string name
+        string description
+        boolean requires_database
+        object schema_changes
+        string[] dependencies
+        string testing_strategy
+    }
+    
+    INCIDENT_TYPE {
+        string severity PK
+        string category
+        string[] notification_channels
+        boolean auto_rollback
+        string[] monitoring_dashboards
+        int escalation_timeout_minutes
+    }
+    
+    INTEGRATION_ANALYSIS {
+        string provider PK
+        object cost_structure
+        object performance_metrics
+        string[] compliance_requirements
+        float recommendation_score
+    }
+    
+    PERFORMANCE_METRIC {
+        string metric_type PK
+        float current_value
+        float baseline_value
+        float threshold
+        string optimization_recommendation
+        float potential_savings
+    }

@@ -1,0 +1,65 @@
+%% config: theme: dark, layout: dagre
+flowchart TD
+    A[VS Code Chat Input] --> B{Parse @mention}
+    B --> C["@debug detected"]
+    B --> D["@deliver detected"]
+    B --> E["@support detected"]
+    B --> F["@research detected"]
+    B --> G["@optimize detected"]
+    B --> H["Multiple @agents detected"]
+
+    C --> C1[DebugAgent.execute]
+    D --> D1[DeliverAgent.execute]
+    E --> E1[SupportAgent.execute]
+    F --> F1[ResearchAgent.execute]
+    G --> G1[OptimizeAgent.execute]
+
+    H --> I{Coordination Type?}
+    I --> I1[Sequential Chain]
+    I --> I2[Parallel Swarm]
+    I --> I3[Escalation Path]
+
+    C1 --> J[Load Smart Debug Mode]
+    D1 --> K[Load Feature Delivery Mode]
+    E1 --> L[Load Production Support Mode]
+    F1 --> M[Load API Research Mode]
+    G1 --> N[Load Cost Optimization Mode]
+
+    J --> O[Invoke MCP Tools]
+    K --> O
+    L --> O
+    M --> O
+    N --> O
+
+    O --> P{MCP Tool Required?}
+    P -- supabase-troubleshooting --> P1[Connect supabase-troubleshooting]
+    P -- postgresql --> P2[Connect postgresql]
+    P -- chrome-devtools --> P3[Connect chrome-devtools]
+    P -- github --> P4[Connect github]
+    P -- integration-hub --> P5[Connect integration-hub]
+    P -- observability --> P6[Connect observability]
+
+    P1 --> Q[Execute MCP Tool]
+    P2 --> Q
+    P3 --> Q
+    P4 --> Q
+    P5 --> Q
+    P6 --> Q
+
+    Q --> R{Automation Script Needed?}
+    R -- Yes --> S[Execute Script]
+    R -- No --> T[Generate Response]
+    S --> T
+
+    T --> U{Escalation Required?}
+    U -- Yes --> V[Suggest Agent Coordination]
+    U -- No --> W[Return Response to VS Code]
+    V --> W
+
+    I1 --> X[ChainCoordinator.execute]
+    I2 --> Y[SwarmCoordinator.execute]
+    I3 --> Z[EscalationCoordinator.execute]
+
+    X --> X1[Execute Agent1] --> X2[Pass Result to Agent2] --> X3[Execute Agent2] --> W
+    Y --> Y1[Execute All Agents in Parallel] --> Y2[Synthesize Results] --> W
+    Z --> Z1[Execute Primary Agent] --> Z2{Critical Issue?} --> Z3[Auto-invoke Support Agent] --> W
