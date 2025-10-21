@@ -1,0 +1,5 @@
+/workspaces/ProspectPro/app/frontend/index.html
+/workspaces/ProspectPro/app/frontend/App.tsx
+/workspaces/ProspectPro/app/frontend/index.css
+/workspaces/ProspectPro/app/frontend/main.tsx
+/workspaces/ProspectPro/app/frontend/vite-env.d.ts

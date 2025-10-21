@@ -86,7 +86,21 @@ See `docs/tooling/agent-debug-playbooks.md` for full workflow and guard policy.
 
 ## Next Steps
 
-- Inventory all scripts, tasks, and documentation that reference `/app/frontend`, `/supabase/functions`, or legacy tooling paths.
+
+# Migration Execution (2025-10-21)
+
+- Pre-move inventory snapshot completed: see reports/context/pre-move-tree.txt and reports/context/frontend-files.txt
+- Supabase functions moved to app/backend/functions via migrate-supabase-functions.sh
+- Post-move validation pipeline run: docs:prepare, docs:update, lint, test, supabase:test:db all succeeded
+- Note: supabase:test:functions failed (missing scripts/testing/test-env.local.sh); review and restore if needed
+- Documentation and codebase index regenerated; outputs validated
+
+## Next Steps
+
+- Review supabase:functions test environment setup
+- Stage reference rewrites and .vscode/.github updates for approval
+- Update REPO_RESTRUCTURE_PLAN.md and related docs with migration results
+- Archive migration scripts after cutover
 - Draft proposed directory moves and update plans here for review.
 - Stage all config and automation changes in this file before touching guarded directories.
 
