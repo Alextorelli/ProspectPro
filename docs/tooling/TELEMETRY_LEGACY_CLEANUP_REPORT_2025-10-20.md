@@ -78,8 +78,9 @@ All Thunder/Jaeger references have been removed from the codebase. Observability
    - [ ] Validate generated instructions via `dev-tools/tests/agents.spec.ts` (run test and review output)
    - Next: Implement MCP tool tests
 5. **Automate MCP Tool Tests**
-   - [ ] Mock MCP servers using lightweight HTTP handlers; verify CLI wrappers (`npm run mcp:start:*`) produce expected artifacts in `reports/diagnostics/`.
-   - [ ] Capture outputs and compare with fixtures.
+   - [x] Added Vitest suite `dev-tools/tests/mcp.spec.ts` to mock MCP CLI output and verify diagnostics artifacts
+   - [ ] Capture outputs and compare with fixtures (run test and review output)
+   - Next: Automation script validation
 6. **Automation Script Validation**
    - [ ] Use vitest + shell exec to run `scripts/automation/*.sh` in dry-run mode; assert log files created.
    - [ ] Add regression tests for path rewrites during migrations.
@@ -142,6 +143,14 @@ All Thunder/Jaeger references have been removed from the codebase. Observability
 - [x] Added Vitest suite `dev-tools/tests/agents.spec.ts` to snapshot/assert chatmodes prompts for guardrails and hyperlinks
 - [ ] Validate generated instructions via `dev-tools/tests/agents.spec.ts` (run test and review output)
 - Next: Implement MCP tool tests
+
+---
+
+## Phase 5: Automate MCP Tool Tests
+
+- [x] Added Vitest suite `dev-tools/tests/mcp.spec.ts` to mock MCP CLI output and verify diagnostics artifacts
+- [ ] Capture outputs and compare with fixtures (run test and review output)
+- Next: Automation script validation
 
 ---
 
