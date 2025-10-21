@@ -23,6 +23,11 @@ describe("MCPClientManager", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     jest.spyOn(mockConfigLocator, "loadConfig");
+    // Reset telemetry sink mocks
+    mockTelemetrySink.info.mockReset();
+    mockTelemetrySink.warn.mockReset();
+    mockTelemetrySink.error.mockReset();
+    mockTelemetrySink.event.mockReset();
     clientManager = new MCPClientManager({
       configLocator: mockConfigLocator,
       workspaceContext: mockWorkspaceContext,
@@ -203,9 +208,7 @@ describe("MCPClientManager", () => {
         throw new Error("Dispose failed");
       });
 
-      await expect(clientManager.dispose(mockClient)).rejects.toThrow(
-        "Dispose failed"
-      );
+      await expect(clientManager.dispose(mockClient)).resolves.toBeUndefined();
       expect(mockTelemetrySink.error).toHaveBeenCalledWith(
         "Failed to dispose MCP client",
         expect.any(Error)

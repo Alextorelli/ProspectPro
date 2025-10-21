@@ -18,6 +18,13 @@ export class ConfigLocator {
   ) {
     this.primaryPath = join(workspaceRoot, primaryPath);
     this.fallbackPath = join(workspaceRoot, fallbackPath);
+    console.log("ConfigLocator constructor:", {
+      workspaceRoot,
+      primaryPath,
+      fallbackPath,
+      primaryPathResult: this.primaryPath,
+      fallbackPathResult: this.fallbackPath,
+    });
   }
 
   loadConfig(): ConfigResult {
