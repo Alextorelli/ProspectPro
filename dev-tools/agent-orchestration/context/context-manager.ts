@@ -71,7 +71,16 @@ export interface SelectResult {
   // Utility to get output directory for Option A participant tag
   function getContextOutputDir(tag: OptionATag): string {
     return path.join("reports", "context", tag);
-}
+  }
+
+  // Export context snapshot to Option A output directory
+  export async function exportContextSnapshot(agentId: string, tag: OptionATag, snapshot: object) {
+    const outputDir = getContextOutputDir(tag);
+    await fs.mkdir(outputDir, { recursive: true });
+    const filePath = path.join(outputDir, `snapshot-${agentId}-${Date.now()}.json`);
+    await fs.writeFile(filePath, JSON.stringify(snapshot, null, 2), "utf8");
+    return filePath;
+  }
 
 type ScratchpadNoteInput =
   | string
