@@ -95,8 +95,42 @@ See `docs/tooling/agent-debug-playbooks.md` for full workflow and guard policy.
 
 ## 1. Script & Task Sweep
 
-- Searched scripts, .vscode, .github, and package.json for `/app/frontend`, `/supabase/functions`, `legacy`, `frontend`, `public`, and `tooling`.
-- **Result:** No direct hardcoded path references found in scripts, tasks, or configs. All npm scripts and VS Code tasks use relative or variable-based paths.
+
+
+# Migration Execution Log (2025-10-21)
+
+## 1. Pre-flight Baseline
+
+- Ran: `npm run docs:prepare`, `npm run docs:update`, `npm run lint`, `npm test`, `npm run supabase:test:db`.
+- All commands completed successfully; outputs validated.
+
+## 2. Bulk Inventory Snapshots
+
+- Script staged: `tooling/migration-scripts/snapshot-pre-move.sh`
+- Output: `reports/context/pre-move-tree.txt`, `reports/context/frontend-files.txt`
+
+## 3. Stage Move Scripts
+
+- Script staged: `tooling/migration-scripts/migrate-supabase-functions.sh` (not executed yet)
+- Rollback: Reverse mv command or restore from git if needed
+
+## 4. Reference Rewrites
+
+- To be staged post-approval: sed replacements and .vscode/.github diffs
+
+## 5. Validation Pipeline (Post-move)
+
+- To be run after migration: `npm run docs:prepare`, `npm run docs:update`, `npm run lint`, `npm test`, `npm run supabase:test:db`, `npm run supabase:test:functions`
+- Output to be saved in `reports/context/post-move-validation.txt`
+
+## 6. Documentation Updates & Cleanup
+
+- Update REPO_RESTRUCTURE_PLAN.md, FAST_README.md, platform-playbooks.md, settings-staging.md with new paths, results, rollback notes
+- Archive migration scripts to tooling/archive/ or delete after cutover
+
+## Next Step
+
+- Await explicit approval in this file before executing move and reference update scripts
 
 ## 2. Documentation Audit
 
