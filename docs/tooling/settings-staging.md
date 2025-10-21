@@ -143,6 +143,18 @@ See `docs/tooling/agent-debug-playbooks.md` for full workflow and guard policy.
 
 - None at this time.
 
+# Staged: CI Workflow Gate for Diagram Patch & MCP Validation (2025-10-21)
+
+- **Proposal**: Update `.github/workflows/mermaid-diagram-sync.yml` to run `npm run docs:patch:diagrams` prior to rendering and enforce `npm run mcp:chat:validate` as a gating step for pull requests touching diagrams/chatmodes.
+- **Rationale**: Ensure automated normalization and MCP chat validation occur in CI before merges, matching local guardrails.
+- **Risk**: Medium – workflow failures could block PRs if scripts regress. Mitigation: both commands already run locally; add early exit messaging for clarity.
+- **Rollback**: Revert workflow file to previous commit.
+- **Validation Plan**: `npm run docs:patch:diagrams`, `npm run docs:prepare`, `npm run mcp:chat:validate`, `npm run lint` pre-commit; confirm GitHub Actions success on test PR.
+
+### Applied 2025-10-21
+- Workflow updated with normalization and MCP validation steps.
+- Local validation executed: `npm run docs:patch:diagrams`, `npm run docs:prepare`, `npm run mcp:chat:validate`, `npm run lint` (all passed). Awaiting CI confirmation on next PR.
+
 ### Applied: Chatmode Persona Migration (2025-10-21)
 
 - Legacy chatmodes replaced with persona-aligned prompts: System Architect, Production Ops, Observability, Development Workflow

@@ -24,6 +24,7 @@ This report documents the current state of the ProspectPro repository after the 
 - MCP production status snapshot migrated into `docs/tooling/devops-agent-runbook.md`.
 - Copilot instructions and runbooks updated to reference live documentation and staging guardrails.
 - VS Code Phase 02 task now emits coverage to `reports/context/coverage.md`.
+- Diagram patch automation landed (`scripts/docs/patch-diagrams.sh`) and is invoked by `npm run docs:render:diagrams` / `docs:prepare`; CI integration staged to require `npm run docs:patch:diagrams` and `npm run mcp:chat:validate` before merges (see settings-staging.md).
 
 ---
 
