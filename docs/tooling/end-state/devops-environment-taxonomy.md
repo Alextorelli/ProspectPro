@@ -10,6 +10,7 @@ Source material captured for follow-up synthesis and alignment work. Content ref
 - When updating flows, edit this markdown first, then regenerate dependent diagrams via `npm run docs:patch:diagrams --source docs/tooling/end-state` followed by `npm run docs:prepare`.
 - Generated Mermaid diagrams (all in `docs/tooling/end-state/`) are derived from the narratives and tables below:
   - `agent-mode-flow.mmd` – environment → agent mode → Option A participant mapping
+    - `participant-coordination-flow.mmd` – coordination manager routing across session types and participants
   - `agent-environment-map-state.mmd` – environment detection → MCP cluster selection → participant activation
   - `environment-mcp-cluster.mmd` – cluster inventory aligned with Option A tooling
   - `agent-coordination-flow.mmd` and `workflow-architecture-c4.mmd` – promotion pipeline feedback loops
@@ -48,36 +49,36 @@ Source material captured for follow-up synthesis and alignment work. Content ref
 %%{init: {'theme': 'dark', 'layout': 'dagre'}}%%
 flowchart TD
     subgraph Environment
-        DEV [Development]
-        TEST [Test/QA]
-        STAGE [Staging]
-        PROD [Production]
-        INCIDENT [Incident Response]
+        DEV[Development]
+        TEST[Test/QA]
+        STAGE[Staging]
+        PROD[Production]
+        INCIDENT[Incident Response]
     end
 
     subgraph Copilot_Agent_Modes
-        DEBUG_MODE [debug]
-        FEATURE_MODE [feature]
-        SUPPORT_MODE [support]
-        OPTIMIZE_MODE [optimize]
-        SECURITY_MODE [security]
+        DEBUG_MODE["@debug"]
+        FEATURE_MODE["@feature"]
+        SUPPORT_MODE["@support"]
+        OPTIMIZE_MODE["@optimize"]
+        SECURITY_MODE["@security"]
     end
 
     subgraph Terminal_Participants
-        ux_participant [ux]
-        platform_participant [platform]
-        devops_participant [devops]
-        secops_participant [secops]
-        integrations_participant [integrations]
+        ux_participant["@ux"]
+        platform_participant["@platform"]
+        devops_participant["@devops"]
+        secops_participant["@secops"]
+        integrations_participant["@integrations"]
     end
 
     subgraph Functions_Primitives
-        DETECT [Detect]
-        DIAGNOSE [Diagnose]
-        REMEDIATE [Remediate]
-        VALIDATE [Validate]
-        ORCHESTRATE [Orchestrate]
-        REPORT [Report]
+        DETECT[Detect]
+        DIAGNOSE[Diagnose]
+        REMEDIATE[Remediate]
+        VALIDATE[Validate]
+        ORCHESTRATE[Orchestrate]
+        REPORT[Report]
     end
 
     DEV --> DEBUG_MODE

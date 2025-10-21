@@ -1,0 +1,62 @@
+%% config: theme: dark
+flowchart LR
+    AgentRequest["@agent command or escalation"]
+    CoordinationManager["Coordination Manager"]
+    CoordinationSession["Coordination Session\n(status, context, results)"]
+    TypeRouter{"Select coordination type"}
+    SingleExec["Single Execution"]
+    ChainExec["Chain Execution"]
+    SwarmExec["Swarm Execution"]
+    EscalationExec["Escalation Execution"]
+    ParticipantSelector{"Activate participants"}
+
+    subgraph Selected_Participants
+        UX["@ux"]
+        Platform["@platform"]
+        DevOps["@devops"]
+        SecOps["@secops"]
+        Integrations["@integrations"]
+    end
+
+    subgraph Automation_Scripts
+        SupabasePull["supabase_pull_logs"]
+        ContextSnapshot["context_snapshot"]
+        VercelStatus["vercel_status_check"]
+    end
+
+    SessionOutcome["Session outcome & guidance"]
+    FeedbackLoop["Update coordination ledger"]
+
+    AgentRequest --> CoordinationManager
+    CoordinationManager -->|creates| CoordinationSession
+    CoordinationSession -->|routes context| TypeRouter
+    TypeRouter --> SingleExec
+    TypeRouter --> ChainExec
+    TypeRouter --> SwarmExec
+    TypeRouter --> EscalationExec
+
+    SingleExec --> ParticipantSelector
+    ChainExec --> ParticipantSelector
+    SwarmExec --> ParticipantSelector
+    EscalationExec --> ParticipantSelector
+
+    ParticipantSelector --> UX
+    ParticipantSelector --> Platform
+    ParticipantSelector --> DevOps
+    ParticipantSelector --> SecOps
+    ParticipantSelector --> Integrations
+
+    UX --> SupabasePull
+    Platform --> SupabasePull
+    DevOps --> ContextSnapshot
+    SecOps --> ContextSnapshot
+    Integrations --> VercelStatus
+
+    SupabasePull --> CoordinationSession
+    ContextSnapshot --> CoordinationSession
+    VercelStatus --> CoordinationSession
+
+    CoordinationSession --> SessionOutcome
+    SessionOutcome --> CoordinationManager
+    CoordinationManager --> FeedbackLoop
+    FeedbackLoop --> AgentRequest
