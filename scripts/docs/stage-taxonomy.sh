@@ -38,7 +38,7 @@ TEMP_DIR="$(mktemp -d)"
 trap 'rm -rf "$TEMP_DIR"' EXIT
 
 find "$STAGING_DIR" -type f -name '*.mmd' | while read -r diagram; do
-  relative_path="$(realpath --relative-to="$ROOT_DIR" "$diagram")"
+  relative_path=$(realpath --relative-to="$ROOT_DIR" "$diagram")
   echo "[INFO] Validating $relative_path"
   output_svg="$TEMP_DIR/$(basename "$diagram" .mmd).svg"
   npx --yes @mermaid-js/mermaid-cli@11.12.0 -i "$diagram" -o "$output_svg" >/dev/null 2>&1
