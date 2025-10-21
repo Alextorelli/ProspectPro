@@ -30,7 +30,9 @@ export class ConfigLocator {
         return { config, source: this.primaryPath, warnings };
       } catch (error) {
         warnings.push(
-          `Failed to parse primary config at ${this.primaryPath}: ${error.message}`
+          `Failed to parse primary config at ${this.primaryPath}: ${
+            (error as Error).message
+          }`
         );
       }
     } else {
@@ -45,7 +47,9 @@ export class ConfigLocator {
         return { config, source: this.fallbackPath, warnings };
       } catch (error) {
         warnings.push(
-          `Failed to parse fallback config at ${this.fallbackPath}: ${error.message}`
+          `Failed to parse fallback config at ${this.fallbackPath}: ${
+            (error as Error).message
+          }`
         );
       }
     } else {

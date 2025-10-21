@@ -115,7 +115,28 @@
         "const supabaseCommands={docs:{functions_overview:'https://supabase.com/docs/reference/cli/supabase-functions',serve:'https://supabase.com/docs/reference/cli/supabase-functions-serve',deploy:'https://supabase.com/docs/reference/cli/supabase-functions-deploy'},common_patterns:{cli_prefix:'npx --yes supabase@latest',workdir_context:'cd /workspaces/ProspectPro/supabase &&'},project_management:{link:'npx --yes supabase@latest link --project-ref <project_ref>',status:'npx --yes supabase@latest status',unlink:'npx --yes supabase@latest unlink'},migration_commands:{new:'npx --yes supabase@latest migration new <migration_name>',list:'npx --yes supabase@latest migration list',status:'npx --yes supabase@latest migration status',repair:'npx --yes supabase@latest migration repair <version> --status <applied|reverted>',up:'npx --yes supabase@latest migration up',down:'npx --yes supabase@latest migration down <version>'},db_operations:{push:'npx --yes supabase@latest db push',push_local:'npx --yes supabase@latest db push --local',pull_schema:'npx --yes supabase@latest db pull --schema <schema_name>',pull_migration:'npx --yes supabase@latest db pull <migration_name>',reset_local:'npx --yes supabase@latest db reset --local',dump:'npx --yes supabase@latest db dump --schema <schema> --file <path>'},type_generation:{typescript:'npx --yes supabase@latest gen types --lang typescript',typescript_local:'npx --yes supabase@latest gen types --local --lang typescript'},output_formats:{available:['env','pretty','json','toml','yaml'],default:'pretty'},deprecated_commands:{db_remote_commit:'DEPRECATED: Use \"db pull\" instead'},error_patterns:{rate_limit:'Rate exceeded - retry after delay',auth_required:'Run authentication script first',project_not_linked:'Run link command with --project-ref',invalid_flags:'Check available flags with --help'}};console.log(JSON.stringify(supabaseCommands,null,2));"
       ]
     },
-    "supabase_edge_functions_context": {
+    "mcp-service-layer": {
+      "autoStart": true,
+      "lazyLoad": false,
+      "maxMemory": "64MB",
+      "priority": "high",
+      "description": "MCP Service Layer for client management, configuration, and telemetry (Phase 4 Production)",
+      "command": "node",
+      "args": ["./dev-tools/agent-orchestration/mcp/dist/index.js"],
+      "env": {
+        "NODE_ENV": "production",
+        "OTEL_SERVICE_NAME": "prospectpro-mcp-service-layer",
+        "OTEL_TRACES_EXPORTER": "otlp",
+        "OTLP_ENDPOINT": "${OTLP_ENDPOINT}",
+        "OTLP_AUTH_TOKEN": "${OTLP_AUTH_TOKEN}"
+      },
+      "healthCheck": {
+        "endpoint": "http://localhost:3001/health",
+        "interval": 30000,
+        "timeout": 5000
+      },
+      "tools": []
+    },
       "autoStart": false,
       "description": "Edge Function command reference with Supabase CLI documentation links",
       "command": "node",

@@ -40,13 +40,17 @@ export class ChatModeLoader {
           manifests.push({ name, content, path: filePath });
         } catch (error) {
           warnings.push(
-            `Failed to load chat mode manifest ${file}: ${error.message}`
+            `Failed to load chat mode manifest ${file}: ${
+              (error as Error).message
+            }`
           );
         }
       }
     } catch (error) {
       warnings.push(
-        `Failed to read chat modes directory ${fullPath}: ${error.message}`
+        `Failed to read chat modes directory ${fullPath}: ${
+          (error as Error).message
+        }`
       );
     }
 

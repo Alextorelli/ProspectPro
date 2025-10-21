@@ -153,9 +153,55 @@ class MyTelemetrySink implements TelemetrySink {
   }
 }
 
-// Or use the no-op default
-const telemetrySink = new NoOpTelemetrySink();
+// Or use the tracing-enabled implementation
+import { TracingTelemetrySink } from "@prospectpro/mcp-service-layer";
+
+const telemetrySink = new TracingTelemetrySink({
+  serviceName: "my-mcp-service",
+  serviceVersion: "1.0.0",
+});
+
+// This will create OpenTelemetry spans and events
+telemetrySink.info("Service started", { port: 3000 });
 ```
+
+### Tracing Integration
+
+The service layer includes built-in OpenTelemetry tracing support:
+
+```typescript
+import { TracingTelemetrySink } from "@prospectpro/mcp-service-layer";
+
+const tracingSink = new TracingTelemetrySink({
+  serviceName: "prospectpro-mcp-client",
+  serviceVersion: "1.0.0",
+});
+
+// All MCP operations will be automatically traced
+const manager = new MCPClientManager({
+  // ... other options
+  telemetrySink: tracingSink,
+});
+
+// Manual span creation for custom operations
+const span = tracingSink.startSpan("custom-operation", {
+  operation: "data-processing",
+  batchSize: 100,
+});
+
+try {
+  // Your operation here
+  await processData();
+  span.setAttribute("success", true);
+} catch (error) {
+  span.recordException(error);
+  span.setStatus({ code: SpanStatusCode.ERROR, message: error.message });
+} finally {
+  span.end();
+}
+```
+
+````
 
 ### ChatModeLoader
 
@@ -169,7 +215,7 @@ const manifest = loader.loadManifest("smart-debug");
 
 // Load from custom path
 const customManifest = loader.loadManifest("custom-mode", "/custom/path");
-```
+````
 
 ## Testing
 

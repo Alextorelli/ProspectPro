@@ -211,12 +211,50 @@ curl -X POST 'https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/campaign-exp
   -H 'Authorization: Bearer SUPABASE_SESSION_JWT' \
   -H 'Content-Type: application/json' \
   -d '{"campaignId": "campaign_123", "format": "csv"}'
+```
+
+### MCP Service Layer (Phase 4)
+
+The MCP (Model Context Protocol) Service Layer provides production-ready client management, configuration, and observability integration:
+
+```bash
+# Build and test MCP service layer
+cd dev-tools/agent-orchestration/mcp
+npm install
+npm run build
+npm test
+
+# Deploy MCP service layer to production
+../../../scripts/operations/deploy-mcp-service-layer.sh
+
+# Start MCP servers for development
+npm run mcp:start
+
+# Monitor MCP operations with tracing
+# Traces available at: http://localhost:16686 (Jaeger UI)
+```
+
+**Key Features:**
+
+- **Production Deployment**: Automated deployment with systemd integration
+- **OpenTelemetry Tracing**: Built-in distributed tracing with Jaeger backend
+- **Concurrent Safety**: Promise caching for safe concurrent client access
+- **Retry Logic**: Exponential backoff with configurable retry strategies
+- **Type Safety**: Full TypeScript support with comprehensive test coverage
+
+**Integration Points:**
+
+- Connects to existing MCP servers (production, development, troubleshooting)
+- Integrates with observability stack for monitoring and alerting
+- Supports both development mocking and production implementations
 
 # Run Supabase-auth diagnostics
+
 curl -X POST 'https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/test-new-auth' \
-  -H 'Authorization: Bearer SUPABASE_SESSION_JWT' \
-  -H 'Content-Type: application/json' \
-  -d '{"diagnostics": true}'
+ -H 'Authorization: Bearer SUPABASE_SESSION_JWT' \
+ -H 'Content-Type: application/json' \
+ -d '{"diagnostics": true}'
+
 ```
 
 ## 🎯 Roadmap
@@ -329,3 +367,4 @@ MIT License - see [LICENSE](LICENSE) file for details.
 ---
 
 **ProspectPro v4.3** – Tier-Aware Background Discovery with Supabase Session Enforcement
+```

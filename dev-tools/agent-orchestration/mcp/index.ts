@@ -13,8 +13,9 @@ export {
   type MCPClientManagerOptions,
   type RetryOptions,
 } from "./MCPClientManager";
-export {
+export type {
+  TelemetrySink as ITelemetrySink,
   TelemetrySink,
-  type TelemetrySink as ITelemetrySink,
 } from "./TelemetrySink";
+export { TracingTelemetrySink } from "./TracingTelemetrySink";
 export { WorkspaceContext } from "./WorkspaceContext";

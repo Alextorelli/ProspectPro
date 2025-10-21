@@ -61,7 +61,7 @@ export class MCPClientManager {
     } catch (error) {
       this.options.telemetrySink.error(
         "Failed to initialize MCP Client Manager",
-        error
+        error as Error
       );
       throw error;
     }
@@ -147,7 +147,10 @@ export class MCPClientManager {
         serverName: client.serverName,
       });
     } catch (error) {
-      this.options.telemetrySink.error("Failed to dispose MCP client", error);
+      this.options.telemetrySink.error(
+        "Failed to dispose MCP client",
+        error as Error
+      );
     }
   }
 
@@ -177,17 +180,17 @@ export class MCPClientManager {
       ...this.options.retryOptions,
       ...customOptions,
     } as RetryOptions;
-    let lastError: Error;
+    let lastError: Error | undefined;
 
     for (let attempt = 1; attempt <= opts.maxAttempts; attempt++) {
       try {
         return await operation();
       } catch (error) {
-        lastError = error;
+        lastError = error as Error;
         this.options.telemetrySink.warn(
           `${operationName} failed (attempt ${attempt}/${opts.maxAttempts})`,
           {
-            error: error.message,
+            error: (error as Error).message,
             attempt,
           }
         );
@@ -203,7 +206,10 @@ export class MCPClientManager {
       `${operationName} failed after ${opts.maxAttempts} attempts`,
       lastError
     );
-    throw lastError;
+    throw (
+      lastError ||
+      new Error(`${operationName} failed after ${opts.maxAttempts} attempts`)
+    );
   }
 
   private calculateDelay(attempt: number, opts: RetryOptions): number {
