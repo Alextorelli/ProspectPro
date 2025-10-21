@@ -1,82 +1,195 @@
-{
-  "version": "2.0",
-  "last_updated": "2025-10-19",
-  "servers": {
-    "chrome-devtools": {
-      "type": "stdio",
-      "package": "chrome-devtools-mcp@latest",
-      "invocation": "npx",
-      "capabilities": [
-        "browser_automation",
-        "performance_profiling",
-        "visual_regression_testing",
-        "screenshot_capture",
-        "trace_analysis"
-      ],
-      "health_check_url": null,
-      "startup_timeout_ms": 5000,
-      "response_time_p95_target_ms": 500
-    },
-    "github": {
-      "type": "stdio",
-      "package": "@modelcontextprotocol/server-github",
-      "invocation": "npx",
-      "capabilities": [
-        "repository_management",
-        "pr_automation",
-        "issue_tracking",
-        "ci_cd_integration",
-        "security_scanning"
-      ],
-      "health_check_url": null,
-      "startup_timeout_ms": 5000,
-      "response_time_p95_target_ms": 500
-    },
-    "supabase-troubleshooting": {
-      "type": "stdio",
-      "package": "local",
-      "invocation": "node",
-      "script_path": "./mcp-servers/supabase-troubleshooting-server.js",
-      "capabilities": [
-        "log_aggregation",
-        "error_correlation",
-        "real_time_monitoring",
-        "trace_correlation",
-        "incident_detection"
-      ],
-      "health_check_url": null,
-      "startup_timeout_ms": 5000,
-      "response_time_p95_target_ms": 500
-    },
-    "postgresql": {
-      "type": "stdio",
-      "package": "local",
-      "invocation": "node",
-      "script_path": "./mcp-servers/postgresql-server.js",
-      "capabilities": [
-        "database_operations",
-        "query_optimization",
-        "schema_management",
-        "migration_validation",
-        "performance_analysis"
-      ],
-      "health_check_url": null,
-      "startup_timeout_ms": 5000,
-      "response_time_p95_target_ms": 500
-    },
-    "integration-hub": {
-      "type": "stdio",
-      "package": "local",
-      "invocation": "node",
-      "script_path": "./mcp-servers/integration-hub-server.js",
-      "capabilities": [
-        "webhook_management",
-        "third_party_integration",
-        "notification_routing",
-        "payment_operations",
-        "workflow_automation"
-      ],
-      "health_check_url": null,
+{{
+
+  "version": "2.0",  "version": "2.0",
+
+  "last_updated": "2025-10-21",  "last_updated": "2025-10-19",
+
+  "servers": {  "servers": {
+
+    "platform-development": {    "chrome-devtools": {
+
+      "type": "stdio",      "type": "stdio",
+
+      "package": "local",      "package": "chrome-devtools-mcp@latest",
+
+      "invocation": "node",      "invocation": "npx",
+
+      "script_path": "./mcp-servers/development-server.js",      "capabilities": [
+
+      "capabilities": [        "browser_automation",
+
+        "react_devtools",        "performance_profiling",
+
+        "eslint_autofix",        "visual_regression_testing",
+
+        "api_testing",        "screenshot_capture",
+
+        "supabase_functions",        "trace_analysis"
+
+        "docs_generation"      ],
+
+      ],      "health_check_url": null,
+
+      "health_check_url": null,      "startup_timeout_ms": 5000,
+
+      "startup_timeout_ms": 5000,      "response_time_p95_target_ms": 500
+
+      "response_time_p95_target_ms": 500    },
+
+    },    "github": {
+
+    "platform-production": {      "type": "stdio",
+
+      "type": "stdio",      "package": "@modelcontextprotocol/server-github",
+
+      "package": "local",      "invocation": "npx",
+
+      "invocation": "node",      "capabilities": [
+
+      "script_path": "./mcp-servers/production-server.js",        "repository_management",
+
+      "capabilities": [        "pr_automation",
+
+        "production_monitoring",        "issue_tracking",
+
+        "campaign_analytics",        "ci_cd_integration",
+
+        "cost_intelligence",        "security_scanning"
+
+        "supabase_validation",      ],
+
+        "vercel_status"      "health_check_url": null,
+
+      ],      "startup_timeout_ms": 5000,
+
+      "health_check_url": null,      "response_time_p95_target_ms": 500
+
+      "startup_timeout_ms": 7000,    },
+
+      "response_time_p95_target_ms": 600    "supabase-troubleshooting": {
+
+    },      "type": "stdio",
+
+    "devops-vercel-cli": {      "package": "local",
+
+      "type": "stdio",      "invocation": "node",
+
+      "package": "local",      "script_path": "./mcp-servers/supabase-troubleshooting-server.js",
+
+      "invocation": "node",      "capabilities": [
+
+      "script_path": "./mcp-servers/supabase-troubleshooting-server.js",        "log_aggregation",
+
+      "capabilities": [        "error_correlation",
+
+        "vercel_cli",        "real_time_monitoring",
+
+        "supabase_triage",        "trace_correlation",
+
+        "rls_diagnostics",        "incident_detection"
+
+        "ci_validation",      ],
+
+        "log_aggregation"      "health_check_url": null,
+
+      ],      "startup_timeout_ms": 5000,
+
+      "health_check_url": null,      "response_time_p95_target_ms": 500
+
+      "startup_timeout_ms": 5000,    },
+
+      "response_time_p95_target_ms": 500    "postgresql": {
+
+    },      "type": "stdio",
+
+    "platform-postgresql": {      "package": "local",
+
+      "type": "stdio",      "invocation": "node",
+
+      "package": "local",      "script_path": "./mcp-servers/postgresql-server.js",
+
+      "invocation": "node",      "capabilities": [
+
+      "script_path": "./mcp-servers/postgresql-server.js",        "database_operations",
+
+      "capabilities": [        "query_optimization",
+
+        "database_operations",        "schema_management",
+
+        "query_optimization",        "migration_validation",
+
+        "schema_management",        "performance_analysis"
+
+        "migration_validation",      ],
+
+        "performance_analysis"      "health_check_url": null,
+
+      ],      "startup_timeout_ms": 5000,
+
+      "health_check_url": null,      "response_time_p95_target_ms": 500
+
+      "startup_timeout_ms": 5000,    },
+
+      "response_time_p95_target_ms": 500    "integration-hub": {
+
+    },      "type": "stdio",
+
+    "integrations-hub": {      "package": "local",
+
+      "type": "stdio",      "invocation": "node",
+
+      "package": "local",      "script_path": "./mcp-servers/integration-hub-server.js",
+
+      "invocation": "node",      "capabilities": [
+
+      "script_path": "./mcp-servers/integration-hub-server.js",        "webhook_management",
+
+      "capabilities": [        "third_party_integration",
+
+        "webhook_management",        "notification_routing",
+
+        "third_party_integration",        "payment_operations",
+
+        "notification_routing",        "workflow_automation"
+
+        "payment_operations",      ],
+
+        "workflow_automation"      "health_check_url": null,
+
+      ],      "startup_timeout_ms": 5000,
+
+      "health_check_url": null,      "response_time_p95_target_ms": 500
+
+      "startup_timeout_ms": 5000,    }
+
+      "response_time_p95_target_ms": 500  },
+
+    },  "monitoring": {
+
+    "github": {    "performance_targets": {
+
+      "type": "stdio",      "mcp_call_latency_p95_ms": 500,
+
+      "package": "@modelcontextprotocol/server-github",      "connection_pool_utilization_max_percent": 80,
+
+      "invocation": "npx",      "error_rate_max_percent": 1
+
+      "capabilities": [    },
+
+        "repository_management",    "alerting": {
+
+        "pr_automation",      "mcp_server_downtime": "immediate_slack_alert",
+
+        "issue_tracking",      "performance_degradation": "alert_if_p95_gt_1s_for_5min",
+
+        "ci_cd_integration",      "authentication_failures": "alert_on_repeated_failures"
+
+        "security_scanning"    }
+
+      ],  }
+
+      "health_check_url": null,}
+
       "startup_timeout_ms": 5000,
       "response_time_p95_target_ms": 500
     }

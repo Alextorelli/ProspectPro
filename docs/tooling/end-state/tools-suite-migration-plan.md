@@ -57,7 +57,7 @@ This document tracks the phased migration of ProspectPro’s MCP, agent orchestr
 ## Progress Tracking
 
 - [x] Audit complete; migration plan documented
-- [ ] MCP config/registry rewrite staged
+- [x] MCP config/registry rewrite staged
 - [ ] Orchestration/context scripts refactored
 - [ ] Automation/docs updated
 - [ ] Chatmodes/CI workflows replaced
@@ -75,7 +75,7 @@ This document tracks the phased migration of ProspectPro’s MCP, agent orchestr
 
 ## Next Steps
 
-1. Stage MCP config and registry proposals
+1. Validate staged MCP config/registry via `npm run mcp:chat:validate` and record outputs in `settings-staging.md` & `reports/context/coverage.md`.
 2. Begin refactoring orchestration and context scripts
 3. Update automation and documentation
 4. Replace chatmodes and CI workflows
