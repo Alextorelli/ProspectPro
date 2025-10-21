@@ -45,6 +45,15 @@ All scripts output to `reports/` and enforce guardrails. See platform-playbooks.
 
 ## DevOps Agent Checklist Runbook
 
+## Persona-Aligned Workflow Patterns
+
+| Persona              | Workflow Pattern                                                                |
+| -------------------- | ------------------------------------------------------------------------------- |
+| System Architect     | @debug → postgresql.validate_migration → integration-hub.execute_workflow       |
+| Development Workflow | @deliver → ci_cd_validation_suite → vercel_status_check                         |
+| Production Ops       | @support → supabase_troubleshooting.generate_incident_timeline → rollback tasks |
+| Observability        | @optimize → observability.trace_diff → context-snapshot.sh                      |
+
 ### 1. Pre-flight
 
 - `git status` (clean tree)
