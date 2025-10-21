@@ -47,37 +47,37 @@ Source material captured for follow-up synthesis and alignment work. Content ref
 ```mermaid
 %%{init: {'theme': 'dark', 'layout': 'dagre'}}%%
 flowchart TD
-    subgraph "Environment"
-      DEV[Development]
-      TEST[Test/QA]
-      STAGE[Staging]
-      PROD[Production]
-      INCIDENT[Incident Response]
+    subgraph Environment
+        DEV[Development]
+        TEST[Test/QA]
+        STAGE[Staging]
+        PROD[Production]
+        INCIDENT[Incident Response]
     end
 
-    subgraph "Copilot Agent Modes"
-      DEBUG_MODE[@debug]
-      FEATURE_MODE[@feature]
-      SUPPORT_MODE[@support]
-      OPTIMIZE_MODE[@optimize]
-      SECURITY_MODE[@security]
+    subgraph Copilot_Agent_Modes
+        DEBUG_MODE[debug]
+        FEATURE_MODE[feature]
+        SUPPORT_MODE[support]
+        OPTIMIZE_MODE[optimize]
+        SECURITY_MODE[security]
     end
 
-        subgraph "Terminal Participants"
-            ux_participant[@ux]
-            platform_participant[@platform]
-            devops_participant[@devops]
-            secops_participant[@secops]
-            integrations_participant[@integrations]
-        end
+    subgraph Terminal_Participants
+        ux_participant[ux]
+        platform_participant[platform]
+        devops_participant[devops]
+        secops_participant[secops]
+        integrations_participant[integrations]
+    end
 
-    subgraph "Functions/Primitives"
-      DETECT[Detect]
-      DIAGNOSE[Diagnose]
-      REMEDIATE[Remediate]
-      VALIDATE[Validate]
-      ORCHESTRATE[Orchestrate]
-      REPORT[Report]
+    subgraph Functions_Primitives
+        DETECT[Detect]
+        DIAGNOSE[Diagnose]
+        REMEDIATE[Remediate]
+        VALIDATE[Validate]
+        ORCHESTRATE[Orchestrate]
+        REPORT[Report]
     end
 
     DEV --> DEBUG_MODE
@@ -222,7 +222,7 @@ stateDiagram-v2
 
 ```mermaid
 %%{init: {'theme': 'dark'}}%%
-
+flowchart TD
     subgraph env_clusters ["Environment-Specific MCP Clusters"]
         subgraph dev_cluster ["Development Cluster"]
             D1[chrome-devtools-local]
@@ -230,21 +230,18 @@ stateDiagram-v2
             D3[supabase-dev]
             D4[postgres-local]
         end
-
         subgraph test_cluster ["Testing Cluster"]
             T1[integration-testing]
             T2[performance-profiling]
             T3[quality-gates]
             T4[test-data-management]
         end
-
         subgraph stage_cluster ["Staging Cluster"]
             S1[supabase-staging]
             S2[observability-staging]
             S3[deployment-validation]
             S4[cost-optimization]
         end
-
         subgraph prod_cluster ["Production Cluster"]
             P1[supabase-production]
             P2[monitoring-alerts]
@@ -252,15 +249,12 @@ stateDiagram-v2
             P4[security-scanning]
         end
     end
-
     subgraph cross_tools ["Cross-Environment Tools"]
         X1[github-cicd]
         X2[infrastructure-as-code]
         X3[secrets-management]
     end
-
     ENV_ROUTER[Environment Router]
-
     ENV_ROUTER --> D1
     ENV_ROUTER --> T1
     ENV_ROUTER --> S1
