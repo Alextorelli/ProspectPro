@@ -87,8 +87,9 @@ All Thunder/Jaeger references have been removed from the codebase. Observability
      - Add regression test for path rewrites during migrations
    - Next: CI integration and test pipeline
 7. **CI Integration**
-   - [ ] Stage new `npm run test:devtools` script in package.json.
-   - [ ] Add VS Code task proposal in `settings-staging.md`; update `.github/workflows/ci.yml` only after approval.
+   - [x] Added npm script `test:devtools` for dev tools test suite in `package.json`
+   - [ ] Add VS Code task proposal in `settings-staging.md`; update `.github/workflows/ci.yml` only after approval
+   - Next: Telemetry & coverage aggregation
 8. **Telemetry & Coverage**
    - [ ] Aggregate results into coverage.md via updated Phase 02 task.
    - [ ] Include coverage badges or summary in devops-agent-runbook.md.
@@ -167,8 +168,8 @@ All Thunder/Jaeger references have been removed from the codebase. Observability
 
 ## Phase 7: CI Integration
 
-- [ ] Stage new `npm run test:devtools` script in package.json.
-- [ ] Add VS Code task proposal in `settings-staging.md`; update `.github/workflows/ci.yml` only after approval.
+- [x] Added npm script `test:devtools` for dev tools test suite in `package.json`
+- [ ] Add VS Code task proposal in `settings-staging.md`; update `.github/workflows/ci.yml` only after approval
 - Next: Telemetry & coverage aggregation
 
 ---
