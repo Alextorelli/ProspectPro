@@ -1,0 +1,73 @@
+%% Agent Lifecycle & Coordination States (State Diagram)
+%% Extracted from Dev Tools Taxonomy Diagrams Optimized.md
+
+---
+config:
+theme: base
+look: handDrawn
+---
+stateDiagram-v2
+[*] --> Idle
+Idle --> Invoked : @mention received
+state Invoked {
+    [*] --> ParseIntent
+    ParseIntent --> LoadChatMode
+    LoadChatMode --> AnalyzeContext
+    AnalyzeContext --> SelectMCPServers
+}
+Invoked --> SingleExecution : Single agent task
+Invoked --> CoordinationRequired : Multiple agents needed
+state SingleExecution {
+    [*] --> ConnectMCP
+    ConnectMCP --> ExecuteTools
+    ExecuteTools --> RunAutomation
+    RunAutomation --> GenerateResponse
+    GenerateResponse --> [*]
+}
+state CoordinationRequired {
+    [*] --> DeterminePattern
+    DeterminePattern --> ChainExecution : Sequential workflow
+    DeterminePattern --> SwarmExecution : Parallel workflow
+    DeterminePattern --> EscalationExecution : Severity-based
+    state ChainExecution {
+        [*] --> Agent1
+        Agent1 --> Agent2 : Pass context
+        Agent2 --> AgentN : Continue chain
+        AgentN --> SynthesizeChain
+        SynthesizeChain --> [*]
+    }
+    state SwarmExecution {
+        [*] --> ParallelAgents
+        ParallelAgents --> Agent_A
+        ParallelAgents --> Agent_B
+        ParallelAgents --> Agent_C
+        Agent_A --> SynthesizeSwarm
+        Agent_B --> SynthesizeSwarm
+        Agent_C --> SynthesizeSwarm
+        SynthesizeSwarm --> [*]
+    }
+    state EscalationExecution {
+        [*] --> PrimaryAgent
+        PrimaryAgent --> AssessSeverity
+        AssessSeverity --> SecondaryAgent : Critical issue
+        AssessSeverity --> Complete : Issue resolved
+        SecondaryAgent --> Complete
+        Complete --> [*]
+    }
+}
+SingleExecution --> ResponseReady
+CoordinationRequired --> ResponseReady
+state ResponseReady {
+    [*] --> ValidateResults
+    ValidateResults --> CacheContext
+    CacheContext --> ReturnToUser
+    ReturnToUser --> [*]
+}
+ResponseReady --> Idle
+note right of CoordinationRequired
+    Coordination patterns:
+    - Chain: @research → @deliver
+    - Swarm: @debug + @support + @optimize
+    - Escalation: @debug → @support
+end note
+---

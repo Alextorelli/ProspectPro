@@ -1,0 +1,68 @@
+%% Data Flow & Context Management (Flowchart)
+%% Extracted from Dev Tools Taxonomy Diagrams Optimized.md
+
+---
+config:
+theme: forest
+layout: dagre
+---
+flowchart TD
+A[VS Code Chat Input] --> B{Parse @mention Pattern}
+B --> |@debug| C[Debug Agent Handler]
+B --> |@deliver| D[Deliver Agent Handler]
+B --> |@support| E[Support Agent Handler]
+B --> |@research| F[Research Agent Handler]
+B --> |@optimize| G[Optimize Agent Handler]
+B --> |Multiple @agents| H[Coordination Manager]
+C --> C1[Load Smart Debug Mode]
+D --> D1[Load Feature Delivery Mode]
+E --> E1[Load Production Support Mode]
+F --> F1[Load API Research Mode]
+G --> G1[Load Cost Optimization Mode]
+C1 --> I[Intent Analysis]
+D1 --> I
+E1 --> I
+F1 --> I
+G1 --> I
+I --> J{Context Requirements}
+J --> |Workspace Context| K[Load Codebase State]
+J --> |Historical Context| L[Load Previous Sessions]
+J --> |External Context| M[Fetch External Data]
+K --> N[MCP Server Selection]
+L --> N
+M --> N
+N --> O{MCP Server Type}
+O --> |supabase-troubleshooting| P1[Diagnostic Analysis]
+O --> |postgresql| P2[Database Operations]
+O --> |github| P3[Repository Actions]
+O --> |integration-hub| P4[Service Integration]
+O --> |observability| P5[Monitoring & Alerts]
+O --> |chrome-devtools| P6[Browser Automation]
+P1 --> Q[Execute MCP Tools]
+P2 --> Q
+P3 --> Q
+P4 --> Q
+P5 --> Q
+P6 --> Q
+Q --> R{Automation Required?}
+R --> |Yes| S[Execute Automation Scripts]
+R --> |No| T[Generate Response]
+S --> T
+T --> U{Agent Coordination Needed?}
+U --> |Yes| V[Initiate Multi-Agent Workflow]
+U --> |No| W[Return Response to VS Code]
+H --> X{Coordination Type}
+X --> |Sequential| Y[Chain Coordinator]
+X --> |Parallel| Z[Swarm Coordinator]
+X --> |Escalation| AA[Escalation Coordinator]
+Y --> BB[Execute Agents in Sequence]
+Z --> CC[Execute Agents in Parallel]
+AA --> DD[Execute Primary + Escalated Agents]
+BB --> EE[Synthesize Chain Results]
+CC --> FF[Synthesize Swarm Results]
+DD --> GG[Handle Escalation Results]
+EE --> W
+FF --> W
+GG --> W
+V --> X
+---

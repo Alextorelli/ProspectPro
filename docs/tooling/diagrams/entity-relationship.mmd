@@ -1,0 +1,140 @@
+%% Complete Entity Relationship Model (ER Diagram)
+%% Extracted from Dev Tools Taxonomy Diagrams Optimized.md
+
+---
+config:
+theme: dark
+look: classic
+---
+erDiagram
+VS_CODE_EXTENSION ||--|| AGENT_ORCHESTRATOR : manages
+AGENT_ORCHESTRATOR ||--|| MCP_CLIENT_MANAGER : uses
+AGENT_ORCHESTRATOR ||--|| CHAT_MODE_LOADER : uses
+AGENT_ORCHESTRATOR ||--|| COORDINATION_MANAGER : uses
+AGENT_ORCHESTRATOR ||--|| CONTEXT_MANAGER : uses
+AGENT_ORCHESTRATOR ||--|| AUTOMATION_EXECUTOR : uses
+AGENT_ORCHESTRATOR ||--o{ CHAT_PARTICIPANT : creates
+CHAT_PARTICIPANT {
+    string id PK
+    string name
+    string fullName  
+    string description
+    string iconTheme
+    string[] mcpServers
+    string[] automationScripts
+    CoordinationType[] coordinationCapabilities
+}
+CHAT_PARTICIPANT ||--|| DEBUG_AGENT : implements
+CHAT_PARTICIPANT ||--|| DELIVER_AGENT : implements  
+CHAT_PARTICIPANT ||--|| SUPPORT_AGENT : implements
+CHAT_PARTICIPANT ||--|| RESEARCH_AGENT : implements
+CHAT_PARTICIPANT ||--|| OPTIMIZE_AGENT : implements
+MCP_CLIENT_MANAGER ||--o{ MCP_SERVER : connects_to
+MCP_SERVER {
+    string name PK
+    string command
+    string[] args
+    object env
+    string transport_type
+    string status
+    datetime last_connected
+    int retry_count
+}
+MCP_SERVER ||--|| SUPABASE_TROUBLESHOOTING : instance
+MCP_SERVER ||--|| POSTGRESQL : instance
+MCP_SERVER ||--|| CHROME_DEVTOOLS : instance
+MCP_SERVER ||--|| GITHUB : instance
+MCP_SERVER ||--|| INTEGRATION_HUB : instance
+MCP_SERVER ||--|| OBSERVABILITY : instance
+CHAT_MODE_LOADER ||--o{ CHAT_MODE : loads
+CHAT_MODE {
+    string id PK
+    string title
+    string description
+    string[] tools
+    string model
+    string instructions
+    object frontmatter
+    string filepath
+    datetime last_modified
+}
+CHAT_MODE ||--|| SMART_DEBUG_MODE : instance
+CHAT_MODE ||--|| FEATURE_DELIVERY_MODE : instance
+CHAT_MODE ||--|| PRODUCTION_SUPPORT_MODE : instance
+CHAT_MODE ||--|| API_RESEARCH_MODE : instance
+CHAT_MODE ||--|| COST_OPTIMIZATION_MODE : instance
+COORDINATION_MANAGER ||--o{ COORDINATION_SESSION : manages
+COORDINATION_SESSION {
+    string id PK
+    string initiator
+    string[] participants
+    CoordinationType type
+    object context
+    string status
+    datetime created_at
+    datetime completed_at
+    object results
+    int retry_attempts
+}
+COORDINATION_SESSION ||--|| SINGLE_EXECUTION : type
+COORDINATION_SESSION ||--|| CHAIN_EXECUTION : type
+COORDINATION_SESSION ||--|| SWARM_EXECUTION : type
+COORDINATION_SESSION ||--|| ESCALATION_EXECUTION : type
+CONTEXT_MANAGER ||--o{ CONTEXT_STORE : maintains
+CONTEXT_STORE {
+    string session_id PK
+    string agent_id FK
+    object workspace_state
+    object historical_context
+    object external_context
+    datetime timestamp
+    int ttl_seconds
+}
+AUTOMATION_EXECUTOR ||--o{ AUTOMATION_SCRIPT : executes
+AUTOMATION_SCRIPT {
+    string name PK
+    string path
+    string description
+    string[] required_env
+    string[] outputs
+    string execution_context
+    int timeout_seconds
+    boolean async_execution
+}
+AUTOMATION_SCRIPT ||--|| SUPABASE_PULL_LOGS : instance
+AUTOMATION_SCRIPT ||--|| CONTEXT_SNAPSHOT : instance
+AUTOMATION_SCRIPT ||--|| VERCEL_STATUS_CHECK : instance
+CHAT_PARTICIPANT }o--o{ MCP_SERVER : can_access
+CHAT_PARTICIPANT }o--o{ AUTOMATION_SCRIPT : can_execute
+CHAT_PARTICIPANT }o--|| CHAT_MODE : implements
+DEBUG_AGENT ||--o{ DIAGNOSTIC_TYPE : handles
+DELIVER_AGENT ||--o{ FEATURE_SPEC : processes
+SUPPORT_AGENT ||--o{ INCIDENT_TYPE : manages
+RESEARCH_AGENT ||--o{ INTEGRATION_ANALYSIS : performs
+OPTIMIZE_AGENT ||--o{ PERFORMANCE_METRIC : analyzes
+VS_CODE_TASKS ||--o{ TASK_DEFINITION : contains
+TASK_DEFINITION {
+    string name PK
+    string type
+    string command
+    string[] args
+    object options
+    string group
+    string[] dependencies
+}
+TASK_DEFINITION ||--|| DEPLOY_EDGE_FUNCTIONS : instance
+TASK_DEFINITION ||--|| DEPLOY_FRONTEND : instance
+TASK_DEFINITION ||--|| RUN_TESTS : instance
+TASK_DEFINITION ||--|| BUILD_PRODUCTION : instance
+THUNDER_CLIENT ||--o{ API_COLLECTION : manages
+API_COLLECTION {
+    string name PK
+    string description
+    object[] requests
+    object environment
+    string[] tags
+}
+API_COLLECTION ||--|| PROSPECTPRO_AUTH : instance
+API_COLLECTION ||--|| PROSPECTPRO_ENRICHMENT : instance
+API_COLLECTION ||--|| PROSPECTPRO_DISCOVERY : instance
+---

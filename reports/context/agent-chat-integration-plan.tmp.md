@@ -4,10 +4,10 @@
 
 ## Phase 0 – Prerequisites & Safeguards
 
-- [ ] Confirm working tree status (`git status`) and note pre-existing changes.
-- [ ] Ensure required tasks available: review `.vscode/TASKS_REFERENCE.md` for validation pipeline commands.
-- [ ] Snapshot current MCP configuration (`config/mcp-config.json`, `.vscode/mcp_config.json`) and chat mode manifests (`.github/chatmodes/`).
-- [ ] Create backup copy of `Dev Tools Taxonomy Diagrams Optimized.md` before splitting diagrams (store under `archive/deployment/`).
+- [x] Confirm working tree status (`git status`) and note pre-existing changes. _(2025-10-21)_
+- [x] Ensure required tasks available: review `.vscode/TASKS_REFERENCE.md` for validation pipeline commands. _(2025-10-21)_
+- [x] Snapshot current MCP configuration (`config/mcp-config.json`, `.vscode/mcp_config.json`) and chat mode manifests (`.github/chatmodes/`). _(2025-10-21)_
+- [x] Create backup copy of `Dev Tools Taxonomy Diagrams Optimized.md` before splitting diagrams (store under `archive/deployment/`). _(2025-10-21)_
 - [ ] Open tracking log in `reports/context/coverage.md` for any anomalies discovered during work.
 
 ## Phase 1 – Validate Integration Guide vs Current Workspace
@@ -20,14 +20,15 @@
 
 ## Phase 2 – Diagram Extraction & Documentation
 
-- [ ] Create directory `docs/tooling/diagrams/` if missing.
-- [ ] Extract each Mermaid block into dedicated files:
+- [x] Create directory `docs/tooling/diagrams/` if missing. _(2025-10-21)_
+- [x] Extract each Mermaid block into dedicated files:
   - `system-architecture.mmd`
   - `agent-taxonomy.mmd`
   - `data-flow-context.mmd`
   - `agent-lifecycle.mmd`
   - `entity-relationship.mmd`
   - `implementation-timeline.mmd`
+    _(2025-10-21)_
 - [ ] Replace sections in source markdown with references/links to the new `.mmd` files.
 - [ ] Run `npm run docs:prepare` to regenerate documentation assets; review output for failures.
 - [ ] Update `docs/tooling/settings-staging.md` with proposed `.github` / `.vscode` changes if any references shift.
