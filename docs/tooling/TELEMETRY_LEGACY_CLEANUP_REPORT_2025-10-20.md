@@ -103,5 +103,23 @@ All Thunder/Jaeger references have been removed from the codebase. Observability
 
 ---
 
+## Phase 2: Define Targets & Fixtures
+
+- Categorized test targets:
+  - [ ] Agent prompts (chatmodes, instruction files)
+  - [ ] MCP server helpers (dev-tools/agent-orchestration/agents, MCP endpoints)
+  - [ ] Automation scripts (scripts/automation/\*.sh)
+  - [ ] VS Code tasks (task definitions, settings-staging.md proposals)
+- Staged fixture directory: `dev-tools/testing/fixtures/`
+  - [ ] Sample MCP responses (JSON)
+  - [ ] Supabase logs (sample .log)
+  - [ ] Vercel status JSON (sample .json)
+- Documented dependencies:
+  - [ ] Supabase CLI session (required for all integration tests)
+  - [ ] Mock MCP endpoints (for agent orchestration and diagnostics)
+- Next: Scaffold test harnesses and add initial fixtures.
+
+---
+
 **Prepared by:** GitHub Copilot
 **Date:** 2025-10-20
