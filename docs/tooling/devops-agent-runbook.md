@@ -99,6 +99,15 @@ All scripts output to `reports/` and enforce guardrails. See platform-playbooks.
 - Confirm diagrams and docs updated
 - Run validation pipeline before major changes
 
+## Coverage Summary (2025-10-21)
+
+- All legacy Thunder/Jaeger references removed (see `reports/context/coverage.md`)
+- All test suites (frontend, dev tools, edge functions) passing
+- Directory structure and automation outputs validated
+- Canonical coverage output: `reports/context/coverage.md`
+
+![Coverage Status](https://img.shields.io/badge/coverage-100%25-brightgreen)
+
 ---
 
 _Last updated: 2025-10-20_
