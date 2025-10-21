@@ -82,8 +82,10 @@ All Thunder/Jaeger references have been removed from the codebase. Observability
    - [ ] Capture outputs and compare with fixtures (run test and review output)
    - Next: Automation script validation
 6. **Automation Script Validation**
-   - [ ] Use vitest + shell exec to run `scripts/automation/*.sh` in dry-run mode; assert log files created.
-   - [ ] Add regression tests for path rewrites during migrations.
+   - [x] Added Vitest suite `dev-tools/tests/automation.spec.ts` to:
+     - Run automation scripts in dry-run mode and assert log output
+     - Add regression test for path rewrites during migrations
+   - Next: CI integration and test pipeline
 7. **CI Integration**
    - [ ] Stage new `npm run test:devtools` script in package.json.
    - [ ] Add VS Code task proposal in `settings-staging.md`; update `.github/workflows/ci.yml` only after approval.
@@ -151,6 +153,47 @@ All Thunder/Jaeger references have been removed from the codebase. Observability
 - [x] Added Vitest suite `dev-tools/tests/mcp.spec.ts` to mock MCP CLI output and verify diagnostics artifacts
 - [ ] Capture outputs and compare with fixtures (run test and review output)
 - Next: Automation script validation
+
+---
+
+## Phase 6: Automation Script Validation
+
+- [x] Added Vitest suite `dev-tools/tests/automation.spec.ts` to:
+  - Run automation scripts in dry-run mode and assert log output
+  - Add regression test for path rewrites during migrations
+- Next: CI integration and test pipeline
+
+---
+
+## Phase 7: CI Integration
+
+- [ ] Stage new `npm run test:devtools` script in package.json.
+- [ ] Add VS Code task proposal in `settings-staging.md`; update `.github/workflows/ci.yml` only after approval.
+- Next: Telemetry & coverage aggregation
+
+---
+
+## Phase 8: Telemetry & Coverage
+
+- [ ] Aggregate results into coverage.md via updated Phase 02 task.
+- [ ] Include coverage badges or summary in devops-agent-runbook.md.
+- Next: Validation pipeline
+
+---
+
+## Phase 9: Validation Pipeline
+
+- [ ] Run full suite: `npm run docs:prepare`, `npm run lint`, `npm test`, `npm run test:devtools`, `npm run supabase:test:functions`.
+- [ ] Log outputs and diffs in `settings-staging.md` before merge.
+- Next: Merge and monitor
+
+---
+
+## Phase 10: Merge and Monitor
+
+- [ ] Merge `restructure-recovery` into `main` after final approval.
+- [ ] Monitor logs and metrics for any residual Thunder/Jaeger references or issues.
+- [ ] Confirm deprecation of Thunder Client and Jaeger in all environments.
 
 ---
 
