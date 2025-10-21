@@ -203,9 +203,14 @@ describe("MCPClientManager", () => {
 
     it("should handle dispose errors gracefully", async () => {
       const mockClient = { serverName: "test" };
-      // Mock the telemetry sink info call to throw
+      // Mock the telemetry sink info call to throw only once
+      let called = false;
       mockTelemetrySink.info.mockImplementation(() => {
-        throw new Error("Dispose failed");
+        if (!called) {
+          called = true;
+          throw new Error("Dispose failed");
+        }
+        return undefined;
       });
 
       await expect(clientManager.dispose(mockClient)).resolves.toBeUndefined();

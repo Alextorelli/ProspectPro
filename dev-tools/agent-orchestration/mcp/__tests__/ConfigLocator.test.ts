@@ -1,12 +1,9 @@
 import * as fs from "fs";
-import * as path from "path";
 import { ConfigLocator } from "../ConfigLocator";
 
-// Mock dependencies
+// Mock dependencies (keep real path.join; only mock fs)
 jest.mock("fs");
-jest.mock("path");
 const mockedFs = fs as jest.Mocked<typeof fs>;
-const mockedPath = path as jest.Mocked<typeof path>;
 
 describe("ConfigLocator", () => {
   beforeEach(() => {
@@ -22,16 +19,11 @@ describe("ConfigLocator", () => {
       );
       const mockConfig = { mcpServers: { test: {} } };
 
-      mockedPath.join.mockImplementation((...args) => {
-        console.log("join called with:", args);
-        return args.join("/");
-      });
-      mockedFs.existsSync.mockImplementation((path) => {
-        console.log("existsSync called with:", path);
+      // fs mocked to report files exist and to return the JSON body
+      mockedFs.existsSync.mockImplementation((p) => {
         return true;
       });
-      mockedFs.readFileSync.mockImplementation((path) => {
-        console.log("readFileSync called with:", path);
+      mockedFs.readFileSync.mockImplementation((p) => {
         return JSON.stringify(mockConfig);
       });
 
