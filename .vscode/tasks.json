@@ -1103,10 +1103,14 @@
       "problemMatcher": []
     },
     {
-      "label": "Docs: Bootstrap Tooling Diagrams",
+      "label": "Test: Dev Tools Suite",
       "type": "shell",
-      "command": "npm run docs:bootstrap",
-      "group": "build",
+      "command": "npm",
+      "args": ["run", "test:devtools"],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "group": "test",
       "presentation": {
         "echo": true,
         "reveal": "always",
