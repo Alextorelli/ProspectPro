@@ -241,3 +241,35 @@ Rollback: `git restore .` or revert individual files if needed
 - **Date**: $(date +%Y-%m-%d)
 - **Details**: Added npm script task for running dev tools test suite
 - **Verification**: Task appears in VS Code Command Palette under "Tasks: Run Task"
+
+# Staged: Phase 5 Automation Updates (2025-10-21)
+
+## Workspace Status Regeneration Script
+
+- **Proposed Change**: Add new npm script `"reports:workspace-status": "node dev-tools/scripts/context/fetch-repo-context.js"`
+- **Rationale**: Enable automated workspace status snapshots for Phase 5 automation and future monitoring
+- **Files Modified**: `package.json`
+- **Risk Assessment**: Low - adds new script without affecting existing functionality
+- **Rollback**: Remove the script line from package.json
+
+## Workspace Status Updates
+
+- **Proposed Change**: Update `workspace_status.md` with current git status, branch info, and Phase 5 completion status
+- **Rationale**: Document current workspace state after Phase 5 automation completion
+- **Files Modified**: `workspace_status.md`
+- **Risk Assessment**: Low - documentation update only
+- **Rollback**: `git checkout workspace_status.md`
+
+## Agent Chat Integration Plan Archive
+
+- **Proposed Change**: Move `reports/context/agent-chat-integration-plan.tmp.md` to `reports/context/archive/` with timestamp
+- **Rationale**: Clean up temporary Phase 5 planning document and archive for historical reference
+- **Files Modified**: `reports/context/agent-chat-integration-plan.tmp.md` → `reports/context/archive/agent-chat-integration-plan-2025-10-21.md`
+- **Risk Assessment**: Low - file move operation
+- **Rollback**: Move file back to original location
+
+## Approval Status
+
+- [ ] Workspace status script addition approved
+- [ ] Workspace status documentation updates approved
+- [ ] Integration plan archival approved
