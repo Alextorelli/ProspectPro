@@ -83,6 +83,15 @@ export class MCPClientManager {
       return existingClient;
     }
 
+    // Return pending connection if one is in progress
+    const pendingConnection = this.pendingConnections.get(serverName);
+    if (pendingConnection) {
+      this.options.telemetrySink.info(
+        `Waiting for pending MCP client connection for ${serverName}`
+      );
+      return pendingConnection;
+    }
+
     const serverConfig = this.configResult.config.mcpServers?.[
       serverName
     ] as MCPServerConfig;
@@ -90,7 +99,8 @@ export class MCPClientManager {
       throw new Error(`MCP server '${serverName}' not found in config`);
     }
 
-    return this.withRetry(async () => {
+    // Create a promise for this connection and cache it
+    const connectionPromise = this.withRetry(async () => {
       // Create and connect the client
       const client = await this.clientAdapter.createClient(
         serverName,
@@ -111,6 +121,17 @@ export class MCPClientManager {
 
       return client;
     }, `Failed to create MCP client for ${serverName}`);
+
+    // Cache the promise while connection is pending
+    this.pendingConnections.set(serverName, connectionPromise);
+
+    try {
+      const client = await connectionPromise;
+      return client;
+    } finally {
+      // Clean up the pending promise regardless of success/failure
+      this.pendingConnections.delete(serverName);
+    }
   }
 
   async dispose(client: MCPClient): Promise<void> {
