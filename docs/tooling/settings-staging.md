@@ -2,6 +2,14 @@
 
 ---
 
+## Safeguarding Overview (Summary)
+
+1. **Stage First** – Draft every proposed `.vscode/` and `.github/` change here (or an approved staging doc) with rationale, risk, and rollback.
+2. **Seek Approval** – Share staged entries via the active work plan for explicit sign-off before touching guarded directories.
+3. **Apply Carefully** – After approval, implement changes, log actions, and archive staging notes to `reports/context/archive/`.
+4. **Validate** – Run the required pipeline (`npm run docs:update`, `npm run lint`, `npm test`, plus Supabase suites when relevant) and record results in this file.
+5. **Commit & Trace** – Commit with governance-aligned messaging, update coverage/workspace reports, and maintain audit traceability.
+
 ## Phase 3 (2025-10-20): Automation Scripts
 
 ---
