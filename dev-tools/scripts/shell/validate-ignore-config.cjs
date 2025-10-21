@@ -39,7 +39,7 @@ const SKIP_DIRS = new Set([
   // MCP/dev tools
   "mcp-servers",
   // Supabase Edge Functions/tests
-  "supabase/functions",
+  "app/backend/functions",
   "supabase/tests",
   // Archive/legacy
   "archive",
@@ -86,7 +86,7 @@ const SKIP_FILES = new Set([
   "mcp-servers/test-servers.js",
   "mcp-servers/test-troubleshooting-server.js",
   // Supabase Edge Function/test files
-  "supabase/functions/business-discovery-user-aware/index.ts.backup",
+  "app/backend/functions/business-discovery-user-aware/index.ts.backup",
   // Scripts/tools
   "scripts/tooling/validate-ignore-config.js",
   // Build artifacts

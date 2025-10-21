@@ -29,7 +29,7 @@
     "app_system_reference": "/docs/app/SYSTEM_REFERENCE.md",
     "technical_reference": "/docs/technical/SYSTEM_REFERENCE.md",
     "database": "/supabase/schema-sql/",
-    "edge_functions": "/supabase/functions/",
+    "edge_functions": "/app/backend/functions/",
     "mcp_registry": "/dev-tools/mcp-servers/registry.json",
     "instructions": ".github/copilot-instructions.md"
   },

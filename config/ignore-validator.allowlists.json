@@ -29,7 +29,7 @@
     "mcp-servers/test-results.json",
     "mcp-servers/test-servers.js",
     "mcp-servers/test-troubleshooting-server.js",
-    "supabase/functions/business-discovery-user-aware/index.ts.backup",
+    "app/backend/functions/business-discovery-user-aware/index.ts.backup",
     "scripts/tooling/validate-ignore-config.js",
     ".github/workflows/deploy.yml",
     ".vercelignore",

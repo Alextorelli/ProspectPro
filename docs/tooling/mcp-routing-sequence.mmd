@@ -13,7 +13,7 @@ sequenceDiagram
     participant MCP_DEV as MCP Development\n(mcp-servers/development-server.js)
     participant MCP_TROUBLE as MCP Troubleshooting\n(mcp-servers/troubleshooting-server.js)
     participant TELEMETRY_STREAM as Telemetry Stream\n(dev-tools/monitoring/log-forwarder.ts)
-    participant SUPABASE as Supabase Logs\n(supabase/functions/)
+    participant SUPABASE as Supabase Logs\n(app/backend/functions/)
 
     INGRESS->>ROUTER: receive request
     ROUTER->>ZFD: validate (ZeroFakeData)

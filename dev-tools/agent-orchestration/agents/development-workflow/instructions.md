@@ -168,10 +168,10 @@ npm run lint && npm test && npm run build && vercel --prod
 
 ```bash
 # 1. Create function directory
-mkdir -p supabase/functions/my-new-function
+mkdir -p app/backend/functions/my-new-function
 
 # 2. Scaffold with MCP pattern
-cat > supabase/functions/my-new-function/index.ts <<EOF
+cat > app/backend/functions/my-new-function/index.ts <<EOF
 import { createClient } from '@supabase/supabase-js';
 import { trace } from '@opentelemetry/api';
 import pRetry from 'p-retry';
@@ -213,14 +213,14 @@ npm run supabase:test:functions
 // Auto-request Copilot review for architectural changes
 if (
   prFiles.includes("supabase/schema-sql/") ||
-  prFiles.includes("supabase/functions/")
+  prFiles.includes("app/backend/functions/")
 ) {
   await mcp.github.request_copilot_review({ owner, repo, pullNumber });
 }
 
 // Auto-label based on file changes
 const labels = [];
-if (prFiles.some((f) => f.startsWith("supabase/functions/")))
+if (prFiles.some((f) => f.startsWith("app/backend/functions/")))
   labels.push("edge-functions");
 if (prFiles.some((f) => f.startsWith("supabase/schema-sql/")))
   labels.push("database");

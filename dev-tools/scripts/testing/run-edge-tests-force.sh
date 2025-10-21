@@ -22,6 +22,6 @@ supabase_cli_exec() {
 cd "$REPO_ROOT"
 source "$REPO_ROOT/scripts/testing/test-env.local.sh" --diagnose
 
-deno test --allow-all supabase/functions/tests/
+deno test --allow-all app/backend/functions/tests/
 
 supabase_cli_exec functions logs --since=5m

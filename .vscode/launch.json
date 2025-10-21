@@ -5,7 +5,7 @@
       "name": "Test Business Discovery Optimized",
       "type": "node",
       "request": "launch",
-      "program": "${workspaceFolder}/supabase/functions/business-discovery-optimized/index.ts",
+      "program": "${workspaceFolder}/app/backend/functions/business-discovery-optimized/index.ts",
       "env": {
         "SUPABASE_URL": "https://sriycekxdqnesdsgwiuc.supabase.co",
         "SUPABASE_ANON_KEY": "${env:SUPABASE_ANON_KEY}"
@@ -17,7 +17,7 @@
       "name": "Test Campaign Export",
       "type": "node",
       "request": "launch",
-      "program": "${workspaceFolder}/supabase/functions/campaign-export/index.ts",
+      "program": "${workspaceFolder}/app/backend/functions/campaign-export/index.ts",
       "env": {
         "SUPABASE_URL": "https://sriycekxdqnesdsgwiuc.supabase.co"
       },
@@ -135,7 +135,7 @@
     {
       "id": "functionPath",
       "type": "promptString",
-      "description": "Path to Edge Function index.ts (e.g., supabase/functions/business-discovery-background/index.ts)"
+      "description": "Path to Edge Function index.ts (e.g., app/backend/functions/business-discovery-background/index.ts)"
     }
   ]
 }

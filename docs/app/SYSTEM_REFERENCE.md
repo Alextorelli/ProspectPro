@@ -16,18 +16,18 @@
 ### Key Files
 ```typescript
 // Core Discovery Module Functions
-/supabase/functions/business-discovery-background/                    # PRIMARY: Tier-aware async discovery
-/supabase/functions/business-discovery-optimized/                    # Session-aware sync discovery
-/supabase/functions/business-discovery-user-aware/                    # Legacy compatibility discovery
-/supabase/functions/test-business-discovery/                    # Discovery smoke tests
-/supabase/functions/test-google-places/                    # Google Places API testing
+/app/backend/functions/business-discovery-background/                    # PRIMARY: Tier-aware async discovery
+/app/backend/functions/business-discovery-optimized/                    # Session-aware sync discovery
+/app/backend/functions/business-discovery-user-aware/                    # Legacy compatibility discovery
+/app/backend/functions/test-business-discovery/                    # Discovery smoke tests
+/app/backend/functions/test-google-places/                    # Google Places API testing
 
 // Supporting Services
-/supabase/functions/_shared/authenticateRequest.ts         # Session JWT validation
-/supabase/functions/_shared/business-taxonomy.ts         # MECE business categories (300+ types)
-/supabase/functions/_shared/google-places-service.ts         # Google Places API integration
-/supabase/functions/_shared/foursquare-service.ts         # Foursquare Places API integration
-/supabase/functions/_shared/census-targeting.ts         # Geographic targeting logic
+/app/backend/functions/_shared/authenticateRequest.ts         # Session JWT validation
+/app/backend/functions/_shared/business-taxonomy.ts         # MECE business categories (300+ types)
+/app/backend/functions/_shared/google-places-service.ts         # Google Places API integration
+/app/backend/functions/_shared/foursquare-service.ts         # Foursquare Places API integration
+/app/backend/functions/_shared/census-targeting.ts         # Geographic targeting logic
 ```
 
 ### Quick Commands
@@ -54,18 +54,18 @@ source scripts/ensure-supabase-cli-session.sh
 ### Key Files
 ```typescript
 // Core Enrichment Module Functions
-/supabase/functions/enrichment-orchestrator/                    # PRIMARY: Multi-service coordination
-/supabase/functions/enrichment-hunter/                    # Hunter.io email discovery + 24hr caching
-/supabase/functions/enrichment-neverbounce/                    # NeverBounce email verification
-/supabase/functions/enrichment-business-license/                    # Professional licensing data (Enterprise)
-/supabase/functions/enrichment-pdl/                    # People Data Labs integration (Enterprise)
+/app/backend/functions/enrichment-orchestrator/                    # PRIMARY: Multi-service coordination
+/app/backend/functions/enrichment-hunter/                    # Hunter.io email discovery + 24hr caching
+/app/backend/functions/enrichment-neverbounce/                    # NeverBounce email verification
+/app/backend/functions/enrichment-business-license/                    # Professional licensing data (Enterprise)
+/app/backend/functions/enrichment-pdl/                    # People Data Labs integration (Enterprise)
 
 // Supporting Services
-/supabase/functions/_shared/hunter-service.ts         # Hunter.io API client with caching
-/supabase/functions/_shared/neverbounce-service.ts         # NeverBounce verification client
-/supabase/functions/_shared/cobalt-sos-service.ts         # Secretary of State filings (cache-first)
-/supabase/functions/_shared/budget-controls.ts         # Tier-based cost management
-/supabase/functions/_shared/enrichment-cache.ts         # 24-hour result caching system
+/app/backend/functions/_shared/hunter-service.ts         # Hunter.io API client with caching
+/app/backend/functions/_shared/neverbounce-service.ts         # NeverBounce verification client
+/app/backend/functions/_shared/cobalt-sos-service.ts         # Secretary of State filings (cache-first)
+/app/backend/functions/_shared/budget-controls.ts         # Tier-based cost management
+/app/backend/functions/_shared/enrichment-cache.ts         # 24-hour result caching system
 ```
 
 ### Quick Commands
@@ -89,15 +89,15 @@ curl -X POST "$SUPABASE_URL/functions/v1/enrichment-orchestrator"
 ### Key Files
 ```typescript
 // Core Validation Module Functions
-/supabase/functions/test-new-auth/                    # PRIMARY: Session diagnostics & RLS validation
-/supabase/functions/test-official-auth/                    # Supabase reference auth implementation
-/supabase/functions/auth-diagnostics/                    # Authentication testing suite
+/app/backend/functions/test-new-auth/                    # PRIMARY: Session diagnostics & RLS validation
+/app/backend/functions/test-official-auth/                    # Supabase reference auth implementation
+/app/backend/functions/auth-diagnostics/                    # Authentication testing suite
 
 // Supporting Services
-/supabase/functions/_shared/quality-scoring.ts         # Lead confidence scoring (0-100)
-/supabase/functions/_shared/data-validation.ts         # Contact data verification
-/supabase/functions/_shared/email-validation.ts         # Email pattern validation (rejects fake emails)
-/supabase/functions/_shared/rls-helpers.ts         # Row Level Security validation helpers
+/app/backend/functions/_shared/quality-scoring.ts         # Lead confidence scoring (0-100)
+/app/backend/functions/_shared/data-validation.ts         # Contact data verification
+/app/backend/functions/_shared/email-validation.ts         # Email pattern validation (rejects fake emails)
+/app/backend/functions/_shared/rls-helpers.ts         # Row Level Security validation helpers
 ```
 
 ### Quick Commands
@@ -116,8 +116,8 @@ curl -X POST "$SUPABASE_URL/functions/v1/test-new-auth"
 ### Export System (User-Aware)
 ```typescript
 // User-authorized exports with enrichment metadata
-/supabase/functions/campaign-export-user-aware/       # PRIMARY: User-authorized exports
-/supabase/functions/campaign-export/                  # Internal automation export
+/app/backend/functions/campaign-export-user-aware/       # PRIMARY: User-authorized exports
+/app/backend/functions/campaign-export/                  # Internal automation export
 
 // Export features
 - User ownership validation
@@ -129,9 +129,9 @@ curl -X POST "$SUPABASE_URL/functions/v1/test-new-auth"
 
 ### Shared Authentication Infrastructure
 ```typescript
-/supabase/functions/_shared/authenticateRequest.ts    # Session JWT validation
-/supabase/functions/_shared/rls-helpers.ts             # RLS policy helpers
-/supabase/functions/_shared/user-context.ts           # User session management
+/app/backend/functions/_shared/authenticateRequest.ts    # Session JWT validation
+/app/backend/functions/_shared/rls-helpers.ts             # RLS policy helpers
+/app/backend/functions/_shared/user-context.ts           # User session management
 
 // Authentication pattern (all functions)
 const user = await authenticateRequest(request);

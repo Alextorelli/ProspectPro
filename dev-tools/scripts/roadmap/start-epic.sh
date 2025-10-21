@@ -41,7 +41,7 @@ FEATURE_DIR="${REPO_ROOT}/src/features/${EPIC_KEY}"
 COMPONENT_FILE="${FEATURE_DIR}/${PASCAL_NAME}Feature.tsx"
 LIB_DIR="${REPO_ROOT}/lib/roadmap/${EPIC_KEY}"
 LIB_FILE="${LIB_DIR}/index.ts"
-FUNCTION_DIR="${REPO_ROOT}/supabase/functions/${EPIC_KEY}"
+FUNCTION_DIR="${REPO_ROOT}/app/backend/functions/${EPIC_KEY}"
 FUNCTION_FILE="${FUNCTION_DIR}/index.ts"
 
 mkdir -p "$FEATURE_DIR" "$LIB_DIR" "$FUNCTION_DIR"

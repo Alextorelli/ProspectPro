@@ -31,7 +31,7 @@ try {
 
   if (
     settings["deno.enablePaths"] &&
-    settings["deno.enablePaths"].includes("supabase/functions")
+    settings["deno.enablePaths"].includes("app/backend/functions")
   ) {
     console.log("✅ Deno enabled only for Supabase functions");
   }

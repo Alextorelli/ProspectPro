@@ -44,8 +44,8 @@ ProspectPro v4.4 adds user-aware campaign deduplication and billing-ready analyt
 
 ### Key Sources
 
-- Edge function implementations: `/supabase/functions/`
-- Shared auth utilities: `/supabase/functions/_shared/`
+- Edge function implementations: `/app/backend/functions/`
+- Shared auth utilities: `/app/backend/functions/_shared/`
 - Deployment command: `supabase functions deploy <function-name>`
 
 ---
@@ -68,7 +68,7 @@ ProspectPro v4.4 adds user-aware campaign deduplication and billing-ready analyt
 - Supabase Auth with JWT tokens (
   - Frontend enforces sign-in before campaign creation
   - Session context passed through background discovery payloads
-- Shared auth utilities: `/supabase/functions/_shared/edge-auth.ts`
+- Shared auth utilities: `/app/backend/functions/_shared/edge-auth.ts`
 - Refer to `AUTHENTICATION_COMPLETE.md` for the end-to-end auth hardening log
 
 ---
@@ -111,7 +111,7 @@ ProspectPro v4.4 adds user-aware campaign deduplication and billing-ready analyt
 
 - MECE taxonomy (`src/constants/businessTaxonomy.ts`) with 16 categories / 300+ business types
 - Verified contact enrichment via Hunter.io + NeverBounce + licensing data
-- Tier-aware budgets & scoring: see `supabase/functions/enrichment-orchestrator/`
+- Tier-aware budgets & scoring: see `app/backend/functions/enrichment-orchestrator/`
 - Export metadata retained in `leads.enrichment_data` JSONB field
 
 ---

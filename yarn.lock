@@ -1057,9 +1057,9 @@
   dependencies:
     "@supabase/node-fetch" "2.6.15"
 
-"@supabase/functions-js@2.75.1":
+"@app/backend/functions-js@2.75.1":
   version "2.75.1"
-  resolved "https://registry.npmjs.org/@supabase/functions-js/-/functions-js-2.75.1.tgz"
+  resolved "https://registry.npmjs.org/@app/backend/functions-js/-/functions-js-2.75.1.tgz"
   integrity sha512-xO+01SUcwVmmo67J7Htxq8FmhkYLFdWkxfR/taxBOI36wACEUNQZmroXGPl4PkpYxBO7TaDsRHYGxUpv9zTKkg==
   dependencies:
     "@supabase/node-fetch" "2.6.15"
@@ -1101,7 +1101,7 @@
   integrity sha512-GEPVBvjQimcMd9z5K1eTKTixTRb6oVbudoLQ9JKqTUJnR6GQdBU4OifFZean1AnHfsQwtri1fop2OWwsMv019w==
   dependencies:
     "@supabase/auth-js" "2.75.1"
-    "@supabase/functions-js" "2.75.1"
+    "@app/backend/functions-js" "2.75.1"
     "@supabase/node-fetch" "2.6.15"
     "@supabase/postgrest-js" "2.75.1"
     "@supabase/realtime-js" "2.75.1"

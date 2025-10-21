@@ -1,6 +1,6 @@
 {
   "deno.enable": true,
-  "deno.enablePaths": ["./supabase/functions"],
+  "deno.enablePaths": ["./app/backend/functions"],
   "deno.lint": true,
   "deno.unstable": ["bare-node-builtins", "byonm", "sloppy-imports"],
   "deno.path": "/home/node/.deno/bin/deno",
@@ -71,8 +71,8 @@
     "source.organizeImports": "explicit"
   },
   "files.associations": {
-    "**/supabase/functions/**/*.ts": "typescript",
-    "**/supabase/functions/**/index.ts": "typescript",
+    "**/app/backend/functions/**/*.ts": "typescript",
+    "**/app/backend/functions/**/index.ts": "typescript",
     "supabase/migrations/*.sql": "sql",
     "*.sql": "sql",
     "*.mdx": "markdown",
@@ -110,7 +110,7 @@
     "**/mcp-servers/logs": true
   },
   "ai.contextFiles": [
-    "supabase/functions/*/index.ts",
+    "app/backend/functions/*/index.ts",
     "docs/app/CODEBASE_INDEX.md",
     "src/lib/supabase.ts",
     "TECHNICAL_SUMMARY_v4.3.md",

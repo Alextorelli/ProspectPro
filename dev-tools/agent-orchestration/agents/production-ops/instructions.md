@@ -89,10 +89,10 @@ npx --yes supabase@latest functions logs business-discovery-background --since=5
 
 ```bash
 # 1. Identify last known good deployment
-git log --oneline supabase/functions/ | head -5
+git log --oneline app/backend/functions/ | head -5
 
 # 2. Checkout previous version
-git checkout <commit-sha> -- supabase/functions/<function-name>
+git checkout <commit-sha> -- app/backend/functions/<function-name>
 
 # 3. Redeploy immediately
 npx --yes supabase@latest functions deploy <function-name> --no-verify-jwt

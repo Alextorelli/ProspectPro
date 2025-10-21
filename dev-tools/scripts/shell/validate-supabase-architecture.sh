@@ -40,7 +40,7 @@ echo "✅ Supabase configuration exists"
 # Check edge functions
 echo ""
 echo "📦 Edge Functions Analysis:"
-FUNCTIONS_DIR="supabase/functions"
+FUNCTIONS_DIR="app/backend/functions"
 
 if [ -d "$FUNCTIONS_DIR/enhanced-business-discovery" ]; then
     echo "✅ enhanced-business-discovery - PRODUCTION READY"

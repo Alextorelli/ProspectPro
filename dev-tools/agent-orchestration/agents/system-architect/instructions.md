@@ -112,7 +112,7 @@ async function callExternalAPI(service, params) {
 - **Deployment**: `/docs/deployment/edge-functions.md`
 - **Database**: `/supabase/schema-sql/` (001-004 sequential migrations)
 - **MCP Registry**: `/mcp-servers/registry.json`
-- **Edge Functions**: `/supabase/functions/` (business-discovery-background, enrichment-orchestrator, campaign-export-user-aware)
+- **Edge Functions**: `/app/backend/functions/` (business-discovery-background, enrichment-orchestrator, campaign-export-user-aware)
 
 ### Performance Targets (from registry.json)
 

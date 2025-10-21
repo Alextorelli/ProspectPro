@@ -416,9 +416,9 @@ step3_backend_redeploy() {
     enrichment-hunter
     enrichment-neverbounce
   )
-  if [ -d "$REPO_ROOT/supabase/functions/data-enhancement-orchestrator" ]; then
+  if [ -d "$REPO_ROOT/app/backend/functions/data-enhancement-orchestrator" ]; then
     function_slugs+=(data-enhancement-orchestrator)
-  elif [ -d "$REPO_ROOT/supabase/functions/enrichment-orchestrator" ]; then
+  elif [ -d "$REPO_ROOT/app/backend/functions/enrichment-orchestrator" ]; then
     function_slugs+=(enrichment-orchestrator)
   fi
   for fn in "${function_slugs[@]}"; do

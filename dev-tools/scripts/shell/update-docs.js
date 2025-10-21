@@ -39,51 +39,51 @@ const allowedFunctionSlugs = new Set([
 
 const descriptionOverrides = new Map([
   [
-    "supabase/functions/business-discovery-background/index.ts",
+    "app/backend/functions/business-discovery-background/index.ts",
     "Primary asynchronous, tier-aware discovery pipeline",
   ],
   [
-    "supabase/functions/business-discovery-optimized/index.ts",
+    "app/backend/functions/business-discovery-optimized/index.ts",
     "Session-aware synchronous discovery path for validation campaigns",
   ],
   [
-    "supabase/functions/business-discovery-user-aware/index.ts",
+    "app/backend/functions/business-discovery-user-aware/index.ts",
     "Legacy synchronous discovery retained for backward compatibility",
   ],
   [
-    "supabase/functions/campaign-export-user-aware/index.ts",
+    "app/backend/functions/campaign-export-user-aware/index.ts",
     "Authenticated campaign export handler",
   ],
   [
-    "supabase/functions/enrichment-orchestrator/index.ts",
+    "app/backend/functions/enrichment-orchestrator/index.ts",
     "Central enrichment coordinator calling Hunter, NeverBounce, licensing",
   ],
   [
-    "supabase/functions/enrichment-hunter/index.ts",
+    "app/backend/functions/enrichment-hunter/index.ts",
     "Hunter.io email discovery wrapper with caching",
   ],
   [
-    "supabase/functions/enrichment-neverbounce/index.ts",
+    "app/backend/functions/enrichment-neverbounce/index.ts",
     "NeverBounce verification helper",
   ],
   [
-    "supabase/functions/enrichment-pdl/index.ts",
+    "app/backend/functions/enrichment-pdl/index.ts",
     "PDL enrichment logic for enterprise compliance",
   ],
   [
-    "supabase/functions/enrichment-business-license/index.ts",
+    "app/backend/functions/enrichment-business-license/index.ts",
     "Professional licensing enrichment module",
   ],
   [
-    "supabase/functions/test-google-places/index.ts",
+    "app/backend/functions/test-google-places/index.ts",
     "Standalone Google Places API test harness",
   ],
   [
-    "supabase/functions/_shared/edge-auth.ts",
+    "app/backend/functions/_shared/edge-auth.ts",
     "Shared Supabase session validator for edge functions",
   ],
   [
-    "supabase/functions/_shared/api-usage.ts",
+    "app/backend/functions/_shared/api-usage.ts",
     "Usage logging helper for third-party API consumption",
   ],
   [
@@ -249,7 +249,7 @@ const MODULES = {
 // ============================================================================
 
 function defaultDescription(relPath) {
-  if (relPath.startsWith("supabase/functions/")) {
+  if (relPath.startsWith("app/backend/functions/")) {
     if (relPath.endsWith("function.toml")) {
       return "Supabase function configuration";
     }
@@ -537,7 +537,7 @@ function generateModuleSection(moduleName, module) {
 ${module.coreFunctions
   .map(
     (func) =>
-      `/supabase/functions/${func}/                    # ${
+      `/app/backend/functions/${func}/                    # ${
         func === module.primaryFunction ? "PRIMARY: " : ""
       }${getDisplayName(func)}`
   )
@@ -547,7 +547,7 @@ ${module.coreFunctions
 ${module.sharedServices
   .map(
     (service) =>
-      `/supabase/functions/_shared/${service}         # ${getDisplayName(
+      `/app/backend/functions/_shared/${service}         # ${getDisplayName(
         service
       )}`
   )
@@ -586,8 +586,8 @@ ${generateModuleSection("validation", MODULES.validation)}
 ### Export System (User-Aware)
 \`\`\`typescript
 // User-authorized exports with enrichment metadata
-/supabase/functions/campaign-export-user-aware/       # PRIMARY: User-authorized exports
-/supabase/functions/campaign-export/                  # Internal automation export
+/app/backend/functions/campaign-export-user-aware/       # PRIMARY: User-authorized exports
+/app/backend/functions/campaign-export/                  # Internal automation export
 
 // Export features
 - User ownership validation
@@ -599,9 +599,9 @@ ${generateModuleSection("validation", MODULES.validation)}
 
 ### Shared Authentication Infrastructure
 \`\`\`typescript
-/supabase/functions/_shared/authenticateRequest.ts    # Session JWT validation
-/supabase/functions/_shared/rls-helpers.ts             # RLS policy helpers
-/supabase/functions/_shared/user-context.ts           # User session management
+/app/backend/functions/_shared/authenticateRequest.ts    # Session JWT validation
+/app/backend/functions/_shared/rls-helpers.ts             # RLS policy helpers
+/app/backend/functions/_shared/user-context.ts           # User session management
 
 // Authentication pattern (all functions)
 const user = await authenticateRequest(request);

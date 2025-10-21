@@ -403,8 +403,8 @@ class DevelopmentMCPServer {
 
     // Simplified analysis - in real implementation, would scan actual files
     const keyFiles = [
-      "supabase/functions/business-discovery-background/index.ts",
-      "supabase/functions/enrichment-orchestrator/index.ts",
+      "app/backend/functions/business-discovery-background/index.ts",
+      "app/backend/functions/enrichment-orchestrator/index.ts",
       "app/frontend/lib/supabase.ts",
     ];
 
@@ -942,7 +942,7 @@ module.exports = ${apiName.replace(/[^a-zA-Z0-9]/g, "")}Client;
 
     const targets = pathFilters.length
       ? pathFilters
-      : ["supabase/functions", ...(includeDocs ? ["docs"] : [])];
+      : ["app/backend/functions", ...(includeDocs ? ["docs"] : [])];
 
     const sanitizedTargets = targets
       .filter((p) => typeof p === "string" && p.trim().length > 0)

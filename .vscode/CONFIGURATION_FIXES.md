@@ -20,7 +20,7 @@
 ```json
 {
   "deno.enable": false, // ← Disabled globally
-  "deno.enablePaths": ["supabase/functions"], // ← Only for Supabase
+  "deno.enablePaths": ["app/backend/functions"], // ← Only for Supabase
   "[typescript]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode" // ← Prettier, not Deno
   }
@@ -132,7 +132,7 @@ Dependency errors: 0
 
 ### ✅ **No More Deno Logs**
 
-- Deno only runs for `supabase/functions/` directory
+- Deno only runs for `app/backend/functions/` directory
 - Node.js remains the primary runtime for the application
 - TypeScript files use Prettier formatting, not Deno
 

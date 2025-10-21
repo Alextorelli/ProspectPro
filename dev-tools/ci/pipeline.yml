@@ -5,7 +5,7 @@ on:
     branches: [main]
     paths:
       - "public/**"
-      - "supabase/functions/**"
+      - "app/backend/functions/**"
       - ".github/workflows/**"
   pull_request:
     branches: [main]
@@ -34,7 +34,7 @@ jobs:
 
   Deploy-Edge-Functions:
     runs-on: ubuntu-latest
-    if: contains(github.event.head_commit.modified, 'supabase/functions/')
+    if: contains(github.event.head_commit.modified, 'app/backend/functions/')
     steps:
       - name: Checkout
         uses: actions/checkout@v4

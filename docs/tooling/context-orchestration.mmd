@@ -8,7 +8,7 @@ sequenceDiagram
     participant AGENT as Agent Orchestrator\n(dev-tools/agent-orchestration/agents/)
     participant CMGR as Context Manager\n(scripts/context/event-bus.ts)
     participant ZFD as ZeroFakeData Checkpoint\n(scripts/shell/zero-fake-data-check.sh)
-    participant FN as Edge Function\n(supabase/functions/context-orchestration)
+    participant FN as Edge Function\n(app/backend/functions/context-orchestration)
     participant DB as Supabase DB\n(supabase/schema-sql/001_core_schema.sql)
     participant CACHE as Cache Layer\n(scripts/context/cache-session.js)
     participant LOG as Diagnostics Logger\n(scripts/diagnostics/edge-function-diagnostics.sh)

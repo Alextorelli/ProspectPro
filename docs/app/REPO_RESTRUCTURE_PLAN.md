@@ -34,7 +34,7 @@ Converge ProspectPro to a hybrid mono-repo structure optimized for AI agent work
 ## Migration Steps
 
 1. Tag and plan migration for legacy folders
-2. Move src, public, supabase/functions into /app (phased)
+2. Move src, public, app/backend/functions into /app (phased)
 3. Relocate dev tooling into /tooling subtrees
 4. Update build scripts, npm scripts, VS Code tasks, and MCP validation collections. All Thunder/Jaeger references are deprecated; use MCP tools and Supabase logs for observability.
 5. Regenerate documentation and codebase index
@@ -57,7 +57,7 @@ Converge ProspectPro to a hybrid mono-repo structure optimized for AI agent work
 ## Next Actions
 
 1. Re-run workspace inventory and document the current directory state in a new telemetry update before deprecating the 2025-10-20 report.
-2. Plan phased relocation of `/app/frontend`, `/supabase/functions`, and supporting tooling into the target `/app` and `/tooling` hierarchy (capture blockers in `settings-staging.md`).
+2. Plan phased relocation of `/app/frontend`, `/app/backend/functions`, and supporting tooling into the target `/app` and `/tooling` hierarchy (capture blockers in `settings-staging.md`).
 3. Align automation outputs (coverage, diagnostics, context snapshots) with the future folder layout to avoid path churn during migration.
 4. Update VS Code tasks and npm scripts once directories move—stage proposals in `docs/tooling/settings-staging.md` prior to editing guarded configs.
 

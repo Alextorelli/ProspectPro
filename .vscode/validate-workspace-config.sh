@@ -40,7 +40,7 @@ REQUIRED_PATHS=(
   ".github/copilot-instructions.md"
   "config/mcp-config.json"
   "package.json"
-  "supabase/functions"
+  "app/backend/functions"
   "scripts/operations/ensure-supabase-cli-session.sh"
   "scripts/testing/campaign-validation.sh"
   "scripts/testing/test-auth-patterns.sh"
@@ -191,8 +191,8 @@ else
 fi
 
 echo "\n🧪 Validating Edge Functions..."
-if [[ -d "supabase/functions" ]]; then
-  log_success "supabase/functions directory exists"
+if [[ -d "app/backend/functions" ]]; then
+  log_success "app/backend/functions directory exists"
 
   CRITICAL_FUNCTIONS=(
     "business-discovery-background"
@@ -212,7 +212,7 @@ if [[ -d "supabase/functions" ]]; then
   )
 
   for fn in "${CRITICAL_FUNCTIONS[@]}"; do
-    if [[ -d "supabase/functions/$fn" ]]; then
+    if [[ -d "app/backend/functions/$fn" ]]; then
       log_success "Edge function present: $fn"
     else
       log_error "Missing edge function: $fn"

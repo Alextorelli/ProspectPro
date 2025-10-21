@@ -74,7 +74,7 @@ See `docs/tooling/agent-debug-playbooks.md` for full workflow and guard policy.
 
 ## Migration Plan
 
-- Begin phased relocation of `/app/frontend`, `/supabase/functions`, and supporting tooling into the target `/app` and `/tooling` hierarchy as described in `docs/app/REPO_RESTRUCTURE_PLAN.md`.
+- Begin phased relocation of `/app/frontend`, `/app/backend/functions`, and supporting tooling into the target `/app` and `/tooling` hierarchy as described in `docs/app/REPO_RESTRUCTURE_PLAN.md`.
 - All changes to `.vscode/` and `.github/` must be staged here before being applied.
 - Capture blockers, risks, and required sequencing for each move.
 
@@ -102,14 +102,14 @@ See `docs/tooling/agent-debug-playbooks.md` for full workflow and guard policy.
 
 ## 1. Workspace Scan
 
-- Ran: `rg -n "supabase/functions"` and `rg -n "/app/backend/functions"` across repo
+- Ran: `rg -n "app/backend/functions"` and `rg -n "/app/backend/functions"` across repo
 - Output: `reports/context/reference-scan.txt` (see file for full hit list)
 
 ## 2. Supabase Functions Path Remap Table
 
 | Old Path                | New Path                      | File(s) / Contexts | Status |
 |-------------------------|-------------------------------|--------------------|--------|
-| supabase/functions      | app/backend/functions         | .vscode/settings.json, .vscode/launch.json, .vscode/validate-workspace-config.sh, .vscode/CONFIGURATION_FIXES.md, dev-tools/scripts/tooling/validate-ignore-config.cjs, dev-tools/scripts/shell/validate-ignore-config.cjs, dev-tools/scripts/shell/validate-supabase-architecture.sh, dev-tools/scripts/shell/update-docs.js, dev-tools/scripts/shell/run-edge-tests-force.sh, dev-tools/scripts/shell/deployment-validation-workflow.sh, dev-tools/ci/pipeline.yml, dev-tools/agent-orchestration/agents/*, dev-tools/mcp-servers/*, package.json, docs/app/REPO_RESTRUCTURE_PLAN.md, docs/app/DOCUMENTATION_INDEX.md, docs/app/SYSTEM_REFERENCE.md, docs/technical/SYSTEM_REFERENCE.md, docs/technical/CODEBASE_INDEX.md, diagrams (.mmd), etc. | Pending |
+| app/backend/functions      | app/backend/functions         | .vscode/settings.json, .vscode/launch.json, .vscode/validate-workspace-config.sh, .vscode/CONFIGURATION_FIXES.md, dev-tools/scripts/tooling/validate-ignore-config.cjs, dev-tools/scripts/shell/validate-ignore-config.cjs, dev-tools/scripts/shell/validate-supabase-architecture.sh, dev-tools/scripts/shell/update-docs.js, dev-tools/scripts/shell/run-edge-tests-force.sh, dev-tools/scripts/shell/deployment-validation-workflow.sh, dev-tools/ci/pipeline.yml, dev-tools/agent-orchestration/agents/*, dev-tools/mcp-servers/*, package.json, docs/app/REPO_RESTRUCTURE_PLAN.md, docs/app/DOCUMENTATION_INDEX.md, docs/app/SYSTEM_REFERENCE.md, docs/technical/SYSTEM_REFERENCE.md, docs/technical/CODEBASE_INDEX.md, diagrams (.mmd), etc. | Pending |
 
 ## 3. Staged Replacement Script
 
@@ -117,8 +117,8 @@ See `docs/tooling/agent-debug-playbooks.md` for full workflow and guard policy.
 # filepath: tooling/migration-scripts/update-paths.sh
 set -euo pipefail
 repo_root="$(git rev-parse --show-toplevel)"
-rg -l "supabase/functions" | while read -r file; do
-  sed -i 's|supabase/functions|app/backend/functions|g' "$file"
+rg -l "app/backend/functions" | while read -r file; do
+  sed -i 's|app/backend/functions|app/backend/functions|g' "$file"
 done
 ````
 
@@ -128,7 +128,7 @@ Rollback: `git restore .` or revert individual files if needed
 
 - .vscode/tasks.json
 - .github/workflows/\*
-- Any config or automation referencing supabase/functions directly
+- Any config or automation referencing app/backend/functions directly
 - Proposed edits: update all path references to app/backend/functions
 
 ## 5. Documentation Touchpoints
@@ -139,7 +139,7 @@ Rollback: `git restore .` or revert individual files if needed
 ## 6. Execution Approval & Post-update Verification
 
 - After approval, run update-paths.sh, apply queued .vscode/.github changes, rerun validation pipeline
-- Confirm: `rg -n "supabase/functions"` returns zero hits outside historical notes
+- Confirm: `rg -n "app/backend/functions"` returns zero hits outside historical notes
 - Log `git status` and `git diff --stat` in staging
 - Draft proposed directory moves and update plans here for review.
 - Stage all config and automation changes in this file before touching guarded directories.
@@ -190,7 +190,7 @@ Rollback: `git restore .` or revert individual files if needed
 
 ## 3. Automation Impact Matrix
 
-- Reviewed automation scripts in scripts/automation/ for hardcoded directories. All outputs are written to `reports/diagnostics/` or `reports/deployments/` and do not reference frontend or supabase/functions directly.
+- Reviewed automation scripts in scripts/automation/ for hardcoded directories. All outputs are written to `reports/diagnostics/` or `reports/deployments/` and do not reference frontend or app/backend/functions directly.
 - **Result:** No changes required for context snapshot, supabase log pull, or vercel status scripts.
 
 ## 4. Draft Directory Moves
@@ -200,7 +200,7 @@ Rollback: `git restore .` or revert individual files if needed
   - Validation: `npm run build`, `npm run lint`, `npm test`
   - Rollback: Restore from git if issues arise
 - **Supabase Functions:**
-  - Source: `supabase/functions/` → Destination: `app/backend/functions/` (proposed)
+  - Source: `app/backend/functions/` → Destination: `app/backend/functions/` (proposed)
   - Update scripts and tasks to use new path if moved
   - Validation: `npm run supabase:types`, `npm run supabase:test:functions`, `npm run deploy:all`
   - Rollback: Move back and revert path changes

@@ -121,7 +121,7 @@
   },
   "rollback_procedures": {
     "edge_function": [
-      "git checkout <commit-sha> -- supabase/functions/<function-name>",
+      "git checkout <commit-sha> -- app/backend/functions/<function-name>",
       "npx --yes supabase@latest functions deploy <function-name> --no-verify-jwt",
       "notify team via integration_hub"
     ],

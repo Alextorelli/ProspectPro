@@ -13,7 +13,7 @@ import { fileURLToPath } from "url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const repoRoot = "/workspaces/ProspectPro";
-const baseDir = path.resolve(repoRoot, "app/backend/supabase/functions");
+const baseDir = path.resolve(repoRoot, "app/backend/functions");
 
 // ============================================================================
 // CODEBASE INDEX CONFIGURATION
@@ -40,51 +40,51 @@ const allowedFunctionSlugs = new Set([
 
 const descriptionOverrides = new Map([
   [
-    "app/backend/supabase/functions/business-discovery-background/index.ts",
+    "app/backend/functions/business-discovery-background/index.ts",
     "Primary asynchronous, tier-aware discovery pipeline",
   ],
   [
-    "app/backend/supabase/functions/business-discovery-optimized/index.ts",
+    "app/backend/functions/business-discovery-optimized/index.ts",
     "Session-aware synchronous discovery path for validation campaigns",
   ],
   [
-    "app/backend/supabase/functions/business-discovery-user-aware/index.ts",
+    "app/backend/functions/business-discovery-user-aware/index.ts",
     "Legacy synchronous discovery retained for backward compatibility",
   ],
   [
-    "app/backend/supabase/functions/campaign-export-user-aware/index.ts",
+    "app/backend/functions/campaign-export-user-aware/index.ts",
     "Authenticated campaign export handler",
   ],
   [
-    "app/backend/supabase/functions/enrichment-orchestrator/index.ts",
+    "app/backend/functions/enrichment-orchestrator/index.ts",
     "Central enrichment coordinator calling Hunter, NeverBounce, licensing",
   ],
   [
-    "app/backend/supabase/functions/enrichment-hunter/index.ts",
+    "app/backend/functions/enrichment-hunter/index.ts",
     "Hunter.io email discovery wrapper with caching",
   ],
   [
-    "app/backend/supabase/functions/enrichment-neverbounce/index.ts",
+    "app/backend/functions/enrichment-neverbounce/index.ts",
     "NeverBounce verification helper",
   ],
   [
-    "app/backend/supabase/functions/enrichment-pdl/index.ts",
+    "app/backend/functions/enrichment-pdl/index.ts",
     "PDL enrichment logic for enterprise compliance",
   ],
   [
-    "app/backend/supabase/functions/enrichment-business-license/index.ts",
+    "app/backend/functions/enrichment-business-license/index.ts",
     "Professional licensing enrichment module",
   ],
   [
-    "app/backend/supabase/functions/test-google-places/index.ts",
+    "app/backend/functions/test-google-places/index.ts",
     "Standalone Google Places API test harness",
   ],
   [
-    "app/backend/supabase/functions/_shared/edge-auth.ts",
+    "app/backend/functions/_shared/edge-auth.ts",
     "Shared Supabase session validator for edge functions",
   ],
   [
-    "app/backend/supabase/functions/_shared/api-usage.ts",
+    "app/backend/functions/_shared/api-usage.ts",
     "Usage logging helper for third-party API consumption",
   ],
   [
@@ -250,7 +250,7 @@ const MODULES = {
 // ============================================================================
 
 function defaultDescription(relPath) {
-  if (relPath.startsWith("app/backend/supabase/functions/")) {
+  if (relPath.startsWith("app/backend/functions/")) {
     if (relPath.endsWith("function.toml")) {
       return "Supabase function configuration";
     }
@@ -302,7 +302,7 @@ async function filterExisting(paths) {
 // ============================================================================
 
 async function collectEdgeFunctions() {
-  const baseDir = path.resolve(repoRoot, "app/backend/supabase/functions");
+  const baseDir = path.resolve(repoRoot, "app/backend/functions");
   console.log("[DEBUG] repoRoot:", repoRoot);
   console.log("[DEBUG] baseDir:", baseDir);
   const entries = await fs.readdir(baseDir, { withFileTypes: true });
@@ -551,7 +551,7 @@ function generateModuleSection(moduleName, module) {
 ${module.coreFunctions
   .map(
     (func) =>
-      `/app/backend/supabase/functions/${func}/                    # ${
+      `/app/backend/functions/${func}/                    # ${
         func === module.primaryFunction ? "PRIMARY: " : ""
       }${getDisplayName(func)}`
   )
@@ -561,7 +561,7 @@ ${module.coreFunctions
 ${module.sharedServices
   .map(
     (service) =>
-      `/app/backend/supabase/functions/_shared/${service}         # ${getDisplayName(
+      `/app/backend/functions/_shared/${service}         # ${getDisplayName(
         service
       )}`
   )
@@ -600,8 +600,8 @@ ${generateModuleSection("validation", MODULES.validation)}
 ### Export System (User-Aware)
 \`\`\`typescript
 // User-authorized exports with enrichment metadata
-app/backend/supabase/functions/campaign-export-user-aware/       # PRIMARY: User-authorized exports
-app/backend/supabase/functions/campaign-export/                  # Internal automation export
+app/backend/functions/campaign-export-user-aware/       # PRIMARY: User-authorized exports
+app/backend/functions/campaign-export/                  # Internal automation export
 
 // Export features
 - User ownership validation
@@ -613,9 +613,9 @@ app/backend/supabase/functions/campaign-export/                  # Internal auto
 
 ### Shared Authentication Infrastructure
 \`\`\`typescript
-app/backend/supabase/functions/_shared/authenticateRequest.ts    # Session JWT validation
-app/backend/supabase/functions/_shared/rls-helpers.ts             # RLS policy helpers
-app/backend/supabase/functions/_shared/user-context.ts           # User session management
+app/backend/functions/_shared/authenticateRequest.ts    # Session JWT validation
+app/backend/functions/_shared/rls-helpers.ts             # RLS policy helpers
+app/backend/functions/_shared/user-context.ts           # User session management
 
 // Authentication pattern (all functions)
 const user = await authenticateRequest(request);

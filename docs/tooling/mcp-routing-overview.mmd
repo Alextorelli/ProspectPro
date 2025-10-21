@@ -28,7 +28,7 @@ flowchart TD
   subgraph TelemetryLayer["Telemetry"]
     direction LR
     TELEMETRY_STREAM["Telemetry Stream\n(dev-tools/monitoring/log-forwarder.ts)"]:::telemetry
-    SUPABASE_LOGS["Supabase Logs\n(supabase/functions/)"]:::telemetry
+    SUPABASE_LOGS["Supabase Logs\n(app/backend/functions/)"]:::telemetry
   end
 
   INGRESS_GATEWAY -- "receive" --> CONTEXT_ROUTER
