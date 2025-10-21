@@ -70,9 +70,9 @@ All Thunder/Jaeger references have been removed from the codebase. Observability
    - [x] Stage required fixtures (sample MCP responses, Supabase logs, Vercel status JSON) in `dev-tools/testing/fixtures/`.
    - [x] Document dependencies (Supabase CLI session, mock MCP endpoints).
 3. **Scaffold Test Harnesses**
-   - [ ] For Node-based tooling, add Vitest suites under `dev-tools/tests/` with shared setup in `dev-tools/tests/utils/setup.ts`.
-   - [ ] For shell automation, create bats or zx harnesses in `scripts/tests/`.
-   - [ ] Stage environment loader updates (no direct .vscode edits).
+   - [x] For Node-based tooling, add Vitest suites under `dev-tools/tests/` with shared setup in `dev-tools/tests/utils/setup.ts`.
+   - [x] For shell automation, create bats or zx harnesses in `scripts/tests/`.
+   - [x] Stage environment loader updates (no direct .vscode edits).
 4. **Implement Agent Prompt Tests**
    - [ ] Add snapshot/assertion tests for chatmodes prompts ensuring required guardrails and hyperlinks.
    - [ ] Validate generated instructions via `dev-tools/tests/agents.spec.ts`.
@@ -118,6 +118,21 @@ All Thunder/Jaeger references have been removed from the codebase. Observability
   - [x] Supabase CLI session (required for all integration tests)
   - [x] Mock MCP endpoints (for agent orchestration and diagnostics)
 - Next: Scaffold test harnesses and add initial fixtures.
+
+---
+
+## Phase 3: Scaffold Test Harnesses
+
+- Node-based tooling:
+  - [x] Created `dev-tools/tests/` for Vitest suites
+  - [x] Added shared setup in `dev-tools/tests/utils/setup.ts`
+  - [x] Added test suite README
+- Shell automation:
+  - [x] Created `scripts/tests/` for bats/zx harnesses
+  - [x] Added sample bats test for automation scripts
+  - [x] Added sample automation script with dry-run mode
+- Environment loader updates staged (no direct .vscode edits)
+- Next: Implement agent prompt tests and MCP tool tests.
 
 ---
 
