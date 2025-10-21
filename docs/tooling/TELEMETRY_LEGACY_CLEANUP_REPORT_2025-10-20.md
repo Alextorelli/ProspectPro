@@ -66,9 +66,9 @@ All Thunder/Jaeger references have been removed from the codebase. Observability
    - [x] Use `rg -n "@test"` inside agent-orchestration and automation to map current tests.
    - [x] Log gaps in settings-staging.md under “Agents & Dev Tools Test Plan”.
 2. **Define Targets & Fixtures**
-   - [ ] Categorize tests: agent prompts, MCP server helpers, automation scripts, VS Code tasks.
-   - [ ] Stage required fixtures (sample MCP responses, Supabase logs, Vercel status JSON) in `dev-tools/testing/fixtures/`.
-   - [ ] Document dependencies (Supabase CLI session, mock MCP endpoints).
+   - [x] Categorize tests: agent prompts, MCP server helpers, automation scripts, VS Code tasks.
+   - [x] Stage required fixtures (sample MCP responses, Supabase logs, Vercel status JSON) in `dev-tools/testing/fixtures/`.
+   - [x] Document dependencies (Supabase CLI session, mock MCP endpoints).
 3. **Scaffold Test Harnesses**
    - [ ] For Node-based tooling, add Vitest suites under `dev-tools/tests/` with shared setup in `dev-tools/tests/utils/setup.ts`.
    - [ ] For shell automation, create bats or zx harnesses in `scripts/tests/`.
@@ -106,17 +106,17 @@ All Thunder/Jaeger references have been removed from the codebase. Observability
 ## Phase 2: Define Targets & Fixtures
 
 - Categorized test targets:
-  - [ ] Agent prompts (chatmodes, instruction files)
-  - [ ] MCP server helpers (dev-tools/agent-orchestration/agents, MCP endpoints)
-  - [ ] Automation scripts (scripts/automation/\*.sh)
-  - [ ] VS Code tasks (task definitions, settings-staging.md proposals)
+  - [x] Agent prompts (chatmodes, instruction files)
+  - [x] MCP server helpers (dev-tools/agent-orchestration/agents, MCP endpoints)
+  - [x] Automation scripts (scripts/automation/\*.sh)
+  - [x] VS Code tasks (task definitions, settings-staging.md proposals)
 - Staged fixture directory: `dev-tools/testing/fixtures/`
-  - [ ] Sample MCP responses (JSON)
-  - [ ] Supabase logs (sample .log)
-  - [ ] Vercel status JSON (sample .json)
+  - [x] Sample MCP responses (JSON)
+  - [x] Supabase logs (sample .log)
+  - [x] Vercel status JSON (sample .json)
 - Documented dependencies:
-  - [ ] Supabase CLI session (required for all integration tests)
-  - [ ] Mock MCP endpoints (for agent orchestration and diagnostics)
+  - [x] Supabase CLI session (required for all integration tests)
+  - [x] Mock MCP endpoints (for agent orchestration and diagnostics)
 - Next: Scaffold test harnesses and add initial fixtures.
 
 ---
