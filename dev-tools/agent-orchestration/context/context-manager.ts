@@ -2,6 +2,9 @@ import { createHash, randomUUID } from "node:crypto";
 import { promises as fs } from "node:fs";
 import * as path from "node:path";
 import { fileURLToPath } from "node:url";
+ 
+// Context routing follows Option A taxonomy: @ux, @platform, @devops, @secops, @integrations
+// All context snapshots and outputs are routed to reports/context/<tag>/
 
 type EnvironmentName = "production" | "staging" | "development";
 
@@ -64,6 +67,10 @@ export interface SelectResult {
   };
   longTermMemory: LongTermMemoryItem[];
   metadata: AgentMetadata;
+
+  // Utility to get output directory for Option A participant tag
+  function getContextOutputDir(tag: OptionATag): string {
+    return path.join("reports", "context", tag);
 }
 
 type ScratchpadNoteInput =
