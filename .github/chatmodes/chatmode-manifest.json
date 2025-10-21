@@ -1,0 +1,15 @@
+{
+  "generatedAt": "2025-10-21T06:14:57.658Z",
+  "mcpIntegration": true,
+  "modes": [
+    "api-research",
+    "cost-optimization",
+    "feature-delivery",
+    "production-support",
+    "smart-debug"
+  ],
+  "tasks": [
+    "MCP: Run Chat Validation",
+    "MCP: Sync Chat Participants"
+  ]
+}

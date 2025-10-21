@@ -642,6 +642,34 @@
       "problemMatcher": []
     },
     {
+      "label": "MCP: Run Chat Validation",
+      "type": "shell",
+      "command": "npm",
+      "args": ["run", "mcp:chat:validate"],
+      "options": { "cwd": "${workspaceFolder}" },
+      "group": "test",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "MCP: Sync Chat Participants",
+      "type": "shell",
+      "command": "npm",
+      "args": ["run", "mcp:chat:sync"],
+      "options": { "cwd": "${workspaceFolder}" },
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
       "label": "Observability: Start Stack",
       "type": "shell",
       "command": "bash",

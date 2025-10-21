@@ -49,6 +49,8 @@
     "logs:live": "bash -lc 'cd supabase && source ../scripts/operations/ensure-supabase-cli-session.sh && npx --yes supabase@latest functions logs --follow'",
     "mcp:debug": "cd mcp-servers && npm run start:troubleshooting",
     "mcp:dev": "cd mcp-servers && npm run start:development",
+    "mcp:chat:sync": "node scripts/automation/mcp-chat-sync.js",
+    "mcp:chat:validate": "node scripts/automation/mcp-chat-validate.js",
     "mcp:init": "npm run mcp:install && npm run mcp:test",
     "mcp:install": "cd mcp-servers && npm install",
     "mcp:prod": "cd mcp-servers && npm run start:production",

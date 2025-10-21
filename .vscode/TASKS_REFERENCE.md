@@ -108,6 +108,8 @@ _Auto-generated from `.vscode/tasks.json` — Last updated: 2025-10-21_
 | **GitHub: Ensure Auth (Non-blocking)** | `bash -lc if command -v gh >/dev/null 2>&1; then gh auth status || echo "⚠️ GitHub CLI not authenticated. Run: gh auth login"; else echo "⚠️ GitHub CLI not installed"; fi` | Multiple | None | No description available |
 | **MCP: Start All Servers** | `npm run mcp:start` | Multiple | None | No description available |
 | **MCP: Stop All Servers** | `npm run mcp:stop` | Multiple | None | No description available |
+| **MCP: Run Chat Validation** | `npm run mcp:chat:validate` | Multiple | None | No description available |
+| **MCP: Sync Chat Participants** | `npm run mcp:chat:sync` | Multiple | None | No description available |
 | **Observability: Start Stack** | `bash -lc cd tooling/observability && docker-compose -f docker-compose.jaeger.yml up -d` | Multiple | None | No description available |
 | **Observability: Stop Stack** | `bash -lc cd tooling/observability && docker-compose -f docker-compose.jaeger.yml down` | Multiple | None | No description available |
 | **Observability: View Prometheus** | `echo Open Prometheus at: http://localhost:9090` | Multiple | None | No description available |

@@ -111,5 +111,10 @@
     "key": "ctrl+alt+p",
     "command": "mermaid-editor.preview",
     "when": "editorLangId == mermaid || editorLangId == mmd"
+  },
+  {
+    "key": "ctrl+alt+m",
+    "command": "mermaid-diagram.preview",
+    "when": "editorTextFocus"
   }
 ]
