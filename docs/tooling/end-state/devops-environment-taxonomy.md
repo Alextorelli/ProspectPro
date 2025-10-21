@@ -48,36 +48,36 @@ Source material captured for follow-up synthesis and alignment work. Content ref
 %%{init: {'theme': 'dark', 'layout': 'dagre'}}%%
 flowchart TD
     subgraph Environment
-        DEV[Development]
-        TEST[Test/QA]
-        STAGE[Staging]
-        PROD[Production]
-        INCIDENT[Incident Response]
+        DEV [Development]
+        TEST [Test/QA]
+        STAGE [Staging]
+        PROD [Production]
+        INCIDENT [Incident Response]
     end
 
     subgraph Copilot_Agent_Modes
-        DEBUG_MODE[debug]
-        FEATURE_MODE[feature]
-        SUPPORT_MODE[support]
-        OPTIMIZE_MODE[optimize]
-        SECURITY_MODE[security]
+        DEBUG_MODE [debug]
+        FEATURE_MODE [feature]
+        SUPPORT_MODE [support]
+        OPTIMIZE_MODE [optimize]
+        SECURITY_MODE [security]
     end
 
     subgraph Terminal_Participants
-        ux_participant[ux]
-        platform_participant[platform]
-        devops_participant[devops]
-        secops_participant[secops]
-        integrations_participant[integrations]
+        ux_participant [ux]
+        platform_participant [platform]
+        devops_participant [devops]
+        secops_participant [secops]
+        integrations_participant [integrations]
     end
 
     subgraph Functions_Primitives
-        DETECT[Detect]
-        DIAGNOSE[Diagnose]
-        REMEDIATE[Remediate]
-        VALIDATE[Validate]
-        ORCHESTRATE[Orchestrate]
-        REPORT[Report]
+        DETECT [Detect]
+        DIAGNOSE [Diagnose]
+        REMEDIATE [Remediate]
+        VALIDATE [Validate]
+        ORCHESTRATE [Orchestrate]
+        REPORT [Report]
     end
 
     DEV --> DEBUG_MODE
