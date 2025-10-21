@@ -1,3 +1,4 @@
+# ProspectPro ER diagram source-of-truth: docs/tooling/end-state/dev-tool-suite-ER.mmd
 #!/bin/bash
 # ProspectPro Diagram Patch Automation
 # Normalizes Mermaid sources prior to documentation regeneration.

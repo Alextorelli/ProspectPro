@@ -13,7 +13,7 @@ Source material captured for follow-up synthesis and alignment work. Content ref
   - `agent-environment-map-state.mmd` – environment detection → MCP cluster selection → participant activation
   - `environment-mcp-cluster.mmd` – cluster inventory aligned with Option A tooling
   - `agent-coordination-flow.mmd` and `workflow-architecture-c4.mmd` – promotion pipeline feedback loops
-  - Repository-wide ER view (`reports/context/erDiagram.mmd`) references these mappings for participant/automation relationships
+    - Repository-wide ER view (`docs/tooling/end-state/dev-tool-suite-ER.mmd`) is the source-of-truth for participant/automation relationships
 - Document revisions that impact diagrams must be noted in `docs/tooling/end-state/tools-suite-migration-plan.md` (Phase 2/3 checkpoints) to keep the migration ledger synchronized.
 
 ---
