@@ -155,6 +155,13 @@ See `docs/tooling/agent-debug-playbooks.md` for full workflow and guard policy.
 - Workflow updated with normalization and MCP validation steps.
 - Local validation executed: `npm run docs:patch:diagrams`, `npm run docs:prepare`, `npm run mcp:chat:validate`, `npm run lint` (all passed). Awaiting CI confirmation on next PR.
 
+### Applied: Taxonomy Guard Job (2025-10-21)
+
+- `.github/workflows/mermaid-diagram-sync.yml` now includes a `docs-taxonomy-guard` job running `docs:stage:taxonomy`, `docs:patch:diagrams`, and `docs:prepare` prior to diagram rendering.
+- `package.json` exposes a new script `docs:stage:taxonomy` invoking `scripts/docs/stage-taxonomy.sh`.
+- Local rehearsal checklist: `npm run docs:stage:taxonomy`, `npm run docs:patch:diagrams -- --source research --target docs/tooling/staging`, `npm run docs:prepare`, `npm run mcp:chat:validate`.
+- Rollback: revert workflow file and remove the script entry from `package.json` if the guard creates regressions.
+
 ### Applied: Chatmode Persona Migration (2025-10-21)
 
 - Legacy chatmodes replaced with persona-aligned prompts: System Architect, Production Ops, Observability, Development Workflow

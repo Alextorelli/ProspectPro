@@ -873,6 +873,51 @@ async function generateTasksReference() {
   console.log(`   ✅ .vscode/TASKS_REFERENCE.md updated`);
 }
 
+async function noteTaxonomyStaging() {
+  const stagingDir = path.join(repoRoot, "docs/tooling/staging");
+  if (!(await pathExists(stagingDir))) {
+    return;
+  }
+
+  const entries = await fs.readdir(stagingDir);
+  const usefulEntries = entries.filter((name) => name !== ".gitkeep");
+  if (usefulEntries.length === 0) {
+    return;
+  }
+
+  const coveragePath = path.join(repoRoot, "reports/context/coverage.md");
+  if (!(await pathExists(coveragePath))) {
+    return;
+  }
+
+  const marker =
+    "- Taxonomy staging artifacts detected in `docs/tooling/staging/` (review before promotion).";
+  let coverage = await fs.readFile(coveragePath, "utf8");
+  if (coverage.includes(marker)) {
+    return;
+  }
+
+  const sectionHeader = "## Key Changes Since Last Report";
+  const headerIndex = coverage.indexOf(sectionHeader);
+  if (headerIndex === -1) {
+    return;
+  }
+
+  const sectionEnd = coverage.indexOf("\n\n---", headerIndex);
+  const insertionIndex = sectionEnd === -1 ? coverage.length : sectionEnd;
+
+  let prefix = coverage.slice(0, insertionIndex);
+  const suffix = coverage.slice(insertionIndex);
+  if (!prefix.endsWith("\n")) {
+    prefix += "\n";
+  }
+  coverage = `${prefix}${marker}\n${suffix}`;
+  await fs.writeFile(coveragePath, coverage, "utf8");
+  console.log(
+    "   ℹ️ reports/context/coverage.md annotated with taxonomy staging reminder"
+  );
+}
+
 async function main() {
   console.log("🔄 ProspectPro Documentation Update");
   console.log("=====================================");
@@ -882,6 +927,7 @@ async function main() {
     await generateCodebaseIndex();
     await generateSystemReference();
     await generateTasksReference();
+    await noteTaxonomyStaging();
 
     console.log("");
     console.log("✅ Documentation updated successfully");
