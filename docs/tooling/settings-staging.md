@@ -50,7 +50,7 @@
 
 **Do not add to .vscode/tasks.json without explicit approval.**
 
-```json
+````json
 {
   "label": "DevTools: Start React DevTools",
   "type": "shell",
@@ -97,19 +97,56 @@ See `docs/tooling/agent-debug-playbooks.md` for full workflow and guard policy.
 
 ## Next Steps
 
-- Review supabase:functions test environment setup
-- Stage reference rewrites and .vscode/.github updates for approval
-- Update REPO_RESTRUCTURE_PLAN.md and related docs with migration results
-- Archive migration scripts after cutover
+
+# Reference Update Execution Log (2025-10-21)
+
+## 1. Workspace Scan
+
+- Ran: `rg -n "supabase/functions"` and `rg -n "/app/backend/functions"` across repo
+- Output: `reports/context/reference-scan.txt` (see file for full hit list)
+
+## 2. Supabase Functions Path Remap Table
+
+| Old Path                | New Path                      | File(s) / Contexts | Status |
+|-------------------------|-------------------------------|--------------------|--------|
+| supabase/functions      | app/backend/functions         | .vscode/settings.json, .vscode/launch.json, .vscode/validate-workspace-config.sh, .vscode/CONFIGURATION_FIXES.md, dev-tools/scripts/tooling/validate-ignore-config.cjs, dev-tools/scripts/shell/validate-ignore-config.cjs, dev-tools/scripts/shell/validate-supabase-architecture.sh, dev-tools/scripts/shell/update-docs.js, dev-tools/scripts/shell/run-edge-tests-force.sh, dev-tools/scripts/shell/deployment-validation-workflow.sh, dev-tools/ci/pipeline.yml, dev-tools/agent-orchestration/agents/*, dev-tools/mcp-servers/*, package.json, docs/app/REPO_RESTRUCTURE_PLAN.md, docs/app/DOCUMENTATION_INDEX.md, docs/app/SYSTEM_REFERENCE.md, docs/technical/SYSTEM_REFERENCE.md, docs/technical/CODEBASE_INDEX.md, diagrams (.mmd), etc. | Pending |
+
+## 3. Staged Replacement Script
+
+```bash
+# filepath: tooling/migration-scripts/update-paths.sh
+set -euo pipefail
+repo_root="$(git rev-parse --show-toplevel)"
+rg -l "supabase/functions" | while read -r file; do
+  sed -i 's|supabase/functions|app/backend/functions|g' "$file"
+done
+````
+
+Rollback: `git restore .` or revert individual files if needed
+
+## 4. Sensitive Files Queue (Requires Approval)
+
+- .vscode/tasks.json
+- .github/workflows/\*
+- Any config or automation referencing supabase/functions directly
+- Proposed edits: update all path references to app/backend/functions
+
+## 5. Documentation Touchpoints
+
+- FAST_README.md, platform-playbooks.md, devops-agent-runbook.md, REPO_RESTRUCTURE_PLAN.md, SYSTEM_REFERENCE.md, CODEBASE_INDEX.md, diagrams (.mmd)
+- Validation: `npm run docs:prepare`, `npm run docs:update` after edits
+
+## 6. Execution Approval & Post-update Verification
+
+- After approval, run update-paths.sh, apply queued .vscode/.github changes, rerun validation pipeline
+- Confirm: `rg -n "supabase/functions"` returns zero hits outside historical notes
+- Log `git status` and `git diff --stat` in staging
 - Draft proposed directory moves and update plans here for review.
 - Stage all config and automation changes in this file before touching guarded directories.
-
 
 # App/Tooling Migration – Inventory (2025-10-20)
 
 ## 1. Script & Task Sweep
-
-
 
 # Migration Execution Log (2025-10-21)
 
@@ -183,4 +220,7 @@ See `docs/tooling/agent-debug-playbooks.md` for full workflow and guard policy.
 - Pre-move: Run `npm run docs:prepare`, `npm run lint`, `npm test`, `npm run supabase:test:db` and snapshot outputs.
 - Post-move: Repeat all validation commands and compare outputs.
 - Document results and any issues in this file before requesting approval for live changes.
+
+```
+
 ```
