@@ -124,7 +124,20 @@ See `docs/tooling/agent-debug-playbooks.md` for full workflow and guard policy.
 - All results, logs, and manifest snapshots are archived in `reports/context/archive/chatmode-automation-2025-10-21.md`
 - Stepwise todo list governs integration and activation
 
-**Next:** Proceed to production activation and post-activation monitoring
+
+### Production Activation (2025-10-21)
+
+- Validation pipeline completed: `docs:update`, `lint`, `test`, `supabase:test:db` — all successful
+- Chatmodes and MCP integration now active in production Copilot Chat
+- Announced activation in project changelog and this staging doc
+
+### Post-Activation Monitoring
+
+- Monitor MCP diagnostics and VS Code logs for regressions/issues
+- Document findings in this file and archive as needed
+
+### Next Steps
+- Conduct final governance review and close out integration plan
 
 ### Pending Automation/Documentation Updates
 
