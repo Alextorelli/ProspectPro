@@ -1,13 +1,13 @@
 
 %% config: theme: dark, layout: dagre
 flowchart TD
-	A[VS Code Chat Input] --> B{Parse @mention Pattern}
-	B --> |@debug| C[Debug Agent Handler]
-	B --> |@deliver| D[Deliver Agent Handler]
-	B --> |@support| E[Support Agent Handler]
-	B --> |@research| F[Research Agent Handler]
-	B --> |@optimize| G[Optimize Agent Handler]
-	B --> |Multiple @agents| H[Coordination Manager]
+	A[VS Code Chat Input] --> B{Parse &#64;mention Pattern}
+	B --> |&#64;debug| C[Debug Agent Handler]
+	B --> |&#64;deliver| D[Deliver Agent Handler]
+	B --> |&#64;support| E[Support Agent Handler]
+	B --> |&#64;research| F[Research Agent Handler]
+	B --> |&#64;optimize| G[Optimize Agent Handler]
+	B --> |Multiple &#64;agents| H[Coordination Manager]
 
 	subgraph Context Manager
 		CM1[Workspace Context]
@@ -31,4 +31,76 @@ flowchart TD
 	F --> F1[Load API Research Mode]
 	G --> G1[Load Cost Optimization Mode]
 
-	...existing code...
+	C1 --> I[Intent Analysis]
+	D1 --> I
+	E1 --> I
+	F1 --> I
+	G1 --> I
+
+	I --> J{Context Requirements}
+	J --> |Workspace| K[Sync Workspace Snapshot]
+	J --> |Historical| L[Retrieve Session Memory]
+	J --> |External| M[Pull External Signals]
+
+	K --> N[MCP Bundle Selection]
+	L --> N
+	M --> N
+
+	N --> O{MCP Server Type}
+	O --> |supabase-troubleshooting| P1[Diagnostic Analysis]
+	O --> |supabase-db| P2[Database Operations]
+	O --> |supabase-functions| P7[Edge Function Invocation]
+	O --> |github| P3[Repository Actions]
+	O --> |integration-hub| P4[Service Integration]
+	O --> |observability| P5[Monitoring & Alerts]
+	O --> |chrome-devtools| P6[Browser Automation]
+
+	P1 --> Q[Execute MCP Tools]
+	P2 --> Q
+	P3 --> Q
+	P4 --> Q
+	P5 --> Q
+	P6 --> Q
+	P7 --> Q
+
+	Q --> R{Automation Required?}
+	R --> |Yes| S[Activate Tooling Interfaces]
+	R --> |No| T[Generate Response]
+
+	subgraph Tooling_Interface_Layer["Tooling Interface Layer"]
+		S1["React DevTools Inspection"]
+		S2["Docker Observability Checks"]
+		S3["Repo Integration Sync"]
+		S4["Stripe Gateway Prep (Future)"]
+	end
+
+	S --> S1
+	S --> S2
+	S --> S3
+	S --> S4
+	S1 --> T
+	S2 --> T
+	S3 --> T
+	S4 --> T
+
+	T --> U{Agent Coordination Needed?}
+	U --> |Yes| V[Initiate Multi-Agent Workflow]
+	U --> |No| W[Return Response to VS Code]
+
+	H --> X{Coordination Type}
+	X --> |Sequential| Y[Chain Coordinator]
+	X --> |Parallel| Z[Swarm Coordinator]
+	X --> |Escalation| AA[Escalation Coordinator]
+
+	Y --> Y1[Execute Agents in Sequence]
+	Z --> Z1[Execute Agents in Parallel]
+	AA --> AA1[Execute Primary + Escalated Agents]
+
+	Y1 --> Y2[Synthesize Chain Results]
+	Z1 --> Z2[Synthesize Swarm Results]
+	AA1 --> AA2[Handle Escalation Results]
+
+	V --> X
+	Y2 --> W
+	Z2 --> W
+	AA2 --> W

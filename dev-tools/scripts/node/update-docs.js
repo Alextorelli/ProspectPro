@@ -4,6 +4,10 @@
  * ProspectPro Documentation Update Script
  * Unified script that generates both codebase index and system reference
  * Replaces separate generate-codebase-index.js and generate-system-reference.js calls
+ *
+ * TODO(automation): When the automated Mermaid patch workflow is approved, invoke
+ * scripts/docs/patch-diagrams.sh before running downstream generators so that diagram
+ * configs stay normalized (see docs/tooling/diagram-guidelines.md).
  */
 
 import { promises as fs } from "fs";

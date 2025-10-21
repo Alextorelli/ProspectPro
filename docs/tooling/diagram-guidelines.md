@@ -33,6 +33,20 @@
 - Use stable node IDs and script/function path references for all nodes.
 - Note all diagram changes in the changelog, referencing snippet usage for traceability.
 
+## Automated Diagram Patch Plan (Preview)
+
+1. **Detect Changes** – During `npm run docs:prepare`, capture the staged `.mmd` files via `git diff --name-only --cached`. Prevent execution if `.vscode/` or `.github/` contain unstaged edits.
+2. **Validate Syntax** – Run `npm run docs:render:diagrams` followed by `npm run docs:lint:mermaid` (future script) to surface syntax issues before patching.
+3. **Apply Standard Patch** – For each changed diagram, invoke `scripts/docs/patch-diagrams.sh` (to be implemented) which will:
+   - Normalize config headers (`%% config: theme: dark, layout: dagre` or approved variants).
+   - Inject required validation checkpoints and zero-fake-data guard nodes.
+   - Enforce indentation and whitespace style (tabs prohibited).
+4. **Regenerate References** – Trigger `npm run docs:update` to refresh cross-file references after patches.
+5. **Record Provenance** – Append summary entries to `reports/context/coverage.md` detailing diagrams touched, automation timestamp, and validation output.
+6. **Gate CI/CD** – Block merges unless `npm run mcp:chat:validate` and the diagram patch script both exit cleanly. Surface failures via VS Code task `Docs: Prepare`.
+
+> **Implementation Note:** The plan is staged here for governance review. Once approved, add the new script and update `package.json` with a `docs:patch:diagrams` task that chains validation, patching, and regeneration.
+
 ---
 
 _Last updated: 2025-10-20_

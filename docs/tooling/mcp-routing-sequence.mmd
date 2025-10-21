@@ -4,6 +4,7 @@ intent: "MCP Routing Sequence: Ingress → ContextManager → MCP → Telemetry 
 context: |
   Sequence diagram showing the stepwise flow from ingress through context validation, routing, MCP invocation, and telemetry emission. Highlights the ZeroFakeData checkpoint and all major agentic handoffs.
 ---
+%% config: theme: dark
 sequenceDiagram
     participant INGRESS as Ingress Gateway\n(scripts/shell/ingress-gateway.sh)
     participant ROUTER as Context Router\n(scripts/shell/context-router.sh)
@@ -12,8 +13,9 @@ sequenceDiagram
     participant MCP_PROD as MCP Production\n(mcp-servers/production-server.js)
     participant MCP_DEV as MCP Development\n(mcp-servers/development-server.js)
     participant MCP_TROUBLE as MCP Troubleshooting\n(mcp-servers/troubleshooting-server.js)
+    participant TOOL_IFACE as Tooling Interface Layer\n(React DevTools, Docker, Repo APIs)
     participant TELEMETRY_STREAM as Telemetry Stream\n(dev-tools/monitoring/log-forwarder.ts)
-    participant SUPABASE as Supabase Logs\n(app/backend/functions/)
+    participant SUPABASE as Supabase Platform\n(Database + Functions)
 
     INGRESS->>ROUTER: receive request
     ROUTER->>ZFD: validate (ZeroFakeData)
@@ -22,8 +24,11 @@ sequenceDiagram
     CTX_MGR->>MCP_PROD: route:prod
     CTX_MGR->>MCP_DEV: route:dev
     CTX_MGR->>MCP_TROUBLE: route:trouble
-    MCP_PROD->>TELEMETRY_STREAM: emit:telemetry
-    MCP_PROD->>SUPABASE: emit:logs
-    MCP_DEV->>TELEMETRY_STREAM: emit:telemetry
-    MCP_TROUBLE->>SUPABASE: emit:logs
+    MCP_PROD->>TELEMETRY_STREAM: emit telemetry
+    MCP_PROD->>SUPABASE: write logs & events
+    MCP_PROD->>TOOL_IFACE: expose deployment hooks
+    MCP_DEV->>TELEMETRY_STREAM: emit telemetry
+    MCP_DEV->>TOOL_IFACE: surface dev metrics
+    MCP_TROUBLE->>SUPABASE: persist diagnostics
+    MCP_TROUBLE->>TOOL_IFACE: stream troubleshooting data
     MCP_PROD-->>MCP_TROUBLE: escalate (on error)
