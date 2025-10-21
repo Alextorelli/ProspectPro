@@ -146,6 +146,12 @@ cd supabase && npx --yes supabase@latest db pull --schema public
 cd supabase && npx --yes supabase@latest db push
 ```
 
+### Automation & Validation Tasks
+
+- `Tasks: Run Task` → **MCP: Sync Chat Participants** — regenerates `.github/chatmodes/chatmode-manifest.json` via `npm run mcp:chat:sync` so native tasks stay aligned with chatmode slugs.
+- `Tasks: Run Task` → **MCP: Run Chat Validation** — runs `npm run mcp:chat:validate` to confirm manifest coverage, task registration, and frontmatter health.
+- Mermaid diagrams for chat workflows can be previewed with `Ctrl+Alt+M` (`mermaid-diagram.preview`) without additional extensions.
+
 ## Response Optimization Patterns
 
 ### Batching Multi-Step Operations
