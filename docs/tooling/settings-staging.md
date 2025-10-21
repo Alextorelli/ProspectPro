@@ -104,11 +104,75 @@ See `docs/tooling/agent-debug-playbooks.md` for full workflow and guard policy.
 
 ## Staged Automation/Documentation Updates
 
-- [Staged] Chatmode audit findings and governance documented above.
-- [Staged] Any future automation scripts or doc updates must be proposed here before live changes.
-- [Pending] If new MCP tool references or VS Code tasks are required, draft proposals in this section.
+## Staged: MCP Chatmode Integration Automation (2025-10-21)
 
-## Validation Pipeline Instructions
+### Proposed VS Code Tasks (Reference Only)
+
+**Do not add to .vscode/tasks.json without explicit approval.**
+
+1. **Run MCP Chat Validation**
+   ```json
+   {
+     "label": "MCP: Run Chat Validation",
+     "type": "shell",
+     "command": "npm run mcp:chat:validate"
+   }
+   ```
+   - *Rationale*: Automates validation of MCP chat participants and chatmode wiring.
+   - *Risk*: Low; new script only, does not affect existing tasks.
+   - *Rollback*: Remove task and script if issues arise.
+
+2. **Sync MCP Participants**
+   ```json
+   {
+     "label": "MCP: Sync Chat Participants",
+     "type": "shell",
+     "command": "npm run mcp:chat:sync"
+   }
+   ```
+   - *Rationale*: Ensures MCP server and chatmode participants are in sync for all agent modes.
+   - *Risk*: Low; new script only, does not affect existing tasks.
+   - *Rollback*: Remove task and script if issues arise.
+
+3. **Open Mermaid Preview (Keybinding)**
+   ```json
+   {
+     "key": "ctrl+alt+m",
+     "command": "mermaid-diagram.preview",
+     "when": "editorTextFocus"
+   }
+   ```
+   - *Rationale*: Quick access to Mermaid diagram preview for chatmode manifest and workflow visualization.
+   - *Risk*: Low; new keybinding only, does not affect existing commands.
+   - *Rollback*: Remove keybinding if conflicts or issues arise.
+
+### Manifest/Config Updates (Staged)
+
+- Propose addition of `chatmode-manifest.json` in `.github/chatmodes/` to declare available chat modes and MCP integration points.
+
+  Example manifest:
+  ```json
+  {
+    "modes": [
+      "smart-debug",
+      "feature-delivery",
+      "production-support",
+      "api-research",
+      "cost-optimization"
+    ],
+    "mcpIntegration": true,
+    "tasks": [
+      "MCP: Run Chat Validation",
+      "MCP: Sync Chat Participants"
+    ]
+  }
+  ```
+
+  - *Rationale*: Centralizes chatmode registry and MCP integration for extension and automation use.
+  - *Risk*: Low; new manifest only, does not affect existing files.
+  - *Rollback*: Remove manifest if not adopted.
+
+---
 
 After any approved change to chatmodes, automation, or documentation:
 
