@@ -7,13 +7,13 @@ theme: forest
 layout: dagre
 ---
 flowchart TD
-A[VS Code Chat Input] --> B{Parse @mention Pattern}
-B --> |@debug| C[Debug Agent Handler]
-B --> |@deliver| D[Deliver Agent Handler]
-B --> |@support| E[Support Agent Handler]
-B --> |@research| F[Research Agent Handler]
-B --> |@optimize| G[Optimize Agent Handler]
-B --> |Multiple @agents| H[Coordination Manager]
+A[VS Code Chat Input] --> B{Parse &#64;mention Pattern}
+B --> |&#64;debug| C[Debug Agent Handler]
+B --> |&#64;deliver| D[Deliver Agent Handler]
+B --> |&#64;support| E[Support Agent Handler]
+B --> |&#64;research| F[Research Agent Handler]
+B --> |&#64;optimize| G[Optimize Agent Handler]
+B --> |Multiple &#64;agents| H[Coordination Manager]
 C --> C1[Load Smart Debug Mode]
 D --> D1[Load Feature Delivery Mode]
 E --> E1[Load Production Support Mode]
@@ -22,12 +22,9 @@ G --> G1[Load Cost Optimization Mode]
 C1 --> I[Intent Analysis]
 D1 --> I
 E1 --> I
-F1 --> I
-G1 --> I
-I --> J{Context Requirements}
-J --> |Workspace Context| K[Load Codebase State]
-J --> |Historical Context| L[Load Previous Sessions]
-J --> |External Context| M[Fetch External Data]
+FF --> W
+GG --> W
+V --> X
 K --> N[MCP Server Selection]
 L --> N
 M --> N
