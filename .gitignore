@@ -121,7 +121,7 @@ tests/archived/
 debug-*.js
 
 # Archive folders (preserved in archive/* branches)
-archive/
+!archive/config-backup/
 docs/archive/
 *-old.*
 *-backup.*
