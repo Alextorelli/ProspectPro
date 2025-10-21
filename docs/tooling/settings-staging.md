@@ -143,6 +143,15 @@ See `docs/tooling/agent-debug-playbooks.md` for full workflow and guard policy.
 
 - None at this time.
 
+### Applied: Chatmode Persona Migration (2025-10-21)
+
+- Legacy chatmodes replaced with persona-aligned prompts: System Architect, Production Ops, Observability, Development Workflow
+- Regenerated README, implementation summary, manifests, and platform playbook excerpt to reflect new personas
+- Validation pipeline 2025-10-21T08:13Z: `mcp:chat:sync`, `mcp:chat:validate`, `docs:update`, `lint`, `test`, `supabase:test:db` (NOTESTS)
+- Archive: `reports/context/archive/chatmode-persona-migration-2025-10-21.md`
+- Rollback: `git checkout -- .github/chatmodes/` (restore previous prompts + manifest)
+
+
 ---
 
 After any approved change to chatmodes, automation, or documentation:

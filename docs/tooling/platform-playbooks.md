@@ -49,6 +49,17 @@
 
 ## MCP Playbook
 
+### Chatmode Personas (2025-10-21)
+
+| Persona               | Chat Mode                                            | Focus                                                |
+| --------------------- | ---------------------------------------------------- | ---------------------------------------------------- |
+| System Architect      | `.github/chatmodes/System Architect.chatmode.md`     | Architecture reviews, schema validation, ADR updates |
+| Production Operations | `.github/chatmodes/Production Ops.chatmode.md`       | Deployments, incident response, rollback execution   |
+| Observability         | `.github/chatmodes/Observability.chatmode.md`        | OTEL spans, diagnostics, zero-fake-data monitoring   |
+| Development Workflow  | `.github/chatmodes/Development Workflow.chatmode.md` | Feature delivery, testing pipelines, MCP automation  |
+
+Use `npm run mcp:chat:sync` and `npm run mcp:chat:validate` after modifying any persona or prompt. Log changes in `docs/tooling/settings-staging.md` and archive outputs under `reports/context/archive/`.
+
 ### MCP Server Types
 
 - **Production Server:**
@@ -82,7 +93,7 @@
 
 ---
 
-_Last updated: 2025-10-20_
+_Last updated: 2025-10-21_
 
 ---
 

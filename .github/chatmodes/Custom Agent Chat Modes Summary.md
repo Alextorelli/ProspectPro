@@ -1,27 +1,34 @@
-# ProspectPro Custom Agent Modes & Chat Participants
+# ProspectPro Agent-Aligned Chat Modes
 
-**Comprehensive Implementation Package for Premium Request Optimization**
+ProspectPro’s chat participants map 1:1 to the revised agent personas. This keeps Codespaces, MCP automation, and documentation synchronized.
 
-## 🎯 Strategic Overview
+## Persona Snapshot
 
-This package provides **5 specialized AI agent modes** and **comprehensive prompt templates** designed to eliminate 80-90% of premium requests through intelligent batching, repository awareness, and ProspectPro-specific automation patterns.
+| Persona | Chat Mode | Primary Outcomes |
+| --- | --- | --- |
+| System Architect | `System Architect.chatmode.md` | Architecture reviews, schema design, integration planning, ADR updates |
+| Production Operations | `Production Ops.chatmode.md` | Deployments, incident response, rollback execution, status communications |
+| Observability | `Observability.chatmode.md` | Metric & trace correlation, alert tuning, compliance monitoring, diagnostics archiving |
+| Development Workflow | `Development Workflow.chatmode.md` | Feature delivery, testing orchestration, MCP adoption, PR/CI hygiene |
 
-### Implementation Philosophy
+## Alignment with Dev-Tools Architecture
+- Agents: `dev-tools/agent-orchestration/agents/**`
+- MCP layer: `dev-tools/agent-orchestration/mcp`, `mcp-servers/registry.json`
+- Automation: `.vscode/tasks.json` tasks `MCP: Sync Chat Participants`, `MCP: Run Chat Validation`
+- Governance: `docs/tooling/settings-staging.md`, archives under `reports/context/archive/`
 
-- **Repository-Aware**: All modes understand existing ProspectPro infrastructure
-- **Batching-Optimized**: Transform 10-15 sequential requests into 1-2 comprehensive solutions
-- **Production-Focused**: Direct integration with existing Vercel/Supabase deployment patterns
-- **Cost-Efficient**: Minimize premium usage while maximizing development velocity
+## Maintenance Workflow
+1. Stage rationale/risk/rollback in `docs/tooling/settings-staging.md`.
+2. Update agent instruction packs as needed.
+3. Refresh chatmodes and manifest:
+   ```bash
+   npm run mcp:chat:sync
+   npm run mcp:chat:validate
+   ```
+4. Run validation pipeline:
+   ```bash
+   npm run docs:update && npm run lint && npm test && npm run supabase:test:db
+   ```
+5. Archive execution summary (e.g., `reports/context/archive/chatmode-persona-migration-2025-10-21.md`).
 
----
-
-## 📁 Custom Agent Mode Directory Structure
-
-```
-.vscode/chat-modes/
-├── smart-debug.md              # Comprehensive debugging & issue resolution
-├── feature-delivery.md         # End-to-end feature implementation
-├── production-support.md       # Production monitoring & troubleshooting
-├── api-research.md            # API evaluation & integration planning
-└── cost-optimization.md       # Performance & cost analysis
-```
+Maintain this alignment to ensure Copilot Chat responds with persona-specific playbooks that match the MCP toolkit and governance guardrails.
