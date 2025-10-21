@@ -17,7 +17,7 @@ AGENT_ORCHESTRATOR ||--o{ CHAT_PARTICIPANT : creates
 CHAT_PARTICIPANT {
     string id PK
     string name
-    string fullName  
+    string fullName
     string description
     string iconTheme
     string[] mcpServers
@@ -25,7 +25,7 @@ CHAT_PARTICIPANT {
     CoordinationType[] coordinationCapabilities
 }
 CHAT_PARTICIPANT ||--|| DEBUG_AGENT : implements
-CHAT_PARTICIPANT ||--|| DELIVER_AGENT : implements  
+CHAT_PARTICIPANT ||--|| DELIVER_AGENT : implements
 CHAT_PARTICIPANT ||--|| SUPPORT_AGENT : implements
 CHAT_PARTICIPANT ||--|| RESEARCH_AGENT : implements
 CHAT_PARTICIPANT ||--|| OPTIMIZE_AGENT : implements
@@ -137,4 +137,3 @@ API_COLLECTION {
 API_COLLECTION ||--|| PROSPECTPRO_AUTH : instance
 API_COLLECTION ||--|| PROSPECTPRO_ENRICHMENT : instance
 API_COLLECTION ||--|| PROSPECTPRO_DISCOVERY : instance
----
