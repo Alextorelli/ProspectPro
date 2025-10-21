@@ -22,9 +22,15 @@ logs/
 # === DEPLOYMENT & INFRASTRUCTURE ===
 .vercel/
 .vercelignore
+dev-tools/agent-orchestration/mcp/dist/
 
 # === ARCHIVE & LEGACY ===
 archive/
+
+# === GENERATED DOCS & REPORTS ===
+docs/
+reports/
+public/
 
 # === SUPABASE FUNCTIONS (Deno/TypeScript, not for ESLint) ===
 supabase/functions/

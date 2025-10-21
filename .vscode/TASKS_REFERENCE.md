@@ -69,6 +69,7 @@ _Auto-generated from `.vscode/tasks.json` — Last updated: 2025-10-21_
 | **Test: Campaign Validation** | `bash -lc ${workspaceFolder}/scripts/testing/campaign-validation.sh ${input:sessionJWT}` | [`${workspaceFolder}/scripts/testing/campaign-validation.sh ${input:sessionJWT}`](../scripts/${workspaceFolder}/scripts/testing/campaign-validation.sh ${input:sessionJWT}) | sessionJWT | No description available |
 | **Test: Auth Patterns** | `bash -lc ${workspaceFolder}/scripts/testing/test-auth-patterns.sh ${input:sessionJWT}` | [`${workspaceFolder}/scripts/testing/test-auth-patterns.sh ${input:sessionJWT}`](../scripts/${workspaceFolder}/scripts/testing/test-auth-patterns.sh ${input:sessionJWT}) | sessionJWT | No description available |
 | **Diagnostics: Full Campaign** | `bash -lc ${workspaceFolder}/scripts/diagnostics/edge-function-diagnostics.sh ${input:sessionJWT}` | [`${workspaceFolder}/scripts/diagnostics/edge-function-diagnostics.sh ${input:sessionJWT}`](../scripts/${workspaceFolder}/scripts/diagnostics/edge-function-diagnostics.sh ${input:sessionJWT}) | sessionJWT | No description available |
+| **Test: Dev Tools Suite** | `npm run test:devtools` | Multiple | None | No description available |
 
 ## Build & Deployment
 
@@ -85,7 +86,6 @@ _Auto-generated from `.vscode/tasks.json` — Last updated: 2025-10-21_
 | **Docs: Update All Documentation** | `npm run docs:update` | Multiple | None | No description available |
 | **Docs: Update System Reference (Legacy)** | `npm run system:reference` | Multiple | None | No description available |
 | **Docs: Update Codebase Index (Legacy)** | `npm run codebase:index` | Multiple | None | No description available |
-| **Docs: Bootstrap Tooling Diagrams** | `npm run docs:bootstrap` |  | None | No description available |
 
 ## Roadmap Management
 
