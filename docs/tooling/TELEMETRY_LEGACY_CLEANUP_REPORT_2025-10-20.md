@@ -91,20 +91,25 @@ All Thunder/Jaeger references have been removed from the codebase. Observability
    - [x] Staged VS Code task proposal for `test:devtools` in settings-staging.md (pending approval before `.vscode/tasks.json` update)
    - Next: Telemetry & coverage aggregation
 8. **Telemetry & Coverage**
-   - [ ] Aggregate results into coverage.md via updated Phase 02 task. (Open: run Phase 02 and update coverage.md)
+   - [x] Aggregate results into coverage.md via updated Phase 02 task. (See `reports/context/coverage.md` for canonical output)
    - [ ] Include coverage badges or summary in devops-agent-runbook.md. (Open: add summary/badges after coverage aggregation)
 9. **Validation Pipeline**
-   - [ ] Run full suite: `npm run docs:prepare`, `npm run lint`, `npm test`, `npm run test:devtools`, `npm run supabase:test:functions`. (Open: last item, `npm run supabase:test:functions`, not yet run)
+   - [x] Run full suite: `npm run docs:prepare`, `npm run lint`, `npm test`, `npm run test:devtools`, `npm run supabase:test:functions`. (Last command output: 1 passed, 1 failed — see below)
    - [x] Log outputs and diffs in `settings-staging.md` before merge. (Partial: see settings-staging.md for logs)
-10. **Merge and Monitor**
-    - [ ] Merge `restructure-recovery` into `main` after final approval.
-    - [ ] Monitor logs and metrics for any residual Thunder/Jaeger references or issues.
-    - [ ] Confirm deprecation of Thunder Client and Jaeger in all environments.
 
 ---
 
-# Open Items Review (2025-10-21)
+## Phase 9: Supabase Edge Function Test Results (2025-10-21)
 
-- Phase 8: Run Phase 02 and aggregate results into `coverage.md`; add coverage badges/summary to `devops-agent-runbook.md`.
-- Phase 9: Run `npm run supabase:test:functions` and log results; ensure all outputs/diffs are staged before merge.
-- Phase 10: Await final approval for merge, then monitor for any legacy references post-merge.
+- Ran `npm run supabase:test:functions`
+- Result: 1 passed, 1 failed
+- Failure: `edge functions expose index.ts and function.toml` — No edge function directories detected
+- Next: Investigate missing edge function directories or update test expectations if structure is correct
+
+---
+
+## Phase 10: Merge and Monitor
+
+- [ ] Await final approval for merge
+- [ ] After merge, monitor logs and metrics for any residual Thunder/Jaeger references or issues
+- [ ] Confirm deprecation of Thunder Client and Jaeger in all environments
