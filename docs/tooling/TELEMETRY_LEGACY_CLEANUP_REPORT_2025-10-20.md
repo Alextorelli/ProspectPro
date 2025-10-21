@@ -75,11 +75,11 @@ All Thunder/Jaeger references have been removed from the codebase. Observability
    - [x] Stage environment loader updates (no direct .vscode edits).
 4. **Implement Agent Prompt Tests**
    - [x] Added Vitest suite `dev-tools/tests/agents.spec.ts` to snapshot/assert chatmodes prompts for guardrails and hyperlinks
-   - [ ] Validate generated instructions via `dev-tools/tests/agents.spec.ts` (run test and review output)
+   - [x] Validate generated instructions via `dev-tools/tests/agents.spec.ts` (test run and output logged in settings-staging.md)
    - Next: Implement MCP tool tests
 5. **Automate MCP Tool Tests**
    - [x] Added Vitest suite `dev-tools/tests/mcp.spec.ts` to mock MCP CLI output and verify diagnostics artifacts
-   - [ ] Capture outputs and compare with fixtures (run test and review output)
+   - [x] Capture outputs and compare with fixtures (deep equality assertion, test run logged in settings-staging.md)
    - Next: Automation script validation
 6. **Automation Script Validation**
    - [x] Added Vitest suite `dev-tools/tests/automation.spec.ts` to:
@@ -88,132 +88,23 @@ All Thunder/Jaeger references have been removed from the codebase. Observability
    - Next: CI integration and test pipeline
 7. **CI Integration**
    - [x] Added npm script `test:devtools` for dev tools test suite in `package.json`
-   - [ ] Add VS Code task proposal in `settings-staging.md`; update `.github/workflows/ci.yml` only after approval
+   - [x] Staged VS Code task proposal for `test:devtools` in settings-staging.md (pending approval before `.vscode/tasks.json` update)
    - Next: Telemetry & coverage aggregation
 8. **Telemetry & Coverage**
-   - [ ] Aggregate results into coverage.md via updated Phase 02 task.
-   - [ ] Include coverage badges or summary in devops-agent-runbook.md.
+   - [ ] Aggregate results into coverage.md via updated Phase 02 task. (Open: run Phase 02 and update coverage.md)
+   - [ ] Include coverage badges or summary in devops-agent-runbook.md. (Open: add summary/badges after coverage aggregation)
 9. **Validation Pipeline**
-   - [ ] Run full suite: `npm run docs:prepare`, `npm run lint`, `npm test`, `npm run test:devtools`, `npm run supabase:test:functions`.
-   - [ ] Log outputs and diffs in `settings-staging.md` before merge.
+   - [ ] Run full suite: `npm run docs:prepare`, `npm run lint`, `npm test`, `npm run test:devtools`, `npm run supabase:test:functions`. (Open: last item, `npm run supabase:test:functions`, not yet run)
+   - [x] Log outputs and diffs in `settings-staging.md` before merge. (Partial: see settings-staging.md for logs)
+10. **Merge and Monitor**
+    - [ ] Merge `restructure-recovery` into `main` after final approval.
+    - [ ] Monitor logs and metrics for any residual Thunder/Jaeger references or issues.
+    - [ ] Confirm deprecation of Thunder Client and Jaeger in all environments.
 
 ---
 
-## Phase 1: Inventory Existing Coverage
+# Open Items Review (2025-10-21)
 
-- Ran `npm run docs:update` — task references refreshed.
-- Ran `rg -n "@test" dev-tools/agent-orchestration scripts/automation` — mapped all current test annotations.
-- Logged test coverage gaps and missing suites in `docs/tooling/settings-staging.md` under “Agents & Dev Tools Test Plan”.
-- Next: Begin Phase 2 (Define Targets & Fixtures).
-
----
-
-## Phase 2: Define Targets & Fixtures
-
-- Categorized test targets:
-  - [x] Agent prompts (chatmodes, instruction files)
-  - [x] MCP server helpers (dev-tools/agent-orchestration/agents, MCP endpoints)
-  - [x] Automation scripts (scripts/automation/\*.sh)
-  - [x] VS Code tasks (task definitions, settings-staging.md proposals)
-- Staged fixture directory: `dev-tools/testing/fixtures/`
-  - [x] Sample MCP responses (JSON)
-  - [x] Supabase logs (sample .log)
-  - [x] Vercel status JSON (sample .json)
-- Documented dependencies:
-  - [x] Supabase CLI session (required for all integration tests)
-  - [x] Mock MCP endpoints (for agent orchestration and diagnostics)
-- Next: Scaffold test harnesses and add initial fixtures.
-
----
-
-## Phase 3: Scaffold Test Harnesses
-
-- Node-based tooling:
-  - [x] Created `dev-tools/tests/` for Vitest suites
-  - [x] Added shared setup in `dev-tools/tests/utils/setup.ts`
-  - [x] Added test suite README
-- Shell automation:
-  - [x] Created `scripts/tests/` for bats/zx harnesses
-  - [x] Added sample bats test for automation scripts
-  - [x] Added sample automation script with dry-run mode
-- Environment loader updates staged (no direct .vscode edits)
-- Next: Implement agent prompt tests and MCP tool tests.
-
----
-
-## Phase 4: Implement Agent Prompt Tests
-
-- [x] Added Vitest suite `dev-tools/tests/agents.spec.ts` to snapshot/assert chatmodes prompts for guardrails and hyperlinks
-- [ ] Validate generated instructions via `dev-tools/tests/agents.spec.ts` (run test and review output)
-- Next: Implement MCP tool tests
-
----
-
-## Phase 5: Automate MCP Tool Tests
-
-- [x] Added Vitest suite `dev-tools/tests/mcp.spec.ts` to mock MCP CLI output and verify diagnostics artifacts
-- [ ] Capture outputs and compare with fixtures (run test and review output)
-- Next: Automation script validation
-
----
-
-## Phase 6: Automation Script Validation
-
-- [x] Added Vitest suite `dev-tools/tests/automation.spec.ts` to:
-  - Run automation scripts in dry-run mode and assert log output
-  - Add regression test for path rewrites during migrations
-- Next: CI integration and test pipeline
-
----
-
-## Phase 7: CI Integration
-
-- [x] Added npm script `test:devtools` for dev tools test suite in `package.json`
-- [ ] Add VS Code task proposal in `settings-staging.md`; update `.github/workflows/ci.yml` only after approval
-- Next: Telemetry & coverage aggregation
-
----
-
-## Phase 8: Telemetry & Coverage ✅
-
-**Completed**:
-
-- ✅ Aggregated results into coverage via updated documentation
-- ✅ Updated test infrastructure with comprehensive coverage
-- ✅ Frontend test suite: 5 tests passing across 3 files
-- ✅ Dev tools test suite: 5 tests passing across 3 files (agents, automation, MCP)
-- ✅ Documented test execution procedures and configuration
-
----
-
-## Phase 9: Validation Pipeline ✅
-
-**Completed**:
-
-- ✅ `npm run docs:prepare` - Documentation generation (3 modules + 16 functions documented)
-- ✅ `npm run lint` - ESLint validation (0 warnings, 0 errors)
-- ✅ `npm test` - Frontend test suite (5 tests passed in 3.44s)
-- ✅ `npm run test:devtools` - Dev tools test suite (5 tests passed in 0.816s)
-- ✅ Complete validation pipeline executed successfully
-
-**Pipeline Results**:
-
-```
-📋 docs:prepare: ✅ (3 modules + 16 functions documented)
-🔍 lint: ✅ (0 warnings, 0 errors)
-🧪 frontend tests: ✅ (5 passed in 3.44s)
-⚙️ devtools tests: ✅ (5 passed in 0.816s)
-```
-
----
-
-## Phase 10: Merge and Monitor
-
-- [ ] Merge `restructure-recovery` into `main` after final approval.
-- [ ] Monitor logs and metrics for any residual Thunder/Jaeger references or issues.
-- [ ] Confirm deprecation of Thunder Client and Jaeger in all environments.
-
----
-
-**Prepared by:** GitHub Copilot
-**Date:** 2025-10-20
+- Phase 8: Run Phase 02 and aggregate results into `coverage.md`; add coverage badges/summary to `devops-agent-runbook.md`.
+- Phase 9: Run `npm run supabase:test:functions` and log results; ensure all outputs/diffs are staged before merge.
+- Phase 10: Await final approval for merge, then monitor for any legacy references post-merge.
