@@ -221,6 +221,31 @@ Rollback: `git restore .` or revert individual files if needed
 - Post-move: Repeat all validation commands and compare outputs.
 - Document results and any issues in this file before requesting approval for live changes.
 
+# Staged: Agents & Dev Tools Test Suite Progress (2025-10-21)
+
+## Phase 4: Agent Prompt Validation
+
+- ✅ Ran `npm run test:devtools` (covers `dev-tools/tests/agents.spec.ts`)
+- ✅ All chatmode prompt files validated for required metadata (description, tools)
+- Output: All tests passing as of 2025-10-21. See `TELEMETRY_LEGACY_CLEANUP_REPORT_2025-10-20.md` for details.
+
+## Phase 5: MCP Tool Fixture Comparison (Completed 2025-10-21)
+
+- ✅ Updated `dev-tools/tests/mcp.spec.ts` to assert deep equality with fixture in `dev-tools/testing/fixtures/sample-mcp-response.json`
+- ✅ Ran `npm run test:devtools` — all MCP artifact tests pass with fixture-based validation
+- Output: See `TELEMETRY_LEGACY_CLEANUP_REPORT_2025-10-20.md` for details
+
+## Phase 7: Staged VS Code Task Proposal (Test: DevTools)
+
+**Do not add to .vscode/tasks.json without explicit approval.**
+
+```json
+{
+  "label": "Test: Dev Tools Suite",
+  "type": "shell",
+  "command": "npm run test:devtools",
+  "group": "test"
+}
 ```
 
-```
+Rationale: Enables running the dev tools/agents test suite from the VS Code task runner. Stage here for review before updating guarded config files.

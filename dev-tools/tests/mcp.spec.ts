@@ -9,7 +9,7 @@ const fixturePath = path.resolve(
 );
 
 describe("MCP CLI tool output", () => {
-  it("should produce a valid diagnostics artifact", () => {
+  it("should produce a diagnostics artifact matching the fixture", () => {
     // Simulate CLI output by copying fixture (in real test, invoke CLI)
     if (!fs.existsSync(diagnosticsDir))
       fs.mkdirSync(diagnosticsDir, { recursive: true });
@@ -17,7 +17,7 @@ describe("MCP CLI tool output", () => {
     fs.copyFileSync(fixturePath, outFile);
     expect(fs.existsSync(outFile)).toBe(true);
     const artifact = JSON.parse(fs.readFileSync(outFile, "utf8"));
-    expect(artifact.status).toBe("ok");
-    expect(artifact.data.agent).toBe("test-agent");
+    const fixture = JSON.parse(fs.readFileSync(fixturePath, "utf8"));
+    expect(artifact).toEqual(fixture);
   });
 });
