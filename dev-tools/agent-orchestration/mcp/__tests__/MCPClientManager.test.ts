@@ -192,9 +192,18 @@ describe("MCPClientManager", () => {
 
   describe("dispose and destroyAll", () => {
     it("should dispose client successfully", async () => {
-      const mockClient = { serverName: "test" };
+      const mockClient = {
+        serverName: "test",
+        config: { command: "test" },
+        isConnected: true,
+        connect: jest.fn(),
+        disconnect: jest.fn(),
+        listTools: jest.fn(),
+        callTool: jest.fn(),
+      };
       await clientManager.dispose(mockClient);
 
+      expect(mockClient.disconnect).toHaveBeenCalled();
       expect(mockTelemetrySink.info).toHaveBeenCalledWith(
         "MCP client disposed",
         { serverName: "test" }
@@ -202,16 +211,15 @@ describe("MCPClientManager", () => {
     });
 
     it("should handle dispose errors gracefully", async () => {
-      const mockClient = { serverName: "test" };
-      // Mock the telemetry sink info call to throw only once
-      let called = false;
-      mockTelemetrySink.info.mockImplementation(() => {
-        if (!called) {
-          called = true;
-          throw new Error("Dispose failed");
-        }
-        return undefined;
-      });
+      const mockClient = {
+        serverName: "test",
+        config: { command: "test" },
+        isConnected: true,
+        connect: jest.fn(),
+        disconnect: jest.fn().mockRejectedValue(new Error("Disconnect failed")),
+        listTools: jest.fn(),
+        callTool: jest.fn(),
+      };
 
       await expect(clientManager.dispose(mockClient)).resolves.toBeUndefined();
       expect(mockTelemetrySink.error).toHaveBeenCalledWith(

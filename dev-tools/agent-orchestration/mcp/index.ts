@@ -2,6 +2,13 @@
 export { ChatModeLoader, type ChatModeManifest } from "./ChatModeLoader";
 export { ConfigLocator, type ConfigResult } from "./ConfigLocator";
 export {
+  MockMCPClient,
+  MockMCPClientAdapter,
+  type MCPClient,
+  type MCPClientAdapter,
+  type MCPServerConfig,
+} from "./MCPClientAdapter";
+export {
   MCPClientManager,
   type MCPClientManagerOptions,
   type RetryOptions,

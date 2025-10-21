@@ -1,4 +1,10 @@
 import { ConfigLocator, ConfigResult } from "./ConfigLocator";
+import {
+  MCPClient,
+  MCPClientAdapter,
+  MCPServerConfig,
+  MockMCPClientAdapter,
+} from "./MCPClientAdapter";
 import { TelemetrySink } from "./TelemetrySink";
 import { WorkspaceContext } from "./WorkspaceContext";
 
@@ -15,11 +21,15 @@ export interface MCPClientManagerOptions {
   workspaceContext: WorkspaceContext;
   telemetrySink: TelemetrySink;
   retryOptions?: Partial<RetryOptions>;
+  clientAdapter?: MCPClientAdapter;
 }
 
 export class MCPClientManager {
   private configResult?: ConfigResult;
   private readonly options: MCPClientManagerOptions;
+  private readonly clientAdapter: MCPClientAdapter;
+  private readonly activeClients = new Map<string, MCPClient>();
+  private readonly pendingConnections = new Map<string, Promise<MCPClient>>();
   private readonly defaultRetryOptions: RetryOptions = {
     maxAttempts: 3,
     baseDelayMs: 1000,
@@ -33,6 +43,7 @@ export class MCPClientManager {
       ...options,
       retryOptions: { ...this.defaultRetryOptions, ...options.retryOptions },
     };
+    this.clientAdapter = options.clientAdapter || new MockMCPClientAdapter();
   }
 
   async initialize(): Promise<void> {
@@ -56,28 +67,61 @@ export class MCPClientManager {
     }
   }
 
-  async getClient(serverName: string): Promise<any> {
+  async getClient(serverName: string): Promise<MCPClient> {
     if (!this.configResult) {
       throw new Error(
         "MCP Client Manager not initialized. Call initialize() first."
       );
     }
 
-    const serverConfig = this.configResult.config.mcpServers?.[serverName];
+    // Return cached client if already connected
+    const existingClient = this.activeClients.get(serverName);
+    if (existingClient && existingClient.isConnected) {
+      this.options.telemetrySink.info(
+        `Returning cached MCP client for ${serverName}`
+      );
+      return existingClient;
+    }
+
+    const serverConfig = this.configResult.config.mcpServers?.[
+      serverName
+    ] as MCPServerConfig;
     if (!serverConfig) {
       throw new Error(`MCP server '${serverName}' not found in config`);
     }
 
     return this.withRetry(async () => {
-      // Placeholder: Implement actual MCP client creation
-      // This would use the MCP SDK to create a client based on serverConfig
-      return { serverName, config: serverConfig };
+      // Create and connect the client
+      const client = await this.clientAdapter.createClient(
+        serverName,
+        serverConfig
+      );
+      await client.connect();
+
+      // Cache the connected client
+      this.activeClients.set(serverName, client);
+
+      this.options.telemetrySink.info(
+        `MCP client connected for ${serverName}`,
+        {
+          serverName,
+          isConnected: client.isConnected,
+        }
+      );
+
+      return client;
     }, `Failed to create MCP client for ${serverName}`);
   }
 
-  async dispose(client: any): Promise<void> {
+  async dispose(client: MCPClient): Promise<void> {
     try {
-      // Placeholder: Implement actual client disposal
+      if (client.isConnected) {
+        await client.disconnect();
+      }
+
+      // Remove from active clients cache
+      this.activeClients.delete(client.serverName);
+
       this.options.telemetrySink.info("MCP client disposed", {
         serverName: client.serverName,
       });
@@ -87,8 +131,20 @@ export class MCPClientManager {
   }
 
   async destroyAll(): Promise<void> {
-    // Placeholder: Dispose all active clients
-    this.options.telemetrySink.info("All MCP clients destroyed");
+    const serverNames = Array.from(this.activeClients.keys());
+    const disposePromises = Array.from(this.activeClients.values()).map(
+      (client) => this.dispose(client)
+    );
+
+    await Promise.allSettled(disposePromises);
+
+    // Dispose the client adapter
+    await this.clientAdapter.dispose();
+
+    this.options.telemetrySink.info("All MCP clients destroyed", {
+      disposedCount: serverNames.length,
+      serverNames,
+    });
   }
 
   private async withRetry<T>(
@@ -96,7 +152,10 @@ export class MCPClientManager {
     operationName: string,
     customOptions?: Partial<RetryOptions>
   ): Promise<T> {
-    const opts = { ...this.options.retryOptions, ...customOptions } as RetryOptions;
+    const opts = {
+      ...this.options.retryOptions,
+      ...customOptions,
+    } as RetryOptions;
     let lastError: Error;
 
     for (let attempt = 1; attempt <= opts.maxAttempts; attempt++) {
