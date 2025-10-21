@@ -4,6 +4,20 @@ Source material captured for follow-up synthesis and alignment work. Content ref
 
 ---
 
+## Diagram Source of Truth & Revision Catalog
+
+- Treat this document as the canonical specification for environment-aware routing across Option A participants, MCP clusters, and automation hooks.
+- When updating flows, edit this markdown first, then regenerate dependent diagrams via `npm run docs:patch:diagrams --source docs/tooling/end-state` followed by `npm run docs:prepare`.
+- Generated Mermaid diagrams (all in `docs/tooling/end-state/`) are derived from the narratives and tables below:
+  - `agent-mode-flow.mmd` – environment → agent mode → Option A participant mapping
+  - `agent-environment-map-state.mmd` – environment detection → MCP cluster selection → participant activation
+  - `environment-mcp-cluster.mmd` – cluster inventory aligned with Option A tooling
+  - `agent-coordination-flow.mmd` and `workflow-architecture-c4.mmd` – promotion pipeline feedback loops
+  - Repository-wide ER view (`reports/context/erDiagram.mmd`) references these mappings for participant/automation relationships
+- Document revisions that impact diagrams must be noted in `docs/tooling/end-state/tools-suite-migration-plan.md` (Phase 2/3 checkpoints) to keep the migration ledger synchronized.
+
+---
+
 ## Modern DevOps Environment Boundaries
 
 ### Development Environment Taxonomy
@@ -99,7 +113,7 @@ Source of record: `docs/tooling/staging/chat-participants-taxonomy.md` (promote 
 
 | Participant Tag            | Layers Covered                                                 | Key Activities                                                                    | Agent Pairings                    | MCP / Automation Hooks                                                           |
 | -------------------------- | -------------------------------------------------------------- | --------------------------------------------------------------------------------- | --------------------------------- | -------------------------------------------------------------------------------- |
-| `@ux`                      | Frontend experience & design                                   | React UI audits, accessibility, component hygiene, DevTools telemetry             | `@deliver`, `@debug`              | `chrome-devtools`, design checklist                                              |
+| `@ux`                      | Frontend experience & design                                   | React UI audits, accessibility, component hygiene, DevTools telemetry             | `@deliver`, `@debug`              | `react-devtools`, design checklist                                               |
 | `@platform`                | API services, database, integrations, enrichment quality       | Endpoint diagnostics, schema/migration review, enrichment data QA, reporting KPIs | `@debug`, `@deliver`, `@support`  | `supabase-dev`, `integration-hub`, Postgres validators, `ci_cd_validation_suite` |
 | `@devops`                  | CI/CD, infrastructure, container orchestration                 | Pipeline tuning, Docker/IaC updates, environment routing, diagram guardrails      | `@deliver`, `@optimize`           | `docs:patch:diagrams`, Docker tasks, GitHub workflow guard                       |
 | `@secops`                  | Security posture, compliance, observability, incident response | Risk triage, alert tuning, production telemetry, rollback playbooks               | `@support`, `@debug`, `@optimize` | `security-scan`, observability MCP, `context-snapshot.sh`, rollback scripts      |

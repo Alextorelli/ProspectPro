@@ -8,6 +8,10 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const repoRoot = path.resolve(__dirname, "..", "..");
 const functionsRoot = path.join(repoRoot, "supabase", "functions");
+function getOptionAOutputDir(tag) {
+  return path.join(repoRoot, "reports", "context", tag);
+}
+
 const cacheDir = path.join(repoRoot, ".cache", "agent", "context");
 
 async function pathExists(target) {
@@ -58,23 +62,36 @@ async function ensureCacheDir() {
   await fs.mkdir(cacheDir, { recursive: true });
 }
 
-async function writeJson(filename, payload) {
-  const destination = path.join(cacheDir, filename);
+async function writeJson(filename, payload, agentTag) {
+  let destination;
+  if (agentTag) {
+    const outputDir = getOptionAOutputDir(agentTag);
+    await fs.mkdir(outputDir, { recursive: true });
+    destination = path.join(outputDir, filename);
+  } else {
+    destination = path.join(cacheDir, filename);
+  }
   await fs.writeFile(destination, JSON.stringify(payload, null, 2), "utf8");
   return destination;
 }
 
 async function main() {
   await ensureCacheDir();
+  const agentTag = process.env.AGENT_TAG || null; // Optionally set AGENT_TAG env var
 
   const functions = await readFunctionMetadata();
   const summary = {
     generatedAt: new Date().toISOString(),
     totalFunctions: functions.length,
     functions,
+    agentTag,
   };
 
-  const outputPath = await writeJson("supabase-functions.json", summary);
+  const outputPath = await writeJson(
+    "supabase-functions.json",
+    summary,
+    agentTag
+  );
   console.log(
     `🗂️ Supabase function context written to ${path.relative(
       repoRoot,

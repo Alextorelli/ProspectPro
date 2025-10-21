@@ -8,6 +8,10 @@ import { fileURLToPath } from "url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const repoRoot = path.resolve(__dirname, "..", "..");
+function getOptionAOutputDir(tag) {
+  return path.join(repoRoot, "reports", "context", tag);
+}
+
 const cacheDir = path.join(repoRoot, ".cache", "agent", "context");
 
 function runGit(args) {
@@ -47,8 +51,15 @@ async function ensureCacheDir() {
   await fs.mkdir(cacheDir, { recursive: true });
 }
 
-async function writeJson(filename, payload) {
-  const destination = path.join(cacheDir, filename);
+async function writeJson(filename, payload, agentTag) {
+  let destination;
+  if (agentTag) {
+    const outputDir = getOptionAOutputDir(agentTag);
+    await fs.mkdir(outputDir, { recursive: true });
+    destination = path.join(outputDir, filename);
+  } else {
+    destination = path.join(cacheDir, filename);
+  }
   const data = JSON.stringify(payload, null, 2);
   await fs.writeFile(destination, data, "utf8");
   return destination;
@@ -56,15 +67,17 @@ async function writeJson(filename, payload) {
 
 async function main() {
   await ensureCacheDir();
+  const agentTag = process.env.AGENT_TAG || null; // Optionally set AGENT_TAG env var
   const snapshot = {
     generatedAt: new Date().toISOString(),
     repositoryRoot: repoRoot,
     git: collectGitSummary(),
     node: process.version,
     workspace: process.cwd(),
+    agentTag,
   };
 
-  const outputPath = await writeJson("repo-context.json", snapshot);
+  const outputPath = await writeJson("repo-context.json", snapshot, agentTag);
   console.log(
     `📦 Repo context written to ${path.relative(repoRoot, outputPath)}`
   );

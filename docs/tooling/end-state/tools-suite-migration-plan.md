@@ -34,12 +34,13 @@ This document tracks the phased migration of ProspectPro’s MCP, agent orchestr
 
    - Refactor orchestration diagrams and context scripts to use new participant tags.
    - Route context snapshots to `reports/context/<tag>/`.
+   - Capture any environment/participant routing revisions in `docs/tooling/end-state/devops-environment-taxonomy.md` before regenerating diagrams with `npm run docs:patch:diagrams` and `npm run docs:prepare`.
    - Validate with `npm run docs:patch:diagrams` and manual review.
 
 3. **Automation & Documentation**
 
    - Update automation scripts to use participant mapping helper.
-   - Refresh documentation and playbooks to match new taxonomy.
+   - Refresh documentation and playbooks to match new taxonomy, sourcing diagrams from the taxonomy root (`devops-environment-taxonomy.md`).
    - Regenerate codebase index and coverage logs.
 
 4. **Chatmodes & CI Workflows**

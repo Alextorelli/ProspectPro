@@ -1,0 +1,30 @@
+% config: theme: dark
+% config: theme: dark
+%%{init: {'theme': 'dark'}}%%
+sequenceDiagram
+    participant DEV as Developer
+    participant ROUTER as Environment Router
+    participant AGENT as Selected Agent
+    participant MCP as Environment MCP Cluster
+    participant CICD as CI/CD Pipeline
+    participant MONITOR as Monitoring
+
+    DEV->>ROUTER: @agent command + context
+    ROUTER->>ROUTER: Detect environment (git branch, deployment stage)
+    ROUTER->>AGENT: Activate environment-aware agent
+
+    alt Development Environment
+        AGENT->>MCP: Use development MCP cluster
+        MCP-->>AGENT: Local debugging tools
+    else Staging Environment
+        AGENT->>MCP: Use staging MCP cluster
+        MCP-->>AGENT: Performance optimization tools
+    else Production Environment
+        AGENT->>MCP: Use production MCP cluster
+        MCP-->>AGENT: Monitoring & incident tools
+    end
+
+    AGENT->>CICD: Trigger environment-specific pipeline
+    CICD->>MONITOR: Report deployment metrics
+    MONITOR-->>AGENT: Provide feedback for optimization
+    AGENT-->>DEV: Environment-aware response
