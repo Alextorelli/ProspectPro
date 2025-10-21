@@ -74,8 +74,9 @@ All Thunder/Jaeger references have been removed from the codebase. Observability
    - [x] For shell automation, create bats or zx harnesses in `scripts/tests/`.
    - [x] Stage environment loader updates (no direct .vscode edits).
 4. **Implement Agent Prompt Tests**
-   - [ ] Add snapshot/assertion tests for chatmodes prompts ensuring required guardrails and hyperlinks.
-   - [ ] Validate generated instructions via `dev-tools/tests/agents.spec.ts`.
+   - [x] Added Vitest suite `dev-tools/tests/agents.spec.ts` to snapshot/assert chatmodes prompts for guardrails and hyperlinks
+   - [ ] Validate generated instructions via `dev-tools/tests/agents.spec.ts` (run test and review output)
+   - Next: Implement MCP tool tests
 5. **Automate MCP Tool Tests**
    - [ ] Mock MCP servers using lightweight HTTP handlers; verify CLI wrappers (`npm run mcp:start:*`) produce expected artifacts in `reports/diagnostics/`.
    - [ ] Capture outputs and compare with fixtures.
@@ -133,6 +134,14 @@ All Thunder/Jaeger references have been removed from the codebase. Observability
   - [x] Added sample automation script with dry-run mode
 - Environment loader updates staged (no direct .vscode edits)
 - Next: Implement agent prompt tests and MCP tool tests.
+
+---
+
+## Phase 4: Implement Agent Prompt Tests
+
+- [x] Added Vitest suite `dev-tools/tests/agents.spec.ts` to snapshot/assert chatmodes prompts for guardrails and hyperlinks
+- [ ] Validate generated instructions via `dev-tools/tests/agents.spec.ts` (run test and review output)
+- Next: Implement MCP tool tests
 
 ---
 
