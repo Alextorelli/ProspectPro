@@ -1,5 +1,5 @@
-# ProspectPro ER diagram source-of-truth: docs/tooling/end-state/dev-tool-suite-ER.mmd
-# Only dev-tool-suite-ER.mmd is processed as the canonical ER diagram. Legacy erDiagram.mmd is removed.
+# ProspectPro ER diagram source-of-truth: docs/tooling/end-state/dev-tool-suite-ER.mmd and docs/tooling/v2/dev-tool-suite-ER.mmd
+# Both end-state/ and v2/ diagrams are processed for normalization and doc generation.
 #!/bin/bash
 # ProspectPro Diagram Patch Automation
 # Normalizes Mermaid sources prior to documentation regeneration.
