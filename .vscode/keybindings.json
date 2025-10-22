@@ -109,12 +109,7 @@
   },
   {
     "key": "ctrl+alt+p",
-    "command": "mermaid-editor.preview",
+    "command": "mermaid-chart.preview",
     "when": "editorLangId == mermaid || editorLangId == mmd"
-  },
-  {
-    "key": "ctrl+alt+m",
-    "command": "mermaid-diagram.preview",
-    "when": "editorTextFocus"
   }
 ]

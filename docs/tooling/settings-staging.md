@@ -394,4 +394,38 @@ Rollback: `git restore .` or revert individual files if needed
 - MCP-aware regression test script added for DevTools startup, Vercel validation, Supabase troubleshooting, and Redis observability.
 - Diagrams/playbooks refreshed; full validation pipeline run (`docs:prepare`, `mcp:chat:validate`).
 - All changes logged; legacy migration plans archived for clarity.
-Begin agent orchestration and automation wiring patch sequence.
+  Begin agent orchestration and automation wiring patch sequence.
+
+# Phase 2 Governance Review & Documentation Update (2025-10-22)
+
+## Summary
+
+- All configuration, guardrails, and automation changes staged and validated.
+- Ignore files, environment loader/configs, authentication scripts, workspace settings, Copilot instructions, and chatmode manifests reviewed and aligned.
+- No direct edits to guarded directories; all proposals and findings documented here.
+
+## Documentation Update Checklist
+
+- [x] FAST_README.md updated for configuration guard, automation, and MCP matrix
+- [x] platform-playbooks.md refreshed for new automation and environment loader
+- [x] devops-agent-runbook.md updated for stepwise automation and MCP server types
+- [x] REPO_RESTRUCTURE_PLAN.md and SYSTEM_REFERENCE.md reflect new directory structure and migration plan
+- [x] coverage.md and coverage-v2.md updated for diagram hashes and audit trail
+- [x] workspace_status.md updated for Phase 5/6 completion
+- [x] All chatmode and Copilot instructions validated and referenced
+
+## Governance Review
+
+- All changes staged in settings-staging.md and approved via active work plan
+- Validation pipeline run: docs:prepare, docs:update, lint, test, supabase:test:db (all passed)
+- No regressions or legacy artifacts found in context, automation, or documentation
+- Archive created for audit logs and migration plans
+
+## Next Steps
+
+- Proceed to final migration, reference rewrites, and post-update validation
+- Document results and governance sign-off in this file before requesting approval for live changes
+
+---
+
+_Governance review and documentation update complete. Ready for final migration and close-out._
