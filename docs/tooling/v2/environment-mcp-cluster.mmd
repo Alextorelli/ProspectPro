@@ -1,24 +1,23 @@
+
 %%{init: {'theme': 'dark'}}%%
 stateDiagram-v2
-    [*] --> PrimaryMCP
-    state PrimaryMCP {
-        DEV_MCP : Development MCP
-        PROD_MCP : Production MCP
-        TROUBLE_MCP : Troubleshooting MCP
-    }
-    DEV_MCP --> SecondaryMCP_Dev
-    PROD_MCP --> SecondaryMCP_Prod
-    TROUBLE_MCP --> SecondaryMCP_Trouble
-    state SecondaryMCP_Dev {
-        SupabaseDB : Supabase (DB)
-        IntegrationHubDB : Integration Hub (DB)
-    }
-    state SecondaryMCP_Prod {
-        SupabaseDB : Supabase (DB)
-        IntegrationHubDB : Integration Hub (DB)
-        ObservabilityDB : Observability (DB)
-    }
-    state SecondaryMCP_Trouble {
-        SupabaseDB : Supabase (DB)
-        ObservabilityDB : Observability (DB)
-    }
+    [*] --> DEV_MCP
+    [*] --> TROUBLE_MCP
+    [*] --> PROD_MCP
+
+    state DEV_MCP {
+        state Secondary_DEV    
+            Supabase_DEV --> IntegrationHub_DEV
+            IntegrationHub_DEV --> Observability_DEV
+        }
+
+    state TROUBLE_MCP {
+        state Secondary_TROUBLE 
+            Supabase_TROUBLE --> IntegrationHub_TROUBLE
+            IntegrationHub_TROUBLE --> Observability_TROUBLE
+        }
+
+    state PROD_MCP {
+        state Secondary_PROD 
+            IntegrationHub_PROD --> Observability_PROD
+        }
