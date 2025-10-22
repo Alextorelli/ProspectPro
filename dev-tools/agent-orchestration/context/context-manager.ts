@@ -2,7 +2,7 @@ import { createHash, randomUUID } from "node:crypto";
 import { promises as fs } from "node:fs";
 import * as path from "node:path";
 import { fileURLToPath } from "node:url";
- 
+
 // Context routing follows Option A taxonomy: @ux, @platform, @devops, @secops, @integrations
 // All context snapshots and outputs are routed to reports/context/<tag>/
 
@@ -13,7 +13,6 @@ export interface ScratchpadNote {
   content: string;
   tags?: string[];
 }
-
 export interface Scratchpad {
   currentTask: string | null;
   notes: ScratchpadNote[];
@@ -45,7 +44,6 @@ export interface AgentContext {
   longTermMemory: LongTermMemoryItem[];
   metadata: AgentMetadata;
 }
-}
 
 export interface SelectInput {
   agentId: string;
@@ -67,10 +65,17 @@ export function getContextOutputDir(tag: OptionATag): string {
 }
 
 // Export context snapshot to Option A output directory
-export async function exportContextSnapshot(agentId: string, tag: OptionATag, snapshot: object) {
+export async function exportContextSnapshot(
+  agentId: string,
+  tag: OptionATag,
+  snapshot: object
+) {
   const outputDir = getContextOutputDir(tag);
   await fs.mkdir(outputDir, { recursive: true });
-  const filePath = path.join(outputDir, `snapshot-${agentId}-${Date.now()}.json`);
+  const filePath = path.join(
+    outputDir,
+    `snapshot-${agentId}-${Date.now()}.json`
+  );
   await fs.writeFile(filePath, JSON.stringify(snapshot, null, 2), "utf8");
   return filePath;
 }
@@ -111,10 +116,17 @@ export function getContextOutputDir(tag: OptionATag): string {
 }
 
 // Export context snapshot to Option A output directory
-export async function exportContextSnapshot(agentId: string, tag: OptionATag, snapshot: object) {
+export async function exportContextSnapshot(
+  agentId: string,
+  tag: OptionATag,
+  snapshot: object
+) {
   const outputDir = getContextOutputDir(tag);
   await fs.mkdir(outputDir, { recursive: true });
-  const filePath = path.join(outputDir, `snapshot-${agentId}-${Date.now()}.json`);
+  const filePath = path.join(
+    outputDir,
+    `snapshot-${agentId}-${Date.now()}.json`
+  );
   await fs.writeFile(filePath, JSON.stringify(snapshot, null, 2), "utf8");
 }
 
