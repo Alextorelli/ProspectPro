@@ -1,4 +1,4 @@
-%%{init: {\'theme\': \'dark\'}}%%
+%%{init: {theme: 'dark'}}%%
 flowchart LR
     AgentRequest["@agent command or escalation"]
     CoordinationManager["Coordination Manager"]
@@ -31,21 +31,4 @@ flowchart LR
     CoordinationManager -->|creates| CoordinationSession
     CoordinationSession -->|routes context| TypeRouter
     TypeRouter --> SingleExec
-    ```mermaid
-    %%{init: {'theme': 'dark'}}%%
-    journey
-            title Participant Coordination Journey
-            section Intake
-                Receive @agent command or escalation: 5: Requester, Coordination Manager
-                Spin up coordination session (status, context, results): 4: Coordination Manager
-            section Routing
-                Select execution pattern (single/chain/swarm/escalation): 4: Coordination Manager
-                Activate required participants (@ux/@platform/@devops/@secops/@integrations): 3: Coordination Manager
-            section Automation
-                Launch automation scripts (supabase_pull_logs/context_snapshot/vercel_status_check): 4: Automation Scripts, Participants
-                Stream telemetry + MCP troubleshooting outputs: 3: MCP Clusters, Participants
-            section Closure
-                Record outcomes & guidance in ledger: 4: Coordination Manager
-                Return coordinated response to requester: 5: Participants, Requester
-    ```
-    DevOps --> ContextSnapshot
+    

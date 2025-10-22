@@ -124,8 +124,11 @@ normalize_config() {
   local file_path="$1"
   # Always ensure first line is '%%{init: {'theme': 'dark'}}%%'
   local temp_file
-    temp_file="$(mktemp)"
-    awk "NR==1 {print \"%%{init: {\\'theme\\': \\'dark\\'}}%%\"} NR>1 {print}" "$file_path" > "$temp_file"
+  temp_file="$(mktemp)"
+  {
+    echo "%%{init: {'theme': 'dark'}}%%"
+    tail -n +2 "$file_path"
+  } > "$temp_file"
   mv "$temp_file" "$file_path"
 }
 
