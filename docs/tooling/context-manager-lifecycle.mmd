@@ -1,9 +1,3 @@
----
-id: context-manager-lifecycle
-intent: ContextManager Lifecycle State Diagram (modular, agentic)
-context: |
-  State diagram showing the lifecycle of the ContextManager, including initialization, update, validation, orchestration, and error handling. Uses shared validation checkpoint snippet.
----
 stateDiagram-v2
     [*] --> Initialized
     Initialized --> AwaitingUpdate: wait for contextUpdate
@@ -20,6 +14,3 @@ stateDiagram-v2
       SchemaCheck --> ConsistencyCheck
       ConsistencyCheck --> [*]
     }
-    
-    %% Validation checkpoint
-    note right of Validating: Validation & Checkpoints\n- Validate: contextState schema\n- Check: cache/session consistency\n- Log: orchestration diagnostics
