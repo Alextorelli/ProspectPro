@@ -3,6 +3,9 @@
 - Converted `agent-mode-flow.mmd` from flowchart to ER diagram (Option A taxonomy)
 - Split `participant-coordination-flow.mmd` into `coordination-overview-flow.mmd` (session/manager/participant routing) and `coordination-activation-flow.mmd` (participant-to-automation mapping)
 - Updated documentation references in `devops-environment-taxonomy.md` to point to new diagrams
+- Normalized Mermaid init headers for all end-state diagrams
+- Updated diagram scripts and coverage to reference new coordination diagrams and ER model
+- Regenerated and validated documentation and tests (see coverage.md)
 
 # End-to-End Tools Suite Migration Plan (Option A Alignment)
 
