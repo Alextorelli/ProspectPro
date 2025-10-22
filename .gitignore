@@ -201,9 +201,6 @@ modules/api-clients/enhanced-sec-edgar-client.js
 modules/api-clients/companies-house-uk-client.js/.deno_lsp/
 
 # === CLOUD BUILD AND DEPLOYMENT ARTIFACTS ===
-# GitHub Actions workflows (archived approach)
-/.github/workflows/
-.github/workflows/
 
 # Cloud Build artifacts
 /build/

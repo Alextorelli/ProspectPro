@@ -52,6 +52,21 @@
 - Extend this document as new guardrails or troubleshooting procedures are introduced.
 - Remove temporary drafts once their corresponding changes have been approved and applied.
 
+# Staged: Ignore Policy Relaxation & Full Audit (2025-10-22)
+
+- **Proposal**: Temporarily relax `.eslintignore` to re-include `docs/` for linting and audit visibility; run full ignore hygiene + diagram validation to confirm no legacy assets remain hidden by staging policies.
+- **Rationale**: Comprehensive end-state verification requires exposing documentation and archive assets to lint/test automation so lingering Round 1 files are surfaced and dispositioned.
+- **Risk**: Low/Medium – lint jobs may take longer or surface stale Markdown issues; ensure we do not accidentally commit guard exceptions without documentation.
+- **Rollback**: Restore prior `.eslintignore` entries (re-ignoring `docs/`) after the audit by reversing this change or running `git checkout -- .eslintignore` if uncommitted.
+- **Validation Plan**:
+  1. `node dev-tools/scripts/node/validate-ignore-config.cjs`
+  2. `bash scripts/operations/check-docs-schema.sh`
+  3. `npm run docs:render:diagrams`
+  4. `npm run docs:update`
+  5. `npm run lint`
+  6. `npm test`
+  7. Document findings + remediation in `reports/context/coverage.md` and this staging file before re-enabling guards.
+
 # Staged: React DevTools Task Reference (2025-10-20)
 
 ## Proposed VS Code Task (Reference Only)

@@ -1,1 +1,0 @@
-../../dev-tools/scripts/scripts/testing/test-env.local.sh
