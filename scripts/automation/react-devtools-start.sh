@@ -1,8 +1,8 @@
 #!/bin/bash
 # Launch React DevTools via MCP
 set -euo pipefail
-source ./scripts/operations/ensure-supabase-cli-session.sh
-source ./scripts/automation/lib/participant-routing.sh
+source $(git rev-parse --show-toplevel)/scripts/operations/ensure-supabase-cli-session.sh
+source $(git rev-parse --show-toplevel)/scripts/automation/lib/participant-routing.sh
 ENV_LOADER="$(git rev-parse --show-toplevel)/config/environment-loader.v2.js"
 DRY_RUN=false
 if [[ "$*" == *"--dry-run"* ]]; then
