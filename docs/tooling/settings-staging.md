@@ -444,3 +444,20 @@ Rollback: `git restore .` or revert individual files if needed
 ---
 
 _Governance review and documentation update complete. Ready for final migration and close-out._
+
+# Staged: Diagram Automation Revamp (2025-10-22)
+
+- **Branch**: `diagram-automation-restructure` (cut from `restructure-recovery`)
+- **Rationale**: Enable precise, automated diagram migration and MECE repo realignment. Isolate all diagram, automation, and MCP changes for focused validation and rollback.
+- **Risk**: Medium – bulk moves and script rewrites may break legacy references or automation. Mitigate by archiving config, running full context snapshots, and validating all changes before merging.
+- **Rollback**: Restore from `archive/loose-root-assets/codespace-config-backup-<date>.tar.gz` and revert branch if needed. All changes staged and validated before cutover.
+- **Validation Plan**:
+
+  1. Run `npm run reports:workspace-status` (done)
+  2. Run `./scripts/automation/context-snapshot.sh full all` (done)
+  3. Compress `.devcontainer/`, `.vscode/`, `.github/`, `config/` to `archive/loose-root-assets/codespace-config-backup-$(date +%F).tar.gz`
+  4. Update `docs/tooling/end-state/index.md` and cross-link to REPO_RESTRUCTURE_PLAN.md
+  5. Bulk-audit diagrams/scripts/configs per migration plan
+  6. Document all findings and validation outputs in `reports/context/coverage.md` and this file
+
+- **Guardrails**: No direct edits to `.vscode/` or `.github/` until staged and approved here. All automation, MCP, and diagram changes must be validated and logged.
