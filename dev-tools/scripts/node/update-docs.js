@@ -874,12 +874,12 @@ async function generateTasksReference() {
 }
 
 async function noteTaxonomyStaging() {
-  const stagingDir = path.join(repoRoot, "docs/tooling/staging");
-  if (!(await pathExists(stagingDir))) {
+  const troubleshootingDir = path.join(repoRoot, "docs/tooling/troubleshooting");
+  if (!(await pathExists(troubleshootingDir))) {
     return;
   }
 
-  const entries = await fs.readdir(stagingDir);
+  const entries = await fs.readdir(troubleshootingDir);
   const usefulEntries = entries.filter((name) => name !== ".gitkeep");
   if (usefulEntries.length === 0) {
     return;
@@ -891,7 +891,7 @@ async function noteTaxonomyStaging() {
   }
 
   const marker =
-    "- Taxonomy staging artifacts detected in `docs/tooling/staging/` (review before promotion).";
+    "- Taxonomy troubleshooting artifacts detected in `docs/tooling/troubleshooting/` (review before promotion).";
   let coverage = await fs.readFile(coveragePath, "utf8");
   if (coverage.includes(marker)) {
     return;
@@ -914,7 +914,7 @@ async function noteTaxonomyStaging() {
   coverage = `${prefix}${marker}\n${suffix}`;
   await fs.writeFile(coveragePath, coverage, "utf8");
   console.log(
-    "   ℹ️ reports/context/coverage.md annotated with taxonomy staging reminder"
+    "   ℹ️ reports/context/coverage.md annotated with taxonomy troubleshooting reminder"
   );
 }
 

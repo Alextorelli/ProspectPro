@@ -85,7 +85,7 @@ All scripts output to `reports/` and enforce guardrails. See platform-playbooks.
 - `npm run supabase:test:db`
 - `npm run supabase:test:functions`
 - Update relevant docs (FAST_README, playbooks) and stage summary in `TEMP_DEVOPS_AGENT_PLAN.md`
-- Ensure `.vscode` / `.github` remain untouched; log configuration proposals in `docs/tooling/settings-staging.md`
+- Ensure `.vscode` / `.github` remain untouched; log configuration proposals in `docs/tooling/settings-troubleshooting.md`
 
 ## Checklist
 

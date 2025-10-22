@@ -63,7 +63,7 @@ await mcp.postgresql.check_pool_health();
 - [ ] Monitoring dashboards ready (MCP log-forwarder, Supabase logs)
 - [ ] Zero-fake-data audit: Always audit enrichment results for compliance using MCP tools. Avoid manual API clients or ad-hoc scripts for production validation.
 - [ ] MCP-First: Prefer MCP tools for all validation, deployment, and incident workflows.
-- [ ] Environment Switch Guidance: Use ContextManager to switch between local, staging, and production. Always export `SUPABASE_SESSION_JWT` for authenticated calls. Validate environment with `supabase:link` and `supabase:ensure-session` tasks.
+- [ ] Environment Switch Guidance: Use ContextManager to switch between local, troubleshooting, and production. Always export `SUPABASE_SESSION_JWT` for authenticated calls. Validate environment with `supabase:link` and `supabase:ensure-session` tasks.
 
 **Deployment Steps**:
 

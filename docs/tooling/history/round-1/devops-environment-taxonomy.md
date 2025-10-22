@@ -53,7 +53,7 @@ graph TB
     subgraph mcp_clusters ["MCP Server Clusters"]
         DEV_MCP[Development MCP Cluster\n- chrome-devtools\n- github\n- local-db]
         TEST_MCP[Testing MCP Cluster\n- integration-testing\n- performance-testing\n- quality-gates]
-        STAGE_MCP[Staging MCP Cluster\n- supabase-staging\n- observability\n- deployment-validation]
+        STAGE_MCP[Staging MCP Cluster\n- supabase-troubleshooting\n- observability\n- deployment-validation]
         PROD_MCP[Production MCP Cluster\n- supabase-production\n- monitoring-alerts\n- incident-response]
     end
 
@@ -122,7 +122,7 @@ stateDiagram-v2
     DetectContext --> LocalDev : git branch = dev/*
     DetectContext --> SharedDev : git branch = develop
     DetectContext --> Testing : git branch = test/*
-    DetectContext --> Staging : git branch = staging
+    DetectContext --> Staging : git branch = troubleshooting
     DetectContext --> Production : git branch = main
     DetectContext --> Incident : alert triggered
     }
@@ -191,8 +191,8 @@ stateDiagram-v2
         end
 
         subgraph stage_cluster ["Staging Cluster"]
-            S1[supabase-staging]
-            S2[observability-staging]
+            S1[supabase-troubleshooting]
+            S2[observability-troubleshooting]
             S3[deployment-validation]
             S4[cost-optimization]
         end
@@ -240,7 +240,7 @@ sequenceDiagram
         AGENT->>MCP: Use development MCP cluster
         MCP-->>AGENT: Local debugging tools
     else Staging Environment
-        AGENT->>MCP: Use staging MCP cluster
+        AGENT->>MCP: Use troubleshooting MCP cluster
         MCP-->>AGENT: Performance optimization tools
     else Production Environment
         AGENT->>MCP: Use production MCP cluster
@@ -267,7 +267,7 @@ sequenceDiagram
 
 ## Reference Index
 
-1. https://www.statsig.com/perspectives/dev-vs-staging-vs-prod
+1. https://www.statsig.com/perspectives/dev-vs-troubleshooting-vs-prod
 2. https://docs.aws.amazon.com/prescriptive-guidance/latest/choosing-git-branch-approach/understanding-the-devops-environments.html
 3. https://octopus.com/devops/gitops/gitops-environments/
 4. https://www.datadoghq.com/blog/gitops-principles-and-components/

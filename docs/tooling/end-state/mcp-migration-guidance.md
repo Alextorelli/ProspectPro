@@ -25,7 +25,7 @@ This guidance connects the revised chat participant taxonomy (`@ux`, `@platform`
 | --------------- | ---------------------------------------------------------------------- | ---------------------------------------------------------- | ----------------------------------------------------------------------- |
 | `@ux`           | `chrome-devtools`, `integration-hub` (frontend subset)                 | Accessibility lint, design checklists                      | Limit to non-production endpoints; ensure Vercel preview compatibility. |
 | `@platform`     | `supabase-development`, `postgresql`, `integration-hub`                | Database diagnostics, schema diff, API clients             | Enforce zero-fake-data guard by default.                                |
-| `@devops`       | `github`, `ci_cd_validation_suite`, `docker`, `infrastructure-as-code` | Pipeline runs, diagram patching, IaC validation            | Gate `.github` and `.vscode` edits via staging logs.                    |
+| `@devops`       | `github`, `ci_cd_validation_suite`, `docker`, `infrastructure-as-code` | Pipeline runs, diagram patching, IaC validation            | Gate `.github` and `.vscode` edits via troubleshooting logs.                    |
 | `@secops`       | `observability-server`, `supabase-troubleshooting`, `security-scan`    | Incident probes, telemetry snapshots, key rotation scripts | Production scope only; require incident authorization flag.             |
 | `@integrations` | `integration-hub`, `stripe` (pending), CRM/MDM connectors              | Vendor heartbeat, contract checks                          | Optional participant; keep behind feature flag until connectors land.   |
 
@@ -39,7 +39,7 @@ This guidance connects the revised chat participant taxonomy (`@ux`, `@platform`
 2. **Update Registry Tags**
 
    - Add `participant` metadata for each server (e.g., `"participants": ["ux"]`).
-   - Stage updates in `docs/tooling/settings-staging.md` before editing JSON manifests.
+   - Stage updates in `docs/tooling/settings-troubleshooting.md` before editing JSON manifests.
 
 3. **Refresh Config Bindings**
 
@@ -49,7 +49,7 @@ This guidance connects the revised chat participant taxonomy (`@ux`, `@platform`
 4. **Adjust Automation Scripts**
 
    - Review `scripts/automation/` for hard-coded server names; replace with participant lookups.
-   - Draft wrapper functions (e.g., `resolve_mcp_cluster_for participant`) in staging before rollout.
+   - Draft wrapper functions (e.g., `resolve_mcp_cluster_for participant`) in troubleshooting before rollout.
 
 5. **Validation Checklist**
    - `npm run mcp:chat:validate`
@@ -64,6 +64,6 @@ This guidance connects the revised chat participant taxonomy (`@ux`, `@platform`
 
 ## Next Steps
 
-1. Prepare JSON patch proposals in `docs/tooling/settings-staging.md`.
+1. Prepare JSON patch proposals in `docs/tooling/settings-troubleshooting.md`.
 2. Draft CLI helper updates for participant-aware routing.
 3. Plan cross-team validation window before enabling new MCP bindings.

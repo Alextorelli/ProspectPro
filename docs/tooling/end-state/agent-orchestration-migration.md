@@ -36,7 +36,7 @@ This document outlines how to transition the agent orchestration layer (Copilot 
 
 - Review scripts calling `@api-debug`, `@integration-mdm`, etc. Replace with the consolidated tags.
 - Introduce a helper in `scripts/automation/lib/` (e.g., `participant-routing.sh`) to map tasks to Option A participants.
-- Update `.vscode/tasks.json` descriptions if they mention legacy participants; stage proposals in `docs/tooling/settings-staging.md`.
+- Update `.vscode/tasks.json` descriptions if they mention legacy participants; stage proposals in `docs/tooling/settings-troubleshooting.md`.
 
 ### 4. Documentation Updates
 
@@ -58,6 +58,6 @@ This document outlines how to transition the agent orchestration layer (Copilot 
 
 ## Next Steps
 
-1. Draft diagram updates in staging and run the patch script.
-2. Prepare chatmode prompt updates with explicit review in `settings-staging.md`.
+1. Draft diagram updates in troubleshooting and run the patch script.
+2. Prepare chatmode prompt updates with explicit review in `settings-troubleshooting.md`.
 3. Coordinate with MCP migration tasks (see `mcp-migration-guidance.md`) before enabling automated routing.

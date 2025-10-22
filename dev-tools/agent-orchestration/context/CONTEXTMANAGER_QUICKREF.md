@@ -28,7 +28,7 @@ import { EnvironmentContextManager } from "./context-manager";
 
 // Switch environment (e.g., before deploy)
 EnvironmentContextManager.switchEnvironment({
-  target: "production", // or 'development', 'staging'
+  target: "production", // or 'development', 'troubleshooting'
   reason: "Deploying new edge function",
 });
 

@@ -31,10 +31,10 @@ This document scaffolds the rewrite of `config/mcp-config.json` so the MCP serve
       "participants": ["platform", "devops"],
       "servers": ["qa-integration", "qa-performance", "qa-quality"]
     },
-    "staging": {
-      "environments": ["staging"],
+    "troubleshooting": {
+      "environments": ["troubleshooting"],
       "participants": ["platform", "devops", "secops"],
-      "servers": ["staging-supabase", "staging-observability", "staging-deploy"]
+      "servers": ["troubleshooting-supabase", "troubleshooting-observability", "troubleshooting-deploy"]
     },
     "production": {
       "environments": ["production"],
@@ -72,7 +72,7 @@ This document scaffolds the rewrite of `config/mcp-config.json` so the MCP serve
     "branchRules": {
       "dev/*": "development",
       "test/*": "testing",
-      "staging": "staging",
+      "troubleshooting": "troubleshooting",
       "main": "production"
     },
     "keywordRules": {
@@ -97,8 +97,8 @@ This document scaffolds the rewrite of `config/mcp-config.json` so the MCP serve
 
 2. **Define Clusters**
 
-   - Map each existing server to one of the five clusters (development, testing, staging, production, incident).
-   - For any gaps (e.g., missing staging observability), add placeholders referencing MCP registry entries.
+   - Map each existing server to one of the five clusters (development, testing, troubleshooting, production, incident).
+   - For any gaps (e.g., missing troubleshooting observability), add placeholders referencing MCP registry entries.
 
 3. **Annotate Participants**
 
@@ -113,7 +113,7 @@ This document scaffolds the rewrite of `config/mcp-config.json` so the MCP serve
 5. **Ensure Observability Guardrails**
 
    - Production/incident servers must require explicit `SECOPS_MODE=true` or similar environment flag before activation.
-   - Document the guard in `docs/tooling/settings-staging.md` and `devops-agent-runbook.md`.
+   - Document the guard in `docs/tooling/settings-troubleshooting.md` and `devops-agent-runbook.md`.
 
 6. **Validation Checklist**
    - `npm run mcp:chat:validate`

@@ -21,9 +21,9 @@ flowchart TD
         end
 
         subgraph stage_cluster ["Staging Cluster"]
-            STAGE_ENTRY((staging cluster))
-            STAGE_ENTRY --> S1[supabase-staging]
-            STAGE_ENTRY --> S2[observability-staging]
+            STAGE_ENTRY((troubleshooting cluster))
+            STAGE_ENTRY --> S1[supabase-troubleshooting]
+            STAGE_ENTRY --> S2[observability-troubleshooting]
             STAGE_ENTRY --> S3[deployment-validation]
             STAGE_ENTRY --> S4[cost-optimization]
         end

@@ -28,7 +28,7 @@ This document tracks the phased migration of ProspectPro’s MCP, agent orchestr
 | dev-tools/agent-orchestration/\*               | Diagrams, JSON payloads reference deprecated participants                | **Refactor** to use `@ux`, `@platform`, `@devops`, `@secops`, `@integrations`; regenerate diagrams            |
 | dev-tools/context/_, scripts/context/_         | Context collectors output to legacy folders                              | **Refactor**: add participant flag, route snapshots to `reports/context/<tag>/` per workspace migration guide |
 | automation, docs                               | Hard-coded participant names (`api-debug`, etc.)                         | **Refactor** using shared mapping helper (new `scripts/automation/lib/participant-routing.sh`)                |
-| .github/chatmodes/_, .github/workflows/_.yml   | Prompts & watchers still point at old taxonomy                           | **Replace** prompts with Option A mapping; update workflow paths to end-state after staging proposal          |
+| .github/chatmodes/_, .github/workflows/_.yml   | Prompts & watchers still point at old taxonomy                           | **Replace** prompts with Option A mapping; update workflow paths to end-state after troubleshooting proposal          |
 | devops-agent-runbook.md, platform-playbooks.md | Narratives reference legacy personas                                     | **Refactor** copy to align with new participants & environment clusters                                       |
 | update-docs.js, coverage.md                    | No awareness of `end-state/` promotions                                  | **Refactor** script to index end-state docs and log promotions automatically                                  |
 | reports/context/history/\*                     | Round 1 assets mixed with current                                        | **Remove/Archive** redundant Round 1 outputs into round-1                                                     |
@@ -40,7 +40,7 @@ This document tracks the phased migration of ProspectPro’s MCP, agent orchestr
 1. **MCP & Registry Rewrite**
 
    - Draft v2.0 `config/mcp-config.json` and retag `dev-tools/mcp-servers/registry.json` per Option A.
-   - Stage proposals in `settings-staging.md` and validate with `npm run mcp:chat:validate`.
+   - Stage proposals in `settings-troubleshooting.md` and validate with `npm run mcp:chat:validate`.
 
 2. **Agent Orchestration & Context Scripts**
 
@@ -81,14 +81,14 @@ This document tracks the phased migration of ProspectPro’s MCP, agent orchestr
 ## Validation Pipeline
 
 - Run `npm run docs:patch:diagrams`, `npm run docs:prepare`, `npm run mcp:chat:validate` after each phase
-- Log results in `reports/context/coverage.md` and `settings-staging.md`
+- Log results in `reports/context/coverage.md` and `settings-troubleshooting.md`
 - Manual review of diagrams, context outputs, and CI status
 
 ---
 
 ## Next Steps
 
-1. Validate staged MCP config/registry via `npm run mcp:chat:validate` and record outputs in `settings-staging.md` & `reports/context/coverage.md`.
+1. Validate staged MCP config/registry via `npm run mcp:chat:validate` and record outputs in `settings-troubleshooting.md` & `reports/context/coverage.md`.
 2. Run `scripts/docs/render-diagrams.sh` to normalize end-state and v2 diagrams with the new aliases.
 3. Proceed with refactoring orchestration and context scripts.
 4. Update automation and documentation to consume the new participant routing helpers.
@@ -134,7 +134,7 @@ Key gaps remain before the Dev Tools suite is fully aligned with the live applic
 2. Extend MCP server tool registries and agent instruction sets for environment-aware auth.
 3. Add automation scripts/tests for React DevTools startup, Vercel deploy validation, and Supabase troubleshooting; regenerate docs.
 4. Refresh diagrams/playbooks to cite the new workflow, then run `npm run docs:prepare` and `npm run mcp:chat:validate`.
-5. Log changes in `docs/tooling/settings-staging.md` and `reports/context/coverage.md`, archive remaining Round 1 assets, and proceed to CI updates.
+5. Log changes in `docs/tooling/settings-troubleshooting.md` and `reports/context/coverage.md`, archive remaining Round 1 assets, and proceed to CI updates.
 
 This audit keeps the DevOps toolchain aligned with the actual application source and prepares agents for context-aware operations across all environments.
 

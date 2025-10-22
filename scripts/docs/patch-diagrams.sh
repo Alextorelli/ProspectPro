@@ -11,11 +11,11 @@ cd "$ROOT_DIR"
 
 usage() {
   cat <<EOF
-Usage: scripts/docs/patch-diagrams.sh [--source <path|research|staging>] [--target <path>]
+Usage: scripts/docs/patch-diagrams.sh [--source <path|research|troubleshooting>] [--target <path>]
 
 Options:
   --source   Process diagrams from a specific directory instead of git changes.
-             Keywords: "research" (docs/tooling/research) or "staging" (docs/tooling/staging).
+             Keywords: "research" (docs/tooling/research) or "troubleshooting" (docs/tooling/troubleshooting).
              Paths may be absolute or relative to the repository root.
   --target   Copy normalized diagrams into this directory (mirroring source structure).
              Paths may be absolute or relative to the repository root.
@@ -50,7 +50,7 @@ while [[ $# -gt 0 ]]; do
 done
 
 if git status --porcelain .vscode .github 2>/dev/null | grep -qE '^\s*[MADRCU]'; then
-  echo "[ERROR] Guarded directories (.vscode/.github) have unstaged changes. Stage proposals in docs/tooling/settings-staging.md before running diagram patches." >&2
+  echo "[ERROR] Guarded directories (.vscode/.github) have unstaged changes. Stage proposals in docs/tooling/settings-troubleshooting.md before running diagram patches." >&2
   exit 1
 fi
 
@@ -63,8 +63,8 @@ resolve_dir() {
     echo "$ROOT_DIR/docs/tooling/research"
     return 0
   fi
-  if [[ "$input" == "staging" ]]; then
-    echo "$ROOT_DIR/docs/tooling/staging"
+  if [[ "$input" == "troubleshooting" ]]; then
+    echo "$ROOT_DIR/docs/tooling/troubleshooting"
     return 0
   fi
   if [[ "$input" == "end-state" ]]; then

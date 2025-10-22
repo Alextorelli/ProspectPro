@@ -1,10 +1,10 @@
 # Chat Participant Taxonomy – Option A (Application Layers)
 
-_Source: Round 2 Integration Plan refinement (2025-10-21). Draft stored in staging pending promotion to end-state guidance._
+_Source: Round 2 Integration Plan refinement (2025-10-21). Draft stored in troubleshooting pending promotion to end-state guidance._
 
 ## Overview
 
-This staging draft consolidates chat participants into layer-focused domain experts. Each participant tag maps the existing agent modes (\`@debug\`, \`@deliver\`, \`@support\`, \`@optimize\`, \`@security\`) to the precise workspace surfaces they should emphasize during automation and guidance workflows.
+This troubleshooting draft consolidates chat participants into layer-focused domain experts. Each participant tag maps the existing agent modes (\`@debug\`, \`@deliver\`, \`@support\`, \`@optimize\`, \`@security\`) to the precise workspace surfaces they should emphasize during automation and guidance workflows.
 
 Alignment objectives:
 
@@ -24,7 +24,7 @@ Alignment objectives:
 
 ## Implementation Notes
 
-- Promotion path: `docs/tooling/staging/chat-participants-taxonomy.md` → `docs/tooling/end-state/chat-participants-taxonomy.md` once approved.
+- Promotion path: `docs/tooling/troubleshooting/chat-participants-taxonomy.md` → `docs/tooling/end-state/chat-participants-taxonomy.md` once approved.
 - Integration plan reference: see `reports/context/archive/agent-chat-integration-plan-2025-10-21.md` for Phase 5 baseline. Update the active guidance after review.
 - CI alignment: ensure `.github/workflows/mermaid-diagram-sync.yml` and related tasks reference the new end-state directory during promotion.
 

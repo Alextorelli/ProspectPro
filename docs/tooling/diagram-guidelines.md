@@ -1,6 +1,6 @@
 # Diagram Guidelines for ProspectPro
 
-> **Configuration Guard:** All changes to `.vscode/` and `.github/` must be staged and approved via `docs/tooling/settings-staging.md`. Do not edit these directories directly during refactors or automation.
+> **Configuration Guard:** All changes to `.vscode/` and `.github/` must be staged and approved via `docs/tooling/settings-troubleshooting.md`. Do not edit these directories directly during refactors or automation.
 
 ## Prompts & Snippet Reuse
 

@@ -8,7 +8,7 @@ stateDiagram-v2
         DetectContext --> LocalDev : git branch = dev/*
         DetectContext --> SharedDev : git branch = develop
         DetectContext --> Testing : git branch = test/*
-        DetectContext --> Staging : git branch = staging
+        DetectContext --> Staging : git branch = troubleshooting
         DetectContext --> Production : git branch = main
         DetectContext --> Incident : alert triggered
     }

@@ -7,7 +7,7 @@
   "properties": {
     "name": {
       "type": "string",
-      "enum": ["production", "staging", "development"]
+      "enum": ["production", "troubleshooting", "development"]
     },
     "description": {
       "type": "string"

@@ -78,7 +78,7 @@ await mcp.postgresql.execute_query({ query: seedSQL, params });
 
 **Environment Switch Guidance**:
 
-- Use ContextManager to switch between local, staging, and production.
+- Use ContextManager to switch between local, troubleshooting, and production.
 - Always export `SUPABASE_SESSION_JWT` for authenticated Edge Function and MCP tool calls.
 - Validate environment with `supabase:link` and `supabase:ensure-session` tasks.
 

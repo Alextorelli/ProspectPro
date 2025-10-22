@@ -4,9 +4,9 @@
 
 ## Safeguarding Overview (Summary)
 
-1. **Stage First** – Draft every proposed `.vscode/` and `.github/` change here (or an approved staging doc) with rationale, risk, and rollback.
+1. **Stage First** – Draft every proposed `.vscode/` and `.github/` change here (or an approved troubleshooting doc) with rationale, risk, and rollback.
 2. **Seek Approval** – Share staged entries via the active work plan for explicit sign-off before touching guarded directories.
-3. **Apply Carefully** – After approval, implement changes, log actions, and archive staging notes to `reports/context/archive/`.
+3. **Apply Carefully** – After approval, implement changes, log actions, and archive troubleshooting notes to `reports/context/archive/`.
 4. **Validate** – Run the required pipeline (`npm run docs:update`, `npm run lint`, `npm test`, plus Supabase suites when relevant) and record results in this file.
 5. **Commit & Trace** – Commit with governance-aligned messaging, update coverage/workspace reports, and maintain audit traceability.
 
@@ -31,16 +31,16 @@
 5. VS Code reference: `Ctrl+Shift+P` → “Tasks: Run Task” → `CI/CD: Validate Workspace Pipeline` after session
 6. Guard status: no `.vscode` edits permitted until plan approval
 
-> Purpose: Document guarded configuration surfaces and the staging process for any prospective changes. Do **not** edit the protected paths directly without explicit approval.
+> Purpose: Document guarded configuration surfaces and the troubleshooting process for any prospective changes. Do **not** edit the protected paths directly without explicit approval.
 
 ## Guarded Directories
 
 - `.vscode/` – Tasks, launch configs, settings, and extensions. Treat as immutable; stage edits here first.
-- `.github/` – Copilot instructions, chat modes, workflows, templates, and policies. Any updates must be reviewed in staging before touching live files.
+- `.github/` – Copilot instructions, chat modes, workflows, templates, and policies. Any updates must be reviewed in troubleshooting before touching live files.
 
 ## Staging Workflow
 
-1. Draft proposed changes in a temporary file under `docs/tooling/` (or another agreed staging location).
+1. Draft proposed changes in a temporary file under `docs/tooling/` (or another agreed troubleshooting location).
 2. Capture rationale, risk assessment, and rollback strategy in the draft.
 3. Share the draft for approval via the active work plan (`docs/tooling/TEMP_DEVOPS_AGENT_PLAN.md`) or another requested channel.
 4. Only after approval, apply the changes to the guarded directory and record the action in the relevant changelog/report.
@@ -48,8 +48,8 @@
 
 ## Notes
 
-- The staging workflow applies during refactors, repository reorganizations, or any operation that could impact workspace stability.
-- Extend this document as new guardrails or staging procedures are introduced.
+- The troubleshooting workflow applies during refactors, repository reorganizations, or any operation that could impact workspace stability.
+- Extend this document as new guardrails or troubleshooting procedures are introduced.
 - Remove temporary drafts once their corresponding changes have been approved and applied.
 
 # Staged: React DevTools Task Reference (2025-10-20)
@@ -129,7 +129,7 @@ See `docs/tooling/agent-debug-playbooks.md` for full workflow and guard policy.
 
 - Validation pipeline completed: `docs:update`, `lint`, `test`, `supabase:test:db` — all successful
 - Chatmodes and MCP integration now active in production Copilot Chat
-- Announced activation in project changelog and this staging doc
+- Announced activation in project changelog and this troubleshooting doc
 
 ### Post-Activation Monitoring
 
@@ -167,7 +167,7 @@ See `docs/tooling/agent-debug-playbooks.md` for full workflow and guard policy.
 
 - `.github/workflows/mermaid-diagram-sync.yml` now includes a `docs-taxonomy-guard` job running `docs:stage:taxonomy`, `docs:patch:diagrams`, and `docs:prepare` prior to diagram rendering.
 - `package.json` exposes a new script `docs:stage:taxonomy` invoking `scripts/docs/stage-taxonomy.sh`.
-- Local rehearsal checklist: `npm run docs:stage:taxonomy`, `npm run docs:patch:diagrams -- --source research --target docs/tooling/staging`, `npm run docs:prepare`, `npm run mcp:chat:validate`.
+- Local rehearsal checklist: `npm run docs:stage:taxonomy`, `npm run docs:patch:diagrams -- --source research --target docs/tooling/troubleshooting`, `npm run docs:prepare`, `npm run mcp:chat:validate`.
 - Rollback: revert workflow file and remove the script entry from `package.json` if the guard creates regressions.
 
 ### Applied: Chatmode Persona Migration (2025-10-21)
@@ -192,7 +192,7 @@ After any approved change to chatmodes, automation, or documentation:
 
 ## Next Steps (Chatmode Migration)
 
-- [x] Document findings and audit results in settings-staging.md for governance
+- [x] Document findings and audit results in settings-troubleshooting.md for governance
 - [x] Stage any automation or documentation updates before modifying .github or .vscode
 - [ ] Run full validation pipeline after any changes
 
@@ -251,7 +251,7 @@ Rollback: `git restore .` or revert individual files if needed
 
 - After approval, run update-paths.sh, apply queued .vscode/.github changes, rerun validation pipeline
 - Confirm: `rg -n "app/backend/functions"` returns zero hits outside historical notes
-- Log `git status` and `git diff --stat` in staging
+- Log `git status` and `git diff --stat` in troubleshooting
 - Draft proposed directory moves and update plans here for review.
 - Stage all config and automation changes in this file before touching guarded directories.
 
@@ -287,7 +287,7 @@ Rollback: `git restore .` or revert individual files if needed
 
 ## 6. Documentation Updates & Cleanup
 
-- Update REPO_RESTRUCTURE_PLAN.md, FAST_README.md, platform-playbooks.md, settings-staging.md with new paths, results, rollback notes
+- Update REPO_RESTRUCTURE_PLAN.md, FAST_README.md, platform-playbooks.md, settings-troubleshooting.md with new paths, results, rollback notes
 - Archive migration scripts to tooling/archive/ or delete after cutover
 
 ## Next Step
@@ -416,7 +416,7 @@ Rollback: `git restore .` or revert individual files if needed
 
 ## Governance Review
 
-- All changes staged in settings-staging.md and approved via active work plan
+- All changes staged in settings-troubleshooting.md and approved via active work plan
 - Validation pipeline run: docs:prepare, docs:update, lint, test, supabase:test:db (all passed)
 - No regressions or legacy artifacts found in context, automation, or documentation
 - Archive created for audit logs and migration plans

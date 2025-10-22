@@ -136,7 +136,7 @@ Always audit enrichment results for zero-fake-data compliance using MCP tools. U
 
 **Environment Switch Guidance**:
 
-- Use ContextManager to switch between local, staging, and production.
+- Use ContextManager to switch between local, troubleshooting, and production.
 - Always export `SUPABASE_SESSION_JWT` for authenticated MCP tool calls.
 - Validate environment with `supabase:link` and `supabase:ensure-session` tasks.
 

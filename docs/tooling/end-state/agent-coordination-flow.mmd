@@ -20,7 +20,7 @@ sequenceDiagram
         AGENT->>MCP: Use development MCP cluster
         MCP-->>AGENT: Local debugging tools
     else Staging Environment
-        AGENT->>MCP: Use staging MCP cluster
+        AGENT->>MCP: Use troubleshooting MCP cluster
         MCP-->>AGENT: Performance optimization tools
     else Production Environment
         AGENT->>MCP: Use production MCP cluster

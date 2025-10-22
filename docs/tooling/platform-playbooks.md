@@ -1,6 +1,6 @@
 # Platform Playbooks – Supabase, Vercel, MCP
 
-> **Configuration Guard:** Do not edit `.vscode/` or `.github/` directly. Stage all automation/config proposals in `docs/tooling/settings-staging.md`.
+> **Configuration Guard:** Do not edit `.vscode/` or `.github/` directly. Stage all automation/config proposals in `docs/tooling/settings-troubleshooting.md`.
 
 ---
 
@@ -23,7 +23,7 @@
 
 ### Guard Note
 
-- No .vscode edits; stage new tasks/scripts in `settings-staging.md`.
+- No .vscode edits; stage new tasks/scripts in `settings-troubleshooting.md`.
 
 ---
 
@@ -43,7 +43,7 @@
 
 ### Guard Note
 
-- No .vscode edits; stage new tasks/scripts in `settings-staging.md`.
+- No .vscode edits; stage new tasks/scripts in `settings-troubleshooting.md`.
 
 ---
 
@@ -58,7 +58,7 @@
 | Observability         | `.github/chatmodes/Observability.chatmode.md`        | OTEL spans, diagnostics, zero-fake-data monitoring   |
 | Development Workflow  | `.github/chatmodes/Development Workflow.chatmode.md` | Feature delivery, testing pipelines, MCP automation  |
 
-Use `npm run mcp:chat:sync` and `npm run mcp:chat:validate` after modifying any persona or prompt. Log changes in `docs/tooling/settings-staging.md` and archive outputs under `reports/context/archive/`.
+Use `npm run mcp:chat:sync` and `npm run mcp:chat:validate` after modifying any persona or prompt. Log changes in `docs/tooling/settings-troubleshooting.md` and archive outputs under `reports/context/archive/`.
 
 ### MCP Server Types
 
@@ -89,7 +89,7 @@ Use `npm run mcp:chat:sync` and `npm run mcp:chat:validate` after modifying any 
 
 ### Guard Note
 
-- No .vscode edits; stage new tasks/scripts in `settings-staging.md`.
+- No .vscode edits; stage new tasks/scripts in `settings-troubleshooting.md`.
 
 ---
 

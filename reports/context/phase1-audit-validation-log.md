@@ -24,7 +24,7 @@
 
 - Proceed to Phase 2: Configuration & Guardrails (ignore files, environment/auth configs, workspace settings, Copilot instructions).
 - Review ZeroFakeData compliance in diagrams and update as needed.
-- Stage any config changes in `docs/tooling/settings-staging.md` before promotion.
+- Stage any config changes in `docs/tooling/settings-troubleshooting.md` before promotion.
 
 ---
 

@@ -14,7 +14,7 @@ context/
 │   └── task-ledger.schema.json
 └── store/
     ├── agents/               # Per-agent working state (scratchpad + memories)
-    ├── environments/         # Environment snapshots (prod, staging, dev)
+    ├── environments/         # Environment snapshots (prod, troubleshooting, dev)
     ├── ledgers/              # Task and incident ledgers
     └── shared/               # Shared knowledge (schemas, cost thresholds, rate limits)
 ```
@@ -26,7 +26,7 @@ context/
 | **Write**    | All agent state is persisted to JSON files inside `store/`. Scratchpads capture current work; long-term memories include Supabase config, cost thresholds, and external API limits. Every write goes through `ContextManager.checkpoint()` so state survives Codespace restarts. |
 | **Select**   | `ContextManager.select()` accepts filters (agent id, task id, time range, keywords) and returns the smallest relevant slice. Memories are tagged with `topic`, `environment`, and `recency` metadata to enable retrieval without loading the full file.                          |
 | **Compress** | When memories grow beyond configured thresholds, `ContextManager.compress()` produces lightweight summaries that keep the last N detailed entries plus a synthetic synopsis. Summaries carry provenance metadata (`derivedFrom`) so original items can be restored if needed.    |
-| **Isolate**  | Each agent gets an isolated namespace under `store/agents/<agentId>/`. Environment-specific overlays (production, staging, development) are applied at runtime and permissions are enforced through `EnvironmentContextManager`.                                                 |
+| **Isolate**  | Each agent gets an isolated namespace under `store/agents/<agentId>/`. Environment-specific overlays (production, troubleshooting, development) are applied at runtime and permissions are enforced through `EnvironmentContextManager`.                                                 |
 
 ## Environment Contexts
 
@@ -69,14 +69,14 @@ await context.updateScratchpad({
   agentId: "development-workflow",
   data: {
     currentTask: "implement-campaign-export",
-    notes: ["MCP validation suite passes in staging"],
+    notes: ["MCP validation suite passes in troubleshooting"],
   },
 });
 
-// 2. Retrieve only staging-related memories with recent activity
+// 2. Retrieve only troubleshooting-related memories with recent activity
 const memories = await context.select({
   agentId: "development-workflow",
-  filters: { environment: "staging", sinceMinutes: 120 },
+  filters: { environment: "troubleshooting", sinceMinutes: 120 },
 });
 
 // 3. Switch environment with a recorded reason

@@ -30,7 +30,7 @@ function getMCPServerForParticipant(tag) {
   return mapping[tag] || "development";
 }
 
-type EnvironmentName = "production" | "staging" | "development";
+type EnvironmentName = "production" | "troubleshooting" | "development";
 
 export interface ScratchpadNote {
   timestamp: string;

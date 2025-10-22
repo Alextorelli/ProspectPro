@@ -331,7 +331,7 @@ class ProductionMCPAdapter implements MCPClientAdapter {
 
 ## Guardrails & Safeguards
 
-- **No Direct .vscode/.github Edits:** All configuration proposals staged in `docs/tooling/settings-staging.md`
+- **No Direct .vscode/.github Edits:** All configuration proposals staged in `docs/tooling/settings-troubleshooting.md`
 - **Dependency Inversion:** All components injectable for testing; no hardcoded VS Code APIs
 - **Error Handling:** Structured warnings and actionable errors; no silent failures
 - **Telemetry Integration:** Lightweight hooks for observability without coupling to specific sinks

@@ -1,6 +1,6 @@
 # FAST_README
 
-> **Configuration Guard:** Stage all workspace configuration edits in `docs/tooling/settings-staging.md`; `.vscode/` and `.github/` stay locked until the guard is explicitly lifted.
+> **Configuration Guard:** Stage all workspace configuration edits in `docs/tooling/settings-troubleshooting.md`; `.vscode/` and `.github/` stay locked until the guard is explicitly lifted.
 
 ---
 
@@ -11,7 +11,7 @@
   - Vercel: build, deploy, validation, troubleshooting
   - MCP: diagnostics, troubleshooting, reports
 
-> **Phase 2:** Platform playbooks expanded. All automation/config proposals must be staged in `docs/tooling/settings-staging.md` per configuration guard.
+> **Phase 2:** Platform playbooks expanded. All automation/config proposals must be staged in `docs/tooling/settings-troubleshooting.md` per configuration guard.
 
 ---
 
@@ -32,7 +32,7 @@
 - Lint and tests passed (`npm run lint`, `npm test`)
 - Supabase DB tests: no DB tests found, no errors
 - Automation scripts usage confirmed (require arguments; guardrails enforced)
-- No direct edits to guarded config files; all proposals staged in `settings-staging.md`
+- No direct edits to guarded config files; all proposals staged in `settings-troubleshooting.md`
 - All progress checkpoints and changelog notes up to date
 
 **All phases complete. Guardrails enforced.**

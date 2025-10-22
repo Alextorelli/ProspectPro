@@ -31,12 +31,12 @@ This guidance defines how to adapt workspace context management (VS Code tasks, 
 ### 2. VS Code Task Adjustments
 
 - Stage updates to `.vscode/tasks.json` that reference participants, mapping them to Option A tags.
-- Use `docs/tooling/settings-staging.md` to log proposed task changes before editing guarded files.
+- Use `docs/tooling/settings-troubleshooting.md` to log proposed task changes before editing guarded files.
 - Regenerate `.vscode/TASKS_REFERENCE.md` via `npm run docs:update` after approval.
 
 ### 3. Coverage & Reporting
 
-- Extend `dev-tools/scripts/node/update-docs.js` to detect artifacts under `docs/tooling/end-state/` (in addition to staging).
+- Extend `dev-tools/scripts/node/update-docs.js` to detect artifacts under `docs/tooling/end-state/` (in addition to troubleshooting).
 - Append a note in `reports/context/coverage.md` when end-state documents are promoted.
 - Archive the `Round 1` context structures under `docs/tooling/history/round-1/` as they are superseded.
 
@@ -61,5 +61,5 @@ This guidance defines how to adapt workspace context management (VS Code tasks, 
 ## Next Steps
 
 1. Draft script updates with feature flags for participant-aware context capture.
-2. Prepare VS Code task proposals and obtain approvals via `settings-staging.md`.
+2. Prepare VS Code task proposals and obtain approvals via `settings-troubleshooting.md`.
 3. Coordinate with the upcoming task/workflow migration plan (see forthcoming strategy document).

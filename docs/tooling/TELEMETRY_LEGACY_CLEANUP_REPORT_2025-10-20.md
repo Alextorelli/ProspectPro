@@ -64,7 +64,7 @@ All Thunder/Jaeger references have been removed from the codebase. Observability
 1. **Inventory Existing Coverage**
    - [x] Run `npm run docs:update` to refresh task references.
    - [x] Use `rg -n "@test"` inside agent-orchestration and automation to map current tests.
-   - [x] Log gaps in settings-staging.md under “Agents & Dev Tools Test Plan”.
+   - [x] Log gaps in settings-troubleshooting.md under “Agents & Dev Tools Test Plan”.
 2. **Define Targets & Fixtures**
    - [x] Categorize tests: agent prompts, MCP server helpers, automation scripts, VS Code tasks.
    - [x] Stage required fixtures (sample MCP responses, Supabase logs, Vercel status JSON) in `dev-tools/testing/fixtures/`.
@@ -75,11 +75,11 @@ All Thunder/Jaeger references have been removed from the codebase. Observability
    - [x] Stage environment loader updates (no direct .vscode edits).
 4. **Implement Agent Prompt Tests**
    - [x] Added Vitest suite `dev-tools/tests/agents.spec.ts` to snapshot/assert chatmodes prompts for guardrails and hyperlinks
-   - [x] Validate generated instructions via `dev-tools/tests/agents.spec.ts` (test run and output logged in settings-staging.md)
+   - [x] Validate generated instructions via `dev-tools/tests/agents.spec.ts` (test run and output logged in settings-troubleshooting.md)
    - Next: Implement MCP tool tests
 5. **Automate MCP Tool Tests**
    - [x] Added Vitest suite `dev-tools/tests/mcp.spec.ts` to mock MCP CLI output and verify diagnostics artifacts
-   - [x] Capture outputs and compare with fixtures (deep equality assertion, test run logged in settings-staging.md)
+   - [x] Capture outputs and compare with fixtures (deep equality assertion, test run logged in settings-troubleshooting.md)
    - Next: Automation script validation
 6. **Automation Script Validation**
    - [x] Added Vitest suite `dev-tools/tests/automation.spec.ts` to:
@@ -88,14 +88,14 @@ All Thunder/Jaeger references have been removed from the codebase. Observability
    - Next: CI integration and test pipeline
 7. **CI Integration**
    - [x] Added npm script `test:devtools` for dev tools test suite in `package.json`
-   - [x] Staged VS Code task proposal for `test:devtools` in settings-staging.md (pending approval before `.vscode/tasks.json` update)
+   - [x] Staged VS Code task proposal for `test:devtools` in settings-troubleshooting.md (pending approval before `.vscode/tasks.json` update)
    - Next: Telemetry & coverage aggregation
 8. **Telemetry & Coverage**
    - [x] Aggregate results into coverage.md via updated Phase 02 task. (See `reports/context/coverage.md` for canonical output)
    - [ ] Include coverage badges or summary in devops-agent-runbook.md. (Open: add summary/badges after coverage aggregation)
 9. **Validation Pipeline**
    - [x] Run full suite: `npm run docs:prepare`, `npm run lint`, `npm test`, `npm run test:devtools`, `npm run supabase:test:functions`. (Last command output: 1 passed, 1 failed — see below)
-   - [x] Log outputs and diffs in `settings-staging.md` before merge. (Partial: see settings-staging.md for logs)
+   - [x] Log outputs and diffs in `settings-troubleshooting.md` before merge. (Partial: see settings-troubleshooting.md for logs)
 
 ---
 

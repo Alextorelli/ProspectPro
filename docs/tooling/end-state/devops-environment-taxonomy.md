@@ -105,7 +105,7 @@ flowchart TD
 
 ### Layer-Aligned Participant Mapping (Option A)
 
-Source of record: `docs/tooling/staging/chat-participants-taxonomy.md` (promote to `docs/tooling/end-state/` after approval).
+Source of record: `docs/tooling/troubleshooting/chat-participants-taxonomy.md` (promote to `docs/tooling/end-state/` after approval).
 
 | Participant Tag            | Layers Covered                                                 | Key Activities                                                                    | Agent Pairings                    | MCP / Automation Hooks                                                           |
 | -------------------------- | -------------------------------------------------------------- | --------------------------------------------------------------------------------- | --------------------------------- | -------------------------------------------------------------------------------- |
@@ -166,7 +166,7 @@ stateDiagram-v2
     DetectContext --> LocalDev : git branch = dev/*
     DetectContext --> SharedDev : git branch = develop
     DetectContext --> Testing : git branch = test/*
-    DetectContext --> Staging : git branch = staging
+    DetectContext --> Staging : git branch = troubleshooting
     DetectContext --> Production : git branch = main
     DetectContext --> Incident : alert triggered
     }
@@ -233,8 +233,8 @@ flowchart TD
             T4[test-data-management]
         end
         subgraph stage_cluster ["Staging Cluster"]
-            S1[supabase-staging]
-            S2[observability-staging]
+            S1[supabase-troubleshooting]
+            S2[observability-troubleshooting]
             S3[deployment-validation]
             S4[cost-optimization]
         end
@@ -278,7 +278,7 @@ sequenceDiagram
         AGENT->>MCP: Use development MCP cluster
         MCP-->>AGENT: Local debugging tools
     else Staging Environment
-        AGENT->>MCP: Use staging MCP cluster
+        AGENT->>MCP: Use troubleshooting MCP cluster
         MCP-->>AGENT: Performance optimization tools
     else Production Environment
         AGENT->>MCP: Use production MCP cluster
@@ -305,7 +305,7 @@ sequenceDiagram
 
 ## Reference Index
 
-1. https://www.statsig.com/perspectives/dev-vs-staging-vs-prod
+1. https://www.statsig.com/perspectives/dev-vs-troubleshooting-vs-prod
 2. https://docs.aws.amazon.com/prescriptive-guidance/latest/choosing-git-branch-approach/understanding-the-devops-environments.html
 3. https://octopus.com/devops/gitops/gitops-environments/
 4. https://www.datadoghq.com/blog/gitops-principles-and-components/

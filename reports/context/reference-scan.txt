@@ -50,9 +50,9 @@ dev-tools/scripts/roadmap/start-epic.sh:44:FUNCTION_DIR="${REPO_ROOT}/app/backen
 docs/tooling/mcp-routing-overview.mmd:31:    SUPABASE_LOGS["Supabase Logs\n(app/backend/functions/)"]:::telemetry
 docs/tooling/context-orchestration.mmd:11:    participant FN as Edge Function\n(app/backend/functions/context-orchestration)
 dev-tools/scripts/testing/run-edge-tests-force.sh:25:deno test --allow-all app/backend/functions/tests/
-docs/tooling/settings-staging.md:77:- Begin phased relocation of `/app/frontend`, `/app/backend/functions`, and supporting tooling into the target `/app` and `/tooling` hierarchy as described in `docs/app/REPO_RESTRUCTURE_PLAN.md`.
-docs/tooling/settings-staging.md:156:- Reviewed automation scripts in scripts/automation/ for hardcoded directories. All outputs are written to `reports/diagnostics/` or `reports/deployments/` and do not reference frontend or app/backend/functions directly.
-docs/tooling/settings-staging.md:166:  - Source: `app/backend/functions/` → Destination: `app/backend/functions/` (proposed)
+docs/tooling/settings-troubleshooting.md:77:- Begin phased relocation of `/app/frontend`, `/app/backend/functions`, and supporting tooling into the target `/app` and `/tooling` hierarchy as described in `docs/app/REPO_RESTRUCTURE_PLAN.md`.
+docs/tooling/settings-troubleshooting.md:156:- Reviewed automation scripts in scripts/automation/ for hardcoded directories. All outputs are written to `reports/diagnostics/` or `reports/deployments/` and do not reference frontend or app/backend/functions directly.
+docs/tooling/settings-troubleshooting.md:166:  - Source: `app/backend/functions/` → Destination: `app/backend/functions/` (proposed)
 docs/tooling/mcp-routing-sequence.mmd:16:    participant SUPABASE as Supabase Logs\n(app/backend/functions/)
 dev-tools/scripts/diagnostics/validate-supabase-architecture.sh:43:FUNCTIONS_DIR="app/backend/functions"
 docs/technical/SYSTEM_REFERENCE.md:19:/app/backend/functions/business-discovery-background/                    # PRIMARY: Tier-aware async discovery
@@ -220,7 +220,7 @@ docs/app/CODEBASE_INDEX.md:48:- [app/backend/functions/_shared/edge-auth-simplif
 docs/app/CODEBASE_INDEX.md:49:- [app/backend/functions/_shared/edge-auth.ts](app/backend/functions/_shared/edge-auth.ts) — Shared Supabase session validator for edge functions
 docs/app/CODEBASE_INDEX.md:50:- [app/backend/functions/_shared/vault-client.ts](app/backend/functions/_shared/vault-client.ts) — Supabase Edge Function module
 docs/app/REPO_RESTRUCTURE_PLAN.md:37:2. Move src, public, app/backend/functions into /app (phased)
-docs/app/REPO_RESTRUCTURE_PLAN.md:60:2. Plan phased relocation of `/app/frontend`, `/app/backend/functions`, and supporting tooling into the target `/app` and `/tooling` hierarchy (capture blockers in `settings-staging.md`).
+docs/app/REPO_RESTRUCTURE_PLAN.md:60:2. Plan phased relocation of `/app/frontend`, `/app/backend/functions`, and supporting tooling into the target `/app` and `/tooling` hierarchy (capture blockers in `settings-troubleshooting.md`).
 dev-tools/scripts/shell/validate-ignore-config.cjs:42:  "app/backend/functions",
 dev-tools/scripts/shell/validate-ignore-config.cjs:89:  "app/backend/functions/business-discovery-user-aware/index.ts.backup",
 dev-tools/scripts/shell/validate-supabase-architecture.sh:43:FUNCTIONS_DIR="app/backend/functions"
