@@ -1,28 +1,30 @@
-% config: theme: dark
-%%{init: {'theme': 'dark', 'layout': 'dagre'}}%%
-erDiagram
-    MCP_SERVER ||--o{ ENVIRONMENT : serves
-    ENVIRONMENT {
-        string name PK
-        string type
+%%{init: {'theme': 'dark'}}%%
+
+C4Context
+    title MCP Server Suite Context (v2)
+
+    Person(user, "User", "Initiates workspace and selects environment")
+
+    System_Boundary(mcp, "Primary MCP Servers") {
+        System(dev_mcp, "Development MCP", "Dev tools, integration helpers")
+        System(prod_mcp, "Production MCP", "Prod tools, integrations, observability")
+        System(trouble_mcp, "Troubleshooting MCP", "Diagnostics, observability")
     }
-    MCP_SERVER {
-        string name PK
-        string[] tools
-        string env
+
+    System_Boundary(secondary, "Secondary MCPs") {
+        Container(supabase_db, "Supabase DB", "Database, introspection")
+        Container(obs_db, "Observability DB", "Tracing, monitoring")
+        Container(integration_db, "Integration Hub DB", "Webhooks, payments")
     }
-    ENVIRONMENT ||--o{ PARTICIPANT : includes
-    PARTICIPANT {
-        string tag PK
-        string displayName
+
+    System_Boundary(participants, "Participants") {
+        Person(ux, "UX", "Frontend audits")
+        Person(platform, "Platform", "API, DB, enrichment")
+        Person(devops, "DevOps", "CI/CD, infra")
+        Person(secops, "SecOps", "Security, compliance")
+        Person(integrations, "Integrations", "External APIs")
     }
-    ENVIRONMENT {
-        string name PK
-        string type
-    }
-    ENVIRONMENT ||--o{ FUNCTION : runs
-    FUNCTION {
-        string name PK
-        string command
-        string description
-    }
+
+    Rel(user, mcp, "Selects environment")
+    Rel(mcp, secondary, "Activates secondary MCPs")
+    Rel(mcp, participants, "Routes tasks to participants")

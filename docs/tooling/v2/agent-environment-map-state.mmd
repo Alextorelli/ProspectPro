@@ -1,26 +1,18 @@
-% config: theme: dark
 %%{init: {'theme': 'dark'}}%%
-stateDiagram-v2
-    [*] --> EnvironmentSelection
-    state EnvironmentSelection {
-        [*] --> PromptUser
-        PromptUser --> Production : selected = production
-        PromptUser --> Development : selected = development
-        PromptUser --> Troubleshooting : selected = troubleshooting
-    }
-    state Production {
-        [*] --> ActivateProdMCP
-        ActivateProdMCP --> Supabase
-        ActivateProdMCP --> IntegrationHub
-        ActivateProdMCP --> Observability
-    }
-    state Development {
-        [*] --> ActivateDevMCP
-        ActivateDevMCP --> Supabase
-        ActivateDevMCP --> IntegrationHub
-    }
-    state Troubleshooting {
-        [*] --> ActivateTroubleMCP
-        ActivateTroubleMCP --> Supabase
-        ActivateTroubleMCP --> Observability
-    }
+sequenceDiagram
+    participant DEV_MCP as Development MCP
+    participant TROUBLE_MCP as Troubleshooting MCP
+    participant PROD_MCP as Production MCP
+    participant Supabase
+    participant IntegrationHub
+    participant Observability
+
+    DEV_MCP->>Supabase: Uses Supabase tools
+    DEV_MCP->>IntegrationHub: Uses IntegrationHub tools
+
+    TROUBLE_MCP->>Supabase: Uses Supabase tools
+    TROUBLE_MCP->>Observability: Uses Observability tools
+
+    PROD_MCP->>Supabase: Uses Supabase tools
+    PROD_MCP->>IntegrationHub: Uses IntegrationHub tools
+    PROD_MCP->>Observability: Uses Observability tools

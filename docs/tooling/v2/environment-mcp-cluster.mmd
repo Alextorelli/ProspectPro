@@ -1,15 +1,24 @@
-% config: theme: dark
 %%{init: {'theme': 'dark'}}%%
-flowchart TD
-    subgraph MCP_Clusters
-        PROD["Production MCP"]
-        DEV["Development MCP"]
-        TROUBLE["Troubleshooting MCP"]
-    end
-    PROD --> Supabase
-    PROD --> IntegrationHub
-    PROD --> Observability
-    DEV --> Supabase
-    DEV --> IntegrationHub
-    TROUBLE --> Supabase
-    TROUBLE --> Observability
+stateDiagram-v2
+    [*] --> PrimaryMCP
+    state PrimaryMCP {
+        DEV_MCP : Development MCP
+        PROD_MCP : Production MCP
+        TROUBLE_MCP : Troubleshooting MCP
+    }
+    DEV_MCP --> SecondaryMCP_Dev
+    PROD_MCP --> SecondaryMCP_Prod
+    TROUBLE_MCP --> SecondaryMCP_Trouble
+    state SecondaryMCP_Dev {
+        SupabaseDB : Supabase (DB)
+        IntegrationHubDB : Integration Hub (DB)
+    }
+    state SecondaryMCP_Prod {
+        SupabaseDB : Supabase (DB)
+        IntegrationHubDB : Integration Hub (DB)
+        ObservabilityDB : Observability (DB)
+    }
+    state SecondaryMCP_Trouble {
+        SupabaseDB : Supabase (DB)
+        ObservabilityDB : Observability (DB)
+    }

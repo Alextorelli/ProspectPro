@@ -114,45 +114,11 @@ fi
 
 normalize_config() {
   local file_path="$1"
-  if grep -q '^%% config:' "$file_path"; then
-    return 0
-  fi
+  # Always ensure first line is '%%{init: {'theme': 'dark'}}%%'
   local temp_file
   temp_file="$(mktemp)"
-
-  if grep -q '^---$' "$file_path"; then
-    awk '
-      BEGIN {in_frontmatter=0; inserted=0}
-      /^---$/ {
-        print;
-        if (in_frontmatter == 0) {
-          in_frontmatter=1;
-        } else if (in_frontmatter == 1 && inserted == 0) {
-          print "%% config: theme: dark";
-          inserted=1;
-        }
-        next;
-      }
-      {
-        if (in_frontmatter == 1 && inserted == 0 && $0 !~ /^---$/) {
-          # still inside frontmatter
-        }
-        print;
-      }
-      END {
-        if (inserted == 0) {
-          # Fallback if closing delimiter missing or config absent
-          print "%% config: theme: dark";
-        }
-      }
-    ' "$file_path" > "$temp_file"
-    mv "$temp_file" "$file_path"
-  else
-    if ! grep -q '^%% config:' "$file_path"; then
-      printf '%% config: theme: dark\n' | cat - "$file_path" > "$temp_file"
-      mv "$temp_file" "$file_path"
-    fi
-  fi
+  awk 'NR==1 {print "%%{init: {\'theme\': \'dark\'}}%%"} NR>1 {print}' "$file_path" > "$temp_file"
+  mv "$temp_file" "$file_path"
 }
 
 for rel_path in "${diagram_list[@]}"; do
