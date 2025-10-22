@@ -100,7 +100,6 @@ const SKIP_FILES = new Set([
   "scripts/testing/test-background-tasks.sh",
   "scripts/testing/test-discovery-pipeline.sh",
   "scripts/testing/test-enrichment-chain.sh",
-  "scripts/testing/test-env.local.sh",
   "scripts/testing/test-export-flow.sh",
   "scripts/testing/test-pdl-state-licensing.sh",
   // TEMPORARY: ESLint parser compatibility issues (TypeScript 5.9.3)
