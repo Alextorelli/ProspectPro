@@ -1,0 +1,31 @@
+architecture-beta
+    group user_interaction(mdi:account)[User_Interaction]
+        service client(mdi:desktop-tower-monitor)[Client_via_Stdio] in user_interaction
+    end
+
+    group integration_hub(mdi:server-network)[Integration_Hub_Server]
+        service hub_server(logos:nodejs-icon)[Hub_Server] in integration_hub
+        service tools(mdi:api)[Tools] in integration_hub
+        service circuit_breaker(mdi:shield-check)[Circuit_Breaker] in integration_hub
+        service workflows(mdi:lan)[Workflows] in integration_hub
+    end
+
+    group external_services(mdi:cloud)[External_Services]
+        service supabase_db(logos:postgresql)[Supabase_Database] in external_services
+        service supabase_functions(logos:google-cloud-functions)[Supabase_Functions] in external_services
+        service third_party_webhooks(mdi:web)[3rd_Party_Webhooks] in external_services
+    end
+
+    client:R --> L:hub_server
+    hub_server:T --> B:tools
+    hub_server:B --> T:circuit_breaker
+    hub_server:B --> T:workflows
+
+    tools:R --> L:supabase_db "Stores webhook configs & notifications"
+    tools:R --> L:third_party_webhooks "Validates signatures"
+
+    workflows:R --> L:supabase_functions "Calls enrichment, discovery, etc."
+    workflows:R --> L:supabase_db "Queries/updates leads & campaigns"
+
+    circuit_breaker:R --> L:supabase_db "Monitors health"
+    circuit_breaker:R --> L:supabase_functions "Monitors health"
