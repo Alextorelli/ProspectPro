@@ -2,12 +2,19 @@
 
 ## Overview
 
-This plan tracks the migration to the consolidated MCP server matrix (production, development, troubleshooting) and config-driven environment selection.
+This plan documents the migration to a v2 folder structure, consolidating MCP servers into three environments—production, development, troubleshooting—with shared observability tooling. Environment selection is now config/prompt-driven (see `environment-loader.v2.js`).
 
-## Key Steps
+## Progress & Revised Approach
 
-- Created v2 config scaffolds: `environment-loader.v2.js`, `environment.v2.json`, `mcp-config.v2.json`
-- Updated ER/state diagrams: `dev-tool-suite-ER.mmd`, `agent-environment-map-state.mmd`, `environment-mcp-cluster.mmd` (v2)
-- All diagrams and configs moved to `docs/tooling/v2/` for clarity
-- Next: Refactor MCP server scripts and registry to match v2 matrix
-- Next: Update coverage and validate with `npm run docs:prepare` and tests
+- Created `docs/tooling/v2/` and `dev-tools/mcp-servers/v2` for all v2 diagrams, configs, and migration plans
+- Scaffolded: `environment-loader.v2.js`, `environment.v2.json`, `mcp-config.v2.json` (config/prompt-driven environment selection)
+- Updated ER/state diagrams: `dev-tool-suite-ER.mmd`, `agent-environment-map-state.mmd`, `environment-mcp-cluster.mmd` (all v2)
+- Approach: Three-mode MCP matrix (production, development, troubleshooting), with observability and integration helpers consolidated per environment
+- Postgres tooling will be folded into Supabase; integration helpers move to dev; observability merges into troubleshooting
+- All legacy branch-based routing replaced by config/prompt selection
+
+## Next Steps
+
+1. Refactor MCP server scripts and registry to match the v2 matrix
+2. Update coverage and validate with `npm run docs:prepare` and tests
+3. Promote v2 diagrams and configs after validation
