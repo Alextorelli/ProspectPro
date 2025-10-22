@@ -1,0 +1,38 @@
+---
+id: system-reference
+intent: System Reference (architecture-beta + ERD, zero-fake-data constraints)
+context: |
+  Combined architecture-beta and entityRelationshipDiagram for Supabase schema. Highlights zero-fake-data constraints for campaigns, leads, dashboard_exports.
+---
+architecture-beta
+  group supabase(cloud)[Supabase]
+  service db(database)[Database] in supabase
+  service edgefn(server)[Edge Functions] in supabase
+  db:R -- L:edgefn
+
+%% Entity Relationship Diagram for Supabase schema
+entityRelationshipDiagram
+  campaigns ||--o{ leads : contains
+  campaigns ||--o{ dashboard_exports : exports
+  leads }o--|| dashboard_exports : exported_by
+  campaigns {
+    string id
+    string business_type
+    string location
+    int target_count
+    decimal budget_limit
+    int min_confidence_score
+    ...
+  }
+  leads {
+    int id
+    string campaign_id
+    string business_name
+    ...
+    string email // zero-fake-data constraint
+  }
+  dashboard_exports {
+    int id
+    string campaign_id
+    ...
+  }

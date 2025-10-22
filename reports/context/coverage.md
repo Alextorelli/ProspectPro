@@ -62,3 +62,4 @@ ProspectPro/
 - CI workflow staged to enforce diagram normalization and taxonomy compliance (`.github/workflows/mermaid-diagram-sync.yml`).
 - Provenance: After each run, log diagram counts, compliance failures, and last script SHA here.
 - Next: Proceed with directory migrations and update automation as tooling is validated.
+Moved shared config, guidelines, and standards to docs/shared/mermaid/config/, docs/shared/mermaid/guidelines/, and docs/shared/standards/.

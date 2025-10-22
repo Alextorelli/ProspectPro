@@ -1,0 +1,30 @@
+---
+id: tooling-file-tree
+intent: Tooling File Tree (modular, agentic, with stable node IDs)
+context: |
+  This diagram visualizes the file tree for the tooling directory in the ProspectPro system. Each node uses a stable, descriptive ID and is linked to the relevant script or function path. Modular and ready for agentic automation.
+---
+flowchart TD
+    ROOT["tooling/\n(root)"]:::dir
+    AGENTS["agent-orchestration/"]:::dir
+    CONTEXT["context/"]:::dir
+    MCP["mcp-servers/"]:::dir
+    MONITORING["monitoring/"]:::dir
+    SCRIPTS["scripts/"]:::dir
+    
+    ROOT --> AGENTS
+    ROOT --> CONTEXT
+    ROOT --> MCP
+    ROOT --> MONITORING
+    ROOT --> SCRIPTS
+    
+    classDef dir fill:#64748b,color:#fff;
+    class ROOT,AGENTS,CONTEXT,MCP,MONITORING,SCRIPTS dir;
+    
+    %% Legend
+    subgraph Legend["Legend"]
+        direction LR
+        L1["Directory"]
+        style Legend fill:#fff,stroke:#888,stroke-width:1px
+        style L1 fill:#64748b,color:#fff
+    end

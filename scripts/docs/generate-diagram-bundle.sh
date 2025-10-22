@@ -4,15 +4,18 @@ set -euo pipefail
 # Phase 5: Differential diagram patching and config normalization
 # Usage: scripts/docs/generate-diagram-bundle.sh [--init-config] [--svg]
 
-CONFIG="docs/tooling/mermaid.config.json"
+CONFIG="docs/shared/mermaid/config/mermaid.config.json"
 DIAGRAM_DIRS=("docs/app/diagrams" "docs/dev-tools/diagrams" "docs/integration/diagrams" "docs/shared/mermaid/templates")
 
 function inject_config {
   local file="$1"
   if ! grep -q "%%{init:" "$file"; then
-    cat "$CONFIG" | jq -r '.init' > ".tmp_init"
-    sed -i "1s/^/%%{init: $(cat .tmp_init)}%%\n/" "$file"
-    rm .tmp_init
+    # Build Mermaid init block from config JSON
+    local theme=$(jq -r '.theme' "$CONFIG")
+    local themeVars=$(jq -c '.themeVariables' "$CONFIG")
+    local logLevel=$(jq -r '.init.logLevel' "$CONFIG")
+    local initBlock="%%{init: { 'theme': '$theme', 'themeVariables': $themeVars, 'logLevel': '$logLevel' }}%%"
+    sed -i "1s/^/$initBlock\n/" "$file"
     echo "Injected config into $file"
   fi
 }
