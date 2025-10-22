@@ -94,3 +94,30 @@ This document tracks the phased migration of ProspectPro’s MCP, agent orchestr
 4. Update automation and documentation to consume the new participant routing helpers.
 5. Replace chatmodes and CI workflows.
 6. Archive superseded assets once validations pass.
+
+---
+
+## 2025-10-22: End-State Suite Progress & Next Steps
+
+### Current Status
+
+- Diagrams, configs, and scripts are aligned to Option A taxonomy and three-environment MCP matrix.
+- v2 configs (`environment-loader.v2.js`, `environment.v2.json`, `mcp-config.v2.json`) staged and validated.
+- Automation scripts reference participant-routing helper; chatmode/CI workflows validated.
+- Coverage and migration logs updated; Mermaid diagrams syntax-validated.
+
+### Remaining Steps
+
+1. **Promote v2 into production artifacts**
+   - Replace legacy MCP configs/registry with v2 versions after approval.
+   - Update documentation/playbooks to reference the new three-environment model.
+2. **Server/tool consolidation**
+   - Fold Postgres tooling into Supabase in server scripts.
+   - Merge observability/integration helpers into troubleshooting/shared modules as planned.
+3. **CI/task alignment**
+   - Final review of workflows/tasks for legacy environment assumptions.
+   - Add/adjust tests for new MCP layouts.
+4. **Archive cleanup**
+   - Remove or archive superseded Round 1/research assets.
+5. **End-state verification**
+   - Run full validation chain and update coverage/staging logs after v2 promotion.

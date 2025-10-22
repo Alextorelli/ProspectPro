@@ -7,42 +7,13 @@
       "lazyLoad": true,
       "maxMemory": "192MB",
       "priority": "high",
-  "description": "Production monitoring for tier-aware background discovery, enrichment, session-enforced auth, and Supabase CLI session caching (32 tools)",
-      "tools": [
-        "environment_health_check",
-        "github_actions_monitor",
-        "dev_prod_config_diff",
-        "cost_budget_monitor",
-        "api_health_dashboard",
-        "vault_api_key_status",
-        "production_startup_validator",
-        "github_workflow_optimizer",
-        "get_system_health",
-        "read_diagnostics",
-        "analyze_logs",
-        "validate_configuration",
-        "generate_performance_report",
-        "monitor_api_quotas",
-        "validate_supabase_session",
-        "diagnose_rls_failure",
-        "analyze_campaign_costs",
-        "predict_campaign_cost",
-        "query_leads",
-        "get_campaign_stats",
-        "analyze_lead_quality",
-        "get_api_costs",
-        "test_google_places",
-        "test_foursquare_places",
-        "test_email_discovery",
-        "verify_email",
-        "get_api_usage_stats",
-        "simulate_lead_discovery",
-        "analyze_project_structure",
-        "find_code_patterns",
-        "analyze_api_clients",
-        "check_fake_data_violations"
-      ]
+      "description": "ProspectPro MCP v2 - Three-mode matrix (production, development, troubleshooting)",
+      "servers": {
+        // ...v2 server definitions...
+      }
     },
+  }
+}
     "prospectpro-development": {
       "autoStart": false,
       "onDemand": true,

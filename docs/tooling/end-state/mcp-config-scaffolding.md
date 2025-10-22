@@ -1,6 +1,14 @@
 # MCP Configuration Refactor Scaffolding (Option A Alignment)
 
-_Last updated: 2025-10-21_
+_Last updated: 2025-10-22_
+
+## Three-Environment MCP Model
+
+- **Development**: Shared dev infra, relaxed security, rapid iteration
+- **Production**: Strict security, monitoring, live user traffic
+- **Troubleshooting**: Observability, diagnostics, compliance, incident response
+
+All MCP configs and registry entries now reference this model. See `config/mcp-config.v2.json` for source-of-truth.
 
 ## Purpose
 
