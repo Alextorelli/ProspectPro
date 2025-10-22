@@ -58,7 +58,7 @@
           "lastAccessed": { "type": "string", "format": "date-time" },
           "environment": {
             "type": ["string", "null"],
-            "enum": ["production", "staging", "development", null]
+            "enum": ["production", "development", "troubleshooting", null]
           },
           "tags": {
             "type": "array",
@@ -78,7 +78,7 @@
       "properties": {
         "environment": {
           "type": "string",
-          "enum": ["production", "staging", "development"]
+          "enum": ["production", "development", "troubleshooting"]
         },
         "version": {
           "type": "string",

@@ -47,11 +47,28 @@
     "pre_commit_hooks": ["lint:fix", "zero-fake-data-check"],
     "pre_push_hooks": ["test", "supabase:test:db", "supabase:test:functions"]
   },
+  "environment_credentials": {
+    "development": {
+      "supabase": "dev-sriycekxdqnesdsgwiuc",
+      "vercel": "prospectpro-dev"
+    },
+    "production": {
+      "supabase": "sriycekxdqnesdsgwiuc",
+      "vercel": "prospectpro-prod"
+    },
+    "troubleshooting": {
+      "supabase": "troubleshoot-sriycekxdqnesdsgwiuc",
+      "vercel": "prospectpro-troubleshoot"
+    }
+  },
   "automation_tasks": {
     "daily_start": "Start Codespace",
     "test_suite": "Test: Full Stack Validation",
     "deploy_prod": "Deploy: Full Automated Frontend",
-    "edge_deploy": "Edge Functions: Production Deploy Workflow"
+    "edge_deploy": "Edge Functions: Production Deploy Workflow",
+    "context_snapshot": "scripts/automation/context-snapshot.sh",
+    "vercel_validate": "scripts/automation/vercel-validate.sh",
+    "redis_observability": "scripts/automation/redis-observability.sh"
   },
   "performance_targets": {
     "pr_merge_time_hours": 24,
@@ -75,18 +92,28 @@
     "frontend_runtime_errors": [
       "chrome_devtools",
       "vercel_logs",
-      "env_validation"
+      "env_validation",
+      "scripts/automation/vercel-validate.sh"
     ],
-    "edge_function_401": ["correlate_errors", "rls_check", "auth_test"],
+    "edge_function_401": [
+      "correlate_errors",
+      "rls_check",
+      "auth_test",
+      "scripts/automation/context-snapshot.sh"
+    ],
     "performance_degradation": [
       "analyze_slow_queries",
       "pool_health",
-      "edge_logs"
+      "edge_logs",
+      "scripts/automation/redis-observability.sh"
     ],
     "integration_failures": [
       "integration_health",
       "circuit_breaker_state",
-      "api_keys"
+      "api_keys",
+      "scripts/automation/context-snapshot.sh"
     ]
-  }
+  },
+  "routing_helper": "scripts/automation/lib/participant-routing.sh",
+  "dry_run_guidance": "All automation scripts support --dry-run for safe diagnostics. Always source environment-loader.v2.js before agent or MCP tool execution."
 }

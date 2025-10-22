@@ -32,6 +32,20 @@
     "supabase_troubleshooting.generate_incident_timeline",
     "chrome_devtools.performance_profile"
   ],
+  "environment_credentials": {
+    "development": {
+      "supabase": "dev-sriycekxdqnesdsgwiuc",
+      "vercel": "prospectpro-dev"
+    },
+    "production": {
+      "supabase": "sriycekxdqnesdsgwiuc",
+      "vercel": "prospectpro-prod"
+    },
+    "troubleshooting": {
+      "supabase": "troubleshoot-sriycekxdqnesdsgwiuc",
+      "vercel": "prospectpro-troubleshoot"
+    }
+  },
   "deployment_config": {
     "edge_functions_sequence": [
       "business-discovery-background",
@@ -42,7 +56,10 @@
     "rollback_threshold_error_rate": 0.05,
     "smoke_test_scripts": [
       "./scripts/testing/test-discovery-pipeline.sh",
-      "./scripts/testing/test-enrichment-chain.sh"
+      "./scripts/testing/test-enrichment-chain.sh",
+      "scripts/automation/context-snapshot.sh",
+      "scripts/automation/vercel-validate.sh",
+      "scripts/automation/redis-observability.sh"
     ]
   },
   "incident_response": {
@@ -165,6 +182,11 @@
   "automation_workflows": {
     "deploy_edge_functions": "integration_hub.execute_workflow",
     "incident_communication": "integration_hub.execute_workflow",
-    "health_check_cron": "*/5 * * * *"
-  }
+    "health_check_cron": "*/5 * * * *",
+    "context_snapshot": "scripts/automation/context-snapshot.sh",
+    "vercel_validate": "scripts/automation/vercel-validate.sh",
+    "redis_observability": "scripts/automation/redis-observability.sh"
+  },
+  "routing_helper": "scripts/automation/lib/participant-routing.sh",
+  "dry_run_guidance": "All automation scripts support --dry-run for safe diagnostics. Always source environment-loader.v2.js before agent or MCP tool execution."
 }

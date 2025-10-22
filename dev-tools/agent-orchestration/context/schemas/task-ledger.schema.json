@@ -29,7 +29,7 @@
     },
     "environment": {
       "type": "string",
-      "enum": ["production", "staging", "development"],
+      "enum": ["production", "development", "troubleshooting"],
       "description": "Environment where the task is executed."
     },
     "createdAt": {

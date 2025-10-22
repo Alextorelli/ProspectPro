@@ -22,11 +22,27 @@
     "integration_hub.check_integration_health",
     "integration_hub.send_notification"
   ],
+  "environment_credentials": {
+    "development": {
+      "supabase": "dev-sriycekxdqnesdsgwiuc",
+      "vercel": "prospectpro-dev"
+    },
+    "production": {
+      "supabase": "sriycekxdqnesdsgwiuc",
+      "vercel": "prospectpro-prod"
+    },
+    "troubleshooting": {
+      "supabase": "troubleshoot-sriycekxdqnesdsgwiuc",
+      "vercel": "prospectpro-troubleshoot"
+    }
+  },
   "monitoring_config": {
     "collection_interval_seconds": 300,
     "retention_days": 30,
     "trace_sampling_rate": 0.1,
-    "critical_paths": ["business-discovery", "enrichment", "export", "auth"]
+    "critical_paths": ["business-discovery", "enrichment", "export", "auth"],
+    "context_snapshot_script": "scripts/automation/context-snapshot.sh",
+    "redis_observability_script": "scripts/automation/redis-observability.sh"
   },
   "alerting_thresholds": {
     "edge_function_error_rate_percent": 5,
@@ -93,6 +109,8 @@
     "development-workflow",
     "production-ops"
   ],
+  "routing_helper": "scripts/automation/lib/participant-routing.sh",
+  "dry_run_guidance": "All automation scripts support --dry-run for safe diagnostics. Always source environment-loader.v2.js before agent or MCP tool execution."
   "notification_channels": {
     "slack": "integration_hub.send_notification",
     "pagerduty": "integration_hub.execute_workflow"

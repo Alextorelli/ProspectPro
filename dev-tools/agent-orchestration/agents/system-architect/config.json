@@ -25,14 +25,32 @@
     "integration_hub.check_integration_health",
     "integration_hub.execute_workflow"
   ],
+  "environment_credentials": {
+    "development": {
+      "supabase": "dev-sriycekxdqnesdsgwiuc",
+      "vercel": "prospectpro-dev"
+    },
+    "production": {
+      "supabase": "sriycekxdqnesdsgwiuc",
+      "vercel": "prospectpro-prod"
+    },
+    "troubleshooting": {
+      "supabase": "troubleshoot-sriycekxdqnesdsgwiuc",
+      "vercel": "prospectpro-troubleshoot"
+    }
+  },
   "knowledge_base": {
     "app_system_reference": "/docs/app/SYSTEM_REFERENCE.md",
     "technical_reference": "/docs/technical/SYSTEM_REFERENCE.md",
     "database": "/supabase/schema-sql/",
     "edge_functions": "/app/backend/functions/",
     "mcp_registry": "/dev-tools/mcp-servers/registry.json",
-    "instructions": ".github/copilot-instructions.md"
+    "instructions": ".github/copilot-instructions.md",
+    "context_snapshot_script": "scripts/automation/context-snapshot.sh",
+    "redis_observability_script": "scripts/automation/redis-observability.sh"
   },
+  "routing_helper": "scripts/automation/lib/participant-routing.sh",
+  "dry_run_guidance": "All automation scripts support --dry-run for safe diagnostics. Always source environment-loader.v2.js before agent or MCP tool execution."
   "performance_targets": {
     "migration_validation_time_ms": 5000,
     "query_explanation_time_ms": 3000,

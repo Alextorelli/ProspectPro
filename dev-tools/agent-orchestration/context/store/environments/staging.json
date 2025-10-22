@@ -1,41 +1,42 @@
 {
-  "name": "staging",
-  "description": "Staging environment used for pre-production validation and performance testing",
-  "supabase": {
-    "projectRef": "staging-sriycekxdqnesdsgwiuc",
-    "apiUrl": "https://staging-sriycekxdqnesdsgwiuc.supabase.co",
-    "anonKey": null,
-    "serviceRoleKey": null
-  },
-  "vercel": {
-    "deploymentUrl": "https://prospectpro-staging.vercel.app",
-    "projectName": "prospect-pro-staging"
-  },
-  "apiRateLimits": {
-    "hunter_io": { "monthlyLimit": 250, "alertThreshold": 200, "unit": "searches" },
-    "neverbounce": { "monthlyLimit": 5000, "alertThreshold": 4000, "unit": "verifications" },
-    "google_places": { "monthlyLimit": 20000, "alertThreshold": 16000, "unit": "requests" }
-  },
-  "featureFlags": {
-    "enableAsyncDiscovery": true,
-    "enableZeroFakeDataAudits": true,
-    "enableRealtimeCampaigns": false,
-    "enableNewUI": true
-  },
-  "monitoring": {
-    "otelEndpoint": "http://localhost:4318/v1/traces",
-    "jaegerUrl": "http://localhost:16686",
-    "logDashboard": "https://supabase.com/dashboard/project/staging-sriycekxdqnesdsgwiuc/logs"
-  },
-  "permissions": {
-    "writeOperations": true,
-    "canDeploy": true,
-    "canFetchLogs": true,
-    "canRunTests": true,
-    "requiresApproval": false
-  },
-  "constraints": {
-    "maxScratchpadEntries": 75,
-    "maxTaskConcurrency": 4
+  {
+    "name": "troubleshooting",
+    "description": "Troubleshooting environment for diagnostics, context recovery, and safe dry-run operations.",
+    "supabase": {
+      "projectRef": "troubleshoot-sriycekxdqnesdsgwiuc",
+      "apiUrl": "https://troubleshoot-sriycekxdqnesdsgwiuc.supabase.co",
+      "anonKey": null,
+      "serviceRoleKey": null
+    },
+    "vercel": {
+      "deploymentUrl": "https://prospectpro-troubleshoot.vercel.app",
+      "projectName": "prospect-pro-troubleshoot"
+    },
+    "apiRateLimits": {
+      "hunter_io": { "monthlyLimit": 100, "alertThreshold": 80, "unit": "searches" },
+      "neverbounce": { "monthlyLimit": 1000, "alertThreshold": 800, "unit": "verifications" },
+      "google_places": { "monthlyLimit": 5000, "alertThreshold": 4000, "unit": "requests" }
+    },
+    "featureFlags": {
+      "enableAsyncDiscovery": false,
+      "enableZeroFakeDataAudits": true,
+      "enableRealtimeCampaigns": false,
+      "enableNewUI": false
+    },
+    "monitoring": {
+      "otelEndpoint": "http://localhost:4318/v1/traces",
+      "jaegerUrl": "http://localhost:16686",
+      "logDashboard": "https://supabase.com/dashboard/project/troubleshoot-sriycekxdqnesdsgwiuc/logs"
+    },
+    "permissions": {
+      "writeOperations": false,
+      "canDeploy": false,
+      "canFetchLogs": true,
+      "canRunTests": false,
+      "requiresApproval": false
+    },
+    "constraints": {
+      "maxScratchpadEntries": 25,
+      "maxTaskConcurrency": 1
+    }
   }
-}

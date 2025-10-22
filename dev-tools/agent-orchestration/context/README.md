@@ -31,10 +31,17 @@ context/
 ## Environment Contexts
 
 - `store/environments/production.json` → Read-only context (no write operations, deployment approvals required)
-- `store/environments/staging.json` → Full CRUD for integration tests and pre-production validation
 - `store/environments/development.json` → Unrestricted context for rapid iteration
+- `store/environments/troubleshooting.json` → Diagnostics, context recovery, and safe dry-run operations
 
 `EnvironmentContextManager.switchEnvironment()` checkpoints current state, applies the target environment overlay, and locks permissions that are not allowed (e.g., production write operations). Environment transitions are recorded in the task ledger for auditability.
+
+### Dry-Run Flag & Environment Loader Contract
+
+- All automation scripts support the `--dry-run` flag for safe diagnostics and context recovery.
+- Always source `config/environment-loader.v2.js` before agent or MCP tool execution.
+- Use `scripts/automation/lib/participant-routing.sh` for participant-aware routing in all agent orchestration flows.
+- Reference new automation scripts: `context-snapshot.sh`, `vercel-validate.sh`, `redis-observability.sh` for troubleshooting and diagnostics.
 
 ## Task Ledgers
 
@@ -100,4 +107,4 @@ await context.compress({ agentId: "observability", maxItems: 50 });
 - [x] Environment-aware context switching with approvals for production
 - [x] Audit trail of handoffs and environment transitions
 
-The context store is the single source of truth for cross-agent coordination. Agents MUST go through the context manager APIs rather than reading files directly to ensure consistency with MCP workflows.
+The context store is the single source of truth for cross-agent coordination. Agents MUST go through the context manager APIs rather than reading files directly to ensure consistency with MCP workflows. For troubleshooting, always use dry-run and validate environment mapping before running agents or workflows.
