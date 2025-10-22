@@ -1,8 +1,8 @@
 // Phase 6: Taxonomy and compliance audit for Mermaid diagrams
 // Usage: node scripts/docs/audit-diagram-taxonomy.js
 
-const fs = require("fs");
-const path = require("path");
+import fs from "fs";
+import path from "path";
 
 const DIAGRAM_DIRS = [
   "docs/app/diagrams",
