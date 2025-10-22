@@ -5,19 +5,19 @@
     "production": {
       "type": "stdio",
       "script_path": "./production-server.js",
-      "tools": ["supabase", "integration-hub", "observability"],
+      "tools": ["supabase", "integration-hub", "observability", "mermaid-mcp"],
       "env": { "NODE_ENV": "production" }
     },
     "development": {
       "type": "stdio",
       "script_path": "./development-server.js",
-      "tools": ["supabase", "integration-hub"],
+      "tools": ["supabase", "integration-hub", "mermaid-mcp"],
       "env": { "NODE_ENV": "development" }
     },
     "troubleshooting": {
       "type": "stdio",
       "script_path": "./supabase-troubleshooting-server.js",
-      "tools": ["supabase", "observability"],
+      "tools": ["supabase", "observability", "mermaid-mcp"],
       "env": { "NODE_ENV": "troubleshooting" }
     }
   }
