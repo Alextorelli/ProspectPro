@@ -45,14 +45,6 @@ export interface AgentContext {
   longTermMemory: LongTermMemoryItem[];
   metadata: AgentMetadata;
 }
-
-interface SelectFilters {
-  environment?: EnvironmentName;
-  sinceMinutes?: number;
-  keywords?: string[];
-  topics?: string[];
-  limit?: number;
-  keywordMatch?: "any" | "all";
 }
 
 export interface SelectInput {
@@ -67,21 +59,21 @@ export interface SelectResult {
   };
   longTermMemory: LongTermMemoryItem[];
   metadata: AgentMetadata;
+}
 
-  // Utility to get output directory for Option A participant tag
-  function getContextOutputDir(tag: OptionATag): string {
-    return path.join("reports", "context", tag);
-  }
+// Utility to get output directory for Option A participant tag
+export function getContextOutputDir(tag: OptionATag): string {
+  return path.join("reports", "context", tag);
+}
 
-  // Export context snapshot to Option A output directory
-  export async function exportContextSnapshot(agentId: string, tag: OptionATag, snapshot: object) {
-    const outputDir = getContextOutputDir(tag);
-    await fs.mkdir(outputDir, { recursive: true });
-    const filePath = path.join(outputDir, `snapshot-${agentId}-${Date.now()}.json`);
-    await fs.writeFile(filePath, JSON.stringify(snapshot, null, 2), "utf8");
-    return filePath;
-  }
-
+// Export context snapshot to Option A output directory
+export async function exportContextSnapshot(agentId: string, tag: OptionATag, snapshot: object) {
+  const outputDir = getContextOutputDir(tag);
+  await fs.mkdir(outputDir, { recursive: true });
+  const filePath = path.join(outputDir, `snapshot-${agentId}-${Date.now()}.json`);
+  await fs.writeFile(filePath, JSON.stringify(snapshot, null, 2), "utf8");
+  return filePath;
+}
 type ScratchpadNoteInput =
   | string
   | (Partial<ScratchpadNote> & { content: string; timestamp?: string });
@@ -104,26 +96,26 @@ interface CompressOptions {
   promoteSummary?: boolean;
 }
 
-export interface CompressResult {
-  compressed: boolean;
-  dropped: number;
-  retained: number;
-  summary?: string;
+export interface SelectResult {
+  agentId: string;
+  scratchpad: Pick<Scratchpad, "currentTask" | "summary"> & {
+    notes: ScratchpadNote[];
+  };
+  longTermMemory: LongTermMemoryItem[];
+  metadata: AgentMetadata;
 }
 
-type MemoryPayload = Omit<
-  LongTermMemoryItem,
-  "id" | "createdAt" | "lastAccessed"
-> & {
-  id?: string;
-  createdAt?: string;
-  lastAccessed?: string;
-};
+// Utility to get output directory for Option A participant tag
+export function getContextOutputDir(tag: OptionATag): string {
+  return path.join("reports", "context", tag);
+}
 
-interface UpsertMemoryInput {
-  agentId: string;
-  memory: MemoryPayload;
-  updateLastAccessed?: boolean;
+// Export context snapshot to Option A output directory
+export async function exportContextSnapshot(agentId: string, tag: OptionATag, snapshot: object) {
+  const outputDir = getContextOutputDir(tag);
+  await fs.mkdir(outputDir, { recursive: true });
+  const filePath = path.join(outputDir, `snapshot-${agentId}-${Date.now()}.json`);
+  await fs.writeFile(filePath, JSON.stringify(snapshot, null, 2), "utf8");
 }
 
 interface ContextManagerOptions {
