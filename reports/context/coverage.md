@@ -1,8 +1,8 @@
 ## Diagram Refactor Coverage (Option A)
 
-- `agent-mode-flow.mmd` now ER diagram (environment, agent mode, participant mapping)
-- `coordination-overview-flow.mmd` covers session/manager/participant routing
-- `coordination-activation-flow.mmd` covers participant-to-automation mapping
+- `agent-mode-flow.mmd` now ER diagram (Option A taxonomy, Mermaid init header)
+- `coordination-overview-flow.mmd` covers session/manager/participant routing (init header normalized)
+- `coordination-activation-flow.mmd` covers participant-to-automation mapping (init header normalized)
   9c389c385a48e10b0a8b9c18f5465b3ec2a6775df22b96380ab64787ab3c7a8d docs/tooling/end-state/agent-coordination-flow.mmd
   661566db8c3b5612c453afa9f15e126840c50927317ac12ee64a2c26a0b15f99 docs/tooling/end-state/agent-environment-map-state.mmd
   10d436a68ccb148d6f8eb5dc68e9e89ed3e90a8c23cd39a3291ab4f01e2c2666 docs/tooling/end-state/agent-mode-flow.mmd

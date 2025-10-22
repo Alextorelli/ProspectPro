@@ -8,7 +8,10 @@ Source material captured for follow-up synthesis and alignment work. Content ref
 
 - Treat this document as the canonical specification for environment-aware routing across Option A participants, MCP clusters, and automation hooks.
 - When updating flows, edit this markdown first, then regenerate dependent diagrams via `npm run docs:patch:diagrams --source docs/tooling/end-state` followed by `npm run docs:prepare`.
-- Generated Mermaid diagrams (all in `docs/tooling/end-state/`) are derived from the narratives and tables below: - `agent-mode-flow.mmd` – environment → agent mode → Option A participant mapping - `coordination-overview-flow.mmd` – high-level coordination manager/session/participant routing - `coordination-activation-flow.mmd` – participant-to-automation mapping
+- Generated Mermaid diagrams (all in `docs/tooling/end-state/`) are derived from the narratives and tables below:
+  - `agent-mode-flow.mmd` – now ER diagram (Option A taxonomy, with Mermaid init header)
+  - `coordination-overview-flow.mmd` – high-level coordination manager/session/participant routing
+  - `coordination-activation-flow.mmd` – participant-to-automation mapping
   - `agent-environment-map-state.mmd` – environment detection → MCP cluster selection → participant activation
   - `environment-mcp-cluster.mmd` – cluster inventory aligned with Option A tooling
   - `agent-coordination-flow.mmd` and `workflow-architecture-c4.mmd` – promotion pipeline feedback loops
