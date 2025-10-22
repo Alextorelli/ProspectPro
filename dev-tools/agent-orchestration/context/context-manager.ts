@@ -50,51 +50,6 @@ export interface SelectInput {
   filters?: SelectFilters;
 }
 
-export interface SelectResult {
-  agentId: string;
-  scratchpad: Pick<Scratchpad, "currentTask" | "summary"> & {
-    notes: ScratchpadNote[];
-  };
-  longTermMemory: LongTermMemoryItem[];
-  metadata: AgentMetadata;
-}
-
-// Utility to get output directory for Option A participant tag
-export function getContextOutputDir(tag: OptionATag): string {
-  return path.join("reports", "context", tag);
-}
-
-// Export context snapshot to Option A output directory
-export async function exportContextSnapshot(
-  agentId: string,
-  tag: OptionATag,
-  snapshot: object
-) {
-  const outputDir = getContextOutputDir(tag);
-  await fs.mkdir(outputDir, { recursive: true });
-  const filePath = path.join(
-    outputDir,
-    `snapshot-${agentId}-${Date.now()}.json`
-  );
-  await fs.writeFile(filePath, JSON.stringify(snapshot, null, 2), "utf8");
-  return filePath;
-}
-type ScratchpadNoteInput =
-  | string
-  | (Partial<ScratchpadNote> & { content: string; timestamp?: string });
-
-interface UpdateScratchpadInput {
-  agentId: string;
-  data: {
-    currentTask?: string | null;
-    notes?: ScratchpadNoteInput | ScratchpadNoteInput[];
-    summary?: string | null;
-  };
-  tags?: string[];
-  append?: boolean;
-  environment?: EnvironmentName;
-}
-
 interface CompressOptions {
   agentId: string;
   maxItems?: number;
