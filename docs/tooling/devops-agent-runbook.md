@@ -10,18 +10,21 @@
 - Development: `npm run mcp:start:development`
 - Troubleshooting: `npm run mcp:start:troubleshooting`
 
-### Stepwise Diagnostics
+### Stepwise Diagnostics & Telemetry
 
 1. Start troubleshooting server: `npm run mcp:start:troubleshooting`
 2. Run tools in order:
    - `test_edge_function`
    - `validate_database_permissions`
    - `collect_and_summarize_logs`
+   - `capture_api_trace` (capture OTEL traces for API calls)
+   - `compare_campaign_costs` (aggregate cost metrics from Supabase logs and OTEL traces)
+   - `predict_campaign_roi` (predict campaign ROI using cost, enrichment, and validation telemetry)
 3. Outputs: `reports/diagnostics/`
 
 ### Automation Integration
 
-- Use `./scripts/automation/context-snapshot.sh <function-slug> <since-time>` to aggregate MCP, Supabase, and Vercel diagnostics.
+- Use `./scripts/automation/context-snapshot.sh <function-slug> <since-time>` to aggregate MCP, Supabase, and Vercel diagnostics, including telemetry tool outputs.
 - Ensure all outputs are referenced in incident/debug notes and staged per guard policy.
 
 - **Supabase Log Pull:** `./scripts/automation/supabase-pull-logs.sh <function-slug> <since-time>`
@@ -33,7 +36,7 @@ All scripts output to `reports/` and enforce guardrails. See platform-playbooks.
 ## MCP Production Status Snapshot (2025-10-20)
 
 - **Server state**: Production MCP server active via stdio transport (version 4.1.0 Post-Cleanup Enhanced)
-- **Tool inventory**: 28 production tools spanning monitoring, diagnostics, analytics, API testing, and filesystem analysis
+  -- **Tool inventory**: 28+ production tools spanning monitoring, diagnostics, analytics, API testing, filesystem analysis, and telemetry (API trace, cost, ROI)
 - **Key categories**:
   - Monitoring (environment health, CI/CD, budget tracking)
   - System diagnostics (logs, configuration, performance)
@@ -95,17 +98,18 @@ All scripts output to `reports/` and enforce guardrails. See platform-playbooks.
 2. **React DevTools Attach**
    - Use browser extension or run `./scripts/devtools/launch-react-devtools.sh`
    - Document findings in agent-debug-playbooks.md
-3. **MCP Troubleshooting Sequence**
+3. **MCP Troubleshooting & Telemetry Sequence**
    - Use MCP CLI tools and scripts in `mcp-servers/` and `scripts/operations/`
    - Reference: `npm run mcp:start`, `npm run mcp:stop`, diagnostics scripts
+   - Run telemetry tools: `capture_api_trace`, `compare_campaign_costs`, `predict_campaign_roi` for diagnostics and operational analysis
 4. **Docs Update Pipeline**
    - Run `npm run docs:prepare`, `npm run docs:update`, `npm run lint`
    - Validate diagrams and documentation
 
 ## Verification
 
-- Capture outputs in `reports/` as needed
-- Confirm diagrams and docs updated
+- Capture outputs in `reports/` as needed, including telemetry tool results
+- Confirm diagrams and docs updated for new troubleshooting and telemetry flows
 - Run validation pipeline before major changes
 
 ## Coverage Summary (2025-10-21)

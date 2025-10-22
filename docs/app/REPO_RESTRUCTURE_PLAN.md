@@ -36,9 +36,9 @@ Converge ProspectPro to a hybrid mono-repo structure optimized for AI agent work
 1. Tag and plan migration for legacy folders
 2. Move src, public, app/backend/functions into /app (phased)
 3. Relocate dev tooling into /tooling subtrees
-4. Update build scripts, npm scripts, VS Code tasks, and MCP validation collections. All Thunder/Jaeger references are deprecated; use MCP tools and Supabase logs for observability.
-5. Regenerate documentation and codebase index
-6. Validate agent readiness and zero-fake-data compliance
+4. Integrate MCP troubleshooting server telemetry tools (`capture_api_trace`, `compare_campaign_costs`, `predict_campaign_roi`) into diagnostics and automation scripts. Update build scripts, npm scripts, VS Code tasks, and MCP validation collections. All Thunder/Jaeger references are deprecated; use MCP tools and Supabase logs for observability.
+5. Regenerate documentation, diagrams, and codebase index to reflect new telemetry flows and validation checkpoints.
+6. Validate agent readiness, ZeroFakeData compliance, and operational coverage. Ensure context snapshots and diagnostics outputs are aligned with new folder structure and coverage standards.
 
 ## Notes
 
@@ -56,10 +56,10 @@ Converge ProspectPro to a hybrid mono-repo structure optimized for AI agent work
 
 ## Next Actions
 
-1. Re-run workspace inventory and document the current directory state in a new telemetry update before deprecating the 2025-10-20 report.
+1. Re-run workspace inventory and capture a full context snapshot using `./scripts/automation/context-snapshot.sh <function-slug> <since-time>`. Document the current directory state and operational coverage in `reports/context/coverage.md` before deprecating the 2025-10-20 report.
 2. Plan phased relocation of `/app/frontend`, `/app/backend/functions`, and supporting tooling into the target `/app` and `/tooling` hierarchy (capture blockers in `settings-troubleshooting.md`).
-3. Align automation outputs (coverage, diagnostics, context snapshots) with the future folder layout to avoid path churn during migration.
-4. Update VS Code tasks and npm scripts once directories move—stage proposals in `docs/tooling/settings-troubleshooting.md` prior to editing guarded configs.
+3. Align automation outputs (coverage, diagnostics, context snapshots) and MCP telemetry tool usage with the future folder layout to avoid path churn during migration.
+4. Update VS Code tasks, npm scripts, and documentation to reference new telemetry tools and troubleshooting flows. Stage proposals in `docs/tooling/settings-troubleshooting.md` prior to editing guarded configs.
 
 ## Ignore File Policy
 

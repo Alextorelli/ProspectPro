@@ -69,13 +69,14 @@
 
 ## 🏗️ Architecture
 
-### Supabase-First Serverless
+### Supabase-First Serverless & MCP Telemetry
 
 - **Frontend:** React/Vite deployed to Vercel
 - **Backend:** 6 Supabase Edge Functions with global deployment
 - **Database:** PostgreSQL with Row Level Security (RLS) and user isolation
 - **Authentication:** Supabase Auth with JWT tokens and session management
 - **Real-time:** Ready for live updates and notifications
+- **Telemetry & Diagnostics:** MCP troubleshooting server exposes tools for API trace capture, campaign cost comparison, and ROI prediction, integrated with OTEL collector and Supabase logs.
 
 ### User-Aware Data Model
 
@@ -90,7 +91,7 @@ leads (id, campaign_id, business_name, email, user_id, session_user_id, ...)
 dashboard_exports (id, campaign_id, user_id, session_user_id, ...)
 ```
 
-### Edge Functions (Production, Supabase Session Required)
+### Edge Functions & MCP Tools (Production, Supabase Session Required)
 
 - **Discovery**
   - `business-discovery-background` – Tier-aware asynchronous discovery + enrichment orchestration
@@ -104,11 +105,15 @@ dashboard_exports (id, campaign_id, user_id, session_user_id, ...)
 - **Export**
   - `campaign-export-user-aware` – User-authorized export with enrichment metadata
   - `campaign-export` – Internal automation export path (service-role only)
-- **Diagnostics**
+- **Diagnostics & Telemetry**
   - `test-new-auth` – Session diagnostics for the shared auth helper
   - `test-official-auth` – Mirrors Supabase’s reference pattern end-to-end
   - `test-business-discovery` – Session-scoped discovery smoke test
   - `test-google-places` – API testing and validation
+  - MCP troubleshooting server tools:
+    - `capture_api_trace` – Capture OTEL traces for API calls
+    - `compare_campaign_costs` – Aggregate cost metrics from Supabase logs and OTEL traces
+    - `predict_campaign_roi` – Predict campaign ROI using cost, enrichment, and validation telemetry
 
 ## 🧪 Quality Standards
 
@@ -259,9 +264,9 @@ curl -X POST 'https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/test-new-aut
 
 ## 🎯 Roadmap
 
-### 🔄 MCP Rework Implementation (70% Complete)
+### 🌀 MCP Rework Implementation & Telemetry Operationalization
 
-**Goal:** Establish AI agent automation with 70-80% script reduction through MCP-first architecture
+**Goal:** Establish AI agent automation and operationalize MCP telemetry tools for diagnostics, cost analysis, and ROI prediction.
 
 #### ✅ Completed Phases
 
@@ -270,25 +275,27 @@ curl -X POST 'https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/test-new-aut
 - **Phase 3: Agent Suite Creation** - AI agent orchestration framework
 - **Phase 4: Script/Task Sync** - 4/10+ scripts migrated to MCP workflows
 - **Phase 5: Observability Setup** - Distributed tracing infrastructure established
+- **Phase 6: Telemetry Tool Integration** - MCP troubleshooting server exposes `capture_api_trace`, `compare_campaign_costs`, and `predict_campaign_roi` tools, integrated with OTEL collector and Supabase logs.
 
-#### 🔄 Current Phase: Validation Harness (Next Priority)
+#### 🌀 Current Phase: Validation Harness & Coverage
 
 - MCP server health checks and smoke tests
-- Full-stack validation with tracing enabled
-- Documentation cleanup and usage patterns
+- Full-stack validation with tracing and telemetry enabled
+- Documentation and diagram update for new tools and flows
 
 #### 📋 Remaining Work
 
 - **Script Migration** - Complete refactoring of remaining 6+ test scripts
 - **VS Code Integration** - Update tasks.json to invoke MCP tools
-- **Documentation** - Update technical docs with observability patterns
-- **Testing Integration** - Automated validation with distributed tracing
+- **Documentation** - Update technical docs and diagrams with telemetry and troubleshooting patterns
+- **Testing Integration** - Automated validation with distributed tracing and MCP telemetry tools
 
 #### 🏗️ Infrastructure Status
 
 - **MCP Servers:** 6 servers operational (production, development, troubleshooting, postgresql, integration-hub, observability)
 - **Observability Stack:** Jaeger + Prometheus + Grafana configured for distributed tracing
 - **Agent Orchestration:** Ready for AI workflow automation
+- **Telemetry Tools:** MCP troubleshooting server operational with OTEL and Supabase log integration
 - **Script Reduction:** 40% achieved, targeting 70-80% total reduction
 
 #### 🔍 Observability Features
@@ -298,6 +305,7 @@ curl -X POST 'https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/test-new-aut
 - **Workflow Correlation:** Trace correlation across MCP server interactions
 - **Health Checks:** System diagnostics and connectivity validation
 - **Metrics Collection:** Prometheus integration with custom dashboards
+- **Telemetry Tools:** API trace capture, campaign cost comparison, ROI prediction via MCP troubleshooting server
 
 **Access Points:**
 
@@ -308,7 +316,9 @@ curl -X POST 'https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/test-new-aut
 
 ## 🛠️ Troubleshooting
 
-- **Blank screen after campaign completes** – Indicates the browser hit an old build where the campaign store could not process undefined lead batches. Pull the latest `main`, run `npm install && npm run build`, and redeploy the `/dist` bundle. If the issue persists, open dev tools and confirm there are no React error #185 stacks; the null-safe store shipping in v4.3.1 should keep results rendering once Supabase returns data.
+**Blank screen after campaign completes** – Indicates the browser hit an old build where the campaign store could not process undefined lead batches. Pull the latest `main`, run `npm install && npm run build`, and redeploy the `/dist` bundle. If the issue persists, open dev tools and confirm there are no React error #185 stacks; the null-safe store shipping in v4.3.1 should keep results rendering once Supabase returns data.
+
+**Telemetry/Diagnostics Issues** – If MCP troubleshooting server tools (`capture_api_trace`, `compare_campaign_costs`, `predict_campaign_roi`) fail to return expected results, check OTEL collector and Supabase log connectivity. Review outputs in `reports/diagnostics/` and validate configuration in `docs/tooling/platform-playbooks.md`.
 
 ### Ignore Hygiene & Automation (2025-10-18)
 
