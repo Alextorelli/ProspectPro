@@ -10,7 +10,7 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$ROOT_DIR"
 
 usage() {
-  cat <<'EOF'
+  cat <<EOF
 Usage: scripts/docs/patch-diagrams.sh [--source <path|research|staging>] [--target <path>]
 
 Options:
@@ -124,8 +124,8 @@ normalize_config() {
   local file_path="$1"
   # Always ensure first line is '%%{init: {'theme': 'dark'}}%%'
   local temp_file
-  temp_file="$(mktemp)"
-  awk 'NR==1 {print "%%{init: {\'theme\': \'dark\'}}%%"} NR>1 {print}' "$file_path" > "$temp_file"
+    temp_file="$(mktemp)"
+    awk "NR==1 {print \"%%{init: {\\'theme\\': \\'dark\\'}}%%\"} NR>1 {print}" "$file_path" > "$temp_file"
   mv "$temp_file" "$file_path"
 }
 
