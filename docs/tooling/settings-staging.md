@@ -384,3 +384,15 @@ Rollback: `git restore .` or revert individual files if needed
 - [ ] Workspace status script addition approved
 - [ ] Workspace status documentation updates approved
 - [ ] Integration plan archival approved
+
+---
+
+## 2025-10-22: MCP/Participant Routing & Chatmode Validation
+
+- Orchestration/context scripts reviewed: Option A taxonomy and participant tags (`@ux`, `@platform`, `@devops`, `@secops`, `@integrations`) confirmed in context-manager and output routing.
+- Chatmode manifest regenerated (`npm run mcp:chat:sync`), validation passed (`npm run mcp:chat:validate`).
+- No legacy participant references found in context or orchestration scripts.
+- No legacy assets found in `docs/tooling/history/round-1/`.
+- Chatmode and agent migration archives present in `reports/context/archive/`.
+- Coverage log updated; diagram normalization and documentation complete.
+- No further action required for participant routing or asset archiving at this time.
