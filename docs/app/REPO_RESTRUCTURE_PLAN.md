@@ -6,150 +6,148 @@ Deliver the ProspectPro hybrid mono-repo realignment with a diagram-first, autom
 
 ## Target Directory Layout
 
-```
 ProspectPro/
-├── 📁 app/                              # APP SOURCE DOMAIN
-│   ├── frontend/                        # React application
-│   │   ├── src/
-│   │   │   ├── components/              # Reusable UI components
-│   │   │   ├── pages/                   # Route-based page components
-│   │   │   ├── hooks/                   # Custom React hooks
-│   │   │   ├── stores/                  # Zustand state management
-│   │   │   ├── services/                # API client services
-│   │   │   ├── types/                   # TypeScript definitions
-│   │   │   └── utils/                   # Helper functions
-│   │   ├── public/                      # Static assets
-│   │   └── tests/                       # Frontend unit tests
-│   │
-│   ├── backend/                         # Supabase functions & schemas
-│   │   ├── functions/                   # Edge functions
-│   │   │   ├── business-discovery/      # Lead generation functions
-│   │   │   ├── enrichment/             # Data enrichment functions
-│   │   │   ├── exports/                # Export/campaign functions
-│   │   │   └── shared/                 # Shared utilities
-│   │   ├── schemas/                    # Database schemas
-│   │   │   ├── migrations/             # SQL migration files
-│   │   │   └── types/                  # Generated TypeScript types
-│   │   └── tests/                      # Backend function tests
-│   │
-│   └── shared/                         # Shared between frontend/backend
-│       ├── types/                      # Common TypeScript types
-│       ├── constants/                  # Application constants
-│       └── validators/                 # Data validation schemas
+├── 📁 app/ # APP SOURCE DOMAIN
+│ ├── frontend/ # React application
+│ │ ├── src/
+│ │ │ ├── components/ # Reusable UI components
+│ │ │ ├── pages/ # Route-based page components
+│ │ │ ├── hooks/ # Custom React hooks
+│ │ │ ├── stores/ # Zustand state management
+│ │ │ ├── services/ # API client services
+│ │ │ ├── types/ # TypeScript definitions
+│ │ │ └── utils/ # Helper functions
+│ │ ├── public/ # Static assets
+│ │ └── tests/ # Frontend unit tests
+│ │
+│ ├── backend/ # Supabase functions & schemas
+│ │ ├── functions/ # Edge functions
+│ │ │ ├── business-discovery/ # Lead generation functions
+│ │ │ ├── enrichment/ # Data enrichment functions
+│ │ │ ├── exports/ # Export/campaign functions
+│ │ │ └── shared/ # Shared utilities
+│ │ ├── schemas/ # Database schemas
+│ │ │ ├── migrations/ # SQL migration files
+│ │ │ └── types/ # Generated TypeScript types
+│ │ └── tests/ # Backend function tests
+│ │
+│ └── shared/ # Shared between frontend/backend
+│ ├── types/ # Common TypeScript types
+│ ├── constants/ # Application constants
+│ └── validators/ # Data validation schemas
 │
-├── 📁 dev-tools/                       # DEV TOOLS DOMAIN
-│   ├── automation/                     # Build & deployment automation
-│   │   ├── ci-cd/                      # CI/CD workflows & scripts
-│   │   ├── deployment/                 # Deployment orchestration
-│   │   └── releases/                   # Release management
-│   │
-│   ├── testing/                        # Testing infrastructure
-│   │   ├── e2e/                        # End-to-end tests
-│   │   ├── integration/                # Integration tests
-│   │   ├── load/                       # Performance testing
-│   │   └── fixtures/                   # Test data & mocks
-│   │
-│   ├── monitoring/                     # Observability & analytics
-│   │   ├── telemetry/                  # OpenTelemetry setup
-│   │   ├── logging/                    # Logging configuration
-│   │   ├── metrics/                    # Custom metrics
-│   │   └── alerts/                     # Alert definitions
-│   │
-│   ├── agents/                         # AI agent orchestration
-│   │   ├── mcp-servers/                # Model Context Protocol servers
-│   │   ├── workflows/                  # Agent workflow definitions
-│   │   └── prompts/                    # Prompt templates & chains
-│   │
-│   ├── scripts/                        # Development scripts
-│   │   ├── setup/                      # Environment setup
-│   │   ├── maintenance/                # Cleanup & maintenance
-│   │   ├── data/                       # Data management scripts
-│   │   └── utils/                      # Utility scripts
-│   │
-│   ├── config/                         # Tool configurations
-│   │   ├── eslint/                     # ESLint configurations
-│   │   ├── typescript/                 # TypeScript configurations
-│   │   ├── vite/                       # Vite build configurations
-│   │   └── jest/                       # Test configurations
-│   │
-│   └── workspace/                      # Developer workspace tools
-│       ├── vscode/                     # VS Code extensions & settings
-│       ├── codespaces/                 # GitHub Codespaces setup
-│       └── templates/                  # Code generation templates
+├── 📁 dev-tools/ # DEV TOOLS DOMAIN
+│ ├── automation/ # Build & deployment automation
+│ │ ├── ci-cd/ # CI/CD workflows & scripts
+│ │ ├── deployment/ # Deployment orchestration
+│ │ └── releases/ # Release management
+│ │
+│ ├── testing/ # Testing infrastructure
+│ │ ├── e2e/ # End-to-end tests
+│ │ ├── integration/ # Integration tests
+│ │ ├── load/ # Performance testing
+│ │ └── fixtures/ # Test data & mocks
+│ │
+│ ├── monitoring/ # Observability & analytics
+│ │ ├── telemetry/ # OpenTelemetry setup
+│ │ ├── logging/ # Logging configuration
+│ │ ├── metrics/ # Custom metrics
+│ │ └── alerts/ # Alert definitions
+│ │
+│ ├── agents/ # AI agent orchestration
+│ │ ├── mcp-servers/ # Model Context Protocol servers
+│ │ ├── workflows/ # Agent workflow definitions
+│ │ └── prompts/ # Prompt templates & chains
+│ │
+│ ├── scripts/ # Development scripts
+│ │ ├── setup/ # Environment setup
+│ │ ├── maintenance/ # Cleanup & maintenance
+│ │ ├── data/ # Data management scripts
+│ │ └── utils/ # Utility scripts
+│ │
+│ ├── config/ # Tool configurations
+│ │ ├── eslint/ # ESLint configurations
+│ │ ├── typescript/ # TypeScript configurations
+│ │ ├── vite/ # Vite build configurations
+│ │ └── jest/ # Test configurations
+│ │
+│ └── workspace/ # Developer workspace tools
+│ ├── vscode/ # VS Code extensions & settings
+│ ├── codespaces/ # GitHub Codespaces setup
+│ └── templates/ # Code generation templates
 │
-├── 📁 integration/                     # INTEGRATION DOMAIN
-│   ├── platform/                       # Platform integrations
-│   │   ├── supabase/                   # Supabase-specific configs
-│   │   ├── vercel/                     # Vercel deployment configs
-│   │   ├── github/                     # GitHub Actions & workflows
-│   │   └── external-apis/              # Third-party API integrations
-│   │
-│   ├── infrastructure/                 # Infrastructure as code
-│   │   ├── terraform/                  # Terraform configurations (if used)
-│   │   ├── docker/                     # Container definitions
-│   │   └── k8s/                        # Kubernetes manifests (if used)
-│   │
-│   ├── security/                       # Security & compliance
-│   │   ├── auth/                       # Authentication configurations
-│   │   ├── secrets/                    # Secret management templates
-│   │   └── compliance/                 # Security compliance files
-│   │
-│   ├── data/                          # Data pipeline integrations
-│   │   ├── etl/                        # Extract, transform, load processes
-│   │   ├── backup/                     # Backup & recovery procedures
-│   │   └── sync/                       # Data synchronization
-│   │
-│   └── environments/                   # Environment-specific configs
-│       ├── development/                # Dev environment setup
-│       ├── staging/                    # Staging environment
-│       └── production/                 # Production environment
+├── 📁 integration/ # INTEGRATION DOMAIN
+│ ├── platform/ # Platform integrations
+│ │ ├── supabase/ # Supabase-specific configs
+│ │ ├── vercel/ # Vercel deployment configs
+│ │ ├── github/ # GitHub Actions & workflows
+│ │ └── external-apis/ # Third-party API integrations
+│ │
+│ ├── infrastructure/ # Infrastructure as code
+│ │ ├── terraform/ # Terraform configurations (if used)
+│ │ ├── docker/ # Container definitions
+│ │ └── k8s/ # Kubernetes manifests (if used)
+│ │
+│ ├── security/ # Security & compliance
+│ │ ├── auth/ # Authentication configurations
+│ │ ├── secrets/ # Secret management templates
+│ │ └── compliance/ # Security compliance files
+│ │
+│ ├── data/ # Data pipeline integrations
+│ │ ├── etl/ # Extract, transform, load processes
+│ │ ├── backup/ # Backup & recovery procedures
+│ │ └── sync/ # Data synchronization
+│ │
+│ └── environments/ # Environment-specific configs
+│ ├── development/ # Dev environment setup
+│ ├── staging/ # Staging environment
+│ └── production/ # Production environment
 │
-├── 📁 docs/                           # DOCUMENTATION DOMAIN
-│   ├── app/                           # App source documentation
-│   │   ├── api/                        # API documentation
-│   │   ├── components/                 # Component documentation
-│   │   ├── user-guides/               # End-user documentation
-│   │   └── diagrams/                  # App-specific Mermaid diagrams
-│   │       ├── user-flows/            # User journey diagrams
-│   │       ├── state-machines/        # State transition diagrams
-│   │       └── api-flows/             # API interaction diagrams
-│   │
-│   ├── dev-tools/                     # Dev tools documentation
-│   │   ├── setup/                      # Development setup guides
-│   │   ├── workflows/                  # Development workflows
-│   │   ├── tooling/                   # Tool-specific documentation
-│   │   └── diagrams/                  # Dev tools Mermaid diagrams
-│   │       ├── architecture/          # System architecture
-│   │       ├── ci-cd/                 # CI/CD pipeline diagrams
-│   │       └── agent-flows/           # AI agent workflows
-│   │
-│   ├── integration/                   # Integration documentation
-│   │   ├── platform/                   # Platform integration guides
-│   │   ├── deployment/                 # Deployment procedures
-│   │   ├── security/                   # Security documentation
-│   │   └── diagrams/                  # Integration Mermaid diagrams
-│   │       ├── deployment/            # Deployment flows
-│   │       ├── data-flow/             # Data pipeline diagrams
-│   │       └── security/              # Security architecture
-│   │
-│   └── shared/                        # Cross-cutting documentation
-│       ├── mermaid/                   # Mermaid configuration & standards
-│       │   ├── config/                # Global Mermaid configurations
-│       │   ├── templates/             # Diagram templates
-│       │   └── guidelines/            # Diagram style guidelines
-│       ├── standards/                 # Coding & documentation standards
-│       └── troubleshooting/           # Common issues & solutions
+├── 📁 docs/ # DOCUMENTATION DOMAIN
+│ ├── app/ # App source documentation
+│ │ ├── api/ # API documentation
+│ │ ├── components/ # Component documentation
+│ │ ├── user-guides/ # End-user documentation
+│ │ └── diagrams/ # App-specific Mermaid diagrams
+│ │ ├── user-flows/ # User journey diagrams
+│ │ ├── state-machines/ # State transition diagrams
+│ │ └── api-flows/ # API interaction diagrams
+│ │
+│ ├── dev-tools/ # Dev tools documentation
+│ │ ├── setup/ # Development setup guides
+│ │ ├── workflows/ # Development workflows
+│ │ ├── tooling/ # Tool-specific documentation
+│ │ └── diagrams/ # Dev tools Mermaid diagrams
+│ │ ├── architecture/ # System architecture
+│ │ ├── ci-cd/ # CI/CD pipeline diagrams
+│ │ └── agent-flows/ # AI agent workflows
+│ │
+│ ├── integration/ # Integration documentation
+│ │ ├── platform/ # Platform integration guides
+│ │ ├── deployment/ # Deployment procedures
+│ │ ├── security/ # Security documentation
+│ │ └── diagrams/ # Integration Mermaid diagrams
+│ │ ├── deployment/ # Deployment flows
+│ │ ├── data-flow/ # Data pipeline diagrams
+│ │ └── security/ # Security architecture
+│ │
+│ └── shared/ # Cross-cutting documentation
+│ ├── mermaid/ # Mermaid configuration & standards
+│ │ ├── config/ # Global Mermaid configurations
+│ │ ├── templates/ # Diagram templates
+│ │ └── guidelines/ # Diagram style guidelines
+│ ├── standards/ # Coding & documentation standards
+│ └── troubleshooting/ # Common issues & solutions
 │
-├── 📁 scripts/                        # ROOT LEVEL SCRIPTS
-│   ├── setup/                         # Initial repository setup
-│   ├── maintenance/                   # Repository maintenance
-│   └── docs/                          # Documentation generation scripts
+├── 📁 scripts/ # ROOT LEVEL SCRIPTS
+│ ├── setup/ # Initial repository setup
+│ ├── maintenance/ # Repository maintenance
+│ └── docs/ # Documentation generation scripts
 │
-└── 📁 config/                         # ROOT LEVEL CONFIGS
-    ├── typescript/                    # Global TypeScript config
-    ├── package-configs/               # Package.json configurations
-    └── environment/                   # Environment variable templates
-```
+└── 📁 config/ # ROOT LEVEL CONFIGS
+├── typescript/ # Global TypeScript config
+├── package-configs/ # Package.json configurations
+└── environment/ # Environment variable templates
 
 ## Governance & Ownership
 
