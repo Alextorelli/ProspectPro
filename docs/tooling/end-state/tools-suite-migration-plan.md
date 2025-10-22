@@ -1,3 +1,9 @@
+## Phase 2/3 Diagram Refactor Log
+
+- Converted `agent-mode-flow.mmd` from flowchart to ER diagram (Option A taxonomy)
+- Split `participant-coordination-flow.mmd` into `coordination-overview-flow.mmd` (session/manager/participant routing) and `coordination-activation-flow.mmd` (participant-to-automation mapping)
+- Updated documentation references in `devops-environment-taxonomy.md` to point to new diagrams
+
 # End-to-End Tools Suite Migration Plan (Option A Alignment)
 
 _Last updated: 2025-10-21_

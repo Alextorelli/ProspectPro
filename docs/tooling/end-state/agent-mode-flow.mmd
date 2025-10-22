@@ -1,61 +1,22 @@
-% config: theme: dark
-%%{init: {'theme': 'dark', 'layout': 'dagre'}}%%
-flowchart TD
-  subgraph Environment
-    DEV[Development]
-    TEST[Test/QA]
-    STAGE[Staging]
-    PROD[Production]
-    INCIDENT[Incident Response]
-  end
+%%{init: {'theme': 'dark'}}%%
+erDiagram
+	entity Environment {
+		id int
+		name varchar
+		type varchar
+	}
 
-  subgraph Copilot_Agent_Modes
-    DEBUG_MODE["@debug"]
-    FEATURE_MODE["@feature"]
-    SUPPORT_MODE["@support"]
-    OPTIMIZE_MODE["@optimize"]
-    SECURITY_MODE["@security"]
-  end
+	entity AgentMode {
+		id int
+		name varchar
+		description text
+	}
 
-  subgraph Terminal_Participants
-    ux_participant["@ux"]
-    platform_participant["@platform"]
-    devops_participant["@devops"]
-    secops_participant["@secops"]
-    integrations_participant["@integrations"]
-  end
+	entity Participant {
+		id int
+		role varchar
+		name varchar
+	}
 
-  subgraph Functions_Primitives
-    DETECT[Detect]
-    DIAGNOSE[Diagnose]
-    REMEDIATE[Remediate]
-    VALIDATE[Validate]
-    ORCHESTRATE[Orchestrate]
-    REPORT[Report]
-  end
-
-  DEV --> DEBUG_MODE
-  TEST --> FEATURE_MODE
-  STAGE --> SUPPORT_MODE
-  PROD --> OPTIMIZE_MODE
-  INCIDENT --> SECURITY_MODE
-
-  DEBUG_MODE --> platform_participant
-  DEBUG_MODE --> ux_participant
-  FEATURE_MODE --> ux_participant
-  FEATURE_MODE --> integrations_participant
-  SUPPORT_MODE --> platform_participant
-  SUPPORT_MODE --> secops_participant
-  OPTIMIZE_MODE --> devops_participant
-  OPTIMIZE_MODE --> secops_participant
-  SECURITY_MODE --> secops_participant
-  SECURITY_MODE --> devops_participant
-
-  ux_participant --> VALIDATE
-  platform_participant --> DIAGNOSE
-  platform_participant --> REPORT
-  devops_participant --> ORCHESTRATE
-  secops_participant --> DETECT
-  secops_participant --> REMEDIATE
-  integrations_participant --> ORCHESTRATE
-  integrations_participant --> REPORT
+	Environment ||--o{ AgentMode : "supports"
+	AgentMode ||--o{ Participant : "engages"

@@ -1,0 +1,20 @@
+%% config: theme: dark
+flowchart LR
+    AgentRequest["@agent command or escalation"]
+    CoordinationManager["Coordination Manager"]
+    CoordinationSession["Coordination Session\n(status, context, results)"]
+    TypeRouter{"Select coordination type"}
+    SingleExec["Single Execution"]
+    ChainExec["Chain Execution"]
+    SwarmExec["Swarm Execution"]
+    EscalationExec["Escalation Execution"]
+
+    AgentRequest --> CoordinationManager
+    CoordinationManager -->|creates| CoordinationSession
+    CoordinationSession -->|routes context| TypeRouter
+    TypeRouter --> SingleExec
+    TypeRouter --> ChainExec
+    TypeRouter --> SwarmExec
+    TypeRouter --> EscalationExec
+
+   
