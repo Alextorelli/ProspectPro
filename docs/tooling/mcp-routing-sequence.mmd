@@ -12,7 +12,8 @@ sequenceDiagram
     participant CTX_MGR as ContextManager\n(dev-tools/context/context-manager.ts)
     participant MCP_PROD as MCP Production\n(mcp-servers/production-server.js)
     participant MCP_DEV as MCP Development\n(mcp-servers/development-server.js)
-    participant MCP_TROUBLE as MCP Troubleshooting\n(mcp-servers/troubleshooting-server.js)
+  participant MCP_TROUBLE as MCP Troubleshooting\n(mcp-servers/supabase-troubleshooting-server.js)
+  participant OTEL as OTEL Collector\n(telemetry/otel)
     participant TOOL_IFACE as Tooling Interface Layer\n(React DevTools, Docker, Repo APIs)
     participant TELEMETRY_STREAM as Telemetry Stream\n(dev-tools/monitoring/log-forwarder.ts)
     participant SUPABASE as Supabase Platform\n(Database + Functions)
@@ -30,5 +31,8 @@ sequenceDiagram
     MCP_DEV->>TELEMETRY_STREAM: emit telemetry
     MCP_DEV->>TOOL_IFACE: surface dev metrics
     MCP_TROUBLE->>SUPABASE: persist diagnostics
-    MCP_TROUBLE->>TOOL_IFACE: stream troubleshooting data
+  MCP_TROUBLE->>OTEL: run telemetry tools (capture_api_trace, compare_campaign_costs, predict_campaign_roi)
+  MCP_TROUBLE->>TOOL_IFACE: stream troubleshooting data
     MCP_PROD-->>MCP_TROUBLE: escalate (on error)
+  %% Validation checkpoint
+  Note over MCP_TROUBLE,OTEL: Telemetry & Validation\n- Tools: capture_api_trace, compare_campaign_costs, predict_campaign_roi\n- Validate: ZeroFakeData, cost, ROI\n- Log: diagnostics, OTEL traces

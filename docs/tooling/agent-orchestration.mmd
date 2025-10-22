@@ -6,6 +6,8 @@ sequenceDiagram
     participant SKILL_ROUTER as Route Skills\n(src/agent-orchestration/skill-router.ts)
     participant AGENT_POOL as Agent Pool\n(dev-tools/agent-orchestration/agents/)
     participant MCP_BRIDGE as Invoke MCP\n(mcp-servers/production-server.js)
+    participant MCP_TROUBLE as MCP Troubleshooting\n(mcp-servers/supabase-troubleshooting-server.js)
+    participant OTEL as OTEL Collector\n(telemetry/otel)
     participant DELIVERABLE as Deliver Result\n(src/agent-orchestration/deliverable.ts)
 
     REQUEST->>PLAN: submit request
@@ -14,10 +16,12 @@ sequenceDiagram
     CONTEXT_MGR->>SKILL_ROUTER: manage context
     SKILL_ROUTER->>AGENT_POOL: route skills
     AGENT_POOL->>MCP_BRIDGE: execute
-    MCP_BRIDGE->>DELIVERABLE: deliver result
+    MCP_BRIDGE->>MCP_TROUBLE: run telemetry tools
+    MCP_TROUBLE->>OTEL: capture_api_trace / compare_campaign_costs / predict_campaign_roi
+    MCP_TROUBLE->>DELIVERABLE: deliver diagnostics
     DELIVERABLE-->>REQUEST: feedback
     MCP_BRIDGE->>LEDGER: update ledger
 
     %% Validation checkpoint
-    Note over MCP_BRIDGE,LEDGER: Validation & Checkpoints\n- Validate: agent state\n- Log: orchestration diagnostics
+    Note over MCP_TROUBLE,OTEL: Telemetry & Validation\n- Tools: capture_api_trace, compare_campaign_costs, predict_campaign_roi\n- Validate: ZeroFakeData, cost, ROI\n- Log: diagnostics, OTEL traces
 
