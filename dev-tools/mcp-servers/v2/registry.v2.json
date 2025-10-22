@@ -1,0 +1,24 @@
+{
+  "version": "2.0",
+  "last_updated": "2025-10-22",
+  "servers": {
+    "production": {
+      "type": "stdio",
+      "script_path": "./production-server.js",
+      "tools": ["supabase", "integration-hub", "observability"],
+      "env": { "NODE_ENV": "production" }
+    },
+    "development": {
+      "type": "stdio",
+      "script_path": "./development-server.js",
+      "tools": ["supabase", "integration-hub"],
+      "env": { "NODE_ENV": "development" }
+    },
+    "troubleshooting": {
+      "type": "stdio",
+      "script_path": "./supabase-troubleshooting-server.js",
+      "tools": ["supabase", "observability"],
+      "env": { "NODE_ENV": "troubleshooting" }
+    }
+  }
+}

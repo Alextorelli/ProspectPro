@@ -15,6 +15,6 @@ This plan documents the migration to a v2 folder structure, consolidating MCP se
 
 ## Next Steps
 
-1. Refactor MCP server scripts and registry to match the v2 matrix
-2. Update coverage and validate with `npm run docs:prepare` and tests
+1. Registry and server scripts refactored: see `dev-tools/mcp-servers/v2/registry.v2.json`
+2. Validate with `npm run docs:prepare` and tests
 3. Promote v2 diagrams and configs after validation
