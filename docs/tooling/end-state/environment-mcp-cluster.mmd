@@ -11,22 +11,7 @@ flowchart LR
             DEV_ENTRY --> D4[postgres-local]
         end
 
-        subgraph test_cluster ["Testing Cluster"]
-            TEST_ENTRY((test cluster))
-            TEST_ENTRY --> T1[integration-testing]
-            TEST_ENTRY --> T2[performance-profiling]
-            TEST_ENTRY --> T3[quality-gates]
-            TEST_ENTRY --> T4[test-data-management]
-        end
-
-        subgraph stage_cluster ["Staging Cluster"]
-            STAGE_ENTRY((troubleshooting cluster))
-            STAGE_ENTRY --> S1[supabase-troubleshooting]
-            STAGE_ENTRY --> S2[observability-troubleshooting]
-            STAGE_ENTRY --> S3[deployment-validation]
-            STAGE_ENTRY --> S4[cost-optimization]
-        end
-
+     
         subgraph prod_cluster ["Production Cluster"]
             PROD_ENTRY((production cluster))
             PROD_ENTRY --> P1[supabase-production]
@@ -45,7 +30,5 @@ flowchart LR
     end
 
     ENV_ROUTER --> DEV_ENTRY
-    ENV_ROUTER --> TEST_ENTRY
-    ENV_ROUTER --> STAGE_ENTRY
     ENV_ROUTER --> PROD_ENTRY
     ENV_ROUTER --> CROSS_ENTRY
