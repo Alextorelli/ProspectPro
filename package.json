@@ -77,6 +77,8 @@
     "serve:local": "npm run preview",
     "session:wrap": "bash ./scripts/operations/post-session.sh",
     "static:deploy": "npm run build && cd dist && npx --yes vercel@latest --prod",
+    "repo:scan": "bash scripts/docs/repo_scan.sh",
+    "repo:scan:summary": "SUMMARY_DEPTH=1 bash scripts/docs/repo_scan.sh",
     "supabase:auth": "bash -lc 'cd supabase && source ../scripts/operations/ensure-supabase-cli-session.sh'",
     "supabase:db:pull": "bash -lc 'cd supabase && source ../scripts/operations/ensure-supabase-cli-session.sh && npx --yes supabase@latest db pull --schema public'",
     "supabase:db:push": "bash -lc 'cd supabase && source ../scripts/operations/ensure-supabase-cli-session.sh && npx --yes supabase@latest migration list && npx --yes supabase@latest db push'",
