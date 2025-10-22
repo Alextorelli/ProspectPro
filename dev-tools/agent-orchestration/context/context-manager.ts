@@ -6,6 +6,30 @@ import { fileURLToPath } from "node:url";
 // Context routing follows Option A taxonomy: @ux, @platform, @devops, @secops, @integrations
 // All context snapshots and outputs are routed to reports/context/<tag>/
 
+// Environment loader sourcing
+const {
+  selectEnvironment,
+} = require("../../../config/environment-loader.v2.js");
+const DRY_RUN = process.argv.includes("--dry-run");
+const CURRENT_ENV = selectEnvironment();
+if (DRY_RUN) {
+  console.log(
+    "[DRY RUN] Agent orchestration context-manager initialized. No actions will be executed."
+  );
+}
+// MCP routing helpers
+function getMCPServerForParticipant(tag) {
+  // Option A mapping, can be extended for dynamic registry lookup
+  const mapping = {
+    ux: "development",
+    platform: "development",
+    devops: "production",
+    secops: "supabase-troubleshooting",
+    integrations: "development",
+  };
+  return mapping[tag] || "development";
+}
+
 type EnvironmentName = "production" | "staging" | "development";
 
 export interface ScratchpadNote {

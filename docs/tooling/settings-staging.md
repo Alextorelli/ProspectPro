@@ -394,3 +394,4 @@ Rollback: `git restore .` or revert individual files if needed
 - MCP-aware regression test script added for DevTools startup, Vercel validation, Supabase troubleshooting, and Redis observability.
 - Diagrams/playbooks refreshed; full validation pipeline run (`docs:prepare`, `mcp:chat:validate`).
 - All changes logged; legacy migration plans archived for clarity.
+Begin agent orchestration and automation wiring patch sequence.
