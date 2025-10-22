@@ -461,3 +461,14 @@ _Governance review and documentation update complete. Ready for final migration 
   6. Document all findings and validation outputs in `reports/context/coverage.md` and this file
 
 - **Guardrails**: No direct edits to `.vscode/` or `.github/` until staged and approved here. All automation, MCP, and diagram changes must be validated and logged.
+
+# Staged: CI Workflow Gate for Diagram Bundle & Taxonomy Audit (2025-10-22)
+
+- **Proposal**: Update `.github/workflows/mermaid-diagram-sync.yml` to run `npm run docs:prepare` (calls bundle + audit) and fail merges on missing taxonomy/compliance anchors.
+- **Rationale**: Enforce diagram normalization and compliance in CI before merges, matching local guardrails and governance.
+- **Risk**: Medium – workflow failures could block PRs if scripts regress. Mitigation: local rehearsal and early exit messaging.
+- **Rollback**: Revert workflow file to previous commit.
+- **Validation Plan**: `npm run docs:prepare`, `npm run docs:validate`, `npm run docs:audit`, `npm run lint` pre-commit; confirm GitHub Actions success on test PR.
+
+- **Applied**: Added npm scripts: `docs:validate`, `docs:preview`, `docs:audit`, `docs:render:svg`. Updated `docs:prepare` to call bundle, audit, and preview.
+- **Next**: Extend provenance logging in `reports/context/coverage.md` after each run, then proceed with directory migrations when automation is ready.

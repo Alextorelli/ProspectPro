@@ -57,5 +57,8 @@ ProspectPro/
 ### Provenance & Next Steps
 
 - All inventories logged for pre-migration baseline.
-- Downstream scripts and automation will be revised to match the new directory structure.
-- Proceed to Phase 3: Centralized Mermaid config and standards.
+- Diagram bundle and taxonomy audit scripts implemented (`scripts/docs/generate-diagram-bundle.sh`, `scripts/docs/audit-diagram-taxonomy.js`).
+- New npm scripts added: `docs:validate`, `docs:preview`, `docs:audit`, `docs:render:svg`; `docs:prepare` now calls bundle, audit, and preview.
+- CI workflow staged to enforce diagram normalization and taxonomy compliance (`.github/workflows/mermaid-diagram-sync.yml`).
+- Provenance: After each run, log diagram counts, compliance failures, and last script SHA here.
+- Next: Proceed with directory migrations and update automation as tooling is validated.
