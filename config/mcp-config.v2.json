@@ -3,15 +3,15 @@
   "description": "ProspectPro MCP v2 - Three-mode matrix (production, development, troubleshooting)",
   "servers": {
     "production": {
-      "tools": ["supabase", "integration-hub", "observability"],
+      "tools": ["supabase", "integration-hub", "observability", "mermaid-mcp"],
       "env": { "NODE_ENV": "production" }
     },
     "development": {
-      "tools": ["supabase", "integration-hub"],
+      "tools": ["supabase", "integration-hub", "mermaid-mcp"],
       "env": { "NODE_ENV": "development" }
     },
     "troubleshooting": {
-      "tools": ["supabase", "observability"],
+      "tools": ["supabase", "observability", "mermaid-mcp"],
       "env": { "NODE_ENV": "troubleshooting" }
     }
   },

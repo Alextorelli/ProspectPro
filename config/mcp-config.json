@@ -33,7 +33,8 @@
         "deploy_and_validate_function",
         "compare_edge_function_versions",
         "update_technical_docs",
-        "generate_api_changelog"
+        "generate_api_changelog",
+        "mermaid-mcp"
       ],
       "activationKeywords": [
         "develop",
@@ -60,7 +61,8 @@
         "check_vercel_deployment",
         "diagnose_anon_key_mismatch",
         "run_rls_diagnostics",
-        "generate_debugging_commands"
+        "generate_debugging_commands",
+        "mermaid-mcp"
       ],
       "activationKeywords": [
         "debug",
