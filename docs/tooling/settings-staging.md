@@ -387,12 +387,11 @@ Rollback: `git restore .` or revert individual files if needed
 
 ---
 
-## 2025-10-22: MCP/Participant Routing & Chatmode Validation
+## 2025-10-22: Phase 4 Automation & Routing
 
-- Orchestration/context scripts reviewed: Option A taxonomy and participant tags (`@ux`, `@platform`, `@devops`, `@secops`, `@integrations`) confirmed in context-manager and output routing.
-- Chatmode manifest regenerated (`npm run mcp:chat:sync`), validation passed (`npm run mcp:chat:validate`).
-- No legacy participant references found in context or orchestration scripts.
-- No legacy assets found in `docs/tooling/history/round-1/`.
-- Chatmode and agent migration archives present in `reports/context/archive/`.
-- Coverage log updated; diagram normalization and documentation complete.
-- No further action required for participant routing or asset archiving at this time.
+- Added `scripts/automation/lib/participant-routing.sh` for Option A participant routing.
+- All automation scripts now reference participant tags (`ux`, `platform`, `devops`, `secops`, `integrations`) via shared helper.
+- Chatmode and CI workflows validated; no legacy participant references remain.
+- Documentation and playbooks to be refreshed to match new taxonomy and routing.
+
+---

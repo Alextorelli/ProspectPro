@@ -19,3 +19,12 @@
 - No legacy participant references or assets found in context, orchestration, or history/round-1.
 - Chatmode and agent migration archives present in `reports/context/archive/`.
 - Diagram normalization and documentation update complete.
+
+---
+
+## 2025-10-22: Phase 4 Automation & Routing
+
+- Added `scripts/automation/lib/participant-routing.sh` for Option A participant routing.
+- All automation scripts now reference participant tags via shared helper.
+- Chatmode and CI workflows validated; no legacy participant references remain.
+- Documentation and playbooks to be refreshed to match new taxonomy and routing.
