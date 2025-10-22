@@ -5,6 +5,13 @@
  * Enhanced debugging and diagnostics for Supabase-first architecture
  */
 
+// Environment loader sourcing
+import { selectEnvironment } from "../../../config/environment-loader.v2.js";
+
+// Dry-run mode support
+const DRY_RUN = process.argv.includes("--dry-run");
+
+
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import {
@@ -21,6 +28,10 @@ const execAsync = promisify(exec);
 class SupabaseTroubleshootingServer {
   constructor() {
     this.server = new Server(
+    this.environment = selectEnvironment();
+    if (DRY_RUN) {
+      console.log("[DRY RUN] Supabase Troubleshooting MCP Server initialized. No actions will be executed.");
+    }
       {
         name: "prospectpro-supabase-troubleshooting",
         version: "1.0.0",

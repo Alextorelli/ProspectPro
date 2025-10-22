@@ -36,12 +36,17 @@ function loadConfig() {
 async function selectEnvironment() {
   let config = loadConfig();
   let env = config?.environment || process.env.MCP_ENVIRONMENT;
-  if (!env) {
+  const dryRun = process.argv.includes("--dry-run");
+  if (!env && !dryRun) {
     env = await promptEnvironment();
     fs.writeFileSync(
       CONFIG_PATH,
       JSON.stringify({ environment: env }, null, 2)
     );
+  }
+  if (dryRun) {
+    console.log("[DRY RUN] Environment selection skipped.");
+    return env || "development";
   }
   console.log(`Selected environment: ${env}`);
   return env;

@@ -13,6 +13,12 @@
  * - Cost Intelligence: Dynamic pricing with admin panel integration
  */
 
+// Environment loader sourcing
+import { selectEnvironment } from "../../../config/environment-loader.v2.js";
+
+// Dry-run mode support
+const DRY_RUN = process.argv.includes("--dry-run");
+
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { CallToolRequestSchema } from "@modelcontextprotocol/sdk/types.js";
@@ -43,6 +49,12 @@ class ProductionMCPServer {
     this.supabase = null;
     this.apiClients = {};
     this.workspaceRoot = process.env.WORKSPACE_ROOT || process.cwd();
+    this.environment = selectEnvironment();
+    if (DRY_RUN) {
+      console.log(
+        "[DRY RUN] Production MCP Server initialized. No actions will be executed."
+      );
+    }
     this.setupTools();
     this.setupErrorHandling();
   }
