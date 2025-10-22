@@ -50,6 +50,45 @@ class SupabaseTroubleshootingServer {
     this.server.setRequestHandler(ListToolsRequestSchema, async () => ({
       tools: [
         {
+          name: "capture_api_trace",
+          description: "Capture OpenTelemetry trace for a given API call (discovery/enrichment/validation)",
+          inputSchema: {
+            type: "object",
+            properties: {
+              apiEndpoint: { type: "string", description: "API endpoint URL" },
+              method: { type: "string", description: "HTTP method", default: "POST" },
+              payload: { type: "object", description: "Request payload" },
+              authKey: { type: "string", description: "API key or token" },
+            },
+            required: ["apiEndpoint", "authKey"],
+          },
+        },
+        {
+          name: "compare_campaign_costs",
+          description: "Compare cost metrics across multiple campaigns using API telemetry and Supabase logs",
+          inputSchema: {
+            type: "object",
+            properties: {
+              campaignIds: { type: "array", items: { type: "string" }, description: "List of campaign IDs" },
+              sinceTime: { type: "string", description: "Time window (e.g., 24h)" },
+            },
+            required: ["campaignIds"],
+          },
+        },
+        {
+          name: "predict_campaign_roi",
+          description: "Predict campaign ROI using cost, enrichment, and validation telemetry",
+          inputSchema: {
+            type: "object",
+            properties: {
+              campaignId: { type: "string", description: "Campaign ID" },
+              tierKey: { type: "string", description: "Tier or plan key" },
+              targetCount: { type: "integer", description: "Target lead count" },
+            },
+            required: ["campaignId", "tierKey", "targetCount"],
+          },
+        },
+        {
           name: "collect_react_runtime_logs",
           description:
             "Tail Vercel build output or local dev server logs for React hook violations and runtime errors.",
