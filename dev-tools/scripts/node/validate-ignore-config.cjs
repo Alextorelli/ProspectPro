@@ -124,7 +124,28 @@ function getAllFiles(dir, arr = []) {
   for (const entry of fs.readdirSync(dir)) {
     const full = path.join(dir, entry);
     const rel = path.relative(ROOT, full);
-    if (fs.statSync(full).isDirectory()) {
+    let stats;
+    try {
+      stats = fs.lstatSync(full);
+    } catch (err) {
+      if (err.code === "ENOENT") {
+        continue;
+      }
+      throw err;
+    }
+
+    if (stats.isSymbolicLink()) {
+      try {
+        stats = fs.statSync(full);
+      } catch (err) {
+        if (err.code === "ENOENT") {
+          continue;
+        }
+        throw err;
+      }
+    }
+
+    if (stats.isDirectory()) {
       // Skip known runtime/build/IDE/dev/test/legacy directories entirely
       if (
         SKIP_DIRS.has(entry) ||
