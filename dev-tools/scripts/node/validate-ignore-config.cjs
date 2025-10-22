@@ -3,6 +3,7 @@
 const fs = require("fs");
 const path = require("path");
 const ignore = require("ignore");
+const minimatch = require("minimatch");
 
 const IGNORE_FILES = [".gitignore", ".eslintignore", ".vercelignore"];
 const ROOT = process.cwd();
@@ -53,7 +54,6 @@ const SKIP_FILES = new Set([
   ".env.vercel",
   ".env.local",
   ".env.development.local",
-  ".env.test.local",
   ".env.production.local",
   // Logs
   "test-output.log",
