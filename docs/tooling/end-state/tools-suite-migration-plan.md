@@ -6,6 +6,7 @@
 - Normalized Mermaid init headers for all end-state diagrams
 - Updated diagram scripts and coverage to reference new coordination diagrams and ER model
 - Regenerated and validated documentation and tests (see coverage.md)
+- Promoted revised `agent-mode-flow.mmd` hierarchy into `devops-environment-taxonomy.md`
 
 # End-to-End Tools Suite Migration Plan (Option A Alignment)
 

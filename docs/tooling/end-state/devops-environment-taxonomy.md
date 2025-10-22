@@ -49,64 +49,58 @@ Source material captured for follow-up synthesis and alignment work. Content ref
 ```mermaid
 %%{init: {'theme': 'dark', 'layout': 'dagre'}}%%
 flowchart TD
-    subgraph Environment
-        DEV[Development]
-        TEST[Test/QA]
-        STAGE[Staging]
-        PROD[Production]
-        INCIDENT[Incident Response]
+    %% Copilot Mode Activation
+    CopilotActivation@{shape: stadium, label: ["Copilot Mode Activation"]} -->|routes context| Agent_Modes
+
+    subgraph Agent_Modes
+        DEBUG["@debug"]
+        FEATURE["@feature"]
+        SUPPORT["@support"]
+        OPTIMIZE["@optimize"]
+        SECURITY["@security"]
     end
 
-    subgraph Copilot_Agent_Modes
-        DEBUG_MODE["@debug"]
-        FEATURE_MODE["@feature"]
-        SUPPORT_MODE["@support"]
-        OPTIMIZE_MODE["@optimize"]
-        SECURITY_MODE["@security"]
-    end
-
-    subgraph Terminal_Participants
+    %% Many-to-many mapping table: Agent Modes ↔ Chat Participants
+    subgraph Chat_Participants
         ux_participant["@ux"]
         platform_participant["@platform"]
         devops_participant["@devops"]
         secops_participant["@secops"]
-        integrations_participant["@integrations"]
+        integrations_participant["@integrations (optional)"]
     end
 
-    subgraph Functions_Primitives
-        DETECT[Detect]
-        DIAGNOSE[Diagnose]
-        REMEDIATE[Remediate]
-        VALIDATE[Validate]
-        ORCHESTRATE[Orchestrate]
-        REPORT[Report]
+    Agent_Modes --> Environment_Matrix
+    Agent_Modes <--> Chat_Participants
+    Chat_Participants --> Environment_Matrix
+
+     %% Chat Participants → Environment Matrix
+    subgraph Environment_Matrix
+        DEV["Development"]
+        TEST["Testing / QA"]
+        STAGE["Staging"]
+        PROD["Production"]
+        INCIDENT["Incident Response"]
     end
+%% Environment Matrix → Functions / Tests / Workflows
+    DEV --> DEV_Function1@{shape: "lean-r", label: "npm run lint"}
+    --> DEV_Function2@{shape: "lean-r", label: "npm run test:unit"}
+    --> DEV_Function3@{shape: "lean-r", label: "npm run docs:prepare"}
 
-    DEV --> DEBUG_MODE
-    TEST --> FEATURE_MODE
-    STAGE --> SUPPORT_MODE
-    PROD --> OPTIMIZE_MODE
-    INCIDENT --> SECURITY_MODE
+    TEST --> TEST_Function1@{shape: "lean-r", label: "npm run lint"}
+    --> TEST_Function2@{shape: "lean-r", label: "nnpm run supabase:test:db"}
+    --> TEST_Function3@{shape: "lean-r", label: "nnpm run docs:update"}
 
-    DEBUG_MODE --> platform_participant
-    DEBUG_MODE --> ux_participant
-    FEATURE_MODE --> ux_participant
-    FEATURE_MODE --> integrations_participant
-    SUPPORT_MODE --> platform_participant
-    SUPPORT_MODE --> secops_participant
-    OPTIMIZE_MODE --> devops_participant
-    OPTIMIZE_MODE --> secops_participant
-    SECURITY_MODE --> secops_participant
-    SECURITY_MODE --> devops_participant
+    STAGE --> STAGE_Function1@{shape: "lean-r", label: "npm run lint"}
+    --> STAGE_Function2@{shape: "lean-r", label: "npm run supabase:test:db"}
+    --> STAGE_Function3@{shape: "lean-r", label: "npm run docs:update"}
 
-    ux_participant --> VALIDATE
-    platform_participant --> DIAGNOSE
-    platform_participant --> REPORT
-    devops_participant --> ORCHESTRATE
-    secops_participant --> DETECT
-    secops_participant --> REMEDIATE
-    integrations_participant --> ORCHESTRATE
-    integrations_participant --> REPORT
+    PROD --> PROD_Function1@{shape: "lean-r", label: "npm run lint"}
+    --> PROD_Function2@{shape: "lean-r", label: "npm run supabase:test:db"}
+    --> PROD_Function3@{shape: "lean-r", label: "npm run docs:update"}
+
+    INCIDENT --> INCIDENT_Function1@{shape: "lean-r", label: "npm run lint"}
+    --> INCIDENT_Function2@{shape: "lean-r", label: "npm run supabase:test:db"}
+    --> INCIDENT_Function3@{shape: "lean-r", label: "npm run docs:update"}
 ```
 
 ### Layer-Aligned Participant Mapping (Option A)
