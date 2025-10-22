@@ -30,3 +30,11 @@
 1. Changes in this folder **must** maintain alignment with the MECE layout (app / shared / tooling).
 2. Update `docs/technical/REPO_RESTRUCTURE_PLAN.md` when introducing new config artifacts.
 3. Run `npm run validate:ignores` after edits affecting ignore policy.
+
+---
+
+## 2025-10-22: Dev Tools Integration Update
+
+- MCP config now references Supabase, React DevTools, Vercel CLI, Redis, and environment loader.
+- Integration steps for environment loader added to startup scripts and VS Code tasks.
+- Direct integration with frontend and Supabase functions highlighted.

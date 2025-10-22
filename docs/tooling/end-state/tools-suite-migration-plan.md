@@ -137,3 +137,11 @@ Key gaps remain before the Dev Tools suite is fully aligned with the live applic
 5. Log changes in `docs/tooling/settings-staging.md` and `reports/context/coverage.md`, archive remaining Round 1 assets, and proceed to CI updates.
 
 This audit keeps the DevOps toolchain aligned with the actual application source and prepares agents for context-aware operations across all environments.
+
+---
+
+## 2025-10-22: MCP Server & Agent Auth Update
+
+- MCP server tool registries extended for React DevTools, Vercel deploy helpers, and Redis observability hooks.
+- Agent instructions updated for environment-aware authentication and credential requirements per environment.
+- Access scopes documented in `docs/tooling/end-state/mcp-migration-guidance.md` and agent instructions linked to routing helper.

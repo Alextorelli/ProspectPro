@@ -128,10 +128,8 @@ This document scaffolds the rewrite of `config/mcp-config.json` so the MCP serve
 
 ---
 
-## 2025-10-22: Final MCP Architecture Update
+## 2025-10-22: MCP Scaffolding Update
 
-- All MCP servers now use Supabase as the unified data layer; legacy Postgres modules are deprecated.
-- Observability and integration helpers are routed through the troubleshooting/observability and integration-hub servers, respectively.
-- Registry and v2 configs reference only Supabase, integration-hub, and observability tools for each environment.
-- Architecture is now Supabase-first, with three-environment MCP matrix (development, production, troubleshooting).
-- All diagrams, configs, and scripts are aligned and validated for the end-state suite.
+- Legacy multi-server layout removed; now references Supabase, React DevTools, Vercel CLI, Redis, and environment loader integration.
+- v2 config promoted in `config/mcp-config.json` and template in `config/mcp-config.v2.json`.
+- Environment loader integration steps documented for startup scripts and VS Code tasks.

@@ -28,3 +28,13 @@
 - All automation scripts now reference participant tags via shared helper.
 - Chatmode and CI workflows validated; no legacy participant references remain.
 - Documentation and playbooks to be refreshed to match new taxonomy and routing.
+
+---
+
+## 2025-10-22: Dev Tools Suite Audit & Execution Log
+
+- MCP scaffolding and config README updated for React DevTools, Vercel CLI, Redis, and environment loader integration.
+- MCP server tool registries and agent instructions extended for environment-aware authentication.
+- MCP-aware regression test script added for DevTools startup, Vercel validation, Supabase troubleshooting, and Redis observability.
+- Diagrams/playbooks refreshed; full validation pipeline run (`docs:prepare`, `mcp:chat:validate`).
+- All changes logged; legacy migration plans archived for clarity.
