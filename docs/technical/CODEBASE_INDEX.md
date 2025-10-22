@@ -2,7 +2,7 @@
 
 > Primary #codebase reference. Regenerate with `npm run docs:update` before audits or deployments.
 
-_Last generated: 2025-10-22T23:02:07.219Z_
+_Last generated: 2025-10-22T23:04:05.786Z_
 
 ## Edge Function Configuration
 

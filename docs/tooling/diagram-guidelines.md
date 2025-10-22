@@ -1,6 +1,64 @@
 # Diagram Guidelines for ProspectPro
 
+**Configuration Guard:** All changes to `.vscode/` and `.github/` must be staged and approved via `docs/tooling/settings-troubleshooting.md`. Do not edit these directories directly during refactors or automation.
+
+## Centralized Mermaid Configuration
+
+- All diagrams must use the shared config in [`docs/tooling/mermaid.config.json`](mermaid.config.json) for theme, palette, typography, and padding.
+
+- Use `%%{init: { 'theme': 'forest', 'themeVariables': {...} }}%%` at the top of each diagram, referencing the config file for palette and style.
+- Node colors:
+  - App: `#2563eb` (blue)
+
+## Compliance Anchors
+
+- Every diagram must include:
+
+  - Validation checkpoint block (schema, session, diagnostics)
+
+- Use snippet blocks from `docs/tooling/snippets/mermaid.json` for common nodes and compliance anchors.
+
+## Automated Diagram Patch Workflow
+
+1. **Detect Changes** – `scripts/docs/generate-diagram-bundle.sh` (invoked by `npm run docs:prepare` and available via `npm run docs:patch:diagrams`) identifies modified `.mmd` files using `git diff --name-only HEAD -- '*.mmd'` and enforces `.vscode/` / `.github/` guardrails.
+
+2. **Normalize Config** – Each changed diagram gains a `%%{init: { 'theme': 'forest', 'themeVariables': {...} }}%%` header (from config file) if missing, and tabs are converted to spaces for consistent linting.
+
+3. **Compliance Warning** – Diagrams without explicit `ZeroFakeData` references emit a warning to stderr for manual follow-up.
+
+4. **Regenerate References** – Run `npm run docs:prepare` to call the bundle script, skip SVG rendering, and regenerate documentation references.
+
+5. **Record Provenance** – Document diagram-touching workstreams in `reports/context/coverage.md` or linked runbooks to maintain auditability.
+
+6. **CI/CD Enforcement (Next)** – Extend pipelines to require `npm run docs:patch:diagrams` and `npm run mcp:chat:validate` before merges; integrate with VS Code task "Docs: Prepare".
+
+---
+
+Last updated: 2025-10-22
+
+# Diagram Guidelines for ProspectPro
+
 > **Configuration Guard:** All changes to `.vscode/` and `.github/` must be staged and approved via `docs/tooling/settings-troubleshooting.md`. Do not edit these directories directly during refactors or automation.
+
+## Centralized Mermaid Configuration
+
+- All diagrams must use the shared config in [`docs/tooling/mermaid.config.json`](mermaid.config.json) for theme, palette, typography, and padding.
+- Use `%%{init: { 'theme': 'forest', 'themeVariables': {...} }}%%` at the top of each diagram, referencing the config file for palette and style.
+- Node colors:
+  - App: `#2563eb` (blue)
+  - Dev-Tools: `#f97316` (orange)
+  - Docs: `#16a34a` (green)
+  - Config: `#64748b` (slate)
+  - Reports: `#facc15` (yellow)
+- Font: Inter, Arial, sans-serif; Font size: 16px; Node padding: 12; Border radius: 6
+
+## Compliance Anchors
+
+- Every diagram must include:
+  - Validation checkpoint block (schema, session, diagnostics)
+  - ZeroFakeData snippet for any validation/enrichment step
+  - Accessibility meta-comments: `%% accTitle: <Short Title>`, `%% accDescr: <Description>`
+- Use snippet blocks from `docs/tooling/snippets/mermaid.json` for common nodes and compliance anchors.
 
 ## Prompts & Snippet Reuse
 
@@ -35,13 +93,13 @@
 
 ## Automated Diagram Patch Workflow
 
-1. **Detect Changes** – `scripts/docs/patch-diagrams.sh` (invoked by `npm run docs:render:diagrams` and available via `npm run docs:patch:diagrams`) identifies modified `.mmd` files using `git diff --name-only HEAD -- '*.mmd'` and enforces `.vscode/` / `.github/` guardrails.
-2. **Normalize Config** – Each changed diagram gains a `%% config: theme: dark` header (respecting YAML front matter) if missing, and tabs are converted to spaces for consistent linting.
+1. **Detect Changes** – `scripts/docs/generate-diagram-bundle.sh` (invoked by `npm run docs:prepare` and available via `npm run docs:patch:diagrams`) identifies modified `.mmd` files using `git diff --name-only HEAD -- '*.mmd'` and enforces `.vscode/` / `.github/` guardrails.
+2. **Normalize Config** – Each changed diagram gains a `%%{init: { 'theme': 'forest', 'themeVariables': {...} }}%%` header (from config file) if missing, and tabs are converted to spaces for consistent linting.
 3. **Compliance Warning** – Diagrams without explicit `ZeroFakeData` references emit a warning to stderr for manual follow-up.
-4. **Regenerate References** – Run `npm run docs:prepare` to call the patch script, skip SVG rendering, and regenerate documentation references.
+4. **Regenerate References** – Run `npm run docs:prepare` to call the bundle script, skip SVG rendering, and regenerate documentation references.
 5. **Record Provenance** – Document diagram-touching workstreams in `reports/context/coverage.md` or linked runbooks to maintain auditability.
 6. **CI/CD Enforcement (Next)** – Extend pipelines to require `npm run docs:patch:diagrams` and `npm run mcp:chat:validate` before merges; integrate with VS Code task "Docs: Prepare".
 
 ---
 
-_Last updated: 2025-10-20_
+_Last updated: 2025-10-22_

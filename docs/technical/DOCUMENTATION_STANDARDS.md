@@ -1,3 +1,22 @@
+# Documentation Standards for ProspectPro
+
+## Diagram Compliance & Automation
+
+- All Mermaid diagrams must reference the centralized config in [`docs/tooling/mermaid.config.json`](../tooling/mermaid.config.json).
+- Diagrams must include validation checkpoints, ZeroFakeData anchors, and accessibility meta-comments as described in [`diagram-guidelines.md`](../tooling/diagram-guidelines.md).
+- Use automation scripts (`npm run docs:patch:diagrams`, `npm run docs:prepare`) to enforce config normalization and compliance.
+- Provenance for diagram changes must be logged in `reports/context/coverage.md`.
+
+## General Documentation Requirements
+
+- All technical documentation must be MECE-structured, versioned, and cross-linked to relevant playbooks and runbooks.
+- Configuration changes must be staged in `docs/tooling/settings-staging.md` before updating live files.
+- Audit artifacts and validation templates must be retained until restructure backlog closes.
+
+---
+
+Last updated: 2025-10-22
+
 # Documentation Standards (ProspectPro)
 
 ## Tiered Content
@@ -35,6 +54,13 @@
 - Prefer subgraphs for logical grouping (e.g., "MCP Fleet", "Context Hub").
 - Keep diagrams agent-parseable but human-friendly.
 
+## Diagram Compliance & Automation
+
+- All Mermaid diagrams must reference the centralized config in [`docs/tooling/mermaid.config.json`](../tooling/mermaid.config.json).
+- Diagrams must include validation checkpoints, ZeroFakeData anchors, and accessibility meta-comments as described in [`diagram-guidelines.md`](../tooling/diagram-guidelines.md).
+- Use automation scripts (`npm run docs:patch:diagrams`, `npm run docs:prepare`) to enforce config normalization and compliance.
+- Provenance for diagram changes must be logged in `reports/context/coverage.md`.
+
 - Automation
 
 - Use generate-diagrams.mjs for differential diagram rendering
@@ -42,3 +68,13 @@
 - `npm run docs:bootstrap` or VS Code task "Docs: Bootstrap Tooling Diagrams" will force initial render and manifest seeding for new diagrams
 - VS Code task: Docs: Refresh Differential Diagrams (runs docs:prepare)
 - Keyboard shortcut: `Ctrl+Alt+P` previews Mermaid diagrams in VS Code
+
+## General Documentation Requirements
+
+- All technical documentation must be MECE-structured, versioned, and cross-linked to relevant playbooks and runbooks.
+- Configuration changes must be staged in `docs/tooling/settings-staging.md` before updating live files.
+- Audit artifacts and validation templates must be retained until restructure backlog closes.
+
+---
+
+_Last updated: 2025-10-22_

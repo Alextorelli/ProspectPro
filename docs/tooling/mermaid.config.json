@@ -1,0 +1,18 @@
+{
+  "theme": "forest",
+  "themeVariables": {
+    "primaryColor": "#2563eb", // App (blue)
+    "secondaryColor": "#f97316", // Dev-Tools (orange)
+    "tertiaryColor": "#16a34a", // Docs (green)
+    "quaternaryColor": "#64748b", // Config (slate)
+    "accentColor": "#facc15", // Reports (yellow)
+    "fontFamily": "Inter, Arial, sans-serif",
+    "fontSize": "16px",
+    "nodePadding": "12",
+    "nodeBorderRadius": "6",
+    "edgeLabelBackground": "#fffbe6"
+  },
+  "init": {
+    "logLevel": "fatal"
+  }
+}
