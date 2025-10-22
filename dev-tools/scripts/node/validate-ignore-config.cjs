@@ -111,7 +111,6 @@ const SKIP_FILES = new Set([
   // These are handled as glob patterns below
 ]);
 
-const minimatch = require("minimatch");
 const SKIP_GLOBS = ["config/**/*.js", "mcp-servers/**/*.js", "scripts/**/*.js"];
 function readIgnoreFile(file) {
   try {
