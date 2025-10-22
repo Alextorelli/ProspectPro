@@ -1,0 +1,28 @@
+{
+  "version": "2.0",
+  "description": "ProspectPro MCP v2 - Three-mode matrix (production, development, troubleshooting)",
+  "servers": {
+    "production": {
+      "tools": ["supabase", "integration-hub", "observability"],
+      "env": { "NODE_ENV": "production" }
+    },
+    "development": {
+      "tools": ["supabase", "integration-hub"],
+      "env": { "NODE_ENV": "development" }
+    },
+    "troubleshooting": {
+      "tools": ["supabase", "observability"],
+      "env": { "NODE_ENV": "troubleshooting" }
+    }
+  },
+  "participants": ["ux", "platform", "devops", "secops", "integrations"],
+  "routing": {
+    "promptOnInit": true,
+    "configFile": "config/environment.v2.json"
+  },
+  "globalSettings": {
+    "maxConcurrentServers": 3,
+    "smartLoading": true,
+    "contextOptimization": true
+  }
+}

@@ -1,0 +1,27 @@
+%%{init: {'theme': 'dark', 'layout': 'dagre'}}%%
+erDiagram
+    MCP_SERVER ||--o{ ENVIRONMENT : serves
+    ENVIRONMENT {
+        string name PK
+        string type
+    }
+    MCP_SERVER {
+        string name PK
+        string[] tools
+        string env
+    }
+    ENVIRONMENT ||--o{ PARTICIPANT : includes
+    PARTICIPANT {
+        string tag PK
+        string displayName
+    }
+    ENVIRONMENT {
+        string name PK
+        string type
+    }
+    ENVIRONMENT ||--o{ FUNCTION : runs
+    FUNCTION {
+        string name PK
+        string command
+        string description
+    }

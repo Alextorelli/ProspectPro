@@ -1,0 +1,14 @@
+%%{init: {'theme': 'dark'}}%%
+flowchart TD
+    subgraph MCP_Clusters
+        PROD["Production MCP"]
+        DEV["Development MCP"]
+        TROUBLE["Troubleshooting MCP"]
+    end
+    PROD --> Supabase
+    PROD --> IntegrationHub
+    PROD --> Observability
+    DEV --> Supabase
+    DEV --> IntegrationHub
+    TROUBLE --> Supabase
+    TROUBLE --> Observability
