@@ -97,27 +97,43 @@ This document tracks the phased migration of ProspectPro’s MCP, agent orchestr
 
 ---
 
-## 2025-10-22: End-State Suite Progress & Next Steps
+## 2025-10-22: End-State Dev Tools Suite Audit & Action Plan
 
-### Current Status
+Key gaps remain before the Dev Tools suite is fully aligned with the live application stack. This plan supersedes all previous migration and refactor logs. Archive prior plans and logs to avoid confusion.
 
-- Diagrams, configs, and scripts are aligned to Option A taxonomy and three-environment MCP matrix.
-- v2 configs (`environment-loader.v2.js`, `environment.v2.json`, `mcp-config.v2.json`) staged and validated.
-- Automation scripts reference participant-routing helper; chatmode/CI workflows validated.
-- Coverage and migration logs updated; Mermaid diagrams syntax-validated.
+### Configuration & Tooling
 
-### Remaining Steps
+- Update `docs/tooling/end-state/mcp-config-scaffolding.md` to remove legacy multi-server layout and add React DevTools, Vercel CLI, Redis, and environment loader integration.
+- Promote v2 config in `config/mcp-config.json` and template in `config/mcp-config.v2.json`.
+- Wire `config/environment-loader.v2.js` into startup scripts and VS Code tasks; document integration steps in `config/README.md` and automation.
 
-1. **Promote v2 into production artifacts**
-   - Replace legacy MCP configs/registry with v2 versions after approval.
-   - Update documentation/playbooks to reference the new three-environment model.
-2. **Server/tool consolidation**
-   - Fold Postgres tooling into Supabase in server scripts.
-   - Merge observability/integration helpers into troubleshooting/shared modules as planned.
-3. **CI/task alignment**
-   - Final review of workflows/tasks for legacy environment assumptions.
-   - Add/adjust tests for new MCP layouts.
-4. **Archive cleanup**
-   - Remove or archive superseded Round 1/research assets.
-5. **End-state verification**
-   - Run full validation chain and update coverage/staging logs after v2 promotion.
+### MCP Servers & Agents
+
+- Extend MCP server tool registration for React DevTools, Vercel deploy helpers, and Redis observability hooks.
+- Document access scopes and environment-specific authentication in `docs/tooling/end-state/mcp-migration-guidance.md` and agent instructions.
+- Add credential requirements per environment and link to the new routing helper.
+
+### Automation, Tests, CI/CD
+
+- Add scripts/tasks for React DevTools startup, Vercel CLI validation, and Redis/observability checks; ensure participant-routing helper is invoked.
+- Create MCP-aware regression test suite in `scripts/testing` and update test index for `npm run docs:prepare`.
+
+### Documentation & Diagrams
+
+- Update v2 playbook (`docs/tooling/v2/tools-suite-migration-plan.md`) to reflect remaining work and link to revised diagrams in v2.
+- Ensure README sections for MCP tooling highlight direct integration with frontend and Supabase functions.
+
+### Observability & Security
+
+- Surface Redis/trace requirements in `docs/tooling/end-state/agent-orchestration-migration.md` and align with `config/otel-config.yml`.
+- Define role-based access for MCP agents and document in `docs/tooling/devops-agent-runbook.md`.
+
+### Next actions
+
+1. Rewrite MCP scaffolding + README sections to reference React DevTools, Vercel CLI, Redis, and environment prompting.
+2. Extend MCP server tool registries and agent instruction sets for environment-aware auth.
+3. Add automation scripts/tests for React DevTools startup, Vercel deploy validation, and Supabase troubleshooting; regenerate docs.
+4. Refresh diagrams/playbooks to cite the new workflow, then run `npm run docs:prepare` and `npm run mcp:chat:validate`.
+5. Log changes in `docs/tooling/settings-staging.md` and `reports/context/coverage.md`, archive remaining Round 1 assets, and proceed to CI updates.
+
+This audit keeps the DevOps toolchain aligned with the actual application source and prepares agents for context-aware operations across all environments.

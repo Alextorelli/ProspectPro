@@ -24,7 +24,7 @@ This document scaffolds the rewrite of `config/mcp-config.json` so the MCP serve
     "development": {
       "environments": ["sandbox", "development"],
       "participants": ["ux", "platform", "devops"],
-      "servers": ["dev-chrome", "dev-supabase", "dev-postgres", "dev-ci"]
+      "servers": ["dev-chrome", "dev-supabase", "dev-ci"]
     },
     "testing": {
       "environments": ["testing"],
@@ -125,3 +125,13 @@ This document scaffolds the rewrite of `config/mcp-config.json` so the MCP serve
 - Update `dev-tools/mcp-servers/registry.json` in tandem; ensure slugs match the scaffolding above.
 - Keep backups of the legacy configuration until Option A routing is validated.
 - Record changes in `reports/context/coverage.md` under “Key Changes Since Last Report”.
+
+---
+
+## 2025-10-22: Final MCP Architecture Update
+
+- All MCP servers now use Supabase as the unified data layer; legacy Postgres modules are deprecated.
+- Observability and integration helpers are routed through the troubleshooting/observability and integration-hub servers, respectively.
+- Registry and v2 configs reference only Supabase, integration-hub, and observability tools for each environment.
+- Architecture is now Supabase-first, with three-environment MCP matrix (development, production, troubleshooting).
+- All diagrams, configs, and scripts are aligned and validated for the end-state suite.
