@@ -13,8 +13,12 @@
 ## Diagrams:
 
 - [Workspace Architecture](workspace-architecture.mmd)
-- [Context Orchestration](context-orchestration.mmd)
 - [Agent Orchestration](agent-orchestration.mmd)
+- [Agent Coordination Journey](end-state/agent-coordination-flow.mmd)
+- [Agent Mode Journey](end-state/agent-mode-flow.mmd)
+- [Participant Coordination Journey](end-state/participant-coordination-flow.mmd)
+- [Environment MCP Cluster](end-state/environment-mcp-cluster.mmd)
+- [Dev Tool Suite ER](end-state/dev-tool-suite-ER.mmd)
 - [MCP Routing Overview](mcp-routing-overview.mmd)
 - [MCP Server Matrix](mcp-server-matrix.mmd)
 - [Repo File Tree (Tooling)](repo-filetree.mmd)

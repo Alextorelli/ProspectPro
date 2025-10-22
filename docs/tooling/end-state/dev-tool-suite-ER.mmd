@@ -1,59 +1,51 @@
-%%{init: {\'theme\': \'dark\'}}%%
+%%{init: {'theme': 'dark'}}%%
 erDiagram
-    VS_CODE_EXTENSION ||--|| AGENT_ORCHESTRATOR : contains
-    AGENT_ORCHESTRATOR ||--|| MCP_CLIENT_MANAGER : uses
-    AGENT_ORCHESTRATOR ||--|| AGENT_MODE_EXECUTOR : orchestrates
-    AGENT_ORCHESTRATOR ||--|| COORDINATION_MANAGER : uses
+    MCP_CLUSTER }|..|{ AGENT_MODE : routes
+    AGENT_MODE ||--o{ COORDINATION_PATTERN : selects
+    AGENT_MODE ||--o{ AUTOMATION_SCRIPT : triggers
+    AUTOMATION_SCRIPT }o..o{ TELEMETRY_TOOL : emits
+    COORDINATION_PATTERN }o..o{ PARTICIPANT : activates
 
-    AGENT_ORCHESTRATOR ||--o{ AGENT_PARTICIPANT : manages
+    MCP_CLUSTER {
+        string name PK
+        string tier
+        string transport
+    }
 
-    AGENT_PARTICIPANT {
-        string tag PK
-        string displayName
-        string layerFocus
-        string[] preferredModes
-        string[] mcpClusters
-        string[] automationScripts
-        string iconTheme
-        string handbookUrl
+    AGENT_MODE {
+        string modeKey PK
+        string primaryFocus
+        string defaultParticipants
+    }
+
+    COORDINATION_PATTERN {
+        string pattern PK
+        string cadence
+        string escalationRule
+    }
+
+    PARTICIPANT {
+        string handle PK
+        string specialization
         boolean optional
     }
 
-    AGENT_PARTICIPANT ||--|| UX_PARTICIPANT : instance
-    AGENT_PARTICIPANT ||--|| PLATFORM_PARTICIPANT : instance
-    AGENT_PARTICIPANT ||--|| DEVOPS_PARTICIPANT : instance
-    AGENT_PARTICIPANT ||--|| SECOPS_PARTICIPANT : instance
-    AGENT_PARTICIPANT ||--|| INTEGRATIONS_PARTICIPANT : instance
-
-    MCP_CLIENT_MANAGER ||--o{ MCP_SERVER : connects_to
-
-    MCP_SERVER {
-        string name PK
-        string command
-        string[] args
-        object env
-        string transport_type
-        string status
-        datetime last_connected
+    AUTOMATION_SCRIPT {
+        string script PK
+        string path
+        string output
     }
 
-    MCP_SERVER ||--|| SUPABASE_TROUBLESHOOTING : instance
-    MCP_SERVER ||--|| POSTGRESQL : instance
-    MCP_SERVER ||--|| REACT_DEVTOOLS : instance
-    MCP_SERVER ||--|| GITHUB : instance
-    MCP_SERVER ||--|| INTEGRATION_HUB : instance
-    MCP_SERVER ||--|| OBSERVABILITY : instance
-
-    AGENT_MODE_EXECUTOR ||--o{ AGENT_MODE : loads
-
-    AGENT_MODE {
-        string id PK
-        string title
-        string purpose
-        string[] recommendedParticipants
-        string[] requiredClusters
-        string instructions
+    TELEMETRY_TOOL {
+        string tool PK
+        string collector
+        string reportTarget
     }
+
+    MCP_CLUSTER ||--|| DEV_CLUSTER : instance
+    MCP_CLUSTER ||--|| TEST_CLUSTER : instance
+    MCP_CLUSTER ||--|| STAGE_CLUSTER : instance
+    MCP_CLUSTER ||--|| PROD_CLUSTER : instance
 
     AGENT_MODE ||--|| DEBUG_MODE : instance
     AGENT_MODE ||--|| FEATURE_MODE : instance
@@ -61,111 +53,24 @@ erDiagram
     AGENT_MODE ||--|| OPTIMIZE_MODE : instance
     AGENT_MODE ||--|| SECURITY_MODE : instance
 
-    AGENT_MODE }o--o{ AGENT_PARTICIPANT : collaborates_with
+    COORDINATION_PATTERN ||--|| SINGLE_EXECUTION : instance
+    COORDINATION_PATTERN ||--|| CHAIN_EXECUTION : instance
+    COORDINATION_PATTERN ||--|| SWARM_EXECUTION : instance
+    COORDINATION_PATTERN ||--|| ESCALATION_EXECUTION : instance
 
-    COORDINATION_MANAGER ||--o{ COORDINATION_SESSION : manages
-
-    COORDINATION_SESSION {
-        string id PK
-        string initiator
-        string[] participants
-        CoordinationType type
-        object context
-        string status
-        datetime created_at
-        datetime completed_at
-        object results
-    }
-
-    COORDINATION_SESSION ||--|| SINGLE_EXECUTION : type
-    COORDINATION_SESSION ||--|| CHAIN_EXECUTION : type
-    COORDINATION_SESSION ||--|| SWARM_EXECUTION : type
-    COORDINATION_SESSION ||--|| ESCALATION_EXECUTION : type
-
-    AGENT_PARTICIPANT }o--o{ AUTOMATION_SCRIPT : executes
-
-    AUTOMATION_SCRIPT {
-        string name PK
-        string path
-        string description
-        string[] required_env
-        string[] outputs
-        string execution_context
-    }
+    PARTICIPANT ||--|| UX_PARTICIPANT : instance
+    PARTICIPANT ||--|| PLATFORM_PARTICIPANT : instance
+    PARTICIPANT ||--|| DEVOPS_PARTICIPANT : instance
+    PARTICIPANT ||--|| SECOPS_PARTICIPANT : instance
+    PARTICIPANT ||--|| INTEGRATIONS_PARTICIPANT : instance
 
     AUTOMATION_SCRIPT ||--|| SUPABASE_PULL_LOGS : instance
     AUTOMATION_SCRIPT ||--|| CONTEXT_SNAPSHOT : instance
     AUTOMATION_SCRIPT ||--|| VERCEL_STATUS_CHECK : instance
+    AUTOMATION_SCRIPT ||--|| CAPTURE_API_TRACE : instance
+    AUTOMATION_SCRIPT ||--|| COMPARE_CAMPAIGN_COSTS : instance
+    AUTOMATION_SCRIPT ||--|| PREDICT_CAMPAIGN_ROI : instance
 
-    DEBUG_MODE ||--o{ DIAGNOSTIC_TYPE : handles
-    FEATURE_MODE ||--o{ FEATURE_SPEC : delivers
-    SUPPORT_MODE ||--o{ INCIDENT_TYPE : manages
-    OPTIMIZE_MODE ||--o{ PERFORMANCE_METRIC : optimizes
-    SECURITY_MODE ||--o{ RISK_REGISTER : audits
-
-    UX_PARTICIPANT ||--o{ UX_AUDIT : reviews
-    PLATFORM_PARTICIPANT ||--o{ FEATURE_SPEC : validates
-    DEVOPS_PARTICIPANT ||--o{ PERFORMANCE_METRIC : tunes
-    SECOPS_PARTICIPANT ||--o{ RISK_REGISTER : mitigates
-    INTEGRATIONS_PARTICIPANT ||--o{ INTEGRATION_ANALYSIS : evaluates
-
-    DIAGNOSTIC_TYPE {
-        string category PK
-        string severity
-        string[] required_mcps
-        string[] automation_scripts
-        boolean escalation_required
-    }
-
-    FEATURE_SPEC {
-        string id PK
-        string name
-        string description
-        boolean requires_database
-        object schema_changes
-        string[] dependencies
-        string testing_strategy
-    }
-
-    INCIDENT_TYPE {
-        string severity PK
-        string category
-        string[] notification_channels
-        boolean auto_rollback
-        string[] monitoring_dashboards
-        int escalation_timeout_minutes
-    }
-
-    INTEGRATION_ANALYSIS {
-        string provider PK
-        object cost_structure
-        object performance_metrics
-        string[] compliance_requirements
-        float recommendation_score
-    }
-
-    PERFORMANCE_METRIC {
-        string metric_type PK
-        float current_value
-        float baseline_value
-        float threshold
-        string optimization_recommendation
-        float potential_savings
-    }
-
-    UX_AUDIT {
-        string id PK
-        string description
-        string[] affectedComponents
-        string severity
-        string status
-    }
-
-    RISK_REGISTER {
-        string id PK
-        string severity
-        string[] affectedSystems
-        string mitigationPlan
-        string status
-        datetime lastReviewed
-    }
+    TELEMETRY_TOOL ||--|| OTEL_COLLECTOR : instance
+    TELEMETRY_TOOL ||--|| SUPABASE_LOGS : instance
+    TELEMETRY_TOOL ||--|| CONTEXT_SNAPSHOT_REPORT : instance

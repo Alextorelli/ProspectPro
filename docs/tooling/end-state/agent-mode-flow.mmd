@@ -1,54 +1,19 @@
-%%{init: {'theme': 'dark', 'layout': 'dagre'}}%%
+%%{init: {\'theme\': \'dark\'}}%%
 flowchart TD
-    %% Copilot Mode Activation
-    CopilotActivation@{shape: stadium, label: ["Copilot Mode Activation"]} -->|routes context| Agent_Modes
-
     subgraph Agent_Modes
-        DEBUG["@debug"]
-        FEATURE["@feature"]
-        SUPPORT["@support"]
-        OPTIMIZE["@optimize"]
-        SECURITY["@security"]
-    end
-
-    %% Many-to-many mapping table: Agent Modes ↔ Chat Participants
-    subgraph Chat_Participants
-        ux_participant["@ux"]
-        platform_participant["@platform"]
-        devops_participant["@devops"]
-        secops_participant["@secops"]
-        integrations_participant["@integrations (optional)"]
-    end
-   
-    Agent_Modes --> Environment_Matrix
-    Agent_Modes <--> Chat_Participants
-    Chat_Participants --> Environment_Matrix
-
-     %% Chat Participants → Environment Matrix
-    subgraph Environment_Matrix
-        DEV["Development"]
-        TEST["Testing / QA"]
-        STAGE["Staging"]
-        PROD["Production"]
-        INCIDENT["Incident Response"]
-    end
-%% Environment Matrix → Functions / Tests / Workflows
-    DEV --> DEV_Function1@{shape: "lean-r", label: "npm run lint"} 
-    --> DEV_Function2@{shape: "lean-r", label: "npm run test:unit"}
-    --> DEV_Function3@{shape: "lean-r", label: "npm run docs:prepare"}
-    
-    TEST --> TEST_Function1@{shape: "lean-r", label: "npm run lint"}
-    --> TEST_Function2@{shape: "lean-r", label: "nnpm run supabase:test:db"}
-    --> TEST_Function3@{shape: "lean-r", label: "nnpm run docs:update"}
-    
-    STAGE --> STAGE_Function1@{shape: "lean-r", label: "npm run lint"}
-    --> STAGE_Function2@{shape: "lean-r", label: "npm run supabase:test:db"}
-    --> STAGE_Function3@{shape: "lean-r", label: "npm run docs:update"}
-    
-    PROD --> PROD_Function1@{shape: "lean-r", label: "npm run lint"}
-    --> PROD_Function2@{shape: "lean-r", label: "npm run supabase:test:db"}
-    --> PROD_Function3@{shape: "lean-r", label: "npm run docs:update"}
-    
-    INCIDENT --> INCIDENT_Function1@{shape: "lean-r", label: "npm run lint"}
-    --> INCIDENT_Function2@{shape: "lean-r", label: "npm run supabase:test:db"}
-    --> INCIDENT_Function3@{shape: "lean-r", label: "npm run docs:update"}
+        ```mermaid
+        %%{init: {'theme': 'dark'}}%%
+        journey
+                title Agent Mode Activation Journey
+                section Detect Mode
+                    Activate copilot prompt: 5: Developer
+                    Classify mode (@debug/@feature/@support/@optimize/@security): 4: Agent Router
+                section Align Participants
+                    Map mode to chat participants (@ux/@platform/@devops/@secops/@integrations): 4: Coordination Manager
+                    Confirm environment matrix (dev/test/stage/prod/incident): 3: Environment Router
+                section Execute Automation
+                    Run lint/tests/docs pipeline scoped to environment: 4: Automation Scripts, Selected Agent
+                    Invoke MCP troubleshooting + telemetry tools: 3: MCP Clusters
+                section Review & Close
+                    Capture outcomes in coordination ledger: 4: Coordination Manager
+                    Surface recommendations to requester: 5: Selected Agent, Developer    Agent_Modes <--> Chat_Participants
