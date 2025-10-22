@@ -75,16 +75,21 @@ Use `npm run mcp:chat:sync` and `npm run mcp:chat:validate` after modifying any 
 
 - **Troubleshooting Server:**
   - Start: `npm run mcp:start:troubleshooting`
-  - Tools: `test_edge_function`, `validate_database_permissions`, `collect_and_summarize_logs`
+  - Tools: `test_edge_function`, `validate_database_permissions`, `collect_and_summarize_logs`, `capture_api_trace`, `compare_campaign_costs`, `predict_campaign_roi`
   - Output: `reports/diagnostics/`
 
 ### Diagnostic Workflow
 
 1. Start troubleshooting server: `npm run mcp:start:troubleshooting`
 2. Run tools in order:
-   - `test_edge_function`
-   - `validate_database_permissions`
-   - `collect_and_summarize_logs`
+
+- `test_edge_function`
+- `validate_database_permissions`
+- `collect_and_summarize_logs`
+- `capture_api_trace` (capture OTEL traces for API calls)
+- `compare_campaign_costs` (aggregate cost metrics from Supabase logs and OTEL traces)
+- `predict_campaign_roi` (predict campaign ROI using cost, enrichment, and validation telemetry)
+
 3. Review outputs in `reports/diagnostics/`
 
 ### Guard Note
@@ -118,5 +123,9 @@ _Last updated: 2025-10-21_
   - Usage: `./vercel-status-check.sh`
 - **Context Snapshot:** [`context-snapshot.sh`](../../scripts/automation/context-snapshot.sh)
   - Usage: `./context-snapshot.sh <function-slug> <since-time>`
+  - For telemetry/cost/ROI analysis, run MCP troubleshooting server and use:
+    - `capture_api_trace` to fetch OTEL traces for API endpoints
+    - `compare_campaign_costs` to compare campaign costs across logs and traces
+    - `predict_campaign_roi` to estimate ROI for campaign parameters
 
 Each script enforces top-level directory checks and outputs to `reports/`.

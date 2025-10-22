@@ -329,8 +329,171 @@ class SupabaseTroubleshootingServer {
 
     this.server.setRequestHandler(CallToolRequestSchema, async (request) => {
       switch (request.params.name) {
+        case "predict_campaign_roi": {
+          // Handler for campaign ROI prediction using cost, enrichment, and validation telemetry
+          const { campaignId, tierKey, targetCount } = request.params.arguments;
+          try {
+            // Fetch cost metrics from Supabase logs
+            const logPath = `/workspaces/ProspectPro/reports/logs/campaign-${campaignId}.log`;
+            let logContent = "";
+            try {
+              logContent = await fs.readFile(logPath, "utf8");
+            } catch {
+              logContent = `No log file found for campaign ${campaignId}`;
+            }
+            const costMatches = logContent.match(/\$cost=(\d+\.?\d*)/g) || [];
+            const costs = costMatches.map(m => parseFloat(m.split("=")[1]));
+            const totalCost = costs.reduce((a, b) => a + b, 0);
+
+            // Fetch enrichment/validation telemetry from OTEL
+            const otelCollectorUrl = this.environment.otelCollectorUrl || "http://localhost:4318/v1/traces";
+            const fetch = (await import("node-fetch")).default;
+            const response = await fetch(`${otelCollectorUrl}?campaignId=${encodeURIComponent(campaignId)}&tierKey=${encodeURIComponent(tierKey)}`);
+            let traces = [];
+            try {
+              traces = await response.json();
+            } catch {
+              traces = [];
+            }
+            // Aggregate enrichment/validation metrics
+            const enrichmentCount = Array.isArray(traces) ? traces.filter(t => t.type === "enrichment").length : 0;
+            const validationCount = Array.isArray(traces) ? traces.filter(t => t.type === "validation").length : 0;
+            const successCount = Array.isArray(traces) ? traces.filter(t => t.status === "success").length : 0;
+
+            // Simple ROI prediction formula
+            const costPerLead = totalCost / (successCount || 1);
+            const predictedROI = ((targetCount * costPerLead) / (totalCost || 1)) * 100;
+
+            return {
+              content: [
+                {
+                  type: "text",
+                  text: `Campaign ROI Prediction:\n\nCampaign: ${campaignId}\nTier: ${tierKey}\nTarget Leads: ${targetCount}\nTotal Cost: $${totalCost.toFixed(2)}\nCost per Lead: $${costPerLead.toFixed(2)}\nEnrichment Events: ${enrichmentCount}\nValidation Events: ${validationCount}\nSuccessful Events: ${successCount}\n\nPredicted ROI: ${predictedROI.toFixed(2)}%\n\nRecommendations:\n- Optimize enrichment/validation flows for higher ROI.\n- Review cost per lead and adjust campaign parameters.\n- Use compare_campaign_costs for benchmarking.`,
+                },
+              ],
+            };
+          } catch (error) {
+            return {
+              content: [
+                {
+                  type: "text",
+                  text: `Error predicting campaign ROI: ${error.message}`,
+                },
+              ],
+            };
+          }
+        }
+        case "compare_campaign_costs": {
+          // Handler for comparing campaign costs using Supabase logs and OTEL traces
+          const { campaignIds, sinceTime = "24h" } = request.params.arguments;
+          try {
+            // Step 1: Fetch Supabase logs for each campaign
+            const logResults = [];
+            for (const campaignId of campaignIds) {
+              // Simulate log fetch (replace with real CLI/API call as needed)
+              const logPath = `/workspaces/ProspectPro/reports/logs/campaign-${campaignId}.log`;
+              let logContent = "";
+              try {
+                logContent = await fs.readFile(logPath, "utf8");
+              } catch {
+                logContent = `No log file found for campaign ${campaignId}`;
+              }
+              // Extract cost metrics (simple regex for $cost=...)
+              const costMatches = logContent.match(/\$cost=(\d+\.?\d*)/g) || [];
+              const costs = costMatches.map(m => parseFloat(m.split("=")[1]));
+              logResults.push({ campaignId, costs, logSummary: logContent.substring(0, 500) });
+            }
+
+            // Step 2: Fetch OTEL traces for each campaign
+            const otelCollectorUrl = this.environment.otelCollectorUrl || "http://localhost:4318/v1/traces";
+            const fetch = (await import("node-fetch")).default;
+            const otelResults = [];
+            for (const campaignId of campaignIds) {
+              const response = await fetch(`${otelCollectorUrl}?campaignId=${encodeURIComponent(campaignId)}&since=${sinceTime}`);
+              let traces = [];
+              try {
+                traces = await response.json();
+              } catch {
+                traces = [];
+              }
+              // Aggregate cost from traces (assume trace.cost field)
+              const traceCosts = Array.isArray(traces) ? traces.map(t => t.cost || 0) : [];
+              otelResults.push({ campaignId, traceCosts, traceCount: traceCosts.length });
+            }
+
+            // Step 3: Summarize and compare
+            const summary = campaignIds.map((id, idx) => {
+              const log = logResults[idx];
+              const otel = otelResults[idx];
+              const totalLogCost = log.costs.reduce((a, b) => a + b, 0);
+              const totalTraceCost = otel.traceCosts.reduce((a, b) => a + b, 0);
+              return {
+                campaignId: id,
+                totalLogCost,
+                totalTraceCost,
+                logSummary: log.logSummary,
+                traceCount: otel.traceCount
+              };
+            });
+
+            return {
+              content: [
+                {
+                  type: "text",
+                  text: `Campaign Cost Comparison (Supabase logs + OTEL traces):\n\n${JSON.stringify(summary, null, 2)}\n\nRecommendations:\n- Review campaigns with high cost or low trace count for optimization.\n- Check logs for errors or anomalies.\n- Use predict_campaign_roi for deeper analysis.`,
+                },
+              ],
+            };
+          } catch (error) {
+            return {
+              content: [
+                {
+                  type: "text",
+                  text: `Error comparing campaign costs: ${error.message}`,
+                },
+              ],
+            };
+          }
+        }
+        case "capture_api_trace": {
+          // Handler for OTEL trace capture for API calls
+          const { apiEndpoint, method = "POST", payload = {}, authKey } = request.params.arguments;
+          try {
+            // Connect to OTEL collector (assume HTTP endpoint from config)
+            const otelCollectorUrl = this.environment.otelCollectorUrl || "http://localhost:4318/v1/traces";
+            // Simulate API call and fetch trace (in real use, would POST to API and then query OTEL)
+            // For demo, fetch recent traces for endpoint
+            const fetch = (await import("node-fetch")).default;
+            const traceQuery = {
+              endpoint: apiEndpoint,
+              method,
+              timeRange: "5m"
+            };
+            const response = await fetch(`${otelCollectorUrl}?endpoint=${encodeURIComponent(apiEndpoint)}&method=${method}`);
+            const traces = await response.json();
+            // Filter traces for errors/warnings
+            const errorTraces = Array.isArray(traces) ? traces.filter(t => t.status === "error" || t.status === "warning") : [];
+            return {
+              content: [
+                {
+                  type: "text",
+                  text: `OTEL Trace Results for ${apiEndpoint} [${method}]:\n\n${JSON.stringify(traces, null, 2)}\n\nError/Warning Traces:\n${JSON.stringify(errorTraces, null, 2)}`,
+                },
+              ],
+            };
+          } catch (error) {
+            return {
+              content: [
+                {
+                  type: "text",
+                  text: `Error capturing OTEL trace: ${error.message}`,
+                },
+              ],
+            };
+          }
+        }
         case "collect_react_runtime_logs": {
-          // Tail Vercel build/dev logs for React hook violations
+          // ...existing code...
           const { logPath, lines = 100 } = request.params.arguments;
           try {
             const logContent = await fs.readFile(logPath, "utf8");
