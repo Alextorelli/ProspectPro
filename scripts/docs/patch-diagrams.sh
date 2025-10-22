@@ -67,6 +67,14 @@ resolve_dir() {
     echo "$ROOT_DIR/docs/tooling/staging"
     return 0
   fi
+  if [[ "$input" == "end-state" ]]; then
+    echo "$ROOT_DIR/docs/tooling/end-state"
+    return 0
+  fi
+  if [[ "$input" == "v2" ]]; then
+    echo "$ROOT_DIR/docs/tooling/v2"
+    return 0
+  fi
   if [[ "$input" == /* ]]; then
     echo "$input"
   else

@@ -5,8 +5,10 @@
 - Updated documentation references in `devops-environment-taxonomy.md` to point to new diagrams
 - Normalized Mermaid init headers for all end-state diagrams
 - Updated diagram scripts and coverage to reference new coordination diagrams and ER model
+- Added shorthand aliases (`end-state`, `v2`) to diagram patching scripts for targeted normalization
 - Regenerated and validated documentation and tests (see coverage.md)
 - Promoted revised `agent-mode-flow.mmd` hierarchy into `devops-environment-taxonomy.md`
+- Reworked `environment-mcp-cluster.mmd` to depict primary-to-secondary MCP routes per Option A
 
 # End-to-End Tools Suite Migration Plan (Option A Alignment)
 
@@ -87,7 +89,8 @@ This document tracks the phased migration of ProspectPro’s MCP, agent orchestr
 ## Next Steps
 
 1. Validate staged MCP config/registry via `npm run mcp:chat:validate` and record outputs in `settings-staging.md` & `reports/context/coverage.md`.
-2. Begin refactoring orchestration and context scripts
-3. Update automation and documentation
-4. Replace chatmodes and CI workflows
-5. Archive superseded assets
+2. Run `scripts/docs/render-diagrams.sh` to normalize end-state and v2 diagrams with the new aliases.
+3. Proceed with refactoring orchestration and context scripts.
+4. Update automation and documentation to consume the new participant routing helpers.
+5. Replace chatmodes and CI workflows.
+6. Archive superseded assets once validations pass.
