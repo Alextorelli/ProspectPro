@@ -27,8 +27,7 @@ dev-tools/agent-orchestration/mcp/dist/
 # === ARCHIVE & LEGACY ===
 archive/
 
-# === GENERATED DOCS & REPORTS ===
-docs/
+# === GENERATED REPORTS & PUBLIC ASSETS ===
 reports/
 public/
 
