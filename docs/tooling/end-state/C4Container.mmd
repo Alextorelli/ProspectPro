@@ -8,11 +8,11 @@ C4Container
         Container(active_participant, "Active Chat Participant", "TypeScript", "Resolves a single participant per execution")
     }
 
-    Container_Boundary(environment_layer, "Primary MCP Environment Stack") {
-        Container(primary_mcp_stack, "Tiered MCP Router", "Node.js", "Distributes work across Production, Development, and Troubleshooting tiers (1:3)")
+    Container_Boundary(environment_layer, "Primary MCP Environment Router") {
+        Container(mcp_router, "Tiered MCP Router", "Node.js", "Distributes work across production, development, and troubleshooting tiers")
     }
 
-    Container_Boundary(mcp_tools, "MCP Toolchain") {
+    Container_Boundary(mcp_tools, "MCP Tool Stack") {
         Container(supabase_ops, "Supabase Operations Suite", "Node.js", "Edge diagnostics, auth enforcement, migration verification")
         Container(observability_suite, "Observability System", "Node.js", "Telemetry streaming, tracing, alert routing")
         Container(github_automation, "GitHub Automation Hub", "Node.js", "CI/CD orchestration, workflow guards")
@@ -26,11 +26,18 @@ C4Container
         Container(artifact_vault, "Artifact Vault", "Markdown, JSON", "Deployment packages, diagnostics, compliance archives")
     }
 
+    Container_Boundary(knowledge_layer, "Context Library") {
+        Container(context_library, "Context Library", "Markdown, JSON", "Curated automation outputs and playbooks")
+    }
+
     Rel(dev, chat_modes, "Selects delivery focus via chat UI", "VS Code chat")
-    Rel(chat_modes, active_participant, "Activates a single participant for the run", "Intent mapping")
-    Rel(active_participant, primary_mcp_stack, "Routes execution to tiered MCP environment", "JSON-RPC")
-    Rel(primary_mcp_stack, supabase_ops, "Prioritizes backend operations", "JSON-RPC")
-    Rel(supabase_ops, observability_suite, "Shares runtime state for telemetry decisions", "Event bus")
-    Rel(observability_suite, github_automation, "Feeds deployment signals to workflow guards", "Webhook")
-    Rel(github_automation, automation_mesh, "Triggers environment-aware scripts", "CLI invocations")
+    Rel(chat_modes, active_participant, "Activates participant for execution", "Intent mapping")
+    Rel(active_participant, mcp_router, "Routes task to tiered MCP", "JSON-RPC")
+    Rel(mcp_router, supabase_ops, "Dispatches backend operations", "JSON-RPC")
+    Rel(mcp_router, observability_suite, "Requests telemetry insights", "JSON-RPC")
+    Rel(mcp_router, github_automation, "Triggers workflow guards", "JSON-RPC")
+    Rel(supabase_ops, automation_mesh, "Initiates Supabase diagnostics", "CLI orchestration")
+    Rel(observability_suite, automation_mesh, "Streams deployment telemetry", "Event hook")
+    Rel(github_automation, automation_mesh, "Executes environment scripts", "CLI wrapper")
     Rel(automation_mesh, artifact_vault, "Publishes validated artifacts", "Reports & packages")
+    Rel(artifact_vault, context_library, "Archives into context library", "Knowledge capture")
