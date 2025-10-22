@@ -1,19 +1,28 @@
-%%{init: {'theme': 'dark'}}%%
-flowchart TD
-    subgraph Agent_Modes
-        ```mermaid
-        %%{init: {'theme': 'dark'}}%%
-        journey
-                title Agent Mode Activation Journey
-                section Detect Mode
-                    Activate copilot prompt: 5: Developer
-                    Classify mode (@debug/@feature/@support/@optimize/@security): 4: Agent Router
-                section Align Participants
-                    Map mode to chat participants (@ux/@platform/@devops/@secops/@integrations): 4: Coordination Manager
-                    Confirm environment matrix (dev/test/stage/prod/incident): 3: Environment Router
-                section Execute Automation
-                    Run lint/tests/docs pipeline scoped to environment: 4: Automation Scripts, Selected Agent
-                    Invoke MCP troubleshooting + telemetry tools: 3: MCP Clusters
-                section Review & Close
-                    Capture outcomes in coordination ledger: 4: Coordination Manager
-                    Surface recommendations to requester: 5: Selected Agent, Developer    Agent_Modes <--> Chat_Participants
+
+sequenceDiagram
+    participant Developer
+    participant Prompt as Copilot Prompt
+    participant Router as Agent Router
+    participant Coordinator as Coordination Manager
+    participant Env as Environment Router
+    participant Scripts as Automation Scripts
+    participant Agent as Selected Agent
+    participant MCP as MCP Clusters
+
+    Developer->>Prompt: Activate agent mode
+    Prompt->>Router: Submit context & intent
+    Router-->>Prompt: Mode classification
+    Router->>Coordinator: Transfer mode details
+    Coordinator-->>Router: Confirm participants
+    Coordinator->>Env: Request environment matrix
+    Env-->>Coordinator: Return scoped environment
+    Coordinator->>Agent: Brief selected agent
+    par Automation pipeline
+        Coordinator->>Scripts: Run lint/tests/docs suite
+        Scripts-->>Coordinator: Report execution status
+    and Telemetry
+        Coordinator->>MCP: Invoke troubleshooting tools
+        MCP-->>Coordinator: Return telemetry results
+    end
+    Coordinator->>Agent: Compile outcomes
+    Agent-->>Developer: Surface recommendations
