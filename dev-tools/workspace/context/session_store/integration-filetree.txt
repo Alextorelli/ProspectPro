@@ -20,6 +20,7 @@ integration/
 |   |   |   `-- operations/
 |   |   `-- tests/
 |   `-- vercel/
+|-- reports/
 `-- security/
     |-- auth/
     |-- compliance/
