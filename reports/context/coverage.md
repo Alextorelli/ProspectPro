@@ -134,3 +134,14 @@ ProspectPro/
   Moved source-architecture.mmd to api-flows
   Moved codebase-filetree.mmd to integration/data-flow
   Moved mermaid.json to shared/mermaid/config
+
+## 2025-10-23: Dev-Tools Domain Migration
+
+- **Action**: Relocated dev-tools domain files into MECE-aligned folders (`dev-tools/automation`, `dev-tools/testing`, `dev-tools/monitoring`, `dev-tools/agents`, `dev-tools/scripts`, `dev-tools/config`, `dev-tools/workspace`, `dev-tools/reports`).
+- **Validation**: File inventories generated and tree summary appended.
+- **Inventory**:
+  - `reports/context/dev-tools-filetree.txt`: List of all relocated dev-tools domain files
+  - `reports/context/repo-tree-summary.txt`: Updated repo tree summary (dev-tools domain appended)
+- **Notes**: Rsync warnings for pre-existing fixture files; no impact on migration integrity.
+
+---
