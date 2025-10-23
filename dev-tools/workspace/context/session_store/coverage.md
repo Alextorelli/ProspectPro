@@ -7,8 +7,8 @@
 
 ## 2025-10-23: Supabase Helper Consolidation
 
-- Action: Routed Supabase session guard and dev-tools diagnostics/deployment scripts to the canonical helper under `integration/platform/supabase/scripts/operations/`, converting the legacy `scripts/operations` copy into a wrapper and pruning the unused `scripts/docs/` folder.
-- Validation: Wrapper path resolution verified locally; Supabase CLI still exits with segmentation fault in this container (unchanged upstream behaviour).
+- Action: Routed Supabase session guard and dev-tools diagnostics/deployment scripts to the canonical helper under `integration/platform/supabase/scripts/operations/`, converting the legacy `scripts/operations` copy into a wrapper and pruning the unused `scripts/docs/` folder. Restored the canonical guard implementation after an accidental self-sourcing regression.
+- Validation: `source scripts/operations/ensure-supabase-cli-session.sh` now short-circuits successfully using the cached marker (no segmentation fault).
 - Notes: Downstream tasks continue to reference `scripts/operations/ensure-supabase-cli-session.sh`; wrapper keeps them stable while canonical logic now lives solely under the integration platform tree.
 
 ## Diagram Refactor Coverage (Option A)
