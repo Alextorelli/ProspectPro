@@ -1,5 +1,74 @@
-/workspaces/ProspectPro/app/frontend/index.html
-/workspaces/ProspectPro/app/frontend/App.tsx
-/workspaces/ProspectPro/app/frontend/index.css
-/workspaces/ProspectPro/app/frontend/main.tsx
-/workspaces/ProspectPro/app/frontend/vite-env.d.ts
+app/frontend
+├── index.html
+├── node_modules
+├── public
+│   ├── favicon-yellow-arrow.svg
+│   └── logo-full.svg
+├── src
+│   ├── App.tsx
+│   ├── components
+│   │   ├── ApiUsageChart.tsx
+│   │   ├── ApiUsageTable.tsx
+│   │   ├── AuthComponent.tsx
+│   │   ├── CampaignsTable.tsx
+│   │   ├── CollapsibleCard.tsx
+│   │   ├── EnrichmentButton.tsx
+│   │   ├── ErrorBoundary.tsx
+│   │   ├── GeographicSelector.tsx
+│   │   ├── Layout.tsx
+│   │   ├── LeadCard.tsx
+│   │   ├── LeadDetailsDrawer.tsx
+│   │   ├── LeadExplorerGrid.tsx
+│   │   ├── LeadExplorerTable.tsx
+│   │   ├── LogoIcon.tsx
+│   │   ├── MultiSelectBusinessTypes.tsx
+│   │   ├── PaymentMethods.tsx
+│   │   ├── ProgressDisplay.tsx
+│   │   ├── SelectedChips.tsx
+│   │   ├── Stepper.tsx
+│   │   ├── Tabs.tsx
+│   │   ├── ThemeToggle.tsx
+│   │   └── TierSelector.tsx
+│   ├── constants
+│   │   └── businessTaxonomy.ts
+│   ├── contexts
+│   │   └── AuthContext.tsx
+│   ├── hooks
+│   │   ├── useBusinessDiscovery.ts
+│   │   ├── useCampaignResults.ts
+│   │   ├── useJobProgress.tsx
+│   │   └── useLeadEnrichment.ts
+│   ├── index.css
+│   ├── lib
+│   │   ├── supabase.ts
+│   │   └── utils.ts
+│   ├── main.tsx
+│   ├── pages
+│   │   ├── AccountPage.tsx
+│   │   ├── AdminPanel.tsx
+│   │   ├── AuthCallback.tsx
+│   │   ├── BusinessDiscovery.tsx
+│   │   ├── CampaignProgress.tsx
+│   │   ├── Campaign.tsx
+│   │   ├── Dashboard.tsx
+│   │   └── Results.tsx
+│   ├── stores
+│   │   ├── campaignStore.ts
+│   │   ├── enhancedCampaignStore.ts
+│   │   ├── services
+│   │   └── utils
+│   │       └── leadSanitizers.ts
+│   ├── types
+│   │   ├── index.ts
+│   │   └── supabase.ts
+│   └── utils
+│       ├── campaignTransforms.ts
+│       ├── exportLeadsToCsv.ts
+│       ├── leadFilters.ts
+│       └── __tests__
+│           ├── basic.test.ts
+│           ├── campaignTransforms.test.ts
+│           └── smoke.test.ts
+└── vite-env.d.ts
+
+16 directories, 56 files

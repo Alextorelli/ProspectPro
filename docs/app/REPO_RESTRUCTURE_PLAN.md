@@ -43,16 +43,24 @@ Deliver the ProspectPro hybrid mono-repo realignment with a diagram-first, autom
 ProspectPro/
 ├── 📁 app/ # APP SOURCE DOMAIN
 │ ├── frontend/ # React application
-│ │ ├── src/
-│ │ │ ├── components/ # Reusable UI components
-│ │ │ ├── pages/ # Route-based page components
-│ │ │ ├── hooks/ # Custom React hooks
-│ │ │ ├── stores/ # Zustand state management
-│ │ │ ├── services/ # API client services
-│ │ │ ├── types/ # TypeScript definitions
-│ │ │ └── utils/ # Helper functions
-│ │ ├── public/ # Static assets
-│ │ └── tests/ # Frontend unit tests
+│ │ ├── index.html # Vite entry document
+│ │ ├── public/ # Static assets served at build time
+│ │ │ ├── favicon-yellow-arrow.svg
+│ │ │ └── logo-full.svg
+│ │ └── src/
+│ │ ├── main.tsx # Vite bootstrap entry
+│ │ ├── App.tsx # Root React component
+│ │ ├── index.css # Global styles & Tailwind layer
+│ │ ├── vite-env.d.ts # Vite TS environment declarations
+│ │ ├── components/ # Reusable UI components
+│ │ ├── constants/ # Frontend constants
+│ │ ├── contexts/ # React context providers
+│ │ ├── hooks/ # Custom React hooks
+│ │ ├── lib/ # Frontend libraries (supabase client, etc.)
+│ │ ├── pages/ # Route-based page components
+│ │ ├── stores/ # Zustand stores & helpers
+│ │ ├── types/ # TypeScript definitions
+│ │ └── utils/ # Helper functions & tests
 │ │
 │ ├── backend/ # Supabase functions & schemas
 │ │ ├── functions/ # Edge functions
@@ -304,6 +312,7 @@ Converge ProspectPro to a hybrid mono-repo structure optimized for AI agent work
   - reports/
   - .gitignore, .eslintignore, .vercelignore
   - README.md, LICENSE, package.json, package-lock.json, yarn.lock, CHANGELOG.md
+  - index.html (optional Vite entry shim; primary frontend lives under app/frontend)
   - .github/, .vscode/, .devcontainer/, .husky/, .nvmrc, .npmrc
 - All other files/folders must be moved into the appropriate namespace or archived before deletion.
 - The folder archive/loose-root-assets/ is used as a temporary quarantine for legacy or loose files pending review or deletion.
