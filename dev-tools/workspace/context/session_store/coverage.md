@@ -13,9 +13,13 @@ f05e63feffad7adf3744e77e12dc45c10a6a8be768a6d572b175cd4402ca4646 docs/tooling/en
 
 ## 2025-10-22: Dev Tools Suite Audit & Execution Log
 
----
+## 2025-10-23: Integration Symlink & Template Strategy
 
-## 2025-10-22: End-State Inventory & Provenance
+- **Action**: Staged symlink management scripts (`create-symlinks.sh`, `validate-symlinks.sh`, `platform-detector.js`) in `integration/symlinks/`.
+- **Action**: Added template manifest and schema in `integration/templates/`.
+- **Action**: Root symlinks (e.g., `supabase → app/backend`) now managed via `integration/templates/init-template.sh` and validated with npm automation.
+- **Validation**: `npm run template:init` and `npm run platform:validate` available for pre-flight and rollback checks; automation scripts reference symlink validator before platform tasks.
+- **Notes**: Symlink/template model documented in REPO_RESTRUCTURE_PLAN.md; ready for automation and platform wiring.
 
 ### Optimal Target Directory Layout
 
@@ -153,7 +157,7 @@ Moved mermaid.json to shared/mermaid/config
 - **Validation**: Generated post-cleanup inventory: `dev-tools/context/session_store/legacy-assets-post-cleanup.txt`.
 - **Notes**: All non-essential legacy files purged; ready for settings/config assessment and codespace hardening.
 
-## 2025-10-23: Codespaces Bootstrap Realignment
+ev## 2025-10-23: Codespaces Bootstrap Realignment
 
 - **Action**: Re-homed `.codespaces-init.sh` under `dev-tools/scripts/setup/` and updated MCP startup helper guidance to reference the new path.
 - **Action**: Corrected Supabase session guard path within the bootstrap script to use `scripts/operations/ensure-supabase-cli-session.sh`.
@@ -185,4 +189,11 @@ Moved mermaid.json to shared/mermaid/config
 - **Validation**: `npm run repo:scan` completes successfully and refreshes `dev-tools/context/session_store/{repo-tree-summary,app-filetree,dev-tools-filetree,integration-filetree}.txt`.
 - **Notes**: Documentation references updated to the new path; future automation should target the dev-tools location.
 
----
+## 2025-10-23: Documentation Automation Phase
+
+- **Action**: Staged diagram automation under `integration/platform/github/docs-automation/` (template registry, generator, GitHub sync).
+- **Action**: Added dev-tools mermaid automation scripts and validation tasks.
+- **Action**: Inserted symlink-aware GitHub workflow for docs automation.
+- **Taxonomy**: Canonical diagrams now stored in `docs/app/diagrams/`, `docs/dev-tools/diagrams/`, `docs/integration/diagrams/`, `docs/shared/mermaid/`.
+- **Validation**: Pre-flight checklist extended to run `npm run platform:validate` and `npm run docs:validate` after structural changes; diagram changelogs archived before push.
+- **Notes**: Rollback via git reset and diagram regeneration; automation phase logged in REPO_RESTRUCTURE_PLAN.md.

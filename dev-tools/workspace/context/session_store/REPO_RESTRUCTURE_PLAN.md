@@ -302,6 +302,27 @@ Converge ProspectPro to a hybrid mono-repo structure optimized for AI agent work
 - No changes to migration plan required; all blockers resolved.
 - Next phase: migrate and update documentation files to match new structure and standards, then proceed to automation overhaul (Phase 5).
 
+## Documentation Automation Phase (2025-10-24)
+
+- Staged documentation automation scripts under `integration/platform/github/docs-automation/`:
+  - `mermaid-template-registry.json` (diagram registry)
+  - `generate-mermaid-diagrams.js` (diagram generator)
+  - `sync-github-projects.js` (GitHub sync)
+- Created CI/CD shell scripts for diagram workflows in `dev-tools/automation/ci-cd/mermaid/`:
+  - `run-mermaid-automation.sh` (automation entrypoint)
+  - `validate-mermaid-diagrams.sh` (diagram validation)
+- Added `.github/workflows/docs-automation.yml` for symlink-aware documentation automation in CI.
+- Updated `package.json` with scripts for docs generation, sync, and validation.
+- Canonical diagram taxonomy established:
+  - `docs/app/diagrams/` (app-specific diagrams)
+  - `docs/dev-tools/diagrams/` (dev tools diagrams)
+  - `docs/integration/diagrams/` (integration diagrams)
+  - `docs/shared/mermaid/` (shared templates, config, guidelines)
+- Provenance and rollback procedures:
+  - All automation phases and diagram moves logged in `dev-tools/workspace/context/session_store/coverage.md`.
+  - Changelog and rollback procedures documented for safe automation.
+- Next steps: Finalize dev-tools automation wiring, validate documentation sync in CI, and ensure all automation scripts/workflows are referenced in provenance logs.
+
 ## Ignore File Policy
 
 - All ignore files (.gitignore, .eslintignore, .vercelignore) are maintained at the repository root for clarity and single-source-of-truth enforcement.

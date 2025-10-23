@@ -1,0 +1,30 @@
+name: Documentation Automation
+on:
+    push:
+        branches:
+            - main
+    workflow_dispatch:
+
+jobs:
+    docs-automation:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v3
+            - name: Install dependencies
+              run: npm ci
+            - name: Initialize symlinks
+              run: npm run template:init
+            - name: Validate symlinks
+              run: npm run platform:validate
+            - name: Run documentation sync
+              run: npm run docs:sync
+            - name: Commit and push changes
+              run: |
+                  if ! git diff --quiet; then
+                    git config --global user.email "github-actions[bot]@users.noreply.github.com"
+                    git config --global user.name "github-actions[bot]"
+                    git add docs/app/diagrams docs/dev-tools/diagrams docs/integration/diagrams docs/shared/mermaid
+                    git commit -m "docs: automated mermaid diagram update"
+                    git push
+                  fi
