@@ -85,7 +85,7 @@ Data quality focuses on auditing live responses, preserving attribution, and doc
 5. Reference the stepwise relocation guidance in `docs/app/**Targeted ROOT action plan**.md` when discussing structural work
 6. Cite the production system’s current behavior when discussing alternatives or enhancements
 7. Keep responses concise, oriented around debugging, deployment, or data quality tasks
-8. Use the canonical inventories in `dev-tools/context/session_store/{app-filetree,dev-tools-filetree,integration-filetree}.txt` when verifying layout changes, and log provenance updates in `dev-tools/context/session_store/coverage.md`
+8. Use the canonical inventories in `dev-tools/workspace/context/session_store/{app-filetree,dev-tools-filetree,integration-filetree}.txt` when verifying layout changes, and log provenance updates in `dev-tools/workspace/context/session_store/coverage.md`
 
 ## MCP & Observability Notes
 
@@ -96,11 +96,9 @@ Data quality focuses on auditing live responses, preserving attribution, and doc
 
 ## Remaining Dependencies & Follow-up
 
-- **Telemetry report**: `dev-tools/context/session_store/coverage.md` is now the authoritative audit; keep linked from this file for all future reference
+- **Telemetry report**: `dev-tools/workspace/context/session_store/coverage.md` is now the authoritative audit; keep linked from this file for all future reference
 - **Restructure plan**: `docs/app/REPO_RESTRUCTURE_PLAN.md` is the canonical migration roadmap (daily sequencing captured in `docs/app/**Targeted ROOT action plan**.md`); update both in lockstep with structural changes
-- **Validation template**: `dev-tools/reports/reports/validation/template.md` is required by validation runners and VS Code tasks; retain path integrity
 - **MCP status**: See `docs/tooling/devops-agent-runbook.md` (MCP Production Status Snapshot) for the current production server inventory; update that section when tool counts change
 - **Audit artifacts**: `dev-tools/reports/reports/refactor/docs-audit.txt` and `dev-tools/reports/reports/refactor/structure-gap.md` track the ongoing cleanup; keep until the restructure backlog closes
-- **Coverage output**: `dev-tools/context/session_store/coverage.md` is populated by the “Phase 02” task; this is the new standard output location
-- **Historical sizes**: `CODEBASE_SIZES_BEFORE.txt` has no active references and can be deleted if the snapshot is no longer needed (delete and document in changelog if you remove it)
+- **Coverage output**: `dev-tools/workspace/context/session_store/coverage.md` is populated by the “Phase 02” task; this is the new standard output location
 - After each removal or replacement, re-run `npm run docs:update` and refresh cross-references in the FAST README and platform playbooks
