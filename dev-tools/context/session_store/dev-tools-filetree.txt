@@ -94,6 +94,9 @@ dev-tools/
 |-- context/
 |   `-- session_store/
 |       |-- app-filetree.txt
+|       |-- coverage.md
+|       |-- dev-tools-filetree.txt
+|       |-- integration-filetree.txt
 |       `-- repo-tree-summary.txt
 |-- integration/
 |   `-- third-party/
@@ -137,13 +140,39 @@ dev-tools/
 |   |       `-- prometheus.yml
 |   `-- validation/
 |       `-- deprecated/
+|           |-- shell-archive/
+|           |   |-- cache-publishable-key.sh
+|           |   |-- campaign-validation.sh
+|           |   |-- debug-campaign.sql
+|           |   |-- post-session.sh
+|           |   |-- preflight-checklist.sh
+|           |   |-- reset-auth-emulator.sh
+|           |   |-- reset-user-campaigns.sh
+|           |   |-- run-edge-tests-force.sh
+|           |   |-- setup-edge-auth-env.sh
+|           |   |-- setup-edge-auth-simple.sh
+|           |   |-- toggle-gitignore.sh
+|           |   |-- validate-supabase-architecture.sh
+|           |   `-- validation-suite.sh
 |           `-- participant-routing.sh
 |-- scripts/
 |   |-- automation/
-|   |   `-- migration/
-|   |       |-- migrate-supabase-functions.sh
-|   |       |-- snapshot-pre-move.sh
-|   |       `-- update-paths.sh
+|   |   |-- migration/
+|   |   |   |-- migrate-supabase-functions.sh
+|   |   |   |-- snapshot-pre-move.sh
+|   |   |   `-- update-paths.sh
+|   |   |-- context-snapshot.sh
+|   |   |-- mcp-chat-sync.js
+|   |   |-- mcp-chat-validate.js
+|   |   |-- migration-phase.sh
+|   |   |-- participant-routing.sh
+|   |   |-- react-devtools-start.sh
+|   |   |-- README.md
+|   |   |-- redis-observability.sh
+|   |   |-- sample-automation.sh
+|   |   |-- supabase-pull-logs.sh
+|   |   |-- vercel-status-check.sh
+|   |   `-- vercel-validate.sh
 |   |-- context/
 |   |   |-- cache-session.js
 |   |   |-- fetch-repo-context.js
@@ -180,8 +209,11 @@ dev-tools/
 |   |-- git-hooks/
 |   |   `-- pre-push-ignore-check.sh
 |   |-- lib/
-|   |   |-- shared-functions.sh
-|   |   `-- supabase_cli_helpers.sh
+|   |-- monitoring/
+|   |   `-- observability/
+|   |       |-- start-observability.sh
+|   |       |-- stop-observability.sh
+|   |       `-- verify-observability.sh
 |   |-- node/
 |   |   |-- cache-session.js
 |   |   |-- fetch-repo-context.js
@@ -196,6 +228,13 @@ dev-tools/
 |   |   |-- update-docs.js
 |   |   |-- validate-ignore-config.cjs
 |   |   `-- validation-runner.js
+|   |-- operations/
+|   |   |-- mcp/
+|   |   |   |-- start-mcp.sh
+|   |   |   `-- stop-mcp.sh
+|   |   |-- deploy-mcp-service-layer.sh
+|   |   |-- launch-react-devtools.sh
+|   |   `-- shared-functions.sh
 |   |-- roadmap/
 |   |   |-- roadmap-batch.js
 |   |   |-- roadmap-dashboard.js
@@ -207,74 +246,19 @@ dev-tools/
 |   |   `-- sync-epics-to-github.sh
 |   |-- setup/
 |   |   `-- launch-react-devtools.sh
-|   |-- shell/
-|   |   |-- edge-functions/
-|   |   |   `-- run-edge-function-tests.sh
-|   |   |-- cache-publishable-key.sh
-|   |   |-- campaign-validation.sh
-|   |   |-- cleanup-edge-functions.sh
-|   |   |-- collect-diagnostics.sh
-|   |   |-- debug-campaign.sql
-|   |   |-- deploy-background-tasks.sh
-|   |   |-- deploy.sh
-|   |   |-- deployment-validation-workflow.sh
-|   |   |-- diagnose-campaign-failure.sh
-|   |   |-- diagnose-zero-results.sh
-|   |   |-- edge-function-diagnostics.sh
-|   |   |-- enforce-repository-cleanliness.sh
-|   |   |-- ensure-codespace-startup.sh
-|   |   |-- ensure-supabase-cli-session.sh
-|   |   |-- inject-api-keys.sh
-|   |   |-- install-git-hooks.sh
-|   |   |-- manual-verification.sh
-|   |   |-- monitor-discovery-job.sh
-|   |   |-- populate-secrets.sh
-|   |   |-- post-session.sh
-|   |   |-- preflight-checklist.sh
-|   |   |-- production-health-check.sh
-|   |   |-- reset-auth-emulator.sh
-|   |   |-- reset-user-campaigns.sh
-|   |   |-- run-edge-tests-force.sh
-|   |   |-- setup-edge-auth-env.sh
-|   |   |-- setup-edge-auth-simple.sh
-|   |   |-- start-mcp.sh
-|   |   |-- start-observability.sh
-|   |   |-- stop-mcp.sh
-|   |   |-- stop-observability.sh
-|   |   |-- supabase_cli_helpers.sh
-|   |   |-- toggle-gitignore.sh
-|   |   |-- update-docs.js
-|   |   |-- update-edge-secrets.sh
-|   |   |-- validate-ignore-config.cjs
-|   |   |-- validate-production-enrichment.sh
-|   |   |-- validate-supabase-architecture.sh
-|   |   |-- validation-suite.sh
-|   |   |-- verify-observability.sh
-|   |   `-- verify-toolchain.sh
-|   |-- testing/
-|   |   `-- edge-functions/
-|   |       `-- run-edge-function-tests.sh
 |   |-- tooling/
 |   |   |-- check-docs-schema.sh
 |   |   |-- install-git-hooks.sh
 |   |   |-- preflight-checklist.sh
 |   |   |-- toggle-gitignore.sh
 |   |   `-- validate-ignore-config.cjs
-|   |-- utils/
 |   |-- validation/
 |   |   `-- quick-health-check.js
 |   `-- README.md
-|-- supabase/
-|   `-- supabase-troubleshooting-server.js
 |-- test-automation/
-|   |-- context/
-|   |   |-- context.test.js
-|   |   `-- fixture-dataset.json
-|   `-- supabase-tests/
-|       `-- database/
-|           |-- campaigns.test.sql
-|           |-- core_schema.test.sql
-|           `-- leads.test.sql
+|   `-- context/
+|       |-- context.test.js
+|       `-- fixture-dataset.json
 |-- testing/
 |   |-- e2e/
 |   |-- fixtures/
@@ -293,10 +277,6 @@ dev-tools/
 |   |-- utils/
 |   |   `-- setup.ts
 |   `-- README.md
-|-- vercel/
-|   `-- vercel.json
-|-- workflow/
-|   `-- engine.ts
 |-- workspace/
 |   |-- codespaces/
 |   |-- context/

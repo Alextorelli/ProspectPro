@@ -18,10 +18,22 @@ integration/
 |   |-- supabase/
 |   |   |-- scripts/
 |   |   |   `-- operations/
-|   |   `-- tests/
-|   `-- vercel/
+|   |   |       |-- ensure-supabase-cli-session.sh
+|   |   |       `-- supabase_cli_helpers.sh
+|   |   |-- tests/
+|   |   |   `-- database/
+|   |   |       |-- campaigns.test.sql
+|   |   |       |-- core_schema.test.sql
+|   |   |       `-- leads.test.sql
+|   |   `-- supabase-troubleshooting-server.js
+|   |-- vercel/
+|   |   `-- vercel.json
+|   `-- workflow/
+|       `-- engine.ts
 |-- reports/
-`-- security/
-    |-- auth/
-    |-- compliance/
-    `-- secrets/
+|-- security/
+|   |-- auth/
+|   |-- compliance/
+|   `-- secrets/
+`-- testing/
+    `-- devtools-regression.sh

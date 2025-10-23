@@ -31,12 +31,9 @@ ProspectPro/
 |   |-- mcp-servers/
 |   |-- reports/
 |   |-- scripts/
-|   |-- supabase/
 |   |-- test-automation/
 |   |-- testing/
 |   |-- tests/
-|   |-- vercel/
-|   |-- workflow/
 |   `-- workspace/
 |-- docs/
 |   |-- app/
@@ -55,20 +52,17 @@ ProspectPro/
 |   |-- infrastructure/
 |   |-- platform/
 |   |-- reports/
-|   `-- security/
+|   |-- security/
+|   `-- testing/
 |-- scripts/
 |   |-- automation/
 |   |-- devtools/
 |   |-- docs/
 |   |-- operations/
-|   |-- testing/
 |   `-- tests/
 |-- supabase/
 |   |-- .temp/
 |   |-- migrations/
-|   |-- schema-sql/
-|   |-- scripts/
-|   |-- supabase/
-|   `-- tests/
+|   `-- schema-sql/
 `-- tooling/
     `-- migration-scripts/
