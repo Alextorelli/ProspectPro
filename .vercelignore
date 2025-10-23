@@ -39,6 +39,8 @@ yarn-debug.log*
 yarn-error.log*
 
 # === MCP Servers (not needed for frontend build) ===
+dev-tools/
+integration/
 mcp-servers/
 
 # === Codespaces/Dev Configs (not needed for build) ===
@@ -48,8 +50,7 @@ mcp-servers/
 database/
 
 # === Test Files ===
-test-*.sh
-test-*.js
+app/frontend/tests/
 
 # === Supabase Functions (deployed separately) ===
 supabase/functions/

@@ -12,8 +12,9 @@
 ###############################################################
 
 # === BUILD OUTPUTS ===
-dist/
-public/dist/
+app/frontend/
+app/backend/
+dev-tools/
 
 # === LOGS & TEMP FILES ===
 logs/

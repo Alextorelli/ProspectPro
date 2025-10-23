@@ -130,6 +130,17 @@ docs/archive/
 *-backup.*
 *.backup
 *.bak
+dev-tools/**/reports/
+integration/**/tests/tmp/
+archive/loose-root-assets/*.tar.gz
+
+# Remove legacy tooling and supabase/functions
+# tooling/
+# supabase/functions/
+# Remove old diagram paths (example)
+# docs/app/diagrams-old/
+# docs/dev-tools/diagrams-old/
+# docs/integration/diagrams-old/
 
 # Development artifacts
 .cache/
