@@ -31,22 +31,29 @@ ProspectPro/
 │ ├── testing/
 │ ├── monitoring/
 │ ├── agents/
-│ ├── scripts/
-│ ├── config/
-│ └── workspace/
-├── integration/
-│ ├── platform/
-│ ├── infrastructure/
-│ ├── security/
-│ ├── data/
-│ └── environments/
-├── docs/
-│ ├── app/diagrams/
-│ ├── dev-tools/diagrams/
-│ ├── integration/diagrams/
-│ └── shared/mermaid/
-├── scripts/
-├── config/
+
+## 2025-10-23: App Domain Migration
+
+...existing content...
+
+## 2025-10-23: Integration Domain Migration
+
+- **Action**: Relocated integration domain files into MECE-aligned folders (`integration/platform`, `integration/infrastructure`, `integration/security`, `integration/data`, `integration/environments`).
+- **Validation**: File inventories generated and tree summary appended.
+- **Inventory**:
+  - `reports/context/integration-filetree.txt`: List of all relocated integration domain files
+  - `reports/context/repo-tree-summary.txt`: Updated repo tree summary (integration domain appended)
+- **Notes**: No errors reported during relocation; structure matches REPO_RESTRUCTURE_PLAN.
+  │ └── workspace/
+  ├── integration/
+  │ ├── platform/
+  ├── docs/
+  │ ├── app/diagrams/
+  │ ├── dev-tools/diagrams/
+  │ ├── integration/diagrams/
+  │ └── shared/mermaid/
+  ├── scripts/
+  ├── config/
 
 ### Audit Outputs
 

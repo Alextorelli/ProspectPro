@@ -137,3 +137,30 @@ app/shared/constants
 app/shared/validators
 
 44 directories, 90 files
+integration/platform
+├── external-apis
+├── github
+│   └── workflows
+├── supabase
+│   ├── scripts
+│   │   └── operations
+│   └── tests
+└── vercel
+integration/infrastructure
+├── docker
+├── k8s
+└── terraform
+integration/security
+├── auth
+├── compliance
+└── secrets
+integration/data
+├── backup
+├── etl
+└── sync
+integration/environments
+├── development
+├── production
+└── staging
+
+25 directories, 0 files
