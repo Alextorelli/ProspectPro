@@ -299,8 +299,20 @@ Converge ProspectPro to a hybrid mono-repo structure optimized for AI agent work
 
 - Directory migration completed: all source, dev tools, and integration folders have been moved to their MECE-aligned locations per plan.
 - Repo scan automation added (`dev-tools/automation/ci-cd/repo_scan.sh`); generated summary and domain file trees for diagram refresh.
-- No changes to migration plan required; all blockers resolved.
-- Next phase: migrate and update documentation files to match new structure and standards, then proceed to automation overhaul (Phase 5).
+- MCP server dependency correction and validation complete; provenance logged in coverage.md.
+- Documentation automation phase completed: `docs/technical/CODEBASE_INDEX.md`, `docs/technical/SYSTEM_REFERENCE.md`, `.vscode/TASKS_REFERENCE.md` refreshed and in sync with new repo structure.
+- All blockers resolved; repo structure, MCP, and documentation now aligned.
+- Next phase: finalize automation wiring, update CI workflows, and validate all automation scripts/tasks against new structure.
+
+### Next Steps for Wiring & Automation
+
+1. Update CI workflows to reference new documentation and automation script locations (see `.github/workflows/docs-automation.yml`).
+2. Validate all npm scripts and VS Code tasks for correct domain paths and automation triggers.
+3. Refresh inventories in `dev-tools/workspace/context/session_store/{app-filetree,dev-tools-filetree,integration-filetree}.txt` after each major move or automation update.
+4. Run `npm run repo:scan` and `npm run docs:prepare` after automation changes; log results in `coverage.md`.
+5. Stage any new config or settings changes in `docs/tooling/settings-staging.md` before updating live `.github/` or `.vscode/` files.
+6. Continue provenance logging in `coverage.md` for all automation, wiring, and validation phases.
+7. Reference the canonical migration roadmap in this file and `coverage.md` for all future structure or automation work.
 
 ## Documentation Automation Phase (2025-10-24)
 

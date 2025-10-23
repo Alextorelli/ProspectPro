@@ -53,10 +53,11 @@
 2. Cite concrete paths or existing scripts instead of inventing new workflows.
 3. Recommend established tasks or npm scripts before bespoke commands.
 4. Flag any configuration change proposals in `docs/tooling/settings-staging.md`.
-5. Reference the relocation roadmap when advising on structural work.
-6. Align suggestions with current production behavior and Supabase-first design.
-7. Keep answers concise, oriented around debugging, deployment, and data quality.
+5. Reference the relocation roadmap and REPO_RESTRUCTURE_PLAN.md when advising on structural work.
+6. Align suggestions with current production behavior, Supabase-first design, and latest automation wiring.
+7. Keep answers concise, oriented around debugging, deployment, automation, and data quality.
 8. Use the session_store inventories to verify layout changes and capture updates in `coverage.md`.
+9. After major repo structure or automation changes, suggest next steps for CI wiring, automation validation, and provenance logging.
 
 ## Follow-up References
 
