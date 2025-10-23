@@ -458,7 +458,7 @@ _Governance review and documentation update complete. Ready for final migration 
   3. Compress `.devcontainer/`, `.vscode/`, `.github/`, `config/` to `archive/loose-root-assets/codespace-config-backup-$(date +%F).tar.gz`
   4. Update `docs/tooling/end-state/index.md` and cross-link to REPO_RESTRUCTURE_PLAN.md
   5. Bulk-audit diagrams/scripts/configs per migration plan
-  6. Document all findings and validation outputs in `dev-tools/context/session_store/coverage.md` and this file
+  6. Document all findings and validation outputs in `dev-tools/workspace/context/session_store/coverage.md` and this file
 
 - **Guardrails**: No direct edits to `.vscode/` or `.github/` until staged and approved here. All automation, MCP, and diagram changes must be validated and logged.
 
@@ -469,9 +469,8 @@ _Governance review and documentation update complete. Ready for final migration 
 - **Risk**: Medium – workflow failures could block PRs if scripts regress. Mitigation: local rehearsal and early exit messaging.
 - **Rollback**: Revert workflow file to previous commit.
 - **Validation Plan**: `npm run docs:prepare`, `npm run docs:validate`, `npm run docs:audit`, `npm run lint` pre-commit; confirm GitHub Actions success on test PR.
-
 - **Applied**: Added npm scripts: `docs:validate`, `docs:preview`, `docs:audit`, `docs:render:svg`. Updated `docs:prepare` to call bundle, audit, and preview.
-- **Next**: Extend provenance logging in `dev-tools/context/session_store/coverage.md` after each run, then proceed with directory migrations when automation is ready.
+- **Next**: Extend provenance logging in `dev-tools/workspace/context/session_store/coverage.md` after each run, then proceed with directory migrations when automation is ready.
 
 # Applied: Vite Entry & Root Directory Adjustments (2025-10-23)
 

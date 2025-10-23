@@ -116,10 +116,6 @@ dev-tools/
 |   |-- typescript/
 |   |-- vite/
 |   `-- vite.config.devtools.ts
-|-- context/
-|   |-- schemas/
-|   |   `-- compile.sh
-|   `-- event-bus.ts
 |-- integration/
 |   `-- third-party/
 |       `-- webhook-validator.js
@@ -157,32 +153,34 @@ dev-tools/
 |-- observability/
 |   `-- config/
 |       `-- prometheus.yml
-|-- reports/ ## DEPRECATED Remove and add reports folders to relevant subdirectories as needed.
-|   `-- reports/
-|       |-- refactor/
-|       |   `-- temp-assets.txt
-|       |-- release/
-|       |   `-- approval.md
-|       `-- validation/
-|           |-- mcp-validation-harness-20251019-100816.log
-|           |-- mcp-validation-harness-20251019-101005.log
-|           |-- mcp-validation-harness-20251019-101018.log
-|           |-- mcp-validation-harness-20251019-101026.log
-|           |-- mcp-validation-harness-20251019-101040.log
-|           |-- mcp-validation-harness-20251019-101145.log
-|           |-- mcp-validation-harness-20251019-101222.log
-|           |-- mcp-validation-harness-20251019-101300.log
-|           |-- mcp-validation-harness-20251019-101636.log
-|           |-- mcp-validation-harness-20251019-101722.log
-|           |-- mcp-validation-harness-20251019-101802.log
-|           |-- mcp-validation-harness-20251019-103447.log
-|           |-- mcp-validation-harness-20251019-103509.log
-|           |-- mcp-validation-harness-20251019-103530.log
-|           |-- mcp-validation-harness-20251019-103622.log
-|           |-- mcp-validation-harness-20251019-103735.log
-|           |-- mcp-validation-harness-20251019-103842.log
-|           |-- mcp-validation-harness-report-20251019-103842.json
-|           `-- template.md
+|-- reports/ (proposed consolidated telemetry & release outputs)
+|   |-- diagnostics/
+|   |   `-- (pending relocation: mcp-diagnostics-test.json)
+|   |-- monitoring/
+|   |   |-- alerts/
+|   |   |-- jaeger/
+|   |   |-- logging/
+|   |   |-- metrics/
+|   |   |-- otel/
+|   |   `-- telemetry/
+|   `-- observability/
+|       `-- config/
+|           `-- prometheus.yml
+|-- Reports/ (legacy directory to merge into reports/)
+|   |-- diagnostics/
+|   |   `-- mcp-diagnostics-test.json
+|   |-- monitoring/
+|   |   |-- alerts/
+|   |   |-- jaeger/
+|   |   |   `-- .gitkeep
+|   |   |-- logging/
+|   |   |-- metrics/
+|   |   |-- otel/
+|   |   |   `-- .gitkeep
+|   |   `-- telemetry/
+|   `-- observability/
+|       `-- config/
+|           `-- prometheus.yml
 |-- scripts/
 |   |-- context/
 |   |   |-- cache-session.js
@@ -336,6 +334,28 @@ dev-tools/
 |-- workflow/
 |   `-- engine.ts
 |-- workspace/
+|   |-- context/
+|   |   |-- event-bus.ts
+|   |   |-- schemas/
+|   |   |   `-- compile.sh
+|   |   `-- session_store/
+|   |       |-- **Targeted ROOT action plan**.md
+|   |       |-- REPO_RESTRUCTURE_PLAN.md
+|   |       |-- app-filetree.txt
+|   |       |-- coverage.md
+|   |       |-- dev-tools-filetree.txt
+|   |       |-- diagrams-current.txt
+|   |       |-- frontend-files.txt
+|   |       |-- integration-filetree.txt
+|   |       |-- legacy-assets-post-cleanup.txt
+|   |       |-- live-tooling-list.txt
+|   |       |-- post-move-validation.txt
+|   |       |-- pre-config-update-status.txt
+|   |       |-- pre-move-tree.txt
+|   |       |-- reference-scan.txt
+|   |       |-- workspace_status.md
+|   |       `-- archive/
+|   |           `-- .gitkeep
 |   |-- codespaces/
 |   |-- templates/
 |   `-- vscode/
