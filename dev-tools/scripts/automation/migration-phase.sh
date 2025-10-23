@@ -5,7 +5,7 @@ set -euo pipefail
 
 # 1. Remove node_modules and ensure .gitignore is correct
 echo "Cleaning up node_modules..."
-rm -rf ./node_modules ./dev-tools/agent-orchestration/mcp/node_modules
+rm -rf ./node_modules ./dev-tools/agents/mcp/node_modules
 
 grep -q '^node_modules/' .gitignore || echo 'node_modules/' >> .gitignore
 
@@ -14,7 +14,7 @@ echo "node_modules cleanup complete."
 # 2. MCP/Config/Registry sync
 echo "Syncing MCP configs and registry..."
 cp config/mcp-config.v2.json config/mcp-config.json
-cp dev-tools/mcp-servers/v2/registry.v2.json dev-tools/mcp-servers/registry.json
+cp dev-tools/agents/mcp-servers/v2/registry.v2.json dev-tools/agents/mcp-servers/registry.json
 
 echo "MCP configs and registry synced."
 

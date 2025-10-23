@@ -2,7 +2,7 @@
 
 ## Usage
 
-- Place this template in `dev-tools/agent-orchestration/context/store/agents/<agent_id>/scratchpad.md` or similar.
+- Place this template in `dev-tools/agents/context/store/agents/<agent_id>/scratchpad.md` or similar.
 - Update fields as you begin a new session or change agent mode.
 
 ---

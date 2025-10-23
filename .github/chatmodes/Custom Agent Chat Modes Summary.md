@@ -22,8 +22,8 @@ ProspectPro’s chat participants map 1:1 to the revised agent personas. This ke
 
 ## Alignment with Dev-Tools Architecture
 
-- Agents: `dev-tools/agent-orchestration/agents/**`
-- MCP layer: `dev-tools/agent-orchestration/mcp`, `mcp-servers/registry.json`
+- Agents: `dev-tools/agents/workflows/**`
+- MCP layer: `dev-tools/agents/mcp`, `dev-tools/agents/mcp-servers/registry.json`
 - Automation: `.vscode/tasks.json` tasks `MCP: Sync Chat Participants`, `MCP: Run Chat Validation`
 - Governance: `docs/tooling/settings-staging.md`, archives under `dev-tools/context/session_store/archive/`
 
@@ -40,6 +40,6 @@ ProspectPro’s chat participants map 1:1 to the revised agent personas. This ke
    ```bash
    npm run docs:update && npm run lint && npm test && npm run supabase:test:db
    ```
-5. Archive execution summary (e.g., `dev-tools/context/session_store/archive/chatmode-persona-migration-2025-10-21.md`).
+5. Archive execution summary (e.g., `dev-tools/workspace/context/session_store/archive/chatmode-persona-migration-2025-10-21.md`).
 
 Maintain this alignment to ensure Copilot Chat responds with persona-specific playbooks that match the MCP toolkit and governance guardrails.

@@ -1,6 +1,7 @@
+require("ts-node/register");
 const {
   ContextManager,
-} = require("../../../agent-orchestration/context/context-manager.cjs");
+} = require("../../../agents/context/context-manager.ts");
 const dataset = require("../../test-automation/context/fixture-dataset.json");
 
 describe("ContextManager integration", () => {

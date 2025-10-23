@@ -224,7 +224,7 @@ The MCP (Model Context Protocol) Service Layer provides production-ready client 
 
 ```bash
 # Build and test MCP service layer
-cd dev-tools/agent-orchestration/mcp
+cd dev-tools/agents/mcp
 npm install
 npm run build
 npm test

@@ -23,7 +23,7 @@ logs/
 # === DEPLOYMENT & INFRASTRUCTURE ===
 .vercel/
 .vercelignore
-dev-tools/agent-orchestration/mcp/dist/
+dev-tools/agents/mcp/dist/
 
 # === ARCHIVE & LEGACY ===
 archive/

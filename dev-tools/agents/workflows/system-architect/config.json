@@ -44,7 +44,7 @@
     "technical_reference": "/docs/technical/SYSTEM_REFERENCE.md",
     "database": "/supabase/schema-sql/",
     "edge_functions": "/app/backend/functions/",
-    "mcp_registry": "/dev-tools/mcp-servers/registry.json",
+  "mcp_registry": "/dev-tools/agents/mcp-servers/registry.json",
     "instructions": ".github/copilot-instructions.md",
     "context_snapshot_script": "scripts/automation/context-snapshot.sh",
     "redis_observability_script": "scripts/automation/redis-observability.sh"

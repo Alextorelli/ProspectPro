@@ -96,8 +96,8 @@
     "dev_tools_fast_readme": "/docs/tooling/FAST_README.md",
     "otel_config": "/config/otel-config.yml",
     "observability_stack": "/dev-tools/observability/docker-compose.jaeger.yml",
-    "context_store": "/dev-tools/agent-orchestration/context/README.md",
-    "mcp_registry": "/dev-tools/mcp-servers/registry.json"
+  "context_store": "/dev-tools/agents/context/README.md",
+  "mcp_registry": "/dev-tools/agents/mcp-servers/registry.json"
   },
   "dashboard_access": {
     "supabase_logs": "https://supabase.com/dashboard/project/sriycekxdqnesdsgwiuc/logs",

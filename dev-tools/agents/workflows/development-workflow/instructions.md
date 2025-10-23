@@ -273,7 +273,7 @@ await mcp.github.add_labels({ owner, repo, issueNumber: pullNumber, labels });
 - **App System Reference**: `/docs/app/SYSTEM_REFERENCE.md`
 - **Dev Tools FAST_README**: `/docs/tooling/FAST_README.md`
 - **Documentation Standards**: `/docs/technical/DOCUMENTATION_STANDARDS.md`
-- **Context Store Guide**: `/dev-tools/agent-orchestration/context/README.md`
+- **Context Store Guide**: `/dev-tools/agents/context/README.md`
 - **Validation Runner Script**: `/dev-tools/scripts/node/validation-runner.js`
 
 ### VS Code Integration

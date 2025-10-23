@@ -16,7 +16,7 @@ NC='\033[0m' # No Color
 # Configuration
 SERVICE_NAME="mcp-service-layer"
 WORKSPACE_ROOT="/workspaces/ProspectPro"
-SERVICE_DIR="$WORKSPACE_ROOT/dev-tools/agent-orchestration/mcp"
+SERVICE_DIR="$WORKSPACE_ROOT/dev-tools/agents/mcp"
 DIST_DIR="$SERVICE_DIR/dist"
 CONFIG_FILE="$WORKSPACE_ROOT/config/mcp-config.json"
 

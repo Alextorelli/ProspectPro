@@ -134,13 +134,22 @@ ProspectPro/
   Moved codebase-filetree.mmd to integration/data-flow
   Moved mermaid.json to shared/mermaid/config
 
-## 2025-10-23: Dev-Tools Domain Migration
+## 2025-10-23: Dev-Tools Domain Migration & Script Audit
 
 - **Action**: Relocated dev-tools domain files into MECE-aligned folders (`dev-tools/automation`, `dev-tools/testing`, `dev-tools/monitoring`, `dev-tools/agents`, `dev-tools/scripts`, `dev-tools/config`, `dev-tools/workspace`, `dev-tools/reports`).
-- **Validation**: File inventories generated and tree summary appended.
+- **Script Moves**: Root scripts (`automation, docs, operations, testing, tests`) moved to `dev-tools/scripts/{automation,docs,operations,testing,qa}`. `devtools/launch-react-devtools.sh` relocated to `dev-tools/scripts/setup/launch-react-devtools.sh`. Legacy `lib/participant-routing.sh` archived under `dev-tools/reports/validation/deprecated/`.
+- **Migration Scripts**: All migration scripts moved to `dev-tools/scripts/automation/migration/` with a README pointer in `tooling/migration-scripts/`.
+- **ensure-supabase-cli-session.sh**: Canonical copy retained in `integration/platform/supabase/scripts/operations/` (pending move completion); update automation references and remove duplicates after validation.
+- **Reports**: Confirmed telemetry/log outputs only in `dev-tools/reports/`.
+- **Integration Review**: Supabase CLI helpers, Vercel config, GitHub workflows confirmed under `integration/platform/{supabase,vercel,github}`. `integration/reports/{platform,security,data}` stubbed for future deployment logs.
+- **Session Store**: Temporary inventories/checklists retained; provenance logged in `coverage.md`.
+- **Documentation**: Transient restructure notes moved to session_store; canonical plan in `dev-tools/workspace/context/session_store/REPO_RESTRUCTURE_PLAN.md`.
+- **Validation**: Ran `npm run repo:scan` to refresh inventories; all changes logged in provenance.
 - **Inventory**:
-  - `dev-tools/context/session_store/dev-tools-filetree.txt`: List of all relocated dev-tools domain files
-  - `dev-tools/context/session_store/repo-tree-summary.txt`: Updated repo tree summary (dev-tools domain appended)
+  - `dev-tools/workspace/context/session_store/dev-tools-filetree.txt`: List of all relocated dev-tools domain files
+  - `dev-tools/workspace/context/session_store/repo-tree-summary.txt`: Updated repo tree summary (dev-tools domain appended)
+  - `dev-tools/workspace/context/session_store/integration-filetree.txt`: Integration domain inventory
+  - `dev-tools/workspace/context/session_store/app-filetree.txt`: App domain inventory
 - **Notes**: Rsync warnings for pre-existing fixture files; no impact on migration integrity.
 
 ## 2025-10-23: Legacy Asset Cleanup
@@ -156,5 +165,15 @@ ProspectPro/
 - **Action**: Lifted `dev-tools/**/reports/` from `.gitignore` so telemetry artifacts remain tracked per operations guide.
 - **Validation**: Manual git status check confirms only expected relocation deltas; MCP startup helper executes guard clauses without path warnings.
 - **Notes**: Documented change here; update repo inventories after remaining MECE sweeps complete.
+
+## 2025-10-23: Agents & Automation Realignment
+
+- **Action**: Collapsed `dev-tools/agent-orchestration/**` and `dev-tools/mcp-servers/` into the unified `dev-tools/agents/{workflows,context,mcp,mcp-servers}` hierarchy.
+- **Action**: Relocated CI/CD scripts to `dev-tools/automation/ci-cd/` and removed the legacy `ci_cd/` root folder.
+- **Action**: Migrated webhook handlers to `integration/platform/github/{webhook-handler.js,webhook-validator.js}` and retitled the API client README under `dev-tools/testing/integration/api/`.
+- **Action**: Archived duplicate inventories from the legacy `dev-tools/context/` root under `dev-tools/workspace/context/session_store/archive/legacy-top-level-context/`.
+- **Docs**: Refreshed `dev-tools/README.md` to describe the MECE directory layout and updated chatmode references to the new agent paths.
+- **Validation**: Updated automation scripts, configs, and chatmodes to reference the relocated assets; `npm run repo:scan` pending after remaining checks.
+- **Notes**: Regenerate session store inventories once outstanding MECE adjustments settle.
 
 ---

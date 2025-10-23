@@ -32,7 +32,7 @@
     "app_system_reference": "/docs/app/SYSTEM_REFERENCE.md",
     "dev_tools_fast_readme": "/docs/tooling/FAST_README.md",
     "documentation_standards": "/docs/technical/DOCUMENTATION_STANDARDS.md",
-    "context_store": "/dev-tools/agent-orchestration/context/README.md",
+    "context_store": "/dev-tools/agents/context/README.md",
     "validation_runner": "/dev-tools/scripts/node/validation-runner.js"
   },
   "testing_config": {

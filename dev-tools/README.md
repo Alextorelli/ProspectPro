@@ -1,116 +1,97 @@
 # Dev Tools Suite v5.0 - AI Agent Orchestration Platform
 
-This `/tooling/` directory contains the complete development toolchain for ProspectPro, organized for maximum productivity and AI agent integration.
+The `dev-tools/` directory contains ProspectPro’s complete automation stack: AI agents, CI/CD tooling, diagnostics, and workspace governance assets.
 
 ## Tool Suite Layout
 
-- **Agent Orchestration** (`/agent-orchestration/`): AI agent templates, context management, and workflow engines for automated development tasks.
-- **Scripts** (`/scripts/`): Shell and Node.js automation for deployment, testing, diagnostics, and operations.
-- **Monitoring** (`/monitoring/`): Observability stack configuration (MCP log-forwarder, Supabase logs, Prometheus, Grafana) and OTel collectors.
-- **CI** (`/ci/`): Continuous integration pipelines and automated PR reviews.
+- **Agents** (`/agents/`): Persona workflows, shared context manager, MCP client package, and MCP server runtime.
+- **Automation** (`/automation/`): CI/CD orchestration, taxonomy refreshers, and diagram pipelines.
+- **Scripts** (`/scripts/`): Shell and Node.js utilities for deployment, diagnostics, docs, roadmap, and setup tasks.
+- **Testing** (`/testing/`): Unit, integration, e2e, and fixtures powering automation assurance.
+- **Reports** (`/reports/`): Diagnostics, observability snapshots, and validation archives aligned with operations guide.
+- **Config** (`/config/`): Tooling configuration (ESLint, TypeScript, Vite, MCP, observability) referenced across agents and scripts.
+- **Workspace** (`/workspace/`): Session store inventories, restructure plans, and sandbox templates for day-to-day work.
 
 ## Directory Structure
 
+### `/agents/`
+
+**Multi-agent workflow coordination and runtime assets**
+
+- `workflows/` – Persona instruction packs and orchestration configs.
+- `context/` – Context manager sources, schemas, and store templates.
+- `mcp/` – MCP client/package code powering agent connectivity.
+- `mcp-servers/` – Production, development, and troubleshooting MCP servers (registry lives here).
+
+### `/automation/`
+
+**Continuous integration and scripted release automation**
+
+- `ci-cd/` – Pipeline definitions and diagram/taxonomy automation (`pipeline.yml`, `repo_scan.sh`, `stage-taxonomy.sh`, etc.).
+
 ### `/scripts/`
 
-**Shell and Node.js automation scripts for development workflows**
+**Reusable automation entry points**
 
-- `shell/` - Bash scripts for deployment, testing, diagnostics, and operations
-- `node/` - JavaScript/Node.js utilities for codegen, API health checks, and test generation
+- `automation/`, `context/`, `deployment/`, `diagnostics/`, `docs/`, `operations/`, `roadmap/`, `setup/`, `tooling/`, `validation/`, plus Node utilities under `node/`.
+- Prefer VS Code tasks or npm scripts that wrap these helpers before adding new entry points.
 
-### `/ci/`
+### `/testing/`
 
-**Continuous Integration and Deployment**
+**Quality gates for the automation stack**
 
-- `pipeline.yml` - Unified CI/CD pipeline configuration (GitHub Actions/others)
-- `pr-review.js` - Automated PR review triggers for Development Agent
+- `unit/`, `integration/`, `e2e/`, `fixtures/`, `utils/` – Test suites and data supporting MCP agents and Supabase workflows.
 
-### `/docker/`
+### `/reports/`
 
-**Containerization and local development**
+**Tracked telemetry and diagnostics output**
 
-- `Dockerfile.dev` - Development environment setup
-- `Dockerfile.ci` - Build/test container image
+- `diagnostics/`, `monitoring/`, `observability/`, `validation/` – Store curated artifacts only (temporary logs belong in `dev-tools/workspace/context/session_store/`).
 
-### `/vercel/`
+### `/config/`
 
-**Frontend deployment and optimization**
+**Shared configuration for the toolchain**
 
-- `vercel.json` - Vercel deploy config/optimizations
-- `vercel-healthcheck.sh` - Custom health checks for Vercel
+- ESLint, TypeScript, Vite, MCP, and observability configs consumed by agents, servers, and scripts.
 
-### `/monitoring/`
+### `/workspace/`
 
-**Observability and tracing infrastructure**
+**Operational workspace assets**
 
-- `otel/` - OpenTelemetry configuration for tracing agents/app
-
-### `/supabase/`
-
-**Database and backend tooling**
-
-- `cli-helpers.sh` - CLI wrappers for Supabase operations (migrations/tests)
-- `migration-tools.js` - Coordinate DB changes with MCP server
-- `troubleshooting-server.js` - Advanced agent-enabled logging and error correlation
-
-### `/test-automation/`
-
-**End-to-end and integration testing**
-
-- `e2e-runner.js` - Orchestrates end-to-end tests with agent validators
-
-### `/agent-orchestration/`
-
-**Multi-agent workflow coordination**
-
-- `context-manager.js` - Redis-based shared context store for agent workflows
-- `workflow-engine.js` - Event-driven workflow orchestration (multi-agent)
-- `event-bus.js` - Async MCP event integration, message passing
-
-### `/integration/third-party/`
-
-**External service integrations**
-
-- `webhook-validator.js` - Automated webhook endpoint validation/alerts
-- `stripe-integration.js` - Payment ops automation, with metric tracking
-- `zapier-integration.js` - Workflow automations (business ops, notifications)
-- `slack-escalation.js` - Event-driven notifications and escalations
+- `context/session_store/` – Live inventories, coverage logs, and restructure plans.
+- Templates, scratchpads, and VS Code validation helpers for day-to-day development.
 
 ## Features Modeled from Implementation Packages
 
-- **AI agent invocation logic:** PR, code review, deployment, and health scripts call MCP servers and agents as described in `implementation_package.json` and `optimized_agent_strategy.json`.
-- **Single responsibility:** Each script/module in `/tooling/` is focused, matching your cross-agent and event-driven workflow coordination pattern.
-- **Centralized config references:** Read `.env`, tracing endpoints, model/agent configs from `/config/` (not app source).
-- **Observability baked in:** All agent calls traced via OpenTelemetry, with correlation and aggregation for debugging, compliance, and ML baseline comparison.
-- **Automated error handling + rollback:** Circuit breaker logic and incident response workflows are implemented per the MCP prompt specs.
-- **Easy extension and audit:** Suite can be migrated to new projects; simply drop `/tooling/` (and `/config/`) into another mono-repo.
+- **AI agent invocation logic:** Automation scripts call MCP servers and agents defined under `/agents/`.
+- **Single responsibility:** Each script/module aligns with MECE directory boundaries.
+- **Centralized config references:** Shared configs live in `/dev-tools/config/`; app code consumes them via documented imports.
+- **Observability baked in:** MCP servers and scripts emit OTEL data captured under `/reports/` and observability tooling.
+- **Automated error handling + rollback:** Circuit breakers and incident playbooks live beside the agents that execute them.
 
 ## Usage
 
 ### Development Workflow
 
-1. **Setup:** Run scripts from `/scripts/shell/` for environment setup
-2. **Development:** Use `/agent-orchestration/` for multi-agent workflows
-3. **Testing:** Execute `/test-automation/` for comprehensive validation
-4. **Deployment:** Use `/ci/` and `/vercel/` for production releases
-5. **Monitoring:** Check `/monitoring/` for observability and debugging
+1. **Setup:** Use npm tasks or `dev-tools/scripts/setup/` helpers for environment bootstrap.
+2. **Development:** Invoke persona workflows under `/agents/workflows/` when driving change.
+3. **Testing:** Run suites from `/testing/` or associated VS Code tasks for coverage.
+4. **Deployment:** Leverage automation in `/automation/ci-cd/` and `/scripts/deployment/` before releasing.
+5. **Monitoring:** Persist telemetry outputs under `/reports/` per operations guide.
 
 ### AI Agent Integration
 
-- All scripts support MCP server integration for automated workflows
-- Tracing enabled via OpenTelemetry for agent call correlation
-- Event-driven architecture supports async agent coordination
-- Centralized configuration prevents agent context conflicts
+- MCP server registry resides in `/agents/mcp-servers/registry.json`; keep it in sync with `config/mcp-config.json`.
+- Context manager schemas live under `/agents/context/`; reference them from workflows and tests.
+- GitHub webhook and platform automations now live in `integration/platform/**` (see `/integration/platform/github/` for webhook handlers).
 
 ## Migration Notes
 
-This structure replaces the previous `dev-tools-suite/` organization with a more focused, agent-ready architecture. Key improvements:
+The current structure supersedes the legacy `agent-orchestration/` + scattered script layout. When relocating artifacts, update:
 
-- **Unified scripts location** under `/scripts/` instead of scattered locations
-- **Agent orchestration** centralized for multi-agent workflow coordination
-- **Third-party integrations** isolated for security and maintenance
-- **Observability first** with OpenTelemetry integration
-- **CI/CD consolidation** with unified pipeline configuration
+- VS Code tasks and npm scripts that reference old paths.
+- Documentation sections (e.g., platform playbooks, settings staging).
+- Session store inventories (`dev-tools/workspace/context/session_store/*`).
 
 ## Requirements
 
