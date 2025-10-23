@@ -144,4 +144,10 @@ ProspectPro/
   - `reports/context/repo-tree-summary.txt`: Updated repo tree summary (dev-tools domain appended)
 - **Notes**: Rsync warnings for pre-existing fixture files; no impact on migration integrity.
 
+## 2025-10-23: Legacy Asset Cleanup
+
+- **Action**: Removed legacy backup, temp, old, archive, and log files from `archive/loose-root-assets`.
+- **Validation**: Generated post-cleanup inventory: `reports/context/legacy-assets-post-cleanup.txt`.
+- **Notes**: All non-essential legacy files purged; ready for settings/config assessment and codespace hardening.
+
 ---
