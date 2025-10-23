@@ -1,41 +1,6 @@
 {
   "version": "2.0",
   "last_updated": "2025-10-22",
-  "servers": {
-    "development": {
-      "type": "stdio",
-      "package": "local",
-      "invocation": "node",
-      "script_path": "./mcp-servers/development-server.js",
-      "capabilities": [
-        "react_devtools",
-        "eslint_autofix",
-        "performance_profiling",
-        "api_testing",
-        "supabase_functions",
-        "vercel_status",
-        "docs_generation"
-      ],
-      "health_check_url": null,
-      "startup_timeout_ms": 5000,
-      "response_time_p95_target_ms": 500
-    },
-    "production": {
-      "type": "stdio",
-      "package": "local",
-      "invocation": "node",
-      "script_path": "./mcp-servers/production-server.js",
-      "capabilities": [
-        "production_monitoring",
-        "campaign_analytics",
-        "ci_cd_integration",
-        "cost_intelligence",
-        "security_scanning",
-        "supabase_validation",
-        "vercel_status"
-      ],
-      "health_check_url": null,
-      "startup_timeout_ms": 7000,
       "response_time_p95_target_ms": 600
     },
     "supabase-troubleshooting": {

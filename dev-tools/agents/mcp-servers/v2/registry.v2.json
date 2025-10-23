@@ -20,5 +20,3 @@
       "tools": ["supabase", "observability", "mermaid-mcp"],
       "env": { "NODE_ENV": "troubleshooting" }
     }
-  }
-}
