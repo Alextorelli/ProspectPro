@@ -328,30 +328,25 @@ async function collectFunctionConfigs() {
     "supabase",
     "functions"
   );
-  const entries = await fs.readdir(baseDir, { withFileTypes: true });
   const items = [];
-  for (const entry of entries) {
-    if (!entry.isDirectory()) continue;
-    if (entry.name.startsWith(".")) continue;
-    if (!allowedFunctionSlugs.has(entry.name)) continue;
-    const configPath = path.join(baseDir, entry.name, "function.toml");
-    if (!(await pathExists(configPath))) continue;
-    const rel = path.relative(repoRoot, configPath).replace(/\\/g, "/");
-    items.push(rel);
+  if (await pathExists(baseDir)) {
+    const entries = await fs.readdir(baseDir, { withFileTypes: true });
+    for (const entry of entries) {
+      if (!entry.isDirectory()) continue;
+      if (entry.name.startsWith(".")) continue;
+      if (!allowedFunctionSlugs.has(entry.name)) continue;
+      const configPath = path.join(baseDir, entry.name, "function.toml");
+      if (!(await pathExists(configPath))) continue;
+      const rel = path.relative(repoRoot, configPath).replace(/\\/g, "/");
+      items.push(rel);
+    }
   }
   items.sort();
   return items;
 }
 
 async function collectSharedModules() {
-  const baseDir = path.join(
-    repoRoot,
-    "app",
-    "backend",
-    "supabase",
-    "functions",
-    "_shared"
-  );
+  const baseDir = path.join(repoRoot, "app", "backend", "functions", "_shared");
   const entries = await fs.readdir(baseDir, { withFileTypes: true });
   return entries
     .filter((entry) => entry.isFile() && entry.name.endsWith(".ts"))
@@ -874,7 +869,10 @@ async function generateTasksReference() {
 }
 
 async function noteTaxonomyStaging() {
-  const troubleshootingDir = path.join(repoRoot, "docs/tooling/troubleshooting");
+  const troubleshootingDir = path.join(
+    repoRoot,
+    "docs/tooling/troubleshooting"
+  );
   if (!(await pathExists(troubleshootingDir))) {
     return;
   }
@@ -885,7 +883,10 @@ async function noteTaxonomyStaging() {
     return;
   }
 
-  const coveragePath = path.join(repoRoot, "dev-tools/context/session_store/coverage.md");
+  const coveragePath = path.join(
+    repoRoot,
+    "dev-tools/context/session_store/coverage.md"
+  );
   if (!(await pathExists(coveragePath))) {
     return;
   }
