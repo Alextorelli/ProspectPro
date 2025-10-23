@@ -1,6 +1,6 @@
 # ProspectPro VS Code Tasks Reference
 
-_Auto-generated from `.vscode/tasks.json` — Last updated: 2025-10-22_
+_Auto-generated from `.vscode/tasks.json` — Last updated: 2025-10-23_
 
 **Quick Access**: Press `Ctrl+Shift+P` → "Tasks: Run Task" → Select from list below
 
