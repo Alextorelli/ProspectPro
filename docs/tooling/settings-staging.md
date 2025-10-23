@@ -481,3 +481,10 @@ _Governance review and documentation update complete. Ready for final migration 
 - Validation suite run: `npm run build`, `npm test`, `npm run repo:scan` — all passed.
 - Updated inventories: `app-filetree.txt`, `dev-tools-filetree.txt`, `integration-filetree.txt`, `repo-tree-summary.txt`.
 - Provenance and results logged in `coverage.md` and `workspace_status.md`.
+
+# Applied: Copilot Instructions Alignment (2025-10-23)
+
+- Updated `.github/copilot-instructions.md` to reference the active action plan (`docs/app/**Targeted ROOT action plan**.md`) and refreshed inventories in `reports/context/`.
+- Alignment ensures Copilot guidance mirrors the MECE repo structure and current relocation workflow.
+- Risk: Low — documentation-only change; rollback via `git checkout -- .github/copilot-instructions.md` if needed.
+- Validation: Links verified; inventories already current from latest `npm run repo:scan`.

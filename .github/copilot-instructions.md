@@ -8,7 +8,7 @@
 - **Data Layer**: Supabase Postgres with Row Level Security, campaign ownership, and authenticated exports
 - **Observability**: MCP log-forwarder + Supabase logs (see `reports/context/coverage.md`)
 - **Authentication**: Supabase Auth (anonymous + authenticated sessions) enforced through shared helpers across functions and frontend
-- **Configuration Guard**: Stage all `.vscode/` and `.github/` changes in `docs/tooling/settings-staging.md` before updating live files
+- **Configuration Guard**: Stage all `.vscode/` and `.github/` changes in `docs/tooling/settings-staging.md` before updating live files; follow the active relocation steps in `docs/app/**Targeted ROOT action plan**.md` (mirrored in `dev-tools/context/session_store/`).
 
 ## Data Integrity & Sources
 
@@ -81,9 +81,10 @@ Data quality focuses on auditing live responses, preserving attribution, and doc
 2. Prioritize actionable fixes, referencing existing files or scripts by path
 3. Default to existing npm scripts, tasks, and automation instead of bespoke commands
 4. Flag configuration changes by staging proposals in `docs/tooling/settings-staging.md` before modifying `.vscode/` or `.github/`
-5. Cite the production system’s current behavior when discussing alternatives or enhancements
-6. Keep responses concise, oriented around debugging, deployment, or data quality tasks
-7. When unsure about data-source integrity, cross-check against the playbooks and log findings in `reports/`
+5. Reference the stepwise relocation guidance in `docs/app/**Targeted ROOT action plan**.md` when discussing structural work
+6. Cite the production system’s current behavior when discussing alternatives or enhancements
+7. Keep responses concise, oriented around debugging, deployment, or data quality tasks
+8. Use the canonical inventories in `reports/context/{app-filetree,dev-tools-filetree,integration-filetree}.txt` when verifying layout changes, and log provenance updates in `coverage.md`
 
 ## MCP & Observability Notes
 
@@ -95,7 +96,7 @@ Data quality focuses on auditing live responses, preserving attribution, and doc
 ## Remaining Dependencies & Follow-up
 
 - **Telemetry report**: `reports/context/coverage.md` is now the authoritative audit; keep linked from this file for all future reference
-- **Restructure plan**: `docs/app/REPO_RESTRUCTURE_PLAN.md` is the canonical migration roadmap and is referenced by README.md; update in lockstep with structural changes
+- **Restructure plan**: `docs/app/REPO_RESTRUCTURE_PLAN.md` is the canonical migration roadmap (daily sequencing captured in `docs/app/**Targeted ROOT action plan**.md`); update both in lockstep with structural changes
 - **Validation template**: `dev-tools/reports/reports/validation/template.md` is required by validation runners and VS Code tasks; retain path integrity
 - **MCP status**: See `docs/tooling/devops-agent-runbook.md` (MCP Production Status Snapshot) for the current production server inventory; update that section when tool counts change
 - **Audit artifacts**: `dev-tools/reports/reports/refactor/docs-audit.txt` and `dev-tools/reports/reports/refactor/structure-gap.md` track the ongoing cleanup; keep until the restructure backlog closes
