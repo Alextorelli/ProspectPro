@@ -114,7 +114,9 @@
     "test:watch": "vitest --exclude app/backend/functions/tests/**",
     "type-check": "tsc -p config/tsconfig.json --noEmit",
     "supabase:test:db": "bash -lc 'cd supabase && source ../scripts/operations/ensure-supabase-cli-session.sh && npx --yes supabase@latest test db'",
-    "thunder:test": "echo 'Run Thunder Client tests via VS Code extension (Thunder: Run Full Test Suite task)'"
+    "thunder:test": "echo 'Run Thunder Client tests via VS Code extension (Thunder: Run Full Test Suite task)'",
+    "template:init": "bash integration/templates/init-template.sh",
+    "platform:validate": "bash integration/symlinks/validate-symlinks.sh"
   },
   "keywords": [
     "verified-business-intelligence",

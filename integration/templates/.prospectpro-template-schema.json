@@ -1,0 +1,16 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "ProspectPro Integration Template Manifest",
+  "type": "object",
+  "properties": {
+    "symlinks": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "templates": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  },
+  "required": ["symlinks", "templates"]
+}
