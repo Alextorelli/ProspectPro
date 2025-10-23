@@ -29,5 +29,5 @@
     }
   },
   "include": ["app/frontend/src", "app/backend", "app/shared"],
-  "references": [{ "path": "./tsconfig.node.json" }]
+  "references": [{ "path": "../app/frontend/tsconfig.node.json" }]
 }

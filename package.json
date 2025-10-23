@@ -13,7 +13,6 @@
     "docs:generate": "node integration/platform/github/docs-automation/generate-mermaid-diagrams.js",
     "docs:sync": "npm run docs:generate && bash dev-tools/automation/ci-cd/mermaid/run-mermaid-automation.sh",
     "docs:validate": "bash dev-tools/automation/ci-cd/mermaid/validate-mermaid-diagrams.sh",
-    "docs:validate": "node scripts/docs/audit-diagram-taxonomy.js",
     "docs:preview": "code --command MermaidChart.openPreview",
     "docs:audit": "node scripts/docs/audit-diagram-taxonomy.js",
     "docs:render:svg": "bash scripts/docs/generate-diagram-bundle.sh --svg",
