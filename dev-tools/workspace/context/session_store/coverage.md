@@ -1,3 +1,10 @@
+## 2025-10-23: Full Domain Rewiring & Validation
+
+- Action: Audited and updated all npm scripts, VS Code tasks, and automation references for new MECE-aligned paths in dev-tools, integration, and app domains.
+- Validation: Ran lint and test suites; all passed for rewired domains.
+- Inventory: Refreshed repo-tree-summary.txt, app-filetree.txt, dev-tools-filetree.txt, integration-filetree.txt after rewiring.
+- Notes: All automation, validation, and inventories now fully aligned with MECE structure. CI and documentation automation ready for ongoing use.
+
 ## Diagram Refactor Coverage (Option A)
 
 9c389c385a48e10b0a8b9c18f5465b3ec2a6775df22b96380ab64787ab3c7a8d docs/tooling/end-state/agent-coordination-flow.mmd
