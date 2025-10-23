@@ -1,90 +1,163 @@
-app/frontend/src/stores/utils/leadSanitizers.ts
-app/frontend/src/stores/enhancedCampaignStore.ts
-app/frontend/src/stores/campaignStore.ts
-app/frontend/src/utils/__tests__/smoke.test.ts
-app/frontend/src/utils/__tests__/campaignTransforms.test.ts
-app/frontend/src/utils/__tests__/basic.test.ts
-app/frontend/src/utils/leadFilters.ts
-app/frontend/src/utils/exportLeadsToCsv.ts
-app/frontend/src/utils/campaignTransforms.ts
-app/frontend/src/components/MultiSelectBusinessTypes.tsx
-app/frontend/src/components/PaymentMethods.tsx
-app/frontend/src/components/CampaignsTable.tsx
-app/frontend/src/components/SelectedChips.tsx
-app/frontend/src/components/ApiUsageChart.tsx
-app/frontend/src/components/ErrorBoundary.tsx
-app/frontend/src/components/LogoIcon.tsx
-app/frontend/src/components/LeadDetailsDrawer.tsx
-app/frontend/src/components/LeadExplorerGrid.tsx
-app/frontend/src/components/AuthComponent.tsx
-app/frontend/src/components/TierSelector.tsx
-app/frontend/src/components/ApiUsageTable.tsx
-app/frontend/src/components/ThemeToggle.tsx
-app/frontend/src/components/LeadCard.tsx
-app/frontend/src/components/Layout.tsx
-app/frontend/src/components/ProgressDisplay.tsx
-app/frontend/src/components/EnrichmentButton.tsx
-app/frontend/src/components/Stepper.tsx
-app/frontend/src/components/Tabs.tsx
-app/frontend/src/components/LeadExplorerTable.tsx
-app/frontend/src/components/GeographicSelector.tsx
-app/frontend/src/components/CollapsibleCard.tsx
-app/frontend/src/lib/utils.ts
-app/frontend/src/lib/supabase.ts
-app/frontend/src/hooks/useBusinessDiscovery.ts
-app/frontend/src/hooks/useCampaignResults.ts
-app/frontend/src/hooks/useJobProgress.tsx
-app/frontend/src/hooks/useLeadEnrichment.ts
-app/frontend/src/constants/businessTaxonomy.ts
-app/frontend/src/types/supabase.ts
-app/frontend/src/types/index.ts
-app/frontend/src/pages/AccountPage.tsx
-app/frontend/src/pages/BusinessDiscovery.tsx
-app/frontend/src/pages/CampaignProgress.tsx
-app/frontend/src/pages/AuthCallback.tsx
-app/frontend/src/pages/AdminPanel.tsx
-app/frontend/src/pages/Campaign.tsx
-app/frontend/src/pages/Results.tsx
-app/frontend/src/pages/Dashboard.tsx
-app/frontend/src/contexts/AuthContext.tsx
-app/backend/functions/example-function/index.ts
-app/backend/functions/example-function/function.toml
-app/backend/functions/tests/placeholder.test.ts
-app/backend/functions/tests/edge-functions.test.ts
-app/backend/supabase/functions/auth-diagnostics/index.ts
-app/backend/supabase/functions/auth-diagnostics/function.toml
-app/backend/supabase/functions/business-discovery-background/index.ts
-app/backend/supabase/functions/business-discovery-background/function.toml
-app/backend/supabase/functions/campaign-export-user-aware/index.ts
-app/backend/supabase/functions/campaign-export-user-aware/function.toml
-app/backend/supabase/functions/business-discovery-user-aware/index.ts
-app/backend/supabase/functions/business-discovery-user-aware/function.toml
-app/backend/supabase/functions/enrichment-orchestrator/index.ts
-app/backend/supabase/functions/enrichment-orchestrator/function.toml
-app/backend/supabase/functions/business-discovery-optimized/index.ts
-app/backend/supabase/functions/business-discovery-optimized/function.toml
-app/backend/supabase/functions/_shared/edge-auth.ts
-app/backend/supabase/functions/_shared/vault-client.ts
-app/backend/supabase/functions/_shared/cobalt-cache.ts
-app/backend/supabase/functions/_shared/edge-auth-simplified.ts
-app/backend/supabase/functions/_shared/cache-manager.ts
-app/backend/supabase/functions/_shared/api-usage.ts
-app/backend/supabase/functions/campaign-export/index.ts
-app/backend/supabase/functions/campaign-export/function.toml
-app/backend/supabase/functions/enrichment-pdl/index.ts
-app/backend/supabase/functions/enrichment-pdl/function.toml
-app/backend/supabase/functions/enrichment-neverbounce/index.ts
-app/backend/supabase/functions/enrichment-neverbounce/function.toml
-app/backend/supabase/functions/enrichment-hunter/index.ts
-app/backend/supabase/functions/enrichment-hunter/function.toml
-app/backend/supabase/functions/test-google-places/index.ts
-app/backend/supabase/functions/test-google-places/function.toml
-app/backend/supabase/functions/test-user-deduplication/index.ts
-app/backend/supabase/functions/test-user-deduplication/function.toml
-app/backend/supabase/functions/enrichment-business-license/index.ts
-app/backend/supabase/functions/enrichment-business-license/function.toml
-app/backend/supabase/functions/tests/business-discovery.test.ts
-app/backend/supabase/functions/test-new-auth/index.ts
-app/backend/supabase/functions/test-new-auth/function.toml
-app/backend/supabase/functions/enrichment-cobalt/index.ts
-app/backend/supabase/functions/enrichment-cobalt/function.toml
+app/
+|-- backend/
+|   |-- functions/
+|   |   |-- business-discovery/
+|   |   |-- enrichment/
+|   |   |-- example-function/
+|   |   |   |-- function.toml
+|   |   |   `-- index.ts
+|   |   |-- exports/
+|   |   |-- shared/
+|   |   `-- tests/
+|   |       |-- edge-functions.test.ts
+|   |       `-- placeholder.test.ts
+|   |-- schemas/
+|   |   |-- migrations/
+|   |   `-- types/
+|   |-- supabase/
+|   |   |-- functions/
+|   |   |   |-- _shared/
+|   |   |   |   |-- api-usage.ts
+|   |   |   |   |-- cache-manager.ts
+|   |   |   |   |-- cobalt-cache.ts
+|   |   |   |   |-- edge-auth-simplified.ts
+|   |   |   |   |-- edge-auth.ts
+|   |   |   |   `-- vault-client.ts
+|   |   |   |-- auth-diagnostics/
+|   |   |   |   |-- function.toml
+|   |   |   |   `-- index.ts
+|   |   |   |-- business-discovery-background/
+|   |   |   |   |-- function.toml
+|   |   |   |   `-- index.ts
+|   |   |   |-- business-discovery-optimized/
+|   |   |   |   |-- function.toml
+|   |   |   |   `-- index.ts
+|   |   |   |-- business-discovery-user-aware/
+|   |   |   |   |-- function.toml
+|   |   |   |   `-- index.ts
+|   |   |   |-- campaign-export/
+|   |   |   |   |-- function.toml
+|   |   |   |   `-- index.ts
+|   |   |   |-- campaign-export-user-aware/
+|   |   |   |   |-- function.toml
+|   |   |   |   `-- index.ts
+|   |   |   |-- enrichment-business-license/
+|   |   |   |   |-- function.toml
+|   |   |   |   `-- index.ts
+|   |   |   |-- enrichment-cobalt/
+|   |   |   |   |-- function.toml
+|   |   |   |   `-- index.ts
+|   |   |   |-- enrichment-hunter/
+|   |   |   |   |-- function.toml
+|   |   |   |   `-- index.ts
+|   |   |   |-- enrichment-neverbounce/
+|   |   |   |   |-- function.toml
+|   |   |   |   `-- index.ts
+|   |   |   |-- enrichment-orchestrator/
+|   |   |   |   |-- function.toml
+|   |   |   |   `-- index.ts
+|   |   |   |-- enrichment-pdl/
+|   |   |   |   |-- function.toml
+|   |   |   |   `-- index.ts
+|   |   |   |-- test-google-places/
+|   |   |   |   |-- function.toml
+|   |   |   |   `-- index.ts
+|   |   |   |-- test-new-auth/
+|   |   |   |   |-- function.toml
+|   |   |   |   `-- index.ts
+|   |   |   |-- test-user-deduplication/
+|   |   |   |   |-- function.toml
+|   |   |   |   `-- index.ts
+|   |   |   `-- tests/
+|   |   |       `-- business-discovery.test.ts
+|   |   `-- {functions/
+|   |       `-- tests}/
+|   `-- tests/
+|-- frontend/
+|   |-- components/
+|   |-- constants/
+|   |-- contexts/
+|   |-- hooks/
+|   |-- lib/
+|   |-- pages/
+|   |-- public/
+|   |   |-- favicon-yellow-arrow.svg
+|   |   `-- logo-full.svg
+|   |-- src/
+|   |   |-- components/
+|   |   |   |-- ApiUsageChart.tsx
+|   |   |   |-- ApiUsageTable.tsx
+|   |   |   |-- AuthComponent.tsx
+|   |   |   |-- CampaignsTable.tsx
+|   |   |   |-- CollapsibleCard.tsx
+|   |   |   |-- EnrichmentButton.tsx
+|   |   |   |-- ErrorBoundary.tsx
+|   |   |   |-- GeographicSelector.tsx
+|   |   |   |-- Layout.tsx
+|   |   |   |-- LeadCard.tsx
+|   |   |   |-- LeadDetailsDrawer.tsx
+|   |   |   |-- LeadExplorerGrid.tsx
+|   |   |   |-- LeadExplorerTable.tsx
+|   |   |   |-- LogoIcon.tsx
+|   |   |   |-- MultiSelectBusinessTypes.tsx
+|   |   |   |-- PaymentMethods.tsx
+|   |   |   |-- ProgressDisplay.tsx
+|   |   |   |-- SelectedChips.tsx
+|   |   |   |-- Stepper.tsx
+|   |   |   |-- Tabs.tsx
+|   |   |   |-- ThemeToggle.tsx
+|   |   |   `-- TierSelector.tsx
+|   |   |-- constants/
+|   |   |   `-- businessTaxonomy.ts
+|   |   |-- contexts/
+|   |   |   `-- AuthContext.tsx
+|   |   |-- hooks/
+|   |   |   |-- useBusinessDiscovery.ts
+|   |   |   |-- useCampaignResults.ts
+|   |   |   |-- useJobProgress.tsx
+|   |   |   `-- useLeadEnrichment.ts
+|   |   |-- lib/
+|   |   |   |-- supabase.ts
+|   |   |   `-- utils.ts
+|   |   |-- pages/
+|   |   |   |-- AccountPage.tsx
+|   |   |   |-- AdminPanel.tsx
+|   |   |   |-- AuthCallback.tsx
+|   |   |   |-- BusinessDiscovery.tsx
+|   |   |   |-- Campaign.tsx
+|   |   |   |-- CampaignProgress.tsx
+|   |   |   |-- Dashboard.tsx
+|   |   |   `-- Results.tsx
+|   |   |-- stores/
+|   |   |   |-- services/
+|   |   |   |-- utils/
+|   |   |   |   `-- leadSanitizers.ts
+|   |   |   |-- campaignStore.ts
+|   |   |   `-- enhancedCampaignStore.ts
+|   |   |-- types/
+|   |   |   |-- index.ts
+|   |   |   `-- supabase.ts
+|   |   `-- utils/
+|   |       |-- __tests__/
+|   |       |   |-- basic.test.ts
+|   |       |   |-- campaignTransforms.test.ts
+|   |       |   `-- smoke.test.ts
+|   |       |-- campaignTransforms.ts
+|   |       |-- exportLeadsToCsv.ts
+|   |       `-- leadFilters.ts
+|   |-- stores/
+|   |   `-- utils/
+|   |-- tests/
+|   |-- types/
+|   |-- utils/
+|   |   `-- __tests__/
+|   |-- App.tsx
+|   |-- index.css
+|   |-- index.html
+|   |-- main.tsx
+|   `-- vite-env.d.ts
+|-- shared/
+|   |-- constants/
+|   |-- types/
+|   `-- validators/
+`-- app.json
