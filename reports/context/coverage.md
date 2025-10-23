@@ -61,5 +61,6 @@ ProspectPro/
 - New npm scripts added: `docs:validate`, `docs:preview`, `docs:audit`, `docs:render:svg`; `docs:prepare` now calls bundle, audit, and preview.
 - CI workflow staged to enforce diagram normalization and taxonomy compliance (`.github/workflows/mermaid-diagram-sync.yml`).
 - Provenance: After each run, log diagram counts, compliance failures, and last script SHA here.
+- Repo scan automation added (`scripts/docs/repo_scan.sh`); generated `reports/context/repo-tree-summary.txt`, `app-filetree.txt`, `dev-tools-filetree.txt`, `integration-filetree.txt` for diagram refresh.
 - Next: Proceed with directory migrations and update automation as tooling is validated.
-Moved shared config, guidelines, and standards to docs/shared/mermaid/config/, docs/shared/mermaid/guidelines/, and docs/shared/standards/.
+  Moved shared config, guidelines, and standards to docs/shared/mermaid/config/, docs/shared/mermaid/guidelines/, and docs/shared/standards/.

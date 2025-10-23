@@ -20,7 +20,18 @@ APP_FILE="$OUT_DIR/app-filetree.txt"
 DEVTOOLS_FILE="$OUT_DIR/dev-tools-filetree.txt"
 INTEGRATION_FILE="$OUT_DIR/integration-filetree.txt"
 
-PYTHON_SCRIPT=$(cat <<'PY'
+run_tree() {
+  local target="$1"
+  local outfile="$2"
+  local max_depth="$3"
+  local include_files="${4:-false}"
+
+  EXCLUDES=".git:.github:.vscode:.idea:node_modules:.docs-cache:dist:.vercel:coverage:.husky:.cache" \
+    TARGET="$target" \
+    OUTFILE="$outfile" \
+    MAX_DEPTH="$max_depth" \
+    INCLUDE_FILES="$include_files" \
+    python3 - <<'PY'
 import os
 from pathlib import Path
 
@@ -34,7 +45,6 @@ if not TARGET.exists():
     OUTFILE.write_text(f"[missing] {TARGET}\n")
     raise SystemExit(0)
 
-# Sort directories before files, then alphabetically (case-insensitive)
 def sort_key(path: Path):
     return (path.is_file(), path.name.lower())
 
@@ -51,9 +61,14 @@ def walk(directory: Path, depth: int, last_stack, lines):
     if MAX_DEPTH >= 0 and depth > MAX_DEPTH:
         return
     try:
-        entries = sorted([e for e in directory.iterdir() if should_include(e)], key=sort_key)
+        entries = sorted(
+            [e for e in directory.iterdir() if should_include(e)],
+            key=sort_key,
+        )
     except PermissionError:
-        lines.append("".join("    " if last else "|   " for last in last_stack) + "[permission-denied]")
+        lines.append(
+            "".join("    " if last else "|   " for last in last_stack) + "[permission-denied]"
+        )
         return
     for index, entry in enumerate(entries):
         is_last = index == len(entries) - 1
@@ -64,24 +79,11 @@ def walk(directory: Path, depth: int, last_stack, lines):
         if entry.is_dir():
             walk(entry, depth + 1, last_stack + [is_last], lines)
 
+
 lines = [TARGET.name + "/"]
 walk(TARGET, 0, [], lines)
 OUTFILE.write_text("\n".join(lines) + "\n")
 PY
-)
-
-run_tree() {
-  local target="$1"
-  local outfile="$2"
-  local max_depth="$3"
-  local include_files="${4:-false}"
-
-  EXCLUDES=".git:.github:.vscode:.idea:node_modules:.docs-cache:dist:.vercel:coverage:.husky:.cache" \
-    TARGET="$target" \
-    OUTFILE="$outfile" \
-    MAX_DEPTH="$max_depth" \
-    INCLUDE_FILES="$include_files" \
-    python3 - "$PYTHON_SCRIPT"
 }
 
 # Summary across repo (directories only, depth limited)

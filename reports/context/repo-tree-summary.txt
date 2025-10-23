@@ -1,0 +1,68 @@
+ProspectPro/
+|-- .deno_lsp/
+|-- .devcontainer/
+|-- .temp/
+|-- app/
+|   |-- backend/
+|   `-- frontend/
+|-- archive/
+|   |-- config-backup/
+|   |-- deployment/
+|   |-- development/
+|   |-- legacy-agent-orchestration/
+|   |-- loose-root-assets/
+|   |-- multi-level-archive/
+|   |-- production/
+|   `-- testing/
+|-- config/
+|-- dev-tools/
+|   |-- agent-orchestration/
+|   |-- api/
+|   |-- api-tests/
+|   |-- ci/
+|   |-- config/
+|   |-- context/
+|   |-- integration/
+|   |-- mcp-servers/
+|   |-- monitoring/
+|   |-- observability/
+|   |-- reports/
+|   |-- scripts/
+|   |-- supabase/
+|   |-- test-automation/
+|   |-- testing/
+|   |-- tests/
+|   |-- vercel/
+|   `-- workflow/
+|-- docs/
+|   |-- app/
+|   |-- deployment/
+|   |-- dev-tools/
+|   |-- development/
+|   |-- guides/
+|   |-- integration/
+|   |-- setup/
+|   |-- shared/
+|   |-- technical/
+|   `-- tooling/
+|-- mcp-servers/
+|-- reports/
+|   |-- archive/
+|   |-- context/
+|   `-- diagnostics/
+|-- scripts/
+|   |-- automation/
+|   |-- devtools/
+|   |-- docs/
+|   |-- operations/
+|   |-- testing/
+|   `-- tests/
+|-- supabase/
+|   |-- .temp/
+|   |-- migrations/
+|   |-- schema-sql/
+|   |-- scripts/
+|   |-- supabase/
+|   `-- tests/
+`-- tooling/
+    `-- migration-scripts/
