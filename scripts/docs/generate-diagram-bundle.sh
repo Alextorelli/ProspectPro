@@ -5,6 +5,7 @@ set -euo pipefail
 # Usage: scripts/docs/generate-diagram-bundle.sh [--init-config] [--svg]
 
 CONFIG="docs/shared/mermaid/config/mermaid.config.json"
+PUPPETEER_CONFIG="docs/shared/mermaid/config/puppeteer.config.json"
 DIAGRAM_DIRS=("docs/app/diagrams" "docs/dev-tools/diagrams" "docs/integration/diagrams" "docs/shared/mermaid/templates")
 
 function inject_config {
@@ -25,7 +26,7 @@ for dir in "${DIAGRAM_DIRS[@]}"; do
     inject_config "$file"
     # Optionally render SVG if --svg is passed
     if [[ "${1:-}" == "--svg" ]]; then
-      npx --yes mmdc -i "$file" -o "${file%.mmd}.svg"
+  npx --yes mmdc -p "$PUPPETEER_CONFIG" -i "$file" -o "${file%.mmd}.svg"
       echo "Rendered SVG for $file"
     fi
   done

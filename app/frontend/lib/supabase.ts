@@ -1,7 +1,7 @@
 import {
   FunctionsHttpError,
   FunctionsRelayError,
-} from "@app/backend/functions-js";
+} from "@supabase/functions-js";
 import { createClient } from "@supabase/supabase-js";
 
 const supabaseUrl =
