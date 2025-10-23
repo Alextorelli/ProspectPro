@@ -103,7 +103,6 @@ dev-tools/
 |   |-- integration-hub-server.js
 |   |-- MCP-package.json
 |   |-- observability-server.js
-|   |-- package-lock.json
 |   |-- package.json
 |   |-- postgresql-server.js
 |   |-- production-server.js

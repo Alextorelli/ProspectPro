@@ -45,6 +45,7 @@ ProspectPro/
 |   |-- shared/
 |   |-- technical/
 |   `-- tooling/
+|-- integration/
 |-- mcp-servers/
 |-- reports/
 |   |-- archive/
