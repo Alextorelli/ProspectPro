@@ -2,7 +2,7 @@ import react from "@vitejs/plugin-react";
 import path from "path";
 import { defineConfig } from "vitest/config";
 
-const frontendRoot = path.resolve(__dirname, "app/frontend");
+const frontendRoot = path.resolve(__dirname, "app/frontend/src");
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -10,10 +10,12 @@ export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: {
-      "@": frontendRoot,
+      "@frontend": path.resolve(__dirname, "app/frontend/src"),
+      "@backend": path.resolve(__dirname, "app/backend"),
+      "@shared": path.resolve(__dirname, "app/shared"),
     },
   },
-  publicDir: path.resolve(frontendRoot, "public"),
+  publicDir: path.resolve(__dirname, "app/frontend/public"),
   envPrefix: ["VITE_", "NEXT_PUBLIC_", "SUPABASE_", "PUBLIC_"],
   server: {
     port: 5173,
@@ -30,7 +32,7 @@ export default defineConfig({
     ),
   },
   test: {
-    root: frontendRoot,
+    root: path.resolve(__dirname, "app/frontend/src"),
     environment: "jsdom",
     globals: true,
     css: true,
