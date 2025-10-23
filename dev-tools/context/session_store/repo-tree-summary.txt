@@ -39,6 +39,14 @@ ProspectPro/
 |   |-- environments/
 |   |-- infrastructure/
 |   |-- platform/
-|   `-- security/
-`-- scripts/
-    `-- docs/
+|   |-- security/
+|   |-- symlinks/
+|   `-- templates/
+|-- scripts/
+|   |-- docs/
+|   `-- operations/
+`-- supabase/
+    |-- .temp/
+    |-- functions/
+    |-- migrations/
+    `-- schema/

@@ -50,25 +50,29 @@ dev-tools/
 |   |   |-- tsconfig.json
 |   |   `-- WorkspaceContext.ts
 |   |-- mcp-servers/
-|   |   |-- tools/
+|   |   |-- archive/
+|   |   |   |-- integration-hub-server.js
+|   |   |   |-- registry.json
+|   |   |   `-- registry.v2.json
+|   |   |-- environments/
+|   |   |   |-- development.js
+|   |   |   |-- production.js
+|   |   |   `-- troubleshooting.js
+|   |   |-- mcp-tools/
 |   |   |   |-- development-server-tools.js
 |   |   |   |-- integration-hub-server-tools.js
 |   |   |   |-- postgresql-server-tools.js
 |   |   |   |-- production-server-tools.js
 |   |   |   |-- README.md
 |   |   |   `-- supabase-troubleshooting-server-tools.js
-|   |   |-- v2/
-|   |   |   `-- registry.v2.json
-|   |   |-- development-server.js
-|   |   |-- integration-hub-server.js
+|   |   |-- validation/
+|   |   |-- active-registry.json
 |   |   |-- MCP-package.json
 |   |   |-- observability-server.js
+|   |   |-- package-lock.json
 |   |   |-- package.json
 |   |   |-- postgresql-server.js
-|   |   |-- production-server.js
 |   |   |-- README.md
-|   |   |-- registry.json
-|   |   |-- supabase-troubleshooting-server.js
 |   |   `-- test-results.json
 |   `-- workflows/
 |       |-- development-workflow/
@@ -93,6 +97,9 @@ dev-tools/
 |       `-- .gitkeep
 |-- automation/
 |   `-- ci-cd/
+|       |-- mermaid/
+|       |   |-- run-mermaid-automation.sh
+|       |   `-- validate-mermaid-diagrams.sh
 |       |-- audit-diagram-taxonomy.js
 |       |-- check-docs-schema.sh
 |       |-- generate-diagram-bundle.sh
@@ -108,8 +115,12 @@ dev-tools/
 |-- context/
 |   `-- session_store/
 |       |-- app-filetree.txt
+|       |-- dev-tools-filetree.txt
+|       |-- integration-filetree.txt
 |       `-- repo-tree-summary.txt
 |-- reports/
+|   |-- automation/
+|   |   `-- diagram-changelogs/
 |   |-- diagnostics/
 |   |   `-- mcp-diagnostics-test.json
 |   |-- monitoring/

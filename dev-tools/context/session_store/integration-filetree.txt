@@ -4,6 +4,10 @@ integration/
 |-- infrastructure/
 |-- platform/
 |   |-- github/
+|   |   |-- docs-automation/
+|   |   |   |-- generate-mermaid-diagrams.js
+|   |   |   |-- mermaid-template-registry.json
+|   |   |   `-- sync-github-projects.js
 |   |   |-- webhook-handler.js
 |   |   `-- webhook-validator.js
 |   |-- supabase/
@@ -24,4 +28,11 @@ integration/
 |   |   `-- vercel.json
 |   `-- workflow/
 |       `-- engine.ts
-`-- security/
+|-- security/
+|-- symlinks/
+|   |-- create-symlinks.sh
+|   |-- platform-detector.js
+|   `-- validate-symlinks.sh
+`-- templates/
+    |-- .prospectpro-template-schema.json
+    `-- init-template.sh
