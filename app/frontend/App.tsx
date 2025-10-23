@@ -1,6 +1,4 @@
 import { Route, Routes } from "react-router-dom";
-import { ErrorBoundary } from "./components/ErrorBoundary";
-import { Layout } from "./components/Layout";
 import { AuthProvider } from "./contexts/AuthContext";
 import { AccountPage } from "./pages/AccountPage";
 import { AdminPanel } from "./pages/AdminPanel";
@@ -10,6 +8,8 @@ import { Campaign } from "./pages/Campaign";
 import { CampaignProgress } from "./pages/CampaignProgress";
 import Dashboard from "./pages/Dashboard";
 import { Results } from "./pages/Results";
+import { ErrorBoundary } from "./src/components/ErrorBoundary";
+import { Layout } from "./src/components/Layout";
 
 function App() {
   return (
