@@ -5,6 +5,12 @@
 - Inventory: Refreshed repo-tree-summary.txt, app-filetree.txt, dev-tools-filetree.txt, integration-filetree.txt after rewiring.
 - Notes: All automation, validation, and inventories now fully aligned with MECE structure. CI and documentation automation ready for ongoing use.
 
+## 2025-10-23: Supabase Helper Consolidation
+
+- Action: Routed Supabase session guard and dev-tools diagnostics/deployment scripts to the canonical helper under `integration/platform/supabase/scripts/operations/`, converting the legacy `scripts/operations` copy into a wrapper and pruning the unused `scripts/docs/` folder.
+- Validation: Wrapper path resolution verified locally; Supabase CLI still exits with segmentation fault in this container (unchanged upstream behaviour).
+- Notes: Downstream tasks continue to reference `scripts/operations/ensure-supabase-cli-session.sh`; wrapper keeps them stable while canonical logic now lives solely under the integration platform tree.
+
 ## Diagram Refactor Coverage (Option A)
 
 9c389c385a48e10b0a8b9c18f5465b3ec2a6775df22b96380ab64787ab3c7a8d docs/tooling/end-state/agent-coordination-flow.mmd

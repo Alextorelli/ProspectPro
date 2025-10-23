@@ -23,8 +23,11 @@ require_repo_root() {
 require_repo_root
 
 SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
-# shellcheck source=/workspaces/ProspectPro/scripts/lib/supabase_cli_helpers.sh
-source "$SCRIPT_DIR/lib/supabase_cli_helpers.sh"
+# shellcheck source=/workspaces/ProspectPro/integration/platform/supabase/scripts/operations/supabase_cli_helpers.sh
+if ! REPO_ROOT=$(git rev-parse --show-toplevel 2>/dev/null); then
+  REPO_ROOT=$(cd "$SCRIPT_DIR/../../.." && pwd)
+fi
+source "$REPO_ROOT/integration/platform/supabase/scripts/operations/supabase_cli_helpers.sh"
 
 usage() {
   cat <<'EOF'
