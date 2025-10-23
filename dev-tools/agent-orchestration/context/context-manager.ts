@@ -4,7 +4,7 @@ import * as path from "node:path";
 import { fileURLToPath } from "node:url";
 
 // Context routing follows Option A taxonomy: @ux, @platform, @devops, @secops, @integrations
-// All context snapshots and outputs are routed to reports/context/<tag>/
+// All context snapshots and outputs are routed to dev-tools/context/session_store/<tag>/
 
 // Environment loader sourcing
 const {

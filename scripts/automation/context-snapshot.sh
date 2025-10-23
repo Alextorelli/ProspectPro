@@ -41,25 +41,25 @@ if ! $DRY_RUN; then
   node "$ENV_LOADER"
 fi
 
-mkdir -p reports/diagnostics
-SNAPSHOT_MD="reports/diagnostics/context-snapshot-$(date +%Y%m%d-%H%M%S).md"
+mkdir -p dev-tools/context/session_store/diagnostics
+SNAPSHOT_MD="dev-tools/context/session_store/diagnostics/context-snapshot-$(date +%Y%m%d-%H%M%S).md"
 
 if ! $DRY_RUN; then
-  SUPABASE_LOG="reports/diagnostics/${FUNC_SLUG}-$(date +%Y%m%d-%H%M%S).log"
+  SUPABASE_LOG="dev-tools/context/session_store/diagnostics/${FUNC_SLUG}-$(date +%Y%m%d-%H%M%S).log"
   ./scripts/automation/supabase-pull-logs.sh "$FUNC_SLUG" "$SINCE_TIME"
 else
   SUPABASE_LOG="[DRY RUN]"
 fi
 
 if ! $DRY_RUN; then
-  VERCEL_STATUS="reports/deployments/vercel-status-$(date +%Y%m%d-%H%M%S).json"
+  VERCEL_STATUS="dev-tools/context/session_store/deployments/vercel-status-$(date +%Y%m%d-%H%M%S).json"
   ./scripts/automation/vercel-status-check.sh
 else
   VERCEL_STATUS="[DRY RUN]"
 fi
 
 if ! $DRY_RUN; then
-  MCP_OUT="reports/diagnostics/mcp-troubleshooting-$(date +%Y%m%d-%H%M%S).log"
+  MCP_OUT="dev-tools/context/session_store/diagnostics/mcp-troubleshooting-$(date +%Y%m%d-%H%M%S).log"
   if npm run mcp:start:troubleshooting > "$MCP_OUT" 2>&1; then
     MCP_STATUS="OK"
   else

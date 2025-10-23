@@ -41,8 +41,8 @@ ProspectPro/
 - **Action**: Relocated integration domain files into MECE-aligned folders (`integration/platform`, `integration/infrastructure`, `integration/security`, `integration/data`, `integration/environments`).
 - **Validation**: File inventories generated and tree summary appended.
 - **Inventory**:
-  - `reports/context/integration-filetree.txt`: List of all relocated integration domain files
-  - `reports/context/repo-tree-summary.txt`: Updated repo tree summary (integration domain appended)
+  - `dev-tools/context/session_store/integration-filetree.txt`: List of all relocated integration domain files
+  - `dev-tools/context/session_store/repo-tree-summary.txt`: Updated repo tree summary (integration domain appended)
 - **Notes**: No errors reported during relocation; structure matches REPO_RESTRUCTURE_PLAN.
   │ └── workspace/
   ├── integration/
@@ -57,15 +57,15 @@ ProspectPro/
 
 ### Audit Outputs
 
-- **Diagram inventory**: `reports/context/diagrams-current.txt` (all Mermaid diagrams)
-- **Tooling/scripts/config inventory**: `reports/context/live-tooling-list.txt` (all tracked scripts, docs, configs)
-- **Context snapshot**: See latest markdown in `reports/diagnostics/context-snapshot-*.md`
+- **Diagram inventory**: `dev-tools/context/session_store/diagrams-current.txt` (all Mermaid diagrams)
+- **Tooling/scripts/config inventory**: `dev-tools/context/session_store/live-tooling-list.txt` (all tracked scripts, docs, configs)
+- **Context snapshot**: See latest markdown in `dev-tools/context/session_store/diagnostics/context-snapshot-*.md`
 
 ### Provenance & Next Steps
 
 - All inventories logged for pre-migration baseline.
 - Provenance: After each run, log diagram counts, compliance failures, and last script SHA here.
-- Repo scan automation added (`scripts/docs/repo_scan.sh`); generated `reports/context/repo-tree-summary.txt`, `app-filetree.txt`, `dev-tools-filetree.txt`, `integration-filetree.txt` for diagram refresh.
+- Repo scan automation added (`scripts/docs/repo_scan.sh`); generated `dev-tools/context/session_store/repo-tree-summary.txt`, `app-filetree.txt`, `dev-tools-filetree.txt`, `integration-filetree.txt` for diagram refresh.
 - Next: Proceed with directory migrations and update automation as tooling is validated.
   ProspectPro/
   |-- .deno_lsp/
@@ -87,7 +87,10 @@ ProspectPro/
   | |-- mcp-servers/
   | |-- monitoring/
   | |-- observability/
-  | |-- reports/
+  | |-- dev-tools/
+  | | |-- context/
+  | | | `-- session_store/
+  | |   |       (coverage, inventories, diagnostics, archives)
   | |-- scripts/
   | |-- supabase/
   | |-- test-automation/
@@ -95,22 +98,18 @@ ProspectPro/
   | |-- tests/
   | |-- vercel/
   | `-- workflow/
-|-- docs/
-|   |-- app/
-|   |-- deployment/
-|   |-- dev-tools/
-|   |-- development/
-|   |-- guides/
-|   |-- integration/
-|   |-- setup/
-|   |-- shared/
-|   |-- technical/
-|   `-- tooling/
+  |-- docs/
+  | |-- app/
+  | |-- deployment/
+  | |-- dev-tools/
+  | |-- development/
+  | |-- guides/
+  | |-- integration/
+  | |-- setup/
+  | |-- shared/
+  | |-- technical/
+  | `-- tooling/
   |-- mcp-servers/
-  |-- reports/
-  | |-- archive/
-  | |-- context/
-  | `-- diagnostics/
 |-- scripts/
 |   |-- automation/
 |   |-- devtools/
@@ -140,14 +139,14 @@ ProspectPro/
 - **Action**: Relocated dev-tools domain files into MECE-aligned folders (`dev-tools/automation`, `dev-tools/testing`, `dev-tools/monitoring`, `dev-tools/agents`, `dev-tools/scripts`, `dev-tools/config`, `dev-tools/workspace`, `dev-tools/reports`).
 - **Validation**: File inventories generated and tree summary appended.
 - **Inventory**:
-  - `reports/context/dev-tools-filetree.txt`: List of all relocated dev-tools domain files
-  - `reports/context/repo-tree-summary.txt`: Updated repo tree summary (dev-tools domain appended)
+  - `dev-tools/context/session_store/dev-tools-filetree.txt`: List of all relocated dev-tools domain files
+  - `dev-tools/context/session_store/repo-tree-summary.txt`: Updated repo tree summary (dev-tools domain appended)
 - **Notes**: Rsync warnings for pre-existing fixture files; no impact on migration integrity.
 
 ## 2025-10-23: Legacy Asset Cleanup
 
 - **Action**: Removed legacy backup, temp, old, archive, and log files from `archive/loose-root-assets`.
-- **Validation**: Generated post-cleanup inventory: `reports/context/legacy-assets-post-cleanup.txt`.
+- **Validation**: Generated post-cleanup inventory: `dev-tools/context/session_store/legacy-assets-post-cleanup.txt`.
 - **Notes**: All non-essential legacy files purged; ready for settings/config assessment and codespace hardening.
 
 ---

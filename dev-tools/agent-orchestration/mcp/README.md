@@ -368,4 +368,4 @@ npm run example
 - **Phase 3C:** VS Code API integration and UI components
 - **Phase 4:** Production deployment and monitoring integration
 
-All changes logged in `reports/context/agent-chat-integration-plan.tmp.md`
+All changes logged in `dev-tools/context/session_store/agent-chat-integration-plan.tmp.md`

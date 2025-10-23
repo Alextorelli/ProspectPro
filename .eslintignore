@@ -29,7 +29,7 @@ dev-tools/agent-orchestration/mcp/dist/
 archive/
 
 # === GENERATED REPORTS & PUBLIC ASSETS ===
-reports/
+dev-tools/context/session_store/
 public/
 
 # === SUPABASE FUNCTIONS (Deno/TypeScript, not for ESLint) ===

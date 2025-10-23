@@ -760,7 +760,7 @@ This instruction set prioritizes rapid problem resolution and eliminates repetit
 
 - **Order of Operations**: Thunder tests → `Supabase: Fetch Logs` → `Supabase: Analyze Logs`
 - **Automated Collection**: Use MCP `collect_and_summarize_logs` tool for one-click log analysis
-- **Report Generation**: Markdown summaries saved to `reports/diagnostics/` with error counts and next steps
+- **Report Generation**: Markdown summaries saved to `dev-tools/context/session_store/diagnostics/` with error counts and next steps
 
 ### Run & Debug Preferences
 

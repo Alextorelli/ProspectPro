@@ -885,7 +885,7 @@ async function noteTaxonomyStaging() {
     return;
   }
 
-  const coveragePath = path.join(repoRoot, "reports/context/coverage.md");
+  const coveragePath = path.join(repoRoot, "dev-tools/context/session_store/coverage.md");
   if (!(await pathExists(coveragePath))) {
     return;
   }
@@ -914,7 +914,7 @@ async function noteTaxonomyStaging() {
   coverage = `${prefix}${marker}\n${suffix}`;
   await fs.writeFile(coveragePath, coverage, "utf8");
   console.log(
-    "   ℹ️ reports/context/coverage.md annotated with taxonomy troubleshooting reminder"
+    "   ℹ️ dev-tools/context/session_store/coverage.md annotated with taxonomy troubleshooting reminder"
   );
 }
 

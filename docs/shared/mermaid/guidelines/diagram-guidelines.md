@@ -28,7 +28,7 @@
 
 4. **Regenerate References** – Run `npm run docs:prepare` to call the bundle script, skip SVG rendering, and regenerate documentation references.
 
-5. **Record Provenance** – Document diagram-touching workstreams in `reports/context/coverage.md` or linked runbooks to maintain auditability.
+5. **Record Provenance** – Document diagram-touching workstreams in `dev-tools/context/session_store/coverage.md` or linked runbooks to maintain auditability.
 
 6. **CI/CD Enforcement (Next)** – Extend pipelines to require `npm run docs:patch:diagrams` and `npm run mcp:chat:validate` before merges; integrate with VS Code task "Docs: Prepare".
 
@@ -97,7 +97,7 @@ Last updated: 2025-10-22
 2. **Normalize Config** – Each changed diagram gains a `%%{init: { 'theme': 'forest', 'themeVariables': {...} }}%%` header (from config file) if missing, and tabs are converted to spaces for consistent linting.
 3. **Compliance Warning** – Diagrams without explicit `ZeroFakeData` references emit a warning to stderr for manual follow-up.
 4. **Regenerate References** – Run `npm run docs:prepare` to call the bundle script, skip SVG rendering, and regenerate documentation references.
-5. **Record Provenance** – Document diagram-touching workstreams in `reports/context/coverage.md` or linked runbooks to maintain auditability.
+5. **Record Provenance** – Document diagram-touching workstreams in `dev-tools/context/session_store/coverage.md` or linked runbooks to maintain auditability.
 6. **CI/CD Enforcement (Next)** – Extend pipelines to require `npm run docs:patch:diagrams` and `npm run mcp:chat:validate` before merges; integrate with VS Code task "Docs: Prepare".
 
 ---

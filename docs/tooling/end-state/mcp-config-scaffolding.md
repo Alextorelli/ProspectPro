@@ -124,7 +124,7 @@ This document scaffolds the rewrite of `config/mcp-config.json` so the MCP serve
 
 - Update `dev-tools/mcp-servers/registry.json` in tandem; ensure slugs match the scaffolding above.
 - Keep backups of the legacy configuration until Option A routing is validated.
-- Record changes in `reports/context/coverage.md` under “Key Changes Since Last Report”.
+- Record changes in `dev-tools/context/session_store/coverage.md` under “Key Changes Since Last Report”.
 
 ---
 

@@ -318,7 +318,7 @@ curl -X POST 'https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/test-new-aut
 
 **Blank screen after campaign completes** – Indicates the browser hit an old build where the campaign store could not process undefined lead batches. Pull the latest `main`, run `npm install && npm run build`, and redeploy the `/dist` bundle. If the issue persists, open dev tools and confirm there are no React error #185 stacks; the null-safe store shipping in v4.3.1 should keep results rendering once Supabase returns data.
 
-**Telemetry/Diagnostics Issues** – If MCP troubleshooting server tools (`capture_api_trace`, `compare_campaign_costs`, `predict_campaign_roi`) fail to return expected results, check OTEL collector and Supabase log connectivity. Review outputs in `reports/diagnostics/` and validate configuration in `docs/tooling/platform-playbooks.md`.
+**Telemetry/Diagnostics Issues** – If MCP troubleshooting server tools (`capture_api_trace`, `compare_campaign_costs`, `predict_campaign_roi`) fail to return expected results, check OTEL collector and Supabase log connectivity. Review outputs in `dev-tools/context/session_store/diagnostics/` and validate configuration in `docs/tooling/platform-playbooks.md`.
 
 ### Ignore Hygiene & Automation (2025-10-18)
 

@@ -49,7 +49,7 @@ class SupabaseTroubleshootingServer {
                 type: "string",
                 description: "Path to Vercel build or dev server log file.",
                 default:
-                  "/workspaces/ProspectPro/reports/logs/vercel-build.log",
+                  "/workspaces/ProspectPro/dev-tools/context/session_store/logs/vercel-build.log",
               },
               lines: {
                 type: "integer",
@@ -1007,10 +1007,10 @@ Save these commands for quick debugging!`,
         .toISOString()
         .replace(/[:.]/g, "-")
         .slice(0, -5);
-      const logFile = `reports/logs/supabase-logs-${timestamp}.log`;
+      const logFile = `dev-tools/context/session_store/logs/supabase-logs-${timestamp}.log`;
 
       // Ensure reports directory exists
-      await fs.mkdir("reports/logs", { recursive: true });
+      await fs.mkdir("dev-tools/context/session_store/logs", { recursive: true });
 
       const fetchCommand = `cd /workspaces/ProspectPro && source scripts/operations/ensure-supabase-cli-session.sh && npx --yes supabase@latest functions logs ${functionName} --since=${sinceTime} > ${logFile}`;
 
@@ -1038,7 +1038,7 @@ Save these commands for quick debugging!`,
 
       // Step 3: Read the generated report
       const reportPath = logFile
-        .replace("reports/logs/", "reports/diagnostics/")
+        .replace("dev-tools/context/session_store/logs/", "dev-tools/context/session_store/diagnostics/")
         .replace(".log", ".md");
       let reportContent = "";
 

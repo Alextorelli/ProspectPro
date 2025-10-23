@@ -11,8 +11,8 @@ if [[ ! -f .env.vercel ]]; then
   npx --yes vercel@latest env pull .env.vercel
 fi
 
-mkdir -p reports/deployments
-REPORT_FILE="reports/deployments/vercel-status-$(date +%Y%m%d-%H%M%S).json"
+mkdir -p dev-tools/context/session_store/deployments
+REPORT_FILE="dev-tools/context/session_store/deployments/vercel-status-$(date +%Y%m%d-%H%M%S).json"
 
 npx --yes vercel@latest whoami > /dev/null
 npx --yes vercel@latest status --json > "$REPORT_FILE"

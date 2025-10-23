@@ -20,7 +20,7 @@
    - `capture_api_trace` (capture OTEL traces for API calls)
    - `compare_campaign_costs` (aggregate cost metrics from Supabase logs and OTEL traces)
    - `predict_campaign_roi` (predict campaign ROI using cost, enrichment, and validation telemetry)
-3. Outputs: `reports/diagnostics/`
+3. Outputs: `dev-tools/context/session_store/diagnostics/`
 
 ### Automation Integration
 
@@ -31,7 +31,7 @@
 - **Vercel Status Check:** `./scripts/automation/vercel-status-check.sh`
 - **Context Snapshot:** `./scripts/automation/context-snapshot.sh <function-slug> <since-time>`
 
-All scripts output to `reports/` and enforce guardrails. See platform-playbooks.md for details.
+All scripts output to `dev-tools/context/session_store/` and enforce guardrails. See platform-playbooks.md for details.
 
 ## MCP Production Status Snapshot (2025-10-20)
 
@@ -44,7 +44,7 @@ All scripts output to `reports/` and enforce guardrails. See platform-playbooks.
   - API validation (Google Places, Foursquare, Hunter.io, NeverBounce)
   - Filesystem analysis (project structure, pattern search, zero-fake-data guard)
 - **Operational usage**: Launch with `npm run mcp:start:production`; run diagnostics via Start/Stop tasks or CLI scripts in `mcp-servers/`
-- **Status logging**: Capture notable findings in `reports/diagnostics/` alongside incident notes
+- **Status logging**: Capture notable findings in `dev-tools/context/session_store/diagnostics/` alongside incident notes
 
 ## DevOps Agent Checklist Runbook
 
@@ -74,7 +74,7 @@ All scripts output to `reports/` and enforce guardrails. See platform-playbooks.
 
 - `cd supabase && npx --yes supabase@latest functions logs business-discovery-background --since=24h`
 - `Supabase: Fetch Logs` VS Code task (guarded reference only)
-- Capture anomalies in `reports/diagnostics/`
+- Capture anomalies in `dev-tools/context/session_store/diagnostics/`
 
 ### 4. MCP Troubleshooting
 
@@ -108,16 +108,16 @@ All scripts output to `reports/` and enforce guardrails. See platform-playbooks.
 
 ## Verification
 
-- Capture outputs in `reports/` as needed, including telemetry tool results
+- Capture outputs in `dev-tools/context/session_store/` as needed, including telemetry tool results
 - Confirm diagrams and docs updated for new troubleshooting and telemetry flows
 - Run validation pipeline before major changes
 
 ## Coverage Summary (2025-10-21)
 
-- All legacy Thunder/Jaeger references removed (see `reports/context/coverage.md`)
+- All legacy Thunder/Jaeger references removed (see `dev-tools/context/session_store/coverage.md`)
 - All test suites (frontend, dev tools, edge functions) passing
 - Directory structure and automation outputs validated
-- Canonical coverage output: `reports/context/coverage.md`
+- Canonical coverage output: `dev-tools/context/session_store/coverage.md`
 
 ![Coverage Status](https://img.shields.io/badge/coverage-100%25-brightgreen)
 

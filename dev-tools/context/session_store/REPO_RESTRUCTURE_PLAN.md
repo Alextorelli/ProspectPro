@@ -204,14 +204,14 @@ ProspectPro/
 
 1. **Draft move list:**
 
-- Compare `reports/context/pre-move-tree.txt` to the target layout in this plan.
+- Compare `dev-tools/context/session_store/pre-move-tree.txt` to the target layout in this plan.
 - Note affected imports, scripts, and tests for each batch.
 
 2. **Move application source first:**
 
 - Shift frontend, backend, shared libs, and Supabase function trees into their final `/app/**` subdirectories.
 - Update import paths, Supabase references, and run `npm run lint`, `npm test`, `npm run supabase:test:db`, and `npm run repo:scan` after each batch.
-- Log each move and validation run in `reports/context/coverage.md`.
+- Log each move and validation run in `dev-tools/context/session_store/coverage.md`.
 
 3. **Introduce the integration domain:**
 
@@ -234,7 +234,7 @@ ProspectPro/
 
 - Phase the relocation of `/app/frontend`, `/app/backend/functions`, and supporting tooling into the target layout while keeping Supabase auth + RLS intact.
 - Update VS Code tasks, npm scripts, and MCP tooling to match new paths after the diagram automation branch merges.
-- Document ZeroFakeData checks, context snapshots, and diagnostics alignment in `reports/context/coverage.md` for Phase 5/6 sign-offs.
+- Document ZeroFakeData checks, context snapshots, and diagnostics alignment in `dev-tools/context/session_store/coverage.md` for Phase 5/6 sign-offs.
 
 This plan supersedes prior guidance; follow the phased approach above for all restructuring and diagram automation work.
 
@@ -306,15 +306,16 @@ Converge ProspectPro to a hybrid mono-repo structure optimized for AI agent work
 
 - Only the following root folders and files are permitted:
   - app/
+  - dev-tools/
   - tooling/
   - docs/
   - config/
-  - reports/
   - .gitignore, .eslintignore, .vercelignore
   - README.md, LICENSE, package.json, package-lock.json, yarn.lock, CHANGELOG.md
   - index.html (optional Vite entry shim; primary frontend lives under app/frontend)
   - .github/, .vscode/, .devcontainer/, .husky/, .nvmrc, .npmrc
 - All other files/folders must be moved into the appropriate namespace or archived before deletion.
+- Historical `reports/` artifacts have been consolidated under `dev-tools/context/session_store/`; do not recreate a root-level reports directory.
 - The folder archive/loose-root-assets/ is used as a temporary quarantine for legacy or loose files pending review or deletion.
 
 ### Config Folder Layout

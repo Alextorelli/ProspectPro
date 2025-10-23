@@ -106,7 +106,7 @@
 - **Validation Results**: All tests passing (lint: ✅, unit tests: ✅, database: ✅)
 - **Documentation**: Complete audit trail maintained in coverage.md
 - **Configuration**: All changes staged and approved via settings-troubleshooting.md
-- **Archive**: Integration plan archived at `reports/context/archive/agent-chat-integration-plan-2025-10-21.md`
+- **Archive**: Integration plan archived at `dev-tools/context/session_store/archive/agent-chat-integration-plan-2025-10-21.md`
 
 ### Key Deliverables
 
@@ -117,9 +117,9 @@
 
 ### Links for Reference
 
-- [Coverage Report](./reports/context/coverage.md)
+- [Coverage Report](./dev-tools/context/session_store/coverage.md)
 - [Settings Staging](./docs/tooling/settings-troubleshooting.md)
-- [Archived Integration Plan](./reports/context/archive/agent-chat-integration-plan-2025-10-21.md)
+- [Archived Integration Plan](./dev-tools/context/session_store/archive/agent-chat-integration-plan-2025-10-21.md)
 
 ## Agent Integration Plan Status (Phase 5 Complete)
 

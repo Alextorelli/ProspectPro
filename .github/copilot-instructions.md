@@ -6,7 +6,8 @@
 - **Frontend**: React/Vite app deployed to Vercel (`prospect-fyhedobh1-appsmithery.vercel.app`) with build outputs in `/dist`
 - **Backend**: Supabase Edge Functions for discovery, enrichment, export, diagnostics (global edge network, <100ms cold starts)
 - **Data Layer**: Supabase Postgres with Row Level Security, campaign ownership, and authenticated exports
-- **Observability**: MCP log-forwarder + Supabase logs (see `reports/context/coverage.md`)
+- **Observability**: MCP log-forwarder + Supabase logs (see `dev-tools/context/session_store/coverage.md`)
+- **Session-store provenance**: All action plans, coverage reports, workspace status snapshots, and progress updates live in `dev-tools/context/session_store/`; the root `reports/` directory is retired—do not recreate or reference it.
 - **Authentication**: Supabase Auth (anonymous + authenticated sessions) enforced through shared helpers across functions and frontend
 - **Configuration Guard**: Stage all `.vscode/` and `.github/` changes in `docs/tooling/settings-staging.md` before updating live files; follow the active relocation steps in `docs/app/**Targeted ROOT action plan**.md` (mirrored in `dev-tools/context/session_store/`).
 
@@ -22,7 +23,7 @@ Primary integrations:
 - Chamber and trade association directories – membership validation
 - Foursquare Places API – category enrichment and context
 
-Data quality focuses on auditing live responses, preserving attribution, and documenting verification touchpoints inside enrichment metadata. Capture any anomalies in `reports/` and reference them in the relevant playbook before shipping changes.
+Data quality focuses on auditing live responses, preserving attribution, and documenting verification touchpoints inside enrichment metadata. Capture any anomalies in `dev-tools/context/session_store/` and reference them in the relevant playbook before shipping changes.
 
 ## AI-Assisted Workflow & Tooling
 
@@ -30,7 +31,7 @@ Data quality focuses on auditing live responses, preserving attribution, and doc
 - **VS Code tasks**: `CI/CD: Validate Workspace Pipeline`, `Supabase: Fetch Logs`, `Supabase: Analyze Logs`, `Docs: Prepare`, `Deploy: Full Automated Frontend` (auto-generated reference in `.vscode/TASKS_REFERENCE.md`)
 - **Mermaid diagrams**: Source-of-truth `.mmd` files under `docs/tooling/` and `docs/app/`; validate via `npm run docs:prepare`
 - **MCP tooling**: Production/dev/troubleshooting servers plus tools such as `supabase_cli_healthcheck`, `vercel_status_check`, `ci_cd_validation_suite`, and `checkFakeDataViolations` for auditing downstream calls
-- **Automation scripts**: `scripts/automation/` bundle handles Supabase log pulls, Vercel status checks, and context snapshots (outputs stored under `reports/`)
+- **Automation scripts**: `scripts/automation/` bundle handles Supabase log pulls, Vercel status checks, and context snapshots (outputs stored under `dev-tools/context/session_store/`)
 
 ## Platform Architecture Overview
 
@@ -84,7 +85,7 @@ Data quality focuses on auditing live responses, preserving attribution, and doc
 5. Reference the stepwise relocation guidance in `docs/app/**Targeted ROOT action plan**.md` when discussing structural work
 6. Cite the production system’s current behavior when discussing alternatives or enhancements
 7. Keep responses concise, oriented around debugging, deployment, or data quality tasks
-8. Use the canonical inventories in `reports/context/{app-filetree,dev-tools-filetree,integration-filetree}.txt` when verifying layout changes, and log provenance updates in `coverage.md`
+8. Use the canonical inventories in `dev-tools/context/session_store/{app-filetree,dev-tools-filetree,integration-filetree}.txt` when verifying layout changes, and log provenance updates in `dev-tools/context/session_store/coverage.md`
 
 ## MCP & Observability Notes
 
@@ -95,11 +96,11 @@ Data quality focuses on auditing live responses, preserving attribution, and doc
 
 ## Remaining Dependencies & Follow-up
 
-- **Telemetry report**: `reports/context/coverage.md` is now the authoritative audit; keep linked from this file for all future reference
+- **Telemetry report**: `dev-tools/context/session_store/coverage.md` is now the authoritative audit; keep linked from this file for all future reference
 - **Restructure plan**: `docs/app/REPO_RESTRUCTURE_PLAN.md` is the canonical migration roadmap (daily sequencing captured in `docs/app/**Targeted ROOT action plan**.md`); update both in lockstep with structural changes
 - **Validation template**: `dev-tools/reports/reports/validation/template.md` is required by validation runners and VS Code tasks; retain path integrity
 - **MCP status**: See `docs/tooling/devops-agent-runbook.md` (MCP Production Status Snapshot) for the current production server inventory; update that section when tool counts change
 - **Audit artifacts**: `dev-tools/reports/reports/refactor/docs-audit.txt` and `dev-tools/reports/reports/refactor/structure-gap.md` track the ongoing cleanup; keep until the restructure backlog closes
-- **Coverage output**: `reports/context/coverage.md` is populated by the “Phase 02” task; this is the new standard output location
+- **Coverage output**: `dev-tools/context/session_store/coverage.md` is populated by the “Phase 02” task; this is the new standard output location
 - **Historical sizes**: `CODEBASE_SIZES_BEFORE.txt` has no active references and can be deleted if the snapshot is no longer needed (delete and document in changelog if you remove it)
 - After each removal or replacement, re-run `npm run docs:update` and refresh cross-references in the FAST README and platform playbooks

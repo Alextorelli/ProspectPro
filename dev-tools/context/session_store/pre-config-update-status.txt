@@ -1,3 +1,4 @@
+# Legacy log captured prior to session-store migration; paths normalized here to dev-tools/context/session_store/ for clarity.
 On branch diagram-automation-restructure
 Your branch is up to date with 'origin/diagram-automation-restructure'.
 
@@ -5,14 +6,14 @@ Changes not staged for commit:
   (use "git add <file>..." to update what will be committed)
   (use "git restore <file>..." to discard changes in working directory)
 	modified:   docs/technical/CODEBASE_INDEX.md
-	modified:   reports/context/app-filetree.txt
-	modified:   reports/context/dev-tools-filetree.txt
-	modified:   reports/context/integration-filetree.txt
-	modified:   reports/context/repo-tree-summary.txt
+	modified:   dev-tools/context/session_store/app-filetree.txt
+	modified:   dev-tools/context/session_store/dev-tools-filetree.txt
+	modified:   dev-tools/context/session_store/integration-filetree.txt
+	modified:   dev-tools/context/session_store/repo-tree-summary.txt
 
 Untracked files:
   (use "git add <file>..." to include in what will be committed)
 	archive/loose-root-assets/
-	reports/context/pre-config-update-status.txt
+	dev-tools/context/session_store/pre-config-update-status.txt
 
 no changes added to commit (use "git add" and/or "git commit -a")

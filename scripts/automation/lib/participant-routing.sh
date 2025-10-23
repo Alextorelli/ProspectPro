@@ -13,7 +13,7 @@ for arg in "$@"; do
     *)
       for P in "${PARTICIPANTS[@]}"; do
         if [[ "$arg" == "$P" ]]; then
-          echo "reports/context/$arg/"
+          echo "dev-tools/context/session_store/$arg/"
           exit 0
         fi
       done

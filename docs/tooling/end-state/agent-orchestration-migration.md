@@ -48,7 +48,7 @@ This document outlines how to transition the agent orchestration layer (Copilot 
 - `npm run docs:prepare`
 - `npm run docs:update`
 - Manual review of generated diagrams (`docs/tooling/diagrams/` outputs)
-- Confirm `reports/context/coverage.md` logs the promotion of Option A taxonomy.
+- Confirm `dev-tools/context/session_store/coverage.md` logs the promotion of Option A taxonomy.
 
 ## Risk Considerations
 

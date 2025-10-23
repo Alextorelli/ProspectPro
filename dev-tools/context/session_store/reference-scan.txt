@@ -1,3 +1,4 @@
+legacy snapshot note: entries referencing reports/context represent pre-migration paths prior to session-store consolidation.
 tooling/migration-scripts/migrate-supabase-functions.sh:5:mv "$repo_root/app/backend/functions" "$repo_root/app/backend/functions"
 .vscode/CONFIGURATION_FIXES.md:23:  "deno.enablePaths": ["app/backend/functions"], // ← Only for Supabase
 .vscode/CONFIGURATION_FIXES.md:135:- Deno only runs for `app/backend/functions/` directory
@@ -16,7 +17,7 @@ tooling/migration-scripts/migrate-supabase-functions.sh:5:mv "$repo_root/app/bac
 yarn.lock:1060:"@app/backend/functions-js@2.75.1":
 yarn.lock:1062:  resolved "https://registry.npmjs.org/@app/backend/functions-js/-/functions-js-2.75.1.tgz"
 yarn.lock:1104:    "@app/backend/functions-js" "2.75.1"
-reports/context/post-move-validation.txt:3:> bash -lc 'source scripts/testing/test-env.local.sh && deno test --allow-all app/backend/functions/tests/'
+dev-tools/context/session_store/post-move-validation.txt:3:> bash -lc 'source scripts/testing/test-env.local.sh && deno test --allow-all app/backend/functions/tests/'
 package.json:77:    "supabase:test:functions": "bash -lc 'source scripts/testing/test-env.local.sh && deno test --allow-all app/backend/functions/tests/'",
 package.json:94:    "test": "vitest run --exclude app/backend/functions/tests/**",
 package.json:96:    "test:edge:local": "bash -lc 'source scripts/testing/test-env.local.sh && deno test --allow-all app/backend/functions/tests/'",
@@ -51,7 +52,7 @@ docs/tooling/mcp-routing-overview.mmd:31:    SUPABASE_LOGS["Supabase Logs\n(app/
 docs/tooling/context-orchestration.mmd:11:    participant FN as Edge Function\n(app/backend/functions/context-orchestration)
 dev-tools/scripts/testing/run-edge-tests-force.sh:25:deno test --allow-all app/backend/functions/tests/
 docs/tooling/settings-troubleshooting.md:77:- Begin phased relocation of `/app/frontend`, `/app/backend/functions`, and supporting tooling into the target `/app` and `/tooling` hierarchy as described in `docs/app/REPO_RESTRUCTURE_PLAN.md`.
-docs/tooling/settings-troubleshooting.md:156:- Reviewed automation scripts in scripts/automation/ for hardcoded directories. All outputs are written to `reports/diagnostics/` or `reports/deployments/` and do not reference frontend or app/backend/functions directly.
+docs/tooling/settings-troubleshooting.md:156:- Reviewed automation scripts in scripts/automation/ for hardcoded directories. All outputs are written to `dev-tools/context/session_store/diagnostics/` or `dev-tools/context/session_store/deployments/` and do not reference frontend or app/backend/functions directly.
 docs/tooling/settings-troubleshooting.md:166:  - Source: `app/backend/functions/` → Destination: `app/backend/functions/` (proposed)
 docs/tooling/mcp-routing-sequence.mmd:16:    participant SUPABASE as Supabase Logs\n(app/backend/functions/)
 dev-tools/scripts/diagnostics/validate-supabase-architecture.sh:43:FUNCTIONS_DIR="app/backend/functions"

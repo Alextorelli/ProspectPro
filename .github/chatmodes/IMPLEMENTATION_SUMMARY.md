@@ -26,4 +26,4 @@
 - Prompts reinforce zero-fake-data governance, OTEL instrumentation, and MCP-first workflows.
 - Codespace automation (VS Code tasks) remains aligned via manifest regeneration.
 
-Archive: `reports/context/archive/chatmode-persona-migration-2025-10-21.md`
+Archive: `dev-tools/context/session_store/archive/chatmode-persona-migration-2025-10-21.md`

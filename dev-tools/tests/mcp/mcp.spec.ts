@@ -2,7 +2,10 @@ import fs from "fs";
 import path from "path";
 import { describe, expect, it } from "vitest";
 
-const diagnosticsDir = path.resolve(__dirname, "../../reports/diagnostics");
+const diagnosticsDir = path.resolve(
+  __dirname,
+  "../../dev-tools/context/session_store/diagnostics"
+);
 const fixturePath = path.resolve(
   __dirname,
   "../../dev-tools/testing/fixtures/sample-mcp-response.json"

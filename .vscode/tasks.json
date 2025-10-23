@@ -1074,7 +1074,7 @@
       "command": "bash",
       "args": [
         "-lc",
-        "mkdir -p reports/logs && source scripts/operations/ensure-supabase-cli-session.sh && npx --yes supabase@latest functions logs ${input:functionName} --since=${input:sinceTime} > reports/logs/supabase-logs-$(date +%Y%m%d-%H%M%S).log && echo 'Logs saved to reports/logs/supabase-logs-$(date +%Y%m%d-%H%M%S).log'"
+        "mkdir -p dev-tools/context/session_store/logs && source scripts/operations/ensure-supabase-cli-session.sh && npx --yes supabase@latest functions logs ${input:functionName} --since=${input:sinceTime} > dev-tools/context/session_store/logs/supabase-logs-$(date +%Y%m%d-%H%M%S).log && echo 'Logs saved to dev-tools/context/session_store/logs/supabase-logs-$(date +%Y%m%d-%H%M%S).log'"
       ],
       "group": "build",
       "dependsOn": "Supabase: Ensure Session",
@@ -1168,7 +1168,7 @@
       "postRun": [
         {
           "type": "shell",
-          "command": "npx nyc --reporter=markdown --report-dir=reports/context -- temp tooling/test-automation/context/context.test.js"
+          "command": "npx nyc --reporter=markdown --report-dir=dev-tools/context/session_store -- temp tooling/test-automation/context/context.test.js"
         }
       ]
     },
@@ -1216,7 +1216,7 @@
     {
       "id": "logFile",
       "type": "promptString",
-      "description": "Path to log file to analyze (e.g., reports/logs/supabase-logs-20251018-020000.log)"
+      "description": "Path to log file to analyze (e.g., dev-tools/context/session_store/logs/supabase-logs-20251018-020000.log)"
     }
   ]
 }

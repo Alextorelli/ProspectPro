@@ -25,7 +25,7 @@ Alignment objectives:
 ## Implementation Notes
 
 - Promotion path: `docs/tooling/troubleshooting/chat-participants-taxonomy.md` → `docs/tooling/end-state/chat-participants-taxonomy.md` once approved.
-- Integration plan reference: see `reports/context/archive/agent-chat-integration-plan-2025-10-21.md` for Phase 5 baseline. Update the active guidance after review.
+- Integration plan reference: see `dev-tools/context/session_store/archive/agent-chat-integration-plan-2025-10-21.md` for Phase 5 baseline. Update the active guidance after review.
 - CI alignment: ensure `.github/workflows/mermaid-diagram-sync.yml` and related tasks reference the new end-state directory during promotion.
 
 ## Next Steps

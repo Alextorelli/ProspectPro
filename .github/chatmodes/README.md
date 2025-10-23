@@ -22,7 +22,7 @@ ProspectPro ships **four chat participants** that mirror the MCP agent personas.
 
 ## Governance Guardrails
 - Stage all `.github/` / `.vscode/` changes in `docs/tooling/settings-staging.md` with rationale, risk, rollback.
-- Archive chatmode rollouts under `reports/context/archive/`.
+- Archive chatmode rollouts under `dev-tools/context/session_store/archive/`.
 - Audit enrichment changes with MCP tools to maintain zero-fake-data compliance.
 - Keep OTEL spans, circuit breakers, and Supabase auth helpers intact when delivering fixes.
 

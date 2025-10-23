@@ -36,8 +36,8 @@ Run these to generate inventories for migration and validation:
 
 ```bash
 ./scripts/automation/context-snapshot.sh diagrams latest
-find docs -name '*.mmd' -print | sort > reports/context/diagrams-current.txt
-git ls-files '*scripts/**' '*docs/**' '*config/**' > reports/context/live-tooling-list.txt
+find docs -name '*.mmd' -print | sort > dev-tools/context/session_store/diagrams-current.txt
+git ls-files '*scripts/**' '*docs/**' '*config/**' > dev-tools/context/session_store/live-tooling-list.txt
 ```
 
-Log outputs in `reports/context/coverage.md` for provenance and audit trail.
+Log outputs in `dev-tools/context/session_store/coverage.md` for provenance and audit trail.

@@ -44,6 +44,27 @@ dev-tools/
 |   |   |   |   `-- staging.json
 |   |   |   `-- shared/
 |   |   |       `-- cost-thresholds.json
+|   |   |-- session_store/
+|   |   |   |-- **Targeted ROOT action plan**.md
+|   |   |   |-- REPO_RESTRUCTURE_PLAN.md
+|   |   |   |-- app-filetree.txt
+|   |   |   |-- archive/
+|   |   |   |   `-- .gitkeep
+|   |   |   |-- coverage.md
+|   |   |   |-- diagnostics/
+|   |   |   |   `-- mcp-diagnostics-test.json
+|   |   |   |-- deployments/
+|   |   |   |   `-- .gitkeep
+|   |   |   |-- integration-filetree.txt
+|   |   |   |-- legacy-assets-post-cleanup.txt
+|   |   |   |-- live-tooling-list.txt
+|   |   |   |-- logs/
+|   |   |   |   `-- .gitkeep
+|   |   |   |-- post-move-validation.txt
+|   |   |   |-- repo-tree-summary.txt
+|   |   |   |-- testing/
+|   |   |   |   `-- .gitkeep
+|   |   |   `-- workspace_status.md
 |   |   |-- checkpoint-contexts.ts
 |   |   |-- context-manager.ts
 |   |   |-- CONTEXTMANAGER_QUICKREF.md

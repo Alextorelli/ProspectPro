@@ -58,7 +58,7 @@
 | Observability         | `.github/chatmodes/Observability.chatmode.md`        | OTEL spans, diagnostics, zero-fake-data monitoring   |
 | Development Workflow  | `.github/chatmodes/Development Workflow.chatmode.md` | Feature delivery, testing pipelines, MCP automation  |
 
-Use `npm run mcp:chat:sync` and `npm run mcp:chat:validate` after modifying any persona or prompt. Log changes in `docs/tooling/settings-troubleshooting.md` and archive outputs under `reports/context/archive/`.
+Use `npm run mcp:chat:sync` and `npm run mcp:chat:validate` after modifying any persona or prompt. Log changes in `docs/tooling/settings-troubleshooting.md` and archive outputs under `dev-tools/context/session_store/archive/`.
 
 ### MCP Server Types
 
@@ -76,7 +76,7 @@ Use `npm run mcp:chat:sync` and `npm run mcp:chat:validate` after modifying any 
 - **Troubleshooting Server:**
   - Start: `npm run mcp:start:troubleshooting`
   - Tools: `test_edge_function`, `validate_database_permissions`, `collect_and_summarize_logs`, `capture_api_trace`, `compare_campaign_costs`, `predict_campaign_roi`
-  - Output: `reports/diagnostics/`
+  - Output: `dev-tools/context/session_store/diagnostics/`
 
 ### Diagnostic Workflow
 
@@ -90,7 +90,7 @@ Use `npm run mcp:chat:sync` and `npm run mcp:chat:validate` after modifying any 
 - `compare_campaign_costs` (aggregate cost metrics from Supabase logs and OTEL traces)
 - `predict_campaign_roi` (predict campaign ROI using cost, enrichment, and validation telemetry)
 
-3. Review outputs in `reports/diagnostics/`
+3. Review outputs in `dev-tools/context/session_store/diagnostics/`
 
 ### Guard Note
 
@@ -128,4 +128,4 @@ _Last updated: 2025-10-21_
     - `compare_campaign_costs` to compare campaign costs across logs and traces
     - `predict_campaign_roi` to estimate ROI for campaign parameters
 
-Each script enforces top-level directory checks and outputs to `reports/`.
+Each script enforces top-level directory checks and outputs to `dev-tools/context/session_store/`.

@@ -11,7 +11,7 @@ This guidance defines how to adapt workspace context management (VS Code tasks, 
 - Participant taxonomy: `docs/tooling/end-state/chat-participants-taxonomy.md`
 - DevOps taxonomy: `docs/tooling/end-state/devops-environment-taxonomy.md`
 - Context scripts: `scripts/context/`, `scripts/docs/`
-- Coverage reporting: `reports/context/coverage.md`
+- Coverage reporting: `dev-tools/context/session_store/coverage.md`
 - Workspace status automation: `workspace_status.md`, `package.json` scripts
 
 ## Migration Goals
@@ -25,7 +25,7 @@ This guidance defines how to adapt workspace context management (VS Code tasks, 
 ### 1. Context Snapshot Scripts
 
 - Update `scripts/context/` helpers to accept a `participant` flag instead of legacy handles.
-- Ensure snapshots store outputs under `reports/context/<participant>/` folders.
+- Ensure snapshots store outputs under `dev-tools/context/session_store/<participant>/` folders.
 - Document the new paths in `docs/tooling/devops-agent-runbook.md`.
 
 ### 2. VS Code Task Adjustments
@@ -37,7 +37,7 @@ This guidance defines how to adapt workspace context management (VS Code tasks, 
 ### 3. Coverage & Reporting
 
 - Extend `dev-tools/scripts/node/update-docs.js` to detect artifacts under `docs/tooling/end-state/` (in addition to troubleshooting).
-- Append a note in `reports/context/coverage.md` when end-state documents are promoted.
+- Append a note in `dev-tools/context/session_store/coverage.md` when end-state documents are promoted.
 - Archive the `Round 1` context structures under `docs/tooling/history/round-1/` as they are superseded.
 
 ### 4. Workspace Narrative
@@ -50,7 +50,7 @@ This guidance defines how to adapt workspace context management (VS Code tasks, 
 - Run `npm run docs:prepare` to confirm diagrams and context tables stay in sync.
 - Execute context snapshot scripts for each participant and verify outputs.
 - `npm run docs:update` to reflect coverage and task references.
-- Manual review of `reports/context/coverage.md` for new annotations.
+- Manual review of `dev-tools/context/session_store/coverage.md` for new annotations.
 
 ## Risks & Mitigation
 

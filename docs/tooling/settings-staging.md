@@ -6,7 +6,7 @@
 
 1. **Stage First** – Draft every proposed `.vscode/` and `.github/` change here (or an approved troubleshooting doc) with rationale, risk, and rollback.
 2. **Seek Approval** – Share staged entries via the active work plan for explicit sign-off before touching guarded directories.
-3. **Apply Carefully** – After approval, implement changes, log actions, and archive troubleshooting notes to `reports/context/archive/`.
+3. **Apply Carefully** – After approval, implement changes, log actions, and archive troubleshooting notes to `dev-tools/context/session_store/archive/`.
 4. **Validate** – Run the required pipeline (`npm run docs:update`, `npm run lint`, `npm test`, plus Supabase suites when relevant) and record results in this file.
 5. **Commit & Trace** – Commit with governance-aligned messaging, update coverage/workspace reports, and maintain audit traceability.
 
@@ -65,7 +65,7 @@
   4. `npm run docs:update`
   5. `npm run lint`
   6. `npm test`
-  7. Document findings + remediation in `reports/context/coverage.md` and this staging file before re-enabling guards.
+  7. Document findings + remediation in `dev-tools/context/session_store/coverage.md` and this staging file before re-enabling guards.
 
 # Staged: React DevTools Task Reference (2025-10-20)
 
@@ -90,8 +90,8 @@ See `docs/tooling/agent-debug-playbooks.md` for full workflow and guard policy.
 
 # Applied: Phase 02 Coverage Output Update (2025-10-20)
 
-- VS Code task `Phase 02` now leaves the markdown report at `reports/context/coverage.md` (rename step removed from `.vscode/tasks.json`).
-- Legacy artifact `reports/context/phase-02-report.md` is fully deprecated; all downstream tools and automation must consume `reports/context/coverage.md` as the canonical output.
+- VS Code task `Phase 02` now leaves the markdown report at `dev-tools/context/session_store/coverage.md` (rename step removed from `.vscode/tasks.json`).
+- Legacy artifact `dev-tools/context/session_store/phase-02-report.md` is fully deprecated; all downstream tools and automation must consume `dev-tools/context/session_store/coverage.md` as the canonical output.
 
 # Staged: App/Tooling Directory Migration (2025-10-20)
 
@@ -116,7 +116,7 @@ See `docs/tooling/agent-debug-playbooks.md` for full workflow and guard policy.
 - Chatmode files (Smart Debug, Feature Delivery, Production Support, API Research, Cost Optimization) are present, validated, and contain required metadata (description, tools).
 - MCP tooling, Thunder Client, and Supabase CLI integration are referenced and standardized across all modes.
 - README and IMPLEMENTATION_SUMMARY.md document activation workflow, usage, and maintenance procedures.
-- Pre-refactor snapshot archived in `reports/context/archive/chatmodes-pre-refactor-2025-10-21.md`.
+- Pre-refactor snapshot archived in `dev-tools/context/session_store/archive/chatmodes-pre-refactor-2025-10-21.md`.
 - All prompt files validated by `npm run test:devtools` (see TELEMETRY_LEGACY_CLEANUP_REPORT_2025-10-20.md).
 
 ## Governance & Guardrails
@@ -133,10 +133,10 @@ See `docs/tooling/agent-debug-playbooks.md` for full workflow and guard policy.
 - VS Code tasks and keybindings updated for chatmode/MCP workflows
 - Validation pipeline run: `docs:update`, `lint`, `test`, `supabase:test:db` (all passed, `NOTESTS` for db as expected)
 - MCP chatmode validation and Copilot Chat switching tested: **passed**
-- Archive created: `reports/context/archive/chatmode-automation-2025-10-21.md`
+- Archive created: `dev-tools/context/session_store/archive/chatmode-automation-2025-10-21.md`
 
 **Traceability:**
-- All results, logs, and manifest snapshots are archived in `reports/context/archive/chatmode-automation-2025-10-21.md`
+- All results, logs, and manifest snapshots are archived in `dev-tools/context/session_store/archive/chatmode-automation-2025-10-21.md`
 - Stepwise todo list governs integration and activation
 
 
@@ -163,7 +163,7 @@ See `docs/tooling/agent-debug-playbooks.md` for full workflow and guard policy.
 - **Rationale**: Align MCP routing with the new chat participant taxonomy and environment model, ensuring each participant triggers the correct server cluster.
 - **Risk**: Medium – misconfigured routing could block automation or expose production tooling. Mitigate with staged reviews, `npm run mcp:chat:validate`, and targeted MCP startup smoke tests.
 - **Rollback**: Restore previous `config/mcp-config.json` and related registry entries from git.
-- **Validation Plan**: `npm run mcp:chat:validate`, `npm run docs:patch:diagrams`, and `npm run mcp:start:production` / `npm run mcp:start:development`; log outcomes here and in `reports/context/coverage.md`.
+- **Validation Plan**: `npm run mcp:chat:validate`, `npm run docs:patch:diagrams`, and `npm run mcp:start:production` / `npm run mcp:start:development`; log outcomes here and in `dev-tools/context/session_store/coverage.md`.
 
 
 # Staged: CI Workflow Gate for Diagram Patch & MCP Validation (2025-10-21)
@@ -190,7 +190,7 @@ See `docs/tooling/agent-debug-playbooks.md` for full workflow and guard policy.
 - Legacy chatmodes replaced with persona-aligned prompts: System Architect, Production Ops, Observability, Development Workflow
 - Regenerated README, implementation summary, manifests, and platform playbook excerpt to reflect new personas
 - Validation pipeline 2025-10-21T08:13Z: `mcp:chat:sync`, `mcp:chat:validate`, `docs:update`, `lint`, `test`, `supabase:test:db` (NOTESTS)
-- Archive: `reports/context/archive/chatmode-persona-migration-2025-10-21.md`
+- Archive: `dev-tools/context/session_store/archive/chatmode-persona-migration-2025-10-21.md`
 - Rollback: `git checkout -- .github/chatmodes/` (restore previous prompts + manifest)
 
 
@@ -215,7 +215,7 @@ After any approved change to chatmodes, automation, or documentation:
 
 # Migration Execution (2025-10-21)
 
-- Pre-move inventory snapshot completed: see reports/context/pre-move-tree.txt and reports/context/frontend-files.txt
+- Pre-move inventory snapshot completed: see dev-tools/context/session_store/pre-move-tree.txt and dev-tools/context/session_store/frontend-files.txt
 - Supabase functions moved to app/backend/functions via migrate-supabase-functions.sh
 - Post-move validation pipeline run: docs:prepare, docs:update, lint, test, supabase:test:db all succeeded
 - Note: supabase:test:functions failed (missing scripts/testing/test-env.local.sh); review and restore if needed
@@ -229,7 +229,7 @@ After any approved change to chatmodes, automation, or documentation:
 ## 1. Workspace Scan
 
 - Ran: `rg -n "app/backend/functions"` and `rg -n "/app/backend/functions"` across repo
-- Output: `reports/context/reference-scan.txt` (see file for full hit list)
+- Output: `dev-tools/context/session_store/reference-scan.txt` (see file for full hit list)
 
 ## 2. Supabase Functions Path Remap Table
 
@@ -284,7 +284,7 @@ Rollback: `git restore .` or revert individual files if needed
 ## 2. Bulk Inventory Snapshots
 
 - Script staged: `tooling/migration-scripts/snapshot-pre-move.sh`
-- Output: `reports/context/pre-move-tree.txt`, `reports/context/frontend-files.txt`
+- Output: `dev-tools/context/session_store/pre-move-tree.txt`, `dev-tools/context/session_store/frontend-files.txt`
 
 ## 3. Stage Move Scripts
 
@@ -298,7 +298,7 @@ Rollback: `git restore .` or revert individual files if needed
 ## 5. Validation Pipeline (Post-move)
 
 - To be run after migration: `npm run docs:prepare`, `npm run docs:update`, `npm run lint`, `npm test`, `npm run supabase:test:db`, `npm run supabase:test:functions`
-- Output to be saved in `reports/context/post-move-validation.txt`
+- Output to be saved in `dev-tools/context/session_store/post-move-validation.txt`
 
 ## 6. Documentation Updates & Cleanup
 
@@ -316,7 +316,7 @@ Rollback: `git restore .` or revert individual files if needed
 
 ## 3. Automation Impact Matrix
 
-- Reviewed automation scripts in scripts/automation/ for hardcoded directories. All outputs are written to `reports/diagnostics/` or `reports/deployments/` and do not reference frontend or app/backend/functions directly.
+- Reviewed automation scripts in scripts/automation/ for hardcoded directories. All outputs are written to `dev-tools/context/session_store/` (diagnostics and deployment snapshots) and do not reference frontend or app/backend/functions directly.
 - **Result:** No changes required for context snapshot, supabase log pull, or vercel status scripts.
 
 ## 4. Draft Directory Moves
@@ -388,9 +388,9 @@ Rollback: `git restore .` or revert individual files if needed
 
 ## Agent Chat Integration Plan Archive
 
-- **Proposed Change**: Move `reports/context/agent-chat-integration-plan.tmp.md` to `reports/context/archive/` with timestamp
+- **Proposed Change**: Move `dev-tools/context/session_store/agent-chat-integration-plan.tmp.md` to `dev-tools/context/session_store/archive/` with timestamp
 - **Rationale**: Clean up temporary Phase 5 planning document and archive for historical reference
-- **Files Modified**: `reports/context/agent-chat-integration-plan.tmp.md` → `reports/context/archive/agent-chat-integration-plan-2025-10-21.md`
+- **Files Modified**: `dev-tools/context/session_store/agent-chat-integration-plan.tmp.md` → `dev-tools/context/session_store/archive/agent-chat-integration-plan-2025-10-21.md`
 - **Risk Assessment**: Low - file move operation
 - **Rollback**: Move file back to original location
 
@@ -458,7 +458,7 @@ _Governance review and documentation update complete. Ready for final migration 
   3. Compress `.devcontainer/`, `.vscode/`, `.github/`, `config/` to `archive/loose-root-assets/codespace-config-backup-$(date +%F).tar.gz`
   4. Update `docs/tooling/end-state/index.md` and cross-link to REPO_RESTRUCTURE_PLAN.md
   5. Bulk-audit diagrams/scripts/configs per migration plan
-  6. Document all findings and validation outputs in `reports/context/coverage.md` and this file
+  6. Document all findings and validation outputs in `dev-tools/context/session_store/coverage.md` and this file
 
 - **Guardrails**: No direct edits to `.vscode/` or `.github/` until staged and approved here. All automation, MCP, and diagram changes must be validated and logged.
 
@@ -471,7 +471,7 @@ _Governance review and documentation update complete. Ready for final migration 
 - **Validation Plan**: `npm run docs:prepare`, `npm run docs:validate`, `npm run docs:audit`, `npm run lint` pre-commit; confirm GitHub Actions success on test PR.
 
 - **Applied**: Added npm scripts: `docs:validate`, `docs:preview`, `docs:audit`, `docs:render:svg`. Updated `docs:prepare` to call bundle, audit, and preview.
-- **Next**: Extend provenance logging in `reports/context/coverage.md` after each run, then proceed with directory migrations when automation is ready.
+- **Next**: Extend provenance logging in `dev-tools/context/session_store/coverage.md` after each run, then proceed with directory migrations when automation is ready.
 
 # Applied: Vite Entry & Root Directory Adjustments (2025-10-23)
 
@@ -484,7 +484,7 @@ _Governance review and documentation update complete. Ready for final migration 
 
 # Applied: Copilot Instructions Alignment (2025-10-23)
 
-- Updated `.github/copilot-instructions.md` to reference the active action plan (`docs/app/**Targeted ROOT action plan**.md`) and refreshed inventories in `reports/context/`.
+- Updated `.github/copilot-instructions.md` to reference the active action plan (`docs/app/**Targeted ROOT action plan**.md`) and refreshed inventories in `dev-tools/context/session_store/`.
 - Alignment ensures Copilot guidance mirrors the MECE repo structure and current relocation workflow.
 - Risk: Low — documentation-only change; rollback via `git checkout -- .github/copilot-instructions.md` if needed.
 - Validation: Links verified; inventories already current from latest `npm run repo:scan`.

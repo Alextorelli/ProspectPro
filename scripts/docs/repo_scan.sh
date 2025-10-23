@@ -4,13 +4,13 @@ set -euo pipefail
 # repo_scan.sh
 # Generates ASCII file-tree summaries to support diagram refresh planning.
 # Outputs:
-#   reports/context/repo-tree-summary.txt          # Top-level overview (depth 1)
-#   reports/context/app-filetree.txt               # Full tree for /app (dirs + files)
-#   reports/context/dev-tools-filetree.txt         # Full tree for /dev-tools (dirs + files)
-#   reports/context/integration-filetree.txt       # Full tree for /integration (dirs + files)
+#   dev-tools/context/session_store/repo-tree-summary.txt          # Top-level overview (depth 1)
+#   dev-tools/context/session_store/app-filetree.txt               # Full tree for /app (dirs + files)
+#   dev-tools/context/session_store/dev-tools-filetree.txt         # Full tree for /dev-tools (dirs + files)
+#   dev-tools/context/session_store/integration-filetree.txt       # Full tree for /integration (dirs + files)
 
 ROOT_DIR="${ROOT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}"
-OUT_DIR="${OUT_DIR:-"$ROOT_DIR/reports/context"}"
+OUT_DIR="${OUT_DIR:-"$ROOT_DIR/dev-tools/context/session_store"}"
 SUMMARY_DEPTH="${SUMMARY_DEPTH:-1}"
 
 mkdir -p "$OUT_DIR"

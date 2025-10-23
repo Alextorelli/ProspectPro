@@ -8,7 +8,7 @@
   - `capture_api_trace` – Capture OTEL traces for API calls
   - `compare_campaign_costs` – Aggregate cost metrics from Supabase logs and OTEL traces
   - `predict_campaign_roi` – Predict campaign ROI using cost, enrichment, and validation telemetry
-- Outputs are saved in `reports/diagnostics/` and referenced in context snapshots and coverage reports.
+- Outputs are saved in `dev-tools/context/session_store/diagnostics/` and referenced in context snapshots and coverage reports.
 
 ## Diagrams:
 
