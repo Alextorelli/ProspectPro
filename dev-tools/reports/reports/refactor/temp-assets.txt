@@ -1,8 +1,0 @@
-./app/backend/functions/business-discovery-user-aware/index.ts.backup
-./backups
-./.git/logs/refs/heads/backup-before-cleanup-20251019-224818
-./.git/refs/heads/backup-before-cleanup-20251019-224818
-./thunder-collection
-./thunder-collection/thunder-environment.json
-./node_modules/lucide-react/dist/esm/icons/database-backup.js.map
-./node_modules/lucide-react/dist/esm/icons/database-backup.js
