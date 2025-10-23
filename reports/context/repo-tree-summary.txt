@@ -4,7 +4,8 @@ ProspectPro/
 |-- .temp/
 |-- app/
 |   |-- backend/
-|   `-- frontend/
+|   |-- frontend/
+|   `-- shared/
 |-- archive/
 |   |-- config-backup/
 |   |-- deployment/

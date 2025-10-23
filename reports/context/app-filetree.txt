@@ -7,62 +7,66 @@ app/
 |   |   `-- tests/
 |   |       |-- edge-functions.test.ts
 |   |       `-- placeholder.test.ts
-|   `-- supabase/
-|       `-- functions/
-|           |-- _shared/
-|           |   |-- api-usage.ts
-|           |   |-- cache-manager.ts
-|           |   |-- cobalt-cache.ts
-|           |   |-- edge-auth-simplified.ts
-|           |   |-- edge-auth.ts
-|           |   `-- vault-client.ts
-|           |-- auth-diagnostics/
-|           |   |-- function.toml
-|           |   `-- index.ts
-|           |-- business-discovery-background/
-|           |   |-- function.toml
-|           |   `-- index.ts
-|           |-- business-discovery-optimized/
-|           |   |-- function.toml
-|           |   `-- index.ts
-|           |-- business-discovery-user-aware/
-|           |   |-- function.toml
-|           |   `-- index.ts
-|           |-- campaign-export/
-|           |   |-- function.toml
-|           |   `-- index.ts
-|           |-- campaign-export-user-aware/
-|           |   |-- function.toml
-|           |   `-- index.ts
-|           |-- enrichment-business-license/
-|           |   |-- function.toml
-|           |   `-- index.ts
-|           |-- enrichment-cobalt/
-|           |   |-- function.toml
-|           |   `-- index.ts
-|           |-- enrichment-hunter/
-|           |   |-- function.toml
-|           |   `-- index.ts
-|           |-- enrichment-neverbounce/
-|           |   |-- function.toml
-|           |   `-- index.ts
-|           |-- enrichment-orchestrator/
-|           |   |-- function.toml
-|           |   `-- index.ts
-|           |-- enrichment-pdl/
-|           |   |-- function.toml
-|           |   `-- index.ts
-|           |-- test-google-places/
-|           |   |-- function.toml
-|           |   `-- index.ts
-|           |-- test-new-auth/
-|           |   |-- function.toml
-|           |   `-- index.ts
-|           |-- test-user-deduplication/
-|           |   |-- function.toml
-|           |   `-- index.ts
-|           `-- tests/
-|               `-- business-discovery.test.ts
+|   |-- schemas/
+|   |   |-- migrations/
+|   |   `-- types/
+|   |-- supabase/
+|   |   `-- functions/
+|   |       |-- _shared/
+|   |       |   |-- api-usage.ts
+|   |       |   |-- cache-manager.ts
+|   |       |   |-- cobalt-cache.ts
+|   |       |   |-- edge-auth-simplified.ts
+|   |       |   |-- edge-auth.ts
+|   |       |   `-- vault-client.ts
+|   |       |-- auth-diagnostics/
+|   |       |   |-- function.toml
+|   |       |   `-- index.ts
+|   |       |-- business-discovery-background/
+|   |       |   |-- function.toml
+|   |       |   `-- index.ts
+|   |       |-- business-discovery-optimized/
+|   |       |   |-- function.toml
+|   |       |   `-- index.ts
+|   |       |-- business-discovery-user-aware/
+|   |       |   |-- function.toml
+|   |       |   `-- index.ts
+|   |       |-- campaign-export/
+|   |       |   |-- function.toml
+|   |       |   `-- index.ts
+|   |       |-- campaign-export-user-aware/
+|   |       |   |-- function.toml
+|   |       |   `-- index.ts
+|   |       |-- enrichment-business-license/
+|   |       |   |-- function.toml
+|   |       |   `-- index.ts
+|   |       |-- enrichment-cobalt/
+|   |       |   |-- function.toml
+|   |       |   `-- index.ts
+|   |       |-- enrichment-hunter/
+|   |       |   |-- function.toml
+|   |       |   `-- index.ts
+|   |       |-- enrichment-neverbounce/
+|   |       |   |-- function.toml
+|   |       |   `-- index.ts
+|   |       |-- enrichment-orchestrator/
+|   |       |   |-- function.toml
+|   |       |   `-- index.ts
+|   |       |-- enrichment-pdl/
+|   |       |   |-- function.toml
+|   |       |   `-- index.ts
+|   |       |-- test-google-places/
+|   |       |   |-- function.toml
+|   |       |   `-- index.ts
+|   |       |-- test-new-auth/
+|   |       |   |-- function.toml
+|   |       |   `-- index.ts
+|   |       |-- test-user-deduplication/
+|   |       |   |-- function.toml
+|   |       |   `-- index.ts
+|   |       `-- tests/
+|   |           `-- business-discovery.test.ts
+|   `-- tests/
 |-- frontend/
 |   |-- components/
 |   |   |-- ApiUsageChart.tsx
@@ -116,6 +120,7 @@ app/
 |   |   |   `-- leadSanitizers.ts
 |   |   |-- campaignStore.ts
 |   |   `-- enhancedCampaignStore.ts
+|   |-- tests/
 |   |-- types/
 |   |   |-- index.ts
 |   |   `-- supabase.ts
@@ -132,4 +137,5 @@ app/
 |   |-- index.html
 |   |-- main.tsx
 |   `-- vite-env.d.ts
+|-- shared/
 `-- app.json
