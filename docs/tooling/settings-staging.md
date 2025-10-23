@@ -472,3 +472,12 @@ _Governance review and documentation update complete. Ready for final migration 
 
 - **Applied**: Added npm scripts: `docs:validate`, `docs:preview`, `docs:audit`, `docs:render:svg`. Updated `docs:prepare` to call bundle, audit, and preview.
 - **Next**: Extend provenance logging in `reports/context/coverage.md` after each run, then proceed with directory migrations when automation is ready.
+
+# Applied: Vite Entry & Root Directory Adjustments (2025-10-23)
+
+- Updated `app/frontend/index.html` to reference `/src/main.tsx` for Vite entrypoint.
+- Confirmed all frontend entry files (main.tsx, App.tsx, index.css) reside in `app/frontend/src`.
+- No stray files outside `src`, `public`, or `index.html`; directory clean.
+- Validation suite run: `npm run build`, `npm test`, `npm run repo:scan` — all passed.
+- Updated inventories: `app-filetree.txt`, `dev-tools-filetree.txt`, `integration-filetree.txt`, `repo-tree-summary.txt`.
+- Provenance and results logged in `coverage.md` and `workspace_status.md`.
