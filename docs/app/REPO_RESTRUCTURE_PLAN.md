@@ -302,20 +302,12 @@ Converge ProspectPro to a hybrid mono-repo structure optimized for AI agent work
 - MCP integrations must be updated to new paths
 - All changes staged and verified before cutover
 
-## Progress Update (2025-10-20)
+## Progress Update (2025-10-23)
 
-- Thunder/Jaeger telemetry footprint eliminated; MCP log-forwarder + Supabase logs are the sole observability pipeline (see `reports/context/coverage.md`).
-- Automation scripts consolidated under `/scripts/automation/` with guardrails; VS Code Phase 02 task now emits coverage to `reports/context/coverage.md` without legacy rename.
-- MCP production status snapshot migrated into `docs/tooling/devops-agent-runbook.md`, removing the standalone status file.
-- Legacy audit artifacts (`docs-audit.txt`, `structure-gap.md`, `CODEBASE_SIZES_BEFORE.txt`) retired after dependency unwind. Coverage output is now standardized at `reports/context/coverage.md`.
-- Copilot instructions refreshed to point at live runbooks and troubleshooting guardrails.
-
-## Next Actions
-
-1. Re-run workspace inventory and capture a full context snapshot using `./scripts/automation/context-snapshot.sh <function-slug> <since-time>`. Document the current directory state and operational coverage in `reports/context/coverage.md` before deprecating the 2025-10-20 report.
-2. Plan phased relocation of `/app/frontend`, `/app/backend/functions`, and supporting tooling into the target `/app` and `/tooling` hierarchy (capture blockers in `settings-troubleshooting.md`).
-3. Align automation outputs (coverage, diagnostics, context snapshots) and MCP telemetry tool usage with the future folder layout to avoid path churn during migration.
-4. Update VS Code tasks, npm scripts, and documentation to reference new telemetry tools and troubleshooting flows. Stage proposals in `docs/tooling/settings-troubleshooting.md` prior to editing guarded configs.
+- Directory migration completed: all source, dev tools, and integration folders have been moved to their MECE-aligned locations per plan.
+- Repo scan automation added (`scripts/docs/repo_scan.sh`); generated summary and domain file trees for diagram refresh.
+- No changes to migration plan required; all blockers resolved.
+- Next phase: migrate and update documentation files to match new structure and standards, then proceed to automation overhaul (Phase 5).
 
 ## Ignore File Policy
 
