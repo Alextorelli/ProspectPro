@@ -43,7 +43,7 @@ This guidance defines how to adapt workspace context management (VS Code tasks, 
 ### 4. Workspace Narrative
 
 - Update `workspace_status.md` to summarize Option A adoption milestones once completed.
-- Cross-link new guidance documents from `docs/tooling/FAST_README.md` for quick onboarding.
+- Cross-link new guidance documents from `docs/tooling/README.md` for quick onboarding.
 
 ## Validation Checklist
 

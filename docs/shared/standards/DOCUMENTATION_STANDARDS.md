@@ -21,9 +21,9 @@ Last updated: 2025-10-22
 
 ## Tiered Content
 
-1. FAST_README.md per domain (≤1 screen, links to deep dives)
+1. README.md per domain (≤1 screen, links to deep dives)
 2. Detail sheets in docs/app/** or docs/tooling/**
-3. Diagrams: All .mmd/.mermaid sources live in docs/{app,tooling,technical}/. Tooling diagrams must be referenced from docs/tooling/FAST_README.md. Rendered SVGs are cached in .docs-cache and ignored by git.
+3. Diagrams: All .mmd/.mermaid sources live in docs/{app,tooling,technical}/. Tooling diagrams must be referenced from docs/tooling/README.md. Rendered SVGs are cached in .docs-cache and ignored by git.
 4. Auto-generated manifest (.docs-cache/manifest.json) tracks hashes for all diagram sources.
 
 ## Structure

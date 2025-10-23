@@ -259,7 +259,7 @@ Rollback: `git restore .` or revert individual files if needed
 
 ## 5. Documentation Touchpoints
 
-- FAST_README.md, platform-playbooks.md, devops-agent-runbook.md, REPO_RESTRUCTURE_PLAN.md, SYSTEM_REFERENCE.md, CODEBASE_INDEX.md, diagrams (.mmd)
+- README.md, platform-playbooks.md, devops-agent-runbook.md, REPO_RESTRUCTURE_PLAN.md, SYSTEM_REFERENCE.md, CODEBASE_INDEX.md, diagrams (.mmd)
 - Validation: `npm run docs:prepare`, `npm run docs:update` after edits
 
 ## 6. Execution Approval & Post-update Verification
@@ -302,7 +302,7 @@ Rollback: `git restore .` or revert individual files if needed
 
 ## 6. Documentation Updates & Cleanup
 
-- Update REPO_RESTRUCTURE_PLAN.md, FAST_README.md, platform-playbooks.md, settings-troubleshooting.md with new paths, results, rollback notes
+- Update REPO_RESTRUCTURE_PLAN.md, README.md, platform-playbooks.md, settings-troubleshooting.md with new paths, results, rollback notes
 - Archive migration scripts to tooling/archive/ or delete after cutover
 
 ## Next Step
@@ -311,7 +311,7 @@ Rollback: `git restore .` or revert individual files if needed
 
 ## 2. Documentation Audit
 
-- Searched docs and reports (including FAST_README.md, platform-playbooks.md, devops-agent-runbook.md) for the same path markers.
+- Searched docs and reports (including README.md, platform-playbooks.md, devops-agent-runbook.md) for the same path markers.
 - **Result:** No direct hardcoded path references found in documentation.
 
 ## 3. Automation Impact Matrix
@@ -421,7 +421,7 @@ Rollback: `git restore .` or revert individual files if needed
 
 ## Documentation Update Checklist
 
-- [x] FAST_README.md updated for configuration guard, automation, and MCP matrix
+- [x] README.md updated for configuration guard, automation, and MCP matrix
 - [x] platform-playbooks.md refreshed for new automation and environment loader
 - [x] devops-agent-runbook.md updated for stepwise automation and MCP server types
 - [x] REPO_RESTRUCTURE_PLAN.md and SYSTEM_REFERENCE.md reflect new directory structure and migration plan

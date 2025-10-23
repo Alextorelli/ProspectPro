@@ -1,24 +1,5 @@
-# ProspectPro Tooling FAST_README
+**DEPRECATED**: This file has been replaced by `README.md` for MECE clarity. Please update all references and use `/docs/tooling/README.md` as the canonical quick reference.
 
-> **Configuration Guard:** All changes to `.vscode/` and `.github/` must be staged and approved via `docs/tooling/settings-troubleshooting.md`. Do not edit these directories directly during refactors or automation.
-
-## Telemetry & Troubleshooting Tools
-
-- MCP troubleshooting server exposes:
-  - `capture_api_trace` – Capture OTEL traces for API calls
-  - `compare_campaign_costs` – Aggregate cost metrics from Supabase logs and OTEL traces
-  - `predict_campaign_roi` – Predict campaign ROI using cost, enrichment, and validation telemetry
-- Outputs are saved in `reports/diagnostics/` and referenced in context snapshots and coverage reports.
-
-## Diagrams:
-
-- [Workspace Architecture](workspace-architecture.mmd)
-- [Agent Orchestration](agent-orchestration.mmd)
-- [Agent Coordination Journey](end-state/agent-coordination-flow.mmd)
-- [Agent Mode Journey](end-state/agent-mode-flow.mmd)
-- [Participant Coordination Journey](end-state/participant-coordination-flow.mmd)
-- [Environment MCP Cluster](end-state/environment-mcp-cluster.mmd)
-- [Dev Tool Suite ER](end-state/dev-tool-suite-ER.mmd)
 - [MCP Routing Overview](mcp-routing-overview.mmd)
 - [MCP Server Matrix](mcp-server-matrix.mmd)
 - [Repo File Tree (Tooling)](repo-filetree.mmd)

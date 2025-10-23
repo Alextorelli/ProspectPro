@@ -1,5 +1,1 @@
-# ProspectPro App FAST_README
-
-- Purpose: Quick reference for frontend, Supabase functions, and data models.
-- Links: [Detailed docs](./), [Diagrams](./)
-- Update this file with every major PR touching app/.
+**DEPRECATED**: This file has been replaced by `README.md` for MECE clarity. Please update all references and use `/docs/app/README.md` as the canonical quick reference.

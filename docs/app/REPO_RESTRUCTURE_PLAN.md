@@ -198,7 +198,7 @@ rsync -av --include='*.mmd' --exclude='*' docs/technical/ docs/integration/diagr
 ```
 
 3. Move shared snippets/config to `docs/shared/mermaid/` and document the relocation in `reports/context/coverage.md`.
-4. Update diagram references inside FAST READMEs (`docs/app/FAST_README.md`, `docs/tooling/FAST_README.md`) and other documentation callouts.
+4. Update diagram references inside READMEs (`docs/app/README.md`, `docs/tooling/README.md`) and other documentation callouts.
 
 ### Phase 5 – Automation Overhaul
 
