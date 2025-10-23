@@ -176,4 +176,12 @@ ProspectPro/
 - **Validation**: Updated automation scripts, configs, and chatmodes to reference the relocated assets; `npm run repo:scan` pending after remaining checks.
 - **Notes**: Regenerate session store inventories once outstanding MECE adjustments settle.
 
+## 2025-10-23: Domain Scaffold Verification
+
+- **Action**: Audited root layout to confirm only canonical domains remain (`app/`, `dev-tools/`, `integration/`, `config/`, `docs/`, `scripts/`, `supabase/` pending) with stragglers archived under `archive/`.
+- **App Domain**: `app/{frontend,backend,shared}` present with no orphaned legacy assets.
+- **Integration Domain**: `integration/{platform,infrastructure,environments,data,security}` verified; GitHub webhook handlers now reside under `integration/platform/github/`.
+- **Dev-Tools Domain**: `dev-tools/{agents,automation,config,reports,scripts,testing,workspace}` populated; session_store archive holds legacy inventories for approval-based removal.
+- **Validation**: Manual directory inspection via `list_dir` confirms scaffold alignment; queued `npm run repo:scan` before wiring pass.
+
 ---
