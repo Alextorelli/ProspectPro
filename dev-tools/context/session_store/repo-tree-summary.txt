@@ -43,7 +43,6 @@ ProspectPro/
 |   |-- symlinks/
 |   `-- templates/
 |-- scripts/
-|   |-- docs/
 |   `-- operations/
 `-- supabase/
     |-- .temp/

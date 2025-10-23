@@ -120,8 +120,8 @@ supabase_setup() {
   if [[ "${PROSPECTPRO_SUPABASE_SESSION_READY:-0}" != "1" ]]; then
     local _prev_guard="${PROSPECTPRO_SUPABASE_SUPPRESS_SETUP:-0}"
     export PROSPECTPRO_SUPABASE_SUPPRESS_SETUP=1
-    # shellcheck source=/workspaces/ProspectPro/scripts/ensure-supabase-cli-session.sh
-    source "$PROSPECTPRO_REPO_ROOT/scripts/ensure-supabase-cli-session.sh" || return 1
+  # shellcheck source=/workspaces/ProspectPro/scripts/operations/ensure-supabase-cli-session.sh
+  source "$PROSPECTPRO_REPO_ROOT/scripts/operations/ensure-supabase-cli-session.sh" || return 1
     export PROSPECTPRO_SUPABASE_SUPPRESS_SETUP="$_prev_guard"
     PROSPECTPRO_SUPABASE_SESSION_READY=1
   fi
