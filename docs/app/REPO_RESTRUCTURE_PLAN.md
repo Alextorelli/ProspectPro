@@ -1,5 +1,39 @@
 # REPO_RESTRUCTURE_PLAN
 
+## Pending Migrations (2025-10-23)
+
+### App documentation
+
+- FAST_README.md → docs/app/APP_README.md
+- docs/app/runbooks/\*.md (create consolidated index as docs/app/APP_runbooks.md; migrate existing feature guides)
+
+### Dev-tools documentation
+
+- FAST_README.md → docs/dev-tools/DEV_README.md
+- docs/tooling/playbooks/\*.md → docs/dev-tools/DEV_runbooks.md
+- docs/tooling/diagram-guidelines.md + related assets → ensure references updated to mermaid manifests
+
+### Integration documentation
+
+- Seed docs/integration/INT_README.md using repo scan outputs
+- Aggregate existing integration runbooks into docs/integration/INT_runbooks.md
+- Create docs/integration/diagrams/{deployment,data-flow,security}/ and relocate any relevant diagrams from legacy locations
+
+### Shared documentation & standards
+
+- Move CODEBASE_INDEX.md, SYSTEM_REFERENCE.md, and related standards into standards
+- Ensure docs/shared/mermaid/diagrams.manifest.json lists new diagram locations
+
+### SKIP MMD Diagrams
+
+- Only recommend moving an mmd file if absolutely necessary due to other file linkages (excluding legacy scripts and configs)
+
+### Indexes & cross-links
+
+- Update REPO_RESTRUCTURE_PLAN.md checkpoints with the moves above
+- Refresh index.md to reflect the final diagram paths
+- Re-run npm run repo:scan post-migration and log outputs in coverage.md for provenance
+
 ## Objective
 
 Deliver the ProspectPro hybrid mono-repo realignment with a diagram-first, automation-aware workflow. Separate production application code under `/app` from dev tooling under `/tooling`, enforce centralized Mermaid standards, and keep Supabase-first architecture plus MCP integrations fully operational.

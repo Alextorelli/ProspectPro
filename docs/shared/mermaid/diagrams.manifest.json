@@ -1,0 +1,23 @@
+{
+  "app": [
+    "docs/app/diagrams/user-flows/",
+    "docs/app/diagrams/state-machines/",
+    "docs/app/diagrams/api-flows/"
+  ],
+  "dev-tools": [
+    "docs/dev-tools/diagrams/architecture/",
+    "docs/dev-tools/diagrams/ci-cd/",
+    "docs/dev-tools/diagrams/agent-flows/",
+    "docs/dev-tools/diagrams/erd/"
+  ],
+  "integration": [
+    "docs/integration/diagrams/deployment/",
+    "docs/integration/diagrams/data-flow/",
+    "docs/integration/diagrams/security/"
+  ],
+  "shared": [
+    "docs/shared/mermaid/config/",
+    "docs/shared/mermaid/templates/",
+    "docs/shared/mermaid/guidelines/"
+  ]
+}

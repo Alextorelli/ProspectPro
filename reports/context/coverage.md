@@ -70,3 +70,73 @@ ProspectPro/
 - All source, dev tools, and integration folders migrated to MECE-aligned structure per REPO_RESTRUCTURE_PLAN.
 - Repo scan outputs generated for diagram planning.
 - Next: migrate documentation files and begin automation overhaul (Phase 5).
+ProspectPro/
+|-- .deno_lsp/
+|-- .devcontainer/
+|-- .temp/
+|-- app/
+|   |-- backend/
+|   `-- frontend/
+|-- archive/
+|   |-- config-backup/
+|   |-- deployment/
+|   |-- development/
+|   |-- legacy-agent-orchestration/
+|   |-- loose-root-assets/
+|   |-- multi-level-archive/
+|   |-- production/
+|   `-- testing/
+|-- config/
+|-- dev-tools/
+|   |-- agent-orchestration/
+|   |-- api/
+|   |-- api-tests/
+|   |-- ci/
+|   |-- config/
+|   |-- context/
+|   |-- integration/
+|   |-- mcp-servers/
+|   |-- monitoring/
+|   |-- observability/
+|   |-- reports/
+|   |-- scripts/
+|   |-- supabase/
+|   |-- test-automation/
+|   |-- testing/
+|   |-- tests/
+|   |-- vercel/
+|   `-- workflow/
+|-- docs/
+|   |-- app/
+|   |-- deployment/
+|   |-- dev-tools/
+|   |-- development/
+|   |-- guides/
+|   |-- integration/
+|   |-- setup/
+|   |-- shared/
+|   |-- technical/
+|   `-- tooling/
+|-- mcp-servers/
+|-- reports/
+|   |-- archive/
+|   |-- context/
+|   `-- diagnostics/
+|-- scripts/
+|   |-- automation/
+|   |-- devtools/
+|   |-- docs/
+|   |-- operations/
+|   |-- testing/
+|   `-- tests/
+|-- supabase/
+|   |-- .temp/
+|   |-- migrations/
+|   |-- schema-sql/
+|   |-- scripts/
+|   |-- supabase/
+|   `-- tests/
+`-- tooling/
+    `-- migration-scripts/
+\n---\nRepo scan appended for provenance.
+Rollback tarball created: archive/loose-root-assets/diagram-pre-migration-$(date +%F).tar.gz
