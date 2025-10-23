@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { corsHeaders, handleCORS } from "../_shared/edge-auth.ts";
+import { corsHeaders, handleCORS } from "../../_shared/edge-auth.ts";
 
 // Test User Deduplication System
 // ProspectPro v4.3 - October 2025

@@ -6,7 +6,7 @@ import {
   getAuthorizationHeader,
   handleCORS,
   type AuthenticatedRequestContext,
-} from "../_shared/edge-auth.ts";
+} from "../../_shared/edge-auth.ts";
 
 type NormalizedTier = "starter" | "professional" | "enterprise" | "compliance";
 

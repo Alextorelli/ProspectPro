@@ -1,7 +1,7 @@
 const {
   ContextManager,
 } = require("../../../agent-orchestration/context/context-manager.cjs");
-const dataset = require("./fixture-dataset.json");
+const dataset = require("../../test-automation/context/fixture-dataset.json");
 
 describe("ContextManager integration", () => {
   const context = new ContextManager("redis://localhost:6379");
