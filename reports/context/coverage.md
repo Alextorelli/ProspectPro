@@ -140,3 +140,8 @@ ProspectPro/
     `-- migration-scripts/
 \n---\nRepo scan appended for provenance.
 Rollback tarball created: archive/loose-root-assets/diagram-pre-migration-$(date +%F).tar.gz
+Moved app-architecture.mmd to user-flows
+Moved app-file-tree.mmd to state-machines
+Moved source-architecture.mmd to api-flows
+Moved codebase-filetree.mmd to integration/data-flow
+Moved mermaid.json to shared/mermaid/config

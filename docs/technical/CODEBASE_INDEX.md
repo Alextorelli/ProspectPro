@@ -2,7 +2,7 @@
 
 > Primary #codebase reference. Regenerate with `npm run docs:update` before audits or deployments.
 
-_Last generated: 2025-10-23T00:20:46.376Z_
+_Last generated: 2025-10-23T00:52:08.066Z_
 
 ## Edge Function Configuration
 
@@ -24,12 +24,12 @@ _Last generated: 2025-10-23T00:20:46.376Z_
 
 ## Shared Edge Utilities
 
-- [app/backend/supabase/functions/\_shared/api-usage.ts](app/backend/supabase/functions/_shared/api-usage.ts) — Project file
-- [app/backend/supabase/functions/\_shared/cache-manager.ts](app/backend/supabase/functions/_shared/cache-manager.ts) — Project file
-- [app/backend/supabase/functions/\_shared/cobalt-cache.ts](app/backend/supabase/functions/_shared/cobalt-cache.ts) — Project file
-- [app/backend/supabase/functions/\_shared/edge-auth-simplified.ts](app/backend/supabase/functions/_shared/edge-auth-simplified.ts) — Project file
-- [app/backend/supabase/functions/\_shared/edge-auth.ts](app/backend/supabase/functions/_shared/edge-auth.ts) — Project file
-- [app/backend/supabase/functions/\_shared/vault-client.ts](app/backend/supabase/functions/_shared/vault-client.ts) — Project file
+- [app/backend/supabase/functions/_shared/api-usage.ts](app/backend/supabase/functions/_shared/api-usage.ts) — Project file
+- [app/backend/supabase/functions/_shared/cache-manager.ts](app/backend/supabase/functions/_shared/cache-manager.ts) — Project file
+- [app/backend/supabase/functions/_shared/cobalt-cache.ts](app/backend/supabase/functions/_shared/cobalt-cache.ts) — Project file
+- [app/backend/supabase/functions/_shared/edge-auth-simplified.ts](app/backend/supabase/functions/_shared/edge-auth-simplified.ts) — Project file
+- [app/backend/supabase/functions/_shared/edge-auth.ts](app/backend/supabase/functions/_shared/edge-auth.ts) — Project file
+- [app/backend/supabase/functions/_shared/vault-client.ts](app/backend/supabase/functions/_shared/vault-client.ts) — Project file
 
 ## Database & Security Artifacts
 
