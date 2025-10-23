@@ -1,0 +1,44 @@
+ProspectPro/
+|-- .deno_lsp/
+|-- .devcontainer/
+|-- app/
+|   |-- backend/
+|   |-- frontend/
+|   `-- shared/
+|-- archive/
+|   |-- archive/
+|   |-- chatmodes_archive/
+|   |-- config-backup/
+|   |-- deployment/
+|   |-- legacy-agent-orchestration/
+|   |-- loose-root-assets/
+|   `-- multi-level-archive/
+|-- config/
+|-- dev-tools/
+|   |-- agents/
+|   |-- automation/
+|   |-- config/
+|   |-- context/
+|   |-- reports/
+|   |-- scripts/
+|   |-- testing/
+|   `-- workspace/
+|-- docs/
+|   |-- app/
+|   |-- deployment/
+|   |-- dev-tools/
+|   |-- development/
+|   |-- guides/
+|   |-- integration/
+|   |-- setup/
+|   |-- shared/
+|   |-- technical/
+|   `-- tooling/
+|-- integration/
+|   |-- data/
+|   |-- environments/
+|   |-- infrastructure/
+|   |-- platform/
+|   `-- security/
+`-- scripts/
+    `-- docs/

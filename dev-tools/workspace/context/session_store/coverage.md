@@ -63,33 +63,28 @@ ProspectPro/
 
 ### Provenance & Next Steps
 
-- All inventories logged for pre-migration baseline.
-- Provenance: After each run, log diagram counts, compliance failures, and last script SHA here.
-- Repo scan automation added (`scripts/docs/repo_scan.sh`); generated `dev-tools/context/session_store/repo-tree-summary.txt`, `app-filetree.txt`, `dev-tools-filetree.txt`, `integration-filetree.txt` for diagram refresh.
-- Next: Proceed with directory migrations and update automation as tooling is validated.
-  ProspectPro/
-  |-- .deno_lsp/
-  |-- .devcontainer/
-  |-- .temp/
-  |-- archive/
-  | |-- config-backup/
-  | |-- deployment/
-  | |-- multi-level-archive/
-  | |-- production/
-  |-- config/
-  | |-- agent-orchestration/
-  | |-- api/
-  | |-- api-tests/
-  | |-- ci/
-  | |-- config/
-  | |-- context/
-  | |-- integration/
-  | |-- mcp-servers/
-  | |-- monitoring/
-  | |-- observability/
-  | |-- dev-tools/
-  | | |-- context/
-  | | | `-- session_store/
+|-- .deno_lsp/
+|-- .devcontainer/
+|-- .temp/
+|-- archive/
+| |-- config-backup/
+| |-- deployment/
+| |-- multi-level-archive/
+| |-- production/
+|-- config/
+| |-- agent-orchestration/
+| |-- api/
+| |-- api-tests/
+| |-- ci/
+| |-- config/
+| |-- context/
+| |-- integration/
+| |-- mcp-servers/
+| |-- monitoring/
+| |-- observability/
+| |-- dev-tools/
+| | |-- context/
+| | | `-- session_store/
   | |   |       (coverage, inventories, diagnostics, archives)
   | |-- scripts/
   | |-- supabase/
@@ -98,17 +93,17 @@ ProspectPro/
   | |-- tests/
   | |-- vercel/
   | `-- workflow/
-  |-- docs/
-  | |-- app/
-  | |-- deployment/
-  | |-- dev-tools/
-  | |-- development/
-  | |-- guides/
-  | |-- integration/
-  | |-- setup/
-  | |-- shared/
-  | |-- technical/
-  | `-- tooling/
+|-- docs/
+| |-- app/
+| |-- deployment/
+| |-- dev-tools/
+| |-- development/
+| |-- guides/
+| |-- integration/
+| |-- setup/
+| |-- shared/
+| |-- technical/
+| `-- tooling/
   |-- mcp-servers/
 |-- scripts/
 |   |-- automation/
@@ -117,22 +112,22 @@ ProspectPro/
 |   |-- operations/
 |   |-- testing/
 |   `-- tests/
-  |-- supabase/
-  | |-- .temp/
-  | |-- migrations/
-  | |-- schema-sql/
-  | |-- scripts/
-  | |-- supabase/
-  | `-- tests/
+|-- supabase/
+| |-- .temp/
+| |-- migrations/
+| |-- schema-sql/
+| |-- scripts/
+| |-- supabase/
+| `-- tests/
 `-- tooling/
-  `-- migration-scripts/
-  \n---\nRepo scan appended for provenance.
-  Rollback tarball created: archive/loose-root-assets/diagram-pre-migration-$(date +%F).tar.gz
-  Moved app-architecture.mmd to user-flows
-  Moved app-file-tree.mmd to state-machines
-  Moved source-architecture.mmd to api-flows
-  Moved codebase-filetree.mmd to integration/data-flow
-  Moved mermaid.json to shared/mermaid/config
+`-- migration-scripts/
+\n---\nRepo scan appended for provenance.
+Rollback tarball created: archive/loose-root-assets/diagram-pre-migration-$(date +%F).tar.gz
+Moved app-architecture.mmd to user-flows
+Moved app-file-tree.mmd to state-machines
+Moved source-architecture.mmd to api-flows
+Moved codebase-filetree.mmd to integration/data-flow
+Moved mermaid.json to shared/mermaid/config
 
 ## 2025-10-23: Dev-Tools Domain Migration & Script Audit
 

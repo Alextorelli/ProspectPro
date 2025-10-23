@@ -289,7 +289,7 @@ Converge ProspectPro to a hybrid mono-repo structure optimized for AI agent work
 ## Progress Update (2025-10-23)
 
 - Directory migration completed: all source, dev tools, and integration folders have been moved to their MECE-aligned locations per plan.
-- Repo scan automation added (`scripts/docs/repo_scan.sh`); generated summary and domain file trees for diagram refresh.
+- Repo scan automation added (`dev-tools/automation/ci-cd/repo_scan.sh`); generated summary and domain file trees for diagram refresh.
 - No changes to migration plan required; all blockers resolved.
 - Next phase: migrate and update documentation files to match new structure and standards, then proceed to automation overhaul (Phase 5).
 

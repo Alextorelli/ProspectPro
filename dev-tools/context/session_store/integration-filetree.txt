@@ -1,0 +1,27 @@
+integration/
+|-- data/
+|-- environments/
+|-- infrastructure/
+|-- platform/
+|   |-- github/
+|   |   |-- webhook-handler.js
+|   |   `-- webhook-validator.js
+|   |-- supabase/
+|   |   |-- scripts/
+|   |   |   `-- operations/
+|   |   |       |-- ensure-supabase-cli-session.sh
+|   |   |       `-- supabase_cli_helpers.sh
+|   |   |-- tests/
+|   |   |   `-- database/
+|   |   |       |-- campaigns.test.sql
+|   |   |       |-- core_schema.test.sql
+|   |   |       `-- leads.test.sql
+|   |   |-- package-supabase.json
+|   |   |-- supabase-ca-2021.crt
+|   |   |-- supabase-troubleshooting-server.js
+|   |   `-- supabase.js
+|   |-- vercel/
+|   |   `-- vercel.json
+|   `-- workflow/
+|       `-- engine.ts
+`-- security/
