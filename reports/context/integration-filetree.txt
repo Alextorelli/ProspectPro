@@ -1,1 +1,6 @@
 integration/
+|-- data/
+|-- environments/
+|-- infrastructure/
+|-- platform/
+`-- security/

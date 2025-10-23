@@ -46,6 +46,11 @@ ProspectPro/
 |   |-- technical/
 |   `-- tooling/
 |-- integration/
+|   |-- data/
+|   |-- environments/
+|   |-- infrastructure/
+|   |-- platform/
+|   `-- security/
 |-- mcp-servers/
 |-- reports/
 |   |-- archive/
