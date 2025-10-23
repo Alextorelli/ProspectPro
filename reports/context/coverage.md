@@ -57,55 +57,37 @@ ProspectPro/
 ### Provenance & Next Steps
 
 - All inventories logged for pre-migration baseline.
-- Diagram bundle and taxonomy audit scripts implemented (`scripts/docs/generate-diagram-bundle.sh`, `scripts/docs/audit-diagram-taxonomy.js`).
-- New npm scripts added: `docs:validate`, `docs:preview`, `docs:audit`, `docs:render:svg`; `docs:prepare` now calls bundle, audit, and preview.
-- CI workflow staged to enforce diagram normalization and taxonomy compliance (`.github/workflows/mermaid-diagram-sync.yml`).
 - Provenance: After each run, log diagram counts, compliance failures, and last script SHA here.
 - Repo scan automation added (`scripts/docs/repo_scan.sh`); generated `reports/context/repo-tree-summary.txt`, `app-filetree.txt`, `dev-tools-filetree.txt`, `integration-filetree.txt` for diagram refresh.
 - Next: Proceed with directory migrations and update automation as tooling is validated.
-  Moved shared config, guidelines, and standards to docs/shared/mermaid/config/, docs/shared/mermaid/guidelines/, and docs/shared/standards/.
-
-### 2025-10-23: Directory Migration Complete
-
-- All source, dev tools, and integration folders migrated to MECE-aligned structure per REPO_RESTRUCTURE_PLAN.
-- Repo scan outputs generated for diagram planning.
-- Next: migrate documentation files and begin automation overhaul (Phase 5).
-ProspectPro/
-|-- .deno_lsp/
-|-- .devcontainer/
-|-- .temp/
-|-- app/
-|   |-- backend/
-|   `-- frontend/
-|-- archive/
-|   |-- config-backup/
-|   |-- deployment/
-|   |-- development/
-|   |-- legacy-agent-orchestration/
-|   |-- loose-root-assets/
-|   |-- multi-level-archive/
-|   |-- production/
-|   `-- testing/
-|-- config/
-|-- dev-tools/
-|   |-- agent-orchestration/
-|   |-- api/
-|   |-- api-tests/
-|   |-- ci/
-|   |-- config/
-|   |-- context/
-|   |-- integration/
-|   |-- mcp-servers/
-|   |-- monitoring/
-|   |-- observability/
-|   |-- reports/
-|   |-- scripts/
-|   |-- supabase/
-|   |-- test-automation/
-|   |-- testing/
-|   |-- tests/
-|   |-- vercel/
-|   `-- workflow/
+  ProspectPro/
+  |-- .deno_lsp/
+  |-- .devcontainer/
+  |-- .temp/
+  |-- archive/
+  | |-- config-backup/
+  | |-- deployment/
+  | |-- multi-level-archive/
+  | |-- production/
+  |-- config/
+  | |-- agent-orchestration/
+  | |-- api/
+  | |-- api-tests/
+  | |-- ci/
+  | |-- config/
+  | |-- context/
+  | |-- integration/
+  | |-- mcp-servers/
+  | |-- monitoring/
+  | |-- observability/
+  | |-- reports/
+  | |-- scripts/
+  | |-- supabase/
+  | |-- test-automation/
+  | |-- testing/
+  | |-- tests/
+  | |-- vercel/
+  | `-- workflow/
 |-- docs/
 |   |-- app/
 |   |-- deployment/
@@ -117,11 +99,11 @@ ProspectPro/
 |   |-- shared/
 |   |-- technical/
 |   `-- tooling/
-|-- mcp-servers/
-|-- reports/
-|   |-- archive/
-|   |-- context/
-|   `-- diagnostics/
+  |-- mcp-servers/
+  |-- reports/
+  | |-- archive/
+  | |-- context/
+  | `-- diagnostics/
 |-- scripts/
 |   |-- automation/
 |   |-- devtools/
@@ -129,19 +111,19 @@ ProspectPro/
 |   |-- operations/
 |   |-- testing/
 |   `-- tests/
-|-- supabase/
-|   |-- .temp/
-|   |-- migrations/
-|   |-- schema-sql/
-|   |-- scripts/
-|   |-- supabase/
-|   `-- tests/
+  |-- supabase/
+  | |-- .temp/
+  | |-- migrations/
+  | |-- schema-sql/
+  | |-- scripts/
+  | |-- supabase/
+  | `-- tests/
 `-- tooling/
-    `-- migration-scripts/
-\n---\nRepo scan appended for provenance.
-Rollback tarball created: archive/loose-root-assets/diagram-pre-migration-$(date +%F).tar.gz
-Moved app-architecture.mmd to user-flows
-Moved app-file-tree.mmd to state-machines
-Moved source-architecture.mmd to api-flows
-Moved codebase-filetree.mmd to integration/data-flow
-Moved mermaid.json to shared/mermaid/config
+  `-- migration-scripts/
+  \n---\nRepo scan appended for provenance.
+  Rollback tarball created: archive/loose-root-assets/diagram-pre-migration-$(date +%F).tar.gz
+  Moved app-architecture.mmd to user-flows
+  Moved app-file-tree.mmd to state-machines
+  Moved source-architecture.mmd to api-flows
+  Moved codebase-filetree.mmd to integration/data-flow
+  Moved mermaid.json to shared/mermaid/config
