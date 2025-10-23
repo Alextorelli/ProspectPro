@@ -1057,13 +1057,6 @@
   dependencies:
     "@supabase/node-fetch" "2.6.15"
 
-"@app/backend/functions-js@2.75.1":
-  version "2.75.1"
-  resolved "https://registry.npmjs.org/@app/backend/functions-js/-/functions-js-2.75.1.tgz"
-  integrity sha512-xO+01SUcwVmmo67J7Htxq8FmhkYLFdWkxfR/taxBOI36wACEUNQZmroXGPl4PkpYxBO7TaDsRHYGxUpv9zTKkg==
-  dependencies:
-    "@supabase/node-fetch" "2.6.15"
-
 "@supabase/node-fetch@2.6.15":
   version "2.6.15"
   resolved "https://registry.npmjs.org/@supabase/node-fetch/-/node-fetch-2.6.15.tgz"
