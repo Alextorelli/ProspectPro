@@ -157,7 +157,7 @@ dev-tools/
 |-- observability/
 |   `-- config/
 |       `-- prometheus.yml
-|-- reports/
+|-- reports/ ## DEPRECATED Remove and add reports folders to relevant subdirectories as needed.
 |   `-- reports/
 |       |-- refactor/
 |       |   `-- temp-assets.txt
