@@ -179,4 +179,10 @@ Moved mermaid.json to shared/mermaid/config
 - **Dev-Tools Domain**: `dev-tools/{agents,automation,config,reports,scripts,testing,workspace}` populated; session_store archive holds legacy inventories for approval-based removal.
 - **Validation**: Manual directory inspection via `list_dir` confirms scaffold alignment; queued `npm run repo:scan` before wiring pass.
 
+## 2025-10-23: Repo Scan Automation Alignment
+
+- **Action**: Redirected `npm run repo:scan` to `dev-tools/automation/ci-cd/repo_scan.sh` and added a compatibility shim at `dev-tools/scripts/docs/repo_scan.sh`.
+- **Validation**: `npm run repo:scan` completes successfully and refreshes `dev-tools/context/session_store/{repo-tree-summary,app-filetree,dev-tools-filetree,integration-filetree}.txt`.
+- **Notes**: Documentation references updated to the new path; future automation should target the dev-tools location.
+
 ---
