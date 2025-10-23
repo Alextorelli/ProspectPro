@@ -1,0 +1,27 @@
+integration/
+|-- data/
+|   |-- backup/
+|   |-- etl/
+|   `-- sync/
+|-- environments/
+|   |-- development/
+|   |-- production/
+|   `-- staging/
+|-- infrastructure/
+|   |-- docker/
+|   |-- k8s/
+|   `-- terraform/
+|-- platform/
+|   |-- external-apis/
+|   |-- github/
+|   |   `-- workflows/
+|   |-- supabase/
+|   |   |-- scripts/
+|   |   |   `-- operations/
+|   |   `-- tests/
+|   `-- vercel/
+|-- reports/
+`-- security/
+    |-- auth/
+    |-- compliance/
+    `-- secrets/
