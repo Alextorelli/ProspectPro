@@ -230,6 +230,15 @@ ProspectPro/
 - Remove or archive remaining legacy folders/loose documentation, ensuring rollback tarballs under `archive/loose-root-assets/`.
 - After structure stabilises, rebuild documentation and automation configs per the restructure plan.
 
+### Integration Symlink & Template Strategy
+
+- Move symlink management scripts (`create-symlinks.sh`, `validate-symlinks.sh`, `platform-detector.js`) into `integration/symlinks/`.
+- Track template manifests under `integration/templates/` with a master schema (`.prospectpro-template-schema.json`).
+- Root symlinks (e.g., `supabase → app/backend`) managed via `integration/templates/init-template.sh`.
+- Checklist: Initialize symlinks via `npm run template:init` and validate with `npm run platform:validate` before automation wiring.
+- Pre-flight: Run `npm run platform:validate` after each structural move; rollback by removing/regenerating symlinks via `integration/symlinks/create-symlinks.sh`.
+- Automation: Reference symlink validator before running Supabase/Vercel tasks.
+
 ## Remaining Alignment Tasks
 
 - Phase the relocation of `/app/frontend`, `/app/backend/functions`, and supporting tooling into the target layout while keeping Supabase auth + RLS intact.
