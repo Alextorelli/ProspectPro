@@ -10,7 +10,7 @@ echo "🤖 Starting ProspectPro MCP servers"
 
 MCP_DIR="$REPO_ROOT/mcp-servers"
 if [[ ! -d "$MCP_DIR" ]]; then
-  echo "❌ mcp-servers directory missing. Run .codespaces-init.sh to restore." >&2
+  echo "❌ mcp-servers directory missing. Run dev-tools/scripts/setup/.codespaces-init.sh to restore." >&2
   exit 1
 fi
 

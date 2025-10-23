@@ -149,4 +149,12 @@ ProspectPro/
 - **Validation**: Generated post-cleanup inventory: `dev-tools/context/session_store/legacy-assets-post-cleanup.txt`.
 - **Notes**: All non-essential legacy files purged; ready for settings/config assessment and codespace hardening.
 
+## 2025-10-23: Codespaces Bootstrap Realignment
+
+- **Action**: Re-homed `.codespaces-init.sh` under `dev-tools/scripts/setup/` and updated MCP startup helper guidance to reference the new path.
+- **Action**: Corrected Supabase session guard path within the bootstrap script to use `scripts/operations/ensure-supabase-cli-session.sh`.
+- **Action**: Lifted `dev-tools/**/reports/` from `.gitignore` so telemetry artifacts remain tracked per operations guide.
+- **Validation**: Manual git status check confirms only expected relocation deltas; MCP startup helper executes guard clauses without path warnings.
+- **Notes**: Documented change here; update repo inventories after remaining MECE sweeps complete.
+
 ---

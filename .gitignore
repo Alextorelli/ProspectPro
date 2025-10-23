@@ -130,7 +130,6 @@ docs/archive/
 *-backup.*
 *.backup
 *.bak
-dev-tools/**/reports/
 integration/**/tests/tmp/
 archive/loose-root-assets/*.tar.gz
 

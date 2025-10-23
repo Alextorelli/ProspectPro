@@ -59,7 +59,7 @@ if [[ -d "$MCP_DIR" && ! -d "$MCP_DIR/node_modules" ]]; then
 fi
 
 # 7. Supabase CLI session (idempotent guard)
-ENSURE_SCRIPT="$REPO_ROOT/dev-tools/scripts/operations/ensure-supabase-cli-session.sh"
+ENSURE_SCRIPT="$REPO_ROOT/scripts/operations/ensure-supabase-cli-session.sh"
 if [[ -f "$ENSURE_SCRIPT" ]]; then
   echo "🔐 Ensuring Supabase CLI session..."
   # shellcheck disable=SC1091
