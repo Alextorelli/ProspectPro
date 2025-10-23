@@ -197,3 +197,4 @@ ev## 2025-10-23: Codespaces Bootstrap Realignment
 - **Taxonomy**: Canonical diagrams now stored in `docs/app/diagrams/`, `docs/dev-tools/diagrams/`, `docs/integration/diagrams/`, `docs/shared/mermaid/`.
 - **Validation**: Pre-flight checklist extended to run `npm run platform:validate` and `npm run docs:validate` after structural changes; diagram changelogs archived before push.
 - **Notes**: Rollback via git reset and diagram regeneration; automation phase logged in REPO_RESTRUCTURE_PLAN.md.
+MCP server dependency correction and validation complete on 2025-10-23.
