@@ -3,7 +3,7 @@ export default {
   content: [
     "../app/frontend/src/**/*.{js,ts,jsx,tsx}",
     "../app/backend/**/*.{js,ts,jsx,tsx}",
-    "../app/shared/**/*.{js,ts,jsx,tsx}"
+    "../app/shared/**/*.{js,ts,jsx,tsx}",
   ],
   darkMode: "class", // Enable class-based dark mode
   theme: {

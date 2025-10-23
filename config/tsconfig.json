@@ -21,12 +21,12 @@
     "noFallthroughCasesInSwitch": true,
 
     /* Path mapping */
-      "baseUrl": ".",
-      "paths": {
-        "@frontend/*": ["app/frontend/src/*"],
-        "@backend/*": ["app/backend/*"],
-        "@shared/*": ["app/shared/*"]
-      }
+    "baseUrl": ".",
+    "paths": {
+      "@frontend/*": ["app/frontend/src/*"],
+      "@backend/*": ["app/backend/*"],
+      "@shared/*": ["app/shared/*"]
+    }
   },
   "include": ["app/frontend/src", "app/backend", "app/shared"],
   "references": [{ "path": "./tsconfig.node.json" }]
