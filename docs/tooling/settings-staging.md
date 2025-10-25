@@ -18,6 +18,7 @@
   5. Confirm MCP tasks and automation run via VS Code tasks/npm scripts
   6. Confirm all .vscode/ and .github/ config changes are staged here before merge
   7. Run full validation pipeline: `npm run docs:update && npm run lint && npm test && npm run supabase:test:db`
+
 # Workspace Configuration Safeguard Staging
 
 ---
