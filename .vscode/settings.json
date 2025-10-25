@@ -42,20 +42,8 @@
   },
   "chat.checkpoints.enabled": true,
   "chat.checkpoints.showFileChanges": true,
-  "thunderClient.requestLayout": "Left",
-  "thunderClient.saveToWorkspace": true,
-  "thunderClient.workspaceRelativePath": "thunder-collection",
-  "thunderClient.followRedirects": true,
-  "thunderClient.certificates": [],
-  "thunderClient.environments": [
-    {
-      "name": "ProspectPro Production",
-      "default": true,
-      "sortOrder": 1,
-      "created": "2025-10-17T00:00:00.000Z",
-      "modified": "2025-10-17T00:00:00.000Z"
-    }
-  ],
+  "vitest.commandLine": "npm run test:devtools",
+  "vitest.configFile": "app/frontend/vite.config.devtools.ts",
   "typescript.preferences.importModuleSpecifier": "relative",
   "typescript.updateImportsOnFileMove.enabled": "always",
   "typescript.suggest.autoImports": true,
