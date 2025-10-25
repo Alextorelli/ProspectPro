@@ -33,7 +33,8 @@
         "bradlc.vscode-tailwindcss",
         "antfu.vite",
         "redhat.vscode-yaml",
-        "ms-playwright.playwright"
+        "ms-playwright.playwright",
+        "vitest.explorer"
       ],
       "settings": {
         "terminal.integrated.defaultProfile.linux": "bash",
