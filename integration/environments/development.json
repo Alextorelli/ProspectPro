@@ -12,9 +12,21 @@
     "projectName": "prospect-pro-dev"
   },
   "apiRateLimits": {
-    "hunter_io": { "monthlyLimit": 100, "alertThreshold": 80, "unit": "searches" },
-    "neverbounce": { "monthlyLimit": 1000, "alertThreshold": 750, "unit": "verifications" },
-    "google_places": { "monthlyLimit": 10000, "alertThreshold": 8000, "unit": "requests" }
+    "hunter_io": {
+      "monthlyLimit": 100,
+      "alertThreshold": 80,
+      "unit": "searches"
+    },
+    "neverbounce": {
+      "monthlyLimit": 1000,
+      "alertThreshold": 750,
+      "unit": "verifications"
+    },
+    "google_places": {
+      "monthlyLimit": 10000,
+      "alertThreshold": 8000,
+      "unit": "requests"
+    }
   },
   "featureFlags": {
     "enableAsyncDiscovery": true,
