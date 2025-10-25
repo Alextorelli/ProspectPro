@@ -89,18 +89,7 @@
     "args": "Thunder: Run Enrichment Tests",
     "when": "!terminalFocus"
   },
-  {
-    "key": "ctrl+alt+x",
-    "command": "workbench.action.tasks.runTask",
-    "args": "Thunder: Run Export Tests",
-    "when": "!terminalFocus"
-  },
-  {
-    "key": "ctrl+alt+s",
-    "command": "workbench.action.tasks.runTask",
-    "args": "Thunder: Sync Environment Variables",
-    "when": "!terminalFocus"
-  },
+
   {
     "key": "f5",
     "command": "workbench.action.tasks.runTask",
@@ -109,7 +98,7 @@
   },
   {
     "key": "ctrl+alt+p",
-    "command": "mermaid-chart.preview",
+    "command": "mermaidchart.previewdiagram",
     "when": "editorLangId == mermaid || editorLangId == mmd"
   }
 ]
