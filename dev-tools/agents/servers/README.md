@@ -6,11 +6,25 @@ This directory contains the **enhanced MCP server implementation** that provides
 
 > Note: `MCP-package.json` mirrors the root `package.json` MCP scripts so reviewers can audit server dependencies without touching the primary manifest. Keep both files aligned when adding scripts or dependencies.
 
-**Architecture**: 3 specialized servers for enrichment production, development, and troubleshooting workflows  
+**Architecture**: 3 specialized servers for enrichment production, development, and troubleshooting workflows (PostgreSQL MCP server removed; all DB tooling now via Supabase MCP + Drizzle ORM)  
 **Tools**: 42 tools total across all servers (6 troubleshooting + 36 enrichment tools)  
 **Status**: Production-ready with tier-aware background discovery + enrichment (v4.3)
 
 ## Enhanced MCP Servers v3.0 - Email Discovery & Verification Architecture
+
+## Registry & Server Inventory (2025-10-25)
+
+**Active MCP Servers:**
+
+- Production Server (`production-server.js`)
+- Development Server (`development-server.js`)
+- Troubleshooting Server (`supabase-troubleshooting-server.js`)
+
+**Retired:**
+
+- PostgreSQL MCP Server (all Postgres/DB tooling now handled by Supabase MCP and Drizzle ORM)
+
+---
 
 ### 1. Production Server (`production-server.js`) - **v2.1.0**
 
@@ -38,7 +52,7 @@ This directory contains the **enhanced MCP server implementation** that provides
 - Circuit breaker pattern testing
 - Caching efficiency benchmarks
 
-### 3. 🆕 Troubleshooting Server (`supabase-troubleshooting-server.js`) - **v1.1.0**
+### 3. Troubleshooting Server (`supabase-troubleshooting-server.js`) - **v1.1.0**
 
 **Purpose**: Systematic debugging of email enrichment architecture, Hunter.io/NeverBounce integration issues, and deliverability validation failures
 
@@ -69,74 +83,9 @@ This directory contains the **enhanced MCP server implementation** that provides
 - Apollo API (optional) returns cost errors
 - Deliverability scores not displaying correctly
 
-### 1. Production Server (`production-server.js`) - **v2.0.0**
+---
 
-**Purpose**: Comprehensive production monitoring, database analytics, system diagnostics, API testing, and filesystem analysis
-
-**Enhanced Capabilities** (28 tools):
-
-#### Database Analytics (4 tools)
-
-- Query enhanced leads with advanced filters and analytics
-- Get campaign statistics and performance metrics
-- Analyze lead quality patterns and scoring distribution
-- Retrieve API cost breakdowns and budget analysis
-
-#### System Monitoring (7 tools)
-
-- System health monitoring with Docker integration
-- Diagnostics file analysis and performance tracking
-- Log analysis and error pattern detection
-- Configuration validation across environments
-- Performance reporting with optimization suggestions
-
-#### API Testing (8 tools)
-
-- Test Google Places API with sample queries and rate limiting
-- Test Foursquare Places API integration with caching
-- Test Hunter.io email discovery with validation
-- Verify email deliverability with NeverBounce
-- Simulate complete lead discovery pipeline
-- API cost tracking and quota monitoring
-- Performance benchmarking across API endpoints
-
-#### Filesystem Analysis (6 tools)
-
-- Analyze project structure and architectural patterns
-- Search for code patterns and potential issues
-- Analyze API client implementations for consistency
-- **Critical**: Check for fake data violations (zero tolerance)
-- Analyze error handling patterns across codebase
-- Generate code quality reports
-
-#### Production Monitoring (3 tools)
-
-- Health check endpoints monitoring
-- Production deployment status tracking
-- Real-time system metrics collection
-
-### 2. Development Server (`development-server.js`) - **v1.0.0**
-
-**Purpose**: Development utilities, new API integration testing, and performance benchmarking
-
-**Specialized Capabilities** (8 tools):
-
-#### New API Integration (4 tools)
-
-- Test US Chamber of Commerce API integration
-- Test Better Business Bureau (BBB) API
-- Test LinkedIn Sales Navigator API patterns
-- Test ZoomInfo API integration patterns
-
-#### Development Utilities (2 tools)
-
-- Performance benchmarking across API clients
-- Generate API client templates for new integrations
-
-#### Code Generation (2 tools)
-
-- Generate boilerplate for new API clients
-- Create test suites for API integrations
+**Note:** All database and migration tooling is now handled by the Supabase MCP (hosted endpoint) and Drizzle ORM (for type-safe queries/migrations). No standalone PostgreSQL MCP server remains in the registry or package scripts as of 2025-10-25.
 
 ## Quick Start
 
