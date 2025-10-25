@@ -179,6 +179,7 @@
     "react-devtools-core": "^7.0.0",
     "redis": "^4.7.0",
     "supabase": "^2.51.0",
+    "@supabase/cli": "2.51.0",
     "tailwindcss": "^3.3.6",
     "ts-node": "^10.9.2",
     "tsx": "^4.20.6",
@@ -190,7 +191,7 @@
     "esbuild": "^0.24.2"
   },
   "engines": {
-    "node": "22.x"
+    "node": "20.x"
   },
   "repository": {
     "type": "git",
