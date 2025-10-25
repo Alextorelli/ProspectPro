@@ -220,3 +220,10 @@ ev## 2025-10-23: Codespaces Bootstrap Realignment
 - Validation: Confirmed no duplicate or orphaned environment files remain. All MCP/agent context configs should reference integration/environments/.
 - Inventory: integration/environments/{development,production,staging}.json
 - Notes: Session-store inventories and provenance updated. Proceeding with integration/data, infrastructure, and security population next.
+
+## 2025-10-25: Partner Data Specs Added
+
+- Action: Authored canonical data specifications for Google Places, Foursquare Places, Hunter.io, and NeverBounce under integration/data/.
+- Validation: Cross-checked fields against official API docs; ensured mappings align with enrichment pipeline.
+- Inventory: integration/data/{google-places.md,foursquare-places.md,hunter-io.md,neverbounce.md}.
+- Notes: Use these specs as authoritative source for schema validation and sync cadence.
