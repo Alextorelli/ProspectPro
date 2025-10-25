@@ -17,17 +17,21 @@
 
 ### Primary MCP Servers
 
-1. **postgresql** - Schema design, migration validation, query optimization
-2. **supabase-troubleshooting** - Architecture impact analysis, error correlation
-3. **integration-hub** - Third-party service coordination, workflow design
+1. **supabase** - Schema design, migration validation, query optimization (replaces postgresql MCP)
+2. **drizzle-orm** - Type-safe Postgres access, schema, and migration management
+3. **supabase-troubleshooting** - Architecture impact analysis, error correlation
+4. **integration-hub** - Third-party service coordination, workflow design
 
 ### Key Tool Usage Patterns
 
 ```javascript
 // Schema evolution workflow
-await mcp.postgresql.validate_migration({ migrationSql, rollback: true });
-await mcp.postgresql.explain_query({ query, analyze: true });
-await mcp.postgresql.check_pool_health();
+await mcp.supabase.validate_migration({ migrationSql, rollback: true });
+await mcp.supabase.explain_query({ query, analyze: true });
+await mcp.supabase.check_pool_health();
+// Or use Drizzle ORM for type-safe migrations/queries
+await mcp.drizzle_orm.migrate({ ... });
+await mcp.drizzle_orm.query({ ... });
 
 // Architecture validation
 await mcp.supabase_troubleshooting.correlate_errors({ timeWindowStart });
@@ -38,7 +42,7 @@ await mcp.integration_hub.check_integration_health();
 
 ### Architecture Principles (Non-Negotiable)
 
-1. **Supabase-First**: All backend logic in Edge Functions, no Express/Node.js containers
+1. **Supabase-First**: All backend logic in Edge Functions, no Express/Node.js containers. All DB/migration/testing is now via Supabase MCP or Drizzle ORM. Do not use PostgreSQL MCP or custom scripts.
 2. **Zero Fake Data**: Verified contacts only (Hunter.io, NeverBounce, licensing boards). **Always audit enrichment results for zero-fake-data compliance using MCP tools.**
 3. **MCP-First Workflows**: Replace custom scripts with MCP tools (target 80%+ reduction). Never rely on manual API clients or ad-hoc scripts for production validation.
 4. **OpenTelemetry Observability**: All critical paths instrumented with trace spans
@@ -70,13 +74,13 @@ await mcp.integration_hub.check_integration_health();
 
 ```bash
 # 1. Validate SQL syntax and constraints
-mcp postgresql validate_migration --migrationSql="..." --rollback=true
+mcp supabase validate_migration --migrationSql="..." --rollback=true
 
 # 2. Explain query performance impact
-mcp postgresql explain_query --query="..." --analyze=true
+mcp supabase explain_query --query="..." --analyze=true
 
 # 3. Check current pool health before deployment
-mcp postgresql check_pool_health
+mcp supabase check_pool_health
 
 # 4. Monitor post-deployment errors
 mcp supabase_troubleshooting correlate_errors --timeWindowStart="..."

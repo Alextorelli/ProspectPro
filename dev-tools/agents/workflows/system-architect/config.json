@@ -11,19 +11,21 @@
     "observability_design"
   ],
   "mcp_dependencies": {
-    "primary": ["postgresql", "supabase-troubleshooting", "integration-hub"],
-    "secondary": ["chrome-devtools", "github"]
+    "primary": ["supabase", "supabase-troubleshooting", "integration-hub"],
+    "secondary": ["chrome-devtools", "github", "drizzle-orm"]
   },
   "tools_access": [
-    "postgresql.execute_query",
-    "postgresql.explain_query",
-    "postgresql.validate_migration",
-    "postgresql.check_pool_health",
-    "postgresql.analyze_slow_queries",
+    "supabase.execute_query",
+    "supabase.explain_query",
+    "supabase.validate_migration",
+    "supabase.check_pool_health",
+    "supabase.analyze_slow_queries",
     "supabase_troubleshooting.correlate_errors",
     "supabase_troubleshooting.generate_incident_timeline",
     "integration_hub.check_integration_health",
-    "integration_hub.execute_workflow"
+    "integration_hub.execute_workflow",
+    "drizzle_orm.migrate",
+    "drizzle_orm.query"
   ],
   "environment_credentials": {
     "development": {

@@ -17,8 +17,9 @@
 ### Primary MCP Servers
 
 1. **supabase-troubleshooting** - Log aggregation, error correlation, incident detection
-2. **postgresql** - Slow query analysis, pool health monitoring
-3. **integration-hub** - Circuit breaker state tracking, service health checks
+2. **supabase** - All database access, slow query analysis, pool health monitoring (replaces postgresql MCP)
+3. **drizzle-orm** - Type-safe Postgres access, schema, and migration management
+4. **integration-hub** - Circuit breaker state tracking, service health checks
 
 ### Key Tool Usage Patterns
 
@@ -29,8 +30,10 @@ await mcp.supabase_troubleshooting.correlate_errors({
 });
 
 // Performance monitoring
-await mcp.postgresql.analyze_slow_queries({ thresholdMs: 1000, limit: 20 });
-await mcp.postgresql.check_pool_health();
+await mcp.supabase.analyze_slow_queries({ thresholdMs: 1000, limit: 20 });
+await mcp.supabase.check_pool_health();
+// Or use Drizzle ORM for type-safe queries
+await mcp.drizzle_orm.query({ ... });
 
 // Integration health
 await mcp.integration_hub.check_integration_health();
@@ -132,7 +135,7 @@ for (const pattern of patterns.slice(0, 3)) {
 
 **Detection Rules**:
 
-Always audit enrichment results for zero-fake-data compliance using MCP tools. Use `postgresql.execute_query` to scan for generic/fake patterns and `integration_hub.send_notification` to alert on violations. Avoid manual API clients or other ad-hoc tools for compliance checks.
+Always audit enrichment results for zero-fake-data compliance using MCP tools. Use `supabase.execute_query` or `drizzle_orm.query` to scan for generic/fake patterns and `integration_hub.send_notification` to alert on violations. Avoid manual API clients or other ad-hoc tools for compliance checks.
 
 **Environment Switch Guidance**:
 

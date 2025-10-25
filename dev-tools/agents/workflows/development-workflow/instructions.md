@@ -18,8 +18,9 @@
 
 1. **chrome-devtools** - Visual regression testing, performance profiling
 2. **github** - PR automation, code review, CI/CD integration
-3. **postgresql** - Test data seeding, query validation
-4. **integration-hub** - Workflow automation, notification routing
+3. **supabase** - All database access, migration, and testing (replaces postgresql MCP)
+4. **drizzle-orm** - Type-safe Postgres access, schema, and migration management
+5. **integration-hub** - Workflow automation, notification routing
 
 ### Key Tool Usage Patterns
 
@@ -41,7 +42,9 @@ await mcp.github.create_pull_request({
 await mcp.github.request_copilot_review({ owner, repo, pullNumber });
 
 // Database test seeding
-await mcp.postgresql.execute_query({ query: seedSQL, params });
+await mcp.supabase.execute_query({ query: seedSQL, params });
+// Or use Drizzle ORM for type-safe queries
+await mcp.drizzle_orm.query({ ... });
 ```
 
 ## Development Workflow Standards
@@ -99,7 +102,7 @@ await mcp.postgresql.execute_query({ query: seedSQL, params });
 
 ### Replacing Custom Scripts with MCP Tools
 
-**Before (Custom Script)**:
+**Before (Custom Script or PostgreSQL MCP):**
 
 ```bash
 # scripts/testing/test-discovery-pipeline.sh
@@ -108,7 +111,7 @@ curl -X POST https://... \
   -d '{"businessType": "...", ...}'
 ```
 
-**After (MCP Tool)**:
+**After (Supabase MCP or Drizzle ORM):**
 
 ```javascript
 // Use integration-hub workflow automation
@@ -117,6 +120,9 @@ await mcp.integration_hub.execute_workflow({
   input: { businessType: "coffee shop", location: "Seattle, WA" },
   dryRun: false,
 });
+// Or for DB access/migrations:
+await mcp.supabase.execute_query({ query: "..." });
+await mcp.drizzle_orm.migrate({ ... });
 ```
 
 ### Testing Workflow with MCP Validation Runner + MCP
@@ -204,7 +210,7 @@ npm run supabase:test:functions
 - [ ] All CI checks pass (lint, test, build)
 - [ ] Zero-fake-data compliance verified
 - [ ] MCP tool usage documented in commit message
-- [ ] Database migrations validated with `postgresql.validate_migration`
+- [ ] Database migrations validated with `supabase.validate_migration` or `drizzle_orm.migrate`
 - [ ] Performance impact assessed (no >20% degradation)
 
 ### Review Automation with GitHub MCP
@@ -216,10 +222,11 @@ if (
   prFiles.includes("app/backend/functions/")
 ) {
   await mcp.github.request_copilot_review({ owner, repo, pullNumber });
-}
 
-// Auto-label based on file changes
-const labels = [];
+- ESLint autofix (`npm run lint:fix`)
+- TypeScript strict mode validation
+- Zero-fake-data pattern detection (always audit enrichment results for compliance using MCP tools; never rely on manual API clients or ad-hoc scripts for production validation)
+- All DB/migration/testing is now via Supabase MCP or Drizzle ORM. Do not use PostgreSQL MCP or custom scripts.
 if (prFiles.some((f) => f.startsWith("app/backend/functions/")))
   labels.push("edge-functions");
 if (prFiles.some((f) => f.startsWith("supabase/schema-sql/")))
@@ -251,13 +258,13 @@ await mcp.github.add_labels({ owner, repo, issueNumber: pullNumber, labels });
 **401/403 Errors**:
 
 1. Validate session JWT: `mcp.supabase_troubleshooting.correlate_errors`
-2. Check RLS policies: `mcp.postgresql.execute_query`
+2. Check RLS policies: `mcp.supabase.execute_query` or `mcp.drizzle_orm.query`
 3. Test auth helper: `curl https://.../test-new-auth`
 
 **Performance Degradation**:
 
-1. Analyze slow queries: `mcp.postgresql.analyze_slow_queries`
-2. Check pool health: `mcp.postgresql.check_pool_health`
+1. Analyze slow queries: `mcp.supabase.analyze_slow_queries` or `mcp.drizzle_orm.query`
+2. Check pool health: `mcp.supabase.check_pool_health`
 3. Review Edge Function logs: `npm run edge:logs:errors`
 
 **Integration Failures**:

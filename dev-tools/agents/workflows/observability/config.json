@@ -11,16 +11,17 @@
     "compliance_monitoring"
   ],
   "mcp_dependencies": {
-    "primary": ["supabase-troubleshooting", "postgresql", "integration-hub"],
-    "secondary": ["chrome-devtools"]
+    "primary": ["supabase-troubleshooting", "supabase", "integration-hub"],
+    "secondary": ["chrome-devtools", "drizzle-orm"]
   },
   "tools_access": [
     "supabase_troubleshooting.correlate_errors",
     "supabase_troubleshooting.generate_incident_timeline",
-    "postgresql.analyze_slow_queries",
-    "postgresql.check_pool_health",
+    "supabase.analyze_slow_queries",
+    "supabase.check_pool_health",
     "integration_hub.check_integration_health",
-    "integration_hub.send_notification"
+    "integration_hub.send_notification",
+    "drizzle_orm.query"
   ],
   "environment_credentials": {
     "development": {

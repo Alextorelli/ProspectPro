@@ -18,8 +18,9 @@
 
 1. **integration-hub** - Workflow automation, deployment orchestration, notification routing
 2. **github** - Release management, PR automation, CI/CD integration
-3. **postgresql** - Migration validation, database health monitoring
-4. **supabase-troubleshooting** - Production error correlation, incident timelines
+3. **supabase** - Migration validation, database health monitoring (replaces postgresql MCP)
+4. **drizzle-orm** - Type-safe Postgres access, schema, and migration management
+5. **supabase-troubleshooting** - Production error correlation, incident timelines
 
 ### Key Tool Usage Patterns
 
@@ -46,8 +47,11 @@ await mcp.integration_hub.send_notification({
 });
 
 // Migration safety checks
-await mcp.postgresql.validate_migration({ migrationSql, rollback: true });
-await mcp.postgresql.check_pool_health();
+await mcp.supabase.validate_migration({ migrationSql, rollback: true });
+await mcp.supabase.check_pool_health();
+// Or use Drizzle ORM for type-safe migrations/queries
+await mcp.drizzle_orm.migrate({ ... });
+await mcp.drizzle_orm.query({ ... });
 ```
 
 ## Deployment Procedures
@@ -58,11 +62,11 @@ await mcp.postgresql.check_pool_health();
 
 - [ ] All tests passing (Deno test suite, MCP Validation Runner)
 - [ ] Code review approved (GitHub Copilot or human reviewer)
-- [ ] Migration validated if database changes required
+- [ ] Migration validated if database changes required (Supabase MCP or Drizzle ORM only)
 - [ ] Rollback plan documented
 - [ ] Monitoring dashboards ready (MCP log-forwarder, Supabase logs)
 - [ ] Zero-fake-data audit: Always audit enrichment results for compliance using MCP tools. Avoid manual API clients or ad-hoc scripts for production validation.
-- [ ] MCP-First: Prefer MCP tools for all validation, deployment, and incident workflows.
+- [ ] MCP-First: Prefer MCP tools for all validation, deployment, and incident workflows. All DB/migration/testing is now via Supabase MCP or Drizzle ORM. Do not use PostgreSQL MCP or custom scripts.
 - [ ] Environment Switch Guidance: Use ContextManager to switch between local, troubleshooting, and production. Always export `SUPABASE_SESSION_JWT` for authenticated calls. Validate environment with `supabase:link` and `supabase:ensure-session` tasks.
 
 **Deployment Steps**:
@@ -133,12 +137,12 @@ npm run lint && npm test && npm run build && vercel --prod
 
 ```bash
 # 1. Validate migration SQL syntax
-mcp postgresql validate_migration \
+mcp supabase validate_migration \
   --migrationSql="$(cat supabase/migrations/new_migration.sql)" \
   --rollback=true
 
 # 2. Check current pool health
-mcp postgresql check_pool_health
+mcp supabase check_pool_health
 
 # 3. Create migration in Supabase
 cd supabase
@@ -294,7 +298,7 @@ if (monthlySpend > budgetThreshold * 0.8) {
 curl -f https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/test-new-auth || alert
 
 # 2. Database connectivity
-mcp postgresql execute_query --query="SELECT 1" || alert
+mcp supabase execute_query --query="SELECT 1" || alert
 
 # 3. Integration health
 mcp integration_hub check_integration_health || alert
@@ -303,7 +307,7 @@ mcp integration_hub check_integration_health || alert
 curl -f https://prospect-fyhedobh1-appsmithery.vercel.app || alert
 
 # 5. MCP server health
-for server in chrome-devtools github supabase-troubleshooting postgresql integration-hub; do
+for server in chrome-devtools github supabase-troubleshooting supabase integration-hub drizzle-orm; do
   mcp $server health_check || alert
 done
 ```

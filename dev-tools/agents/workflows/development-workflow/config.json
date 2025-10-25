@@ -11,8 +11,8 @@
     "debugging"
   ],
   "mcp_dependencies": {
-    "primary": ["chrome-devtools", "github", "postgresql", "integration-hub"],
-    "secondary": ["supabase-troubleshooting"]
+    "primary": ["chrome-devtools", "github", "supabase", "integration-hub"],
+    "secondary": ["supabase-troubleshooting", "drizzle-orm"]
   },
   "tools_access": [
     "chrome_devtools.screenshot_capture",
@@ -22,11 +22,13 @@
     "github.request_copilot_review",
     "github.add_labels",
     "github.merge_pull_request",
-    "postgresql.execute_query",
-    "postgresql.validate_migration",
+    "supabase.execute_query",
+    "supabase.validate_migration",
     "integration_hub.execute_workflow",
     "integration_hub.send_notification",
-    "supabase_troubleshooting.correlate_errors"
+    "supabase_troubleshooting.correlate_errors",
+    "drizzle_orm.migrate",
+    "drizzle_orm.query"
   ],
   "knowledge_base": {
     "app_system_reference": "/docs/app/SYSTEM_REFERENCE.md",

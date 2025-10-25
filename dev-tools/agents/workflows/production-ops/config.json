@@ -14,8 +14,8 @@
     "primary": [
       "integration-hub",
       "github",
-      "postgresql",
-      "supabase-troubleshooting"
+        "supabase",
+        "supabase-troubleshooting"
     ],
     "secondary": ["chrome-devtools"]
   },
@@ -25,12 +25,14 @@
     "integration_hub.check_integration_health",
     "github.create_pull_request",
     "github.merge_pull_request",
-    "postgresql.validate_migration",
-    "postgresql.check_pool_health",
-    "postgresql.execute_query",
+      "supabase.validate_migration",
+      "supabase.check_pool_health",
+      "supabase.execute_query",
     "supabase_troubleshooting.correlate_errors",
     "supabase_troubleshooting.generate_incident_timeline",
     "chrome_devtools.performance_profile"
+      "drizzle_orm.migrate",
+      "drizzle_orm.query"
   ],
   "environment_credentials": {
     "development": {
