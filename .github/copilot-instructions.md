@@ -33,6 +33,15 @@
 - **Supabase CLI**: Run from `/workspaces/ProspectPro/supabase` (symlinked to `app/backend/`) via `npx --yes supabase@latest`; keep auth fresh with `dev-tools/scripts/operations/ensure-supabase-cli-session.sh`.
 - **Automation scripts**: `dev-tools/scripts/automation/` and `dev-tools/automation/ci-cd/` handle log pulls, Vercel checks, and context snapshots; outputs captured in `dev-tools/reports/` once finalized.
 
+## Workspace & Editor Settings
+
+- **Playwright E2E Testing**: All major browsers (Chromium, Firefox, WebKit) and required Linux dependencies are installed. Playwright config enables full cross-browser testing. Use `npx playwright test` or VS Code test explorer.
+- **Deno for Edge Functions**: Deno is enabled for all backend Edge Functions in `app/backend/functions/`. Linting and unstable features are supported via workspace settings.
+- **Prettier & ESLint**: Prettier is the default formatter (`esbenp.prettier-vscode`), with format-on-save and explicit code actions on save. ESLint is enforced for all TypeScript/React code.
+- **File/Folder Exclusions & Associations**: `.vscode/settings.json` excludes heavy folders (node_modules, dist, logs, archive) and associates file types for SQL, Mermaid, Markdown, and dotenv. File nesting is enabled for clarity in the explorer.
+- **MCP Servers & Automation**: MCP servers and automation flows are managed via curated VS Code tasks and npm scripts. See `.vscode/tasks.json` and workspace tasks for build, deploy, and diagnostics.
+- **Staging Editor Config Changes**: All changes to `.vscode/` or `.github/` configs must be staged in `docs/tooling/settings-staging.md` before merging to main. This ensures reproducibility and auditability of automation and validation flows.
+
 ## Deployment & Validation
 
 1. **Frontend**: `npm run build`, then deploy `dist/` with `npx --yes vercel@latest --prod --confirm --scope appsmithery --project prospect-pro --cwd dist` or the `Deploy: Full Automated Frontend` task.
