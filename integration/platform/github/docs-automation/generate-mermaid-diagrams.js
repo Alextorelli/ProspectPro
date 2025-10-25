@@ -1,7 +1,7 @@
 // Generate Mermaid diagrams from GraphQL and repo metadata
-const fs = require("fs");
-const path = require("path");
-const registry = require("./mermaid-template-registry.json");
+import fs from "fs";
+import path from "path";
+import registry from "./mermaid-template-registry.js";
 
 // Placeholder: fetch metadata, generate diagrams, write to registry paths
 Object.entries(registry).forEach(([domain, outDir]) => {
