@@ -3,22 +3,22 @@ export default {
   "app-source": [
     "docs/diagrams/app-source/user-flows/",
     "docs/diagrams/app-source/state-machines/",
-    "docs/diagrams/app-source/api-flows/"
+    "docs/diagrams/app-source/api-flows/",
   ],
   "dev-tools": [
     "docs/diagrams/dev-tools/architecture/",
     "docs/diagrams/dev-tools/ci-cd/",
     "docs/diagrams/dev-tools/agent-flows/",
-    "docs/diagrams/dev-tools/erd/"
+    "docs/diagrams/dev-tools/erd/",
   ],
-  "integration": [
+  integration: [
     "docs/diagrams/integration/deployment/",
     "docs/diagrams/integration/data-flow/",
-    "docs/diagrams/integration/security/"
+    "docs/diagrams/integration/security/",
   ],
-  "shared": [
+  shared: [
     "docs/shared/mermaid/config/",
     "docs/shared/mermaid/templates/",
-    "docs/shared/mermaid/guidelines/"
-  ]
+    "docs/shared/mermaid/guidelines/",
+  ],
 };
