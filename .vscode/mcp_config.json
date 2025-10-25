@@ -155,16 +155,10 @@
       }
     },
     "supabase": {
-      "command": "node",
-      "args": [
-        "${workspaceFolder}/dev-tools/agents/servers/supabase-troubleshooting-server.js"
-      ],
-      "env": {
-        "SUPABASE_URL": "${SUPABASE_URL}",
-        "SUPABASE_SERVICE_KEY": "${SUPABASE_SERVICE_KEY}"
-      },
+      "type": "http",
+      "url": "https://mcp.supabase.com/mcp?project_ref=sriycekxdqnesdsgwiuc&features=docs%2Caccount%2Cdatabase%2Cdebugging%2Cdevelopment%2Cfunctions%2Cstorage%2Cbranching",
       "metadata": {
-        "purpose": "Local Supabase MCP server",
+        "purpose": "Hosted Supabase MCP server",
         "source": "user-global-config"
       }
     },

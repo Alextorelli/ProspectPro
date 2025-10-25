@@ -102,7 +102,7 @@ class SupabaseTroubleshootingServer {
             },
             required: ["supabaseUrl", "anonKey"],
           },
-        },
+        }
         {
           name: "check_production_deployment",
           description:
