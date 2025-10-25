@@ -1,12 +1,11 @@
 %% compliance:ZeroFakeData %%
 %% domain: app-source %%
 %% reciprocal: [] %%
-%% type: swimlane %%
-%% title: UI-Edge Trace Swimlane %%
+%% type: flowchart %%
+%% title: UI-Edge Trace Flowchart %%
 %% index: ../../../../tooling/end-state/index.md %%
-swimlane
-  UI | Edge | DB
-  UI->Edge: Request
-  Edge->DB: Query
-  DB->Edge: Result
-  Edge->UI: Response
+flowchart TD
+  UI[UI] -->|Request| Edge[Edge]
+  Edge -->|Query| DB[DB]
+  DB -->|Result| Edge
+  Edge -->|Response| UI
