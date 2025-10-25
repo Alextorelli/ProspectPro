@@ -35,7 +35,7 @@
     "supabase-troubleshooting": {
       "command": "node",
       "args": [
-        "${workspaceFolder}/dev-tools/agents/servers/supabase-troubleshooting-server.js"
+        "${workspaceFolder}/dev-tools/agents/mcp-servers/supabase-troubleshooting-server.js"
       ],
       "env": {
         "SUPABASE_URL": "${SUPABASE_URL}",
@@ -53,7 +53,9 @@
     },
     "postgresql": {
       "command": "node",
-      "args": ["${workspaceFolder}/mcp-servers/postgresql-server.js"],
+      "args": [
+        "${workspaceFolder}/dev-tools/agents/mcp-servers/postgresql-server.js"
+      ],
       "env": {
         "DATABASE_URL": "${DATABASE_URL}",
         "QUERY_TIMEOUT_MS": "30000",
@@ -70,7 +72,9 @@
     },
     "integration-hub": {
       "command": "node",
-      "args": ["${workspaceFolder}/mcp-servers/integration-hub-server.js"],
+      "args": [
+        "${workspaceFolder}/dev-tools/agents/mcp-servers/integration-hub-server.js"
+      ],
       "env": {
         "ZAPIER_API_KEY": "${ZAPIER_API_KEY}",
         "STRIPE_SECRET_KEY": "${STRIPE_SECRET_KEY}",
@@ -87,7 +91,9 @@
     },
     "observability": {
       "command": "node",
-      "args": ["${workspaceFolder}/mcp-servers/observability-server.js"],
+      "args": [
+        "${workspaceFolder}/dev-tools/agents/mcp-servers/observability-server.js"
+      ],
       "env": {
         "JAEGER_ENDPOINT": "http://localhost:14268/api/traces",
         "OTLP_ENDPOINT": "${OTLP_ENDPOINT}",
@@ -104,7 +110,9 @@
     },
     "prospectpro-production": {
       "command": "node",
-      "args": ["${workspaceFolder}/mcp-servers/production-server.js"],
+      "args": [
+        "${workspaceFolder}/dev-tools/agents/mcp-servers/production-server.js"
+      ],
       "env": {},
       "metadata": {
         "purpose": "Production MCP server for ProspectPro",
@@ -118,7 +126,9 @@
     },
     "prospectpro-development": {
       "command": "node",
-      "args": ["${workspaceFolder}/mcp-servers/development-server.js"],
+      "args": [
+        "${workspaceFolder}/dev-tools/agents/mcp-servers/development-server.js"
+      ],
       "env": {},
       "metadata": {
         "purpose": "Development MCP server for ProspectPro",
@@ -132,7 +142,7 @@
     "prospectpro-troubleshooting": {
       "command": "node",
       "args": [
-        "${workspaceFolder}/mcp-servers/supabase-troubleshooting-server.js"
+        "${workspaceFolder}/dev-tools/agents/mcp-servers/supabase-troubleshooting-server.js"
       ],
       "env": {},
       "metadata": {
