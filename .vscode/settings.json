@@ -220,5 +220,6 @@
   "mermaidChart.enableLivePreview": true,
   "mermaidChart.exportOnSave": false,
   "mermaidChart.defaultTheme": "dark",
-  "mermaidChart.externalSnippets": ["docs/tooling/snippets/mermaid.json"]
+  "mermaidChart.externalSnippets": ["docs/tooling/snippets/mermaid.json"],
+  "vitest.nodeEnv": {}
 }
