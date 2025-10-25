@@ -11,39 +11,28 @@
   "customizations": {
     "vscode": {
       "extensions": [
-        // Core Development
         "denoland.vscode-deno",
         "supabase.supabase-vscode",
         "dbaeumer.vscode-eslint",
         "esbenp.prettier-vscode",
-
-        // Productivity
         "eamodio.gitlens",
         "github.copilot",
         "github.copilot-chat",
         "streetsidesoftware.code-spell-checker",
         "wayou.vscode-todo-highlight",
-
-        // API Development
         "humao.rest-client",
         "rangav.vscode-thunder-client",
-
-        // Database Tools
         "mtxr.sqltools",
         "mtxr.sqltools-driver-pg",
-
-        // Security
         "snyk-security.snyk-vulnerability-scanner",
-
-        // Performance
         "wix.vscode-import-cost",
-
-        // Documentation
         "bierner.markdown-preview-github-styles",
-
-        // Development Theme & Visual Organization
-        "deepforest.theme", // Vira Deepforest theme for organized development
-        "vscode-icons-team.vscode-icons" // Better file icons for organization
+        "deepforest.theme",
+        "vscode-icons-team.vscode-icons",
+        "Supabase.vscode-supabase-extension",
+        "bradlc.vscode-tailwindcss",
+        "antfu.vite",
+        "redhat.vscode-yaml"
       ],
       "settings": {
         "terminal.integrated.defaultProfile.linux": "bash",
