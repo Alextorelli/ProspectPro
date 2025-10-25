@@ -7,7 +7,7 @@
 >   - Every committed `.mmd` references a domain pattern from this guide.
 >   - Taxonomy preflight links the offending file to the relevant section here.
 >   - Snippet anchors (`ZeroFakeData`, `SchemaCheckpoint`) appear in all diagrams flagged “compliance required”.
-> - **Dependencies:** `mermaid.config.json`, `snippets/mermaid.json`, `diagram-taxonomy.md`.
+> - **Dependencies:** `docs/shared/mermaid/config/mermaid.config.json`, `docs/shared/mermaid/config/mermaid.json`, `diagram-taxonomy.md`.
 
 ## Domain Patterns
 
@@ -19,7 +19,7 @@
 
 ## Snippet Usage
 
-- Pull compliance anchors and reusable shapes from `docs/tooling/snippets/mermaid.json`.
+- Pull compliance anchors and reusable shapes from `docs/shared/mermaid/config/mermaid.json`.
 - Extend snippets when new compliance anchors are introduced; update this guide accordingly.
 
 ## Authoring Checklist
@@ -32,6 +32,6 @@
 
 ## References
 
-- Styling: `docs/tooling/mermaid.config.json`
+- Styling: `docs/shared/mermaid/config/mermaid.config.json`
 - Automation pipeline: `docs/tooling/generation-workflow.md`
 - Taxonomy rules: `docs/tooling/diagram-taxonomy.md`

@@ -7,7 +7,7 @@
 >   - 100% of diagrams contain a domain tag comment in the first five lines.
 >   - Preflight report lists zero “missing taxonomy” items on green-path builds.
 >   - Compliance anchors (`ZeroFakeData`, `SchemaCheckpoint`) are surfaced in the audit when absent.
-> - **Dependencies:** `diagram-guidelines.md`, `generation-workflow.md`, `snippets/mermaid.json`.
+> - **Dependencies:** `diagram-guidelines.md`, `generation-workflow.md`, `docs/shared/mermaid/config/mermaid.json`.
 
 ## Tag Syntax
 
@@ -33,5 +33,5 @@ Insert both domain and compliance anchors at the top of each `.mmd` file:
 
 1. Tag comment must appear before any Mermaid directives (`%%{init:...`).
 2. Domain keyword must match folder location; mismatch raises an error.
-3. Anchors listed must exist in `snippets/mermaid.json`; unknown anchors trigger warnings.
+3. Anchors listed must exist in `docs/shared/mermaid/config/mermaid.json`; unknown anchors trigger warnings.
 4. Reports are archived under `dev-tools/reports/diagram-taxonomy/` (future enhancement).

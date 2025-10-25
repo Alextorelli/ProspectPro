@@ -12,7 +12,7 @@
 
 set -euo pipefail
 
-CONFIG="docs/tooling/mermaid.config.json"
+CONFIG="docs/shared/mermaid/config/mermaid.config.json"
 TAXONOMY="docs/tooling/diagram-taxonomy.md"
 DIAGRAM_ROOT="docs/diagrams"
 RENDER_STATIC="${RENDER_STATIC:-false}"

@@ -13,11 +13,13 @@
 
 - Add `diagram_patch` handler to troubleshooting server to normalize snippets, inject config, and call generation script.
 - Ensure tool respects `--init-config` flag and returns lint output for agent consumption.
+- Use canonical config at `docs/shared/mermaid/config/mermaid.config.json` and snippets at `docs/shared/mermaid/config/mermaid.json`.
 
 ## VS Code Tasks & Shortcuts
 
 - Define tasks in `.vscode/tasks.json` to run `MermaidChart.createDiagram` with domain presets.
 - Map keybindings (e.g., `ctrl+alt+m <domain>`) for rapid scaffolding.
+- Reference only the canonical config/snippet paths above in all automation.
 
 ## Provenance Logging
 

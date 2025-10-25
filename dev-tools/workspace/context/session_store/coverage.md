@@ -250,3 +250,14 @@ ev## 2025-10-23: Codespaces Bootstrap Realignment
 - Validation: Cross-checked fields against official API docs; ensured mappings align with enrichment pipeline.
 - Inventory: integration/data/{google-places.md,foursquare-places.md,hunter-io.md,neverbounce.md}.
 - Notes: Use these specs as authoritative source for schema validation and sync cadence.
+
+## 2025-10-25: Mermaid Config & Snippet Consolidation
+
+- **Action:** Consolidated all Mermaid config/snippet files to canonical paths:
+  - Kept: docs/shared/mermaid/config/mermaid.config.json, docs/shared/mermaid/config/mermaid.json
+  - Updated: scripts, guidelines, taxonomy, and agent-integration docs to reference canonical paths
+  - Updated: diagrams.manifest.json to match MECE layout
+  - Removed: per-domain and duplicate config/snippet files, .mermaidrc.json
+- **Validation:** Ran `npm run docs:bootstrap` to confirm all diagrams scaffold and lint using the shared config/snippets. No per-domain config duplication remains.
+- **Impact:** All diagram generation, lint, and automation now use a single source of config/snippets. Manifest and docs are MECE-aligned.
+- **Next:** Repo GPS snapshot refresh recommended.
