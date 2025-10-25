@@ -5,7 +5,7 @@
 PATCH_SCRIPT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/patch-diagrams.sh"
 if [[ -x "$PATCH_SCRIPT" ]]; then
 	bash "$PATCH_SCRIPT" --source end-state
-	LEGACY_DIR="$(git rev-parse --show-toplevel)/docs/tooling/v2"
+	LEGACY_DIR="$(git rev-parse --show-toplevel)/docs/mmd-shared/v2"
 	if [[ -d "$LEGACY_DIR" ]]; then
 		bash "$PATCH_SCRIPT" --source v2
 	else

@@ -1,4 +1,4 @@
-# ProspectPro ER diagram source-of-truth: docs/tooling/end-state/dev-tool-suite-ER.mmd and docs/tooling/v2/dev-tool-suite-ER.mmd
+# ProspectPro ER diagram source-of-truth: docs/mmd-shared/end-state/dev-tool-suite-ER.mmd and docs/mmd-shared/v2/dev-tool-suite-ER.mmd
 # Both end-state/ and v2/ diagrams are processed for normalization and doc generation.
 #!/bin/bash
 # ProspectPro Diagram Patch Automation
@@ -15,7 +15,7 @@ Usage: scripts/docs/patch-diagrams.sh [--source <path|research|troubleshooting>]
 
 Options:
   --source   Process diagrams from a specific directory instead of git changes.
-             Keywords: "research" (docs/tooling/research) or "troubleshooting" (docs/tooling/troubleshooting).
+             Keywords: "research" (docs/mmd-shared/research) or "troubleshooting" (docs/mmd-shared/troubleshooting).
              Paths may be absolute or relative to the repository root.
   --target   Copy normalized diagrams into this directory (mirroring source structure).
              Paths may be absolute or relative to the repository root.
@@ -50,7 +50,7 @@ while [[ $# -gt 0 ]]; do
 done
 
 if git status --porcelain .vscode .github 2>/dev/null | grep -qE '^\s*[MADRCU]'; then
-  echo "[ERROR] Guarded directories (.vscode/.github) have unstaged changes. Stage proposals in docs/tooling/settings-troubleshooting.md before running diagram patches." >&2
+  echo "[ERROR] Guarded directories (.vscode/.github) have unstaged changes. Stage proposals in docs/mmd-shared/config/settings-troubleshooting.md before running diagram patches." >&2
   exit 1
 fi
 
@@ -60,19 +60,19 @@ SOURCE_LABEL="git"
 resolve_dir() {
   local input="$1"
   if [[ "$input" == "research" ]]; then
-    echo "$ROOT_DIR/docs/tooling/research"
+  echo "$ROOT_DIR/docs/mmd-shared/research"
     return 0
   fi
   if [[ "$input" == "troubleshooting" ]]; then
-    echo "$ROOT_DIR/docs/tooling/troubleshooting"
+  echo "$ROOT_DIR/docs/mmd-shared/troubleshooting"
     return 0
   fi
   if [[ "$input" == "end-state" ]]; then
-    echo "$ROOT_DIR/docs/tooling/end-state"
+  echo "$ROOT_DIR/docs/mmd-shared/end-state"
     return 0
   fi
   if [[ "$input" == "v2" ]]; then
-    echo "$ROOT_DIR/docs/tooling/v2"
+  echo "$ROOT_DIR/docs/mmd-shared/v2"
     return 0
   fi
   if [[ "$input" == /* ]]; then

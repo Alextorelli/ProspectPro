@@ -3,14 +3,14 @@
 ## Diagram Compliance & Automation
 
 - All Mermaid diagrams must reference the centralized config in [`docs/shared/mermaid/config/mermaid.config.json`](../shared/mermaid/config/mermaid.config.json).
-- Diagrams must include validation checkpoints, ZeroFakeData anchors, and accessibility meta-comments as described in [`diagram-guidelines.md`](../tooling/diagram-guidelines.md).
+- Diagrams must include validation checkpoints, ZeroFakeData anchors, and accessibility meta-comments as described in [`diagram-guidelines.md`](../guidelines/diagram-guidelines.md).
 - Use automation scripts (`npm run docs:generate`, `npm run docs:prepare`) to enforce config normalization and compliance.
 - Provenance for diagram changes must be logged in `dev-tools/context/session_store/coverage.md`.
 
 ## General Documentation Requirements
 
 - All technical documentation must be MECE-structured, versioned, and cross-linked to relevant playbooks and runbooks.
-- Configuration changes must be staged in `docs/tooling/settings-staging.md` before updating live files.
+- Configuration changes must be staged in `docs/mmd-shared/config/settings-staging.md` before updating live files.
 - Audit artifacts and validation templates must be retained until restructure backlog closes.
 
 ---
@@ -22,14 +22,14 @@ Last updated: 2025-10-22
 ## Tiered Content
 
 1. README.md per domain (≤1 screen, links to deep dives)
-2. Detail sheets in docs/app/** or docs/tooling/**
-3. Diagrams: All .mmd/.mermaid sources live in docs/{app,tooling,technical}/. Tooling diagrams must be referenced from docs/tooling/README.md. Rendered SVGs are cached in .docs-cache and ignored by git.
+2. Detail sheets in docs/app/** or docs/mmd-shared/**
+3. Diagrams: All .mmd/.mermaid sources live in docs/{app,mmd-shared,technical}/. Tooling diagrams must be referenced from docs/mmd-shared/README.md. Rendered SVGs are cached in .docs-cache and ignored by git.
 4. Auto-generated manifest (.docs-cache/manifest.json) tracks hashes for all diagram sources.
 
 ## Structure
 
 - app/: frontend, Supabase functions, data models
-- docs/tooling/: MCP, scripts, CI
+- docs/mmd-shared/: MCP, scripts, CI
 - docs/{app,tooling,technical}/: diagrams only, no rendered assets; sources only
 - .docs-cache/: cached SVGs and manifest (not committed)
 
@@ -57,7 +57,7 @@ Last updated: 2025-10-22
 ## Diagram Compliance & Automation
 
 - All Mermaid diagrams must reference the centralized config in [`docs/shared/mermaid/config/mermaid.config.json`](../shared/mermaid/config/mermaid.config.json).
-- Diagrams must include validation checkpoints, ZeroFakeData anchors, and accessibility meta-comments as described in [`diagram-guidelines.md`](../tooling/diagram-guidelines.md).
+- Diagrams must include validation checkpoints, ZeroFakeData anchors, and accessibility meta-comments as described in [`diagram-guidelines.md`](../guidelines/diagram-guidelines.md).
 - Use automation scripts (`npm run docs:generate`, `npm run docs:prepare`) to enforce config normalization and compliance.
 - Provenance for diagram changes must be logged in `dev-tools/context/session_store/coverage.md`.
 
@@ -72,7 +72,7 @@ Last updated: 2025-10-22
 ## General Documentation Requirements
 
 - All technical documentation must be MECE-structured, versioned, and cross-linked to relevant playbooks and runbooks.
-- Configuration changes must be staged in `docs/tooling/settings-staging.md` before updating live files.
+- Configuration changes must be staged in `docs/mmd-shared/config/settings-staging.md` before updating live files.
 - Audit artifacts and validation templates must be retained until restructure backlog closes.
 
 ---

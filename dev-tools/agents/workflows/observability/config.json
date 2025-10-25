@@ -94,7 +94,7 @@
     "zero_fake_data_violation"
   ],
   "knowledge_base": {
-    "dev_tools_fast_readme": "/docs/tooling/FAST_README.md",
+  "dev_tools_fast_readme": "/docs/mmd-shared/FAST_README.md",
     "otel_config": "/config/otel-config.yml",
     "observability_stack": "/dev-tools/observability/docker-compose.jaeger.yml",
   "context_store": "/dev-tools/agents/context/README.md",

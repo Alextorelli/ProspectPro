@@ -278,7 +278,7 @@ await mcp.github.add_labels({ owner, repo, issueNumber: pullNumber, labels });
 ### Critical Documentation
 
 - **App System Reference**: `/docs/app/SYSTEM_REFERENCE.md`
-- **Dev Tools FAST_README**: `/docs/tooling/FAST_README.md`
+- **Dev Tools FAST_README**: `/docs/mmd-shared/FAST_README.md`
 - **Documentation Standards**: `/docs/technical/DOCUMENTATION_STANDARDS.md`
 - **Context Store Guide**: `/dev-tools/agents/context/README.md`
 <!-- Validation Runner Script reference removed: use canonical context/tooling scripts -->

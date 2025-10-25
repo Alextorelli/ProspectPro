@@ -5,8 +5,8 @@
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-RESEARCH_DIR="$ROOT_DIR/docs/tooling/research"
-STAGING_DIR="$ROOT_DIR/docs/tooling/troubleshooting"
+RESEARCH_DIR="$ROOT_DIR/docs/mmd-shared/research"
+STAGING_DIR="$ROOT_DIR/docs/mmd-shared/troubleshooting"
 PATCH_SCRIPT="$ROOT_DIR/scripts/docs/patch-diagrams.sh"
 
 if [[ ! -d "$RESEARCH_DIR" ]]; then
@@ -19,7 +19,7 @@ mkdir -p "$STAGING_DIR"
 # Sync latest research content into troubleshooting mirror.
 rsync -a --delete "$RESEARCH_DIR/" "$STAGING_DIR/"
 
-echo "[INFO] Research content mirrored into docs/tooling/troubleshooting." 
+echo "[INFO] Research content mirrored into docs/mmd-shared/troubleshooting." 
 
 # Restore git sentinels for ignored troubleshooting artifacts.
 cat > "$STAGING_DIR/.gitignore" <<'EOF'
@@ -45,4 +45,4 @@ find "$STAGING_DIR" -type f -name '*.mmd' | while read -r diagram; do
   rm -f "$output_svg"
 done
 
-echo "[INFO] Taxonomy troubleshooting complete. Review docs/tooling/troubleshooting for promotion candidates."
+echo "[INFO] Taxonomy troubleshooting complete. Review docs/mmd-shared/troubleshooting for promotion candidates."

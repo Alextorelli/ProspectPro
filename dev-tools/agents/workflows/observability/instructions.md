@@ -148,7 +148,7 @@ Always audit enrichment results for zero-fake-data compliance using MCP tools. U
 ### Critical Documentation
 
 - **Monitoring Setup**: `/docs/technical/observability.md`
-- **OTEL Configuration**: `/tooling/monitoring/otel/otel-config.js`
+- **OTEL Configuration**: `/dev-tools/monitoring/otel/otel-config.js`
 - **Incident Runbooks**: `/docs/maintenance/incident-response.md`
 - **Performance Baselines**: `/mcp-servers/registry.json` (monitoring section)
 

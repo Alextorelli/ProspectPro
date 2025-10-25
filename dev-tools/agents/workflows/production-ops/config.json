@@ -156,7 +156,7 @@
     ]
   },
   "knowledge_base": {
-    "ops_fast_readme": "/docs/tooling/FAST_README.md",
+  "ops_fast_readme": "/docs/mmd-shared/FAST_README.md",
     "deployment_workflow": "/dev-tools/scripts/shell/deployment-validation-workflow.sh",
     "edge_diagnostics": "/dev-tools/scripts/shell/edge-function-diagnostics.sh",
     "production_health": "/dev-tools/scripts/shell/production-health-check.sh",
