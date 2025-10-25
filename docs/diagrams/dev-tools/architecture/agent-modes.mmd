@@ -1,0 +1,37 @@
+%%{init: { 'config': 'docs/shared/mermaid/config/mermaid.config.json', 'flowchart': { 'elk': { 'elk.direction': 'RIGHT' } } }}%%
+%% index: [docs/tooling/end-state/index.md] %%
+flowchart LR
+    subgraph Agent_Modes["Agent Modes & Chat Contexts"]
+        DevWorkflow["Development Workflow\nCode generation • testing • builds"]
+        Observability["Observability\nMonitoring • logs • performance"]
+        ProdOps["Production Ops\nDeployment • troubleshooting"]
+        SysArchitect["System Architect\nDesign • diagrams • planning"]
+    end
+
+    subgraph Context_Engine["Context Engine"]
+        AgentContext[("Agent Context\nScratchpad • persistent memory")]
+        EnvContext[("Environment Context\nPermissions • configuration")]
+        TaskLedger[("Task Ledger\nActive tasks • handoffs")]
+    end
+
+    subgraph MCP_Servers["MCP Server Registry"]
+        DevMCP[[Development Server\nTool set for build/test]]
+        ProdMCP[[Production Server\nOperational tools]]
+        ObserveMCP[[Observability Server\nTracing • metrics]]
+        TroubleMCP[[Troubleshooting Server\nDiagnostics suite]]
+    end
+
+    DevWorkflow --> AgentContext
+    Observability --> AgentContext
+    ProdOps --> TaskLedger
+    SysArchitect --> EnvContext
+
+    AgentContext --> DevMCP
+    AgentContext --> ObserveMCP
+    EnvContext --> ProdMCP
+    TaskLedger --> TroubleMCP
+
+    DevWorkflow -.-> DevMCP
+    Observability -.-> ObserveMCP
+    ProdOps -.-> TroubleMCP
+    SysArchitect -.-> ProdMCP

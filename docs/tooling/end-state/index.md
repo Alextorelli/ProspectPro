@@ -1,3 +1,10 @@
+> - **Owner:** Dev Tooling Guild → Information Architecture Squad
+> - **Success Signals:**
+>   - Every diagram listed here links back to its `.mmd` and vice versa.
+>   - Index is grouped by domain and kept alphabetically sorted.
+>   - Quarterly review confirms no orphaned diagrams.
+> - **Dependencies:** `diagram-guidelines.md`, `diagram-taxonomy.md`.
+
 # MECE Diagram Index
 
 > **Acceptance Criteria**
@@ -8,6 +15,14 @@
 >   - Index is grouped by domain and kept alphabetically sorted.
 >   - Quarterly review confirms no orphaned diagrams.
 > - **Dependencies:** `diagram-guidelines.md`, `diagram-taxonomy.md`.
+
+## Pipeline Views (Integration → Dev Tools → App)
+
+| Diagram                                                                                  | Type      | Path                                                       |
+| ---------------------------------------------------------------------------------------- | --------- | ---------------------------------------------------------- |
+| [Agent Modes & Context Engine](../../diagrams/dev-tools/architecture/agent-modes.mmd)    | Flowchart | `docs/diagrams/dev-tools/architecture/agent-modes.mmd`     |
+| [Environment to MCP Tool Map](../../diagrams/dev-tools/architecture/environment-mcp.mmd) | Flowchart | `docs/diagrams/dev-tools/architecture/environment-mcp.mmd` |
+| [Discovery & Enrichment Workflow](../../diagrams/dev-tools/architecture/workflow.mmd)    | Flowchart | `docs/diagrams/dev-tools/architecture/workflow.mmd`        |
 
 ## Dev Tools (Automation & Observability)
 

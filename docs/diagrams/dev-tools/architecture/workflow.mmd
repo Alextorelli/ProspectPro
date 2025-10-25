@@ -1,0 +1,55 @@
+%%{init: { 'config': 'docs/shared/mermaid/config/mermaid.config.json', 'flowchart': { 'elk': { 'elk.direction': 'DOWN' } } }}%%
+%% index: [docs/tooling/end-state/index.md] %%
+flowchart TD
+    subgraph Discovery["Discovery Pipeline"]
+        UserRequest(["User request\nBusiness search"])
+        TierValidation{{"Tier validation\nFREE • PRO • ENT"}}
+        BackgroundJob["Background discovery\nGoogle Places • Foursquare"]
+    end
+
+    subgraph Enrichment["Enrichment Pipeline"]
+        Orchestrator{{"Enrichment orchestrator\nBudget & sequencing"}}
+        HunterService["Hunter.io\nEmail discovery"]
+        NeverBounceService["NeverBounce\nVerification"]
+        CobaltService["Cobalt Intelligence\nFilings data"]
+        Cache[("24-hour cache\nCost optimization")]
+        QualityScoring["Quality scoring\n0–100 confidence"]
+    end
+
+    subgraph DataFlow["Data Pipeline"]
+        Database[("Supabase database\nRLS enforcement • user isolation")]
+        Export["Campaign export\nCSV • XLSX • JSON"]
+        Analytics["Usage analytics\nCost tracking"]
+    end
+
+    subgraph DevTools["Dev Tools Integration"]
+        MCPDiagnostics["MCP diagnostics\nFunction health"]
+        ObservabilityPipe["Observability pipeline\nTraces • metrics"]
+        AutomationTasks["Automation tasks\nDeploy • validate"]
+    end
+
+    UserRequest --> TierValidation
+    TierValidation -->|Approved| BackgroundJob
+    TierValidation -.->|Retry| UserRequest
+
+    BackgroundJob --> Orchestrator
+    Orchestrator --> Cache
+    Cache -->|Hit| QualityScoring
+    Cache -->|Miss| HunterService
+    Cache -->|Miss| NeverBounceService
+    Cache -->|Miss| CobaltService
+    HunterService --> QualityScoring
+    NeverBounceService --> QualityScoring
+    CobaltService --> QualityScoring
+
+    QualityScoring --> Database
+    Database --> Export
+    Database --> Analytics
+
+    BackgroundJob -.-> MCPDiagnostics
+    Orchestrator -.-> ObservabilityPipe
+    Database -.-> AutomationTasks
+
+    Analytics -.-> Orchestrator
+    MCPDiagnostics -.-> BackgroundJob
+    ObservabilityPipe -.-> QualityScoring

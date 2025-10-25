@@ -1,0 +1,48 @@
+%%{init: { 'config': 'docs/shared/mermaid/config/mermaid.config.json', 'flowchart': { 'elk': { 'elk.direction': 'RIGHT' } } }}%%
+%% index: [docs/tooling/end-state/index.md] %%
+flowchart LR
+    subgraph Environments["Environment Contexts"]
+        Production{{"Production\nWrite ops • deploy • logs"}}
+        Development{{"Development\nWrite ops • tests • no deploy"}}
+        Troubleshooting{{"Troubleshooting\nRead only • diagnostics • logs"}}
+    end
+
+    subgraph MCP_Tools["MCP Tool Categories"]
+        subgraph Database["Database"]
+            SupabaseDB[("Supabase DB\nRLS policies • query tooling")]
+            DrizzleORM["Drizzle ORM\nMigrations • schema safety"]
+        end
+
+        subgraph Functions["Edge Functions"]
+            EdgeFunctions["Edge Functions\nDeploy • test • monitor"]
+            TestSuite["Test Suite\nUnit • integration coverage"]
+        end
+
+        subgraph External_APIs["External APIs"]
+            GooglePlaces(["Google Places\nBusiness discovery"])
+            HunterIO(["Hunter.io\nEmail discovery"])
+            NeverBounce(["NeverBounce\nDeliverability verification"])
+        end
+
+        subgraph DevOps["Delivery & CI/CD"]
+            CICDPipeline["CI/CD Pipeline\nLint • test • build validation"]
+            VercelDeploy["Vercel Deploy\nFrontend releases • status"]
+        end
+    end
+
+    Production --> SupabaseDB
+    Production --> EdgeFunctions
+    Production --> VercelDeploy
+
+    Development --> DrizzleORM
+    Development --> TestSuite
+    Development --> CICDPipeline
+
+    Troubleshooting --> SupabaseDB
+    Troubleshooting --> EdgeFunctions
+
+    EdgeFunctions --> GooglePlaces
+    EdgeFunctions --> HunterIO
+    EdgeFunctions --> NeverBounce
+    TestSuite --> SupabaseDB
+    CICDPipeline --> VercelDeploy
