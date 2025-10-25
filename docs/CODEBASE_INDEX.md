@@ -1,1 +1,0 @@
-technical/CODEBASE_INDEX.md

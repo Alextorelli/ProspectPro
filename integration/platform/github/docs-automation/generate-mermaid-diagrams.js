@@ -1,7 +1,7 @@
 // Generate Mermaid diagrams from GraphQL and repo metadata
 import fs from "fs";
 import path from "path";
-import manifest from "../../../../docs/shared/mermaid/diagrams.manifest.js";
+import manifest from "../../../../docs/shared/mermaid/scripts/diagrams.manifest.js";
 import registry from "./mermaid-template-registry.js";
 
 // Copy the main index.md to all manifest locations

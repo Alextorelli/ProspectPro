@@ -1,1 +1,0 @@
-technical/SYSTEM_REFERENCE.md
