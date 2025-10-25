@@ -1,1 +1,1 @@
-// ...existing code from dev-tools/scripts/automation/mcp-chat-validate.js
+// MOVED: This script now lives in dev-tools/agents/scripts/mcp-chat-validate.js
