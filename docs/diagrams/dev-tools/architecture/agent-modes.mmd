@@ -1,37 +1,50 @@
-%%{init: { 'config': 'docs/shared/mermaid/config/mermaid.config.json', 'flowchart': { 'elk': { 'elk.direction': 'RIGHT' } } }}%%
+%%{init: { 'theme': 'dark', 'flowchart': { 'defaultRenderer': 'elk', 'elk': { 'algorithm': 'layered', 'direction': 'RIGHT', 'spacing.nodeNode': '60' }}}}%%
 %% index: [docs/tooling/end-state/index.md] %%
 flowchart LR
-    subgraph Agent_Modes["Agent Modes & Chat Contexts"]
-        DevWorkflow["Development Workflow\nCode generation • testing • builds"]
-        Observability["Observability\nMonitoring • logs • performance"]
-        ProdOps["Production Ops\nDeployment • troubleshooting"]
-        SysArchitect["System Architect\nDesign • diagrams • planning"]
+    subgraph Orchestration["Agent Orchestration"]
+        AgentRouter["Agent Router<br/>Context switching • Load balancing"]
+        SessionMgr["Session Manager<br/>State persistence • Handoffs"]
     end
 
-    subgraph Context_Engine["Context Engine"]
-        AgentContext[("Agent Context\nScratchpad • persistent memory")]
-        EnvContext[("Environment Context\nPermissions • configuration")]
-        TaskLedger[("Task Ledger\nActive tasks • handoffs")]
+    subgraph Agents["Specialized Agent Modes"]
+        DevWorkflow["Development Workflow<br/>Code generation • Testing • Builds"]
+        Observability["Observability<br/>Monitoring • Logs • Performance"]
+        ProdOps["Production Ops<br/>Deploy • Troubleshoot • Scale"]
+        SysArchitect["System Architect<br/>Design • Diagrams • Planning"]
     end
 
-    subgraph MCP_Servers["MCP Server Registry"]
-        DevMCP[[Development Server\nTool set for build/test]]
-        ProdMCP[[Production Server\nOperational tools]]
-        ObserveMCP[[Observability Server\nTracing • metrics]]
-        TroubleMCP[[Troubleshooting Server\nDiagnostics suite]]
+    subgraph Context["Context Intelligence Engine"]
+        AgentContext[("Agent Context<br/>Scratchpad • Memory")]
+        EnvContext[("Environment Context<br/>Permissions • Config")]
+        TaskLedger[("Task Ledger<br/>Active tasks • Handoffs")]
     end
 
-    DevWorkflow --> AgentContext
-    Observability --> AgentContext
-    ProdOps --> TaskLedger
-    SysArchitect --> EnvContext
+    subgraph MCPServers["MCP Server Registry"]
+        DevMCP[["Development Server<br/>Git • Build • Test"]]
+        ProdMCP[["Production Server<br/>Deploy • Monitor • Scale"]]
+        ObserveMCP[["Observability Server<br/>Traces • Metrics • Logs"]]
+        TroubleMCP[["Troubleshooting Server<br/>Debug • Diagnose • Fix"]]
+    end
+
+    AgentRouter --> DevWorkflow
+    AgentRouter --> Observability
+    AgentRouter --> ProdOps
+    AgentRouter --> SysArchitect
+    
+    SessionMgr --> AgentContext
+    SessionMgr --> TaskLedger
+
+    DevWorkflow -.-> AgentContext
+    Observability -.-> AgentContext
+    ProdOps -.-> TaskLedger
+    SysArchitect -.-> EnvContext
 
     AgentContext --> DevMCP
     AgentContext --> ObserveMCP
     EnvContext --> ProdMCP
     TaskLedger --> TroubleMCP
 
-    DevWorkflow -.-> DevMCP
-    Observability -.-> ObserveMCP
-    ProdOps -.-> TroubleMCP
-    SysArchitect -.-> ProdMCP
+    DevWorkflow ==> DevMCP
+    Observability ==> ObserveMCP
+    ProdOps ==> TroubleMCP
+    SysArchitect ==> ProdMCP

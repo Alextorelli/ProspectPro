@@ -1,23 +1,61 @@
 {
   "theme": "dark",
   "themeVariables": {
-    "primaryColor": "#222",
+    "darkMode": true,
+    "primaryColor": "#2a2a2a",
     "primaryTextColor": "#f5f5f5",
-    "lineColor": "#888",
+    "primaryBorderColor": "#555555",
+    "secondaryColor": "#3a3a3a",
+    "secondaryTextColor": "#f5f5f5",
+    "secondaryBorderColor": "#666666",
+    "tertiaryColor": "#4a4a4a",
+    "tertiaryTextColor": "#f5f5f5",
+    "tertiaryBorderColor": "#777777",
     "background": "#161616",
-    "fontFamily": "Inter, Arial, sans-serif",
-    "fontSize": "16px",
-    "nodePadding": "12",
-    "nodeBorderRadius": "6"
+    "lineColor": "#888888",
+    "textColor": "#f5f5f5",
+    "fontFamily": "Inter, 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif",
+    "fontSize": "14px",
+    "nodeBorder": "#555555",
+    "clusterBkg": "#1a1a1a",
+    "clusterBorder": "#666666",
+    "defaultLinkColor": "#888888",
+    "edgeLabelBackground": "#1a1a1a"
   },
   "flowchart": {
     "defaultRenderer": "elk",
     "elk": {
-      "elk.algorithm": "layered",
-      "elk.spacing.nodeNode": 40
-    }
+      "algorithm": "layered",
+      "direction": "RIGHT",
+      "spacing.nodeNode": "60",
+      "layered.spacing.nodeNodeBetweenLayers": "80",
+      "spacing.edgeNode": "40",
+      "spacing.edgeEdge": "20",
+      "mergeEdges": false,
+      "nodePlacementStrategy": "BRANDES_KOEPF"
+    },
+    "htmlLabels": true,
+    "curve": "basis"
+  },
+  "sequence": {
+    "actorMargin": 60,
+    "width": 180,
+    "height": 65,
+    "boxMargin": 10,
+    "messageMargin": 35,
+    "mirrorActors": true
+  },
+  "sankey": {
+    "width": 600,
+    "height": 400,
+    "linkColor": "gradient"
+  },
+  "state": {
+    "sizeUnit": 8,
+    "dividerMargin": 10
   },
   "init": {
-    "logLevel": "fatal"
+    "logLevel": "error",
+    "securityLevel": "loose"
   }
 }
