@@ -5,21 +5,11 @@ ProspectPro/
 |   |-- backend/
 |   |-- frontend/
 |   `-- shared/
-|-- archive/
-|   |-- archive/
-|   |-- chatmodes_archive/
-|   |-- config-backup/
-|   |-- deployment/
-|   |-- legacy-agent-orchestration/
-|   |-- loose-root-assets/
-|   `-- multi-level-archive/
 |-- config/
 |-- dev-tools/
 |   |-- agents/
 |   |-- automation/
-|   |-- config/
 |   |-- context/
-|   |-- reports/
 |   |-- scripts/
 |   |-- testing/
 |   `-- workspace/
@@ -30,6 +20,8 @@ ProspectPro/
 |   |-- development/
 |   |-- guides/
 |   |-- integration/
+|   |-- product-roadmap/
+|   |-- scripts/
 |   |-- setup/
 |   |-- shared/
 |   |-- technical/
@@ -38,14 +30,15 @@ ProspectPro/
 |   |-- data/
 |   |-- environments/
 |   |-- infrastructure/
+|   |-- monitoring/
 |   |-- platform/
 |   |-- security/
 |   |-- symlinks/
 |   `-- templates/
-|-- scripts/
-|   `-- operations/
-`-- supabase/
-    |-- .temp/
-    |-- functions/
-    |-- migrations/
-    `-- schema/
+|-- supabase/
+|   |-- .temp/
+|   |-- db/
+|   |-- functions/
+|   |-- migrations/
+|   `-- schema/
+`-- tests/

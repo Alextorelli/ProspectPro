@@ -9,6 +9,12 @@ app/
 |   |   |-- rest-version
 |   |   `-- storage-version
 |   |-- backend
+|   |-- db/
+|   |   |-- schema/
+|   |   |   `-- users.ts
+|   |   |-- client.ts
+|   |   |-- drizzle.config.ts
+|   |   `-- example-crud.ts
 |   |-- functions/
 |   |   |-- _shared/
 |   |   |   |-- api-usage.ts
@@ -66,9 +72,7 @@ app/
 |   |       |-- test-user-deduplication/
 |   |       |   |-- function.toml
 |   |       |   `-- index.ts
-|   |       |-- business-discovery.test.ts
-|   |       |-- edge-functions.test.ts
-|   |       `-- placeholder.test.ts
+|   |       `-- business-discovery.test.ts
 |   |-- migrations/
 |   |   |-- 20251017175251_remote_schema.sql
 |   |   |-- 20251017180924_install_pgtap.sql

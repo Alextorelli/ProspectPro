@@ -17,9 +17,6 @@ dev-tools/
 |   |   |   |   |   `-- context.json
 |   |   |   |   `-- scratchpad-template.md
 |   |   |   |-- environments/
-|   |   |   |   |-- development.json
-|   |   |   |   |-- production.json
-|   |   |   |   `-- staging.json
 |   |   |   `-- shared/
 |   |   |       `-- cost-thresholds.json
 |   |   |-- checkpoint-contexts.ts
@@ -49,15 +46,18 @@ dev-tools/
 |   |   |-- TracingTelemetrySink.ts
 |   |   |-- tsconfig.json
 |   |   `-- WorkspaceContext.ts
-|   |-- mcp-servers/
-|   |   |-- archive/
-|   |   |   |-- integration-hub-server.js
-|   |   |   |-- registry.json
-|   |   |   `-- registry.v2.json
-|   |   |-- environments/
-|   |   |   |-- development.js
-|   |   |   |-- production.js
-|   |   |   `-- troubleshooting.js
+|   |-- scripts/
+|   |   |-- cache-session.js
+|   |   |-- context-snapshot.sh
+|   |   |-- deploy-mcp-service-layer.sh
+|   |   |-- fetch-repo-context.js
+|   |   |-- fetch-supabase-context.js
+|   |   |-- mcp-chat-sync.js
+|   |   |-- mcp-chat-validate.js
+|   |   |-- participant-routing.sh
+|   |   |-- start-mcp.sh
+|   |   `-- stop-mcp.sh
+|   |-- servers/
 |   |   |-- mcp-tools/
 |   |   |   |-- development-server-tools.js
 |   |   |   |-- integration-hub-server-tools.js
@@ -65,14 +65,13 @@ dev-tools/
 |   |   |   |-- production-server-tools.js
 |   |   |   |-- README.md
 |   |   |   `-- supabase-troubleshooting-server-tools.js
-|   |   |-- validation/
 |   |   |-- active-registry.json
 |   |   |-- MCP-package.json
 |   |   |-- observability-server.js
 |   |   |-- package-lock.json
 |   |   |-- package.json
-|   |   |-- postgresql-server.js
 |   |   |-- README.md
+|   |   |-- supabase-troubleshooting-server.js
 |   |   `-- test-results.json
 |   `-- workflows/
 |       |-- development-workflow/
@@ -97,159 +96,32 @@ dev-tools/
 |       `-- .gitkeep
 |-- automation/
 |   `-- ci-cd/
-|       |-- mermaid/
-|       |   |-- run-mermaid-automation.sh
-|       |   `-- validate-mermaid-diagrams.sh
-|       |-- audit-diagram-taxonomy.js
 |       |-- check-docs-schema.sh
 |       |-- generate-diagram-bundle.sh
 |       |-- patch-diagrams.sh
 |       |-- pipeline.yml
 |       |-- render-diagrams.sh
 |       |-- repo_scan.sh
-|       |-- repository-cleanup.sh
 |       `-- stage-taxonomy.sh
-|-- config/
-|   |-- mcp-config.v2.json
-|   `-- otel-config.yml
 |-- context/
 |   `-- session_store/
 |       |-- app-filetree.txt
 |       |-- dev-tools-filetree.txt
 |       |-- integration-filetree.txt
 |       `-- repo-tree-summary.txt
-|-- reports/
-|   |-- automation/
-|   |   `-- diagram-changelogs/
-|   |-- diagnostics/
-|   |   `-- mcp-diagnostics-test.json
-|   |-- monitoring/
-|   |   |-- jaeger/
-|   |   |   `-- .gitkeep
-|   |   `-- otel/
-|   |       `-- .gitkeep
-|   |-- observability/
-|   |   `-- config/
-|   |       `-- integration/monitoring/prometheus.yml
-|   `-- validation/
-|       `-- deprecated/
-|           |-- shell-archive/
-|           |   |-- cache-publishable-key.sh
-|           |   |-- campaign-validation.sh
-|           |   |-- debug-campaign.sql
-|           |   |-- post-session.sh
-|           |   |-- preflight-checklist.sh
-|           |   |-- reset-auth-emulator.sh
-|           |   |-- reset-user-campaigns.sh
-|           |   |-- run-edge-tests-force.sh
-|           |   |-- setup-edge-auth-env.sh
-|           |   |-- setup-edge-auth-simple.sh
-|           |   |-- toggle-gitignore.sh
-|           |   |-- validate-supabase-architecture.sh
-|           |   `-- validation-suite.sh
-|           `-- participant-routing.sh
 |-- scripts/
 |   |-- automation/
-|   |   |-- migration/
-|   |   |   |-- migrate-supabase-functions.sh
-|   |   |   |-- snapshot-pre-move.sh
-|   |   |   `-- update-paths.sh
-|   |   |-- context-snapshot.sh
-|   |   |-- mcp-chat-sync.js
-|   |   |-- mcp-chat-validate.js
-|   |   |-- migration-phase.sh
-|   |   |-- participant-routing.sh
-|   |   |-- react-devtools-start.sh
 |   |   |-- README.md
-|   |   |-- redis-observability.sh
-|   |   |-- sample-automation.sh
-|   |   |-- supabase-pull-logs.sh
-|   |   |-- vercel-status-check.sh
-|   |   `-- vercel-validate.sh
-|   |-- context/
-|   |   |-- cache-session.js
-|   |   |-- fetch-repo-context.js
-|   |   `-- fetch-supabase-context.js
-|   |-- deployment/
-|   |   |-- cache-publishable-key.sh
-|   |   |-- cleanup-edge-functions.sh
-|   |   |-- deploy-background-tasks.sh
-|   |   |-- deploy.sh
-|   |   |-- deployment-validation-workflow.sh
-|   |   |-- inject-api-keys.sh
-|   |   |-- populate-secrets.sh
-|   |   `-- update-edge-secrets.sh
-|   |-- diagnostics/
-|   |   |-- collect-diagnostics.sh
-|   |   |-- debug-campaign.sql
-|   |   |-- diagnose-campaign-failure.sh
-|   |   |-- diagnose-zero-results.sh
-|   |   |-- edge-function-diagnostics.sh
-|   |   |-- manual-verification.sh
-|   |   |-- monitor-discovery-job.sh
-|   |   |-- production-health-check.sh
-|   |   |-- validate-production-enrichment.sh
-|   |   |-- validate-supabase-architecture.sh
-|   |   `-- verify-toolchain.sh
-|   |-- docs/
-|   |   |-- audit-diagram-taxonomy.js
-|   |   |-- generate-diagram-bundle.sh
-|   |   |-- generate-diagrams.mjs
-|   |   |-- patch-diagrams.sh
-|   |   |-- render-diagrams.sh
-|   |   |-- repo_scan.sh
-|   |   `-- stage-taxonomy.sh
-|   |-- git-hooks/
-|   |   `-- pre-push-ignore-check.sh
-|   |-- monitoring/
-|   |   `-- observability/
-|   |       |-- start-observability.sh
-|   |       |-- stop-observability.sh
-|   |       `-- verify-observability.sh
-|   |-- node/
-|   |   |-- cache-session.js
-|   |   |-- fetch-repo-context.js
-|   |   |-- fetch-supabase-context.js
-|   |   |-- generate-mcp-tooling.cjs
-|   |   |-- generate-mcp-tooling.js
-|   |   |-- roadmap-batch.js
-|   |   |-- roadmap-dashboard.js
-|   |   |-- roadmap-epic.js
-|   |   |-- roadmap-open.js
-|   |   |-- roadmap-pull.js
-|   |   |-- update-docs.js
-|   |   |-- validate-ignore-config.cjs
-|   |   `-- validation-runner.js
+|   |   `-- sample-automation.sh
 |   |-- operations/
-|   |   |-- mcp/
-|   |   |   |-- start-mcp.sh
-|   |   |   `-- stop-mcp.sh
-|   |   |-- deploy-mcp-service-layer.sh
+|   |   |-- ensure-supabase-cli-session.sh
 |   |   |-- launch-react-devtools.sh
 |   |   `-- shared-functions.sh
-|   |-- roadmap/
-|   |   |-- roadmap-batch.js
-|   |   |-- roadmap-dashboard.js
-|   |   |-- roadmap-epic.js
-|   |   |-- roadmap-open.js
-|   |   |-- roadmap-pull.js
-|   |   |-- seed-roadmap.sh
-|   |   |-- start-epic.sh
-|   |   `-- sync-epics-to-github.sh
 |   |-- setup/
-|   |   |-- .codespaces-init.sh
-|   |   `-- launch-react-devtools.sh
+|   |   `-- .codespaces-init.sh
 |   |-- tooling/
-|   |   |-- check-docs-schema.sh
-|   |   |-- install-git-hooks.sh
 |   |   |-- migrate-supabase-functions.sh
-|   |   |-- preflight-checklist.sh
-|   |   |-- snapshot-pre-move.sh
-|   |   |-- toggle-gitignore.sh
-|   |   |-- update-paths.sh
 |   |   `-- validate-ignore-config.cjs
-|   |-- validation/
-|   |   `-- quick-health-check.js
 |   `-- README.md
 |-- testing/
 |   |-- e2e/
