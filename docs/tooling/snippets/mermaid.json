@@ -1,7 +1,0 @@
-{
-  "zeroFakeDataCheckpoint": "ZERO_FAKE_DATA_CHECK[\"ZeroFakeData Checkpoint\\n(scripts/shell/zero-fake-data-check.sh)\"]:::validate",
-  "contextManagerNode": "CONTEXT_MANAGER[\"ContextManager\\n(dev-tools/context/context-manager.ts)\"]:::context",
-  "architectureBetaSkeleton": "architecture-beta\ngroup app(folder)[App]\ngroup devtools(folder)[Dev Tools]\ngroup supabase(cloud)[Supabase]\ngroup telemetry(database)[Telemetry]\nservice frontend(app)[Frontend] in app\nservice backend(server)[Backend] in app\nservice edgefn(server)[Edge Functions] in supabase\nservice db(database)[Database] in supabase\nservice logs(database)[Logs] in telemetry\nfrontend:R -- L:backend\nbackend:R -- L:edgefn\nedgefn:R -- L:db\ndb:R -- L:logs",
-  "sequenceParticipant": "participant {ID} as {Label}\\n({Path})",
-  "validationCheckpointBlock": "subgraph VALIDATION [\"Validation & Checkpoints\"]\n  V1[\"Validate: contextState schema\"]\n  V2[\"Check: cache/session consistency\"]\n  V3[\"Log: orchestration diagnostics\"]\nend\nFN -.-> V1\nFN -.-> V2\nFN -.-> V3"
-}
