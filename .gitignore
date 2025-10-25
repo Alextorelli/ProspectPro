@@ -232,3 +232,10 @@ cloudbuild-*.log
 # ESLint and docs cache
 .eslintcache
 .docs-cache/manifest.json
+
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+/playwright/.auth/
