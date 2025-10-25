@@ -3,7 +3,7 @@
 >   - Every diagram listed here links back to its `.mmd` and vice versa.
 >   - Index is grouped by domain and kept alphabetically sorted.
 >   - Quarterly review confirms no orphaned diagrams.
-> - **Dependencies:** `diagram-guidelines.md`, `diagram-taxonomy.md`.
+> - **Dependencies:** [`../guidelines/diagram-guidelines.md`](../guidelines/diagram-guidelines.md), [`../guidelines/diagram-taxonomy.md`](../guidelines/diagram-taxonomy.md).
 
 # MECE Diagram Index
 
@@ -14,7 +14,7 @@
 >   - Every diagram listed here links back to its `.mmd` and vice versa.
 >   - Index is grouped by domain and kept alphabetically sorted.
 >   - Quarterly review confirms no orphaned diagrams.
-> - **Dependencies:** `diagram-guidelines.md`, `diagram-taxonomy.md`.
+> - **Dependencies:** [`../guidelines/diagram-guidelines.md`](../guidelines/diagram-guidelines.md), [`../guidelines/diagram-taxonomy.md`](../guidelines/diagram-taxonomy.md).
 
 ## Pipeline Views (Integration → Dev Tools → App)
 
@@ -59,7 +59,7 @@
 **Reciprocal linking:** Each `.mmd` file must link back to this index. Use a comment at the top:
 
 ```mermaid
-%% index: [relative/path/to/docs/tooling/end-state/index.md] %%
+%% index: [docs/mmd-shared/config/index.md] %%
 ```
 
 **Update provenance:** After diagram creation/migration, log in `dev-tools/workspace/context/session_store/coverage.md`.

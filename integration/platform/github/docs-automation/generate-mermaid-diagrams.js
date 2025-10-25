@@ -1,11 +1,11 @@
 // Generate Mermaid diagrams from GraphQL and repo metadata
 import fs from "fs";
 import path from "path";
-import manifest from "../../../../docs/shared/mermaid/scripts/diagrams.manifest.js";
+import manifest from "../../../../docs/mmd-shared/scripts/diagrams.manifest.json" assert { type: "json" };
 import registry from "./mermaid-template-registry.js";
 
 // Copy the main index.md to all manifest locations
-const indexSrc = path.resolve("../../../../docs/tooling/end-state/index.md");
+const indexSrc = path.resolve("../../../../docs/mmd-shared/config/index.md");
 let indexContent = "";
 try {
   indexContent = fs.readFileSync(indexSrc, "utf8");

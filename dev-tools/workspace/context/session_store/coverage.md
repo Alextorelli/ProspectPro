@@ -21,6 +21,12 @@
 - **Provenance**: All moves and removals logged here and in `dev-tools/workspace/context/session_store/dev-tools-filetree.txt`.
 - **Reference**: See `REPO_RESTRUCTURE_PLAN.md` for canonical directory layout and migration rationale.
 
+## 2025-10-25: Diagram Assets Relocation
+
+- **Action**: Consolidated active Mermaid guidance and staging logs under `docs/mmd-shared/{config,guidelines,scripts}`. Updated automation scripts to reference the new shared manifest, index, and configuration assets.
+- **Validation**: Ran `npm run docs:prepare` to ensure the new paths resolve; confirmed `docs/mmd-shared/scripts/generate-diagrams.mjs` tracks `docs/diagrams/**` and automation commit tooling stages `docs/mmd-shared`.
+- **Notes**: Legacy pointers remain in `docs/tooling/` as relocation breadcrumbs until remaining references are scrubbed. Follow-up required to remove obsolete files once downstream consumers are updated.
+
 ## 2025-10-23: Full Domain Rewiring & Validation
 
 - Action: Audited and updated all npm scripts, VS Code tasks, and automation references for new MECE-aligned paths in dev-tools, integration, and app domains.

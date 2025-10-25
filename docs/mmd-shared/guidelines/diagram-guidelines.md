@@ -1,6 +1,6 @@
 # Diagram Guidelines for ProspectPro
 
-**Configuration Guard:** All changes to `.vscode/` and `.github/` must be staged and approved via `docs/tooling/settings-troubleshooting.md`. Do not edit these directories directly during refactors or automation.
+**Configuration Guard:** All changes to `.vscode/` and `.github/` must be staged and approved via [`../config/settings-staging.md`](../config/settings-staging.md). Do not edit these directories directly during refactors or automation.
 
 ## Centralized Mermaid Configuration
 
@@ -13,11 +13,11 @@
 
 - Every diagram must include:
   - Validation checkpoint block (schema, session, diagnostics)
-- Use snippet blocks from `../config/mermaid.json` for common nodes and compliance anchors.
+- Use snippet blocks from [`../config/mermaid.json`](../config/mermaid.json) for common nodes and compliance anchors.
 
 ## Prompts & Snippet Reuse
 
-- Use snippet blocks from `../config/mermaid.json` for all common nodes (e.g., ContextManager, ZeroFakeData, architecture-beta skeleton).
+- Use snippet blocks from [`../config/mermaid.json`](../config/mermaid.json) for all common nodes (e.g., ContextManager, ZeroFakeData, architecture-beta skeleton).
 - For sequence diagrams, use the `sequenceParticipant` snippet for each participant.
 - For validation, always include the `validationCheckpointBlock` snippet.
 
@@ -25,7 +25,6 @@
 
 - Author or edit diagrams in `.mmd` files with YAML front-matter.
 - Preview diagrams in VS Code using the Mermaid Chart extension.
-- Run `npm run docs:render:svg` to render static diagrams via CLI.
 - Run `npm run docs:prepare` to lint diagrams and refresh documentation references.
 - Run `npm run docs:update` to refresh documentation references.
 - Run `npm run lint` to validate diagram-associated markdown syntax.
@@ -48,12 +47,12 @@
 
 ## Automated Diagram Patch Workflow
 
-1. **Detect Changes** – `scripts/docs/generate-diagram-bundle.sh` (invoked by `npm run docs:prepare` and available via `npm run docs:patch:diagrams`) identifies modified `.mmd` files using `git diff --name-only HEAD -- '*.mmd'` and enforces `.vscode/` / `.github/` guardrails.
+1. **Detect Changes** – [`../scripts/generate-diagrams.mjs`](../scripts/generate-diagrams.mjs) (invoked by `npm run docs:prepare`) identifies modified `.mmd` files using the tracked manifest and enforces `.vscode/` / `.github/` guardrails.
 2. **Normalize Config** – Each changed diagram gains a `%%{init: { 'theme': 'dark', 'themeVariables': {...}, 'flowchart': { 'defaultRenderer': 'elk', 'elk': { 'elk.algorithm': 'layered', 'elk.spacing.nodeNode': 40 } } }}%%` header (from config file) if missing, and tabs are converted to spaces for consistent linting.
 3. **Compliance Warning** – Diagrams without explicit `ZeroFakeData` references emit a warning to stderr for manual follow-up.
 4. **Regenerate References** – Run `npm run docs:prepare` to call the bundle script, skip SVG rendering, and regenerate documentation references.
 5. **Record Provenance** – Document diagram-touching workstreams in `dev-tools/context/session_store/coverage.md` or linked runbooks to maintain auditability.
-6. **CI/CD Enforcement (Next)** – Extend pipelines to require `npm run docs:patch:diagrams` and `npm run mcp:chat:validate` before merges; integrate with VS Code task "Docs: Prepare".
+6. **CI/CD Enforcement (Next)** – Extend pipelines to require `npm run docs:prepare` and `npm run mcp:chat:validate` before merges; integrate with the VS Code task "Docs: Prepare".
 
 ---
 

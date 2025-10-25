@@ -5,20 +5,27 @@ import { execSync } from "child_process";
 import fs from "fs";
 import path from "path";
 
-const DIAGRAM_SRC_DIRS = ["docs/app", "docs/tooling", "docs/technical"];
+const DIAGRAM_ROOT = "docs/diagrams";
 const CACHE_DIR = ".docs-cache";
 const MANIFEST = path.join(CACHE_DIR, "manifest.json");
 
-function getAllMermaidFiles() {
+function walk(dir) {
   let files = [];
-  for (const dir of DIAGRAM_SRC_DIRS) {
-    if (!fs.existsSync(dir)) continue;
-    for (const f of fs.readdirSync(dir)) {
-      if (f.endsWith(".mmd") || f.endsWith(".mermaid"))
-        files.push(path.join(dir, f));
+  if (!fs.existsSync(dir)) return files;
+  for (const entry of fs.readdirSync(dir)) {
+    const fullPath = path.join(dir, entry);
+    const stat = fs.statSync(fullPath);
+    if (stat.isDirectory()) {
+      files = files.concat(walk(fullPath));
+    } else if (entry.endsWith(".mmd") || entry.endsWith(".mermaid")) {
+      files.push(fullPath);
     }
   }
   return files;
+}
+
+function getAllMermaidFiles() {
+  return walk(DIAGRAM_ROOT);
 }
 
 function getChangedMermaidFiles() {
@@ -28,7 +35,7 @@ function getChangedMermaidFiles() {
     .filter(
       (f) =>
         (f.endsWith(".mermaid") || f.endsWith(".mmd")) &&
-        DIAGRAM_SRC_DIRS.some((dir) => f.startsWith(dir))
+        f.startsWith(`${DIAGRAM_ROOT}/`)
     );
 }
 
