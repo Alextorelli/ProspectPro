@@ -29,9 +29,11 @@ fi
 
 # Lint all .mmd files using mermaid-cli
 find "$DIAGRAM_ROOT" -name '*.mmd' | while read -r mmd; do
-  npx -y @mermaid-js/mermaid-cli -p "$mmd" || {
-    echo "Lint failed for $mmd"; exit 1;
+  tmp_svg="${mmd%.mmd}.lint.svg"
+  npx -y @mermaid-js/mermaid-cli -i "$mmd" -o "$tmp_svg" -c "$CONFIG" --puppeteerConfigFile docs/shared/mermaid/config/puppeteer.config.json || {
+    echo "Lint failed for $mmd"; rm -f "$tmp_svg"; exit 1;
   }
+  rm -f "$tmp_svg"
   echo "Linted $mmd"
   # Optionally render SVG
   if [[ "$RENDER_STATIC" == "true" || "${1:-}" == "--svg" ]]; then
