@@ -1,7 +1,0 @@
-{
-  "role": "integration-agent",
-  "server": "integration-hub-server.js",
-  "tools": ["integration-hub-server-tools.js"],
-  "apiIntegration": true,
-  "workflowValidation": true
-}
