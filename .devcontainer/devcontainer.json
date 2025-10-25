@@ -32,7 +32,8 @@
         "Supabase.vscode-supabase-extension",
         "bradlc.vscode-tailwindcss",
         "antfu.vite",
-        "redhat.vscode-yaml"
+        "redhat.vscode-yaml",
+        "ms-playwright.playwright"
       ],
       "settings": {
         "terminal.integrated.defaultProfile.linux": "bash",
