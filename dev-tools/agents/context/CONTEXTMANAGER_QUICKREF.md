@@ -7,18 +7,20 @@ import { ContextManager } from "./context-manager";
 
 // Checkpoint current agent state
 ContextManager.checkpoint({
-  agentId: "<agent_id>",
-  notes: "Describe current state or task",
+  agentId: "development-workflow", // or system-architect, observability, production-ops
+  notes:
+    "Describe current state or task. All DB/migration/testing via Supabase MCP or Drizzle ORM.",
 });
 
 // Update scratchpad
 ContextManager.updateScratchpad({
-  agentId: "<agent_id>",
-  update: "New notes or context",
+  agentId: "development-workflow",
+  update:
+    "New notes or context. Use MCP-first workflows and Drizzle ORM for queries.",
 });
 
 // Read current context
-const ctx = ContextManager.getContext("<agent_id>");
+const ctx = ContextManager.getContext("development-workflow");
 ```
 
 ## EnvironmentContextManager
@@ -29,11 +31,12 @@ import { EnvironmentContextManager } from "./context-manager";
 // Switch environment (e.g., before deploy)
 EnvironmentContextManager.switchEnvironment({
   target: "production", // or 'development', 'troubleshooting'
-  reason: "Deploying new edge function",
+  reason:
+    "Deploying new edge function. All DB/migration/testing via Supabase MCP or Drizzle ORM.",
 });
 
 // Get current environment
 const env = EnvironmentContextManager.getCurrentEnvironment();
 ```
 
-_Replace `<agent_id>` with your actual agent directory or ID._
+// All DB/migration/testing is now handled via Supabase MCP or Drizzle ORM. Do not use legacy PostgreSQL MCP or custom scripts.

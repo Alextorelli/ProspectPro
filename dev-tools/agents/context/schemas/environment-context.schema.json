@@ -20,7 +20,8 @@
         "apiUrl": { "type": "string", "format": "uri" },
         "anonKey": { "type": ["string", "null"] },
         "serviceRoleKey": { "type": ["string", "null"] }
-      }
+      },
+      "description": "Supabase project configuration. All DB/migration/testing is handled via Supabase MCP and Drizzle ORM."
     },
     "vercel": {
       "type": "object",
@@ -43,7 +44,8 @@
     },
     "featureFlags": {
       "type": "object",
-      "additionalProperties": { "type": "boolean" }
+      "additionalProperties": { "type": "boolean" },
+      "description": "Feature flags for environment. Should match current MCP-first and Drizzle ORM tool wiring."
     },
     "monitoring": {
       "type": "object",
@@ -51,7 +53,8 @@
         "otelEndpoint": { "type": "string", "format": "uri" },
         "jaegerUrl": { "type": "string", "format": "uri" },
         "logDashboard": { "type": "string", "format": "uri" }
-      }
+      },
+      "description": "Monitoring configuration. Should reference only current observability stack and not legacy/removed services."
     },
     "permissions": {
       "type": "object",

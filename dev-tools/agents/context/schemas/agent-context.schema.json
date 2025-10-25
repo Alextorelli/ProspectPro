@@ -7,7 +7,7 @@
   "properties": {
     "agentId": {
       "type": "string",
-      "description": "Identifier for the agent (e.g., system-architect, development-workflow)."
+      "description": "Identifier for the agent (e.g., system-architect, development-workflow, observability, production-ops). Use new agent names and ensure tool usage aligns with Supabase MCP and Drizzle ORM."
     },
     "scratchpad": {
       "type": "object",
@@ -19,7 +19,7 @@
         },
         "notes": {
           "type": "array",
-          "description": "High-frequency working memory entries (auto-compressed over time).",
+          "description": "High-frequency working memory entries (auto-compressed over time). Notes should reference MCP-first workflows, Supabase MCP, and Drizzle ORM for all DB/migration/testing tasks.",
           "items": {
             "type": "object",
             "required": ["timestamp", "content"],

@@ -46,7 +46,7 @@
     },
     "mcpTools": {
       "type": "array",
-      "description": "MCP tools invoked during the task.",
+      "description": "MCP tools invoked during the task. Use new tool names such as supabase.execute_query, supabase.validate_migration, drizzle_orm.migrate, drizzle_orm.query, integration_hub.execute_workflow, etc.",
       "items": { "type": "string" }
     },
     "events": {
