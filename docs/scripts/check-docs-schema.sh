@@ -1,4 +1,4 @@
-# ...existing code from dev-tools/scripts/tooling/check-docs-schema.sh
+# ...existing code from integration/infrastructure/scripts/check-docs-schema.sh
 #!/bin/bash
 
 # ProspectPro Documentation Schema Enforcement Pre-commit Hook

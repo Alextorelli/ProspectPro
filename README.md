@@ -184,7 +184,7 @@ cd ProspectPro
 npm install
 
 # Validate ignore hygiene (run after any ignore file change)
-node scripts/tooling/validate-ignore-config.cjs
+node integration/infrastructure/scripts/validate-ignore-config.cjs
 
 # Start Supabase (local development)
 supabase start
@@ -324,7 +324,7 @@ curl -X POST 'https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/test-new-aut
 
 - `.vercelignore` refactored to remove redundant rules and align with `.gitignore`
 - `.eslintignore` normalized with section headers mirroring `.gitignore` structure
-- Validation script (`scripts/tooling/validate-ignore-config.cjs`) checks for unwanted files after ignore changes
+- Validation script (`integration/infrastructure/scripts/validate-ignore-config.cjs`) checks for unwanted files after ignore changes
 - Integrate validation into Husky pre-commit, Codespace startup, and Vercel build workflows
 - If validation flags files, update ignore rules and rerun
 

@@ -2,6 +2,10 @@
 
 ---
 
+# Workspace Configuration Safeguard Staging
+
+---
+
 ## Safeguarding Overview (Summary)
 
 1. **Stage First** – Draft every proposed `.vscode/` and `.github/` change here (or an approved troubleshooting doc) with rationale, risk, and rollback.
@@ -59,8 +63,8 @@
 - **Risk**: Low/Medium – lint jobs may take longer or surface stale Markdown issues; ensure we do not accidentally commit guard exceptions without documentation.
 - **Rollback**: Restore prior `.eslintignore` entries (re-ignoring `docs/`) after the audit by reversing this change or running `git checkout -- .eslintignore` if uncommitted.
 - **Validation Plan**:
-  1. `node dev-tools/scripts/tooling/validate-ignore-config.cjs`
-  2. `bash scripts/operations/check-docs-schema.sh`
+  1. `node integration/infrastructure/scripts/validate-ignore-config.cjs`
+  2. `bash integration/infrastructure/scripts/check-docs-schema.sh`
   3. `npm run docs:render:diagrams`
   4. `npm run docs:update`
   5. `npm run lint`
@@ -77,7 +81,8 @@
 {
   "label": "DevTools: Start React DevTools",
   "type": "shell",
-  "command": "npm run devtools:react"
+- After approval, run integration/infrastructure/scripts/update-paths.sh, apply queued .vscode/.github changes, rerun validation pipeline
+
 }
 
 ## Manual Command Sequence
@@ -89,7 +94,7 @@ See `docs/tooling/agent-debug-playbooks.md` for full workflow and guard policy.
 ---
 
 # Applied: Phase 02 Coverage Output Update (2025-10-20)
-
+- Script staged: `integration/infrastructure/scripts/snapshot-pre-move.sh`
 - VS Code task `Phase 02` now leaves the markdown report at `dev-tools/context/session_store/coverage.md` (rename step removed from `.vscode/tasks.json`).
 - Legacy artifact `dev-tools/context/session_store/phase-02-report.md` is fully deprecated; all downstream tools and automation must consume `dev-tools/context/session_store/coverage.md` as the canonical output.
 
@@ -235,12 +240,12 @@ After any approved change to chatmodes, automation, or documentation:
 
 | Old Path                | New Path                      | File(s) / Contexts | Status |
 |-------------------------|-------------------------------|--------------------|--------|
-| app/backend/functions      | app/backend/functions         | .vscode/settings.json, .vscode/launch.json, .vscode/validate-workspace-config.sh, .vscode/CONFIGURATION_FIXES.md, dev-tools/scripts/tooling/validate-ignore-config.cjs, dev-tools/scripts/shell/validate-ignore-config.cjs, dev-tools/scripts/shell/validate-supabase-architecture.sh, dev-tools/scripts/shell/update-docs.js, dev-tools/scripts/shell/run-edge-tests-force.sh, dev-tools/scripts/shell/deployment-validation-workflow.sh, dev-tools/ci/pipeline.yml, dev-tools/agent-orchestration/agents/*, dev-tools/mcp-servers/*, package.json, docs/app/REPO_RESTRUCTURE_PLAN.md, docs/app/DOCUMENTATION_INDEX.md, docs/app/SYSTEM_REFERENCE.md, docs/technical/SYSTEM_REFERENCE.md, docs/technical/CODEBASE_INDEX.md, diagrams (.mmd), etc. | Pending |
+| app/backend/functions      | app/backend/functions         | .vscode/settings.json, .vscode/launch.json, .vscode/validate-workspace-config.sh, .vscode/CONFIGURATION_FIXES.md, integration/infrastructure/scripts/validate-ignore-config.cjs, dev-tools/scripts/shell/validate-ignore-config.cjs, dev-tools/scripts/shell/validate-supabase-architecture.sh, dev-tools/scripts/shell/update-docs.js, dev-tools/scripts/shell/run-edge-tests-force.sh, dev-tools/scripts/shell/deployment-validation-workflow.sh, dev-tools/ci/pipeline.yml, dev-tools/agent-orchestration/agents/*, dev-tools/mcp-servers/*, package.json, docs/app/REPO_RESTRUCTURE_PLAN.md, docs/app/DOCUMENTATION_INDEX.md, docs/app/SYSTEM_REFERENCE.md, docs/technical/SYSTEM_REFERENCE.md, docs/technical/CODEBASE_INDEX.md, diagrams (.mmd), etc. | Pending |
 
 ## 3. Staged Replacement Script
 
 ```bash
-# filepath: tooling/migration-scripts/update-paths.sh
+# filepath: integration/infrastructure/scripts/update-paths.sh
 set -euo pipefail
 repo_root="$(git rev-parse --show-toplevel)"
 rg -l "app/backend/functions" | while read -r file; do
@@ -264,7 +269,7 @@ Rollback: `git restore .` or revert individual files if needed
 
 ## 6. Execution Approval & Post-update Verification
 
-- After approval, run update-paths.sh, apply queued .vscode/.github changes, rerun validation pipeline
+- After approval, run integration/infrastructure/scripts/update-paths.sh, apply queued .vscode/.github changes, rerun validation pipeline
 - Confirm: `rg -n "app/backend/functions"` returns zero hits outside historical notes
 - Log `git status` and `git diff --stat` in troubleshooting
 - Draft proposed directory moves and update plans here for review.
@@ -283,7 +288,7 @@ Rollback: `git restore .` or revert individual files if needed
 
 ## 2. Bulk Inventory Snapshots
 
-- Script staged: `tooling/migration-scripts/snapshot-pre-move.sh`
+- Script staged: `integration/infrastructure/scripts/snapshot-pre-move.sh`
 - Output: `dev-tools/context/session_store/pre-move-tree.txt`, `dev-tools/context/session_store/frontend-files.txt`
 
 ## 3. Stage Move Scripts

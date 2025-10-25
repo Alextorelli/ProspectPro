@@ -88,7 +88,7 @@ npm run validate:ignores
 # Or use the VS Code task: Workspace: Dev Hygiene Check
 ```
 
-If any files are flagged, update the skip lists in `scripts/tooling/validate-ignore-config.cjs` or clean up the files as needed. This prevents accidental repo pollution and keeps CI/CD clean.
+If any files are flagged, update the skip lists in `integration/infrastructure/scripts/validate-ignore-config.cjs` or clean up the files as needed. This prevents accidental repo pollution and keeps CI/CD clean.
 
 **Note:** The validator runs in CI (Vercel) and will warn (not fail) on hygiene issues. Local enforcement is strict.
 

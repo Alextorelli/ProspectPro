@@ -108,11 +108,11 @@ dev-tools/scripts/shell/verify-observability.sh
 dev-tools/scripts/shell/verify-toolchain.sh
 dev-tools/scripts/supabase/functions/.gitkeep
 dev-tools/scripts/testing/edge-functions/run-edge-function-tests.sh
-dev-tools/scripts/tooling/check-docs-schema.sh
-dev-tools/scripts/tooling/install-git-hooks.sh
-dev-tools/scripts/tooling/preflight-checklist.sh
-dev-tools/scripts/tooling/toggle-gitignore.sh
-dev-tools/scripts/tooling/validate-ignore-config.cjs
+integration/infrastructure/scripts/check-docs-schema.sh
+integration/infrastructure/scripts/install-git-hooks.sh
+integration/infrastructure/scripts/preflight-checklist.sh
+integration/infrastructure/scripts/toggle-gitignore.sh
+integration/infrastructure/scripts/validate-ignore-config.cjs
 dev-tools/scripts/validation/quick-health-check.js
 docs/FAST_README.md
 docs/README.md

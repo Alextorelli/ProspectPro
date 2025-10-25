@@ -42,8 +42,8 @@ dev-tools/agent-orchestration/agents/development-workflow/instructions.md:223:if
 dev-tools/agent-orchestration/agents/production-ops/config.json:124:      "git checkout <commit-sha> -- app/backend/functions/<function-name>",
 dev-tools/agent-orchestration/agents/production-ops/instructions.md:92:git log --oneline app/backend/functions/ | head -5
 dev-tools/agent-orchestration/agents/production-ops/instructions.md:95:git checkout <commit-sha> -- app/backend/functions/<function-name>
-dev-tools/scripts/tooling/validate-ignore-config.cjs:42:  "app/backend/functions",
-dev-tools/scripts/tooling/validate-ignore-config.cjs:89:  "app/backend/functions/business-discovery-user-aware/index.ts.backup",
+integration/infrastructure/scripts/validate-ignore-config.cjs:42:  "app/backend/functions",
+integration/infrastructure/scripts/validate-ignore-config.cjs:89:  "app/backend/functions/business-discovery-user-aware/index.ts.backup",
 dev-tools/scripts/deployment/deployment-validation-workflow.sh:419:  if [ -d "$REPO_ROOT/app/backend/functions/data-enhancement-orchestrator" ]; then
 dev-tools/scripts/deployment/deployment-validation-workflow.sh:421:  elif [ -d "$REPO_ROOT/app/backend/functions/enrichment-orchestrator" ]; then
 config/ignore-validator.allowlists.json:32:    "app/backend/functions/business-discovery-user-aware/index.ts.backup",

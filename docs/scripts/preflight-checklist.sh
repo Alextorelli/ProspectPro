@@ -28,4 +28,4 @@ else
 fi
 
 echo "[Preflight] Checklist complete."
-# ...existing code from dev-tools/scripts/tooling/preflight-checklist.sh
+# ...existing code from integration/infrastructure/scripts/preflight-checklist.sh

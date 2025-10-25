@@ -89,7 +89,7 @@ Supabase and Vercel workflows run through `ensure-supabase-cli-session.sh` and d
    - `npx madge --orphans scripts`
 4. Log outcomes in repo notes (or this README) and stage only verified changes.
 5. Validate ignore hygiene:
-   - Run `node scripts/tooling/validate-ignore-config.cjs` after any ignore file change
+   - Run `node integration/infrastructure/scripts/validate-ignore-config.cjs` after any ignore file change
    - Refactor `.vercelignore` to remove redundant rules and align with `.gitignore` (see 2025-10-18 update)
    - Document all ignore file changes here and in commit messages
    - Integrate validation script into Husky pre-commit, Codespace startup, and Vercel build workflows

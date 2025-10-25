@@ -54,11 +54,11 @@ if command -v npm >/dev/null 2>&1; then
 fi
 
 # Check if the documentation schema validation script exists
-if [ -f "scripts/check-docs-schema.sh" ]; then
+if [ -f "integration/infrastructure/scripts/check-docs-schema.sh" ]; then
   echo "🔍 Validating documentation schema..."
-  chmod +x scripts/check-docs-schema.sh
+  chmod +x integration/infrastructure/scripts/check-docs-schema.sh
   
-  if ! scripts/check-docs-schema.sh; then
+  if ! integration/infrastructure/scripts/check-docs-schema.sh; then
     echo ""
     echo "💡 Quick fixes:"
     echo "   • Move documentation files to docs/ subdirectories"
@@ -208,7 +208,7 @@ Historical and legacy documentation must be moved to dedicated archive branches:
 ### Automated Enforcement
 1. **Pre-commit Hook**: Validates schema before each commit
 2. **Pre-push Hook**: Final validation before pushing to remote
-3. **Documentation Checker**: `scripts/check-docs-schema.sh`
+3. **Documentation Checker**: `integration/infrastructure/scripts/check-docs-schema.sh`
 
 ### Manual Enforcement
 1. **Monthly Reviews**: Check for documentation sprawl
@@ -230,7 +230,7 @@ Historical and legacy documentation must be moved to dedicated archive branches:
 4. Remove from main branch if applicable
 
 ### For Violations
-1. Run `scripts/check-docs-schema.sh` for validation
+1. Run `integration/infrastructure/scripts/check-docs-schema.sh` for validation
 2. Use `scripts/repository-cleanup.sh` for bulk fixes
 3. Archive inappropriate content to correct branches
 4. Update documentation index
@@ -301,7 +301,7 @@ git commit --no-verify -m "emergency: bypass documentation validation"
 For questions about documentation governance:
 1. Check this GOVERNANCE.md document
 2. Review docs/README.md for structure
-3. Run `scripts/check-docs-schema.sh` for validation
+3. Run `integration/infrastructure/scripts/check-docs-schema.sh` for validation
 4. Use `scripts/repository-cleanup.sh` for fixes
 5. Create issue for governance improvements
 
@@ -319,7 +319,7 @@ echo "   • Commit template: Structured commit messages"
 echo "   • Documentation governance: docs/GOVERNANCE.md"
 echo ""
 echo "🔍 Validation Scripts:"
-echo "   • scripts/check-docs-schema.sh - Schema compliance checker"
+echo "   • integration/infrastructure/scripts/check-docs-schema.sh - Schema compliance checker"
 echo "   • scripts/repository-cleanup.sh - Bulk cleanup automation"
 echo ""
 echo "🎯 Enforcement Active:"
@@ -329,7 +329,7 @@ echo "   • Structured commit message template configured"
 echo ""
 echo "💡 Usage:"
 echo "   • Hooks run automatically on git commit/push"
-echo "   • Manual validation: ./scripts/check-docs-schema.sh"
+echo "   • Manual validation: ./integration/infrastructure/scripts/check-docs-schema.sh"
 echo "   • Bulk cleanup: ./scripts/repository-cleanup.sh"
 echo "   • View governance: cat docs/GOVERNANCE.md"
 echo ""
