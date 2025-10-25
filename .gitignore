@@ -228,3 +228,7 @@ cloudbuild-*.log
 /tmp/
 /tmp2/
 /todo_tmp
+
+# ESLint and docs cache
+.eslintcache
+.docs-cache/manifest.json
