@@ -155,8 +155,14 @@
       }
     },
     "supabase": {
-      "type": "http",
-      "url": "http://localhost:54321/mcp?features=database,debugging,development,docs",
+      "command": "node",
+      "args": [
+        "${workspaceFolder}/mcp-servers/supabase-troubleshooting-server.js"
+      ],
+      "env": {
+        "SUPABASE_URL": "${SUPABASE_URL}",
+        "SUPABASE_SERVICE_KEY": "${SUPABASE_SERVICE_KEY}"
+      },
       "metadata": {
         "purpose": "Local Supabase MCP server",
         "source": "user-global-config"
