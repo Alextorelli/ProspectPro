@@ -732,7 +732,7 @@
       "type": "shell",
       "command": "npm",
       "args": ["run", "start:observability"],
-      "options": { "cwd": "${workspaceFolder}/mcp-servers" },
+      "options": { "cwd": "${workspaceFolder}/dev-tools/agents/servers" },
       "isBackground": true,
       "group": "build",
       "presentation": {
@@ -1127,7 +1127,7 @@
       "type": "npm",
       "script": "mcp:prod",
       "label": "npm: mcp:prod",
-      "detail": "cd mcp-servers && npm run start:production",
+      "detail": "cd dev-tools/agents/servers && npm run start:production",
       "problemMatcher": []
     },
     {

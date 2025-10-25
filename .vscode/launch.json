@@ -28,7 +28,7 @@
       "name": "Debug MCP Production Server v4.1",
       "type": "node",
       "request": "launch",
-      "program": "${workspaceFolder}/mcp-servers/production-server.js",
+      "program": "${workspaceFolder}/dev-tools/agents/servers/observability-server.js",
       "env": {
         "NODE_ENV": "development"
       },
@@ -44,7 +44,7 @@
       "name": "Debug MCP Development Server",
       "type": "node",
       "request": "launch",
-      "program": "${workspaceFolder}/mcp-servers/development-server.js",
+      "program": "${workspaceFolder}/dev-tools/agents/servers/observability-server.js",
       "env": {
         "NODE_ENV": "development"
       },
@@ -60,7 +60,7 @@
       "name": "Debug MCP Troubleshooting Server",
       "type": "node",
       "request": "launch",
-      "program": "${workspaceFolder}/mcp-servers/troubleshooting-server.js",
+      "program": "${workspaceFolder}/dev-tools/agents/servers/supabase-troubleshooting-server.js",
       "env": {
         "NODE_ENV": "development"
       },
@@ -107,7 +107,7 @@
       "name": "Run Script: start:production (mcp-servers)",
       "request": "launch",
       "command": "npm run start:production",
-      "cwd": "${workspaceFolder}/mcp-servers"
+      "cwd": "${workspaceFolder}/dev-tools/agents/servers"
     },
     {
       "name": "Debug Vercel Preview (React DevTools)",
