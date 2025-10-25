@@ -15,16 +15,16 @@
 
 ## Canonical Fields
 
-| Field | Type | Description | ProspectPro Mapping |
-| --- | --- | --- | --- |
-| `result` | enum | `valid`, `invalid`, `catchall`, `disposable`, `unknown` | Stored as verification result |
-| `flags` | array<string> | Additional classifications (`role`, `free_email`, `government`, `spamtrap`, `does_not_accept_mail`) | Lead contact flags |
-| `suggested_correction` | string | Spelling suggestion if domain typos detected | Auto-correction workflow |
-| `retry_token` | string | Token to retry check if result was `unknown` | Used for delayed retries |
-| `execution_time` | number | Time (ms) to process verification | Monitoring metric |
-| `credits_info.balance` | integer | Remaining verification credits | Observability dashboard |
-| `address_info.domain` | string | Domain component | Lead metadata |
-| `address_info.username` | string | Local-part component | Lead metadata |
+| Field                   | Type          | Description                                                                                         | ProspectPro Mapping           |
+| ----------------------- | ------------- | --------------------------------------------------------------------------------------------------- | ----------------------------- |
+| `result`                | enum          | `valid`, `invalid`, `catchall`, `disposable`, `unknown`                                             | Stored as verification result |
+| `flags`                 | array<string> | Additional classifications (`role`, `free_email`, `government`, `spamtrap`, `does_not_accept_mail`) | Lead contact flags            |
+| `suggested_correction`  | string        | Spelling suggestion if domain typos detected                                                        | Auto-correction workflow      |
+| `retry_token`           | string        | Token to retry check if result was `unknown`                                                        | Used for delayed retries      |
+| `execution_time`        | number        | Time (ms) to process verification                                                                   | Monitoring metric             |
+| `credits_info.balance`  | integer       | Remaining verification credits                                                                      | Observability dashboard       |
+| `address_info.domain`   | string        | Domain component                                                                                    | Lead metadata                 |
+| `address_info.username` | string        | Local-part component                                                                                | Lead metadata                 |
 
 ## Derived Fields
 
