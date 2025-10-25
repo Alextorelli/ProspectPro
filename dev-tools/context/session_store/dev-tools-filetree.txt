@@ -130,7 +130,7 @@ dev-tools/
 |   |       `-- .gitkeep
 |   |-- observability/
 |   |   `-- config/
-|   |       `-- prometheus.yml
+|   |       `-- integration/monitoring/prometheus.yml
 |   `-- validation/
 |       `-- deprecated/
 |           |-- shell-archive/

@@ -15,7 +15,7 @@ config/tsconfig.json
 config/tsconfig.node.json
 config/vercel.json
 dev-tools/config/vite.config.devtools.ts
-dev-tools/observability/config/prometheus.yml
+integration/monitoring/prometheus.yml
 dev-tools/scripts/README.md
 dev-tools/scripts/context/cache-session.js
 dev-tools/scripts/context/fetch-repo-context.js

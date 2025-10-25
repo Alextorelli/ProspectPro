@@ -134,7 +134,7 @@ dev-tools/
 |   |   `-- telemetry/
 |   `-- observability/
 |       `-- config/
-|           `-- prometheus.yml
+|           `-- integration/monitoring/prometheus.yml
 |-- scripts/
 |   |-- context/
 |   |   |-- cache-session.js
