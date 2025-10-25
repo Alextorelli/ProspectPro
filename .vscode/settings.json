@@ -80,7 +80,7 @@
   "files.watcherExclude": {
     "**/supabase/.temp/**": true,
     "**/node_modules/**": true,
-    "**/dev-tools/agents/servers/node_modules/**": true,
+    "**/dev-tools/agents/mcp-servers/node_modules/**": true,
     "**/.git/objects/**": true,
     "**/.git/subtree-cache/**": true,
     "**/.deno_lsp/**": true,
@@ -95,7 +95,7 @@
     "**/.git": true,
     "**/supabase/.temp": true,
     "**/archive": true,
-    "**/dev-tools/agents/servers/logs": true
+    "**/dev-tools/agents/mcp-servers/logs": true
   },
   "ai.contextFiles": [
     "app/backend/functions/*/index.ts",
@@ -108,7 +108,7 @@
   "ai.excludeFiles": [
     "archive/**",
     "docs/**",
-    "dev-tools/agents/servers/node_modules/**",
+    "dev-tools/agents/mcp-servers/node_modules/**",
     ".deno_lsp/**",
     "*.log"
   ],
@@ -122,7 +122,7 @@
   "mcp.servers": {
     "prospectpro-production": {
       "command": "node",
-      "args": ["./dev-tools/agents/servers/observability-server.js"],
+      "args": ["./dev-tools/agents/mcp-servers/observability-server.js"],
       "autoStart": true,
       "lazyLoad": true,
       "maxMemory": "256MB",
@@ -130,14 +130,16 @@
     },
     "prospectpro-development": {
       "command": "node",
-      "args": ["./dev-tools/agents/servers/observability-server.js"],
+      "args": ["./dev-tools/agents/mcp-servers/observability-server.js"],
       "autoStart": false,
       "lazyLoad": true,
       "maxMemory": "128MB"
     },
     "prospectpro-troubleshooting": {
       "command": "node",
-      "args": ["./dev-tools/agents/servers/supabase-troubleshooting-server.js"],
+      "args": [
+        "./dev-tools/agents/mcp-servers/supabase-troubleshooting-server.js"
+      ],
       "autoStart": false,
       "lazyLoad": true,
       "maxMemory": "128MB"
