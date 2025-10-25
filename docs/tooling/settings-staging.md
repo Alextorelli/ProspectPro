@@ -1,3 +1,23 @@
+## Staged: Workspace/Editor Config & Playwright/Automation Updates (2025-10-25)
+
+- **Proposal**: Document and validate the following changes:
+  - Playwright fully enabled (all browsers, Linux dependencies installed, config updated for cross-browser E2E)
+  - Deno enabled for backend Edge Functions (with linting, unstable features)
+  - Prettier set as default formatter, format-on-save and code actions enforced
+  - File/folder exclusions and file associations tuned for performance and clarity
+  - MCP servers and automation managed via VS Code tasks/npm scripts
+  - All .vscode/ and .github/ config changes must be staged here before merging
+- **Rationale**: Ensures reproducibility, auditability, and full alignment between workspace automation, validation, and governance guardrails. Reduces risk of config drift and supports zero-fake-data, MCP-first, and Supabase-first policies.
+- **Risk**: Low – changes are additive and reinforce existing guardrails. Main risk is accidental bypass of staging, mitigated by this workflow.
+- **Rollback**: Revert staged changes and restore prior settings/configs if issues arise. Use git history and archive troubleshooting notes as needed.
+- **Validation Plan**:
+  1. Confirm Playwright E2E runs for all browsers (`npx playwright test`)
+  2. Confirm Deno linting and Edge Function support in app/backend/functions
+  3. Confirm Prettier/ESLint format-on-save and code actions
+  4. Confirm file/folder exclusions and associations in VS Code explorer
+  5. Confirm MCP tasks and automation run via VS Code tasks/npm scripts
+  6. Confirm all .vscode/ and .github/ config changes are staged here before merge
+  7. Run full validation pipeline: `npm run docs:update && npm run lint && npm test && npm run supabase:test:db`
 # Workspace Configuration Safeguard Staging
 
 ---
