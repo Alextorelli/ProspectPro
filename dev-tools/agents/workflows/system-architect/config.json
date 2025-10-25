@@ -11,8 +11,8 @@
     "observability_design"
   ],
   "mcp_dependencies": {
-    "primary": ["supabase", "supabase-troubleshooting", "integration-hub"],
-    "secondary": ["chrome-devtools", "github", "drizzle-orm"]
+    "primary": ["supabase", "supabase-troubleshooting", "integration-hub", "drizzle-orm"],
+    "secondary": ["github"]
   },
   "tools_access": [
     "supabase.execute_query",

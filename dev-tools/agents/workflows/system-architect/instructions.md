@@ -29,7 +29,7 @@
 await mcp.supabase.validate_migration({ migrationSql, rollback: true });
 await mcp.supabase.explain_query({ query, analyze: true });
 await mcp.supabase.check_pool_health();
-// Or use Drizzle ORM for type-safe migrations/queries
+// Use Drizzle ORM for type-safe migrations/queries
 await mcp.drizzle_orm.migrate({ ... });
 await mcp.drizzle_orm.query({ ... });
 
@@ -42,7 +42,7 @@ await mcp.integration_hub.check_integration_health();
 
 ### Architecture Principles (Non-Negotiable)
 
-1. **Supabase-First**: All backend logic in Edge Functions, no Express/Node.js containers. All DB/migration/testing is now via Supabase MCP or Drizzle ORM. Do not use PostgreSQL MCP or custom scripts.
+1. **Supabase-First**: All backend logic in Edge Functions, no Express/Node.js containers. All DB/migration/testing is now via Supabase MCP or Drizzle ORM. Do not use PostgreSQL MCP, custom scripts, or deprecated tools.
 2. **Zero Fake Data**: Verified contacts only (Hunter.io, NeverBounce, licensing boards). **Always audit enrichment results for zero-fake-data compliance using MCP tools.**
 3. **MCP-First Workflows**: Replace custom scripts with MCP tools (target 80%+ reduction). Never rely on manual API clients or ad-hoc scripts for production validation.
 4. **OpenTelemetry Observability**: All critical paths instrumented with trace spans
@@ -66,7 +66,7 @@ await mcp.integration_hub.check_integration_health();
 1. **Analyze Requirements** - Identify affected systems (discovery, enrichment, export, auth)
 2. **Design Data Flow** - Map Edge Functions → Database → Frontend interactions
 3. **MCP Tool Mapping** - Determine which MCP servers/tools support implementation
-4. **Schema Evolution** - Design migration with postgresql.validate_migration
+4. **Schema Evolution** - Design migration with supabase.validate_migration
 5. **Observability Plan** - Define trace spans, metrics, and alerting
 6. **Documentation** - Update system diagrams, API contracts, deployment procedures
 
