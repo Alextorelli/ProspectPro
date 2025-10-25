@@ -50,7 +50,7 @@ echo "Running automation scripts (dry-run)..."
 npm run devtools:start -- --dry-run
 npm run vercel:validate -- --dry-run
 npm run redis:observability -- --dry-run
-bash scripts/automation/context-snapshot.sh --dry-run
+bash dev-tools/agents/scripts/context-snapshot.sh --dry-run
 bash scripts/testing/devtools-regression.sh --dry-run
 
 echo "Automation scripts dry-run complete."

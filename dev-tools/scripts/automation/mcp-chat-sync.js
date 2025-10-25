@@ -29,21 +29,5 @@ async function buildManifest() {
     throw new Error("No .chatmode.md files found in .github/chatmodes");
   }
 
-  const manifest = {
+  // MOVED: This script now lives in dev-tools/agents/scripts/mcp-chat-sync.js
     generatedAt: new Date().toISOString(),
-    mcpIntegration: true,
-    modes,
-    tasks: TASK_LABELS,
-  };
-
-  const json = JSON.stringify(manifest, null, 2) + "\n";
-  await fs.writeFile(manifestPath, json, "utf-8");
-  console.log(
-    `✅ chatmode-manifest.json updated with ${modes.length} mode(s).`
-  );
-}
-
-buildManifest().catch((err) => {
-  console.error("❌ Failed to build chatmode manifest:", err.message);
-  process.exitCode = 1;
-});

@@ -41,7 +41,7 @@
     "retention_days": 30,
     "trace_sampling_rate": 0.1,
     "critical_paths": ["business-discovery", "enrichment", "export", "auth"],
-    "context_snapshot_script": "scripts/automation/context-snapshot.sh",
+  "context_snapshot_script": "dev-tools/agents/scripts/context-snapshot.sh",
     "redis_observability_script": "scripts/automation/redis-observability.sh"
   },
   "alerting_thresholds": {

@@ -26,7 +26,7 @@ context/
 | **Write**    | All agent state is persisted to JSON files inside `store/`. Scratchpads capture current work; long-term memories include Supabase config, cost thresholds, and external API limits. Every write goes through `ContextManager.checkpoint()` so state survives Codespace restarts. |
 | **Select**   | `ContextManager.select()` accepts filters (agent id, task id, time range, keywords) and returns the smallest relevant slice. Memories are tagged with `topic`, `environment`, and `recency` metadata to enable retrieval without loading the full file.                          |
 | **Compress** | When memories grow beyond configured thresholds, `ContextManager.compress()` produces lightweight summaries that keep the last N detailed entries plus a synthetic synopsis. Summaries carry provenance metadata (`derivedFrom`) so original items can be restored if needed.    |
-| **Isolate**  | Each agent gets an isolated namespace under `store/agents/<agentId>/`. Environment-specific overlays (production, troubleshooting, development) are applied at runtime and permissions are enforced through `EnvironmentContextManager`.                                                 |
+| **Isolate**  | Each agent gets an isolated namespace under `store/agents/<agentId>/`. Environment-specific overlays (production, troubleshooting, development) are applied at runtime and permissions are enforced through `EnvironmentContextManager`.                                         |
 
 ## Environment Contexts
 
@@ -41,7 +41,7 @@ context/
 - All automation scripts support the `--dry-run` flag for safe diagnostics and context recovery.
 - Always source `config/environment-loader.v2.js` before agent or MCP tool execution.
 - Use `scripts/automation/lib/participant-routing.sh` for participant-aware routing in all agent orchestration flows.
-- Reference new automation scripts: `context-snapshot.sh`, `vercel-validate.sh`, `redis-observability.sh` for troubleshooting and diagnostics.
+- Reference new automation scripts: `context-snapshot.sh`, `vercel-validate.sh`, `redis-observability.sh` for troubleshooting and diagnostics (see dev-tools/agents/scripts/).
 
 ## Task Ledgers
 

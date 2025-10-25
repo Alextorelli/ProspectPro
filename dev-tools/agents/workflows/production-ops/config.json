@@ -57,7 +57,7 @@
     "smoke_test_scripts": [
       "./scripts/testing/test-discovery-pipeline.sh",
       "./scripts/testing/test-enrichment-chain.sh",
-      "scripts/automation/context-snapshot.sh",
+      "dev-tools/agents/scripts/context-snapshot.sh",
       "scripts/automation/vercel-validate.sh",
       "scripts/automation/redis-observability.sh"
     ]
@@ -183,7 +183,7 @@
     "deploy_edge_functions": "integration_hub.execute_workflow",
     "incident_communication": "integration_hub.execute_workflow",
     "health_check_cron": "*/5 * * * *",
-    "context_snapshot": "scripts/automation/context-snapshot.sh",
+    "context_snapshot": "dev-tools/agents/scripts/context-snapshot.sh",
     "vercel_validate": "scripts/automation/vercel-validate.sh",
     "redis_observability": "scripts/automation/redis-observability.sh"
   },

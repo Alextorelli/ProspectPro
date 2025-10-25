@@ -11,7 +11,7 @@ This directory will contain enhanced tool implementations and tests for each MCP
 - Register new tool handlers in the corresponding MCP server's `setupTools()` method.
 - Update `registry.json` to reflect all capabilities and tool names.
 - Ensure environment loader (`config/environment-loader.v2.js`) is sourced at the top of each server entrypoint.
-- For troubleshooting and diagnostics, use automation scripts with the `--dry-run` flag (e.g., `scripts/automation/context-snapshot.sh --dry-run`).
+- For troubleshooting and diagnostics, use automation scripts with the `--dry-run` flag (e.g., `dev-tools/agents/scripts/context-snapshot.sh --dry-run`).
 
 ## Circuit Breaker Support
 

@@ -66,7 +66,7 @@
     "test_suite": "Test: Full Stack Validation",
     "deploy_prod": "Deploy: Full Automated Frontend",
     "edge_deploy": "Edge Functions: Production Deploy Workflow",
-    "context_snapshot": "scripts/automation/context-snapshot.sh",
+    "context_snapshot": "dev-tools/agents/scripts/context-snapshot.sh",
     "vercel_validate": "scripts/automation/vercel-validate.sh",
     "redis_observability": "scripts/automation/redis-observability.sh"
   },
@@ -99,7 +99,7 @@
       "correlate_errors",
       "rls_check",
       "auth_test",
-      "scripts/automation/context-snapshot.sh"
+      "dev-tools/agents/scripts/context-snapshot.sh"
     ],
     "performance_degradation": [
       "analyze_slow_queries",
@@ -111,7 +111,7 @@
       "integration_health",
       "circuit_breaker_state",
       "api_keys",
-      "scripts/automation/context-snapshot.sh"
+      "dev-tools/agents/scripts/context-snapshot.sh"
     ]
   },
   "routing_helper": "scripts/automation/lib/participant-routing.sh",

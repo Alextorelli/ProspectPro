@@ -1,5 +1,3 @@
-#!/bin/bash
-# Launch React DevTools standalone bridge for local debugging
-# Usage: ./scripts/devtools/launch-react-devtools.sh
-
 npx react-devtools
+
+# DEPRECATED: Use dev-tools/scripts/setup/launch-react-devtools.sh as the canonical version.

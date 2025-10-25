@@ -86,7 +86,7 @@ ProspectPro/
 
 - **Diagram inventory**: `dev-tools/context/session_store/diagrams-current.txt` (all Mermaid diagrams)
 - **Tooling/scripts/config inventory**: `dev-tools/context/session_store/live-tooling-list.txt` (all tracked scripts, docs, configs)
-- **Context snapshot**: See latest markdown in `dev-tools/context/session_store/diagnostics/context-snapshot-*.md`
+- **Context snapshot**: See latest markdown in `dev-tools/context/session_store/diagnostics/context-snapshot-*.md` (script: dev-tools/agents/scripts/context-snapshot.sh)
 
 ### Provenance & Next Steps
 
@@ -159,7 +159,7 @@ Moved mermaid.json to shared/mermaid/config
 ## 2025-10-23: Dev-Tools Domain Migration & Script Audit
 
 - **Action**: Relocated dev-tools domain files into MECE-aligned folders (`dev-tools/automation`, `dev-tools/testing`, `dev-tools/monitoring`, `dev-tools/agents`, `dev-tools/scripts`, `dev-tools/config`, `dev-tools/workspace`, `dev-tools/reports`).
-- **Script Moves**: Root scripts (`automation, docs, operations, testing, tests`) moved to `dev-tools/scripts/{automation,docs,operations,testing,qa}`. `devtools/launch-react-devtools.sh` relocated to `dev-tools/scripts/setup/launch-react-devtools.sh`. Legacy `lib/participant-routing.sh` archived under `dev-tools/reports/validation/deprecated/`.
+- **Script Moves**: Root scripts (`automation, docs, operations, testing, tests`) moved to `dev-tools/scripts/{automation,docs,operations,testing,qa}`. `devtools/launch-react-devtools.sh` relocated to `dev-tools/scripts/setup/launch-react-devtools.sh`. MCP automation scripts (`mcp-chat-sync.js`, `mcp-chat-validate.js`, `context-snapshot.sh`) moved to `dev-tools/agents/scripts/`. Legacy `lib/participant-routing.sh` archived under `dev-tools/reports/validation/deprecated/`.
 - **Migration Scripts**: All migration scripts moved to `dev-tools/scripts/automation/migration/` with a README pointer in `tooling/migration-scripts/`.
 - **ensure-supabase-cli-session.sh**: Canonical copy retained in `integration/platform/supabase/scripts/operations/` (pending move completion); update automation references and remove duplicates after validation.
 - **Reports**: Confirmed telemetry/log outputs only in `dev-tools/reports/`.

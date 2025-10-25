@@ -121,7 +121,7 @@ _Last updated: 2025-10-21_
   - Usage: `./supabase-pull-logs.sh <function-slug> <since-time>`
 - **Vercel Status Check:** [`vercel-status-check.sh`](../../scripts/automation/vercel-status-check.sh)
   - Usage: `./vercel-status-check.sh`
-- **Context Snapshot:** [`context-snapshot.sh`](../../scripts/automation/context-snapshot.sh)
+- **Context Snapshot:** [`context-snapshot.sh`](../../agents/scripts/context-snapshot.sh)
   - Usage: `./context-snapshot.sh <function-slug> <since-time>`
   - For telemetry/cost/ROI analysis, run MCP troubleshooting server and use:
     - `capture_api_trace` to fetch OTEL traces for API endpoints
