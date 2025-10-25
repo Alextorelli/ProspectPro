@@ -213,3 +213,10 @@ ev## 2025-10-23: Codespaces Bootstrap Realignment
   MCP server dependency correction and validation complete on 2025-10-23.
   Documentation automation phase completed: CODEBASE_INDEX.md, SYSTEM_REFERENCE.md, and VS Code tasks reference updated and validated.
   Repo structure, MCP, and documentation now aligned; ready for automation wiring and CI workflow updates.
+
+## 2025-10-25: Environment Config Deduplication & Migration
+
+- Action: Removed legacy JS and agent-copied environment configs. Canonical JSON configs now live in integration/environments/ only.
+- Validation: Confirmed no duplicate or orphaned environment files remain. All MCP/agent context configs should reference integration/environments/.
+- Inventory: integration/environments/{development,production,staging}.json
+- Notes: Session-store inventories and provenance updated. Proceeding with integration/data, infrastructure, and security population next.
