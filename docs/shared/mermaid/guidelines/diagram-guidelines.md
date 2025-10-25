@@ -4,7 +4,7 @@
 
 ## Centralized Mermaid Configuration
 
-- All diagrams must use the shared config in [`docs/tooling/mermaid.config.json`](mermaid.config.json) for theme, palette, typography, and padding.
+- All diagrams must use the shared config in [`../config/mermaid.config.json`](../config/mermaid.config.json) for theme, palette, typography, and padding.
 
 - Use `%%{init: { 'theme': 'forest', 'themeVariables': {...} }}%%` at the top of each diagram, referencing the config file for palette and style.
 - Node colors:
@@ -16,13 +16,13 @@
 
   - Validation checkpoint block (schema, session, diagnostics)
 
-- Use snippet blocks from `docs/tooling/snippets/mermaid.json` for common nodes and compliance anchors.
+- Use snippet blocks from `../config/mermaid.json` for common nodes and compliance anchors.
 
 ## Automated Diagram Patch Workflow
 
-1. **Detect Changes** – `scripts/docs/generate-diagram-bundle.sh` (invoked by `npm run docs:prepare` and available via `npm run docs:patch:diagrams`) identifies modified `.mmd` files using `git diff --name-only HEAD -- '*.mmd'` and enforces `.vscode/` / `.github/` guardrails.
+1. **Detect Changes** – `docs/scripts/generate-diagrams.sh` (invoked by `npm run docs:prepare`) identifies modified `.mmd` files using git status and enforces `.vscode/` / `.github/` guardrails.
 
-2. **Normalize Config** – Each changed diagram gains a `%%{init: { 'theme': 'forest', 'themeVariables': {...} }}%%` header (from config file) if missing, and tabs are converted to spaces for consistent linting.
+2. **Normalize Config** – Each changed diagram gains a `%%{init: { 'theme': 'forest', 'themeVariables': {...} }}%%` header (from shared config) if missing, and tabs are converted to spaces for consistent linting.
 
 3. **Compliance Warning** – Diagrams without explicit `ZeroFakeData` references emit a warning to stderr for manual follow-up.
 
@@ -42,7 +42,7 @@ Last updated: 2025-10-22
 
 ## Centralized Mermaid Configuration
 
-- All diagrams must use the shared config in [`docs/tooling/mermaid.config.json`](mermaid.config.json) for theme, palette, typography, and padding.
+- All diagrams must use the shared config in [`../config/mermaid.config.json`](../config/mermaid.config.json) for theme, palette, typography, and padding.
 - Use `%%{init: { 'theme': 'forest', 'themeVariables': {...} }}%%` at the top of each diagram, referencing the config file for palette and style.
 - Node colors:
   - App: `#2563eb` (blue)
@@ -58,11 +58,11 @@ Last updated: 2025-10-22
   - Validation checkpoint block (schema, session, diagnostics)
   - ZeroFakeData snippet for any validation/enrichment step
   - Accessibility meta-comments: `%% accTitle: <Short Title>`, `%% accDescr: <Description>`
-- Use snippet blocks from `docs/tooling/snippets/mermaid.json` for common nodes and compliance anchors.
+- Use snippet blocks from `../config/mermaid.json` for common nodes and compliance anchors.
 
 ## Prompts & Snippet Reuse
 
-- Use snippet blocks from `docs/tooling/snippets/mermaid.json` for all common nodes (e.g., ContextManager, ZeroFakeData, architecture-beta skeleton).
+- Use snippet blocks from `../config/mermaid.json` for all common nodes (e.g., ContextManager, ZeroFakeData, architecture-beta skeleton).
 - For sequence diagrams, use the `sequenceParticipant` snippet for each participant.
 - For validation, always include the `validationCheckpointBlock` snippet.
 
@@ -70,10 +70,10 @@ Last updated: 2025-10-22
 
 - Author or edit diagrams in `.mmd` files with YAML front-matter.
 - Preview diagrams in VS Code using the Mermaid Chart extension.
-- Run `npm run docs:render:diagrams` to render all diagrams via CLI.
-- Run `npm run docs:prepare` to update the diagram manifest.
+- Run `npm run docs:render:svg` to render static diagrams via CLI.
+- Run `npm run docs:prepare` to lint diagrams and refresh documentation references.
 - Run `npm run docs:update` to refresh documentation references.
-- Run `npm run lint` to validate diagram and markdown syntax.
+- Run `npm run lint` to validate diagram-associated markdown syntax.
 
 ## Validation Checkpoints
 

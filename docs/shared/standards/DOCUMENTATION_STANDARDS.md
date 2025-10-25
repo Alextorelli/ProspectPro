@@ -2,9 +2,9 @@
 
 ## Diagram Compliance & Automation
 
-- All Mermaid diagrams must reference the centralized config in [`docs/tooling/mermaid.config.json`](../tooling/mermaid.config.json).
+- All Mermaid diagrams must reference the centralized config in [`docs/shared/mermaid/config/mermaid.config.json`](../shared/mermaid/config/mermaid.config.json).
 - Diagrams must include validation checkpoints, ZeroFakeData anchors, and accessibility meta-comments as described in [`diagram-guidelines.md`](../tooling/diagram-guidelines.md).
-- Use automation scripts (`npm run docs:patch:diagrams`, `npm run docs:prepare`) to enforce config normalization and compliance.
+- Use automation scripts (`npm run docs:generate`, `npm run docs:prepare`) to enforce config normalization and compliance.
 - Provenance for diagram changes must be logged in `dev-tools/context/session_store/coverage.md`.
 
 ## General Documentation Requirements
@@ -56,9 +56,9 @@ Last updated: 2025-10-22
 
 ## Diagram Compliance & Automation
 
-- All Mermaid diagrams must reference the centralized config in [`docs/tooling/mermaid.config.json`](../tooling/mermaid.config.json).
+- All Mermaid diagrams must reference the centralized config in [`docs/shared/mermaid/config/mermaid.config.json`](../shared/mermaid/config/mermaid.config.json).
 - Diagrams must include validation checkpoints, ZeroFakeData anchors, and accessibility meta-comments as described in [`diagram-guidelines.md`](../tooling/diagram-guidelines.md).
-- Use automation scripts (`npm run docs:patch:diagrams`, `npm run docs:prepare`) to enforce config normalization and compliance.
+- Use automation scripts (`npm run docs:generate`, `npm run docs:prepare`) to enforce config normalization and compliance.
 - Provenance for diagram changes must be logged in `dev-tools/context/session_store/coverage.md`.
 
 - Automation
