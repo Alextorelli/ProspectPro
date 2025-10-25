@@ -34,7 +34,8 @@
         "antfu.vite",
         "redhat.vscode-yaml",
         "ms-playwright.playwright",
-        "vitest.explorer"
+        "vitest.explorer",
+        "GraphQL.vscode-graphql"
       ],
       "settings": {
         "terminal.integrated.defaultProfile.linux": "bash",
