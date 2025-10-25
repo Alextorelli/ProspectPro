@@ -1,0 +1,162 @@
+dev-tools/
+|-- agents/
+|   |-- context/
+|   |   |-- schemas/
+|   |   |   |-- agent-context.schema.json
+|   |   |   |-- environment-context.schema.json
+|   |   |   `-- task-ledger.schema.json
+|   |   |-- store/
+|   |   |   |-- agents/
+|   |   |   |   |-- development-workflow/
+|   |   |   |   |   `-- context.json
+|   |   |   |   |-- observability/
+|   |   |   |   |   `-- context.json
+|   |   |   |   |-- production-ops/
+|   |   |   |   |   `-- context.json
+|   |   |   |   |-- system-architect/
+|   |   |   |   |   `-- context.json
+|   |   |   |   `-- scratchpad-template.md
+|   |   |   |-- environments/
+|   |   |   `-- shared/
+|   |   |       `-- cost-thresholds.json
+|   |   |-- checkpoint-contexts.ts
+|   |   |-- context-manager.ts
+|   |   |-- CONTEXTMANAGER_QUICKREF.md
+|   |   |-- MCP_MODE_TOOL_MATRIX.md
+|   |   |-- README.md
+|   |   |-- RELEASE_NOTES_AND_DIFF_TEMPLATE.md
+|   |   `-- TEST_RUN_EXPECTATIONS.md
+|   |-- mcp/
+|   |   |-- __tests__/
+|   |   |   |-- ConfigLocator.test.ts
+|   |   |   |-- MCPClientManager.integration.test.ts
+|   |   |   |-- MCPClientManager.test.ts
+|   |   |   `-- WorkspaceContext.test.ts
+|   |   |-- examples/
+|   |   |   `-- usage-example.ts
+|   |   |-- ChatModeLoader.ts
+|   |   |-- ConfigLocator.ts
+|   |   |-- index.ts
+|   |   |-- MCPClientAdapter.ts
+|   |   |-- MCPClientManager.ts
+|   |   |-- package-lock.json
+|   |   |-- package.json
+|   |   |-- README.md
+|   |   |-- TelemetrySink.ts
+|   |   |-- TracingTelemetrySink.ts
+|   |   |-- tsconfig.json
+|   |   `-- WorkspaceContext.ts
+|   |-- mcp-servers/
+|   |   |-- mcp-tools/
+|   |   |   |-- development-server-tools.js
+|   |   |   |-- integration-hub-server-tools.js
+|   |   |   |-- postgresql-server-tools.js
+|   |   |   |-- production-server-tools.js
+|   |   |   |-- README.md
+|   |   |   `-- supabase-troubleshooting-server-tools.js
+|   |   |-- active-registry.json
+|   |   |-- MCP-package.json
+|   |   |-- observability-server.js
+|   |   |-- package-lock.json
+|   |   |-- package.json
+|   |   |-- README.md
+|   |   |-- supabase-troubleshooting-server.js
+|   |   `-- test-results.json
+|   |-- scripts/
+|   |   |-- cache-session.js
+|   |   |-- context-snapshot.sh
+|   |   |-- deploy-mcp-service-layer.sh
+|   |   |-- fetch-repo-context.js
+|   |   |-- fetch-supabase-context.js
+|   |   |-- mcp-chat-sync.js
+|   |   |-- mcp-chat-validate.js
+|   |   |-- participant-routing.sh
+|   |   |-- start-mcp.sh
+|   |   `-- stop-mcp.sh
+|   `-- workflows/
+|       |-- development-workflow/
+|       |   |-- .gitkeep
+|       |   |-- config.json
+|       |   `-- instructions.md
+|       |-- observability/
+|       |   |-- .gitkeep
+|       |   |-- config.json
+|       |   `-- instructions.md
+|       |-- production-ops/
+|       |   |-- .gitkeep
+|       |   |-- config.json
+|       |   `-- instructions.md
+|       |-- system-architect/
+|       |   |-- .gitkeep
+|       |   |-- config.json
+|       |   `-- instructions.md
+|       |-- templates/
+|       |   |-- .gitkeep
+|       |   `-- README.md
+|       `-- .gitkeep
+|-- automation/
+|   `-- ci-cd/
+|       |-- check-docs-schema.sh
+|       |-- generate-diagram-bundle.sh
+|       |-- patch-diagrams.sh
+|       |-- pipeline.yml
+|       |-- render-diagrams.sh
+|       |-- repo_scan.sh
+|       `-- stage-taxonomy.sh
+|-- context/
+|   |-- repo-GPS/
+|   |   |-- app-filetree.txt
+|   |   |-- dev-tools-filetree.txt
+|   |   |-- integration-filetree.txt
+|   |   `-- repo-tree-summary.txt
+|   `-- session_store/
+|       |-- app-filetree.txt
+|       `-- repo-tree-summary.txt
+|-- scripts/
+|   |-- automation/
+|   |   |-- README.md
+|   |   `-- sample-automation.sh
+|   |-- operations/
+|   |   |-- ensure-supabase-cli-session.sh
+|   |   |-- launch-react-devtools.sh
+|   |   `-- shared-functions.sh
+|   |-- setup/
+|   |   `-- .codespaces-init.sh
+|   |-- tooling/
+|   |   |-- migrate-supabase-functions.sh
+|   |   `-- validate-ignore-config.cjs
+|   `-- README.md
+|-- testing/
+|   |-- e2e/
+|   |-- fixtures/
+|   |   |-- fixture-dataset.json
+|   |   |-- sample-mcp-response.json
+|   |   |-- sample-supabase.log
+|   |   `-- sample-vercel-status.json
+|   |-- integration/
+|   |   |-- api/
+|   |   |   `-- README.md
+|   |   `-- context.test.js
+|   |-- unit/
+|   |   |-- app/
+|   |   |   `-- agents.spec.ts
+|   |   |-- dev-tools/
+|   |   |   |-- automation.bats
+|   |   |   |-- automation.spec.ts
+|   |   |   `-- devtools-regression.sh
+|   |   `-- mcp/
+|   |       `-- mcp.spec.ts
+|   |-- utils/
+|   |   `-- setup.ts
+|   `-- README.md
+|-- workspace/
+|   `-- context/
+|       |-- schemas/
+|       |   `-- compile.sh
+|       |-- session_store/
+|       |   |-- .mmd-automation-plan.md
+|       |   |-- coverage.md
+|       |   |-- live-tooling-list.txt
+|       |   `-- reference-scan.txt
+|       `-- event-bus.ts
+`-- README.md
