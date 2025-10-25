@@ -1,16 +1,21 @@
 {
-  "theme": "forest",
+  "theme": "dark",
   "themeVariables": {
-    "primaryColor": "#2563eb", // App (blue)
-    "secondaryColor": "#f97316", // Dev-Tools (orange)
-    "tertiaryColor": "#16a34a", // Docs (green)
-    "quaternaryColor": "#64748b", // Config (slate)
-    "accentColor": "#facc15", // Reports (yellow)
+    "primaryColor": "#222",
+    "primaryTextColor": "#f5f5f5",
+    "lineColor": "#888",
+    "background": "#161616",
     "fontFamily": "Inter, Arial, sans-serif",
     "fontSize": "16px",
     "nodePadding": "12",
-    "nodeBorderRadius": "6",
-    "edgeLabelBackground": "#fffbe6"
+    "nodeBorderRadius": "6"
+  },
+  "flowchart": {
+    "defaultRenderer": "elk",
+    "elk": {
+      "elk.algorithm": "layered",
+      "elk.spacing.nodeNode": 40
+    }
   },
   "init": {
     "logLevel": "fatal"
