@@ -59,7 +59,7 @@
 - **Risk**: Low/Medium – lint jobs may take longer or surface stale Markdown issues; ensure we do not accidentally commit guard exceptions without documentation.
 - **Rollback**: Restore prior `.eslintignore` entries (re-ignoring `docs/`) after the audit by reversing this change or running `git checkout -- .eslintignore` if uncommitted.
 - **Validation Plan**:
-  1. `node dev-tools/scripts/node/validate-ignore-config.cjs`
+  1. `node dev-tools/scripts/tooling/validate-ignore-config.cjs`
   2. `bash scripts/operations/check-docs-schema.sh`
   3. `npm run docs:render:diagrams`
   4. `npm run docs:update`
