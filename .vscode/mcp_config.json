@@ -35,7 +35,7 @@
     "supabase-troubleshooting": {
       "command": "node",
       "args": [
-        "${workspaceFolder}/mcp-servers/supabase-troubleshooting-server.js"
+        "${workspaceFolder}/dev-tools/agents/servers/supabase-troubleshooting-server.js"
       ],
       "env": {
         "SUPABASE_URL": "${SUPABASE_URL}",
@@ -157,7 +157,7 @@
     "supabase": {
       "command": "node",
       "args": [
-        "${workspaceFolder}/mcp-servers/supabase-troubleshooting-server.js"
+        "${workspaceFolder}/dev-tools/agents/servers/supabase-troubleshooting-server.js"
       ],
       "env": {
         "SUPABASE_URL": "${SUPABASE_URL}",
