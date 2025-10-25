@@ -4,6 +4,11 @@
 %% type: sankey %%
 %% title: Data Pipeline Sankey %%
 %% index: ../../../../tooling/end-state/index.md %%
+%% domain: dev-tools %%
+%% reciprocal: [] %%
+%% type: sankey %%
+%% title: Data Pipeline Sankey %%
+%% index: ../../../../tooling/end-state/index.md %%
 %% compliance:ZeroFakeData %%
 %% domain: dev-tools %%
 %% reciprocal: [] %%
@@ -11,4 +16,5 @@
 %% title: Data Pipeline Sankey %%
 %% index: ../../../../tooling/end-state/index.md %%
 sankey-beta
-  Source[Data Source] --> Transform[Transform], Transform --> Sink[Observability Sink]
+  Source[Data Source] --> Transform[Transform] : 100
+  Transform[Transform] --> Sink[Observability Sink] : 100
