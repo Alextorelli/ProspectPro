@@ -203,7 +203,7 @@ ev## 2025-10-23: Codespaces Bootstrap Realignment
 
 ## 2025-10-23: Agents & Automation Realignment
 
-- **Action**: Collapsed `dev-tools/agent-orchestration/**` and `dev-tools/mcp-servers/` into the unified `dev-tools/agents/{workflows,context,mcp,mcp-servers}` hierarchy.
+- **Action**: Collapsed `dev-tools/agent-orchestration/**` and `dev-tools/agents/servers/` into the unified `dev-tools/agents/{workflows,context,mcp,mcp-servers}` hierarchy. Renamed `servers` to `mcp-servers` and updated all VS Code configs (`settings.json`, `launch.json`, `tasks.json`, `mcp_config.json`) so every MCP hook now targets the new directory. Confirmed the new folder contains all server scripts (e.g., `observability-server.js`, `supabase-troubleshooting-server.js`, tool helpers). Adjustment logged in `docs/tooling/settings-staging.md` for audit. VS Code reload recommended to pick up new paths.
 - **Action**: Relocated CI/CD scripts to `dev-tools/automation/ci-cd/` and removed the legacy `ci_cd/` root folder.
 - **Action**: Migrated webhook handlers to `integration/platform/github/{webhook-handler.js,webhook-validator.js}` and retitled the API client README under `dev-tools/testing/integration/api/`.
 - **Action**: Archived duplicate inventories from the legacy `dev-tools/context/` root under `dev-tools/workspace/context/session_store/archive/legacy-top-level-context/`.
