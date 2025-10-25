@@ -143,6 +143,59 @@
           "maxMemory": "128MB"
         }
       }
+    },
+    "stripe-agent-toolkit": {
+      "type": "http",
+      "url": "https://mcp.stripe.com",
+      "gallery": "https://api.mcp.github.com/2025-09-15/v0/servers/f0b8ecdd-498c-4087-8ae2-b2677215b7ca",
+      "version": "1.0.0",
+      "metadata": {
+        "purpose": "Stripe MCP agent toolkit",
+        "source": "user-global-config"
+      }
+    },
+    "supabase": {
+      "type": "http",
+      "url": "http://localhost:54321/mcp?features=database,debugging,development,docs",
+      "metadata": {
+        "purpose": "Local Supabase MCP server",
+        "source": "user-global-config"
+      }
+    },
+    "microsoft-playwright-mcp": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["@playwright/mcp@latest"],
+      "gallery": "https://api.mcp.github.com/2025-09-15/v0/servers/41b79849-7e6c-4fc7-82c0-5a611ea21523",
+      "version": "0.0.1-seed",
+      "metadata": {
+        "purpose": "Playwright MCP server",
+        "source": "user-global-config"
+      }
+    },
+    "postmanlabs-postman-mcp-server": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["@postman/postman-mcp-server@latest"],
+      "env": {
+        "POSTMAN_API_KEY": "${input:api_key}"
+      },
+      "gallery": "https://api.mcp.github.com/2025-09-15/v0/servers/40516270-789a-bcde-f012-345678901234",
+      "version": "1.0.0",
+      "metadata": {
+        "purpose": "Postman MCP server",
+        "source": "user-global-config"
+      }
+    },
+    "apify-apify-mcp-server": {
+      "type": "http",
+      "url": "https://mcp.apify.com",
+      "gallery": "https://api.mcp.github.com/2025-09-15/v0/servers/1aef85cf-1597-47f1-84ae-3e9a771c2162",
+      "version": "0.0.1-seed",
+      "metadata": {
+        "purpose": "Apify MCP server",
+        "source": "user-global-config"
+      }
     }
   }
 }
