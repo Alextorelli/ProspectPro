@@ -5,59 +5,14 @@
 ## Centralized Mermaid Configuration
 
 - All diagrams must use the shared config in [`../config/mermaid.config.json`](../config/mermaid.config.json) for theme, palette, typography, and padding.
-
-- Use `%%{init: { 'theme': 'forest', 'themeVariables': {...} }}%%` at the top of each diagram, referencing the config file for palette and style.
-- Node colors:
-  - App: `#2563eb` (blue)
-
-## Compliance Anchors
-
-- Every diagram must include:
-
-  - Validation checkpoint block (schema, session, diagnostics)
-
-- Use snippet blocks from `../config/mermaid.json` for common nodes and compliance anchors.
-
-## Automated Diagram Patch Workflow
-
-1. **Detect Changes** – `docs/scripts/generate-diagrams.sh` (invoked by `npm run docs:prepare`) identifies modified `.mmd` files using git status and enforces `.vscode/` / `.github/` guardrails.
-
-2. **Normalize Config** – Each changed diagram gains a `%%{init: { 'theme': 'forest', 'themeVariables': {...} }}%%` header (from shared config) if missing, and tabs are converted to spaces for consistent linting.
-
-3. **Compliance Warning** – Diagrams without explicit `ZeroFakeData` references emit a warning to stderr for manual follow-up.
-
-4. **Regenerate References** – Run `npm run docs:prepare` to call the bundle script, skip SVG rendering, and regenerate documentation references.
-
-5. **Record Provenance** – Document diagram-touching workstreams in `dev-tools/context/session_store/coverage.md` or linked runbooks to maintain auditability.
-
-6. **CI/CD Enforcement (Next)** – Extend pipelines to require `npm run docs:patch:diagrams` and `npm run mcp:chat:validate` before merges; integrate with VS Code task "Docs: Prepare".
-
----
-
-Last updated: 2025-10-22
-
-# Diagram Guidelines for ProspectPro
-
-> **Configuration Guard:** All changes to `.vscode/` and `.github/` must be staged and approved via `docs/tooling/settings-troubleshooting.md`. Do not edit these directories directly during refactors or automation.
-
-## Centralized Mermaid Configuration
-
-- All diagrams must use the shared config in [`../config/mermaid.config.json`](../config/mermaid.config.json) for theme, palette, typography, and padding.
-- Use `%%{init: { 'theme': 'forest', 'themeVariables': {...} }}%%` at the top of each diagram, referencing the config file for palette and style.
-- Node colors:
-  - App: `#2563eb` (blue)
-  - Dev-Tools: `#f97316` (orange)
-  - Docs: `#16a34a` (green)
-  - Config: `#64748b` (slate)
-  - Reports: `#facc15` (yellow)
-- Font: Inter, Arial, sans-serif; Font size: 16px; Node padding: 12; Border radius: 6
+- Use `%%{init: { 'theme': 'dark', 'themeVariables': {...}, 'flowchart': { 'defaultRenderer': 'elk', 'elk': { 'elk.algorithm': 'layered', 'elk.spacing.nodeNode': 40 } } }}%%` at the top of each diagram, referencing the config file for palette and style.
+- Use only grayscale/dark theme colors; do not use per-domain or colored subgraph backgrounds. All diagrams should be visually neutral and accessible.
+- For layout, use ELK (`elk.algorithm: layered`) for all flowcharts and ensure diagrams are aligned symmetrically (vertical or horizontal as appropriate). Set `elk.direction` to match the intended axis.
 
 ## Compliance Anchors
 
 - Every diagram must include:
   - Validation checkpoint block (schema, session, diagnostics)
-  - ZeroFakeData snippet for any validation/enrichment step
-  - Accessibility meta-comments: `%% accTitle: <Short Title>`, `%% accDescr: <Description>`
 - Use snippet blocks from `../config/mermaid.json` for common nodes and compliance anchors.
 
 ## Prompts & Snippet Reuse
@@ -94,7 +49,7 @@ Last updated: 2025-10-22
 ## Automated Diagram Patch Workflow
 
 1. **Detect Changes** – `scripts/docs/generate-diagram-bundle.sh` (invoked by `npm run docs:prepare` and available via `npm run docs:patch:diagrams`) identifies modified `.mmd` files using `git diff --name-only HEAD -- '*.mmd'` and enforces `.vscode/` / `.github/` guardrails.
-2. **Normalize Config** – Each changed diagram gains a `%%{init: { 'theme': 'forest', 'themeVariables': {...} }}%%` header (from config file) if missing, and tabs are converted to spaces for consistent linting.
+2. **Normalize Config** – Each changed diagram gains a `%%{init: { 'theme': 'dark', 'themeVariables': {...}, 'flowchart': { 'defaultRenderer': 'elk', 'elk': { 'elk.algorithm': 'layered', 'elk.spacing.nodeNode': 40 } } }}%%` header (from config file) if missing, and tabs are converted to spaces for consistent linting.
 3. **Compliance Warning** – Diagrams without explicit `ZeroFakeData` references emit a warning to stderr for manual follow-up.
 4. **Regenerate References** – Run `npm run docs:prepare` to call the bundle script, skip SVG rendering, and regenerate documentation references.
 5. **Record Provenance** – Document diagram-touching workstreams in `dev-tools/context/session_store/coverage.md` or linked runbooks to maintain auditability.
@@ -102,4 +57,4 @@ Last updated: 2025-10-22
 
 ---
 
-_Last updated: 2025-10-22_
+_Last updated: 2025-10-25_
