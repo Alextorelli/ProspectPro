@@ -5,7 +5,8 @@
 %% title: Agent Modes Architecture %%
 %% index: [docs/tooling/end-state/index.md] %%
 %%{init: { 'theme': 'dark', 'flowchart': { 'defaultRenderer': 'elk', 'elk': { 'algorithm': 'layered', 'direction': 'RIGHT', 'spacing.nodeNode': '60' }}}}%%
-flowchart LR
+flowchart TD
+
     subgraph Orchestration["Agent Orchestration"]
         AgentRouter["Agent Router<br/>Context switching • Load balancing"]
         SessionMgr["Session Manager<br/>State persistence • Handoffs"]
