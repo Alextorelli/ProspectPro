@@ -5,12 +5,12 @@
   "type": "module",
   "main": "environments/production.js",
   "scripts": {
-    "start:production": "node environments/production.js",
-    "start:development": "node environments/development.js",
-    "start:troubleshooting": "node environments/troubleshooting.js",
-    "start:all": "concurrently \"npm run start:production\" \"npm run start:development\" \"npm run start:troubleshooting\"",
-    "validate": "echo '✅ All MCP servers validated successfully'",
-    "install:deps": "npm install"
+  "start:production": "node environments/production.js",
+  "start:development": "node environments/development.js",
+  "start:troubleshooting": "node environments/troubleshooting.js",
+  "start:all": "concurrently \"npm run start:production\" \"npm run start:development\" \"npm run start:troubleshooting\"",
+  "validate": "echo '✅ All MCP servers validated successfully'",
+  "install:deps": "npm install"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.18.2",
