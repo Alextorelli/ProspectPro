@@ -3,6 +3,7 @@
 - **Action**: Deleted `dev-tools/agents/servers/postgresql-server.js` and removed its entry from `active-registry.json` and package metadata. Supabase MCP and Drizzle ORM now provide all required Postgres tooling and agent access.
 - **Validation**: Confirmed no references remain in registry or package scripts. All database operations now routed through Supabase MCP or Drizzle.
 - **Notes**: Provenance and registry updated. No impact on agent or automation workflows.
+
 ## 2025-10-25: Script Migration to Canonical Docs Locations
 
 - **Action**: Migrated all documentation and roadmap automation scripts from `dev-tools/scripts/node/` and `dev-tools/scripts/tooling/` to `docs/scripts/` and `docs/product-roadmap/scripts/` per MECE and context-driven placement.
