@@ -1,4 +1,5 @@
 [
+  // --- Core Task Shortcuts ---
   {
     "key": "ctrl+shift+s",
     "command": "workbench.action.tasks.runTask",
@@ -6,51 +7,9 @@
     "when": "!terminalFocus"
   },
   {
-    "key": "ctrl+shift+d",
-    "command": "workbench.action.tasks.runTask",
-    "args": "Edge Functions: Deploy Function",
-    "when": "!terminalFocus"
-  },
-  {
-    "key": "ctrl+shift+l",
-    "command": "workbench.action.tasks.runTask",
-    "args": "Logs: Edge Function",
-    "when": "!terminalFocus"
-  },
-  {
-    "key": "ctrl+shift+m",
-    "command": "workbench.action.tasks.runTask",
-    "args": "MCP: Start All Servers",
-    "when": "!terminalFocus"
-  },
-  {
     "key": "ctrl+shift+b",
     "command": "workbench.action.tasks.runTask",
     "args": "Build: Frontend Production",
-    "when": "!terminalFocus"
-  },
-  {
-    "key": "ctrl+shift+f5",
-    "command": "workbench.action.tasks.runTask",
-    "args": "Deploy: Vercel Production",
-    "when": "!terminalFocus"
-  },
-  {
-    "key": "ctrl+shift+e",
-    "command": "workbench.action.tasks.runTask",
-    "args": "Supabase: Ensure Session",
-    "when": "!terminalFocus"
-  },
-  {
-    "key": "ctrl+shift+t",
-    "command": "workbench.action.tasks.runTask",
-    "args": "Test: Campaign Validation",
-    "when": "!terminalFocus"
-  },
-  {
-    "key": "ctrl+shift+a",
-    "command": "workbench.action.tasks.runTask",
-    "args": "Test: Auth Patterns",
     "when": "!terminalFocus"
   },
   {
@@ -71,34 +30,42 @@
     "args": "Thunder: Run Full Test Suite",
     "when": "!terminalFocus"
   },
-  {
-    "key": "ctrl+alt+a",
-    "command": "workbench.action.tasks.runTask",
-    "args": "Thunder: Run Auth Tests",
-    "when": "!terminalFocus"
-  },
-  {
-    "key": "ctrl+alt+d",
-    "command": "workbench.action.tasks.runTask",
-    "args": "Thunder: Run Discovery Tests",
-    "when": "!terminalFocus"
-  },
-  {
-    "key": "ctrl+alt+e",
-    "command": "workbench.action.tasks.runTask",
-    "args": "Thunder: Run Enrichment Tests",
-    "when": "!terminalFocus"
-  },
 
-  {
-    "key": "f5",
-    "command": "workbench.action.tasks.runTask",
-    "args": "Supabase: Serve Local Functions",
-    "when": "!inDebugMode && !terminalFocus"
-  },
+  // --- Extras ---
+  // Mermaid chart preview
   {
     "key": "ctrl+alt+p",
     "command": "mermaidchart.previewdiagram",
     "when": "editorLangId == mermaid || editorLangId == mmd"
+  },
+  // Preferences: Color Theme
+  { "key": "ctrl+alt+c", "command": "workbench.action.selectTheme" },
+  // Developer: Reload Window
+  { "key": "ctrl+shift+r", "command": "workbench.action.reloadWindow" },
+
+  // --- MCP Server Controls ---
+  {
+    "key": "ctrl+alt+m d",
+    "command": "workbench.action.tasks.runTask",
+    "args": "MCP: Start All Servers",
+    "when": "!terminalFocus"
+  },
+  {
+    "key": "ctrl+alt+m p",
+    "command": "workbench.action.tasks.runTask",
+    "args": "npm: mcp:prod",
+    "when": "!terminalFocus"
+  },
+  {
+    "key": "ctrl+alt+m t",
+    "command": "workbench.action.tasks.runTask",
+    "args": "MCP: Start Troubleshooting",
+    "when": "!terminalFocus"
+  },
+  {
+    "key": "ctrl+alt+m s",
+    "command": "workbench.action.tasks.runTask",
+    "args": "MCP: Stop All Servers",
+    "when": "!terminalFocus"
   }
 ]
