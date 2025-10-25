@@ -1,0 +1,31 @@
+{
+  "theme": "dark",
+  "fontFamily": "Inter, Arial, sans-serif",
+  "backgroundColor": "transparent",
+  "themeVariables": {
+    "primaryColor": "#00ff41",
+    "primaryTextColor": "#ffffff",
+    "primaryBorderColor": "#00ff41",
+    "lineColor": "#666666",
+    "secondaryColor": "#1a1a1a",
+    "tertiaryColor": "#333333"
+  },
+  "sequence": {
+    "actorMargin": 50,
+    "diagramMarginX": 50,
+    "diagramMarginY": 10,
+    "boxTextMargin": 5,
+    "noteMargin": 10,
+    "messageMargin": 35
+  },
+  "class": {
+    "defaultRenderer": "dagre"
+  },
+  "flowchart": {
+    "htmlLabels": true,
+    "curve": "basis"
+  },
+  "architecture": {
+    "iconPack": "logos"
+  }
+}
