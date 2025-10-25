@@ -1,13 +1,13 @@
 ## 2025-10-25: Archive Vault Branch + Repo Scrub Prep
 
-- **Action**: Created long-lived `archive-vault` branch and relocated `dev-tools/agents/servers/archive/` under `archives/dev-tools/agents/servers/` for historical retention.
+- **Action**: Created long-lived `archive-vault` branch and relocated `dev-tools/agents/mcp-servers/archive/` under `archives/dev-tools/agents/mcp-servers/` for historical retention.
 - **Action**: Removed the archive directory from the working branch to prepare for a repo focused on active app/dev sources and docs.
 - **Validation**: Ran `npm run repo:scan` to refresh inventories (`repo-tree-summary`, `app-filetree`, `dev-tools-filetree`, `integration-filetree`). Confirmed no references to the removed archive path remain.
 - **Notes**: Archive vault branch stores legacy MCP server registries. Working branch now ready for final scrub and force push once approvals complete.
 
 ## 2025-10-25: PostgreSQL MCP Server Removal
 
-- **Action**: Deleted `dev-tools/agents/servers/postgresql-server.js` and removed its entry from `active-registry.json` and package metadata. Supabase MCP and Drizzle ORM now provide all required Postgres tooling and agent access.
+- **Action**: Deleted `dev-tools/agents/mcp-servers/postgresql-server.js` and removed its entry from `active-registry.json` and package metadata. Supabase MCP and Drizzle ORM now provide all required Postgres tooling and agent access.
 - **Validation**: Confirmed no references remain in registry or package scripts. All database operations now routed through Supabase MCP or Drizzle.
 - **Notes**: Provenance and registry updated. No impact on agent or automation workflows.
 
