@@ -1,0 +1,66 @@
+---
+query: break down further, detailed agent flows, context, db architecture (edge and
+  core modules, not auth/observe), etc. dependecy diagram would be helpful too
+references:
+  - "File: /docs/technical/SYSTEM_REFERENCE.md"
+  - "File: /docs/technical/CODEBASE_INDEX.md"
+  - "File: /docs/integration/INT_README.md"
+generationTime: 2025-10-25T19:06:17.703Z
+---
+%% index: [docs/tooling/end-state/index.md] %%
+sequenceDiagram
+    participant UI as Frontend UI
+    participant Auth as Supabase Auth
+    participant Discovery as business-discovery-background
+    participant Orchestrator as enrichment-orchestrator
+    participant Hunter as Hunter.io API
+    participant NeverBounce as NeverBounce API
+    participant Cobalt as Cobalt Intelligence
+    participant Cache as 24hr Cache Layer
+    participant DB as Supabase DB (RLS)
+
+    UI->>+Auth: User session JWT
+    Auth-->>UI: Validated session
+    
+    UI->>+Discovery: POST /business-discovery-background
+    Note over Discovery: Tier-aware async discovery
+    
+    Discovery->>+DB: Check campaign ownership (RLS)
+    DB-->>Discovery: User-scoped data access
+    
+    par Google Places Discovery
+        Discovery->>External: Google Places API
+        External-->>Discovery: Business listings
+    and Foursquare Enhancement
+        Discovery->>External: Foursquare Places API
+        External-->>Discovery: Category enrichment
+    end
+    
+    Discovery->>+Orchestrator: Trigger enrichment pipeline
+    Note over Orchestrator: Budget-controlled coordination
+    
+    Orchestrator->>+Cache: Check 24hr cache
+    alt Cache Hit
+        Cache-->>Orchestrator: Cached results
+    else Cache Miss
+        par Email Discovery
+            Orchestrator->>+Hunter: Hunter.io email discovery
+            Hunter-->>Orchestrator: Email candidates
+        and Email Verification
+            Orchestrator->>+NeverBounce: Email verification
+            NeverBounce-->>Orchestrator: Deliverability scores
+        and Business Intelligence
+            Orchestrator->>+Cobalt: Secretary of State filings
+            Cobalt-->>Orchestrator: Executive verification
+        end
+        
+        Orchestrator->>Cache: Store results (24hr TTL)
+    end
+    
+    Orchestrator->>+DB: Quality scoring & storage
+    Note over DB: 95% email accuracy enforcement
+    DB-->>Orchestrator: Lead confidence scores
+    
+    Discovery-->>-UI: Background processing complete
+    UI->>DB: Poll for enriched results
+    DB-->>UI: User-scoped lead data

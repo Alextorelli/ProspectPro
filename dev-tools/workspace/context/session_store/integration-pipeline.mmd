@@ -1,0 +1,57 @@
+---
+query: break down further, detailed agent flows, context, db architecture (edge and
+  core modules, not auth/observe), etc. dependecy diagram would be helpful too
+references:
+  - "File: /docs/technical/SYSTEM_REFERENCE.md"
+  - "File: /docs/technical/CODEBASE_INDEX.md"
+  - "File: /docs/integration/INT_README.md"
+generationTime: 2025-10-25T19:06:17.737Z
+---
+%% index: [docs/tooling/end-state/index.md] %%
+flowchart LR
+    subgraph Integration["Integration Layer"]
+        direction TB
+        Supabase["Supabase Infrastructure"]
+        ThirdParty["Third-Party APIs"]
+        Security["Security Boundaries"]
+        Monitoring["Monitoring & Alerts"]
+    end
+    
+    subgraph DevTools["Dev Tools Control Plane"]
+        direction TB
+        Control["Control Plane"]
+        Automation["Automation Pipeline"]
+        Observability["Observability Data"]
+        MCP["MCP Server Lifecycle"]
+    end
+    
+    subgraph AppSource["App Source Experience"]
+        direction TB
+        Frontend["Frontend Modules"]
+        AuthFlow["Authentication Flow"]
+        Campaign["Campaign Lifecycle"]
+        Export["Export Processing"]
+    end
+    
+    %% Integration to Dev Tools
+    Supabase -->|Infrastructure Events| Control
+    ThirdParty -->|API Usage Metrics| Observability
+    Security -->|Audit Logs| Automation
+    Monitoring -->|Alert Triggers| MCP
+    
+    %% Dev Tools to App Source
+    Control -->|Deployment Commands| Frontend
+    Automation -->|Build Pipeline| AuthFlow
+    Observability -->|Performance Data| Campaign
+    MCP -->|Function Health| Export
+    
+    %% Cross-domain flows
+    Integration -.->|Direct Integration| AppSource
+    Supabase -.->|Database Access| Campaign
+    ThirdParty -.->|API Calls| Export
+    
+    %% Feedback loops
+    Campaign -->|Usage Analytics| Observability
+    Export -->|Cost Tracking| Control
+    AuthFlow -->|Security Events| Security
+    Frontend -->|Error Logs| Monitoring

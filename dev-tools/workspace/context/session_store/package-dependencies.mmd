@@ -1,0 +1,100 @@
+---
+query: break down further, detailed agent flows, context, db architecture (edge and
+  core modules, not auth/observe), etc. dependecy diagram would be helpful too
+references:
+  - "File: /docs/technical/SYSTEM_REFERENCE.md"
+  - "File: /docs/technical/CODEBASE_INDEX.md"
+  - "File: /docs/integration/INT_README.md"
+generationTime: 2025-10-25T19:06:17.711Z
+---
+%% index: [docs/tooling/end-state/index.md] %%
+flowchart TD
+    subgraph Frontend["Frontend Layer"]
+        React["React 18"]
+        Vite["Vite Build"]
+        Supabase_JS["@supabase/supabase-js"]
+        React_Router["React Router"]
+        Tailwind["Tailwind CSS"]
+    end
+    
+    subgraph EdgeFunctions["Supabase Edge Functions"]
+        Discovery_BG["business-discovery-background"]
+        Discovery_Opt["business-discovery-optimized"]
+        Enrichment_Orch["enrichment-orchestrator"]
+        Enrichment_Hunter["enrichment-hunter"]
+        Enrichment_NB["enrichment-neverbounce"]
+        Campaign_Export["campaign-export-user-aware"]
+    end
+    
+    subgraph SharedUtilities["Shared Edge Utilities"]
+        Auth_Helper["edge-auth.ts"]
+        Cache_Manager["cache-manager.ts"]
+        Quality_Scoring["quality-scoring.ts"]
+        Business_Tax["business-taxonomy.ts"]
+        RLS_Helpers["rls-helpers.ts"]
+    end
+    
+    subgraph ExternalAPIs["External API Integrations"]
+        Google_Places["Google Places API"]
+        Foursquare["Foursquare Places API"]
+        Hunter_IO["Hunter.io API"]
+        NeverBounce_API["NeverBounce API"]
+        Cobalt_Intel["Cobalt Intelligence API"]
+    end
+    
+    subgraph DevTools["Dev Tools Suite"]
+        MCP_Servers["MCP Servers"]
+        Automation["CI/CD Automation"]
+        Observability["Observability Pipeline"]
+        Diagrams["Mermaid Diagrams"]
+    end
+    
+    subgraph Database["Supabase Database"]
+        Postgres["PostgreSQL 15"]
+        RLS["Row Level Security"]
+        Functions["PL/pgSQL Functions"]
+        Triggers["Database Triggers"]
+    end
+    
+    %% Frontend Dependencies
+    React --> Supabase_JS
+    Vite --> React
+    React --> React_Router
+    React --> Tailwind
+    
+    %% Edge Function Dependencies
+    Discovery_BG --> Auth_Helper
+    Discovery_BG --> Business_Tax
+    Discovery_BG --> Google_Places
+    Discovery_BG --> Foursquare
+    
+    Enrichment_Orch --> Cache_Manager
+    Enrichment_Orch --> Quality_Scoring
+    Enrichment_Hunter --> Hunter_IO
+    Enrichment_NB --> NeverBounce_API
+    
+    Campaign_Export --> RLS_Helpers
+    Campaign_Export --> Auth_Helper
+    
+    %% Cross-layer Dependencies
+    Supabase_JS --> EdgeFunctions
+    EdgeFunctions --> Database
+    SharedUtilities --> Database
+    
+    %% Dev Tools Integration
+    MCP_Servers --> EdgeFunctions
+    Automation --> Database
+    Observability --> EdgeFunctions
+    
+    %% Styling
+    classDef frontend fill:#e1f5fe
+    classDef edge fill:#f3e5f5
+    classDef external fill:#fff3e0
+    classDef devtools fill:#e8f5e8
+    classDef database fill:#fce4ec
+    
+    class React,Vite,Supabase_JS,React_Router,Tailwind frontend
+    class Discovery_BG,Discovery_Opt,Enrichment_Orch,Enrichment_Hunter,Enrichment_NB,Campaign_Export edge
+    class Google_Places,Foursquare,Hunter_IO,NeverBounce_API,Cobalt_Intel external
+    class MCP_Servers,Automation,Observability,Diagrams devtools
+    class Postgres,RLS,Functions,Triggers database

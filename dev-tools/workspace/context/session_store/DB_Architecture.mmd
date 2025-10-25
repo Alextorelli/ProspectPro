@@ -1,0 +1,105 @@
+---
+query: break down further, detailed agent flows, context, db architecture (edge and
+  core modules, not auth/observe), etc. dependecy diagram would be helpful too
+references:
+  - "File: /docs/technical/SYSTEM_REFERENCE.md"
+  - "File: /docs/technical/CODEBASE_INDEX.md"
+  - "File: /docs/integration/INT_README.md"
+generationTime: 2025-10-25T19:06:17.709Z
+---
+%% index: [docs/tooling/end-state/index.md] %%
+erDiagram
+    %% Core User & Campaign Management
+    auth_users ||--o{ campaigns : owns
+    auth_users {
+        uuid id PK
+        string email UK
+        string tier "free|pro|enterprise"
+        timestamp created_at
+    }
+    
+    campaigns ||--o{ leads : contains
+    campaigns {
+        uuid id PK
+        uuid user_id FK "RLS enforced"
+        string name
+        jsonb search_criteria
+        string status "active|paused|completed"
+        int lead_count
+        timestamp created_at
+        timestamp updated_at
+    }
+    
+    %% Lead Data with Quality Scoring
+    leads ||--o{ enrichment_results : has
+    leads {
+        uuid id PK
+        uuid campaign_id FK "RLS via campaign"
+        string business_name
+        string address
+        string phone
+        string website
+        jsonb google_places_data
+        jsonb foursquare_data
+        int confidence_score "0-100"
+        timestamp discovered_at
+    }
+    
+    %% Enrichment Pipeline Results
+    enrichment_results ||--o{ email_verification : verified_by
+    enrichment_results {
+        uuid id PK
+        uuid lead_id FK
+        string enrichment_type "hunter|neverbounce|cobalt"
+        jsonb raw_response
+        jsonb processed_data
+        decimal cost_usd
+        timestamp cached_until "24hr TTL"
+        timestamp created_at
+    }
+    
+    %% Email Discovery & Verification
+    email_verification {
+        uuid id PK
+        uuid enrichment_result_id FK
+        string email
+        string deliverability "safe|risky|invalid"
+        decimal confidence_score
+        string source "hunter|manual|scraped"
+        boolean is_verified
+        timestamp verified_at
+    }
+    
+    %% Budget & Usage Tracking
+    auth_users ||--o{ api_usage : tracked_by
+    api_usage {
+        uuid id PK
+        uuid user_id FK
+        string service "google|hunter|neverbounce|cobalt"
+        int requests_count
+        decimal cost_usd
+        date usage_date
+        string tier_limit "enforced limits"
+    }
+    
+    %% Export & Analytics
+    campaigns ||--o{ dashboard_exports : exported_as
+    dashboard_exports {
+        uuid id PK
+        uuid campaign_id FK "RLS via campaign"
+        uuid user_id FK "Double RLS enforcement"
+        string export_format "csv|xlsx|json"
+        jsonb export_metadata
+        string download_url "Presigned S3"
+        timestamp expires_at
+        timestamp created_at
+    }
+    
+    %% Caching & Performance
+    enrichment_cache {
+        string cache_key PK "domain+service hash"
+        jsonb cached_data
+        timestamp expires_at "24hr sliding window"
+        string service_type
+        decimal cost_saved
+    }
