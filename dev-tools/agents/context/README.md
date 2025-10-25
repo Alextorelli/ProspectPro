@@ -1,3 +1,30 @@
+ProspectPro uses a persistent context store to coordinate MCP-aware agents while keeping working memory manageable. The implementation follows the **Write → Select → Compress → Isolate** pattern defined in the MCP context management playbook. All DB/migration/testing is handled via Supabase MCP and Drizzle ORM. Legacy PostgreSQL MCP and custom scripts are deprecated and must not be used.
+
+## Directory Layout
+
+Each agent gets an isolated namespace under `store/agents/<agentId>/`. Environment-specific overlays (production, troubleshooting, development) are applied at runtime and permissions are enforced through `EnvironmentContextManager`. All automation scripts must be referenced from `scripts/operations/` at the repo root. Use the `--dry-run` flag and always source the environment-loader contract for safe diagnostics and context recovery.
+
+## Core Concepts
+
+// 1. Load agent scratchpad and append a note
+await context.updateScratchpad({
+agentId: "development-workflow",
+data: {
+currentTask: "implement-campaign-export",
+notes: ["MCP validation suite passes in troubleshooting (Supabase MCP, Drizzle ORM only)"],
+},
+});
+
+// 3. Switch environment with a recorded reason
+await envs.switchEnvironment({
+agentId: "production-ops",
+target: "production",
+reason: "P0 incident response (Supabase MCP, Drizzle ORM only)",
+requireApproval: true,
+});
+
+The context store is the single source of truth for cross-agent coordination. Agents MUST go through the context manager APIs rather than reading files directly to ensure consistency with MCP workflows. For troubleshooting, always use dry-run, validate environment mapping, and reference only the canonical automation scripts and tools (Supabase MCP, Drizzle ORM). Legacy or custom DB tooling is not permitted.
+
 # ProspectPro Context Store
 
 ProspectPro uses a persistent context store to coordinate MCP-aware agents while keeping working memory manageable. The implementation follows the **Write → Select → Compress → Isolate** pattern defined in the MCP context management playbook.
