@@ -102,42 +102,45 @@
         }
       }
     },
-    "mcp-server-1": {
+    "prospectpro-production": {
       "command": "node",
-      "args": ["${workspaceFolder}/mcp-servers/mcp-server-1.js"],
-      "env": {
-        "EXAMPLE_ENV": "value1"
-      },
+      "args": ["${workspaceFolder}/mcp-servers/production-server.js"],
+      "env": {},
       "metadata": {
-        "purpose": "Example MCP server 1",
+        "purpose": "Production MCP server for ProspectPro",
         "optimizations": {
-          "custom_feature": true
+          "autoStart": true,
+          "lazyLoad": true,
+          "maxMemory": "256MB",
+          "timeout": 30000
         }
       }
     },
-    "mcp-server-2": {
+    "prospectpro-development": {
       "command": "node",
-      "args": ["${workspaceFolder}/mcp-servers/mcp-server-2.js"],
-      "env": {
-        "EXAMPLE_ENV": "value2"
-      },
+      "args": ["${workspaceFolder}/mcp-servers/development-server.js"],
+      "env": {},
       "metadata": {
-        "purpose": "Example MCP server 2",
+        "purpose": "Development MCP server for ProspectPro",
         "optimizations": {
-          "custom_feature": true
+          "autoStart": false,
+          "lazyLoad": true,
+          "maxMemory": "128MB"
         }
       }
     },
-    "mcp-server-3": {
+    "prospectpro-troubleshooting": {
       "command": "node",
-      "args": ["${workspaceFolder}/mcp-servers/mcp-server-3.js"],
-      "env": {
-        "EXAMPLE_ENV": "value3"
-      },
+      "args": [
+        "${workspaceFolder}/mcp-servers/supabase-troubleshooting-server.js"
+      ],
+      "env": {},
       "metadata": {
-        "purpose": "Example MCP server 3",
+        "purpose": "Troubleshooting MCP server for ProspectPro",
         "optimizations": {
-          "custom_feature": true
+          "autoStart": false,
+          "lazyLoad": true,
+          "maxMemory": "128MB"
         }
       }
     }
