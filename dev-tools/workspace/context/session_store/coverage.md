@@ -1,3 +1,13 @@
+## 2025-10-25: Script Migration to Canonical Docs Locations
+
+- **Action**: Migrated all documentation and roadmap automation scripts from `dev-tools/scripts/node/` and `dev-tools/scripts/tooling/` to `docs/scripts/` and `docs/product-roadmap/scripts/` per MECE and context-driven placement.
+- **Validation**: Confirmed all relevant scripts are present in their new locations and removed from the old directories. Updated inventories and validated with `npm run repo:scan`.
+- **Inventory**:
+  - `docs/scripts/`: update-docs.js, validation-runner.js, check-docs-schema.sh, preflight-checklist.sh
+  - `docs/product-roadmap/scripts/`: roadmap-batch.js, roadmap-dashboard.js, roadmap-epic.js, roadmap-open.js, roadmap-pull.js
+- **Provenance**: All moves and removals logged here and in `dev-tools/workspace/context/session_store/dev-tools-filetree.txt`.
+- **Reference**: See `REPO_RESTRUCTURE_PLAN.md` for canonical directory layout and migration rationale.
+
 ## 2025-10-23: Full Domain Rewiring & Validation
 
 - Action: Audited and updated all npm scripts, VS Code tasks, and automation references for new MECE-aligned paths in dev-tools, integration, and app domains.

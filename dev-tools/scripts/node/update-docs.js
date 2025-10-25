@@ -1,3 +1,4 @@
+// This file has been removed as part of the migration to docs/scripts and docs/product-roadmap/scripts.
 #!/usr/bin/env node
 
 /**

@@ -39,38 +39,5 @@ function collectGitSummary() {
     status: statusShort ? statusShort.split("\n") : [],
     staged: staged ? staged.split("\n") : [],
     unstaged: unstaged ? unstaged.split("\n") : [],
-    diffSummary: diffSummary || null,
+    // DEPRECATED: Use dev-tools/scripts/context/fetch-repo-context.js as the canonical version.
   };
-}
-
-async function ensureCacheDir() {
-  await fs.mkdir(cacheDir, { recursive: true });
-}
-
-async function writeJson(filename, payload) {
-  const destination = path.join(cacheDir, filename);
-  const data = JSON.stringify(payload, null, 2);
-  await fs.writeFile(destination, data, "utf8");
-  return destination;
-}
-
-async function main() {
-  await ensureCacheDir();
-  const snapshot = {
-    generatedAt: new Date().toISOString(),
-    repositoryRoot: repoRoot,
-    git: collectGitSummary(),
-    node: process.version,
-    workspace: process.cwd(),
-  };
-
-  const outputPath = await writeJson("repo-context.json", snapshot);
-  console.log(
-    `📦 Repo context written to ${path.relative(repoRoot, outputPath)}`
-  );
-}
-
-main().catch((error) => {
-  console.error("Failed to capture repository context:", error.message);
-  process.exit(1);
-});

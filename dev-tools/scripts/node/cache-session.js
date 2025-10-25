@@ -17,23 +17,5 @@ async function main() {
   const [, , token] = process.argv;
   if (!token) {
     console.log("No SESSION_JWT provided. Skipping cache update.");
-    return;
+    // DEPRECATED: Use dev-tools/scripts/context/cache-session.js as the canonical version.
   }
-
-  await ensureCacheDir();
-  const destination = path.join(cacheDir, "session.json");
-  const payload = {
-    storedAt: new Date().toISOString(),
-    sessionJwt: token,
-  };
-
-  await fs.writeFile(destination, JSON.stringify(payload, null, 2), "utf8");
-  console.log(
-    `🔐 Cached session JWT at ${path.relative(repoRoot, destination)}`
-  );
-}
-
-main().catch((error) => {
-  console.error("Failed to cache session JWT:", error.message);
-  process.exit(1);
-});
