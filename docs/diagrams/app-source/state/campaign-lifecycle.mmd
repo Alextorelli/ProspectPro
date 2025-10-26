@@ -1,10 +1,70 @@
-%% compliance:ZeroFakeData %%
+%%{init: { 'config': 'docs/mmd-shared/config/mermaid.config.json' } }%%
+%% accTitle: ProspectPro Application Lifecycle %%
+%% accDescr: Application and session lifecycle with navigation and error handling %%
+%% compliance: ZeroFakeData %%
 %% domain: app-source %%
-%% reciprocal: [] %%
+%% reciprocal: [../../../../mmd-shared/config/index.md] %%
 %% type: stateDiagram-v2 %%
-%% title: Campaign Lifecycle %%
-%% index: ../../../../tooling/end-state/index.md %%
+%% title: Application Lifecycle State Machine %%
+%% index: ../../../../mmd-shared/config/index.md %%
+
 stateDiagram-v2
-  [*] --> Draft
-  Draft --> Active
-  Active --> Complete
+  [*] --> Loading: App start
+
+  state "Application States" as app {
+    Loading --> Authenticating: Check auth
+    Loading --> Offline: No connection
+
+    Authenticating --> Authenticated: Valid session
+    Authenticating --> Unauthenticated: No session
+
+    Unauthenticated --> Authenticating: Login attempt
+    Unauthenticated --> Signup: Register
+    Signup --> Authenticating: Account created
+    Signup --> Unauthenticated: Cancelled
+
+    Authenticated --> Dashboard: Load user data
+    Authenticated --> Unauthenticated: Logout or expired
+
+    Dashboard --> Campaign: Open campaign
+    Dashboard --> Settings: Open settings
+    Dashboard --> Profile: Open profile
+
+    Campaign --> Processing: Start discovery
+    Campaign --> Dashboard: Back
+    Processing --> Results: Complete
+    Processing --> Error: Failed
+    Processing --> Cancelled: User cancel
+
+    Results --> Campaign: View campaign
+    Results --> Export: Download
+    Results --> Dashboard: Home
+    Export --> Results: Done
+    Error --> Campaign: Retry
+    Error --> Dashboard: Home
+    Cancelled --> Campaign: Back
+
+    Settings --> Dashboard: Saved
+    Profile --> Dashboard: Updated
+    Offline --> Loading: Connection restored
+  }
+
+  state "Error Handling" as errors {
+    NetworkError --> Retry: Auto retry
+    NetworkError --> Offline: Lost connection
+    ServerError --> ErrorPage: Show error
+    ServerError --> Dashboard: Fallback
+    ValidationError --> Form: Show validation
+    Retry --> Loading: Success
+    Retry --> NetworkError: Failed
+    ErrorPage --> Dashboard: User action
+    Form --> Campaign: Fix data
+  }
+
+  Dashboard --> NetworkError: Network issue
+  Campaign --> ServerError: Server issue
+  Processing --> ValidationError: Invalid data
+
+  Authenticated --> [*]: App close
+  Unauthenticated --> [*]: App close
+  Offline --> [*]: App close

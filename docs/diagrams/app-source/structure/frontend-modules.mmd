@@ -1,11 +1,78 @@
-%% compliance:ZeroFakeData %%
+%%{init: { 'config': 'docs/mmd-shared/config/mermaid.config.json' } }%%
+%% accTitle: Frontend Component Hierarchy %%
+%% accDescr: Hierarchical organization of ProspectPro React components %%
+%% compliance: ZeroFakeData %%
 %% domain: app-source %%
-%% reciprocal: [] %%
+%% reciprocal: [../../../../mmd-shared/config/index.md] %%
 %% type: mindmap %%
-%% title: Frontend Modules Mindmap %%
-%% index: ../../../../tooling/end-state/index.md %%
+%% title: Frontend Component Hierarchy %%
+%% index: ../../../../mmd-shared/config/index.md %%
+
 mindmap
-  root((Frontend Modules))
+  root((ProspectPro App))
+    Layout
+      AppShell
+        Header
+          Navigation
+          UserMenu
+          NotificationBell
+        Sidebar
+          MainNavigation
+          QuickActions
+          UserProfile
+        Footer
+          Links
+          Legal
+          Version
+      PageLayout
+        Breadcrumbs
+        PageHeader
+        PageContent
+        PageFooter
+    Features
+      Authentication
+        LoginForm
+        SignupForm
+        PasswordReset
+        EmailVerification
+      Dashboard
+        StatsOverview
+        RecentCampaigns
+        QuickStart
+        ActivityFeed
+      Campaigns
+        CampaignList
+        CampaignForm
+        CampaignDetail
+        CampaignSettings
+      Prospects
+        ProspectList
+        ProspectCard
+        ProspectDetail
+        ProspectActions
+      Settings
+        ProfileSettings
+        BillingSettings
+        APISettings
+        NotificationSettings
     UI
-    State
-    API
+      Forms
+        InputField
+        SelectField
+        DatePicker
+        FileUpload
+      Display
+        DataTable
+        StatCard
+        ProgressBar
+        Badge
+      Navigation
+        Tabs
+        Pagination
+        Breadcrumbs
+        Stepper
+      Feedback
+        Toast
+        Modal
+        Tooltip
+        Loading
