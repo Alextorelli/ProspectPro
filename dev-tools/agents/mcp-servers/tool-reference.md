@@ -153,6 +153,8 @@ This reference consolidates all MCP tools currently available across the install
 | ------------------- | -------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ | --------- |
 | sequential_thinking | Facilitates a detailed, step-by-step thinking process for problem-solving and analysis | thought, nextThoughtNeeded, thoughtNumber, totalThoughts, isRevision, revisesThought, branchFromThought, branchId, needsMoreThoughts | Cognitive |
 
+> Default thought ledger: `dev-tools/agents/context/session_store/sequential-thoughts.jsonl` (override via `SEQUENTIAL_LOG_PATH`). Set `DISABLE_THOUGHT_LOGGING=true` to suppress persistence during sensitive sessions.
+
 ## Memory MCP
 
 | Tool                | Description                                         | Parameters   | Category        |
@@ -166,6 +168,8 @@ This reference consolidates all MCP tools currently available across the install
 | read_graph          | Read the entire knowledge graph                     | —            | Knowledge Graph |
 | search_nodes        | Search for nodes based on query                     | query        | Knowledge Graph |
 | open_nodes          | Retrieve specific nodes by name                     | names        | Knowledge Graph |
+
+> Default knowledge graph store: `dev-tools/agents/context/session_store/memory.jsonl`. Override with `MCP_MEMORY_FILE_PATH`. A snapshot entry is appended whenever `read_graph` is invoked.
 
 ## Usage Notes
 

@@ -1,91 +1,47 @@
-# Sequential Thinking MCP Server
+# ProspectPro Memory MCP Server
 
-An MCP server implementation that provides a tool for dynamic and reflective problem-solving through a structured thinking process.
+ProspectPro's memory MCP server persists knowledge as a lightweight JSONL-backed graph. Entities, relations, and observation snapshots default to the shared session store so worklogs survive restarts without polluting upstream packages.
 
-## Features
+## Default Context Storage
 
-- Break down complex problems into manageable steps
-- Revise and refine thoughts as understanding deepens
-- Branch into alternative paths of reasoning
-- Adjust the total number of thoughts dynamically
-- Generate and verify solution hypotheses
+- Graph file: `dev-tools/agents/context/session_store/memory.jsonl`
+- Override path: `MCP_MEMORY_FILE_PATH=/absolute/or/relative/path.jsonl`
 
-## Tool
+Legacy `.json` files in the same directory are migrated automatically the first time the server boots. Snapshots are appended whenever the `read_graph` tool is invoked, capturing entity and relation counts with timestamps.
 
-### sequential_thinking
+## Available Tools
 
-Facilitates a detailed, step-by-step thinking process for problem-solving and analysis.
+| Tool name             | Purpose                                           |
+| --------------------- | ------------------------------------------------- |
+| `create_entities`     | Insert entities with initial observations         |
+| `create_relations`    | Link entities together via typed relations        |
+| `add_observations`    | Append observations to existing entities          |
+| `delete_entities`     | Remove entities and cascade related edges         |
+| `delete_observations` | Drop specific observations from entities          |
+| `delete_relations`    | Remove targeted relations                         |
+| `read_graph`          | Return the full graph and append a usage snapshot |
+| `search_nodes`        | Filter entities/relations by string query         |
+| `open_nodes`          | Fetch a focused subgraph by entity names          |
 
-**Inputs:**
+All tool responses are JSON payloads suitable for downstream summarisation.
 
-- `thought` (string): The current thinking step
-- `nextThoughtNeeded` (boolean): Whether another thought step is needed
-- `thoughtNumber` (integer): Current thought number
-- `totalThoughts` (integer): Estimated total thoughts needed
-- `isRevision` (boolean, optional): Whether this revises previous thinking
-- `revisesThought` (integer, optional): Which thought is being reconsidered
-- `branchFromThought` (integer, optional): Branching point thought number
-- `branchId` (string, optional): Branch identifier
-- `needsMoreThoughts` (boolean, optional): If more thoughts are needed
-
-## Usage
-
-The Sequential Thinking tool is designed for:
-
-- Breaking down complex problems into steps
-- Planning and design with room for revision
-- Analysis that might need course correction
-- Problems where the full scope might not be clear initially
-- Tasks that need to maintain context over multiple steps
-- Situations where irrelevant information needs to be filtered out
-
-## Configuration
-
-### Usage with Claude Desktop
-
-Add this to your `claude_desktop_config.json`:
-
-#### npx
-
-```json
-{
-  "mcpServers": {
-    "sequential-thinking": {
-      "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"]
-    }
-  }
-}
-```
-
-#### docker
-
-```json
-{
-  "mcpServers": {
-    "sequentialthinking": {
-      "command": "docker",
-      "args": ["run", "--rm", "-i", "mcp/sequentialthinking"]
-    }
-  }
-}
-```
-
-To disable logging of thought information set env var: `DISABLE_THOUGHT_LOGGING` to `true`.
-
-## Building
+## Build & Run
 
 ```bash
+# install deps once
 npm install
+
+# compile TypeScript output
 npm run build
+
+# launch via node (from dev-tools/agents/mcp-servers)
+node mcp-tools/memory/dist/index.js
 ```
 
-Docker:
+Use `npm run watch` for live rebuilds during development.
 
-```bash
-docker build -t mcp/sequentialthinking .
-```
+## Notes
 
-## License
-
-This MCP server is licensed under the MIT License.
+- The server is ESM-first (`NodeNext`) to align with Node 20 runtimes.
+- Knowledge graph operations are idempotent; duplicate entities and relations are ignored.
+- Snapshot appends keep the JSONL file readable by downstream analytics as each entry occupies a single line.

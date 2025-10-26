@@ -26,6 +26,15 @@ This directory contains the **enhanced MCP server implementation** that provides
 
 ---
 
+### 4. Cognitive Extensions (Sequential + Memory)
+
+ProspectPro ships two lightweight cognitive servers alongside the enrichment stack:
+
+- **Sequential Thinking** (`mcp-tools/sequential/`): streams structured reasoning steps to `dev-tools/agents/context/session_store/sequential-thoughts.jsonl` by default. Override via `SEQUENTIAL_LOG_PATH`; suppress persistence with `DISABLE_THOUGHT_LOGGING=true`.
+- **Memory Graph** (`mcp-tools/memory/`): manages a JSONL knowledge graph at `dev-tools/agents/context/session_store/memory.jsonl`. Override via `MCP_MEMORY_FILE_PATH`. A snapshot line is appended whenever `read_graph` is executed.
+
+Run `npm run build:tools` in `dev-tools/agents/mcp-servers/` after editing these packages so the registry (`active-registry.json`) can execute the latest `dist/` output.
+
 ### 1. Production Server (`production-server.js`) - **v2.1.0**
 
 **Purpose**: Comprehensive email enrichment monitoring, Hunter.io/NeverBounce analytics, enrichment cost tracking, and deliverability validation (28 tools)

@@ -1,6 +1,6 @@
 {
   "version": "3.0",
-  "last_updated": "2025-10-23",
+  "last_updated": "2025-10-27",
   "servers": {
     "production": {
       "type": "stdio",
@@ -87,16 +87,12 @@
     },
     "memory": {
       "type": "stdio",
-      "package": "@modelcontextprotocol/server-memory",
-      "invocation": "npx",
-      "arguments": [
-        "-y",
-        "@modelcontextprotocol/server-memory",
-        "--file",
-        "${env:MCP_MEMORY_FILE_PATH:-dev-tools/agents/context/session_store/memory.jsonl}"
-      ],
+      "package": "local",
+      "invocation": "node",
+      "script_path": "./mcp-tools/memory/dist/index.js",
       "env": {
-        "NODE_ENV": "memory"
+        "NODE_ENV": "memory",
+        "MCP_MEMORY_FILE_PATH": "${env:MCP_MEMORY_FILE_PATH:-dev-tools/agents/context/session_store/memory.jsonl}"
       },
       "capabilities": [
         "long_term_memory",
@@ -204,9 +200,13 @@
     },
     "sequentialthinking": {
       "type": "stdio",
-      "package": "@modelcontextprotocol/server-sequential-thinking",
-      "invocation": "npx",
-      "arguments": ["-y", "@modelcontextprotocol/server-sequential-thinking"],
+      "package": "local",
+      "invocation": "node",
+      "script_path": "./mcp-tools/sequential/dist/index.js",
+      "env": {
+        "NODE_ENV": "sequential",
+        "SEQUENTIAL_LOG_PATH": "${env:SEQUENTIAL_LOG_PATH:-dev-tools/agents/context/session_store/sequential-thoughts.jsonl}"
+      },
       "capabilities": [
         "scenario_analysis",
         "chain_of_thought",

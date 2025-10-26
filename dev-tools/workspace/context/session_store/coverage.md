@@ -1,3 +1,10 @@
+## 2025-10-27: Sequential & Memory MCP Realignment
+
+- **Action**: Migrated sequential and memory MCP packages off upstream distributions. Refreshed `index.ts`, `lib.ts`, `README.md`, `package.json`, and `tsconfig.json` with ProspectPro logging defaults plus session-store fallbacks.
+- **Action**: Updated `active-registry.json`, `mcp.json`, and MCP package scripts to execute local `dist/` builds. Added `build:tools` helper and documented storage overrides in the MCP README/tool reference.
+- **Validation**: Installed dependencies for both packages and ran `npm run build --prefix dev-tools/agents/mcp-servers/mcp-tools/{sequential,memory}` to emit fresh `dist/` outputs.
+- **Notes**: Sequential thoughts persist to `dev-tools/agents/context/session_store/sequential-thoughts.jsonl`; knowledge graph defaults to `dev-tools/agents/context/session_store/memory.jsonl`. Overrides captured via `SEQUENTIAL_LOG_PATH` and `MCP_MEMORY_FILE_PATH`.
+
 ## 2025-10-25: Archive Vault Branch + Repo Scrub Prep
 
 - **Action**: Created long-lived `archive-vault` branch and relocated `dev-tools/agents/mcp-servers/archive/` under `archives/dev-tools/agents/mcp-servers/` for historical retention.

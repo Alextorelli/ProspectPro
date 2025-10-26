@@ -1,38 +1,32 @@
 {
-  "name": "@modelcontextprotocol/server-sequential-thinking",
-  "version": "0.6.2",
-  "description": "MCP server for sequential thinking and problem solving",
+  "name": "@prospectpro/mcp-sequential",
+  "version": "0.2.0",
+  "private": true,
+  "description": "ProspectPro sequential thinking MCP server with session-aware logging",
   "license": "MIT",
-  "author": "Anthropic, PBC (https://anthropic.com)",
-  "homepage": "https://modelcontextprotocol.io",
-  "bugs": "https://github.com/modelcontextprotocol/servers/issues",
+  "author": "ProspectPro Engineering",
   "type": "module",
   "bin": {
-    "mcp-server-sequential-thinking": "dist/index.js"
+    "prospectpro-mcp-sequential": "dist/index.js"
   },
   "files": [
     "dist"
   ],
   "scripts": {
-    "build": "tsc && shx chmod +x dist/*.js",
-    "prepare": "npm run build",
-    "watch": "tsc --watch",
-    "test": "jest --config=jest.config.cjs --coverage"
+    "build": "tsc -p tsconfig.json && shx chmod +x dist/*.js",
+    "clean": "shx rm -rf dist",
+    "watch": "tsc -p tsconfig.json --watch"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.19.1",
-    "chalk": "^5.3.0",
-    "yargs": "^17.7.2"
+    "@modelcontextprotocol/sdk": "^1.20.1",
+    "chalk": "^5.3.0"
   },
   "devDependencies": {
-    "@jest/globals": "^29.7.0",
-    "@types/jest": "^29.5.14",
     "@types/node": "^22",
-    "@types/yargs": "^17.0.32",
-    "jest": "^29.7.0",
     "shx": "^0.3.4",
-    "ts-jest": "^29.1.1",
-    "ts-node": "^10.9.2",
-    "typescript": "^5.3.3"
+    "typescript": "^5.6.2"
+  },
+  "engines": {
+    "node": ">=20.0.0"
   }
 }

@@ -1,29 +1,31 @@
 {
-  "name": "@modelcontextprotocol/server-memory",
-  "version": "0.6.3",
-  "description": "MCP server for enabling memory for Claude through a knowledge graph",
+  "name": "@prospectpro/mcp-memory",
+  "version": "0.7.0",
+  "private": true,
+  "description": "ProspectPro knowledge graph memory MCP server with session-store defaults",
   "license": "MIT",
-  "author": "Anthropic, PBC (https://anthropic.com)",
-  "homepage": "https://modelcontextprotocol.io",
-  "bugs": "https://github.com/modelcontextprotocol/servers/issues",
+  "author": "ProspectPro Engineering",
   "type": "module",
   "bin": {
-    "mcp-server-memory": "dist/index.js"
+    "prospectpro-mcp-memory": "dist/index.js"
   },
   "files": [
     "dist"
   ],
   "scripts": {
-    "build": "tsc && shx chmod +x dist/*.js",
-    "prepare": "npm run build",
-    "watch": "tsc --watch"
+    "build": "tsc -p tsconfig.json && shx chmod +x dist/*.js",
+    "clean": "shx rm -rf dist",
+    "watch": "tsc -p tsconfig.json --watch"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.19.1"
+    "@modelcontextprotocol/sdk": "^1.20.1"
   },
   "devDependencies": {
     "@types/node": "^22",
     "shx": "^0.3.4",
     "typescript": "^5.6.2"
+  },
+  "engines": {
+    "node": ">=20.0.0"
   }
 }

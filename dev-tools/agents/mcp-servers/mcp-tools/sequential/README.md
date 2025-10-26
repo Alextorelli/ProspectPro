@@ -1,91 +1,36 @@
-# Sequential Thinking MCP Server
+# ProspectPro Sequential Thinking MCP Server
 
-An MCP server implementation that provides a tool for dynamic and reflective problem-solving through a structured thinking process.
+ProspectPro's sequential thinking MCP server powers structured reasoning workflows with session-aware logging. The implementation mirrors the upstream MCP schema while defaulting all ledger output to the shared session store so we can review thought history across workspaces.
 
-## Features
+## Default Context Storage
 
-- Break down complex problems into manageable steps
-- Revise and refine thoughts as understanding deepens
-- Branch into alternative paths of reasoning
-- Adjust the total number of thoughts dynamically
-- Generate and verify solution hypotheses
+- Thought log path: `dev-tools/agents/context/session_store/sequential-thoughts.jsonl`
+- Disable logging: set `DISABLE_THOUGHT_LOGGING=true`
+- Override path: set `SEQUENTIAL_LOG_PATH=/absolute/or/relative/path.jsonl`
 
-## Tool
+When logging is enabled, each thought is appended as a JSONL payload containing timestamps, revisions, and branch metadata. The log file is created on demand.
 
-### sequential_thinking
+## Tool Contract
 
-Facilitates a detailed, step-by-step thinking process for problem-solving and analysis.
+`sequential_thinking` exposes the same arguments as the upstream package (thought narrative, revision flags, branching metadata, etc.). Responses include summarized state (`thoughtNumber`, `totalThoughts`, `nextThoughtNeeded`) plus active branch identifiers so downstream agents can inspect the reasoning tree.
 
-**Inputs:**
-
-- `thought` (string): The current thinking step
-- `nextThoughtNeeded` (boolean): Whether another thought step is needed
-- `thoughtNumber` (integer): Current thought number
-- `totalThoughts` (integer): Estimated total thoughts needed
-- `isRevision` (boolean, optional): Whether this revises previous thinking
-- `revisesThought` (integer, optional): Which thought is being reconsidered
-- `branchFromThought` (integer, optional): Branching point thought number
-- `branchId` (string, optional): Branch identifier
-- `needsMoreThoughts` (boolean, optional): If more thoughts are needed
-
-## Usage
-
-The Sequential Thinking tool is designed for:
-
-- Breaking down complex problems into steps
-- Planning and design with room for revision
-- Analysis that might need course correction
-- Problems where the full scope might not be clear initially
-- Tasks that need to maintain context over multiple steps
-- Situations where irrelevant information needs to be filtered out
-
-## Configuration
-
-### Usage with Claude Desktop
-
-Add this to your `claude_desktop_config.json`:
-
-#### npx
-
-```json
-{
-  "mcpServers": {
-    "sequential-thinking": {
-      "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"]
-    }
-  }
-}
-```
-
-#### docker
-
-```json
-{
-  "mcpServers": {
-    "sequentialthinking": {
-      "command": "docker",
-      "args": ["run", "--rm", "-i", "mcp/sequentialthinking"]
-    }
-  }
-}
-```
-
-To disable logging of thought information set env var: `DISABLE_THOUGHT_LOGGING` to `true`.
-
-## Building
+## Build & Run
 
 ```bash
+# install deps once
 npm install
+
+# compile TypeScript output
 npm run build
+
+# launch via node (from dev-tools/agents/mcp-servers)
+node mcp-tools/sequential/dist/index.js
 ```
 
-Docker:
+For iterative development use `npm run watch` to emit updated builds automatically.
 
-```bash
-docker build -t mcp/sequentialthinking .
-```
+## Notes
 
-## License
-
-This MCP server is licensed under the MIT License.
+- The server is ESM-first (`NodeNext` resolution) to align with ProspectPro's Node 20 environment.
+- Logging uses ASCII box formatting in stderr for quick visual parsing while persisting full JSONL payloads to disk.
+- Keep this README in sync with `dev-tools/agents/mcp-servers/tool-reference.md` whenever the tool signature changes.

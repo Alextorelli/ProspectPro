@@ -30,3 +30,7 @@ _Date: 2025-10-26_
 
 - Refresh `dev-tools/agents/mcp-servers/README.md` and package-level READMEs with new defaults
 - Note plan completion in `coverage.md` once merged
+
+---
+
+**2025-10-27 Status Notes:** Phases 2–4 executed locally via `npm run build:tools`. Registry and documentation were updated alongside session-store defaults. Pending follow-up: capture smoke-test transcripts after the next MCP workflow run.
