@@ -14,6 +14,19 @@
       "problemMatcher": []
     },
     {
+      "label": "Ollama: Start Service",
+      "type": "shell",
+      "command": "bash",
+      "args": ["dev-tools/scripts/automation/start-ollama.sh"],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
       "label": "Workspace: Dev Hygiene Check",
       "type": "shell",
       "command": "npm",
