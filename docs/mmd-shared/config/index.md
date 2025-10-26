@@ -1,15 +1,5 @@
 # MECE Diagram Index
 
-## app-source
-
-| Diagram | Path |
-| ------- | ---- |
-| [request routing](docs/diagrams/app-source/flow/request-routing.mmd) | `docs/diagrams/app-source/flow/request-routing.mmd` |
-| [auth flow](docs/diagrams/app-source/sequence/auth-flow.mmd) | `docs/diagrams/app-source/sequence/auth-flow.mmd` |
-| [campaign lifecycle](docs/diagrams/app-source/state/campaign-lifecycle.mmd) | `docs/diagrams/app-source/state/campaign-lifecycle.mmd` |
-| [frontend modules](docs/diagrams/app-source/structure/frontend-modules.mmd) | `docs/diagrams/app-source/structure/frontend-modules.mmd` |
-| [ui edge trace](docs/diagrams/app-source/swimlane/ui-edge-trace.mmd) | `docs/diagrams/app-source/swimlane/ui-edge-trace.mmd` |
-
 ## dev-tools
 
 | Diagram | Path |

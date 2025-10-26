@@ -32,11 +32,6 @@ app/backend/functions/enrichment-neverbounce/index.ts
 app/backend/functions/enrichment-orchestrator/index.ts
 app/backend/functions/enrichment-pdl/index.ts
 dev-tools/
-docs/diagrams/app-source/flow/request-routing.mmd
-docs/diagrams/app-source/sequence/auth-flow.mmd
-docs/diagrams/app-source/state/campaign-lifecycle.mmd
-docs/diagrams/app-source/structure/frontend-modules.mmd
-docs/diagrams/app-source/swimlane/ui-edge-trace.mmd
 docs/diagrams/dev-tools/architecture/agent-modes.mmd
 docs/diagrams/dev-tools/architecture/control-plane.mmd
 docs/diagrams/dev-tools/architecture/environment-mcp.mmd
