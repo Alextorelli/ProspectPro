@@ -1,39 +1,16 @@
----
-accTitle: ProspectPro Application Overview
-accDescr: High-level application architecture with client, frontend, backend, and external integrations
-domain: app-source
-type: flowchart
-title: Application Overview
-index: ../../mmd-shared/config/index.md
----
-
-
-
-
-
-
 %%{init: { 'config': 'docs/mmd-shared/config/mermaid.config.json' } }%%
-
 
 flowchart TB
   subgraph client["Client"]
     direction LR
-    ---
-    accTitle: ProspectPro Application Overview
-    accDescr: High-level application architecture with client, frontend, backend, telemetry, and external integrations
-    domain: app-source
-    type: flowchart
-    title: Application Overview
-    index: ../../../../mmd-shared/config/index.md
-    ---
-
+ 
       classDef cluster fill:#1f1f1f,stroke:#cfcfcf,color:#f5f5f5,stroke-width:1.5px
       classDef node fill:#2b2b2b,stroke:#dedede,color:#f5f5f5,stroke-width:1px
       classDef accent fill:#333333,stroke:#f5f5f5,color:#fefefe,stroke-width:1px
       classDef storage fill:#242424,stroke:#d0d0d0,color:#f5f5f5,stroke-dasharray:4 2
       classDef integration fill:#303030,stroke:#f5f5f5,color:#ffffff,stroke-width:1px
       classDef indicator fill:#2d2d2d,stroke:#bfbfbf,color:#f5f5f5,stroke-dasharray:2 2
-      classDef signal fill:#1d1d1d,stroke:#ababab,color:#f5f5f5,stroke-width:1px
+      classDef signal fill:#1d1d1d,stroke:#ababab,color:#f5f5f5,stroke-width:1px,
 
       subgraph client["Client Touchpoints"]:::cluster
         WebApp([Web App<br/>React · Vite]):::node
