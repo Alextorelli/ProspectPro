@@ -6,20 +6,12 @@
   "type": "module",
   "main": "production-server.js",
   "scripts": {
-    "start:production": "node production-server.js",
-    "start:development": "node development-server.js",
-    "start:troubleshooting": "node supabase-troubleshooting-server.js",
     "start:memory": "node mcp-tools/memory/dist/index.js",
     "start:sequential": "node mcp-tools/sequential/dist/index.js",
-    "start:all": "concurrently \"npm run start:production\" \"npm run start:development\" \"npm run start:troubleshooting\" \"npm run start:memory\" \"npm run start:sequential\"",
     "build:tools": "npm run build --prefix mcp-tools/memory && npm run build --prefix mcp-tools/sequential",
-    "stop": "pkill -f 'mcp-servers' || true",
     "test": "node test-servers.js",
-    "validate": "npm run test && echo '✅ All Supabase MCP servers validated successfully'",
-    "install:deps": "npm install",
-    "debug:anon-key": "echo 'Use troubleshooting server: diagnose_anon_key_mismatch tool'",
-    "debug:edge-functions": "echo 'Use troubleshooting server: test_edge_function tool'",
-    "debug:database": "echo 'Use troubleshooting server: validate_database_permissions tool'"
+    "validate": "npm run test && echo '✅ All canonical MCP servers validated successfully'",
+    "install:deps": "npm install"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.18.2",

@@ -300,3 +300,9 @@ ev## 2025-10-23: Codespaces Bootstrap Realignment
 - All changes align with the finalized MECE taxonomy and integration plan.
 - No impact to sequential, memory, supabase, github, playwright, or context7 MCPs.
 - Next step: validate MCP startup and update inventories.
+
+## MCP Package and Tool Reference Updates (Phase 1)
+
+- Updated `MCP-package.json` scripts: only canonical MCPs (memory, sequential, supabase, github, playwright, context7) remain.
+- Refreshed `tool-reference.md`: removed Stripe, Postman, troubleshooting, and legacy MCPs; only canonical MCPs documented.
+- All changes align with the MECE integration plan and agent/MCP matrix.
