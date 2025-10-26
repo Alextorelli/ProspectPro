@@ -8,7 +8,7 @@
 
 - React/TypeScript frontend development (Vite, Zustand, TanStack Query)
 - Supabase Edge Functions (Deno runtime, TypeScript)
-- Testing strategies (Vitest, MCP Validation Runner, pgTAP, Deno tests)
+- Testing strategies (Vitest, Playwright, MCP Validation Runner, pgTAP, Deno tests, React Dev Tools audits)
 - CI/CD automation (GitHub Actions, Vercel deployments)
 - Code quality enforcement (ESLint, TypeScript strict mode)
 
@@ -49,6 +49,13 @@ await mcp.drizzle_orm.query({ ... });
 
 ## Development Workflow Standards
 
+### Credential Loading & Navigation
+
+- Copy `dev-tools/agents/.env.agent.example` to `dev-tools/agents/.env` and populate Supabase/Vercel variables for each environment.
+- Load credentials with `dotenv -e dev-tools/agents/.env -- <command>` or source the file before running MCP tasks.
+- Reference file tree snapshots for fast jumps: `dev-tools/context/session_store/app-filetree.txt`, `dev-tools/context/session_store/dev-tools-filetree.txt`, and `dev-tools/context/session_store/integration-filetree.txt`.
+- `ContextManager` will pick up the active environment once the `.env` file is present; use it alongside the VS Code tasks for environment switches.
+
 ### Feature Development Lifecycle
 
 1. **Branch Creation** - Feature branches from `main` (never commit to main directly)
@@ -60,9 +67,9 @@ await mcp.drizzle_orm.query({ ... });
 ### Testing Hierarchy (Pyramid Approach)
 
 ```
-         E2E Tests (MCP Validation Runner, Chrome DevTools MCP)
-              Integration Tests (Deno Edge Function tests)
-                    Unit Tests (Vitest, pgTAP)
+     E2E Tests (Playwright suite, MCP Validation Runner, Chrome/React Dev Tools)
+      Integration Tests (Deno Edge Function tests)
+        Unit Tests (Vitest, pgTAP)
 ```
 
 **Test Coverage Targets**:
@@ -81,9 +88,9 @@ await mcp.drizzle_orm.query({ ... });
 
 **Environment Switch Guidance**:
 
-- Use ContextManager to switch between local, troubleshooting, and production.
-- Always export `SUPABASE_SESSION_JWT` for authenticated Edge Function and MCP tool calls.
-- Validate environment with `supabase:link` and `supabase:ensure-session` tasks.
+- Use ContextManager to switch between local, troubleshooting, and production after loading `dev-tools/agents/.env`.
+- Export `SUPABASE_SESSION_JWT` (from the `.env` or ContextManager) for authenticated Edge Function and MCP tool calls.
+- Validate environment with `supabase:link`, `supabase:ensure-session`, and the `Workspace: Validate Configuration` task.
 
 **Pre-Push**:
 
@@ -125,20 +132,31 @@ await mcp.supabase.execute_query({ query: "..." });
 await mcp.drizzle_orm.migrate({ ... });
 ```
 
-### Testing Workflow with MCP Validation Runner + MCP
+### Testing Workflow with Playwright & MCP Validation
+
+```bash
+# 1. Run unit + integration tests (Vitest + Deno + pgTAP)
+npm run test:all
+
+# 2. Execute Playwright E2E suite (headless by default)
+npx playwright test --reporter=line
+
+# 3. Capture React Dev Tools session when UI regressions surface
+npm run devtools:react
+
+# 4. Execute MCP Validation Runner collection for cross-stack assertions
+npm run validate:full
+```
 
 ```javascript
-// 1. Execute MCP Validation Runner collection
-npm run validate:full
-
-// 2. Fetch and analyze Edge Function logs
+// 5. Fetch and analyze Edge Function logs
 await mcp.supabase_troubleshooting.correlate_errors({
-  timeWindowStart: testStartTime
+  timeWindowStart: testStartTime,
 });
 
-// 3. Generate incident timeline for failures
+// 6. Generate incident timeline for failures
 await mcp.supabase_troubleshooting.generate_incident_timeline({
-  incidentId: failedTestId
+  incidentId: failedTestId,
 });
 ```
 
@@ -158,7 +176,7 @@ npm run dev  # Start Vite dev server
 
 ```bash
 # VS Code Task: "Test: Full Stack Validation"
-npm run test:all  # Runs Vitest, pgTAP, Deno, MCP Validation
+npm run test:all  # Runs Vitest, pgTAP, Deno; follow with npx playwright test
 ```
 
 **Deploy to Production**:

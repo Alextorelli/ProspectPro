@@ -1,6 +1,6 @@
 {
   "name": "observability",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "role": "monitoring_engineer",
   "capabilities": [
     "log_analysis",
@@ -23,26 +23,41 @@
     "integration_hub.send_notification",
     "drizzle_orm.query"
   ],
+  "testing_tooling": ["React DevTools", "Playwright"],
   "environment_credentials": {
     "development": {
-      "supabase": "dev-sriycekxdqnesdsgwiuc",
-      "vercel": "prospectpro-dev"
+      "supabase_project_ref_var": "AGENT_DEV_SUPABASE_PROJECT_REF",
+      "supabase_url_var": "AGENT_DEV_SUPABASE_URL",
+      "vercel_project_var": "AGENT_DEV_VERCEL_PROJECT"
     },
     "production": {
-      "supabase": "sriycekxdqnesdsgwiuc",
-      "vercel": "prospectpro-prod"
+      "supabase_project_ref_var": "AGENT_PROD_SUPABASE_PROJECT_REF",
+      "supabase_url_var": "AGENT_PROD_SUPABASE_URL",
+      "vercel_project_var": "AGENT_PROD_VERCEL_PROJECT"
     },
     "troubleshooting": {
-      "supabase": "troubleshoot-sriycekxdqnesdsgwiuc",
-      "vercel": "prospectpro-troubleshoot"
+      "supabase_project_ref_var": "AGENT_TROUBLESHOOT_SUPABASE_PROJECT_REF",
+      "supabase_url_var": "AGENT_TROUBLESHOOT_SUPABASE_URL",
+      "vercel_project_var": "AGENT_TROUBLESHOOT_VERCEL_PROJECT"
     }
+  },
+  "secrets_management": {
+    "env_file": "dev-tools/agents/.env",
+    "template": "dev-tools/agents/.env.agent.example",
+    "required_variables": [
+      "AGENT_SUPABASE_ACCESS_TOKEN",
+      "AGENT_SUPABASE_DEFAULT_JWT",
+      "AGENT_DEV_SUPABASE_PROJECT_REF",
+      "AGENT_PROD_SUPABASE_PROJECT_REF",
+      "AGENT_TROUBLESHOOT_SUPABASE_PROJECT_REF"
+    ]
   },
   "monitoring_config": {
     "collection_interval_seconds": 300,
     "retention_days": 30,
     "trace_sampling_rate": 0.1,
     "critical_paths": ["business-discovery", "enrichment", "export", "auth"],
-  "context_snapshot_script": "dev-tools/agents/scripts/context-snapshot.sh",
+    "context_snapshot_script": "dev-tools/agents/scripts/context-snapshot.sh",
     "redis_observability_script": "scripts/automation/redis-observability.sh"
   },
   "alerting_thresholds": {
@@ -94,14 +109,19 @@
     "zero_fake_data_violation"
   ],
   "knowledge_base": {
-  "dev_tools_fast_readme": "/docs/mmd-shared/FAST_README.md",
-    "otel_config": "/config/otel-config.yml",
-    "observability_stack": "/dev-tools/observability/docker-compose.jaeger.yml",
-  "context_store": "/dev-tools/agents/context/README.md",
-  "mcp_registry": "/dev-tools/agents/mcp-servers/registry.json"
+    "dev_tools_fast_readme": "/docs/mmd-shared/FAST_README.md",
+    "otel_config": "/integration/monitoring/otel-config.yml",
+    "observability_stack": "/integration/monitoring/diagnostics/observability/",
+    "context_store": "/dev-tools/agents/context/README.md",
+    "mcp_registry": "/dev-tools/agents/mcp-servers/active-registry.json",
+    "filetrees": {
+      "app": "/dev-tools/context/session_store/app-filetree.txt",
+      "dev_tools": "/dev-tools/context/session_store/dev-tools-filetree.txt",
+      "integration": "/dev-tools/context/session_store/integration-filetree.txt"
+    }
   },
   "dashboard_access": {
-    "supabase_logs": "https://supabase.com/dashboard/project/sriycekxdqnesdsgwiuc/logs",
+    "supabase_logs": "https://supabase.com/dashboard/project/${env:AGENT_PROD_SUPABASE_PROJECT_REF}/logs",
     "jaeger_local": "http://localhost:16686",
     "vercel_analytics": "https://vercel.com/appsmithery/prospect-pro/analytics"
   },
@@ -110,10 +130,10 @@
     "development-workflow",
     "production-ops"
   ],
-  "routing_helper": "scripts/automation/lib/participant-routing.sh",
-  "dry_run_guidance": "All automation scripts support --dry-run for safe diagnostics. Always source environment-loader.v2.js before agent or MCP tool execution."
   "notification_channels": {
     "slack": "integration_hub.send_notification",
     "pagerduty": "integration_hub.execute_workflow"
-  }
+  },
+  "routing_helper": "scripts/automation/lib/participant-routing.sh",
+  "dry_run_guidance": "All automation scripts support --dry-run for safe diagnostics. Load agent credentials from dev-tools/agents/.env (see .env.agent.example) before invoking MCP tools."
 }

@@ -1,6 +1,6 @@
 {
   "name": "production-ops",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "role": "site_reliability_engineer",
   "capabilities": [
     "deployment_orchestration",
@@ -14,10 +14,10 @@
     "primary": [
       "integration-hub",
       "github",
-        "supabase",
-        "supabase-troubleshooting"
+      "supabase",
+      "supabase-troubleshooting"
     ],
-    "secondary": ["chrome-devtools"]
+    "secondary": ["chrome-devtools", "drizzle-orm"]
   },
   "tools_access": [
     "integration_hub.execute_workflow",
@@ -25,28 +25,46 @@
     "integration_hub.check_integration_health",
     "github.create_pull_request",
     "github.merge_pull_request",
-      "supabase.validate_migration",
-      "supabase.check_pool_health",
-      "supabase.execute_query",
+    "supabase.validate_migration",
+    "supabase.check_pool_health",
+    "supabase.execute_query",
     "supabase_troubleshooting.correlate_errors",
     "supabase_troubleshooting.generate_incident_timeline",
-    "chrome_devtools.performance_profile"
-      "drizzle_orm.migrate",
-      "drizzle_orm.query"
+    "chrome_devtools.performance_profile",
+    "drizzle_orm.migrate",
+    "drizzle_orm.query"
   ],
+  "testing_tooling": ["React DevTools", "Playwright"],
   "environment_credentials": {
     "development": {
-      "supabase": "dev-sriycekxdqnesdsgwiuc",
-      "vercel": "prospectpro-dev"
+      "supabase_project_ref_var": "AGENT_DEV_SUPABASE_PROJECT_REF",
+      "supabase_url_var": "AGENT_DEV_SUPABASE_URL",
+      "vercel_project_var": "AGENT_DEV_VERCEL_PROJECT"
     },
     "production": {
-      "supabase": "sriycekxdqnesdsgwiuc",
-      "vercel": "prospectpro-prod"
+      "supabase_project_ref_var": "AGENT_PROD_SUPABASE_PROJECT_REF",
+      "supabase_url_var": "AGENT_PROD_SUPABASE_URL",
+      "vercel_project_var": "AGENT_PROD_VERCEL_PROJECT"
     },
     "troubleshooting": {
-      "supabase": "troubleshoot-sriycekxdqnesdsgwiuc",
-      "vercel": "prospectpro-troubleshoot"
+      "supabase_project_ref_var": "AGENT_TROUBLESHOOT_SUPABASE_PROJECT_REF",
+      "supabase_url_var": "AGENT_TROUBLESHOOT_SUPABASE_URL",
+      "vercel_project_var": "AGENT_TROUBLESHOOT_VERCEL_PROJECT"
     }
+  },
+  "secrets_management": {
+    "env_file": "dev-tools/agents/.env",
+    "template": "dev-tools/agents/.env.agent.example",
+    "required_variables": [
+      "AGENT_SUPABASE_ACCESS_TOKEN",
+      "AGENT_SUPABASE_DEFAULT_JWT",
+      "AGENT_DEV_SUPABASE_PROJECT_REF",
+      "AGENT_PROD_SUPABASE_PROJECT_REF",
+      "AGENT_TROUBLESHOOT_SUPABASE_PROJECT_REF",
+      "AGENT_DEV_VERCEL_PROJECT",
+      "AGENT_PROD_VERCEL_PROJECT",
+      "AGENT_TROUBLESHOOT_VERCEL_PROJECT"
+    ]
   },
   "deployment_config": {
     "edge_functions_sequence": [
@@ -89,10 +107,10 @@
       "email": "integration_hub.send_notification"
     },
     "investigation_tools": [
-      "correlate_errors",
-      "generate_incident_timeline",
-      "check_integration_health",
-      "check_pool_health"
+      "supabase_troubleshooting.correlate_errors",
+      "supabase_troubleshooting.generate_incident_timeline",
+      "integration_hub.check_integration_health",
+      "supabase.check_pool_health"
     ]
   },
   "capacity_planning": {
@@ -108,18 +126,14 @@
     },
     "cost_budget": {
       "monthly_total": 270,
-      "breakdown": {
-        "supabase": 50,
-        "vercel": 20,
-        "apis": 200
-      },
+      "breakdown": { "supabase": 50, "vercel": 20, "apis": 200 },
       "alert_threshold": 0.8
     }
   },
   "health_checks": {
     "interval_seconds": 300,
     "endpoints": [
-      "https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/test-new-auth",
+      "https://${env:AGENT_PROD_SUPABASE_PROJECT_REF}.supabase.co/functions/v1/test-new-auth",
       "https://prospect-fyhedobh1-appsmithery.vercel.app"
     ],
     "database_check": "SELECT 1",
@@ -127,7 +141,7 @@
       "chrome-devtools",
       "github",
       "supabase-troubleshooting",
-      "postgresql",
+      "supabase",
       "integration-hub"
     ]
   },
@@ -146,25 +160,30 @@
     ],
     "frontend": [
       "git revert <commit-sha>",
-      "npm run build && vercel --prod",
+      "npm run build && npx --yes vercel@latest --prod",
       "verify deployment via curl"
     ],
     "database": [
       "create inverse migration SQL",
-      "validate_migration with rollback=true",
+      "mcp supabase validate_migration --rollback=true",
       "npx --yes supabase@latest db push"
     ]
   },
   "knowledge_base": {
-  "ops_fast_readme": "/docs/mmd-shared/FAST_README.md",
-    "deployment_workflow": "/dev-tools/scripts/shell/deployment-validation-workflow.sh",
-    "edge_diagnostics": "/dev-tools/scripts/shell/edge-function-diagnostics.sh",
-    "production_health": "/dev-tools/scripts/shell/production-health-check.sh",
+    "ops_fast_readme": "/docs/mmd-shared/FAST_README.md",
+    "deployment_workflow": "/integration/monitoring/diagnostics/deployment-validation-workflow.sh",
+    "edge_diagnostics": "/integration/monitoring/diagnostics/edge-function-diagnostics.sh",
+    "production_health": "/scripts/diagnostics/verify-toolchain.sh",
     "context_store": "/dev-tools/agents/context/README.md",
-    "mcp_registry": "/dev-tools/agents/mcp-servers/registry.json"
+    "mcp_registry": "/dev-tools/agents/mcp-servers/active-registry.json",
+    "filetrees": {
+      "app": "/dev-tools/context/session_store/app-filetree.txt",
+      "dev_tools": "/dev-tools/context/session_store/dev-tools-filetree.txt",
+      "integration": "/dev-tools/context/session_store/integration-filetree.txt"
+    }
   },
   "production_access": {
-    "supabase_dashboard": "https://supabase.com/dashboard/project/sriycekxdqnesdsgwiuc",
+    "supabase_dashboard": "https://supabase.com/dashboard/project/${env:AGENT_PROD_SUPABASE_PROJECT_REF}",
     "vercel_dashboard": "https://vercel.com/appsmithery/prospect-pro",
     "production_url": "https://prospect-fyhedobh1-appsmithery.vercel.app",
     "jaeger_tracing": "https://jaeger.prospectpro.app"
@@ -190,5 +209,5 @@
     "redis_observability": "scripts/automation/redis-observability.sh"
   },
   "routing_helper": "scripts/automation/lib/participant-routing.sh",
-  "dry_run_guidance": "All automation scripts support --dry-run for safe diagnostics. Always source environment-loader.v2.js before agent or MCP tool execution."
+  "dry_run_guidance": "All automation scripts support --dry-run for safe diagnostics. Load agent credentials from dev-tools/agents/.env (see .env.agent.example) before invoking MCP tools."
 }

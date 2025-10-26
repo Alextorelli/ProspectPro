@@ -1,6 +1,6 @@
 {
   "name": "system-architect",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "role": "technical_architect",
   "capabilities": [
     "schema_design",
@@ -11,8 +11,13 @@
     "observability_design"
   ],
   "mcp_dependencies": {
-    "primary": ["supabase", "supabase-troubleshooting", "integration-hub", "drizzle-orm"],
-    "secondary": ["github"]
+    "primary": [
+      "supabase",
+      "supabase-troubleshooting",
+      "integration-hub",
+      "drizzle-orm"
+    ],
+    "secondary": ["github", "chrome-devtools"]
   },
   "tools_access": [
     "supabase.execute_query",
@@ -25,34 +30,55 @@
     "integration_hub.check_integration_health",
     "integration_hub.execute_workflow",
     "drizzle_orm.migrate",
-    "drizzle_orm.query"
+    "drizzle_orm.query",
+    "chrome_devtools.trace_analysis"
   ],
+  "testing_tooling": ["React DevTools", "Playwright"],
   "environment_credentials": {
     "development": {
-      "supabase": "dev-sriycekxdqnesdsgwiuc",
-      "vercel": "prospectpro-dev"
+      "supabase_project_ref_var": "AGENT_DEV_SUPABASE_PROJECT_REF",
+      "supabase_url_var": "AGENT_DEV_SUPABASE_URL",
+      "vercel_project_var": "AGENT_DEV_VERCEL_PROJECT"
     },
     "production": {
-      "supabase": "sriycekxdqnesdsgwiuc",
-      "vercel": "prospectpro-prod"
+      "supabase_project_ref_var": "AGENT_PROD_SUPABASE_PROJECT_REF",
+      "supabase_url_var": "AGENT_PROD_SUPABASE_URL",
+      "vercel_project_var": "AGENT_PROD_VERCEL_PROJECT"
     },
     "troubleshooting": {
-      "supabase": "troubleshoot-sriycekxdqnesdsgwiuc",
-      "vercel": "prospectpro-troubleshoot"
+      "supabase_project_ref_var": "AGENT_TROUBLESHOOT_SUPABASE_PROJECT_REF",
+      "supabase_url_var": "AGENT_TROUBLESHOOT_SUPABASE_URL",
+      "vercel_project_var": "AGENT_TROUBLESHOOT_VERCEL_PROJECT"
     }
+  },
+  "secrets_management": {
+    "env_file": "dev-tools/agents/.env",
+    "template": "dev-tools/agents/.env.agent.example",
+    "required_variables": [
+      "AGENT_SUPABASE_ACCESS_TOKEN",
+      "AGENT_SUPABASE_DEFAULT_JWT",
+      "AGENT_DEV_SUPABASE_PROJECT_REF",
+      "AGENT_PROD_SUPABASE_PROJECT_REF",
+      "AGENT_TROUBLESHOOT_SUPABASE_PROJECT_REF"
+    ]
   },
   "knowledge_base": {
     "app_system_reference": "/docs/app/SYSTEM_REFERENCE.md",
     "technical_reference": "/docs/technical/SYSTEM_REFERENCE.md",
-    "database": "/supabase/schema-sql/",
+    "database": "/app/backend/schema/",
     "edge_functions": "/app/backend/functions/",
-  "mcp_registry": "/dev-tools/agents/mcp-servers/registry.json",
+    "mcp_registry": "/dev-tools/agents/mcp-servers/active-registry.json",
     "instructions": ".github/copilot-instructions.md",
-  "context_snapshot_script": "dev-tools/agents/scripts/context-snapshot.sh",
-    "redis_observability_script": "scripts/automation/redis-observability.sh"
+    "context_snapshot_script": "dev-tools/agents/scripts/context-snapshot.sh",
+    "redis_observability_script": "scripts/automation/redis-observability.sh",
+    "filetrees": {
+      "app": "/dev-tools/context/session_store/app-filetree.txt",
+      "dev_tools": "/dev-tools/context/session_store/dev-tools-filetree.txt",
+      "integration": "/dev-tools/context/session_store/integration-filetree.txt"
+    }
   },
   "routing_helper": "scripts/automation/lib/participant-routing.sh",
-  "dry_run_guidance": "All automation scripts support --dry-run for safe diagnostics. Always source environment-loader.v2.js before agent or MCP tool execution."
+  "dry_run_guidance": "All automation scripts support --dry-run for safe diagnostics. Load agent credentials from dev-tools/agents/.env (see .env.agent.example) before invoking MCP tools.",
   "performance_targets": {
     "migration_validation_time_ms": 5000,
     "query_explanation_time_ms": 3000,

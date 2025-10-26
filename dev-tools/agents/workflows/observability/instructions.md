@@ -39,6 +39,16 @@ await mcp.drizzle_orm.query({ ... });
 await mcp.integration_hub.check_integration_health();
 ```
 
+## Credential Loading & Navigation
+
+- Copy `dev-tools/agents/.env.agent.example` to `dev-tools/agents/.env` and populate Supabase/Vercel variables for monitoring environments.
+- Load credentials with `dotenv -e dev-tools/agents/.env -- <command>` or source the file before starting MCP or automation scripts.
+- Use file tree snapshots for rapid path discovery:
+  - `dev-tools/context/session_store/app-filetree.txt`
+  - `dev-tools/context/session_store/dev-tools-filetree.txt`
+  - `dev-tools/context/session_store/integration-filetree.txt`
+- Launch React Dev Tools (`npm run devtools:react`) and Playwright (`npx playwright test --reporter=line`) to reproduce UI anomalies when correlating telemetry with user-facing regressions.
+
 ## Monitoring Workflows
 
 ### Real-Time Monitoring Dashboard
@@ -77,6 +87,7 @@ const alerts = {
 2. Check pool health: `check_pool_health`
 3. Review integration health: `check_integration_health`
 4. Analyze Jaeger traces for distributed failure points
+5. Reproduce customer path with `npx playwright test --grep <scenario>` or capture live state via `npm run devtools:react`
 
 **Resolution Phase**:
 
@@ -139,18 +150,21 @@ Always audit enrichment results for zero-fake-data compliance using MCP tools. U
 
 **Environment Switch Guidance**:
 
-- Use ContextManager to switch between local, troubleshooting, and production.
-- Always export `SUPABASE_SESSION_JWT` for authenticated MCP tool calls.
-- Validate environment with `supabase:link` and `supabase:ensure-session` tasks.
+- Copy `.env.agent.example` to `dev-tools/agents/.env` and load credentials before switching contexts.
+- Use ContextManager to change between local, troubleshooting, and production once credentials are present.
+- Export `SUPABASE_SESSION_JWT` from the `.env` or ContextManager for authenticated MCP tool calls.
+- Validate environment with `supabase:link`, `supabase:ensure-session`, and `Workspace: Validate Configuration` tasks.
 
 ## Knowledge Base References
 
 ### Critical Documentation
 
 - **Monitoring Setup**: `/docs/technical/observability.md`
-- **OTEL Configuration**: `/dev-tools/monitoring/otel/otel-config.js`
+- **OTEL Configuration**: `/integration/monitoring/otel-config.yml`
 - **Incident Runbooks**: `/docs/maintenance/incident-response.md`
-- **Performance Baselines**: `/mcp-servers/registry.json` (monitoring section)
+- **Performance Baselines**: `/dev-tools/agents/mcp-servers/active-registry.json` (monitoring section)
+- **File Trees**: `dev-tools/context/session_store/{app-filetree,dev-tools-filetree,integration-filetree}.txt`
+- **Front-end Reproduction**: `npm run devtools:react` for state capture, `npx playwright test --reporter=line` for scripted journeys
 
 ### Dashboard Access
 
