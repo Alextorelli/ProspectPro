@@ -31,13 +31,24 @@ process_diagram() {
         in_yaml=false
         yaml_content+="$line"$'\n'
         continue
+      else
+        # Skip stray markers that end up in body content
+        continue
       fi
     fi
     
     # Build YAML content
     if [[ "$in_yaml" == true ]]; then
-      yaml_content+="$line"$'\n'
-      continue
+      if [[ "$line" =~ ^[[:space:]]*$ ]]; then
+        yaml_content+="$line"$'\n'
+        continue
+      fi
+      if [[ "$line" =~ ^[A-Za-z0-9_-]+: ]]; then
+        yaml_content+="$line"$'\n'
+        continue
+      fi
+      yaml_content+="---"$'\n'
+      in_yaml=false
     fi
     
     # Skip legacy %% tags at the start
