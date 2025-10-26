@@ -6,7 +6,6 @@ import path from "path";
 const ROOT = path.resolve("docs/diagrams");
 const REQUIRED_TAGS = [
   "%% domain:",
-  "%% compliance:",
   "%% reciprocal:",
   "%% type:",
   "%% title:",

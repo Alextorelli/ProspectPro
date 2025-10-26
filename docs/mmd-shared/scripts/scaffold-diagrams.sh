@@ -17,9 +17,8 @@ TAXONOMY_TAG_PREFIX="%% domain:"
 # Function to create a diagram file with taxonomy and compliance anchors
 create_diagram_file() {
   local path="$1"
-  local domain="$2"
-  local dtype="$3"
-  local name="$4"
+  local dtype="$2"
+  local name="$3"
   local relpath="${path#./}"
   local tag="${TAXONOMY_TAG_PREFIX}${domain} %%"
   local reciprocal="[Back to MECE Index](../../tooling/end-state/index.md)"
