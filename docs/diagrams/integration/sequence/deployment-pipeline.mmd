@@ -1,0 +1,10 @@
+%% compliance:ZeroFakeData %%
+%% domain: integration %%
+%% reciprocal: [] %%
+%% type: sequenceDiagram %%
+%% title: Deployment Pipeline Sequence %%
+%% index: ../../../../tooling/end-state/index.md %%
+sequenceDiagram
+  Dev->>CI: Push
+  CI->>CD: Build
+  CD->>Prod: Deploy

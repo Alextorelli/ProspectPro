@@ -1,0 +1,56 @@
+%% compliance:ZeroFakeData %%
+%% domain: dev-tools %%
+%% reciprocal: [] %%
+%% type: flowchart %%
+%% title: Agent Modes Architecture %%
+%% index: [docs/tooling/end-state/index.md] %%
+%%{init: { 'theme': 'dark', 'flowchart': { 'defaultRenderer': 'elk', 'elk': { 'algorithm': 'layered', 'direction': 'RIGHT', 'spacing.nodeNode': '60' }}}}%%
+flowchart TD
+
+    subgraph Orchestration["Agent Orchestration"]
+        AgentRouter["Agent Router<br/>Context switching • Load balancing"]
+        SessionMgr["Session Manager<br/>State persistence • Handoffs"]
+    end
+
+    subgraph Agents["Specialized Agent Modes"]
+        DevWorkflow["Development Workflow<br/>Code generation • Testing • Builds"]
+        Observability["Observability<br/>Monitoring • Logs • Performance"]
+        ProdOps["Production Ops<br/>Deploy • Troubleshoot • Scale"]
+        SysArchitect["System Architect<br/>Design • Diagrams • Planning"]
+    end
+
+    subgraph Context["Context Intelligence Engine"]
+        AgentContext[("Agent Context<br/>Scratchpad • Memory")]
+        EnvContext[("Environment Context<br/>Permissions • Config")]
+        TaskLedger[("Task Ledger<br/>Active tasks • Handoffs")]
+    end
+
+    subgraph MCPServers["MCP Server Registry"]
+        DevMCP[["Development Server<br/>Git • Build • Test"]]
+        ProdMCP[["Production Server<br/>Deploy • Monitor • Scale"]]
+        ObserveMCP[["Observability Server<br/>Traces • Metrics • Logs"]]
+        TroubleMCP[["Troubleshooting Server<br/>Debug • Diagnose • Fix"]]
+    end
+
+    AgentRouter --> DevWorkflow
+    AgentRouter --> Observability
+    AgentRouter --> ProdOps
+    AgentRouter --> SysArchitect
+    
+    SessionMgr --> AgentContext
+    SessionMgr --> TaskLedger
+
+    DevWorkflow -.-> AgentContext
+    Observability -.-> AgentContext
+    ProdOps -.-> TaskLedger
+    SysArchitect -.-> EnvContext
+
+    AgentContext --> DevMCP
+    AgentContext --> ObserveMCP
+    EnvContext --> ProdMCP
+    TaskLedger --> TroubleMCP
+
+    DevWorkflow ==> DevMCP
+    Observability ==> ObserveMCP
+    ProdOps ==> TroubleMCP
+    SysArchitect ==> ProdMCP

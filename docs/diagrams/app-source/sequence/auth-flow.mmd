@@ -1,0 +1,11 @@
+%% compliance:ZeroFakeData %%
+%% domain: app-source %%
+%% reciprocal: [] %%
+%% type: sequenceDiagram %%
+%% title: Auth Flow Sequence %%
+%% index: ../../../../tooling/end-state/index.md %%
+sequenceDiagram
+  User->>App: Login
+  App->>API: Auth Request
+  API-->>App: Token
+  App-->>User: Authenticated
