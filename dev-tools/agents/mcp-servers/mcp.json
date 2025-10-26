@@ -7,46 +7,36 @@
       "password": false
     },
     {
-      "id": "browser_url",
-      "type": "promptString",
-      "description": "Optional: connect to an already-running Chrome (remote debugging / port-forward). Example: http://127.0.0.1:9222",
-      "password": false
-    },
-    {
-      "id": "headless",
-      "type": "promptString",
-      "description": "Run Chrome headless (true/false). Default: false",
-      "password": false,
-      "default": "false"
-    },
-    {
-      "id": "isolated",
-      "type": "promptString",
-      "description": "Use a temporary user-data-dir (true/false). Default: false",
-      "password": false,
-      "default": "false"
-    },
-    {
-      "id": "chrome_channel",
-      "type": "promptString",
-      "description": "Chrome channel: stable | canary | beta | dev (default: stable).",
-      "password": false,
-      "default": "stable"
-    },
-    {
       "id": "context7_api_key",
       "type": "promptString",
       "description": "Context7 API key (optional; increases rate limits). Get one at https://context7.com/dashboard",
       "password": true
     },
     {
-      "id": "api_key",
+      "id": "postman_api_key",
       "type": "promptString",
       "description": "Your API key for the service",
       "password": true
+    },
+    {
+      "id": "playwright_headed",
+      "type": "promptString",
+      "description": "Run Playwright MCP headed? (true/false). Leave blank for default",
+      "password": false
     }
   ],
   "servers": {
+    "memory": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-memory",
+        "--file",
+        "${input:memory_file_path}"
+      ],
+      "version": "^2025.9.25"
+    },
     "stripe/agent-toolkit": {
       "type": "http",
       "url": "https://mcp.stripe.com",
@@ -58,7 +48,7 @@
       "command": "npx",
       "args": ["@postman/postman-mcp-server@latest"],
       "env": {
-        "POSTMAN_API_KEY": "${input:api_key}"
+        "POSTMAN_API_KEY": "${input:postman_api_key}"
       },
       "gallery": "https://api.mcp.github.com/2025-09-15/v0/servers/40516270-789a-bcde-f012-345678901234",
       "version": "1.0.0"
@@ -77,6 +67,9 @@
       "type": "stdio",
       "command": "npx",
       "args": ["@playwright/mcp@latest"],
+      "env": {
+        "PLAYWRIGHT_HEADED": "${input:playwright_headed}"
+      },
       "gallery": "https://api.mcp.github.com/2025-09-15/v0/servers/41b79849-7e6c-4fc7-82c0-5a611ea21523",
       "version": "0.0.1-seed"
     },

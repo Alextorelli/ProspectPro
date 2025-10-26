@@ -9,7 +9,8 @@
     "start:production": "node production-server.js",
     "start:development": "node development-server.js",
     "start:troubleshooting": "node supabase-troubleshooting-server.js",
-    "start:all": "concurrently \"npm run start:production\" \"npm run start:development\" \"npm run start:troubleshooting\"",
+    "start:memory": "npx -y @modelcontextprotocol/server-memory --file ${MCP_MEMORY_FILE_PATH:-dev-tools/agents/context/session_store/memory.jsonl}",
+    "start:all": "concurrently \"npm run start:production\" \"npm run start:development\" \"npm run start:troubleshooting\" \"npm run start:memory\"",
     "stop": "pkill -f 'mcp-servers' || true",
     "test": "node test-servers.js",
     "validate": "npm run test && echo '✅ All Supabase MCP servers validated successfully'",
@@ -23,6 +24,7 @@
     "@supabase/supabase-js": "^2.58.0"
   },
   "devDependencies": {
+    "@modelcontextprotocol/server-memory": "^2025.9.25",
     "concurrently": "^8.2.2"
   },
   "keywords": [

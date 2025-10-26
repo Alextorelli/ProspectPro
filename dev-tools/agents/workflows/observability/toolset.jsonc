@@ -1,0 +1,12 @@
+// Place your tool sets here...
+// Example:
+// {
+// 	"toolSetName": {observability-tools}
+// 		"tools": [
+// 			"someTool",
+// 			"anotherTool"
+// 		],
+// 		"description": "description",
+// 		"icon": "tools"
+// 	}
+// }

@@ -165,7 +165,6 @@
     "@typescript-eslint/parser": "^8.46.1",
     "@vitejs/plugin-react": "^4.2.1",
     "autoprefixer": "^10.4.16",
-    "chrome-devtools-mcp": "^0.8.1",
     "drizzle-kit": "^0.31.5",
     "eslint": "^8.55.0",
     "eslint-plugin-react": "^7.37.5",

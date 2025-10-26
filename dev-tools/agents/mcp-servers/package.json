@@ -8,7 +8,8 @@
     "start:production": "node environments/production.js",
     "start:development": "node environments/development.js",
     "start:troubleshooting": "node environments/troubleshooting.js",
-    "start:all": "concurrently \"npm run start:production\" \"npm run start:development\" \"npm run start:troubleshooting\"",
+    "start:memory": "npx -y @modelcontextprotocol/server-memory --file ${MCP_MEMORY_FILE_PATH:-dev-tools/agents/context/session_store/memory.jsonl}",
+    "start:all": "concurrently \"npm run start:production\" \"npm run start:development\" \"npm run start:troubleshooting\" \"npm run start:memory\"",
     "validate": "echo '✅ All MCP servers validated successfully'",
     "install:deps": "npm install"
   },
@@ -23,6 +24,7 @@
     "p-timeout": "^6.1.2"
   },
   "devDependencies": {
+    "@modelcontextprotocol/server-memory": "^2025.9.25",
     "concurrently": "^8.2.2"
   },
   "keywords": [

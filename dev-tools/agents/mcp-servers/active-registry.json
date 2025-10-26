@@ -84,6 +84,137 @@
       "health_check_url": null,
       "startup_timeout_ms": 5000,
       "response_time_p95_target_ms": 500
+    },
+    "memory": {
+      "type": "stdio",
+      "package": "@modelcontextprotocol/server-memory",
+      "invocation": "npx",
+      "arguments": [
+        "-y",
+        "@modelcontextprotocol/server-memory",
+        "--file",
+        "${env:MCP_MEMORY_FILE_PATH:-dev-tools/agents/context/session_store/memory.jsonl}"
+      ],
+      "env": {
+        "NODE_ENV": "memory"
+      },
+      "capabilities": [
+        "long_term_memory",
+        "session_recall",
+        "conversation_indexing"
+      ],
+      "health_check_url": null,
+      "startup_timeout_ms": 4000,
+      "response_time_p95_target_ms": 400
+    },
+    "supabase": {
+      "type": "http",
+      "package": "@supabase/mcp",
+      "url": "https://mcp.supabase.com/mcp?project_ref=sriycekxdqnesdsgwiuc&features=docs,account,database,debugging,development,functions,storage,branching",
+      "capabilities": [
+        "database",
+        "functions",
+        "storage",
+        "account",
+        "docs",
+        "debugging",
+        "branching"
+      ],
+      "health_check_url": "https://status.supabase.com/",
+      "startup_timeout_ms": 5000,
+      "response_time_p95_target_ms": 600
+    },
+    "github/github-mcp-server": {
+      "type": "http",
+      "package": "@github/github-mcp-server",
+      "url": "https://api.githubcopilot.com/mcp/",
+      "capabilities": [
+        "code_search",
+        "pull_requests",
+        "issues",
+        "actions_status"
+      ],
+      "health_check_url": "https://www.githubstatus.com/",
+      "startup_timeout_ms": 5000,
+      "response_time_p95_target_ms": 650
+    },
+    "microsoft/playwright-mcp": {
+      "type": "stdio",
+      "package": "@playwright/mcp",
+      "invocation": "npx",
+      "arguments": ["@playwright/mcp@latest"],
+      "env": {
+        "PLAYWRIGHT_HEADED": "${env:PLAYWRIGHT_HEADED:false}"
+      },
+      "capabilities": [
+        "browser_automation",
+        "e2e_testing",
+        "accessibility_audits"
+      ],
+      "health_check_url": null,
+      "startup_timeout_ms": 8000,
+      "response_time_p95_target_ms": 800
+    },
+    "context7": {
+      "type": "http",
+      "package": "context7",
+      "url": "https://mcp.context7.com/mcp",
+      "headers": {
+        "CONTEXT7_API_KEY": "${env:CONTEXT7_API_KEY}"
+      },
+      "capabilities": [
+        "documentation_lookup",
+        "api_reference",
+        "code_examples"
+      ],
+      "health_check_url": "https://status.context7.com/",
+      "startup_timeout_ms": 3000,
+      "response_time_p95_target_ms": 500
+    },
+    "stripe/agent-toolkit": {
+      "type": "http",
+      "package": "stripe/agent-toolkit",
+      "url": "https://mcp.stripe.com",
+      "capabilities": ["billing_metrics", "invoice_lookup", "event_replay"],
+      "health_check_url": "https://status.stripe.com/",
+      "startup_timeout_ms": 4000,
+      "response_time_p95_target_ms": 700
+    },
+    "postmanlabs/postman-mcp-server": {
+      "type": "stdio",
+      "package": "@postman/postman-mcp-server",
+      "invocation": "npx",
+      "arguments": ["@postman/postman-mcp-server@latest"],
+      "env": {
+        "POSTMAN_API_KEY": "${env:POSTMAN_API_KEY}"
+      },
+      "capabilities": ["api_testing", "collection_runner", "monitoring"],
+      "health_check_url": null,
+      "startup_timeout_ms": 6000,
+      "response_time_p95_target_ms": 750
+    },
+    "apify/apify-mcp-server": {
+      "type": "http",
+      "package": "apify/apify-mcp-server",
+      "url": "https://mcp.apify.com",
+      "capabilities": ["web_scraping", "automation", "datasets"],
+      "health_check_url": "https://status.apify.com/",
+      "startup_timeout_ms": 5000,
+      "response_time_p95_target_ms": 700
+    },
+    "sequentialthinking": {
+      "type": "stdio",
+      "package": "@modelcontextprotocol/server-sequential-thinking",
+      "invocation": "npx",
+      "arguments": ["-y", "@modelcontextprotocol/server-sequential-thinking"],
+      "capabilities": [
+        "scenario_analysis",
+        "chain_of_thought",
+        "decision_logging"
+      ],
+      "health_check_url": null,
+      "startup_timeout_ms": 4000,
+      "response_time_p95_target_ms": 450
     }
   },
   "monitoring": {
