@@ -1,87 +1,76 @@
-%%{init: { 'config': 'docs/mmd-shared/config/mermaid.config.json' } }%%
-%% accTitle: ProspectPro API Integration Swimlane %%
-%% accDescr: Interactions between frontend, middleware, backend, external services, and storage %%
+---
+accTitle: ProspectPro API Integration Swimlane
+accDescr: Interactions between frontend, middleware, backend, external services, and storage
+domain: app-source
+type: flowchart
+title: API Integration Swimlane
+index: ../../../../mmd-shared/config/index.md
+---
 
-%% domain: app-source %%
-%% reciprocal: [../../../../mmd-shared/config/index.md] %%
-%% type: flowchart %%
-%% title: API Integration Swimlane %%
-%% index: ../../../../mmd-shared/config/index.md %%
-
+%%{init: { "config": "docs/mmd-shared/config/mermaid.config.json" } }%%
 flowchart TD
-  ---
-  accTitle: ProspectPro API Integration Swimlane
-  accDescr: Interactions between frontend, middleware, backend, external services, and storage
-  domain: app-source
-  type: flowchart
-  title: API Integration Swimlane
-  index: ../../../../mmd-shared/config/index.md
-  ---
+  classDef lane fill:#2a2a2a,stroke:#f5f5f5,color:#f5f5f5,stroke-width:2px
 
-  %%{init: { "config": "docs/mmd-shared/config/mermaid.config.json" } }%%
-  flowchart TD
-    classDef lane fill:#2a2a2a,stroke:#f5f5f5,color:#f5f5f5,stroke-width:2px
+  subgraph frontend["Frontend"]
+    UserAction["User Action"]
+    FormValidation["Validation"]
+    LoadingState["Loading"]
+    ResultDisplay["Results"]
+    ErrorHandling["Error Handling"]
+  end
 
-    subgraph frontend["Frontend"]
-      UserAction["User Action"]
-      FormValidation["Validation"]
-      LoadingState["Loading"]
-      ResultDisplay["Results"]
-      ErrorHandling["Error Handling"]
-    end
+  subgraph middleware["Middleware"]
+    APIClient["API Client"]
+    RequestInterceptor["Request Interceptor"]
+    ResponseInterceptor["Response Interceptor"]
+    RetryLogic["Retry Logic"]
+    CacheManager["Cache Manager"]
+  end
 
-    subgraph middleware["Middleware"]
-      APIClient["API Client"]
-      RequestInterceptor["Request Interceptor"]
-      ResponseInterceptor["Response Interceptor"]
-      RetryLogic["Retry Logic"]
-      CacheManager["Cache Manager"]
-    end
+  subgraph backend["Backend"]
+    EdgeFunction["Edge Function"]
+    AuthMiddleware["Auth Middleware"]
+    ValidationLayer["Validation"]
+    BusinessLogic["Business Logic"]
+    DatabaseORM["ORM"]
+  end
 
-    subgraph backend["Backend"]
-      EdgeFunction["Edge Function"]
-      AuthMiddleware["Auth Middleware"]
-      ValidationLayer["Validation"]
-      BusinessLogic["Business Logic"]
-      DatabaseORM["ORM"]
-    end
+  subgraph external["External APIs"]
+    GooglePlaces["Google Places"]
+    HunterIO["Hunter.io"]
+    NeverBounce["NeverBounce"]
+    CobaltIntel["Cobalt Intelligence"]
+  end
 
-    subgraph external["External APIs"]
-      GooglePlaces["Google Places"]
-      HunterIO["Hunter.io"]
-      NeverBounce["NeverBounce"]
-      CobaltIntel["Cobalt Intelligence"]
-    end
+  subgraph storage["Storage"]
+    PostgreSQL["Postgres"]
+    FileStorage["File Storage"]
+    Cache["Redis"]
+    SearchIndex["Search Index"]
+  end
 
-    subgraph storage["Storage"]
-      PostgreSQL["Postgres"]
-      FileStorage["File Storage"]
-      Cache["Redis"]
-      SearchIndex["Search Index"]
-    end
+  UserAction --> FormValidation --> LoadingState --> APIClient
+  APIClient --> RequestInterceptor --> EdgeFunction
+  EdgeFunction --> ResponseInterceptor --> CacheManager --> ResultDisplay
+  EdgeFunction --> AuthMiddleware --> ValidationLayer --> BusinessLogic --> DatabaseORM
+  BusinessLogic --> GooglePlaces
+  BusinessLogic --> HunterIO
+  BusinessLogic --> NeverBounce
+  BusinessLogic --> CobaltIntel
+  DatabaseORM --> PostgreSQL
+  BusinessLogic --> FileStorage
+  CacheManager --> Cache
+  BusinessLogic --> SearchIndex
+  ResponseInterceptor -.-> RetryLogic -.-> ErrorHandling
+  EdgeFunction -.-> ErrorHandling
+  CacheManager -.-> Cache -.-> ResultDisplay
 
-    UserAction --> FormValidation --> LoadingState --> APIClient
-    APIClient --> RequestInterceptor --> EdgeFunction
-    EdgeFunction --> ResponseInterceptor --> CacheManager --> ResultDisplay
-    EdgeFunction --> AuthMiddleware --> ValidationLayer --> BusinessLogic --> DatabaseORM
-    BusinessLogic --> GooglePlaces
-    BusinessLogic --> HunterIO
-    BusinessLogic --> NeverBounce
-    BusinessLogic --> CobaltIntel
-    DatabaseORM --> PostgreSQL
-    BusinessLogic --> FileStorage
-    CacheManager --> Cache
-    BusinessLogic --> SearchIndex
-    ResponseInterceptor -.-> RetryLogic -.-> ErrorHandling
-    EdgeFunction -.-> ErrorHandling
-    CacheManager -.-> Cache -.-> ResultDisplay
+  class UserAction,FormValidation,LoadingState,ResultDisplay,ErrorHandling lane
+  class APIClient,RequestInterceptor,ResponseInterceptor,RetryLogic,CacheManager lane
+  class EdgeFunction,AuthMiddleware,ValidationLayer,BusinessLogic,DatabaseORM lane
+  class GooglePlaces,HunterIO,NeverBounce,CobaltIntel lane
+  class PostgreSQL,FileStorage,Cache,SearchIndex lane
 
-    class UserAction,FormValidation,LoadingState,ResultDisplay,ErrorHandling lane
-    class APIClient,RequestInterceptor,ResponseInterceptor,RetryLogic,CacheManager lane
-    class EdgeFunction,AuthMiddleware,ValidationLayer,BusinessLogic,DatabaseORM lane
-    class GooglePlaces,HunterIO,NeverBounce,CobaltIntel lane
-    class PostgreSQL,FileStorage,Cache,SearchIndex lane
-
-    click PostgreSQL "database-schema.mmd" "Inspect database schema"
-    click BusinessLogic "prospect-discovery-journey.mmd" "Trace prospect journey"
-    click APIClient "frontend-modules.mmd" "Review frontend modules"
+  click PostgreSQL "database-schema.mmd" "Inspect database schema"
+  click BusinessLogic "prospect-discovery-journey.mmd" "Trace prospect journey"
+  click APIClient "frontend-modules.mmd" "Review frontend modules"
