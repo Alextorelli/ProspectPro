@@ -1,25 +1,28 @@
-# MECE Diagram Index
+# Mermaid Shared Config Index
 
-## dev-tools
+This index documents the shared configuration, theming, and standards for all diagrams in the ProspectPro workspace.
 
-| Diagram | Path |
-| ------- | ---- |
-| [agent modes](docs/diagrams/dev-tools/architecture/agent-modes.mmd) | `docs/diagrams/dev-tools/architecture/agent-modes.mmd` |
-| [control plane](docs/diagrams/dev-tools/architecture/control-plane.mmd) | `docs/diagrams/dev-tools/architecture/control-plane.mmd` |
-| [environment mcp](docs/diagrams/dev-tools/architecture/environment-mcp.mmd) | `docs/diagrams/dev-tools/architecture/environment-mcp.mmd` |
-| [workflow](docs/diagrams/dev-tools/architecture/workflow.mmd) | `docs/diagrams/dev-tools/architecture/workflow.mmd` |
-| [pipeline](docs/diagrams/dev-tools/automation/pipeline.mmd) | `docs/diagrams/dev-tools/automation/pipeline.mmd` |
-| [diagram index](docs/diagrams/dev-tools/navigation/diagram-index.mmd) | `docs/diagrams/dev-tools/navigation/diagram-index.mmd` |
-| [data pipeline](docs/diagrams/dev-tools/observability/data-pipeline.mmd) | `docs/diagrams/dev-tools/observability/data-pipeline.mmd` |
-| [mcp lifecycle](docs/diagrams/dev-tools/sequence/mcp-lifecycle.mmd) | `docs/diagrams/dev-tools/sequence/mcp-lifecycle.mmd` |
+## Config Files
 
-## integration
+- [mermaid.config.json](mermaid.config.json): Theme, palette, and renderer options
+- [icon-registry.json](icon-registry.json): Emoji/icon mapping for semantic nodes
+- [enhanced-diagram-standards.md](../guidelines/enhanced-diagram-standards.md): Frontmatter, shapes, chaining, and validation
+- [navigation-index.md](../navigation-index.md): Canonical navigation and chaining map
 
-| Diagram | Path |
-| ------- | ---- |
-| [supabase stack](docs/diagrams/integration/architecture/supabase-stack.mmd) | `docs/diagrams/integration/architecture/supabase-stack.mmd` |
-| [alerting mesh](docs/diagrams/integration/monitoring/alerting-mesh.mmd) | `docs/diagrams/integration/monitoring/alerting-mesh.mmd` |
-| [data ingestion](docs/diagrams/integration/pipelines/data-ingestion.mmd) | `docs/diagrams/integration/pipelines/data-ingestion.mmd` |
+## Usage
+
+- All diagrams must include the frontmatter block as shown in the standards.
+- Use only shapes, classDefs, and icons defined in the config.
+- Validate diagrams with `npm run docs:prepare` before merging.
+
+## Chaining & Navigation
+
+- Use `click` statements and reciprocal links for cross-diagram navigation.
+- Reference this index in all diagram frontmatter for traceability.
+
+---
+
+For questions, see [enhanced-diagram-standards.md](../guidelines/enhanced-diagram-standards.md).
 | [boundary checkpoints](docs/diagrams/integration/security/boundary-checkpoints.mmd) | `docs/diagrams/integration/security/boundary-checkpoints.mmd` |
-| [deployment pipeline](docs/diagrams/integration/sequence/deployment-pipeline.mmd) | `docs/diagrams/integration/sequence/deployment-pipeline.mmd` |
 
+| [deployment pipeline](docs/diagrams/integration/sequence/deployment-pipeline.mmd) | `docs/diagrams/integration/sequence/deployment-pipeline.mmd` |
