@@ -1,0 +1,30 @@
+{
+  // Shared agent defaults for context management and persona wiring
+  "$schema": "https://prospectpro.app/context/agents-manifest.schema.json",
+  "version": "1.0.0",
+  "defaultEnvironment": "development",
+  "defaultScratchpadLimit": 80,
+  "defaultSchemaVersion": "1.0.0",
+  "agents": {
+    "development-workflow": {
+      "persona": "developer",
+      "environment": "development",
+      "toolset": "development-workflow/toolset.jsonc"
+    },
+    "observability": {
+      "persona": "observability",
+      "environment": "development",
+      "toolset": "observability/toolset.jsonc"
+    },
+    "production-ops": {
+      "persona": "production-ops",
+      "environment": "production",
+      "toolset": "production-ops/toolset.jsonc"
+    },
+    "system-architect": {
+      "persona": "system-architect",
+      "environment": "development",
+      "toolset": "system-architect/toolset.jsonc"
+    }
+  }
+}
