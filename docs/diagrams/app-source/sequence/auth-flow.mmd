@@ -1,11 +1,74 @@
-%% compliance:ZeroFakeData %%
+%%{init: { 'config': 'docs/mmd-shared/config/mermaid.config.json' } }%%
+%% accTitle: ProspectPro Authentication Flow %%
+%% accDescr: Signup, verification, login, session management, reset, and logout interactions %%
+%% compliance: ZeroFakeData %%
 %% domain: app-source %%
-%% reciprocal: [] %%
+%% reciprocal: [../../../../mmd-shared/config/index.md] %%
 %% type: sequenceDiagram %%
-%% title: Auth Flow Sequence %%
-%% index: ../../../../tooling/end-state/index.md %%
+%% title: Complete Authentication Flow %%
+%% index: ../../../../mmd-shared/config/index.md %%
+
 sequenceDiagram
-  User->>App: Login
-  App->>API: Auth Request
-  API-->>App: Token
-  App-->>User: Authenticated
+  participant U as User
+  participant A as App
+  participant S as Supabase Auth
+  participant D as Database
+  participant E as Email Service
+
+  Note over U,E: New User Registration
+  U->>A: Access signup page
+  A->>U: Display signup form
+  U->>A: Submit email/password
+  A->>S: Create user account
+  S->>E: Send verification email
+  S->>A: User created (unverified)
+  A->>U: Prompt to verify email
+
+  Note over U,E: Email Verification
+  U->>E: Click verification link
+  E->>S: Verify email token
+  S->>D: Update verified status
+  S->>A: Redirect to app
+  A->>U: Welcome message
+
+  Note over U,E: Login Flow
+  U->>A: Enter credentials
+  A->>S: Authenticate request
+  S->>S: Validate credentials
+  alt Valid credentials
+    S->>A: Issue JWT tokens
+    A->>D: Fetch profile
+    D->>A: Profile payload
+    A->>U: Dashboard
+  else Invalid credentials
+    S->>A: Auth error
+    A->>U: Error feedback
+  end
+
+  Note over U,E: Session Management
+  loop Active session check
+    A->>S: Validate access token
+    alt Token valid
+      S->>A: OK
+    else Token expired
+      S->>S: Refresh token
+      S->>A: New tokens
+    end
+  end
+
+  Note over U,E: Password Reset
+  U->>A: Request password reset
+  A->>S: Trigger reset email
+  S->>E: Send reset link
+  U->>E: Follow reset link
+  E->>A: Serve reset form
+  U->>A: Submit new password
+  A->>S: Update password
+  S->>A: Confirmation
+  A->>U: Success message
+
+  Note over U,E: Logout
+  U->>A: Logout action
+  A->>S: Sign out
+  S->>A: Session terminated
+  A->>U: Redirect to login
