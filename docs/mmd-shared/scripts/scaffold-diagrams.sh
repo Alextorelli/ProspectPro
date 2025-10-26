@@ -24,22 +24,28 @@ create_diagram_file() {
   local tag="${TAXONOMY_TAG_PREFIX}${domain} %%"
   local reciprocal="[Back to MECE Index](../../tooling/end-state/index.md)"
   mkdir -p "$(dirname "$path")"
-  if [[ ! -f "$path" ]]; then
-    cat > "$path" <<EOF
-${tag}
-${ANCHOR_TAG}
-%% type:${dtype} %%
-
-%% title: ${name} %%
-
-%% reciprocal: ${reciprocal} %%
-
-%% TODO: Populate diagram content. %%
-EOF
-    echo "Created $path"
-  else
-    echo "Exists: $path"
+  # Remove all existing %% header lines at the top of the file (if any)
+  if [[ -f "$path" ]]; then
+    awk 'BEGIN{inheader=1} /^%%/{if(inheader) next} !/^%%/{inheader=0; print $0}' "$path" > "$path.tmp" && mv "$path.tmp" "$path"
   fi
+  # Write canonical header block and append any remaining content
+  {
+    echo "${tag}"
+    echo "${ANCHOR_TAG}"
+    echo "%% type:${dtype} %%"
+    echo
+    echo "%% title: ${name} %%"
+    echo
+    echo "%% reciprocal: ${reciprocal} %%"
+    echo
+    echo "%% TODO: Populate diagram content. %%"
+    # Append any non-header content from the original file
+    if [[ -f "$path" ]]; then
+      awk 'BEGIN{inheader=1} /^%%/{if(inheader) next} !/^%%/{inheader=0; print $0}' "$path"
+    fi
+  } > "$path.tmp"
+  mv "$path.tmp" "$path"
+  echo "Scaffolded $path"
 }
 
 # Parse MECE index for required diagrams
