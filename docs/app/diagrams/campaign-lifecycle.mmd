@@ -4,67 +4,29 @@
 %% compliance: ZeroFakeData %%
 %% domain: app-source %%
 %% reciprocal: [../../../../mmd-shared/config/index.md] %%
-%% type: stateDiagram-v2 %%
-%% title: Application Lifecycle State Machine %%
-%% index: ../../../../mmd-shared/config/index.md %%
+---
+accTitle: ProspectPro Campaign Lifecycle
+accDescr: End-to-end lifecycle of a campaign from creation to export, including enrichment and validation
+domain: app-source
+type: flowchart
+title: Campaign Lifecycle
+index: ../../../../mmd-shared/config/index.md
+---
 
-stateDiagram-v2
-  [*] --> Loading: App start
+%%{init: { "config": "docs/mmd-shared/config/mermaid.config.json" } }%%
+flowchart TD
+  classDef phase fill:#232323,stroke:#f5f5f5,color:#f5f5f5,stroke-width:2px
+  Start([Start Campaign]):::phase
+  CreateForm([Create Campaign Form]):::phase
+  ValidateInput{Valid Input?}:::phase
+  EnrichData([Enrichment Pipeline]):::phase
+  Review([Review Results]):::phase
+  Export([Export Data]):::phase
+  End([End]):::phase
 
-  state "Application States" as app {
-    Loading --> Authenticating: Check auth
-    Loading --> Offline: No connection
+  Start --> CreateForm --> ValidateInput
+  ValidateInput -- Yes --> EnrichData --> Review --> Export --> End
+  ValidateInput -- No --> CreateForm
+  Review -- Refine --> EnrichData
+  Export -- Retry --> Export
 
-    Authenticating --> Authenticated: Valid session
-    Authenticating --> Unauthenticated: No session
-
-    Unauthenticated --> Authenticating: Login attempt
-    Unauthenticated --> Signup: Register
-    Signup --> Authenticating: Account created
-    Signup --> Unauthenticated: Cancelled
-
-    Authenticated --> Dashboard: Load user data
-    Authenticated --> Unauthenticated: Logout or expired
-
-    Dashboard --> Campaign: Open campaign
-    Dashboard --> Settings: Open settings
-    Dashboard --> Profile: Open profile
-
-    Campaign --> Processing: Start discovery
-    Campaign --> Dashboard: Back
-    Processing --> Results: Complete
-    Processing --> Error: Failed
-    Processing --> Cancelled: User cancel
-
-    Results --> Campaign: View campaign
-    Results --> Export: Download
-    Results --> Dashboard: Home
-    Export --> Results: Done
-    Error --> Campaign: Retry
-    Error --> Dashboard: Home
-    Cancelled --> Campaign: Back
-
-    Settings --> Dashboard: Saved
-    Profile --> Dashboard: Updated
-    Offline --> Loading: Connection restored
-  }
-
-  state "Error Handling" as errors {
-    NetworkError --> Retry: Auto retry
-    NetworkError --> Offline: Lost connection
-    ServerError --> ErrorPage: Show error
-    ServerError --> Dashboard: Fallback
-    ValidationError --> Form: Show validation
-    Retry --> Loading: Success
-    Retry --> NetworkError: Failed
-    ErrorPage --> Dashboard: User action
-    Form --> Campaign: Fix data
-  }
-
-  Dashboard --> NetworkError: Network issue
-  Campaign --> ServerError: Server issue
-  Processing --> ValidationError: Invalid data
-
-  Authenticated --> [*]: App close
-  Unauthenticated --> [*]: App close
-  Offline --> [*]: App close

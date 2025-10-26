@@ -13,40 +13,81 @@ flowchart LR
     UserInput["User Input"]
     UIState["UI State"]
     UserFeedback["Feedback"]
-  end
+  ---
+  accTitle: ProspectPro Application Data Flow
+  accDescr: End-to-end data movement from UI through validation, processing, persistence, and observability
+  domain: app-source
+  type: flowchart
+  title: Application Data Flow
+  index: ../../../../mmd-shared/config/index.md
+  ---
 
-  subgraph state["State Layer"]
-    ClientState["Client Store"]
-    Cache["Cache"]
-    Validation["Validation"]
-  end
+  %%{init: { "config": "docs/mmd-shared/config/mermaid.config.json" } }%%
+  flowchart LR
+    classDef cluster fill:#1f1f1f,stroke:#cfcfcf,color:#f5f5f5,stroke-width:1.5px
+    classDef node fill:#2b2b2b,stroke:#dedede,color:#f5f5f5,stroke-width:1px
+    classDef accent fill:#333333,stroke:#f5f5f5,color:#fefefe,stroke-width:1px
+    classDef storage fill:#242424,stroke:#d0d0d0,color:#f5f5f5,stroke-dasharray:4 2
+    classDef indicator fill:#2d2d2d,stroke:#bfbfbf,color:#f5f5f5,stroke-dasharray:2 2
+    classDef signal fill:#1d1d1d,stroke:#ababab,color:#f5f5f5,stroke-width:1px
 
-  subgraph api["API Layer"]
-    APIClient["API Client"]
-    RealTime["Real-time"]
-    ErrorHandler["Error Handler"]
-  end
+    subgraph interactions["User Interaction"]:::cluster
+      UserInput([User Interaction<br/>Forms · Search]):::node
+      UIState{{UI State Manager}}:::accent
+      Feedback>Feedback Surface]:::indicator
+    end
 
-  subgraph backend["Backend"]
-    EdgeFunction["Edge Functions"]
-    Enrichment["Enrichment"]
-    QueueProcessor["Queue Processor"]
-  end
+    subgraph clientstate["Client State Control"]:::cluster
+      ClientStore[[Client Store<br/>Zustand]]:::node
+      CacheLayer[(In-memory Cache)]:::storage
+      ValidationGate{{Validation Rules}}:::accent
+    end
 
-  subgraph storage["Storage"]
-    Database["Postgres"]
-    FileStorage["File Storage"]
-    SearchIndex["Search Index"]
-  end
+    subgraph apis["API Bridge"]:::cluster
+      SupabaseClient[/Supabase JS Client/]:::node
+      RealtimeHub((Realtime Channels)):::indicator
+      ErrorCircuit{{Error Circuit Breaker}}:::signal
+    end
 
-  UserInput --> UIState --> ClientState --> Validation --> APIClient
-  APIClient --> EdgeFunction --> Enrichment --> QueueProcessor --> Database
-  Database --> FileStorage
-  Database --> SearchIndex
-  Database -.-> Cache -.-> RealTime -.-> ClientState -.-> UserFeedback
-  APIClient -.-> ErrorHandler -.-> UserFeedback
+    subgraph processing["Processing Pipelines"]:::cluster
+      EdgeRouter[[Edge Router]]:::node
+      EnrichmentJobs[[Enrichment Jobs]]:::node
+      QueueWorker[[Queue Worker]]:::node
+    end
 
-  classDef layer fill:#2a2a2a,stroke:#f5f5f5,color:#f5f5f5,stroke-width:2px
-  class UserInput,UIState,UserFeedback,ClientState,Cache,Validation layer
-  class APIClient,RealTime,ErrorHandler,EdgeFunction,Enrichment,QueueProcessor layer
-  class Database,FileStorage,SearchIndex layer
+    subgraph persistence["Persistence Layer"]:::cluster
+      RelationalDB[(Postgres<br/>RLS enforced)]:::storage
+      DocumentVault[/Object Storage/]:::storage
+      SearchIndex[(Search Index)]:::storage
+      AuditTrail[/Audit Logs/]:::storage
+    end
+
+    subgraph observability["Observability Hooks"]:::cluster
+      Tracing((Distributed Tracing)):::indicator
+      Metrics((Service Metrics)):::indicator
+    end
+
+    UserInput -->|Input events| UIState --> ClientStore
+    ClientStore --> CacheLayer
+    ClientStore --> ValidationGate
+    ValidationGate -->|Schema guard| ErrorCircuit
+    ValidationGate -->|RPC request| SupabaseClient
+    SupabaseClient -->|Mutations| EdgeRouter
+    SupabaseClient -->|Reads| RelationalDB
+    EdgeRouter -->|Work items| EnrichmentJobs
+    EnrichmentJobs --> QueueWorker --> RelationalDB
+    QueueWorker --> DocumentVault
+    QueueWorker --> SearchIndex
+    RelationalDB -->|CDC| RealtimeHub --> ClientStore
+    ErrorCircuit -.-> Feedback
+    RealtimeHub -.-> Feedback
+    SupabaseClient -.-> Tracing
+    EdgeRouter -.-> Tracing
+    QueueWorker -.-> Metrics
+    RelationalDB -.-> AuditTrail
+    AuditTrail -.-> Metrics
+
+    click RelationalDB "database-schema.mmd" "Inspect database schema"
+    click EnrichmentJobs "api-integration-swimlane.mmd" "View API integration swimlane"
+    click Feedback "prospect-discovery-journey.mmd" "Trace prospect journey"
+    click ClientStore "frontend-modules.mmd" "Review component hierarchy"

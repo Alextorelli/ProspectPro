@@ -11,44 +11,79 @@
 flowchart TB
   subgraph client["Client"]
     direction LR
-    WebApp["Web App"]
-    MobileApp["PWA"]
-  end
+    ---
+    accTitle: ProspectPro Application Overview
+    accDescr: High-level application architecture with client, frontend, backend, telemetry, and external integrations
+    domain: app-source
+    type: flowchart
+    title: Application Overview
+    index: ../../../../mmd-shared/config/index.md
+    ---
 
-  subgraph frontend["Frontend"]
-    direction LR
-    UIComponents["UI Components"]
-    StateManager["State Manager"]
-    AuthService["Auth Service"]
-  end
+    %%{init: { "config": "docs/mmd-shared/config/mermaid.config.json" } }%%
+    flowchart TB
+      classDef cluster fill:#1f1f1f,stroke:#cfcfcf,color:#f5f5f5,stroke-width:1.5px
+      classDef node fill:#2b2b2b,stroke:#dedede,color:#f5f5f5,stroke-width:1px
+      classDef accent fill:#333333,stroke:#f5f5f5,color:#fefefe,stroke-width:1px
+      classDef storage fill:#242424,stroke:#d0d0d0,color:#f5f5f5,stroke-dasharray:4 2
+      classDef integration fill:#303030,stroke:#f5f5f5,color:#ffffff,stroke-width:1px
+      classDef indicator fill:#2d2d2d,stroke:#bfbfbf,color:#f5f5f5,stroke-dasharray:2 2
+      classDef signal fill:#1d1d1d,stroke:#ababab,color:#f5f5f5,stroke-width:1px
 
-  subgraph backend["Backend"]
-    direction TB
-    EdgeFunctions["Edge Functions"]
-    Database["Supabase DB"]
-    Storage["File Storage"]
-  end
+      subgraph client["Client Touchpoints"]:::cluster
+        WebApp([Web App<br/>React · Vite]):::node
+        MobileApp((PWA Client)):::accent
+        CTA>In-App CTA]:::indicator
+      end
 
-  subgraph external["External APIs"]
-    direction LR
-    GooglePlaces["Google Places"]
-    HunterIO["Hunter.io"]
-    NeverBounce["NeverBounce"]
-    CobaltIntel["Cobalt Intelligence"]
-  end
+      subgraph frontend["Frontend Experience"]:::cluster
+        UIComponents[/UI Component Library/]:::node
+        StateManager{{State Manager<br/>Zustand · TanStack Query}}:::accent
+        AuthService{{Auth Service<br/>Supabase Auth SDK}}:::accent
+        Observability(((UI Telemetry))):::indicator
+      end
 
-  WebApp --> UIComponents
-  MobileApp --> UIComponents
-  UIComponents --> StateManager --> AuthService --> EdgeFunctions
-  EdgeFunctions --> Database
-  EdgeFunctions --> Storage
-  EdgeFunctions --> GooglePlaces
-  EdgeFunctions --> HunterIO
-  EdgeFunctions --> NeverBounce
-  EdgeFunctions --> CobaltIntel
-  StateManager --> Database
+      subgraph backend["Edge & Persistence"]:::cluster
+        EdgeFunctions[[Edge Functions<br/>Routing · Policy]]:::node
+        AutomationQueue(((Discovery Queue))):::signal
+        Database[(Supabase Postgres)]:::storage
+        Storage[/Object Storage/]:::storage
+      end
 
-  classDef layer fill:#2a2a2a,stroke:#f5f5f5,color:#f5f5f5,stroke-width:2px
-  class WebApp,MobileApp,UIComponents,StateManager,AuthService layer
-  class EdgeFunctions,Database,Storage layer
-  class GooglePlaces,HunterIO,NeverBounce,CobaltIntel layer
+      subgraph external["External Intelligence"]:::cluster
+        GooglePlaces{{Google Places}}:::integration
+        HunterIO{{Hunter.io}}:::integration
+        NeverBounce{{NeverBounce}}:::integration
+        CobaltIntel{{Cobalt Intelligence}}:::integration
+      end
+
+      subgraph observability["Ops & Reporting"]:::cluster
+        LogForwarder[[MCP Log Forwarder]]:::node
+        MetricsHub([Telemetry SLOs]):::node
+        ReportsArchive[/dev-tools/reports/]:::storage
+      end
+
+      WebApp -->|SPA navigation| UIComponents
+      MobileApp -->|Responsive shell| UIComponents
+      CTA -.-> Observability
+      UIComponents -->|Actions & Forms| StateManager
+      StateManager -->|Session hooks| AuthService
+      AuthService -->|JWT exchange| EdgeFunctions
+      StateManager -.->|Prefetch| Database
+      EdgeFunctions -->|RPC| Database
+      EdgeFunctions -->|Asset writes| Storage
+      EdgeFunctions -->|Async tasks| AutomationQueue
+      AutomationQueue --> EdgeFunctions
+      EdgeFunctions -->|Vendor calls| GooglePlaces
+      EdgeFunctions --> HunterIO
+      EdgeFunctions --> NeverBounce
+      EdgeFunctions --> CobaltIntel
+      EdgeFunctions -->|Telemetry| LogForwarder
+      LogForwarder --> MetricsHub --> ReportsArchive
+      Observability -.-> MetricsHub
+      Database -.->|Audits| ReportsArchive
+
+      click Database "application-data-flow.mmd" "Open application data flow diagram"
+      click EdgeFunctions "api-integration-swimlane.mmd" "Inspect API integration swimlane"
+      click Observability "ui-edge-trace.mmd" "Review UI edge trace"
+      click AutomationQueue "prospect-discovery-journey.mmd" "Follow discovery user journey"

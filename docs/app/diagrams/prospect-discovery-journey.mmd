@@ -4,39 +4,40 @@
 %% compliance: ZeroFakeData %%
 %% domain: app-source %%
 %% reciprocal: [../../../../mmd-shared/config/index.md] %%
-%% type: flowchart %%
-%% title: Prospect Discovery Journey %%
-%% index: ../../../../mmd-shared/config/index.md %%
+---
+accTitle: Prospect Discovery Journey
+accDescr: User workflow from campaign creation through prospect export
+domain: app-source
+type: flowchart
+title: Prospect Discovery Journey
+index: ../../../../mmd-shared/config/index.md
+---
 
+%%{init: { "config": "docs/mmd-shared/config/mermaid.config.json" } }%%
 flowchart TD
-  Start([User Login]) --> Dashboard[Dashboard]
+  classDef action fill:#2a2a2a,stroke:#f5f5f5,color:#f5f5f5,stroke-width:2px
+  Start([User Login]):::action --> Dashboard[Dashboard]:::action
 
-  Dashboard --> CreateCampaign{Create Campaign?}
-  CreateCampaign -->|Yes| CampaignForm[Campaign Form]
-  CreateCampaign -->|No| ExistingCampaign[Select Existing]
+  Dashboard --> CreateCampaign{Create Campaign?}:::action
+  CreateCampaign -->|Yes| CampaignForm[Campaign Form]:::action
+  CreateCampaign -->|No| ExistingCampaign[Select Existing]:::action
 
-  CampaignForm --> SearchCriteria[Search Criteria]
+  CampaignForm --> SearchCriteria[Search Criteria]:::action
   ExistingCampaign --> SearchCriteria
 
-  SearchCriteria --> ValidateInput{Valid Input?}
+  SearchCriteria --> ValidateInput{Valid Input?}:::action
   ValidateInput -->|No| SearchCriteria
-  ValidateInput -->|Yes| StartDiscovery[Start Discovery]
+  ValidateInput -->|Yes| StartDiscovery[Start Discovery]:::action
 
-  StartDiscovery --> ProgressView[Progress View]
-  ProgressView --> ReviewResults[Review Results]
-  ReviewResults --> FilterRefine{Filter or Refine?}
-  FilterRefine -->|Yes| ApplyFilters[Apply Filters]
-  FilterRefine -->|No| ExportData[Export Data]
+  StartDiscovery --> ProgressView[Progress View]:::action
+  ProgressView --> ReviewResults[Review Results]:::action
+  ReviewResults --> FilterRefine{Filter or Refine?}:::action
+  FilterRefine -->|Yes| ApplyFilters[Apply Filters]:::action
+  FilterRefine -->|No| ExportData[Export Data]:::action
   ApplyFilters --> ReviewResults
-  ExportData --> Success[Success]
+  ExportData --> Success[Success]:::action
 
-  ValidateInput -.->|Error| ErrorMessage[Error]
-  StartDiscovery -.->|Quota| QuotaLimit[Quota Limit]
+  ValidateInput -.->|Error| ErrorMessage[Error]:::action
+  StartDiscovery -.->|Quota| QuotaLimit[Quota Limit]:::action
   ErrorMessage --> SearchCriteria
   QuotaLimit --> Dashboard
-
-  classDef action fill:#2a2a2a,stroke:#f5f5f5,color:#f5f5f5,stroke-width:2px
-  class Start,Dashboard,CampaignForm,SearchCriteria,ReviewResults action
-  class StartDiscovery,ProgressView,ApplyFilters,ExportData,Success action
-  class CreateCampaign,ValidateInput,FilterRefine action
-  class ErrorMessage,QuotaLimit action

@@ -21,42 +21,65 @@ sequenceDiagram
   U->>A: Submit credentials
   A->>S: Create account
   S->>E: Send verification
-  S->>A: User created
-  A->>U: Prompt verification
+  ---
+  accTitle: ProspectPro Authentication Flow
+  accDescr: Signup, verification, login, session management, and logout interactions
+  domain: app-source
+  type: sequenceDiagram
+  title: Authentication Flow
+  index: ../../../../mmd-shared/config/index.md
+  ---
 
-  Note over U,E: Verification
-  U->>E: Click link
-  E->>S: Validate token
-  S->>D: Update status
-  S->>A: Redirect
-  A->>U: Welcome
+  %%{init: { "config": "docs/mmd-shared/config/mermaid.config.json" } }%%
+  sequenceDiagram
+    participant U as User
+    participant A as App
+    participant S as Supabase Auth
+    participant D as Database
+    participant E as Email Service
 
-  Note over U,E: Login
-  U->>A: Enter credentials
-  A->>S: Authenticate
-  alt Valid
-    S->>A: Issue JWT
-    A->>D: Fetch profile
-    D->>A: Profile data
-    A->>U: Dashboard
-  else Invalid
-    S->>A: Error
-    A->>U: Show error
-  end
+    Note over U,E: Registration
+    U->>A: Access signup
+    A->>U: Show form
+    U->>A: Submit credentials
+    A->>S: Create account
+    S->>E: Send verification
+    S->>A: User created
+    A->>U: Prompt verification
 
-  Note over U,E: Session Management
-  loop Active session
-    A->>S: Validate token
-    alt Token valid
-      S->>A: OK
-    else Expired
-      S->>S: Refresh
-      S->>A: New token
+    Note over U,E: Verification
+    U->>E: Click link
+    E->>S: Validate token
+    S->>D: Update status
+    S->>A: Redirect
+    A->>U: Welcome
+
+    Note over U,E: Login
+    U->>A: Enter credentials
+    A->>S: Authenticate
+    alt Valid
+      S->>A: Issue JWT
+      A->>D: Fetch profile
+      D->>A: Profile data
+      A->>U: Dashboard
+    else Invalid
+      S->>A: Error
+      A->>U: Show error
     end
-  end
 
-  Note over U,E: Logout
-  U->>A: Logout
-  A->>S: Sign out
-  S->>A: Terminated
-  A->>U: Redirect
+    Note over U,E: Session Management
+    loop Active session
+      A->>S: Validate token
+      alt Token valid
+        S->>A: OK
+      else Expired
+        S->>S: Refresh
+        S->>A: New token
+      end
+    end
+
+    Note over U,E: Logout
+    U->>A: Logout
+    A->>S: Sign out
+    S->>A: Terminated
+    A->>U: Redirect

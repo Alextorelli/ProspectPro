@@ -35,7 +35,8 @@
         "redhat.vscode-yaml",
         "ms-playwright.playwright",
         "vitest.explorer",
-        "GraphQL.vscode-graphql"
+        "GraphQL.vscode-graphql",
+        "Heroku-Dev-Tools.heroku"
       ],
       "settings": {
         "terminal.integrated.defaultProfile.linux": "bash",
