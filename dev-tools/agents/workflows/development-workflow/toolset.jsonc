@@ -1,12 +1,8 @@
-// Place your tool sets here...
-// Example:
-// {
-// 	"toolSetName": {development-workflow-Tools}
-// 		"tools": [
-// 			"someTool",
-// 			"anotherTool"
-// 		],
-// 		"description": "description",
-// 		"icon": "tools"
-// 	}
-// }
+{
+  "development-workflow-tools": {
+    "supabase": ["execute_query", "run_migration", "deploy_function"],
+    "github": ["create_pull_request", "list_workflow_runs", "create_issue"],
+    "playwright": ["run_suite", "screenshot_capture", "trace_analysis"],
+    "react-devtools": ["inspect_component", "profile_render"]
+  }
+}
