@@ -1,0 +1,46 @@
+%%{init: { 'config': 'docs/mmd-shared/config/mermaid.config.json' } }%%
+%% accTitle: ProspectPro Application Lifecycle %%
+%% accDescr: Application and session lifecycle with navigation and error handling %%
+%% compliance: ZeroFakeData %%
+%% domain: app-source %%
+%% reciprocal: [../../../../mmd-shared/config/index.md] %%
+%% type: stateDiagram-v2 %%
+%% title: Application Lifecycle %%
+%% index: ../../../../mmd-shared/config/index.md %%
+
+stateDiagram-v2
+  [*] --> Loading: App start
+
+  state "Main States" as main {
+    Loading --> Authenticating: Check auth
+    Loading --> Offline: No connection
+    Authenticating --> Authenticated: Valid session
+    Authenticating --> Unauthenticated: No session
+    Unauthenticated --> Authenticating: Login attempt
+    Authenticated --> Dashboard: Load data
+    Authenticated --> Unauthenticated: Logout
+    Dashboard --> Campaign: Open campaign
+    Dashboard --> Settings: Open settings
+    Campaign --> Processing: Start discovery
+    Processing --> Results: Complete
+    Results --> Export: Download
+    Export --> Results: Done
+    Settings --> Dashboard: Saved
+    Offline --> Loading: Restored
+  }
+
+  state "Error States" as errors {
+    NetworkError --> Retry: Auto retry
+    ServerError --> ErrorPage: Show error
+    ValidationError --> Form: Show validation
+    Retry --> Loading: Success
+    ErrorPage --> Dashboard: User action
+    Form --> Campaign: Fix data
+  }
+
+  Dashboard --> NetworkError: Network issue
+  Campaign --> ServerError: Server issue
+  Processing --> ValidationError: Invalid data
+
+  Authenticated --> [*]: App close
+  Unauthenticated --> [*]: App close

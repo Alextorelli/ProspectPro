@@ -1,0 +1,42 @@
+%%{init: { 'config': 'docs/mmd-shared/config/mermaid.config.json' } }%%
+%% accTitle: Prospect Discovery Journey %%
+%% accDescr: User workflow from campaign creation through prospect export %%
+%% compliance: ZeroFakeData %%
+%% domain: app-source %%
+%% reciprocal: [../../../../mmd-shared/config/index.md] %%
+%% type: flowchart %%
+%% title: Prospect Discovery Journey %%
+%% index: ../../../../mmd-shared/config/index.md %%
+
+flowchart TD
+  Start([User Login]) --> Dashboard[Dashboard]
+
+  Dashboard --> CreateCampaign{Create Campaign?}
+  CreateCampaign -->|Yes| CampaignForm[Campaign Form]
+  CreateCampaign -->|No| ExistingCampaign[Select Existing]
+
+  CampaignForm --> SearchCriteria[Search Criteria]
+  ExistingCampaign --> SearchCriteria
+
+  SearchCriteria --> ValidateInput{Valid Input?}
+  ValidateInput -->|No| SearchCriteria
+  ValidateInput -->|Yes| StartDiscovery[Start Discovery]
+
+  StartDiscovery --> ProgressView[Progress View]
+  ProgressView --> ReviewResults[Review Results]
+  ReviewResults --> FilterRefine{Filter or Refine?}
+  FilterRefine -->|Yes| ApplyFilters[Apply Filters]
+  FilterRefine -->|No| ExportData[Export Data]
+  ApplyFilters --> ReviewResults
+  ExportData --> Success[Success]
+
+  ValidateInput -.->|Error| ErrorMessage[Error]
+  StartDiscovery -.->|Quota| QuotaLimit[Quota Limit]
+  ErrorMessage --> SearchCriteria
+  QuotaLimit --> Dashboard
+
+  classDef action fill:#2a2a2a,stroke:#f5f5f5,color:#f5f5f5,stroke-width:2px
+  class Start,Dashboard,CampaignForm,SearchCriteria,ReviewResults action
+  class StartDiscovery,ProgressView,ApplyFilters,ExportData,Success action
+  class CreateCampaign,ValidateInput,FilterRefine action
+  class ErrorMessage,QuotaLimit action

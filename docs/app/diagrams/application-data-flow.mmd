@@ -1,0 +1,52 @@
+%%{init: { 'config': 'docs/mmd-shared/config/mermaid.config.json' } }%%
+%% accTitle: Application Data Flow %%
+%% accDescr: End-to-end data flow from UI through backend to storage %%
+%% compliance: ZeroFakeData %%
+%% domain: app-source %%
+%% reciprocal: [../../../../mmd-shared/config/index.md] %%
+%% type: flowchart %%
+%% title: Application Data Flow %%
+%% index: ../../../../mmd-shared/config/index.md %%
+
+flowchart LR
+  subgraph ui["UI Layer"]
+    UserInput["User Input"]
+    UIState["UI State"]
+    UserFeedback["Feedback"]
+  end
+
+  subgraph state["State Layer"]
+    ClientState["Client Store"]
+    Cache["Cache"]
+    Validation["Validation"]
+  end
+
+  subgraph api["API Layer"]
+    APIClient["API Client"]
+    RealTime["Real-time"]
+    ErrorHandler["Error Handler"]
+  end
+
+  subgraph backend["Backend"]
+    EdgeFunction["Edge Functions"]
+    Enrichment["Enrichment"]
+    QueueProcessor["Queue Processor"]
+  end
+
+  subgraph storage["Storage"]
+    Database["Postgres"]
+    FileStorage["File Storage"]
+    SearchIndex["Search Index"]
+  end
+
+  UserInput --> UIState --> ClientState --> Validation --> APIClient
+  APIClient --> EdgeFunction --> Enrichment --> QueueProcessor --> Database
+  Database --> FileStorage
+  Database --> SearchIndex
+  Database -.-> Cache -.-> RealTime -.-> ClientState -.-> UserFeedback
+  APIClient -.-> ErrorHandler -.-> UserFeedback
+
+  classDef layer fill:#2a2a2a,stroke:#f5f5f5,color:#f5f5f5,stroke-width:2px
+  class UserInput,UIState,UserFeedback,ClientState,Cache,Validation layer
+  class APIClient,RealTime,ErrorHandler,EdgeFunction,Enrichment,QueueProcessor layer
+  class Database,FileStorage,SearchIndex layer

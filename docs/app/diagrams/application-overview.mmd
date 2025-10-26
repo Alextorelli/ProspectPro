@@ -1,0 +1,54 @@
+%%{init: { 'config': 'docs/mmd-shared/config/mermaid.config.json' } }%%
+%% accTitle: ProspectPro Application Overview %%
+%% accDescr: High-level application architecture with client, frontend, backend, and external integrations %%
+%% compliance: ZeroFakeData %%
+%% domain: app-source %%
+%% reciprocal: [../../../../mmd-shared/config/index.md] %%
+%% type: flowchart %%
+%% title: Application Overview %%
+%% index: ../../../../mmd-shared/config/index.md %%
+
+flowchart TB
+  subgraph client["Client"]
+    direction LR
+    WebApp["Web App"]
+    MobileApp["PWA"]
+  end
+
+  subgraph frontend["Frontend"]
+    direction LR
+    UIComponents["UI Components"]
+    StateManager["State Manager"]
+    AuthService["Auth Service"]
+  end
+
+  subgraph backend["Backend"]
+    direction TB
+    EdgeFunctions["Edge Functions"]
+    Database["Supabase DB"]
+    Storage["File Storage"]
+  end
+
+  subgraph external["External APIs"]
+    direction LR
+    GooglePlaces["Google Places"]
+    HunterIO["Hunter.io"]
+    NeverBounce["NeverBounce"]
+    CobaltIntel["Cobalt Intelligence"]
+  end
+
+  WebApp --> UIComponents
+  MobileApp --> UIComponents
+  UIComponents --> StateManager --> AuthService --> EdgeFunctions
+  EdgeFunctions --> Database
+  EdgeFunctions --> Storage
+  EdgeFunctions --> GooglePlaces
+  EdgeFunctions --> HunterIO
+  EdgeFunctions --> NeverBounce
+  EdgeFunctions --> CobaltIntel
+  StateManager --> Database
+
+  classDef layer fill:#2a2a2a,stroke:#f5f5f5,color:#f5f5f5,stroke-width:2px
+  class WebApp,MobileApp,UIComponents,StateManager,AuthService layer
+  class EdgeFunctions,Database,Storage layer
+  class GooglePlaces,HunterIO,NeverBounce,CobaltIntel layer
