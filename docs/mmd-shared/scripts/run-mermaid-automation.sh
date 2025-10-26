@@ -22,8 +22,10 @@ fi
 # 3. Validate diagrams
 bash docs/mmd-shared/scripts/validate-mermaid-diagrams.sh
 
-# 4. Stage and commit if there are changes
-git add docs/diagrams docs/mmd-shared dev-tools/workspace/context/session_store/live-tooling-list.txt
-if ! git diff --cached --quiet; then
-  git commit -m "docs: update mermaid diagrams and indexes via automation"
+# 4. Stage and commit if there are changes (CI only)
+if [ "$VALIDATE_ONLY" = "false" ] && { [ "${CI:-}" = "true" ] || [ "${MERMAID_AUTOCOMMIT:-}" = "1" ]; }; then
+  git add docs/diagrams docs/mmd-shared dev-tools/workspace/context/session_store/live-tooling-list.txt
+  if ! git diff --cached --quiet; then
+    git commit -m "docs: update mermaid diagrams and indexes via automation"
+  fi
 fi
