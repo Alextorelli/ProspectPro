@@ -16,7 +16,7 @@ process_diagram() {
   local yaml_content=""
   local mermaid_content=""
   local line_num=0
-  
+
   while IFS= read -r line; do
     ((line_num+=1))
     
@@ -67,8 +67,12 @@ process_diagram() {
     
     # Add to Mermaid content
     mermaid_content+="$line"$'\n'
-    
   done < "$file"
+
+  if [[ "$has_yaml" == true && "$in_yaml" == true ]]; then
+    yaml_content+="---"$'\n'
+    in_yaml=false
+  fi
   
   # Write cleaned content
   {
