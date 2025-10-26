@@ -1,0 +1,14 @@
+{
+  "iconRegistry": {
+    "database": "🗄️",
+    "api": "🔗",
+    "user": "👤",
+    "auth": "🔑",
+    "storage": "💾",
+    "queue": "📬",
+    "external": "🌐",
+    "error": "❗",
+    "success": "✅",
+    "warning": "⚠️"
+  }
+}
