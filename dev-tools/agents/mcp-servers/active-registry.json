@@ -2,89 +2,6 @@
   "version": "3.0",
   "last_updated": "2025-10-27",
   "servers": {
-    "production": {
-      "type": "stdio",
-      "package": "local",
-      "invocation": "node",
-      "script_path": "./environments/production.js",
-      "env": { "NODE_ENV": "production" },
-      "capabilities": [
-        "database",
-        "functions",
-        "storage",
-        "account",
-        "docs",
-        "debugging",
-        "development",
-        "branching",
-        "production_monitoring",
-        "campaign_analytics",
-        "ci_cd_integration",
-        "cost_intelligence",
-        "security_scanning",
-        "supabase_validation",
-        "vercel_status"
-      ],
-      "health_check_url": null,
-      "startup_timeout_ms": 7000,
-      "response_time_p95_target_ms": 600
-    },
-    "development": {
-      "type": "stdio",
-      "package": "local",
-      "invocation": "node",
-      "script_path": "./environments/development.js",
-      "env": { "NODE_ENV": "development" },
-      "capabilities": [
-        "database",
-        "functions",
-        "storage",
-        "account",
-        "docs",
-        "debugging",
-        "development",
-        "branching",
-        "react_devtools",
-        "eslint_autofix",
-        "performance_profiling",
-        "api_testing",
-        "supabase_functions",
-        "vercel_status",
-        "docs_generation"
-      ],
-      "health_check_url": null,
-      "startup_timeout_ms": 5000,
-      "response_time_p95_target_ms": 500
-    },
-    "troubleshooting": {
-      "type": "stdio",
-      "package": "local",
-      "invocation": "node",
-      "script_path": "./environments/troubleshooting.js",
-      "env": { "NODE_ENV": "troubleshooting" },
-      "capabilities": [
-        "database",
-        "functions",
-        "storage",
-        "account",
-        "docs",
-        "debugging",
-        "development",
-        "branching",
-        "log_aggregation",
-        "error_correlation",
-        "vercel_cli",
-        "real_time_monitoring",
-        "supabase_triage",
-        "trace_correlation",
-        "rls_diagnostics",
-        "incident_detection",
-        "ci_validation"
-      ],
-      "health_check_url": null,
-      "startup_timeout_ms": 5000,
-      "response_time_p95_target_ms": 500
-    },
     "memory": {
       "type": "stdio",
       "package": "local",
@@ -166,37 +83,6 @@
       "health_check_url": "https://status.context7.com/",
       "startup_timeout_ms": 3000,
       "response_time_p95_target_ms": 500
-    },
-    "stripe/agent-toolkit": {
-      "type": "http",
-      "package": "stripe/agent-toolkit",
-      "url": "https://mcp.stripe.com",
-      "capabilities": ["billing_metrics", "invoice_lookup", "event_replay"],
-      "health_check_url": "https://status.stripe.com/",
-      "startup_timeout_ms": 4000,
-      "response_time_p95_target_ms": 700
-    },
-    "postmanlabs/postman-mcp-server": {
-      "type": "stdio",
-      "package": "@postman/postman-mcp-server",
-      "invocation": "npx",
-      "arguments": ["@postman/postman-mcp-server@latest"],
-      "env": {
-        "POSTMAN_API_KEY": "${env:POSTMAN_API_KEY}"
-      },
-      "capabilities": ["api_testing", "collection_runner", "monitoring"],
-      "health_check_url": null,
-      "startup_timeout_ms": 6000,
-      "response_time_p95_target_ms": 750
-    },
-    "apify/apify-mcp-server": {
-      "type": "http",
-      "package": "apify/apify-mcp-server",
-      "url": "https://mcp.apify.com",
-      "capabilities": ["web_scraping", "automation", "datasets"],
-      "health_check_url": "https://status.apify.com/",
-      "startup_timeout_ms": 5000,
-      "response_time_p95_target_ms": 700
     },
     "sequentialthinking": {
       "type": "stdio",

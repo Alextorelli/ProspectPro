@@ -274,3 +274,29 @@ ev## 2025-10-23: Codespaces Bootstrap Realignment
 - **Validation:** Ran `npm run docs:bootstrap` to confirm all diagrams scaffold and lint using the shared config/snippets. No per-domain config duplication remains.
 - **Impact:** All diagram generation, lint, and automation now use a single source of config/snippets. Manifest and docs are MECE-aligned.
 - **Next:** Repo GPS snapshot refresh recommended.
+
+# Registry Cleanup and Tool Module Removal
+
+## Date: 2025-10-27
+
+### Actions Completed
+
+- Removed deprecated MCPs from `active-registry.json`:
+  - production
+  - development
+  - troubleshooting
+  - stripe/agent-toolkit
+  - postmanlabs/postman-mcp-server
+  - apify/apify-mcp-server
+- Deleted tool modules:
+  - production-server-tools.js
+  - development-server-tools.js
+  - supabase-troubleshooting-server-tools.js
+  - postgresql-server-tools.js
+  - integration-hub-server-tools.js
+
+### Notes
+
+- All changes align with the finalized MECE taxonomy and integration plan.
+- No impact to sequential, memory, supabase, github, playwright, or context7 MCPs.
+- Next step: validate MCP startup and update inventories.

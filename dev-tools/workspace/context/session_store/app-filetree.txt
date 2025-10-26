@@ -1,0 +1,8 @@
+# app-filetree.txt (post-registry-cleanup)
+
+- dev-tools/agents/mcp-servers/active-registry.json (updated)
+- dev-tools/agents/mcp-servers/mcp-tools/production-server-tools.js (deleted)
+- dev-tools/agents/mcp-servers/mcp-tools/development-server-tools.js (deleted)
+- dev-tools/agents/mcp-servers/mcp-tools/supabase-troubleshooting-server-tools.js (deleted)
+- dev-tools/agents/mcp-servers/mcp-tools/postgresql-server-tools.js (deleted)
+- dev-tools/agents/mcp-servers/mcp-tools/integration-hub-server-tools.js (deleted)
