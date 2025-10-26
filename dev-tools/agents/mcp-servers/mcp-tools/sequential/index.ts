@@ -1,4 +1,4 @@
-!/usr/bin/env node
+#!/usr/bin/env node
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import {
@@ -6,7 +6,7 @@ import {
   ListToolsRequestSchema,
   Tool,
 } from "@modelcontextprotocol/sdk/types.js";
-import { SequentialThinkingServer } from './lib.js';
+import { createSequentialThinkingServer } from "./lib.js";
 
 const SEQUENTIAL_THINKING_TOOL: Tool = {
   name: "sequential_thinking",
@@ -69,47 +69,53 @@ You should:
     properties: {
       thought: {
         type: "string",
-        description: "Your current thinking step"
+        description: "Your current thinking step",
       },
       nextThoughtNeeded: {
         type: "boolean",
-        description: "Whether another thought step is needed"
+        description: "Whether another thought step is needed",
       },
       thoughtNumber: {
         type: "integer",
         description: "Current thought number (numeric value, e.g., 1, 2, 3)",
-        minimum: 1
+        minimum: 1,
       },
       totalThoughts: {
         type: "integer",
-        description: "Estimated total thoughts needed (numeric value, e.g., 5, 10)",
-        minimum: 1
+        description:
+          "Estimated total thoughts needed (numeric value, e.g., 5, 10)",
+        minimum: 1,
       },
       isRevision: {
         type: "boolean",
-        description: "Whether this revises previous thinking"
+        description: "Whether this revises previous thinking",
       },
       revisesThought: {
         type: "integer",
         description: "Which thought is being reconsidered",
-        minimum: 1
+        minimum: 1,
       },
       branchFromThought: {
         type: "integer",
         description: "Branching point thought number",
-        minimum: 1
+        minimum: 1,
       },
       branchId: {
         type: "string",
-        description: "Branch identifier"
+        description: "Branch identifier",
       },
       needsMoreThoughts: {
         type: "boolean",
-        description: "If more thoughts are needed"
-      }
+        description: "If more thoughts are needed",
+      },
     },
-    required: ["thought", "nextThoughtNeeded", "thoughtNumber", "totalThoughts"]
-  }
+    required: [
+      "thought",
+      "nextThoughtNeeded",
+      "thoughtNumber",
+      "totalThoughts",
+    ],
+  },
 };
 
 const server = new Server(
@@ -124,7 +130,7 @@ const server = new Server(
   }
 );
 
-const thinkingServer = new SequentialThinkingServer();
+const thinkingServer = createSequentialThinkingServer();
 
 server.setRequestHandler(ListToolsRequestSchema, async () => ({
   tools: [SEQUENTIAL_THINKING_TOOL],
@@ -136,11 +142,13 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
   }
 
   return {
-    content: [{
-      type: "text",
-      text: `Unknown tool: ${request.params.name}`
-    }],
-    isError: true
+    content: [
+      {
+        type: "text",
+        text: `Unknown tool: ${request.params.name}`,
+      },
+    ],
+    isError: true,
   };
 });
 
