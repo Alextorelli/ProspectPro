@@ -18,7 +18,7 @@ process_diagram() {
   local line_num=0
   
   while IFS= read -r line; do
-    ((line_num++))
+    ((line_num+=1))
     
     # Check for YAML frontmatter delimiters
     if [[ "$line" == "---" ]]; then
@@ -45,6 +45,16 @@ process_diagram() {
       continue
     fi
     
+    # Skip stray markers like D--- introduced by past migrations
+    if [[ "$line" =~ ^[A-Za-z]-{3}$ ]]; then
+      continue
+    fi
+
+    # Drop Markdown fences; .mmd files store raw Mermaid
+    if [[ "${line:0:3}" == '```' ]]; then
+      continue
+    fi
+
     # Skip duplicate %%{init:...} if we already saw one
     if [[ "$line" =~ ^%%\{init: ]] && [[ "$mermaid_content" =~ "%%{init:" ]]; then
       continue
@@ -77,6 +87,6 @@ process_diagram() {
 # Find and process all .mmd files
 while IFS= read -r -d '' file; do
   process_diagram "$file"
-done < <(find docs/app/diagrams docs/dev-tools/diagrams docs/integration/diagrams docs/diagrams -name "*.mmd" -type f -print0 2>/dev/null)
+done < <(find docs/app/diagrams docs/dev-tools/diagrams docs/integration/diagrams -name "*.mmd" -type f -print0 2>/dev/null)
 
 echo "All diagrams fixed."

@@ -3,6 +3,7 @@
 Add YAML frontmatter to all .mmd diagrams that are missing it.
 Extract metadata from legacy %% tags if present, or use sensible defaults.
 """
+import os
 import re
 from pathlib import Path
 
@@ -10,10 +11,10 @@ DIAGRAM_ROOTS = [
     "docs/app/diagrams",
     "docs/dev-tools/diagrams",
     "docs/integration/diagrams",
-    "docs/diagrams",
 ]
 
 DIAGRAM_TYPE_PATTERN = re.compile(r"^(flowchart|erDiagram|sequenceDiagram|classDiagram|mindmap|graph|gitGraph|gantt|pie|journey|timeline|quadrantChart|sankey|block|architecture|C4Context|C4Container|C4Component|C4Dynamic|C4Deployment)\b")
+CONFIG_REFERENCE = Path("docs/mmd-shared/config/index.md").resolve()
 
 def extract_legacy_metadata(lines):
     """Extract metadata from legacy %% tags."""
@@ -23,7 +24,7 @@ def extract_legacy_metadata(lines):
         "domain": "app-source",
         "type": "flowchart",
         "title": "",
-        "index": "../../../../mmd-shared/config/index.md"
+        "index": None,
     }
     
     for line in lines:
@@ -88,6 +89,10 @@ def process_diagram(file_path):
         metadata["domain"] = "app-source"
     
     # Build YAML frontmatter
+    if not metadata["index"]:
+        rel_index = os.path.relpath(CONFIG_REFERENCE, file_path.parent.resolve())
+        metadata["index"] = rel_index.replace(os.sep, "/")
+
     yaml_frontmatter = [
         "---\n",
         f"accTitle: {metadata['accTitle']}\n",
@@ -107,6 +112,12 @@ def process_diagram(file_path):
         stripped = line.strip()
         # Skip legacy tags
         if re.match(r"^%%\s+(accTitle|accDescr|domain|reciprocal|type|title|index|compliance):", stripped):
+            continue
+        # Skip stray markers like D--- created by previous migrations
+        if re.match(r"^[A-Za-z]-{3}$", stripped):
+            continue
+        # Drop Markdown fences; diagrams live as raw Mermaid
+        if stripped.startswith("```"):
             continue
         # Keep first %%{init:...}
         if re.match(r"^%%\{init:", stripped):

@@ -5,7 +5,11 @@ import { execSync } from "child_process";
 import fs from "fs";
 import path from "path";
 
-const DIAGRAM_ROOT = "docs/diagrams";
+const DIAGRAM_ROOTS = [
+  "docs/app/diagrams",
+  "docs/dev-tools/diagrams",
+  "docs/integration/diagrams",
+];
 const CACHE_DIR = ".docs-cache";
 const MANIFEST = path.join(CACHE_DIR, "manifest.json");
 
@@ -25,7 +29,7 @@ function walk(dir) {
 }
 
 function getAllMermaidFiles() {
-  return walk(DIAGRAM_ROOT);
+  return DIAGRAM_ROOTS.flatMap((root) => walk(root));
 }
 
 function getChangedMermaidFiles() {
@@ -35,7 +39,8 @@ function getChangedMermaidFiles() {
     .filter(
       (f) =>
         (f.endsWith(".mermaid") || f.endsWith(".mmd")) &&
-        f.startsWith(`${DIAGRAM_ROOT}/`)
+        DIAGRAM_ROOTS.some((root) => f.startsWith(`${root}/`)) &&
+        fs.existsSync(f)
     );
 }
 
