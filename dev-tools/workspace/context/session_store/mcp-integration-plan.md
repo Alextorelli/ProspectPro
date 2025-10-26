@@ -20,11 +20,15 @@ _Date: 2025-10-26_
 - Default sequential thought ledger to `dev-tools/agents/context/session_store/sequential-thoughts.jsonl`
 - Document overrides via `MCP_MEMORY_FILE_PATH` and `SEQUENTIAL_LOG_PATH`
 
-## Phase 4 — Validation & Registry Sync
 
-- Compile TypeScript outputs (`npm run build`) for both packages
-- Update `active-registry.json` and `tool-reference.md` if tool signatures change
-- Smoke test sequential + memory servers locally using `npx` invocation with session store paths
+## Phase 4 — Validation & Registry Sync (Complete)
+
+- Compile TypeScript outputs (`npm run build`) for both packages  ✅
+- Update `active-registry.json` and `tool-reference.md` if tool signatures change  ✅
+- Smoke test sequential + memory servers locally using direct node invocation with session store paths  ✅
+
+**2025-10-26 Completion Note:**
+Artifact/lock file policy enforced (.gitignore excludes dist/, package-lock.json tracked). MCP Sequential and Memory servers rebuilt and smoke-tested with session-store log paths. Phase 4 complete; ready for documentation refresh and Phase 5 handoff.
 
 ## Phase 5 — Documentation & Handoff
 
