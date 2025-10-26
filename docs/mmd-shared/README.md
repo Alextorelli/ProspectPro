@@ -8,19 +8,29 @@ Centralized configuration, scripts, and standards for all Mermaid diagrams in Pr
 docs/mmd-shared/
 ├── config/
 │   ├── index.md                    # Config and navigation hub
+│   ├── navigation-index.md         # Diagram navigation map
 │   ├── mermaid.config.json         # Mermaid theme and layout config
 │   ├── icon-registry.json          # Semantic emoji/icon mapping
 │   └── puppeteer.config.json       # Browser automation config
 ├── guidelines/
 │   ├── enhanced-diagram-standards.md  # Diagram authoring standards
-│   └── mermaid-syntax-guide.md        # Quick reference for syntax
-└── scripts/
-    ├── check-tags.mjs              # Validate YAML frontmatter
-    ├── fix-all-diagrams.py         # Clean duplicate tags/headers
-    ├── add-yaml-frontmatter.py     # Add missing YAML frontmatter
-    ├── scaffold-diagrams.sh        # Generate new diagram files
-    ├── generate-diagrams.mjs       # Differential rendering engine
-    └── validate-mermaid-diagrams.sh # Full validation suite
+│   ├── diagram-guidelines.md          # Additional guidelines
+│   └── DOCUMENTATION_STANDARDS.md     # Documentation standards
+├── scripts/
+│   ├── check-tags.mjs              # Validate YAML frontmatter
+│   ├── fix-all-diagrams.py         # Clean duplicate tags/headers
+│   ├── add-yaml-frontmatter.py     # Add missing YAML frontmatter
+│   ├── consolidate-diagrams.sh     # Consolidate legacy diagrams
+│   ├── generate-index.py           # Auto-generate diagram index
+│   ├── scaffold-diagrams.sh        # Generate new diagram files
+│   ├── generate-diagrams.mjs       # Differential rendering engine
+│   └── validate-mermaid-diagrams.sh # Full validation suite
+└── README.md                       # This file
+
+docs/shared/mermaid/
+├── MIGRATION_SUMMARY.md            # Migration technical details
+├── CONSOLIDATION_REPORT.md         # Consolidation completion report
+└── MAINTENANCE_CHECKLIST.md        # Ongoing maintenance guide
 ```
 
 ## 🚀 Quick Start
@@ -274,12 +284,30 @@ python3 docs/mmd-shared/scripts/fix-all-diagrams.py
    npm run docs:validate
    ```
 
-## 📖 Further Reading
+## � Further Reading
 
-- [Mermaid Documentation](https://mermaid.js.org/)
-- [Enhanced Diagram Standards](./guidelines/enhanced-diagram-standards.md)
-- [Config Index](./config/index.md)
-- [ProspectPro Documentation](../README.md)
+- **Standards & Guidelines**
+
+  - [Enhanced Diagram Standards](./guidelines/enhanced-diagram-standards.md)
+  - [Diagram Guidelines](./guidelines/diagram-guidelines.md)
+  - [Documentation Standards](./guidelines/DOCUMENTATION_STANDARDS.md)
+
+- **Configuration**
+
+  - [Config Index](./config/index.md)
+  - [Navigation Index](./config/navigation-index.md)
+  - [Mermaid Config](./config/mermaid.config.json)
+  - [Icon Registry](./config/icon-registry.json)
+
+- **Reports & History**
+
+  - [Migration Summary](../shared/mermaid/MIGRATION_SUMMARY.md)
+  - [Consolidation Report](../shared/mermaid/CONSOLIDATION_REPORT.md)
+  - [Maintenance Checklist](../shared/mermaid/MAINTENANCE_CHECKLIST.md)
+
+- **External Resources**
+  - [Mermaid Documentation](https://mermaid.js.org/)
+  - [ProspectPro Documentation](../README.md)
 
 ## 🤝 Contributing
 

@@ -4,8 +4,8 @@
 
 ### Before Creating New Diagrams
 
-- [ ] Review [Enhanced Diagram Standards](./guidelines/enhanced-diagram-standards.md)
-- [ ] Check [Icon Registry](./config/icon-registry.json) for semantic icons
+- [ ] Review [Enhanced Diagram Standards](../../mmd-shared/guidelines/enhanced-diagram-standards.md)
+- [ ] Check [Icon Registry](../../mmd-shared/config/icon-registry.json) for semantic icons
 - [ ] Verify diagram type matches content (flowchart, erDiagram, etc.)
 
 ### After Creating/Editing Diagrams
@@ -105,18 +105,19 @@ npm run docs:fix
 
 When adding new diagram types or standards:
 
-1. Update `guidelines/enhanced-diagram-standards.md`
-2. Add examples to `guidelines/mermaid-syntax-guide.md`
-3. Update `config/icon-registry.json` if new icons needed
-4. Document in `README.md`
-5. Add validation rules to `scripts/check-tags.mjs` if needed
+1. Update `mmd-shared/guidelines/enhanced-diagram-standards.md`
+2. Add examples to `mmd-shared/guidelines/diagram-guidelines.md`
+3. Update `mmd-shared/config/icon-registry.json` if new icons needed
+4. Document in `mmd-shared/README.md`
+5. Add validation rules to `mmd-shared/scripts/check-tags.mjs` if needed
 
 ## 🔗 Quick Links
 
-- [Mermaid Suite README](./README.md)
+- [Mermaid Suite README](../../mmd-shared/README.md)
 - [Migration Summary](./MIGRATION_SUMMARY.md)
-- [Enhanced Standards](./guidelines/enhanced-diagram-standards.md)
-- [Config Index](./config/index.md)
+- [Consolidation Report](./CONSOLIDATION_REPORT.md)
+- [Enhanced Standards](../../mmd-shared/guidelines/enhanced-diagram-standards.md)
+- [Config Index](../../mmd-shared/config/index.md)
 - [Mermaid Docs](https://mermaid.js.org/)
 
 ---

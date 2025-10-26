@@ -142,6 +142,8 @@ $ npm run docs:validate
 
 - 8 new subdirectories in domain folders
 - `docs/mmd-shared/scripts/consolidate-diagrams.sh`
+- `docs/mmd-shared/scripts/generate-index.py`
+- `docs/shared/mermaid/CONSOLIDATION_REPORT.md` (this file)
 
 ### Updated
 
