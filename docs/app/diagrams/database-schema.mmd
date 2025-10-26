@@ -1,64 +1,52 @@
-%%{init: { 'config': 'docs/mmd-shared/config/mermaid.config.json' } }%%
-%% accTitle: Database Schema %%
-%% accDescr: Core tables and relationships for ProspectPro %%
+---
+accTitle: Database Schema
+accDescr: Core tables and relationships for ProspectPro
+domain: app-source
+type: erDiagram
+title: Database Schema
+index: ../../../../mmd-shared/config/index.md
+---
 
-%% domain: app-source %%
-%% reciprocal: [../../../../mmd-shared/config/index.md] %%
-%% type: erDiagram %%
-%% title: Database Schema %%
-%% index: ../../../../mmd-shared/config/index.md %%
-
+%%{init: { "config": "docs/mmd-shared/config/mermaid.config.json" } }%%
 erDiagram
+  users {
+    uuid id PK
+    string email UK
     string name
-  ---
-  accTitle: Database Schema
-  accDescr: Core tables and relationships for ProspectPro
-  domain: app-source
-  type: erDiagram
-  title: Database Schema
-  index: ../../../../mmd-shared/config/index.md
-  ---
+    boolean email_verified
+    timestamp created_at
+  }
 
-  %%{init: { "config": "docs/mmd-shared/config/mermaid.config.json" } }%%
-  erDiagram
-    users {
-      uuid id PK
-      string email UK
-      string name
-      boolean email_verified
-      timestamp created_at
-    }
+  campaigns {
+    uuid id PK
+    uuid user_id FK
+    string name
+    text description
+    json search_criteria
+    enum status
+    timestamp created_at
+  }
 
-    campaigns {
-      uuid id PK
-      uuid user_id FK
-      string name
-      text description
-      json search_criteria
-      enum status
-      timestamp created_at
-    }
+  prospects {
+    uuid id PK
+    uuid campaign_id FK
+    string business_name
+    string email
+    json location_data
+    integer quality_score
+    timestamp discovered_at
+  }
 
-    prospects {
-      uuid id PK
-      uuid campaign_id FK
-      string business_name
-      string email
-      json location_data
-      integer quality_score
-      timestamp discovered_at
-    }
+  exports {
+    uuid id PK
+    uuid campaign_id FK
+    uuid user_id FK
+    string format
+    string file_path
+    timestamp created_at
+  }
 
-    exports {
-      uuid id PK
-      uuid campaign_id FK
-      uuid user_id FK
-      string format
-      string file_path
-      timestamp created_at
-    }
-
-    users ||--o{ campaigns : creates
-    campaigns ||--o{ prospects : discovers
-    campaigns ||--o{ exports : generates
-    users ||--o{ exports : owns
+  users ||--o{ campaigns : creates
+  campaigns ||--o{ prospects : discovers
+  campaigns ||--o{ exports : generates
+  users ||--o{ exports : owns

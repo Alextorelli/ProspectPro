@@ -1,12 +1,14 @@
-%%{init: { 'config': 'docs/mmd-shared/config/mermaid.config.json' } }%%
-%% accTitle: ProspectPro Application Overview %%
-%% accDescr: High-level application architecture with client, frontend, backend, and external integrations %%
+---
+accTitle: ProspectPro Application Overview
+accDescr: High-level application architecture with client, frontend, backend, and external integrations
+domain: app-source
+type: flowchart
+title: Application Overview
+index: ../../../../mmd-shared/config/index.md
+---
 
-%% domain: app-source %%
-%% reciprocal: [../../../../mmd-shared/config/index.md] %%
-%% type: flowchart %%
-%% title: Application Overview %%
-%% index: ../../../../mmd-shared/config/index.md %%
+%%{init: { 'config': 'docs/mmd-shared/config/mermaid.config.json' } }%%
+
 
 flowchart TB
   subgraph client["Client"]
@@ -20,8 +22,6 @@ flowchart TB
     index: ../../../../mmd-shared/config/index.md
     ---
 
-    %%{init: { "config": "docs/mmd-shared/config/mermaid.config.json" } }%%
-    flowchart TB
       classDef cluster fill:#1f1f1f,stroke:#cfcfcf,color:#f5f5f5,stroke-width:1.5px
       classDef node fill:#2b2b2b,stroke:#dedede,color:#f5f5f5,stroke-width:1px
       classDef accent fill:#333333,stroke:#f5f5f5,color:#fefefe,stroke-width:1px
