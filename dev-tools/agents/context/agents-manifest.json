@@ -5,26 +5,62 @@
   "defaultEnvironment": "development",
   "defaultScratchpadLimit": 80,
   "defaultSchemaVersion": "1.0.0",
+  "sharedMcpServers": ["memory", "sequentialthinking"],
+  "contextStore": "dev-tools/agents/context/store/agents/",
+  "sessionStore": "dev-tools/workspace/context/session_store/",
+  "environments": {
+    "development": "integration/environments/development.json",
+    "staging": "integration/environments/staging.json",
+    "production": "integration/environments/production.json"
+  },
   "agents": {
     "development-workflow": {
       "persona": "developer",
+      "defaultEnv": "development",
       "environment": "development",
-      "toolset": "development-workflow/toolset.jsonc"
+      "toolset": "development-workflow/toolset.jsonc",
+      "mcpServers": [
+        "supabase",
+        "github/github-mcp-server",
+        "microsoft/playwright-mcp"
+      ],
+      "requiredSecrets": [
+        "AGENT_DEV_SUPABASE_URL",
+        "AGENT_DEV_SUPABASE_ANON_KEY",
+        "GITHUB_TOKEN"
+      ]
     },
     "observability": {
       "persona": "observability",
-      "environment": "development",
-      "toolset": "observability/toolset.jsonc"
+      "defaultEnv": "staging",
+      "environment": "staging",
+      "toolset": "observability/toolset.jsonc",
+      "mcpServers": ["supabase"],
+      "requiredSecrets": ["AGENT_STAGING_SUPABASE_URL"]
     },
     "production-ops": {
       "persona": "production-ops",
+      "defaultEnv": "production",
       "environment": "production",
-      "toolset": "production-ops/toolset.jsonc"
+      "toolset": "production-ops/toolset.jsonc",
+      "mcpServers": ["supabase", "github/github-mcp-server"],
+      "requiredSecrets": [
+        "AGENT_PROD_SUPABASE_URL",
+        "VERCEL_TOKEN",
+        "GITHUB_TOKEN"
+      ]
     },
     "system-architect": {
       "persona": "system-architect",
+      "defaultEnv": "development",
       "environment": "development",
-      "toolset": "system-architect/toolset.jsonc"
+      "toolset": "system-architect/toolset.jsonc",
+      "mcpServers": [
+        "supabase",
+        "github/github-mcp-server",
+        "microsoft/playwright-mcp"
+      ],
+      "requiredSecrets": ["AGENT_DEV_SUPABASE_URL", "GITHUB_TOKEN"]
     }
   }
 }
