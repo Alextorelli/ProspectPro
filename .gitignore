@@ -90,9 +90,13 @@ docker/data/
 .lovable/
 lovable-config.json
 
+
 # Production builds
 /build
-/dist
+
+# Exclude all dist/ output from MCP sub-packages
+dev-tools/agents/mcp-servers/mcp-tools/sequential/dist/
+dev-tools/agents/mcp-servers/mcp-tools/memory/dist/
 
 # === RUNTIME DATA (NEVER COMMIT) ===
 
