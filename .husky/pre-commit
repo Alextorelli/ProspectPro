@@ -1,6 +1,6 @@
 #!/bin/sh
 # husky pre-commit hook — enforce ignore hygiene
-node integration/infrastructure/scripts/validate-ignore-config.cjs || exit 1
+node dev-tools/scripts/tooling/validate-ignore-config.cjs || exit 1
 # Add other pre-commit checks below
 # Run mermaid automation in validation mode only (do not auto-stage changes)
 docs/mmd-shared/scripts/run-mermaid-automation.sh --validate || exit 1

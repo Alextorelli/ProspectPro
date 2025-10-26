@@ -211,5 +211,6 @@
   "mermaidChart.exportOnSave": false,
   "mermaidChart.defaultTheme": "dark",
   "mermaidChart.externalSnippets": ["docs/shared/mermaid/config/mermaid.json"],
-  "vitest.nodeEnv": {}
+  "vitest.nodeEnv": {},
+  "deno.cacheOnSave": false
 }
