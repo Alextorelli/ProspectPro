@@ -6,7 +6,32 @@
     "lastUpdated": "2025-10-20T06:40:39.969Z",
     "summary": null
   },
-  "longTermMemory": [],
+  "longTermMemory": [
+    {
+      "id": "obs-endpoints-1761603344293",
+      "topic": "observabilityEndpoints",
+      "payload": {},
+      "createdAt": "2025-10-27T22:15:44.293Z",
+      "lastAccessed": "2025-10-27T22:15:44.293Z",
+      "environment": "production",
+      "tags": [
+        "observability"
+      ]
+    },
+    {
+      "id": "deploy-checklist-1761603390026",
+      "topic": "deploymentChecklist",
+      "payload": {
+        "checklist": "# Deployment Checklist Template\n\n## Pre-Deployment Validation\n- [ ] Run `npm run lint` and `npm test` to ensure code quality\n- [ ] Execute `npm run supabase:test:db` for database tests\n- [ ] Validate agent contexts with `npm run validate:contexts`\n- [ ] Check MCP servers status with `npm run mcp:start`\n\n## Frontend Deployment\n- [ ] Build production bundle with `npm run build`\n- [ ] Deploy to Vercel with `npx vercel@latest --prod --confirm --scope appsmithery --project prospect-pro --cwd dist`\n- [ ] Verify deployment URL and health checks\n\n## Backend Deployment\n- [ ] Deploy Edge Functions with `npm run deploy:critical`\n- [ ] Monitor function logs with `npm run edge:logs`\n- [ ] Test authentication flows in production\n\n## Post-Deployment Monitoring\n- [ ] Check Supabase dashboard for errors\n- [ ] Monitor application performance metrics\n- [ ] Validate data integrity and user flows\n- [ ] Update deployment logs in session store\n"
+      },
+      "createdAt": "2025-10-27T22:16:30.026Z",
+      "lastAccessed": "2025-10-27T22:16:30.026Z",
+      "environment": "production",
+      "tags": [
+        "deployment"
+      ]
+    }
+  ],
   "metadata": {
     "environment": "production",
     "version": "1.0.0",

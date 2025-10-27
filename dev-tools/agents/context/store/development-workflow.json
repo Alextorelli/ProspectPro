@@ -6,7 +6,19 @@
     "lastUpdated": "2025-10-20T06:40:39.969Z",
     "summary": null
   },
-  "longTermMemory": [],
+  "longTermMemory": [
+    {
+      "id": "obs-endpoints-1761603344268",
+      "topic": "observabilityEndpoints",
+      "payload": {},
+      "createdAt": "2025-10-27T22:15:44.268Z",
+      "lastAccessed": "2025-10-27T22:15:44.269Z",
+      "environment": "development",
+      "tags": [
+        "observability"
+      ]
+    }
+  ],
   "metadata": {
     "environment": "development",
     "version": "1.0.0",

@@ -14,5 +14,12 @@
     ],
     "description": "Canonical observability and troubleshooting tools for log analysis, error correlation, and performance monitoring.",
     "icon": "visibility"
+  },
+  "playwright": {
+    "runTests": "npx playwright test",
+    "runTestsHeaded": "npx playwright test --headed",
+    "runTestsUI": "npx playwright test --ui",
+    "generateTest": "npx playwright codegen",
+    "showReport": "npx playwright show-report"
   }
 }

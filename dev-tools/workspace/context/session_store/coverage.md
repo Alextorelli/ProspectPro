@@ -358,3 +358,4 @@ ev## 2025-10-23: Codespaces Bootstrap Realignment
   2025-10-27T07:48:29Z: Phase 5 agent/MCP validation complete
   2025-10-27T07:54:34Z: Phase 5 agent/MCP validation complete
   2025-10-27T11:25:45Z: Phase 5 agent/MCP validation complete
+- 2025-10-27: Synced observability endpoints across all agent contexts from observability.json source of truth.
