@@ -783,14 +783,13 @@ export class ContextManager {
     }
   }
 
-
   // Flat agent context file path (store/<agentId>.json)
   private agentFile(agentId: string): string {
     return path.join(this.storeDir, `${agentId}.json`);
   }
 
-// Environment context directory now lives in store/shared/environments/
-const ENV_CONTEXT_DIR = path.join(defaultStoreDir, "shared", "environments");
+  // Environment context directory now lives in store/shared/environments/
+  ENV_CONTEXT_DIR = path.join(defaultStoreDir, "shared", "environments");
 
   private nowISO(): string {
     return this.dateProvider().toISOString();
@@ -923,7 +922,9 @@ export class EnvironmentContextManager {
       .sort((a, b) => Date.parse(b.timestamp) - Date.parse(a.timestamp));
   }
 
-  private async readEnvironment(name: EnvironmentName): Promise<EnvironmentContext> {
+  private async readEnvironment(
+    name: EnvironmentName
+  ): Promise<EnvironmentContext> {
     const file = path.join(ENV_CONTEXT_DIR, `${name}.json`);
     const raw = await fs.readFile(file, "utf8");
     const parsed = JSON.parse(raw) as EnvironmentContext;
