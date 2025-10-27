@@ -5,6 +5,7 @@
   "mcp_servers": [
     "supabase",
     "github/github-mcp-server",
-    "microsoft/playwright-mcp"
+    "microsoft/playwright-mcp",
+    "utility"
   ]
 }

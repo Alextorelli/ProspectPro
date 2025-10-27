@@ -22,7 +22,8 @@
       "mcpServers": [
         "supabase",
         "github/github-mcp-server",
-        "microsoft/playwright-mcp"
+        "microsoft/playwright-mcp",
+        "utility"
       ],
       "requiredSecrets": [
         "AGENT_DEV_SUPABASE_URL",
@@ -35,7 +36,7 @@
       "defaultEnv": "staging",
       "environment": "staging",
       "toolset": "observability/toolset.jsonc",
-      "mcpServers": ["supabase"],
+      "mcpServers": ["supabase", "utility"],
       "requiredSecrets": ["AGENT_STAGING_SUPABASE_URL"]
     },
     "production-ops": {
@@ -43,7 +44,7 @@
       "defaultEnv": "production",
       "environment": "production",
       "toolset": "production-ops/toolset.jsonc",
-      "mcpServers": ["supabase", "github/github-mcp-server"],
+      "mcpServers": ["supabase", "github/github-mcp-server", "utility"],
       "requiredSecrets": [
         "AGENT_PROD_SUPABASE_URL",
         "VERCEL_TOKEN",
@@ -58,7 +59,8 @@
       "mcpServers": [
         "supabase",
         "github/github-mcp-server",
-        "microsoft/playwright-mcp"
+        "microsoft/playwright-mcp",
+        "utility"
       ],
       "requiredSecrets": ["AGENT_DEV_SUPABASE_URL", "GITHUB_TOKEN"]
     }
