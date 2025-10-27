@@ -23,7 +23,7 @@ export interface SequentialThinkingOptions {
 const DEFAULT_LOG_PATH = path.resolve(
   process.cwd(),
   process.env.SEQUENTIAL_LOG_PATH ||
-    "dev-tools/agents/context/session_store/sequential-thoughts.jsonl"
+    "dev-tools/agents/context/session_store/sequential/memory.jsonl"
 );
 
 const SEQUENTIAL_THINKING_TOOL: Tool = {
@@ -139,15 +139,24 @@ You should:
 export class SequentialThinkingEngine {
   private readonly thoughtHistory: ThoughtData[] = [];
   private readonly branches: Record<string, ThoughtData[]> = {};
-  private readonly disableThoughtLogging: boolean;
   private readonly logPath: string;
+  private readonly agentId?: string;
+  private readonly environment?: string;
+  private readonly checkpointId?: string;
+  private readonly scratchpadRetention: boolean;
+  private readonly disableThoughtLogging: boolean;
   private logPrepared = false;
 
   constructor(options: SequentialThinkingOptions = {}) {
+    this.logPath = path.resolve(options.logPath ?? DEFAULT_LOG_PATH);
+    this.agentId = options.agentId;
+    this.environment = options.environment;
+    this.checkpointId = options.checkpointId;
+    this.scratchpadRetention = options.scratchpadRetention !== false;
     this.disableThoughtLogging =
       options.disableThoughtLogging ||
+      !this.scratchpadRetention ||
       (process.env.DISABLE_THOUGHT_LOGGING || "").toLowerCase() === "true";
-    this.logPath = path.resolve(options.logPath ?? DEFAULT_LOG_PATH);
   }
 
   get tool(): Tool {
@@ -173,7 +182,10 @@ export class SequentialThinkingEngine {
     const payload = {
       timestamp: new Date().toISOString(),
       ...thought,
-    } satisfies ThoughtData & { timestamp: string };
+      agentId: this.agentId,
+      environment: this.environment,
+      checkpointId: this.checkpointId,
+    };
 
     await appendFile(this.logPath, `${JSON.stringify(payload)}\n`);
   }
