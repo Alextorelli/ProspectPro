@@ -26,15 +26,7 @@
     }
   ],
   "servers": {
-    "memory": {
-      "type": "stdio",
-      "command": "node",
-      "args": ["./mcp-tools/memory/dist/index.js"],
-      "env": {
-        "MCP_MEMORY_FILE_PATH": "${input:memory_file_path}"
-      },
-      "version": "0.7.0"
-    },
+    // ...existing code...
     "stripe/agent-toolkit": {
       "type": "http",
       "url": "https://mcp.stripe.com",
@@ -83,12 +75,7 @@
       "headers": {
         "CONTEXT7_API_KEY": "${input:context7_api_key}"
       }
-    },
-    "sequentialthinking": {
-      "type": "stdio",
-      "command": "node",
-      "args": ["./mcp-tools/sequential/dist/index.js"],
-      "version": "0.2.0"
     }
+    // ...existing code...
   }
 }
