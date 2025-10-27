@@ -1,5 +1,5 @@
 {
-  "version": "3.0",
+  "version": "3.0"
   "last_updated": "2025-10-27",
   "servers": {
     "supabase": {
@@ -79,11 +79,11 @@
       },
       "capabilities": [
         "http_fetch",
-        "html_conversion",
+  "html_conversion"
         "filesystem_read",
         "filesystem_write",
         "git_status",
-        "timezone_conversion",
+  "timezone_conversion"
         "long_term_memory",
         "session_recall",
         "conversation_indexing",
