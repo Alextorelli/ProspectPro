@@ -57,6 +57,24 @@ class ObservabilityServer {
 
   setupToolHandlers() {
         {
+          name: "check_production_deployment",
+          description: "Check the status and health of the production deployment (Supabase + Vercel)",
+          inputSchema: {
+            type: "object",
+            properties: {
+              supabaseUrl: {
+                type: "string",
+                description: "Supabase project URL (e.g. https://xyz.supabase.co)",
+              },
+              vercelUrl: {
+                type: "string",
+                description: "Vercel frontend deployment URL (e.g. https://prospectpro.vercel.app)",
+              },
+            },
+            required: ["supabaseUrl", "vercelUrl"],
+          },
+        },
+        {
           name: "run_rls_diagnostics",
           description: "Generate and execute RLS diagnostic queries",
           inputSchema: {
@@ -270,6 +288,61 @@ class ObservabilityServer {
     }));
 
     this.server.setRequestHandler(CallToolRequestSchema, async (request) => {
+          } else if (name === "check_production_deployment") {
+            result = await this.checkProductionDeployment(args);
+  async checkProductionDeployment({ supabaseUrl, vercelUrl }) {
+    // Check Supabase API health
+    const supabaseHealthUrl = supabaseUrl.replace(/\/$/, "") + "/rest/v1/";
+    // Check Vercel frontend health (assume /api/health or / for now)
+    const vercelHealthUrl = vercelUrl.replace(/\/$/, "") + "/api/health";
+    const fetch = (await import("node-fetch")).default;
+    let supabaseStatus = {}, vercelStatus = {};
+    try {
+      const supabaseRes = await fetch(supabaseHealthUrl, { method: "GET" });
+      supabaseStatus = {
+        url: supabaseHealthUrl,
+        status: supabaseRes.status,
+        ok: supabaseRes.ok,
+        statusText: supabaseRes.statusText,
+      };
+    } catch (err) {
+      supabaseStatus = { url: supabaseHealthUrl, error: err.message };
+    }
+    try {
+      const vercelRes = await fetch(vercelHealthUrl, { method: "GET" });
+      vercelStatus = {
+        url: vercelHealthUrl,
+        status: vercelRes.status,
+        ok: vercelRes.ok,
+        statusText: vercelRes.statusText,
+      };
+    } catch (err) {
+      // Try fallback to root
+      try {
+        const fallbackRes = await fetch(vercelUrl, { method: "GET" });
+        vercelStatus = {
+          url: vercelUrl,
+          status: fallbackRes.status,
+          ok: fallbackRes.ok,
+          statusText: fallbackRes.statusText,
+        };
+      } catch (err2) {
+        vercelStatus = { url: vercelUrl, error: err2.message };
+      }
+    }
+    return {
+      content: [
+        {
+          type: "text",
+          text:
+            `Production Deployment Health Check Results:\n\nSupabase API:\n${JSON.stringify(supabaseStatus, null, 2)}\n\nVercel Frontend:\n${JSON.stringify(vercelStatus, null, 2)}\n\n` +
+            (supabaseStatus.ok && vercelStatus.ok
+              ? "✅ Both Supabase and Vercel deployments are healthy."
+              : "❌ One or more services are reporting errors. See details above."),
+        },
+      ],
+    };
+  }
       const { name, arguments: args } = request.params;
 
       return await tracer.trace(`observability.${name}`, async (span) => {
