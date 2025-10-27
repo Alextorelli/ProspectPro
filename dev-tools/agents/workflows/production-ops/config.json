@@ -11,30 +11,19 @@
     "cost_optimization"
   ],
   "mcp_dependencies": {
-    "primary": [
-      "integration-hub",
-      "github",
-      "supabase",
-      "supabase-troubleshooting"
-    ],
-    "secondary": ["chrome-devtools", "drizzle-orm"]
+    "primary": ["github", "supabase", "supabase-troubleshooting"],
+    "secondary": []
   },
   "tools_access": [
-    "integration_hub.execute_workflow",
-    "integration_hub.send_notification",
-    "integration_hub.check_integration_health",
     "github.create_pull_request",
     "github.merge_pull_request",
     "supabase.validate_migration",
     "supabase.check_pool_health",
     "supabase.execute_query",
     "supabase_troubleshooting.correlate_errors",
-    "supabase_troubleshooting.generate_incident_timeline",
-    "chrome_devtools.performance_profile",
-    "drizzle_orm.migrate",
-    "drizzle_orm.query"
+    "supabase_troubleshooting.generate_incident_timeline"
   ],
-  "testing_tooling": ["React DevTools", "Playwright"],
+  "testing_tooling": ["Playwright"],
   "environment_credentials": {
     "development": {
       "supabase_project_ref_var": "AGENT_DEV_SUPABASE_PROJECT_REF",

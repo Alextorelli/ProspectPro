@@ -1,12 +1,15 @@
-// Place your tool sets here...
-// Example:
-// {
-// 	"toolSetName": {system-architect-tools}
-// 		"tools": [
-// 			"someTool",
-// 			"anotherTool"
-// 		],
-// 		"description": "description",
-// 		"icon": "tools"
-// 	}
-// }
+{
+  "system-architect-mcp": {
+    "tools": [
+      "supabase.execute_query",
+      "supabase.explain_query",
+      "supabase.validate_migration",
+      "supabase.check_pool_health",
+      "supabase.analyze_slow_queries",
+      "supabase_troubleshooting.correlate_errors",
+      "supabase_troubleshooting.generate_incident_timeline"
+    ],
+    "description": "Canonical system architecture tools for schema design, migration validation, and performance analysis.",
+    "icon": "architecture"
+  }
+}

@@ -11,13 +11,8 @@
     "observability_design"
   ],
   "mcp_dependencies": {
-    "primary": [
-      "supabase",
-      "supabase-troubleshooting",
-      "integration-hub",
-      "drizzle-orm"
-    ],
-    "secondary": ["github", "chrome-devtools"]
+    "primary": ["supabase", "supabase-troubleshooting"],
+    "secondary": []
   },
   "tools_access": [
     "supabase.execute_query",
@@ -26,14 +21,9 @@
     "supabase.check_pool_health",
     "supabase.analyze_slow_queries",
     "supabase_troubleshooting.correlate_errors",
-    "supabase_troubleshooting.generate_incident_timeline",
-    "integration_hub.check_integration_health",
-    "integration_hub.execute_workflow",
-    "drizzle_orm.migrate",
-    "drizzle_orm.query",
-    "chrome_devtools.trace_analysis"
+    "supabase_troubleshooting.generate_incident_timeline"
   ],
-  "testing_tooling": ["React DevTools", "Playwright"],
+  "testing_tooling": ["Playwright"],
   "environment_credentials": {
     "development": {
       "supabase_project_ref_var": "AGENT_DEV_SUPABASE_PROJECT_REF",

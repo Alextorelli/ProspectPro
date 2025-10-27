@@ -1,12 +1,15 @@
-// Place your tool sets here...
-// Example:
-// {
-// 	"toolSetName": {production-ops-tools}
-// 		"tools": [
-// 			"someTool",
-// 			"anotherTool"
-// 		],
-// 		"description": "description",
-// 		"icon": "tools"
-// 	}
-// }
+{
+  "production-ops-mcp": {
+    "tools": [
+      "github.create_pull_request",
+      "github.merge_pull_request",
+      "supabase.validate_migration",
+      "supabase.check_pool_health",
+      "supabase.execute_query",
+      "supabase_troubleshooting.correlate_errors",
+      "supabase_troubleshooting.generate_incident_timeline"
+    ],
+    "description": "Canonical production operations tools for deployment, incident response, and database health.",
+    "icon": "build"
+  }
+}
