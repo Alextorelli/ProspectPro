@@ -12,6 +12,12 @@
 - Validation: Ran CI (lint/test/build/playwright) and captured outputs in dev-tools/reports/security/.
 - Notes: All steps in the acceleration plan are now complete and documented. Ready for ongoing automation and CI/CD health checks.
 
+## 2025-10-27: Session Store Cleanup (Archive Prune)
+
+- Removed outdated `archive/e2e-playwright-reactdevtools-workplan-20251027-221556.md` after migrating plan to canonical docs under `docs/dev-tools/testing/playwright-react-devtools.md`.
+- Deleted unused `logs/` directory (empty) from `dev-tools/workspace/context/session_store/`.
+- Confirmed active inventories remain in `dev-tools/workspace/context/session_store/` without redundant copies.
+
 ## 2025-10-27: Observability MCP Supabase Diagnostics Migration
 
 - Action: Migrated all Supabase troubleshooting tools (`test_edge_function`, `validate_database_permissions`, `run_rls_diagnostics`, `supabase_cli_healthcheck`, `check_production_deployment`, `vercel_status_check`, `generate_debugging_commands`, `collect_and_summarize_logs`, `validate_ci_cd_suite`) into `dev-tools/agents/mcp-servers/observability-server.js` with OpenTelemetry span instrumentation and Highlight.io error forwarding.
