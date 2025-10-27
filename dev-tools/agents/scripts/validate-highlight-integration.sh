@@ -29,8 +29,8 @@ echo "✅ Highlight.io credentials configured"
 echo ""
 echo "🧪 Running failing CI/CD test to trigger error reporting..."
 
-# Run a test that should fail (using non-existent suite)
-node dev-tools/agents/mcp-servers/observability-server.js <<EOF || true
+ # Run a test that should fail (using non-existent suite)
+node ../mcp-servers/observability-server.js <<EOF || true
 {
   "jsonrpc": "2.0",
   "id": 1,
