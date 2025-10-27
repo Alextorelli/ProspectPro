@@ -103,7 +103,7 @@ This reference consolidates all MCP tools currently available across the install
 | search_nodes        | Search for nodes based on query                                                        | query                                                                                                                                | Knowledge Graph |
 | open_nodes          | Retrieve specific nodes by name                                                        | names                                                                                                                                | Knowledge Graph |
 
-> Default workspace root: `${ALLOWED_PATH:-/workspaces/ProspectPro}`. Knowledge graph snapshots are stored at `${MCP_MEMORY_FILE_PATH:-dev-tools/agents/context/session_store/memory.jsonl}`. Sequential thought logs default to `${SEQUENTIAL_LOG_PATH:-dev-tools/agents/context/session_store/sequential-thoughts.jsonl}` and honor `DISABLE_THOUGHT_LOGGING=true`.
+> Default workspace root: `${ALLOWED_PATH:-/workspaces/ProspectPro}`. Knowledge graph snapshots and sequential thought logs are now managed exclusively by the Utility MCP. Legacy memory and sequentialthinking MCPs have been removed. All cognitive and knowledge graph operations should use the Utility MCP endpoints.
 
 ## Usage Notes
 

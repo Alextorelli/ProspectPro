@@ -5,8 +5,6 @@
   "mcp_servers": [
     "supabase",
     "github/github-mcp-server",
-    "microsoft/playwright-mcp",
-    "memory",
-    "sequentialthinking"
+    "microsoft/playwright-mcp"
   ]
 }

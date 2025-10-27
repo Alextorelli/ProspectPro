@@ -5,7 +5,7 @@
   "defaultEnvironment": "development",
   "defaultScratchpadLimit": 80,
   "defaultSchemaVersion": "1.0.0",
-  "sharedMcpServers": ["memory", "sequentialthinking", "utility"],
+  "sharedMcpServers": ["utility"],
   "contextStore": "dev-tools/agents/context/store/agents/",
   "sessionStore": "dev-tools/workspace/context/session_store/",
   "environments": {
