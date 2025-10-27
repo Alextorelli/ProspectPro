@@ -11,19 +11,16 @@
     "compliance_monitoring"
   ],
   "mcp_dependencies": {
-    "primary": ["supabase-troubleshooting", "supabase", "integration-hub"],
-    "secondary": ["chrome-devtools", "drizzle-orm"]
+    "primary": ["supabase-troubleshooting", "supabase"],
+    "secondary": []
   },
   "tools_access": [
     "supabase_troubleshooting.correlate_errors",
     "supabase_troubleshooting.generate_incident_timeline",
     "supabase.analyze_slow_queries",
-    "supabase.check_pool_health",
-    "integration_hub.check_integration_health",
-    "integration_hub.send_notification",
-    "drizzle_orm.query"
+    "supabase.check_pool_health"
   ],
-  "testing_tooling": ["React DevTools", "Playwright"],
+  "testing_tooling": ["Playwright"],
   "environment_credentials": {
     "development": {
       "supabase_project_ref_var": "AGENT_DEV_SUPABASE_PROJECT_REF",

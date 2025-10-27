@@ -1,12 +1,12 @@
-// Place your tool sets here...
-// Example:
-// {
-// 	"toolSetName": {observability-tools}
-// 		"tools": [
-// 			"someTool",
-// 			"anotherTool"
-// 		],
-// 		"description": "description",
-// 		"icon": "tools"
-// 	}
-// }
+{
+  "observability-mcp": {
+    "tools": [
+      "supabase_troubleshooting.correlate_errors",
+      "supabase_troubleshooting.generate_incident_timeline",
+      "supabase.analyze_slow_queries",
+      "supabase.check_pool_health"
+    ],
+    "description": "Canonical observability and troubleshooting tools for log analysis, error correlation, and performance monitoring.",
+    "icon": "visibility"
+  }
+}
