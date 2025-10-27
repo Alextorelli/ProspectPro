@@ -180,8 +180,9 @@ dashboard_exports (id, campaign_id, user_id, session_user_id, ...)
 ### Prerequisites
 
 - Node.js 18+
-- Supabase CLI
-- Vercel CLI (for deployment)
+- Supabase CLI (`npm install -g supabase`)
+- Vercel CLI (`npm install -g vercel`)
+- GitHub CLI (`brew install gh` or see https://cli.github.com/manual/installation)
 
 ### Setup
 
