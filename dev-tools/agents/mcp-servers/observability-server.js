@@ -7,6 +7,7 @@
  * OpenTelemetry instrumented with Jaeger backend
  */
 
+import { H } from "@highlight-run/node";
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import {
@@ -21,6 +22,12 @@ import { NodeTracerProvider } from "@opentelemetry/sdk-trace-node";
 import { SemanticResourceAttributes } from "@opentelemetry/semantic-conventions";
 import fs from "fs/promises";
 import path from "path";
+
+H.init({
+  projectID: process.env.HIGHLIGHT_PROJECT_ID ?? "kgr09vng",
+  serviceName: "observability-server",
+  environment: process.env.NODE_ENV ?? "development",
+});
 
 // Initialize OpenTelemetry with Jaeger exporter
 const resource = new Resource({
