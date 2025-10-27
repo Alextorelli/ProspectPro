@@ -46,6 +46,7 @@
     "deploy:netlify": "netlify deploy --prod --dir=dist",
     "deploy:vercel": "npx --yes vercel@latest --prod",
     "validate:ignores": "node integration/infrastructure/scripts/validate-ignore-config.cjs",
+    "validate:contexts": "bash dev-tools/scripts/automation/verify-agent-context.sh",
     "dev": "vite",
     "devtools:react": "npx react-devtools --port 8097 --host 0.0.0.0",
     "dev:supabase": "bash -lc 'cd supabase && source ../scripts/operations/ensure-supabase-cli-session.sh && npx --yes supabase@latest functions serve --no-verify-jwt --debug'",

@@ -1,0 +1,9 @@
+{
+  "playwright": {
+    "runTests": "npx playwright test",
+    "runTestsHeaded": "npx playwright test --headed",
+    "runTestsUI": "npx playwright test --ui",
+    "generateTest": "npx playwright codegen",
+    "showReport": "npx playwright show-report"
+  }
+}
