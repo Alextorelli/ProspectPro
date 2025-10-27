@@ -783,13 +783,14 @@ export class ContextManager {
     }
   }
 
-  private agentDir(agentId: string): string {
-    return path.join(this.storeDir, "agents", agentId);
+
+  // Flat agent context file path (store/<agentId>.json)
+  private agentFile(agentId: string): string {
+    return path.join(this.storeDir, `${agentId}.json`);
   }
 
-  private agentFile(agentId: string): string {
-    return path.join(this.agentDir(agentId), "context.json");
-  }
+// Environment context directory now lives in store/shared/environments/
+const ENV_CONTEXT_DIR = path.join(defaultStoreDir, "shared", "environments");
 
   private nowISO(): string {
     return this.dateProvider().toISOString();
@@ -823,7 +824,7 @@ export class EnvironmentContextManager {
   }
 
   async list(): Promise<EnvironmentContext[]> {
-    const envDir = path.join(this.storeDir, "environments");
+    const envDir = path.join(ENV_CONTEXT_DIR);
     try {
       const entries = await fs.readdir(envDir);
       const contexts: EnvironmentContext[] = [];
@@ -922,10 +923,8 @@ export class EnvironmentContextManager {
       .sort((a, b) => Date.parse(b.timestamp) - Date.parse(a.timestamp));
   }
 
-  private async readEnvironment(
-    name: EnvironmentName
-  ): Promise<EnvironmentContext> {
-    const file = path.join(this.storeDir, "environments", `${name}.json`);
+  private async readEnvironment(name: EnvironmentName): Promise<EnvironmentContext> {
+    const file = path.join(ENV_CONTEXT_DIR, `${name}.json`);
     const raw = await fs.readFile(file, "utf8");
     const parsed = JSON.parse(raw) as EnvironmentContext;
     return {
