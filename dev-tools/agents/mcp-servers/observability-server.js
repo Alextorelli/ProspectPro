@@ -122,6 +122,48 @@ class ObservabilityServer {
           },
         },
         {
+          name: "test_edge_function",
+          description: "Test Supabase Edge Function connectivity and authentication (smoke test)",
+          inputSchema: {
+            type: "object",
+            properties: {
+              functionName: {
+                type: "string",
+                description: "Name of the Edge Function to test",
+                default: "business-discovery",
+              },
+              anonKey: {
+                type: "string",
+                description: "Supabase anon key for authentication",
+              },
+              testPayload: {
+                type: "object",
+                description: "Test payload to send to function",
+                default: { businessType: "test", location: "test" },
+              },
+            },
+            required: ["functionName", "anonKey"],
+          },
+        },
+        {
+          name: "validate_database_permissions",
+          description: "Check database RLS policies and permissions",
+          inputSchema: {
+            type: "object",
+            properties: {
+              supabaseUrl: {
+                type: "string",
+                description: "Supabase project URL",
+              },
+              anonKey: {
+                type: "string",
+                description: "Supabase anon key",
+              },
+            },
+            required: ["supabaseUrl", "anonKey"],
+          },
+        },
+        {
           name: "query_traces",
           description: "Query trace data for analysis and debugging",
           inputSchema: {
@@ -201,11 +243,10 @@ class ObservabilityServer {
         try {
           span.setAttributes({
             "observability.operation": name,
-            "observability.request_id": crypto.randomUUID(),
+            "observability.request_id": (globalThis.crypto?.randomUUID?.() || Math.random().toString(36).slice(2)),
           });
 
           let result;
-
           if (name === "start_trace") {
             result = await this.startTrace(args);
           } else if (name === "add_trace_event") {
@@ -218,6 +259,10 @@ class ObservabilityServer {
             result = await this.generateTraceReport(args);
           } else if (name === "health_check") {
             result = await this.healthCheck();
+          } else if (name === "test_edge_function") {
+            result = await this.testEdgeFunction(args);
+          } else if (name === "validate_database_permissions") {
+            result = await this.validateDatabasePermissions(args);
           } else {
             throw new Error(`Unknown tool: ${name}`);
           }
@@ -246,6 +291,102 @@ class ObservabilityServer {
         }
       });
     });
+  // --- Supabase Diagnostics Tools ---
+  async testEdgeFunction({ functionName, anonKey, testPayload = { businessType: "test", location: "test" } }) {
+    const url = `https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/${functionName}`;
+    const curlCommand = `curl -X POST '${url}' \\\n  -H 'Authorization: Bearer ${anonKey}' \\\n  -H 'Content-Type: application/json' \\\n  -d '${JSON.stringify(testPayload)}'`;
+    const { exec } = await import('child_process');
+    const { promisify } = await import('util');
+    const execAsync = promisify(exec);
+    try {
+      const { stdout, stderr } = await execAsync(curlCommand);
+      let result;
+      try {
+        result = JSON.parse(stdout);
+      } catch {
+        result = stdout;
+      }
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Edge Function Test Results for '${functionName}':\n\nCommand executed:\n${curlCommand}\n\nResponse:\n${JSON.stringify(result, null, 2)}\n\nStatus: ${stderr ? "ERROR" : "SUCCESS"}\n${stderr ? `Error: ${stderr}` : ""}`,
+          },
+        ],
+      };
+    } catch (error) {
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Error testing Edge Function: ${error.message}`,
+          },
+        ],
+      };
+    }
+  }
+
+  async validateDatabasePermissions({ supabaseUrl, anonKey }) {
+    const { createClient } = await import('@supabase/supabase-js');
+    try {
+      const supabase = createClient(supabaseUrl, anonKey);
+      const tests = [
+        { table: "campaigns", operation: "SELECT" },
+        { table: "leads", operation: "SELECT" },
+        { table: "dashboard_exports", operation: "SELECT" },
+      ];
+      const results = [];
+      for (const test of tests) {
+        try {
+          const { data, error } = await supabase
+            .from(test.table)
+            .select("count", { count: "exact" })
+            .limit(1);
+          results.push({
+            table: test.table,
+            status: error ? "FAILED" : "SUCCESS",
+            error: error?.message,
+            count: data ? "accessible" : "not accessible",
+          });
+        } catch (err) {
+          results.push({
+            table: test.table,
+            status: "FAILED",
+            error: err.message,
+          });
+        }
+      }
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Database Permissions Validation Results:\n\n${results
+              .map(
+                (r) => `Table: ${r.table}\nStatus: ${r.status}\n${r.error ? `Error: ${r.error}` : ""}\n${r.count ? `Access: ${r.count}` : ""}\n`
+              )
+              .join("\n")}\n\nSummary:\n${
+                results.every((r) => r.status === "SUCCESS")
+                  ? "✅ All database permissions are correctly configured"
+                  : "❌ Database permission issues detected - check RLS policies"
+              }\n\nRecommended actions:\n${
+                results.some((r) => r.status === "FAILED")
+                  ? "1. Run /database/rls-setup.sql in Supabase SQL editor\n2. Verify anon key is correct\n3. Check table existence"
+                  : "Database permissions are working correctly"
+              }`,
+          },
+        ],
+      };
+    } catch (error) {
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Database validation failed: ${error.message}`,
+          },
+        ],
+      };
+    }
+  }
   }
 
   async startTrace({ traceName, attributes = {} }) {
