@@ -13,13 +13,23 @@ export interface ThoughtData {
 export interface SequentialThinkingOptions {
     disableThoughtLogging?: boolean;
     logPath?: string;
+    agentId?: string;
+    environment?: string;
+    checkpointId?: string;
+    scratchpadRetention?: boolean;
+    getTimestamp?: () => Promise<string> | string;
 }
 declare const SEQUENTIAL_THINKING_TOOL: Tool;
 export declare class SequentialThinkingEngine {
     private readonly thoughtHistory;
     private readonly branches;
-    private readonly disableThoughtLogging;
     private readonly logPath;
+    private readonly agentId?;
+    private readonly environment?;
+    private readonly checkpointId?;
+    private readonly scratchpadRetention;
+    private readonly disableThoughtLogging;
+    private readonly getTimestamp?;
     private logPrepared;
     constructor(options?: SequentialThinkingOptions);
     get tool(): Tool;

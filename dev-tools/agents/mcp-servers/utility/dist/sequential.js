@@ -2,7 +2,7 @@ import chalk from "chalk";
 import { appendFile, mkdir } from "fs/promises";
 import path from "path";
 const DEFAULT_LOG_PATH = path.resolve(process.cwd(), process.env.SEQUENTIAL_LOG_PATH ||
-    "dev-tools/agents/context/session_store/sequential-thoughts.jsonl");
+    "dev-tools/agents/context/session_store/sequential/memory.jsonl");
 const SEQUENTIAL_THINKING_TOOL = {
     name: "sequential_thinking",
     description: `A detailed tool for dynamic and reflective problem-solving through thoughts.
@@ -114,14 +114,25 @@ You should:
 export class SequentialThinkingEngine {
     thoughtHistory = [];
     branches = {};
-    disableThoughtLogging;
     logPath;
+    agentId;
+    environment;
+    checkpointId;
+    scratchpadRetention;
+    disableThoughtLogging;
+    getTimestamp;
     logPrepared = false;
     constructor(options = {}) {
+        this.logPath = path.resolve(options.logPath ?? DEFAULT_LOG_PATH);
+        this.agentId = options.agentId;
+        this.environment = options.environment;
+        this.checkpointId = options.checkpointId;
+        this.scratchpadRetention = options.scratchpadRetention !== false;
+        this.getTimestamp = options.getTimestamp;
         this.disableThoughtLogging =
             options.disableThoughtLogging ||
+                !this.scratchpadRetention ||
                 (process.env.DISABLE_THOUGHT_LOGGING || "").toLowerCase() === "true";
-        this.logPath = path.resolve(options.logPath ?? DEFAULT_LOG_PATH);
     }
     get tool() {
         return SEQUENTIAL_THINKING_TOOL;
@@ -139,9 +150,22 @@ export class SequentialThinkingEngine {
             return;
         }
         await this.prepareLogFile();
+        let timestamp;
+        if (this.getTimestamp) {
+            timestamp =
+                typeof this.getTimestamp === "function"
+                    ? await this.getTimestamp()
+                    : this.getTimestamp;
+        }
+        else {
+            timestamp = new Date().toISOString();
+        }
         const payload = {
-            timestamp: new Date().toISOString(),
+            timestamp,
             ...thought,
+            agentId: this.agentId,
+            environment: this.environment,
+            checkpointId: this.checkpointId,
         };
         await appendFile(this.logPath, `${JSON.stringify(payload)}\n`);
     }

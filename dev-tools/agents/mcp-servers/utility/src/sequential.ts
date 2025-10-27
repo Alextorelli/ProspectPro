@@ -18,6 +18,11 @@ export interface ThoughtData {
 export interface SequentialThinkingOptions {
   disableThoughtLogging?: boolean;
   logPath?: string;
+  agentId?: string;
+  environment?: string;
+  checkpointId?: string;
+  scratchpadRetention?: boolean;
+  getTimestamp?: () => Promise<string> | string;
 }
 
 const DEFAULT_LOG_PATH = path.resolve(
@@ -145,6 +150,7 @@ export class SequentialThinkingEngine {
   private readonly checkpointId?: string;
   private readonly scratchpadRetention: boolean;
   private readonly disableThoughtLogging: boolean;
+  private readonly getTimestamp?: () => Promise<string> | string;
   private logPrepared = false;
 
   constructor(options: SequentialThinkingOptions = {}) {
@@ -153,6 +159,7 @@ export class SequentialThinkingEngine {
     this.environment = options.environment;
     this.checkpointId = options.checkpointId;
     this.scratchpadRetention = options.scratchpadRetention !== false;
+    this.getTimestamp = options.getTimestamp;
     this.disableThoughtLogging =
       options.disableThoughtLogging ||
       !this.scratchpadRetention ||
@@ -179,8 +186,17 @@ export class SequentialThinkingEngine {
     }
 
     await this.prepareLogFile();
+    let timestamp: string;
+    if (this.getTimestamp) {
+      timestamp =
+        typeof this.getTimestamp === "function"
+          ? await this.getTimestamp()
+          : this.getTimestamp;
+    } else {
+      timestamp = new Date().toISOString();
+    }
     const payload = {
-      timestamp: new Date().toISOString(),
+      timestamp,
       ...thought,
       agentId: this.agentId,
       environment: this.environment,

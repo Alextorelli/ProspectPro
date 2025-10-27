@@ -336,7 +336,23 @@ async function createRuntime(
   options: { sequential?: SequentialThinkingOptions } = {}
 ): Promise<RuntimeContext> {
   const { manager, memoryFilePath } = await initialiseKnowledgeGraph();
-  const sequentialEngine = createSequentialThinkingEngine(options.sequential);
+
+  // Canonical timestamp provider using time MCP
+  async function getCanonicalTimestamp(): Promise<string> {
+    // Use UTC for canonical logs
+    const result = await handleTimeNow({ timezone: "UTC" });
+    try {
+      const parsed = JSON.parse(result);
+      return parsed.timestamp || new Date().toISOString();
+    } catch {
+      return new Date().toISOString();
+    }
+  }
+
+  const sequentialEngine = createSequentialThinkingEngine({
+    ...options.sequential,
+    getTimestamp: getCanonicalTimestamp,
+  });
   const memoryTools = buildMemoryToolList();
   const memoryToolNames = new Set(memoryTools.map((tool) => tool.name));
 
