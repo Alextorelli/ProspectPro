@@ -119,30 +119,7 @@
   "git.fetchOnPull": true,
   "git.mergeEditor": false,
   "mcp.enable": true,
-  "mcp.servers": {
-    "prospectpro-production": {
-      "command": "node",
-      "args": ["./dev-tools/agents/mcp-servers/observability-server.js"],
-      "autoStart": true,
-      "lazyLoad": true,
-      "maxMemory": "256MB",
-      "timeout": 30000
-    },
-    "prospectpro-development": {
-      "command": "node",
-      "args": ["./dev-tools/agents/mcp-servers/observability-server.js"],
-      "autoStart": false,
-      "lazyLoad": true,
-      "maxMemory": "128MB"
-    },
-    "prospectpro-troubleshooting": {
-      "command": "node",
-      "args": ["./dev-tools/agents/mcp-servers/observability-server.js"],
-      "autoStart": false,
-      "lazyLoad": true,
-      "maxMemory": "128MB"
-    }
-  },
+  "mcp.configFile": "${workspaceFolder}/.vscode/mcp_config.json",
   "terminal.integrated.cwd": "${workspaceFolder}",
   "terminal.integrated.enableMultiLinePasteWarning": "never",
   "terminal.integrated.persistentSessionReviveProcess": "never",

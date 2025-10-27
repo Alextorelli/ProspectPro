@@ -10,3 +10,12 @@
 ---
 
 **Action:** VS Code window reload recommended to apply MCP config changes.
+
+## MCP Config Alignment – October 27, 2025
+
+- Removed `mcp.servers` block from `.vscode/settings.json` (was using an unsupported schema).
+- Added `"mcp.configFile": "${workspaceFolder}/.vscode/mcp_config.json"` to `.vscode/settings.json`.
+- `.vscode/mcp_config.json` is now the single source of truth for MCP servers, using the correct schema for the MCP scanner.
+- This resolves parse errors and ensures only supported MCPs are loaded.
+
+**Action:** Reload VS Code to apply changes.
