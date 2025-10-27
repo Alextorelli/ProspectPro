@@ -1,10 +1,23 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { H } from "highlight.run";
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 import App from "./App";
 import "./index.css";
 import { supabase } from "./lib/supabase";
+// Initialize Highlight.io for frontend monitoring
+H.init("kgr09vng", {
+  serviceName: "frontend-app",
+  tracingOrigins: true,
+  networkRecording: {
+    enabled: true,
+    recordHeadersAndBody: true,
+    urlBlocklist: [
+      // Add URLs to exclude from recording if needed
+    ],
+  },
+});
 
 if (typeof window !== "undefined") {
   (window as typeof window & { __supabase?: typeof supabase }).__supabase =
