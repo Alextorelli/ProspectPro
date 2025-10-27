@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 
 const diagnosticsDir = path.resolve(
   __dirname,
-  "../../dev-tools/context/session_store/diagnostics"
+  "../../dev-tools/workspace/context/session_store/diagnostics"
 );
 const fixturePath = path.resolve(
   __dirname,

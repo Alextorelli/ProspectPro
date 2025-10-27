@@ -32,7 +32,7 @@ This directory contains the **enhanced MCP server implementation** that provides
 
 ProspectPro now ships a unified Utility MCP server for cognitive extensions:
 
-- **Utility MCP**: Streams structured reasoning steps to `dev-tools/agents/context/session_store/sequential-thoughts.jsonl` and manages a JSONL knowledge graph at `dev-tools/agents/context/session_store/memory.jsonl`. Override via `SEQUENTIAL_LOG_PATH` and `MCP_MEMORY_FILE_PATH`.
+- **Utility MCP**: Streams structured reasoning steps to `dev-tools/workspace/context/session_store/sequential-thoughts.jsonl` and manages a JSONL knowledge graph at `dev-tools/workspace/context/session_store/memory.jsonl`. Override via `SEQUENTIAL_LOG_PATH` and `MCP_MEMORY_FILE_PATH`.
 - All agents reference canonical secrets from `.env.agent.local` (see `.env.agent.example` for template).
 - Run `npm run build:tools` in `dev-tools/agents/mcp-servers/` after editing these packages so the registry (`active-registry.json`) can execute the latest `dist/` output.
 

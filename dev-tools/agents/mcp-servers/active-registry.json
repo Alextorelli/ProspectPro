@@ -74,8 +74,8 @@
       "env": {
         "NODE_ENV": "utility",
         "ALLOWED_PATH": "${env:ALLOWED_PATH:-/workspaces/ProspectPro}",
-        "MCP_MEMORY_FILE_PATH": "${env:MCP_MEMORY_FILE_PATH:-dev-tools/agents/context/session_store/memory.jsonl}",
-        "SEQUENTIAL_LOG_PATH": "${env:SEQUENTIAL_LOG_PATH:-dev-tools/agents/context/session_store/sequential-thoughts.jsonl}"
+        "MCP_MEMORY_FILE_PATH": "${env:MCP_MEMORY_FILE_PATH:-dev-tools/workspace/context/session_store/memory.jsonl}",
+        "SEQUENTIAL_LOG_PATH": "${env:SEQUENTIAL_LOG_PATH:-dev-tools/workspace/context/session_store/sequential-thoughts.jsonl}"
       },
       "capabilities": [
         "http_fetch",

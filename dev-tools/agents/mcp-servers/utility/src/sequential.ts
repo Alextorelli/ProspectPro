@@ -28,7 +28,7 @@ export interface SequentialThinkingOptions {
 const DEFAULT_LOG_PATH = path.resolve(
   process.cwd(),
   process.env.SEQUENTIAL_LOG_PATH ||
-    "dev-tools/agents/context/session_store/sequential/memory.jsonl"
+  "dev-tools/workspace/context/session_store/sequential/memory.jsonl"
 );
 
 const SEQUENTIAL_THINKING_TOOL: Tool = {

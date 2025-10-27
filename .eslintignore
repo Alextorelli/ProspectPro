@@ -29,7 +29,7 @@ dev-tools/agents/mcp/dist/
 archive/
 
 # === GENERATED REPORTS & PUBLIC ASSETS ===
-dev-tools/context/session_store/
+dev-tools/workspace/context/session_store/
 public/
 
 # === SUPABASE FUNCTIONS (Deno/TypeScript, not for ESLint) ===

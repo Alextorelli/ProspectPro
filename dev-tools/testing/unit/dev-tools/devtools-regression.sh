@@ -28,8 +28,8 @@ else
 	echo "[DRY RUN] React DevTools, Vercel, Supabase, Redis checks skipped."
 fi
 
-mkdir -p dev-tools/context/session_store/testing
-REPORT="dev-tools/context/session_store/testing/devtools-regression-$(date +%Y%m%d-%H%M%S).log"
+mkdir -p dev-tools/workspace/context/session_store/testing
+REPORT="dev-tools/workspace/context/session_store/testing/devtools-regression-$(date +%Y%m%d-%H%M%S).log"
 if ! $DRY_RUN; then
 	echo "DevTools regression tests completed at $(date -u)" > "$REPORT"
 else

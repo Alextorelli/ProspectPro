@@ -47,7 +47,7 @@ analyze_log_file() {
   local log_file="$1"
   local timestamp
   timestamp=$(date --iso-8601=seconds)
-  local report_dir="dev-tools/context/session_store/diagnostics"
+  local report_dir="dev-tools/workspace/context/session_store/diagnostics"
   local report_file="$report_dir/supabase-log-analysis-$timestamp.md"
 
   mkdir -p "$report_dir"

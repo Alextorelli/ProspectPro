@@ -25,7 +25,7 @@ ProspectPro’s chat participants map 1:1 to the revised agent personas. This ke
 - Agents: `dev-tools/agents/workflows/**`
 - MCP layer: `dev-tools/agents/mcp`, `dev-tools/agents/mcp-servers/registry.json`
 - Automation: `.vscode/tasks.json` tasks `MCP: Sync Chat Participants`, `MCP: Run Chat Validation`
-- Governance: `docs/tooling/settings-staging.md`, archives under `dev-tools/context/session_store/archive/`
+- Governance: `docs/tooling/settings-staging.md`, archives under `dev-tools/workspace/context/session_store/archive/`
 
 ## Maintenance Workflow
 
