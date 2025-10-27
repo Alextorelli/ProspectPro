@@ -186,7 +186,7 @@ import { access, appendFile, mkdir, readFile, rename, writeFile, } from "fs/prom
 import path from "path";
 const DEFAULT_MEMORY_PATH = path.resolve(process.cwd(), process.env.MCP_MEMORY_FILE_PATH ||
     process.env.MEMORY_FILE_PATH ||
-    "dev-tools/agents/context/session_store/memory.jsonl");
+    "dev-tools/workspace/context/session_store/memory.jsonl");
 async function resolveMemoryFilePath(options = {}) {
     const resolvedPath = path.resolve(options.memoryFilePath ?? DEFAULT_MEMORY_PATH);
     await mkdir(path.dirname(resolvedPath), { recursive: true });

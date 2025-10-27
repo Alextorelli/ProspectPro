@@ -2,7 +2,7 @@ import chalk from "chalk";
 import { appendFile, mkdir } from "fs/promises";
 import path from "path";
 const DEFAULT_LOG_PATH = path.resolve(process.cwd(), process.env.SEQUENTIAL_LOG_PATH ||
-    "dev-tools/agents/context/session_store/sequential/memory.jsonl");
+    "dev-tools/workspace/context/session_store/sequential/memory.jsonl");
 const SEQUENTIAL_THINKING_TOOL = {
     name: "sequential_thinking",
     description: `A detailed tool for dynamic and reflective problem-solving through thoughts.

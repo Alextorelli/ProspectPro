@@ -3,13 +3,14 @@
     {
       "id": "memory_file_path",
       "type": "promptString",
-      "description": "Path to the memory storage file",
-      "password": false
+      "description": "Path to the Utility MCP memory store",
+      "password": false,
+      "default": "${workspaceFolder}/dev-tools/agents/context/session_store/memory.jsonl"
     },
     {
       "id": "browser_url",
       "type": "promptString",
-      "description": "Optional: connect to an already-running Chrome (remote debugging / port-forward). Example: http://127.0.0.1:9222",
+      "description": "Optional remote Chrome debugging endpoint",
       "password": false
     },
     {
@@ -36,67 +37,46 @@
     {
       "id": "context7_api_key",
       "type": "promptString",
-      "description": "Context7 API key (optional; increases rate limits). Get one at https://context7.com/dashboard",
+      "description": "Optional Context7 API key",
       "password": true
     },
     {
-      "id": "api_key",
+      "id": "supabase_service_role",
       "type": "promptString",
-      "description": "Your API key for the service",
+      "description": "Supabase service role key for Supabase MCP",
       "password": true
-    },
-    {
-      "id": "logfire_token",
-      "type": "promptString",
-      "description": "Pydantic Logfire read token (project-specific)",
-      "password": true
-    },
-    {
-      "id": "logfire_base_url",
-      "type": "promptString",
-      "description": "Self-hosted Logfire base URL (omit for cloud)",
-      "password": false
     }
   ],
   "servers": {
-    "stripe/agent-toolkit": {
-      "type": "http",
-      "url": "https://mcp.stripe.com",
-      "gallery": "https://api.mcp.github.com/2025-09-15/v0/servers/f0b8ecdd-498c-4087-8ae2-b2677215b7ca",
-      "version": "1.0.0"
-    },
-    "postmanlabs/postman-mcp-server": {
+    "utility": {
       "type": "stdio",
-      "command": "npx",
-      "args": ["@postman/postman-mcp-server@latest"],
+      "command": "node",
+      "args": ["./dev-tools/agents/mcp-servers/utility/dist/index.js"],
       "env": {
-        "POSTMAN_API_KEY": "${input:api_key}"
-      },
-      "gallery": "https://api.mcp.github.com/2025-09-15/v0/servers/40516270-789a-bcde-f012-345678901234",
-      "version": "1.0.0"
-    },
-    "apify/apify-mcp-server": {
-      "type": "http",
-      "url": "https://mcp.apify.com",
-      "gallery": "https://api.mcp.github.com/2025-09-15/v0/servers/1aef85cf-1597-47f1-84ae-3e9a771c2162",
-      "version": "0.0.1-seed"
+        "MCP_MEMORY_FILE_PATH": "${input:memory_file_path}"
+      }
     },
     "supabase": {
       "type": "http",
-      "url": "https://mcp.supabase.com/mcp?project_ref=sriycekxdqnesdsgwiuc&features=docs,account,database,debugging,development,functions,storage,branching"
+      "url": "https://mcp.supabase.com/mcp?project_ref=sriycekxdqnesdsgwiuc&features=docs,account,database,debugging,development,functions,storage,branching",
+      "headers": {
+        "apiKey": "${input:supabase_service_role}"
+      }
+    },
+    "github": {
+      "type": "http",
+      "url": "https://api.githubcopilot.com/mcp/"
     },
     "microsoft/playwright-mcp": {
       "type": "stdio",
       "command": "npx",
       "args": ["@playwright/mcp@latest"],
-      "gallery": "https://api.mcp.github.com/2025-09-15/v0/servers/41b79849-7e6c-4fc7-82c0-5a611ea21523",
-      "version": "0.0.1-seed"
-    },
-    "github/github-mcp-server": {
-      "type": "http",
-      "url": "https://api.githubcopilot.com/mcp/",
-      "gallery": "https://api.mcp.github.com/2025-09-15/v0/servers/ab12cd34-5678-90ef-1234-567890abcdef",
-      "version": "0.13.0"
+      "env": {
+        "BROWSER_URL": "${input:browser_url}",
+        "HEADLESS": "${input:headless}",
+        "ISOLATED": "${input:isolated}",
+        "CHROME_CHANNEL": "${input:chrome_channel}"
+      }
     },
     "context7": {
       "type": "http",
@@ -104,11 +84,6 @@
       "headers": {
         "CONTEXT7_API_KEY": "${input:context7_api_key}"
       }
-    },
-    "sequentialthinking": {
-      "type": "stdio",
-      "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"]
     }
   }
 }
