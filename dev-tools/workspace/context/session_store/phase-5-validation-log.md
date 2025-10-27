@@ -29,3 +29,8 @@ Development Workflow: ✗
 Observability: ✓
 Production Ops: ✓
 # MCP Smoke Tests
+# Agent Secret Validation
+Development Workflow: ✗
+Observability: ✓
+Production Ops: ✓
+# MCP Smoke Tests
