@@ -1,0 +1,444 @@
+#discovery-module
+#enrichment-module
+#maintenance-commands
+#validation-module
+.devcontainer/devcontainer.json
+.github/copilot-instructions.md
+.vscode/prospectpro-supabase.code-workspace
+.vscode/settings.json
+ProspectPro/
+`-- README.md
+`-- app.json
+`-- init-template.sh
+`-- templates/
+`-- tests/
+app/
+app/backend/functions/_shared/api-usage.ts
+app/backend/functions/_shared/cache-manager.ts
+app/backend/functions/_shared/cobalt-cache.ts
+app/backend/functions/_shared/edge-auth-simplified.ts
+app/backend/functions/_shared/edge-auth.ts
+app/backend/functions/_shared/vault-client.ts
+app/backend/functions/auth-diagnostics/index.ts
+app/backend/functions/business-discovery-background/index.ts
+app/backend/functions/business-discovery-optimized/index.ts
+app/backend/functions/business-discovery-user-aware/index.ts
+app/backend/functions/campaign-export-user-aware/index.ts
+app/backend/functions/campaign-export/index.ts
+app/backend/functions/enrichment-business-license/index.ts
+app/backend/functions/enrichment-cobalt/index.ts
+app/backend/functions/enrichment-hunter/index.ts
+app/backend/functions/enrichment-neverbounce/index.ts
+app/backend/functions/enrichment-orchestrator/index.ts
+app/backend/functions/enrichment-pdl/index.ts
+dev-tools/
+docs/technical/CODEBASE_INDEX.md
+integration/
+|       `-- .gitkeep
+|       `-- engine.ts
+|       `-- event-bus.ts
+|       `-- repo-tree-summary.txt
+|       `-- stage-taxonomy.sh
+|       `-- update-paths.sh
+|       |   `-- README.md
+|       |   `-- REPO_RESTRUCTURE_PLAN.md
+|       |   `-- compile.sh
+|       |   `-- instructions.md
+|       |   `-- pre-push-ignore-check.sh
+|       |   |   `-- workspace_status.md
+|       |   |   |   `-- repo-tree-summary.txt
+|       |   |   |   |-- app-filetree.txt
+|       |   |   |   |-- coverage.md
+|       |   |   |   |-- dev-tools-filetree.txt
+|       |   |   |   |-- integration-filetree.txt
+|       |   |   |   |-- session_store/
+|       |   |   |-- **Targeted ROOT action plan**.md
+|       |   |   |-- .gitkeep
+|       |   |   |-- diagrams-current.txt
+|       |   |   |-- frontend-files.txt
+|       |   |   |-- legacy-assets-post-cleanup.txt
+|       |   |   |-- legacy-top-level-context/
+|       |   |   |-- pre-config-update-status.txt
+|       |   |   |-- pre-move-tree.txt
+|       |   |   |-- repo-tree-summary.txt
+|       |   |-- .gitkeep
+|       |   |-- app-filetree.txt
+|       |   |-- archive/
+|       |   |-- config.json
+|       |   |-- coverage.md
+|       |   |-- dev-tools-filetree.txt
+|       |   |-- integration-filetree.txt
+|       |   |-- live-tooling-list.txt
+|       |   |-- post-move-validation.txt
+|       |   |-- reference-scan.txt
+|       |-- app-filetree.txt
+|       |-- cache-publishable-key.sh
+|       |-- check-docs-schema.sh
+|       |-- deploy.sh
+|       |-- dev-tools-filetree.txt
+|       |-- development-workflow/
+|       |-- generate-diagram-bundle.sh
+|       |-- git-hooks/
+|       |-- inject-api-keys.sh
+|       |-- install-git-hooks.sh
+|       |-- integration-filetree.txt
+|       |-- launch-react-devtools.sh
+|       |-- migration-phase.sh
+|       |-- observability/
+|       |-- patch-diagrams.sh
+|       |-- pipeline.yml
+|       |-- populate-secrets.sh
+|       |-- preflight-checklist.sh
+|       |-- production-ops/
+|       |-- render-diagrams.sh
+|       |-- repo_scan.sh
+|       |-- schemas/
+|       |-- session_store/
+|       |-- snapshot-pre-move.sh
+|       |-- system-architect/
+|       |-- templates/
+|       |-- toggle-gitignore.sh
+|   `-- README.md
+|   `-- ci-cd/
+|   `-- config.toml
+|   `-- context/
+|   `-- neverbounce.md
+|   `-- prometheus.yml
+|   `-- schema/
+|   `-- scripts/
+|   `-- session_store/
+|   `-- shared/
+|   `-- staging.json
+|   `-- templates/
+|   `-- tooling/
+|   `-- validate-symlinks.sh
+|   `-- vite.config.devtools.ts
+|   `-- workflow/
+|   `-- workflows/
+|   `-- workspace/
+|   |       `-- business-discovery.test.ts
+|   |       `-- mcp.spec.ts
+|   |       |   `-- index.ts
+|   |       |   |-- function.toml
+|   |       |-- test-google-places/
+|   |       |-- test-new-auth/
+|   |       |-- test-user-deduplication/
+|   |   `-- .codespaces-init.sh
+|   |   `-- README.md
+|   |   `-- TEST_RUN_EXPECTATIONS.md
+|   |   `-- WorkspaceContext.ts
+|   |   `-- _install_pgtap.sql
+|   |   `-- context.test.js
+|   |   `-- example-crud.ts
+|   |   `-- logo-full.svg
+|   |   `-- main.tsx
+|   |   `-- mcp/
+|   |   `-- sample-automation.sh
+|   |   `-- sample-vercel-status.json
+|   |   `-- setup.ts
+|   |   `-- shared-functions.sh
+|   |   `-- stop-mcp.sh
+|   |   `-- storage-version
+|   |   `-- supabase.js
+|   |   `-- test-results.json
+|   |   `-- tests/
+|   |   `-- validate-ignore-config.cjs
+|   |   `-- vercel.json
+|   |   `-- verify-observability.sh
+|   |   `-- verify-toolchain.sh
+|   |   `-- webhook-validator.js
+|   |   |       `-- cost-thresholds.json
+|   |   |       `-- placeholder.test.ts
+|   |   |       |-- campaigns.test.sql
+|   |   |       |-- core_schema.test.sql
+|   |   |       |-- edge-functions.test.ts
+|   |   |       |-- leads.test.sql
+|   |   |   `-- AuthContext.tsx
+|   |   |   `-- README.md
+|   |   |   `-- Results.tsx
+|   |   |   `-- TierSelector.tsx
+|   |   |   `-- WorkspaceContext.test.ts
+|   |   |   `-- agents.spec.ts
+|   |   |   `-- businessTaxonomy.ts
+|   |   |   `-- database/
+|   |   |   `-- devtools-regression.sh
+|   |   |   `-- enhancedCampaignStore.ts
+|   |   |   `-- index.ts
+|   |   |   `-- leadFilters.ts
+|   |   |   `-- observability-server-tools.js
+|   |   |   `-- shared/
+|   |   |   `-- supabase.ts
+|   |   |   `-- sync-github-projects.js
+|   |   |   `-- task-ledger.schema.json
+|   |   |   `-- update-edge-secrets.sh
+|   |   |   `-- usage-example.ts
+|   |   |   `-- useLeadEnrichment.ts
+|   |   |   `-- users.ts
+|   |   |   `-- utils.ts
+|   |   |   `-- vault-client.ts
+|   |   |   |   `-- leadSanitizers.ts
+|   |   |   |   `-- scratchpad-template.md
+|   |   |   |   `-- smoke.test.ts
+|   |   |   |   |   `-- context.json
+|   |   |   |   |-- basic.test.ts
+|   |   |   |   |-- campaignTransforms.test.ts
+|   |   |   |   |-- development-workflow/
+|   |   |   |   |-- observability/
+|   |   |   |   |-- production-ops/
+|   |   |   |   |-- system-architect/
+|   |   |   |-- AccountPage.tsx
+|   |   |   |-- AdminPanel.tsx
+|   |   |   |-- ApiUsageChart.tsx
+|   |   |   |-- ApiUsageTable.tsx
+|   |   |   |-- AuthCallback.tsx
+|   |   |   |-- AuthComponent.tsx
+|   |   |   |-- BusinessDiscovery.tsx
+|   |   |   |-- Campaign.tsx
+|   |   |   |-- CampaignProgress.tsx
+|   |   |   |-- CampaignsTable.tsx
+|   |   |   |-- CollapsibleCard.tsx
+|   |   |   |-- ConfigLocator.test.ts
+|   |   |   |-- Dashboard.tsx
+|   |   |   |-- EnrichmentButton.tsx
+|   |   |   |-- ErrorBoundary.tsx
+|   |   |   |-- GeographicSelector.tsx
+|   |   |   |-- Layout.tsx
+|   |   |   |-- LeadCard.tsx
+|   |   |   |-- LeadDetailsDrawer.tsx
+|   |   |   |-- LeadExplorerGrid.tsx
+|   |   |   |-- LeadExplorerTable.tsx
+|   |   |   |-- LogoIcon.tsx
+|   |   |   |-- MCPClientManager.integration.test.ts
+|   |   |   |-- MCPClientManager.test.ts
+|   |   |   |-- MultiSelectBusinessTypes.tsx
+|   |   |   |-- PaymentMethods.tsx
+|   |   |   |-- ProgressDisplay.tsx
+|   |   |   |-- README.md
+|   |   |   |-- SelectedChips.tsx
+|   |   |   |-- Stepper.tsx
+|   |   |   |-- Tabs.tsx
+|   |   |   |-- ThemeToggle.tsx
+|   |   |   |-- __tests__/
+|   |   |   |-- agent-context.schema.json
+|   |   |   |-- agents/
+|   |   |   |-- api-usage.ts
+|   |   |   |-- automation.bats
+|   |   |   |-- automation.spec.ts
+|   |   |   |-- cache-manager.ts
+|   |   |   |-- campaignStore.ts
+|   |   |   |-- campaignTransforms.ts
+|   |   |   |-- cobalt-cache.ts
+|   |   |   |-- deploy-background-tasks.sh
+|   |   |   |-- development-server-tools.js
+|   |   |   |-- edge-auth-simplified.ts
+|   |   |   |-- edge-auth.ts
+|   |   |   |-- ensure-supabase-cli-session.sh
+|   |   |   |-- environment-context.schema.json
+|   |   |   |-- environments/
+|   |   |   |-- exportLeadsToCsv.ts
+|   |   |   |-- function.toml
+|   |   |   |-- generate-mermaid-diagrams.js
+|   |   |   |-- index.ts
+|   |   |   |-- integration-hub-server-tools.js
+|   |   |   |-- mermaid-template-registry.json
+|   |   |   |-- postgresql-server-tools.js
+|   |   |   |-- production-server-tools.js
+|   |   |   |-- supabase.ts
+|   |   |   |-- supabase_cli_helpers.sh
+|   |   |   |-- useBusinessDiscovery.ts
+|   |   |   |-- useCampaignResults.ts
+|   |   |   |-- useJobProgress.tsx
+|   |   |   |-- utils/
+|   |   |-- 001_core_schema.sql
+|   |   |-- 002_user_functions.sql
+|   |   |-- 003_deduplication.sql
+|   |   |-- 004_enrichment_cache.sql
+|   |   |-- 20251017175251_remote_schema.sql
+|   |   |-- 20251017180924_install_pgtap.sql
+|   |   |-- 20251017181104_install_pgtap.sql
+|   |   |-- 20251017181118_install_pgtap.sql
+|   |   |-- 20251017181742_remote_schema.sql
+|   |   |-- 20251018001004_remote_schema.sql
+|   |   |-- 20251018072140_remote_schema.sql
+|   |   |-- App.tsx
+|   |   |-- CONTEXTMANAGER_QUICKREF.md
+|   |   |-- ChatModeLoader.ts
+|   |   |-- ConfigLocator.ts
+|   |   |-- MCP-package.json
+|   |   |-- MCPClientAdapter.ts
+|   |   |-- MCPClientManager.ts
+|   |   |-- MCP_MODE_TOOL_MATRIX.md
+|   |   |-- README.md
+|   |   |-- RELEASE_NOTES_AND_DIFF_TEMPLATE.md
+|   |   |-- TelemetrySink.ts
+|   |   |-- TracingTelemetrySink.ts
+|   |   |-- __tests__/
+|   |   |-- _shared/
+|   |   |-- active-registry.json
+|   |   |-- api/
+|   |   |-- app/
+|   |   |-- auth-diagnostics/
+|   |   |-- business-discovery-background/
+|   |   |-- business-discovery-optimized/
+|   |   |-- business-discovery-user-aware/
+|   |   |-- cache-session.js
+|   |   |-- campaign-export-user-aware/
+|   |   |-- campaign-export/
+|   |   |-- checkpoint-contexts.ts
+|   |   |-- cli-latest
+|   |   |-- client.ts
+|   |   |-- collect-diagnostics.sh
+|   |   |-- components/
+|   |   |-- constants/
+|   |   |-- context-manager.ts
+|   |   |-- context-snapshot.sh
+|   |   |-- contexts/
+|   |   |-- debug-campaign.sql
+|   |   |-- deploy-mcp-service-layer.sh
+|   |   |-- deployment-validation-workflow.sh
+|   |   |-- dev-tools/
+|   |   |-- diagnose-campaign-failure.sh
+|   |   |-- diagnose-zero-results.sh
+|   |   |-- docs-automation/
+|   |   |-- drizzle.config.ts
+|   |   |-- edge-function-diagnostics.sh
+|   |   |-- enrichment-business-license/
+|   |   |-- enrichment-cobalt/
+|   |   |-- enrichment-hunter/
+|   |   |-- enrichment-neverbounce/
+|   |   |-- enrichment-orchestrator/
+|   |   |-- enrichment-pdl/
+|   |   |-- ensure-supabase-cli-session.sh
+|   |   |-- example-function/
+|   |   |-- examples/
+|   |   |-- favicon-yellow-arrow.svg
+|   |   |-- fetch-repo-context.js
+|   |   |-- fetch-supabase-context.js
+|   |   |-- fixture-dataset.json
+|   |   |-- gotrue-version
+|   |   |-- hooks/
+|   |   |-- index.css
+|   |   |-- index.ts
+|   |   |-- launch-react-devtools.sh
+|   |   |-- lib/
+|   |   |-- manual-verification.sh
+|   |   |-- mcp-chat-sync.js
+|   |   |-- mcp-chat-validate.js
+|   |   |-- mcp-tools/
+|   |   |-- migrate-supabase-functions.sh
+|   |   |-- monitor-discovery-job.sh
+|   |   |-- observability-server.js
+|   |   |-- package-lock.json
+|   |   |-- package-supabase.json
+|   |   |-- package.json
+|   |   |-- pages/
+|   |   |-- participant-routing.sh
+|   |   |-- pooler-url
+|   |   |-- postgres-version
+|   |   |-- production-health-check.sh
+|   |   |-- project-ref
+|   |   |-- redis-observability.sh
+|   |   |-- rest-version
+|   |   |-- sample-mcp-response.json
+|   |   |-- sample-supabase.log
+|   |   |-- schema/
+|   |   |-- schemas/
+|   |   |-- scripts/
+|   |   |-- start-mcp.sh
+|   |   |-- start-observability.sh
+|   |   |-- stop-observability.sh
+|   |   |-- store/
+|   |   |-- stores/
+|   |   |-- supabase-ca-2021.crt
+|   |   |-- supabase-pull-logs.sh
+|   |   |-- tests/
+|   |   |-- tsconfig.json
+|   |   |-- types/
+|   |   |-- utils/
+|   |   |-- validate-production-enrichment.sh
+|   |   |-- validate-supabase-architecture.sh
+|   |   |-- vercel-status-check.sh
+|   |   |-- vercel-validate.sh
+|   |   |-- webhook-handler.js
+|   |-- .gitignore
+|   |-- .temp/
+|   |-- agents/
+|   |-- app/
+|   |-- automation/
+|   |-- backend
+|   |-- backend/
+|   |-- context/
+|   |-- create-symlinks.sh
+|   |-- data/
+|   |-- db/
+|   |-- deployment/
+|   |-- dev-tools/
+|   |-- development.json
+|   |-- development/
+|   |-- diagnostics/
+|   |-- e2e/
+|   |-- environments/
+|   |-- fixtures/
+|   |-- foursquare-places.md
+|   |-- frontend/
+|   |-- functions/
+|   |-- github/
+|   |-- google-places.md
+|   |-- guides/
+|   |-- hunter-io.md
+|   |-- index.html
+|   |-- infrastructure/
+|   |-- integration/
+|   |-- mcp/
+|   |-- migrations/
+|   |-- monitoring/
+|   |-- observability/
+|   |-- operations/
+|   |-- otel-config.yml
+|   |-- platform-detector.js
+|   |-- platform/
+|   |-- product-roadmap/
+|   |-- production.json
+|   |-- public/
+|   |-- schema/
+|   |-- scripts/
+|   |-- security/
+|   |-- servers/
+|   |-- setup/
+|   |-- shared/
+|   |-- src/
+|   |-- supabase/
+|   |-- symlinks/
+|   |-- technical/
+|   |-- testing/
+|   |-- tooling/
+|   |-- tsconfig.node.json
+|   |-- unit/
+|   |-- utils/
+|   |-- vercel/
+|   |-- vite-env.d.ts
+|-- .deno_lsp/
+|-- .devcontainer/
+|-- .prospectpro-template-schema.json
+|-- agents/
+|-- app/
+|-- automation/
+|-- backend/
+|-- config/
+|-- context/
+|-- data/
+|-- dev-tools/
+|-- docs/
+|-- environments/
+|-- frontend/
+|-- infrastructure/
+|-- integration/
+|-- monitoring/
+|-- platform/
+|-- scripts/
+|-- security/
+|-- shared/
+|-- supabase/
+|-- symlinks/
+|-- testing/
+|-- workspace/
