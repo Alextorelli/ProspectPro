@@ -174,7 +174,7 @@ if [[ -n "$MCP_CONFIG_PATH" ]]; then
     MCP_REQUIRED_SERVERS=(
       "production-server.js"
       "development-server.js"
-      "supabase-troubleshooting-server.js"
+  "observability-server.js"
     )
     for server in "${MCP_REQUIRED_SERVERS[@]}"; do
       if [[ -f "mcp-servers/$server" ]]; then

@@ -137,9 +137,7 @@
     },
     "prospectpro-troubleshooting": {
       "command": "node",
-      "args": [
-        "./dev-tools/agents/mcp-servers/supabase-troubleshooting-server.js"
-      ],
+      "args": ["./dev-tools/agents/mcp-servers/observability-server.js"],
       "autoStart": false,
       "lazyLoad": true,
       "maxMemory": "128MB"

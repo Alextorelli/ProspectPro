@@ -71,7 +71,7 @@ dev-tools/
 |   |   |-- package-lock.json
 |   |   |-- package.json
 |   |   |-- README.md
-|   |   |-- supabase-troubleshooting-server.js
+|   |   |-- observability-server.js
 |   |   `-- test-results.json
 |   `-- workflows/
 |       |-- development-workflow/
