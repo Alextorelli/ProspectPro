@@ -18,6 +18,11 @@
 - Deleted unused `logs/` directory (empty) from `dev-tools/workspace/context/session_store/`.
 - Confirmed active inventories remain in `dev-tools/workspace/context/session_store/` without redundant copies.
 
+## 2025-10-27: MCP Registry JSON Fix
+
+- Corrected malformed `dev-tools/agents/mcp-servers/active-registry.json` capabilities array (missing commas/indentation) to restore valid JSON for MCP scanner.
+- Validated file via `node -e "JSON.parse(...)"` to confirm parse success.
+
 ## 2025-10-27: Observability MCP Supabase Diagnostics Migration
 
 - Action: Migrated all Supabase troubleshooting tools (`test_edge_function`, `validate_database_permissions`, `run_rls_diagnostics`, `supabase_cli_healthcheck`, `check_production_deployment`, `vercel_status_check`, `generate_debugging_commands`, `collect_and_summarize_logs`, `validate_ci_cd_suite`) into `dev-tools/agents/mcp-servers/observability-server.js` with OpenTelemetry span instrumentation and Highlight.io error forwarding.
