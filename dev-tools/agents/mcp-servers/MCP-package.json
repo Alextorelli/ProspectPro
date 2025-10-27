@@ -1,6 +1,6 @@
 {
   "name": "prospectpro-mcp-servers",
-  "version": "2.1.0"
+  "version": "2.1.0",
   "private": true,
   "description": "Canonical MCP servers for ProspectPro: supabase, github, playwright, context7, utility (unified)",
   "type": "module",
