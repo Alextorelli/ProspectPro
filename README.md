@@ -73,10 +73,7 @@
 
 ProspectPro now uses a MECE-aligned agent orchestration model:
 
-- **Development Workflow** (DEV): supabase, github, playwright, context7, memory, sequentialthinking
-- **Observability** (STAGING): supabase, memory, sequentialthinking
-- **Production Ops** (PROD): supabase, github, memory, sequentialthinking
-- **System Architect** (Design/DEV): supabase, github, playwright, context7, memory, sequentialthinking
+Hydrate agent credentials into the git-ignored `dev-tools/agents/.env.agent.local` via provider CLIs (Vercel, Supabase, GitHub) before running validation; never commit populated secrets—only the template `dev-tools/agents/.env.agent.example`.
 
 See [`dev-tools/workspace/context/session_store/MCP_MODE_TOOL_MATRIX.md`](dev-tools/workspace/context/session_store/MCP_MODE_TOOL_MATRIX.md) for the full agent × MCP matrix and [`mece-agent-mcp-integration-plan.md`](dev-tools/workspace/context/session_store/mece-agent-mcp-integration-plan.md) for responsibilities and escalation paths.
 

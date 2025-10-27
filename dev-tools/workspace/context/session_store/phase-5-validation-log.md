@@ -5,7 +5,8 @@
 - **Action**: Begin Phase 5 of the MECE agent/MCP integration plan: environment-bound validation for all agents.
 - **Checklist**:
   - [ ] Build MCP tools: `npm run build:tools --prefix dev-tools/agents/mcp-servers`
-  - [ ] Test agent MCP access with required secrets for each environment
+  - [ ] Hydrate `dev-tools/agents/.env.agent.local` from provider secret stores (Vercel, Supabase, GitHub)
+  - [ ] Test agent MCP access with required secrets for each environment using `dotenv -e dev-tools/agents/.env.agent.local -- <command>`
   - [ ] Smoke test memory and sequential MCPs
   - [ ] Log results to `coverage.md`
 - **Reference**: See `mece-agent-mcp-integration-plan.md` for validation steps and commands.

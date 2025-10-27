@@ -60,6 +60,14 @@ All agents inherit from `agents-manifest.json`:
 
 **Sequential Thinking MCP**: Multi-step reasoning chains persisted in `session_store/sequential-thoughts.jsonl`; each agent's thought ledger tagged with `agentId` for isolation
 
+## Secret Management Workflow
+
+- **Provider of Record**: Store production secrets in their authoritative providers (Vercel, Supabase, GitHub Actions, etc.).
+- **Template**: `dev-tools/agents/.env.agent.example` lists all required keys; update it with new key names only.
+- **Local Hydration**: Before validation, export provider secrets into the git-ignored `dev-tools/agents/.env.agent.local` file using provider CLIs (e.g., `vercel env pull`, `supabase secrets list`) or a future helper script (`npm run secrets:pull`).
+- **Usage**: Run agent workflows and validation commands with `dotenv -e dev-tools/agents/.env.agent.local -- <command>`.
+- **Compliance**: Never commit real secret values—only the template and manifest should live in source control.
+
 ## Implementation Plan
 
 ### Phase 1: Registry Cleanup
@@ -177,9 +185,9 @@ For each agent in `dev-tools/agents/workflows/{agent}/`:
 npm run build:tools --prefix dev-tools/agents/mcp-servers
 
 # Test each agent's MCP access (from dev-tools/agents/)
-npx --yes dotenv-cli -e .env -- node -e "console.log('Development Workflow:', process.env.AGENT_DEV_SUPABASE_URL ? '✓' : '✗')"
-npx --yes dotenv-cli -e .env -- node -e "console.log('Observability:', process.env.CONTEXT7_API_KEY ? '✓' : '✗')"
-npx --yes dotenv-cli -e .env -- node -e "console.log('Production Ops:', process.env.VERCEL_TOKEN ? '✓' : '✗')"
+npx --yes dotenv-cli -e dev-tools/agents/.env.agent.local -- node -e "console.log('Development Workflow:', process.env.AGENT_DEV_SUPABASE_URL ? '✓' : '✗')"
+npx --yes dotenv-cli -e dev-tools/agents/.env.agent.local -- node -e "console.log('Observability:', process.env.CONTEXT7_API_KEY ? '✓' : '✗')"
+npx --yes dotenv-cli -e dev-tools/agents/.env.agent.local -- node -e "console.log('Production Ops:', process.env.VERCEL_TOKEN ? '✓' : '✗')"
 
 # Smoke test memory/sequential MCPs
 npx tsx mcp-servers/mcp-tools/memory/index.ts --store ../workspace/context/session_store/memory.jsonl --dry-run

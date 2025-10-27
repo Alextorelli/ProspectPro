@@ -79,6 +79,7 @@ yarn-error.log*
 .env.test.local
 .env.production.local
 .env.vercel
+dev-tools/agents/.env.agent.local
 
 # Docker runtime files
 docker-compose.override.yml

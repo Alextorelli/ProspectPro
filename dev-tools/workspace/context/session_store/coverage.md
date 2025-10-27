@@ -6,7 +6,7 @@
   - Memory MCP: smoke test passed (dry-run mode).
   - Sequential Thinking MCP: smoke test passed (dry-run mode).
   - Agent MCP access checks: required secrets (AGENT_DEV_SUPABASE_URL, CONTEXT7_API_KEY, VERCEL_TOKEN) not set; all returned '✗'.
-- **Next Steps**: Provision required secrets in `.env` for each agent and re-run MCP access checks. Once secrets are set, repeat validation and log results here.
+- **Next Steps**: Hydrate `dev-tools/agents/.env.agent.local` from provider secret stores (Vercel, Supabase, GitHub) and re-run MCP access checks with `dotenv -e dev-tools/agents/.env.agent.local -- <command>`. Once secrets are set, repeat validation and log results here.
 
 ## 2025-10-27: Sequential & Memory MCP Realignment
 
