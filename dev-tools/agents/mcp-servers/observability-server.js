@@ -57,6 +57,29 @@ class ObservabilityServer {
 
   setupToolHandlers() {
         {
+          name: "collect_and_summarize_logs",
+          description: "Collect recent logs from Supabase and Vercel, summarize errors and warnings",
+          inputSchema: {
+            type: "object",
+            properties: {
+              supabaseFunction: {
+                type: "string",
+                description: "Supabase Edge Function name (optional)",
+              },
+              vercelUrl: {
+                type: "string",
+                description: "Vercel deployment URL (optional)",
+              },
+              sinceMinutes: {
+                type: "integer",
+                description: "How many minutes back to collect logs (default: 60)",
+                default: 60,
+              },
+            },
+            required: [],
+          },
+        },
+        {
           name: "generate_debugging_commands",
           description: "Generate recommended CLI and HTTP commands for debugging Supabase and Vercel deployments",
           inputSchema: {
@@ -325,6 +348,66 @@ class ObservabilityServer {
     }));
 
     this.server.setRequestHandler(CallToolRequestSchema, async (request) => {
+          } else if (name === "collect_and_summarize_logs") {
+            result = await this.collectAndSummarizeLogs(args);
+  async collectAndSummarizeLogs({ supabaseFunction, vercelUrl, sinceMinutes = 60 }) {
+    // Collect logs from Supabase Edge Function (via CLI) and Vercel (via HTTP)
+    const logs = [];
+    // Supabase logs (if function specified)
+    if (supabaseFunction) {
+      const { exec } = await import("child_process");
+      const { promisify } = await import("util");
+      const execAsync = promisify(exec);
+      const since = `${sinceMinutes}m`;
+      const cmd = `npx --yes supabase@latest functions logs ${supabaseFunction} --since=${since}`;
+      try {
+        const { stdout, stderr } = await execAsync(cmd);
+        logs.push({
+          source: `supabase:${supabaseFunction}`,
+          output: stdout,
+          error: stderr,
+        });
+      } catch (err) {
+        logs.push({ source: `supabase:${supabaseFunction}`, error: err.message });
+      }
+    }
+    // Vercel logs (if URL specified)
+    if (vercelUrl) {
+      const fetch = (await import("node-fetch")).default;
+      try {
+        const res = await fetch(vercelUrl.replace(/\/$/, "") + "/api/logs?since=" + encodeURIComponent(Date.now() - sinceMinutes * 60000));
+        const text = await res.text();
+        logs.push({ source: `vercel:${vercelUrl}`, output: text, status: res.status });
+      } catch (err) {
+        logs.push({ source: `vercel:${vercelUrl}`, error: err.message });
+      }
+    }
+    // Summarize errors/warnings
+    const summary = logs.map((entry) => {
+      if (entry.output) {
+        const lines = entry.output.split(/\r?\n/);
+        const errors = lines.filter((l) => /error|fail|exception/i.test(l));
+        const warnings = lines.filter((l) => /warn|deprecated/i.test(l));
+        return `Source: ${entry.source}\nErrors: ${errors.length}\nWarnings: ${warnings.length}\nSample Errors:\n${errors.slice(0,3).join("\n")}\n`;
+      } else if (entry.error) {
+        return `Source: ${entry.source}\nError: ${entry.error}\n`;
+      } else {
+        return `Source: ${entry.source}\nNo log output.\n`;
+      }
+    }).join("\n");
+    return {
+      content: [
+        {
+          type: "text",
+          text: `Log Collection Summary (last ${sinceMinutes} min):\n\n${summary}\n\nFull logs available in output.`,
+        },
+        ...logs.map((entry) => ({
+          type: "text",
+          text: `---\nSource: ${entry.source}\n${entry.output ? entry.output.slice(0, 2000) : entry.error || "No output"}`,
+        })),
+      ],
+    };
+  }
           } else if (name === "generate_debugging_commands") {
             result = await this.generateDebuggingCommands(args);
   async generateDebuggingCommands({ supabaseUrl, vercelUrl }) {
