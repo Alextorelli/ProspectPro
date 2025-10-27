@@ -14,3 +14,8 @@
 ---
 
 Log each validation run and result below.
+# Agent Secret Validation
+Development Workflow: ✗
+Observability: ✗
+Production Ops: ✓
+# MCP Smoke Tests
