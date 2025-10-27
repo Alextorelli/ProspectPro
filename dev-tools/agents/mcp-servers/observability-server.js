@@ -57,6 +57,24 @@ class ObservabilityServer {
 
   setupToolHandlers() {
         {
+          name: "generate_debugging_commands",
+          description: "Generate recommended CLI and HTTP commands for debugging Supabase and Vercel deployments",
+          inputSchema: {
+            type: "object",
+            properties: {
+              supabaseUrl: {
+                type: "string",
+                description: "Supabase project URL (optional)",
+              },
+              vercelUrl: {
+                type: "string",
+                description: "Vercel deployment URL (optional)",
+              },
+            },
+            required: [],
+          },
+        },
+        {
           name: "vercel_status_check",
           description: "Check the status of a Vercel deployment (frontend health, build info, etc)",
           inputSchema: {
@@ -307,6 +325,37 @@ class ObservabilityServer {
     }));
 
     this.server.setRequestHandler(CallToolRequestSchema, async (request) => {
+          } else if (name === "generate_debugging_commands") {
+            result = await this.generateDebuggingCommands(args);
+  async generateDebuggingCommands({ supabaseUrl, vercelUrl }) {
+    // Generate recommended CLI and HTTP commands for debugging
+    const commands = [];
+    if (supabaseUrl) {
+      commands.push(
+        `# Supabase API Health\ncurl -i '${supabaseUrl.replace(/\/$/, "")}/rest/v1/'`,
+        `# Supabase Auth Test\ncurl -i -X POST '${supabaseUrl.replace(/\/$/, "")}/auth/v1/token' -H 'Content-Type: application/json' -d '{"email":"test@example.com","password":"test123"}'`
+      );
+      commands.push(
+        `# Supabase CLI Healthcheck\nnpx --yes supabase@latest healthcheck --project-url '${supabaseUrl}'`
+      );
+    }
+    if (vercelUrl) {
+      commands.push(
+        `# Vercel Frontend Health\ncurl -i '${vercelUrl.replace(/\/$/, "")}/api/health' || curl -i '${vercelUrl.replace(/\/$/, "")}/'`
+      );
+    }
+    commands.push(
+      `# Check Vercel Deployment Status (requires Vercel CLI)\nvercel inspect <deployment-url>`
+    );
+    return {
+      content: [
+        {
+          type: "text",
+          text: `Recommended Debugging Commands:\n\n${commands.join("\n\n")}\n\nCopy and run these commands in your terminal to debug deployment issues.`,
+        },
+      ],
+    };
+  }
           } else if (name === "vercel_status_check") {
             result = await this.vercelStatusCheck(args);
   async vercelStatusCheck({ vercelUrl, showHeaders = false }) {
