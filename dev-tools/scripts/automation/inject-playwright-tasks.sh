@@ -4,7 +4,7 @@
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO_ROOT="/workspaces/ProspectPro"
+REPO_ROOT="$(cd "$SCRIPT_DIR/../../.." && pwd)"
 TEMPLATE_FILE="$REPO_ROOT/dev-tools/agents/workflows/templates/playwright-toolset-snippet.jsonc"
 TOOLSETS_DIR="$REPO_ROOT/dev-tools/agents/workflows"
 
