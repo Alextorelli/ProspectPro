@@ -1,0 +1,35 @@
+name: MCP Agent Validation
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "dev-tools/agents/**"
+      - "dev-tools/workspace/context/session_store/**"
+      - ".github/workflows/mcp-agent-validation.yml"
+  workflow_dispatch:
+
+jobs:
+  validate-agents:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+      - name: Install dependencies
+        run: npm ci
+      - name: Run Utility MCP and Agent Validation
+        run: bash dev-tools/agents/scripts/validate-agents.sh
+      - name: Upload Validation Logs
+        uses: actions/upload-artifact@v4
+        with:
+          name: mcp-agent-validation-logs
+          path: dev-tools/workspace/context/session_store/phase-5-validation-log.md
+      - name: Upload Coverage
+        uses: actions/upload-artifact@v4
+        with:
+          name: mcp-agent-validation-coverage
+          path: dev-tools/workspace/context/session_store/coverage.md

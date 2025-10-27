@@ -35,10 +35,11 @@
    - Run `bash dev-tools/agents/scripts/validate-agents.sh` to ensure secrets resolve and Utility MCP smoke tests pass; append results to `phase-5-validation-log.md` and `coverage.md`.
 
 6. **Documentation & CI Follow-up**
-   - Update phase-5-validation-log.md with the new validation outcome.
 
-- Refresh MCP_MODE_TOOL_MATRIX.md to reflect the consolidated toolset.
-- Plan CI wiring: add MCP validation task to Phase 5 pipeline (document next steps in `mcp-integration-plan.md`).
+   - Update phase-5-validation-log.md with the new validation outcome.
+   - Refresh MCP_MODE_TOOL_MATRIX.md to reflect the consolidated toolset (Utility MCP as unified provider for fetch, fs, git, time, memory, sequentialthinking).
+   - CI wiring: Added `.github/workflows/mcp-agent-validation.yml` to run `dev-tools/agents/scripts/validate-agents.sh` on agent/context changes and upload validation logs/coverage. See MCP_MODE_TOOL_MATRIX.md for updated agent/server mapping.
+   - Next: Monitor CI runs and update integration plan as new MCP features are added or agent requirements change.
 
 7. **Final Verification**
    - Run targeted workflow dry runs using `dotenv -e .env.agent.local -- <workflow command>`.
