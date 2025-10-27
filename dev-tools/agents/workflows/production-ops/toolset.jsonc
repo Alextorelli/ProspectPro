@@ -7,7 +7,13 @@
       "supabase.check_pool_health",
       "supabase.execute_query",
       "supabase_troubleshooting.correlate_errors",
-      "supabase_troubleshooting.generate_incident_timeline"
+      "supabase_troubleshooting.generate_incident_timeline",
+      "utility.fetch",
+      "utility.fs_read",
+      "utility.fs_write",
+      "utility.git_status",
+      "utility.time_now",
+      "utility.time_convert"
     ],
     "description": "Canonical production operations tools for deployment, incident response, and database health.",
     "icon": "build"

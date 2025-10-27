@@ -3,6 +3,14 @@
     "supabase": ["execute_query", "run_migration", "deploy_function"],
     "github": ["create_pull_request", "list_workflow_runs", "create_issue"],
     "playwright": ["run_suite", "screenshot_capture", "trace_analysis"],
-    "react-devtools": ["inspect_component", "profile_render"]
+    "react-devtools": ["inspect_component", "profile_render"],
+    "utility": [
+      "fetch",
+      "fs_read",
+      "fs_write",
+      "git_status",
+      "time_now",
+      "time_convert"
+    ]
   }
 }

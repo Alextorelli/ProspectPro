@@ -4,7 +4,13 @@
       "supabase_troubleshooting.correlate_errors",
       "supabase_troubleshooting.generate_incident_timeline",
       "supabase.analyze_slow_queries",
-      "supabase.check_pool_health"
+      "supabase.check_pool_health",
+      "utility.fetch",
+      "utility.fs_read",
+      "utility.fs_write",
+      "utility.git_status",
+      "utility.time_now",
+      "utility.time_convert"
     ],
     "description": "Canonical observability and troubleshooting tools for log analysis, error correlation, and performance monitoring.",
     "icon": "visibility"

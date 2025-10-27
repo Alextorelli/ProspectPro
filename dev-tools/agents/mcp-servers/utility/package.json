@@ -1,0 +1,32 @@
+{
+  "name": "@prospectpro/utility-mcp",
+  "version": "1.0.0",
+  "description": "Unified utility MCP server providing fetch, filesystem, git, and time tools",
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "start": "node dist/index.js"
+  },
+  "keywords": [
+    "mcp",
+    "utility",
+    "fetch",
+    "filesystem",
+    "git",
+    "time"
+  ],
+  "author": "ProspectPro Team",
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.4",
+    "node-fetch": "^3.3.2",
+    "html-to-text": "^9.0.5",
+    "simple-git": "^3.25.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "typescript": "^5.3.3"
+  }
+}

@@ -101,6 +101,27 @@
       "health_check_url": null,
       "startup_timeout_ms": 4000,
       "response_time_p95_target_ms": 450
+    },
+    "utility": {
+      "type": "stdio",
+      "package": "local",
+      "invocation": "node",
+      "script_path": "./utility/dist/index.js",
+      "env": {
+        "NODE_ENV": "utility",
+        "ALLOWED_PATH": "${env:ALLOWED_PATH:-/workspaces/ProspectPro}"
+      },
+      "capabilities": [
+        "http_fetch",
+        "html_conversion",
+        "filesystem_read",
+        "filesystem_write",
+        "git_status",
+        "timezone_conversion"
+      ],
+      "health_check_url": null,
+      "startup_timeout_ms": 3000,
+      "response_time_p95_target_ms": 300
     }
   },
   "monitoring": {
