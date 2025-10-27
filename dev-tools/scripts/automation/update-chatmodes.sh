@@ -4,7 +4,7 @@
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO_ROOT="/workspaces/ProspectPro"
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
 TEMPLATE_FILE="$REPO_ROOT/dev-tools/agents/workflows/templates/observability-testing-snippet.md"
 CHATMODES_DIR="$REPO_ROOT/.github/chatmodes"
 
@@ -16,7 +16,7 @@ if [[ ! -f "$TEMPLATE_FILE" ]]; then
   exit 1
 fi
 
-SNIPPET=$(cat "$TEMPLATE_FILE" | sed 's/[[\.*^$()+?{|]/\\&/g')  # Escape special regex chars
+SNIPPET=$(cat "$TEMPLATE_FILE")
 
 # Update each .chatmode.md file
 for chatmode_file in "$CHATMODES_DIR"/*.chatmode.md; do
