@@ -1,35 +1,11 @@
-import { access, appendFile, mkdir, readFile, rename, writeFile, } from "fs/promises";
-import path from "path";
-const DEFAULT_MEMORY_PATH = path.resolve(process.cwd(), process.env.MCP_MEMORY_FILE_PATH ||
-    process.env.MEMORY_FILE_PATH ||
-    "dev-tools/agents/context/session_store/memory.jsonl");
-async function resolveMemoryFilePath(options = {}) {
-    const resolvedPath = path.resolve(options.memoryFilePath ?? DEFAULT_MEMORY_PATH);
-    await mkdir(path.dirname(resolvedPath), { recursive: true });
-    if (resolvedPath.endsWith(".jsonl")) {
-        const legacyPath = resolvedPath.slice(0, -1);
-        try {
-            await access(legacyPath);
-            try {
-                await access(resolvedPath);
-            }
-            catch {
-                await rename(legacyPath, resolvedPath);
-            }
-        }
-        catch {
-            // legacy file not found; ignore
-        }
-        return resolvedPath;
-    }
-    const jsonlPath = `${resolvedPath}.jsonl`;
-    await mkdir(path.dirname(jsonlPath), { recursive: true });
-    return jsonlPath;
-}
 export class KnowledgeGraphManager {
     memoryFilePath;
-    constructor(memoryFilePath) {
+    ttlSeconds;
+    getTimestamp;
+    constructor(memoryFilePath, options = {}) {
         this.memoryFilePath = memoryFilePath;
+        this.ttlSeconds = options.ttlSeconds;
+        this.getTimestamp = options.getTimestamp;
     }
     get filePath() {
         return this.memoryFilePath;
@@ -41,9 +17,17 @@ export class KnowledgeGraphManager {
                 .split("\n")
                 .map((line) => line.trim())
                 .filter((line) => line.length > 0);
+            const now = Date.now();
             const graph = { entities: [], relations: [] };
             for (const line of lines) {
                 const item = JSON.parse(line);
+                // TTL/retention: prune expired entities/relations
+                if (item.expiresAt && Date.parse(item.expiresAt) < now)
+                    continue;
+                if (item.ttlSeconds &&
+                    item.createdAt &&
+                    Date.parse(item.createdAt) + item.ttlSeconds * 1000 < now)
+                    continue;
                 if (item.type === "entity") {
                     graph.entities.push({
                         name: item.name,
@@ -173,20 +157,63 @@ export class KnowledgeGraphManager {
     }
     async appendSnapshot() {
         const graph = await this.loadGraph();
+        let timestamp;
+        if (this.getTimestamp) {
+            timestamp =
+                typeof this.getTimestamp === "function"
+                    ? await this.getTimestamp()
+                    : this.getTimestamp;
+        }
+        else {
+            timestamp = new Date().toISOString();
+        }
         const payload = {
-            timestamp: new Date().toISOString(),
+            type: "snapshot",
+            timestamp,
             summary: {
                 entityCount: graph.entities.length,
                 relationCount: graph.relations.length,
             },
         };
-        await appendFile(this.memoryFilePath, `${JSON.stringify({ type: "snapshot", ...payload })}\n`);
+        if (this.ttlSeconds) {
+            payload.ttlSeconds = this.ttlSeconds;
+            payload.expiresAt = new Date(Date.parse(timestamp) + this.ttlSeconds * 1000).toISOString();
+        }
+        await appendFile(this.memoryFilePath, `${JSON.stringify(payload)}\n`);
     }
+}
+import { access, appendFile, mkdir, readFile, rename, writeFile, } from "fs/promises";
+import path from "path";
+const DEFAULT_MEMORY_PATH = path.resolve(process.cwd(), process.env.MCP_MEMORY_FILE_PATH ||
+    process.env.MEMORY_FILE_PATH ||
+    "dev-tools/agents/context/session_store/memory.jsonl");
+async function resolveMemoryFilePath(options = {}) {
+    const resolvedPath = path.resolve(options.memoryFilePath ?? DEFAULT_MEMORY_PATH);
+    await mkdir(path.dirname(resolvedPath), { recursive: true });
+    if (resolvedPath.endsWith(".jsonl")) {
+        const legacyPath = resolvedPath.slice(0, -1);
+        try {
+            await access(legacyPath);
+            try {
+                await access(resolvedPath);
+            }
+            catch {
+                await rename(legacyPath, resolvedPath);
+            }
+        }
+        catch {
+            // legacy file not found; ignore
+        }
+        return resolvedPath;
+    }
+    const jsonlPath = `${resolvedPath}.jsonl`;
+    await mkdir(path.dirname(jsonlPath), { recursive: true });
+    return jsonlPath;
 }
 export async function initialiseKnowledgeGraph(options = {}) {
     const memoryFilePath = await resolveMemoryFilePath(options);
     return {
-        manager: new KnowledgeGraphManager(memoryFilePath),
+        manager: new KnowledgeGraphManager(memoryFilePath, options),
         memoryFilePath,
     };
 }

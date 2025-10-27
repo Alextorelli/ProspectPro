@@ -1,24 +1,8 @@
-import { Tool } from "@modelcontextprotocol/sdk/types.js";
-export interface Entity {
-    name: string;
-    entityType: string;
-    observations: string[];
-}
-export interface Relation {
-    from: string;
-    to: string;
-    relationType: string;
-}
-export interface KnowledgeGraph {
-    entities: Entity[];
-    relations: Relation[];
-}
-export interface MemoryToolOptions {
-    memoryFilePath?: string;
-}
 export declare class KnowledgeGraphManager {
     private readonly memoryFilePath;
-    constructor(memoryFilePath: string);
+    private readonly ttlSeconds?;
+    private readonly getTimestamp?;
+    constructor(memoryFilePath: string, options?: MemoryToolOptions);
     get filePath(): string;
     private loadGraph;
     private saveGraph;
@@ -42,6 +26,26 @@ export declare class KnowledgeGraphManager {
     searchNodes(query: string): Promise<KnowledgeGraph>;
     openNodes(names: string[]): Promise<KnowledgeGraph>;
     appendSnapshot(): Promise<void>;
+}
+import { Tool } from "@modelcontextprotocol/sdk/types.js";
+export interface Entity {
+    name: string;
+    entityType: string;
+    observations: string[];
+}
+export interface Relation {
+    from: string;
+    to: string;
+    relationType: string;
+}
+export interface KnowledgeGraph {
+    entities: Entity[];
+    relations: Relation[];
+}
+export interface MemoryToolOptions {
+    memoryFilePath?: string;
+    ttlSeconds?: number;
+    getTimestamp?: () => Promise<string> | string;
 }
 export declare function initialiseKnowledgeGraph(options?: MemoryToolOptions): Promise<{
     manager: KnowledgeGraphManager;
