@@ -152,8 +152,6 @@
   },
   "devDependencies": {
     "vercel": "^31.3.1",
-    "supabase": "^2.53.6",
-    "@githubnext/gh": "^0.1.0",
     "@mermaid-js/mermaid-cli": "^11.12.0",
     "@modelcontextprotocol/sdk": "^1.20.1",
     "@modelcontextprotocol/server-memory": "^2025.9.25",
