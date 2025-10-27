@@ -30,7 +30,7 @@ echo ""
 echo "🧪 Running failing CI/CD test to trigger error reporting..."
 
  # Run a test that should fail (using non-existent suite)
-node mcp-servers/observability-server.js <<EOF || true
+node observability-cli.js <<EOF || true
 {
   "jsonrpc": "2.0",
   "id": 1,
