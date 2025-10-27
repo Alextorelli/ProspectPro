@@ -20,8 +20,7 @@
 2. **github/github-mcp-server** – PR automation, code review, CI/CD integration
 3. **microsoft/playwright-mcp** – E2E and UI testing automation
 4. **context7** – Code search, dependency graphing, symbol analysis
-5. **memory** – Cross-agent context sharing
-6. **sequentialthinking** – Multi-step reasoning and decision logging
+5. **utility** – Provides all fetch (HTTP/HTML), filesystem (read/write), git status, and time tools (time_now, time_convert), as well as memory and sequential thinking capabilities. All memory, chain-of-thought, and time context operations are routed through Utility MCP. ContextManager pulls current timestamps via Utility MCP’s `time_now`/`time_convert` endpoints for all context and workflow operations.
 
 ### Key Tool Usage Patterns
 
@@ -35,6 +34,14 @@ await mcp.github.request_copilot_review({ owner, repo, pullNumber });
 
 // Database test seeding
 await mcp.supabase.execute_query({ query: seedSQL, params });
+
+// Fetch, filesystem, git, and time operations (via Utility MCP)
+await mcp.utility.fetch({ url: "https://example.com", method: "GET" });
+await mcp.utility.fs_read({ file_path: "README.md" });
+await mcp.utility.fs_write({ file_path: "out.txt", content: "Hello" });
+await mcp.utility.git_status({ repo_path: "." });
+const now = await mcp.utility.time_now({ timezone: "UTC" });
+const converted = await mcp.utility.time_convert({ time: now, source_timezone: "UTC", target_timezone: "America/Los_Angeles" });
 
 ## Development Workflow Standards
 
