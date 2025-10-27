@@ -14,7 +14,7 @@ cd "$ROOT_DIR/dev-tools/agents/mcp-servers/utility" && npm run build && cd -
 # Test agent secrets
 {
   echo "# Agent Secret Validation"
-  npx --yes dotenv-cli -e "$ENV_FILE" -- node -e "console.log('Development Workflow:', process.env.AGENT_DEV_SUPABASE_URL ? '✓' : '✗')"
+  npx --yes dotenv-cli -e "$ENV_FILE" -- node -e "console.log('Development Workflow:', process.env.SUPABASE_URL ? '✓' : '✗')"
   npx --yes dotenv-cli -e "$ENV_FILE" -- node -e "console.log('Observability:', process.env.CONTEXT7_API_KEY ? '✓' : '✗')"
   npx --yes dotenv-cli -e "$ENV_FILE" -- node -e "console.log('Production Ops:', process.env.VERCEL_TOKEN ? '✓' : '✗')"
 } | tee -a "$LOG_FILE"
