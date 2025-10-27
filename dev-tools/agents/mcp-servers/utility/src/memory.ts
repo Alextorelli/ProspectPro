@@ -28,6 +28,8 @@ export interface KnowledgeGraph {
 
 export interface MemoryToolOptions {
   memoryFilePath?: string;
+  ttlSeconds?: number;
+  getTimestamp?: () => Promise<string> | string;
 }
 
 const DEFAULT_MEMORY_PATH = path.resolve(
@@ -65,8 +67,12 @@ async function resolveMemoryFilePath(
   return jsonlPath;
 }
 
-export class KnowledgeGraphManager {
-  constructor(private readonly memoryFilePath: string) {}
+  private readonly ttlSeconds?: number;
+  private readonly getTimestamp?: () => Promise<string> | string;
+  constructor(private readonly memoryFilePath: string, options: MemoryToolOptions = {}) {
+    this.ttlSeconds = options.ttlSeconds;
+    this.getTimestamp = options.getTimestamp;
+  }
 
   get filePath(): string {
     return this.memoryFilePath;
@@ -80,10 +86,14 @@ export class KnowledgeGraphManager {
         .map((line) => line.trim())
         .filter((line) => line.length > 0);
 
+      const now = Date.now();
       const graph: KnowledgeGraph = { entities: [], relations: [] };
 
       for (const line of lines) {
         const item = JSON.parse(line);
+        // TTL/retention: prune expired entities/relations
+        if (item.expiresAt && Date.parse(item.expiresAt) < now) continue;
+        if (item.ttlSeconds && item.createdAt && Date.parse(item.createdAt) + item.ttlSeconds * 1000 < now) continue;
         if (item.type === "entity") {
           graph.entities.push({
             name: item.name,
@@ -280,16 +290,27 @@ export class KnowledgeGraphManager {
 
   async appendSnapshot(): Promise<void> {
     const graph = await this.loadGraph();
-    const payload = {
-      timestamp: new Date().toISOString(),
+    let timestamp: string;
+    if (this.getTimestamp) {
+      timestamp = typeof this.getTimestamp === 'function' ? await this.getTimestamp() : this.getTimestamp;
+    } else {
+      timestamp = new Date().toISOString();
+    }
+    const payload: any = {
+      type: "snapshot",
+      timestamp,
       summary: {
         entityCount: graph.entities.length,
         relationCount: graph.relations.length,
       },
     };
+    if (this.ttlSeconds) {
+      payload.ttlSeconds = this.ttlSeconds;
+      payload.expiresAt = new Date(Date.parse(timestamp) + this.ttlSeconds * 1000).toISOString();
+    }
     await appendFile(
       this.memoryFilePath,
-      `${JSON.stringify({ type: "snapshot", ...payload })}\n`
+      `${JSON.stringify(payload)}\n`
     );
   }
 }
@@ -299,7 +320,7 @@ export async function initialiseKnowledgeGraph(
 ): Promise<{ manager: KnowledgeGraphManager; memoryFilePath: string }> {
   const memoryFilePath = await resolveMemoryFilePath(options);
   return {
-    manager: new KnowledgeGraphManager(memoryFilePath),
+    manager: new KnowledgeGraphManager(memoryFilePath, options),
     memoryFilePath,
   } as const;
 }
