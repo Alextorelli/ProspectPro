@@ -56,6 +56,24 @@ class ObservabilityServer {
   }
 
   setupToolHandlers() {
+        {
+          name: "run_rls_diagnostics",
+          description: "Generate and execute RLS diagnostic queries",
+          inputSchema: {
+            type: "object",
+            properties: {
+              supabaseUrl: {
+                type: "string",
+                description: "Supabase project URL",
+              },
+              anonKey: {
+                type: "string",
+                description: "Supabase anon key",
+              },
+            },
+            required: ["supabaseUrl", "anonKey"],
+          },
+        },
     this.server.setRequestHandler(ListToolsRequestSchema, async () => ({
       tools: [
         {
@@ -263,9 +281,22 @@ class ObservabilityServer {
             result = await this.testEdgeFunction(args);
           } else if (name === "validate_database_permissions") {
             result = await this.validateDatabasePermissions(args);
+          } else if (name === "run_rls_diagnostics") {
+            result = await this.runRlsDiagnostics(args);
           } else {
             throw new Error(`Unknown tool: ${name}`);
           }
+  async runRlsDiagnostics({ supabaseUrl, anonKey }) {
+    const diagnosticSQL = `-- RLS Diagnostics for ProspectPro\nSELECT schemaname, tablename, rowsecurity as rls_enabled, (SELECT count(*) FROM pg_policies WHERE schemaname = 'public' AND tablename = t.tablename) as policy_count FROM pg_tables t WHERE schemaname = 'public' AND tablename IN ('campaigns', 'leads', 'dashboard_exports');\n\n-- Check specific policies\nSELECT schemaname, tablename, policyname, permissive, roles, cmd FROM pg_policies WHERE schemaname = 'public' AND tablename IN ('campaigns', 'leads', 'dashboard_exports');`;
+    return {
+      content: [
+        {
+          type: "text",
+          text: `RLS Diagnostic Queries Generated:\n\nRun these queries in Supabase SQL Editor to diagnose RLS issues:\n\n${diagnosticSQL}\n\nExpected Results:\n- All tables should have rls_enabled = true\n- Each table should have at least 1-3 policies\n- Policies should include anon role permissions\n\nIf any table shows rls_enabled = false or policy_count = 0:\n1. Run /database/rls-setup.sql\n2. Verify policies are created correctly\n3. Check anon role has necessary permissions`,
+        },
+      ],
+    };
+  }
 
           span.setStatus({ code: SpanStatusCode.OK });
           return result;
