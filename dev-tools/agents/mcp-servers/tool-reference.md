@@ -1,5 +1,49 @@
 # MCP Server Tool Reference
 
+## Utility MCP (Unified)
+
+| Tool                  | Description                     | Parameters                 | Category  |
+| --------------------- | ------------------------------- | -------------------------- | --------- |
+| http_fetch            | Fetch HTTP resources            | url, method, headers, body | Utility   |
+| html_conversion       | Convert HTML to text/markdown   | html                       | Utility   |
+| filesystem_read       | Read files from disk            | path                       | Utility   |
+| filesystem_write      | Write files to disk             | path, content              | Utility   |
+| git_status            | Get git status                  | path                       | Utility   |
+| timezone_conversion   | Convert timezones               | datetime, from, to         | Utility   |
+| long_term_memory      | Store/retrieve memory snapshots | key, value                 | Cognitive |
+| session_recall        | Recall session memory           | session_id                 | Cognitive |
+| conversation_indexing | Index conversation for recall   | session_id, data           | Cognitive |
+| scenario_analysis     | Analyze scenarios               | scenario_data              | Cognitive |
+| chain_of_thought      | Log sequential reasoning        | steps, context             | Cognitive |
+| decision_logging      | Log decisions                   | decision_data              | Cognitive |
+
+## Observability MCP Server
+
+| Tool                          | Description                                 | Parameters                                   | Category    |
+| ----------------------------- | ------------------------------------------- | -------------------------------------------- | ----------- |
+| test_edge_function            | Smoke test Edge Functions (tracing + error) | functionName, anonKey, testPayload           | Diagnostics |
+| validate_database_permissions | Check RLS policies and DB permissions       | supabaseUrl, anonKey                         | Diagnostics |
+| run_rls_diagnostics           | Generate RLS diagnostic SQL                 | supabaseUrl, anonKey                         | Diagnostics |
+| supabase_cli_healthcheck      | CLI status check                            | projectDir                                   | Diagnostics |
+| check_production_deployment   | Full deployment health check                | supabaseUrl, vercelUrl                       | Diagnostics |
+| vercel_status_check           | Vercel deployment status                    | vercelUrl, showHeaders                       | Diagnostics |
+| generate_debugging_commands   | Generate curl/CLI commands                  | supabaseUrl, vercelUrl                       | Diagnostics |
+| collect_and_summarize_logs    | Fetch and analyze logs                      | supabaseFunction, vercelUrl, sinceMinutes    | Diagnostics |
+| validate_ci_cd_suite          | Run test suite with tracing                 | suite                                        | Diagnostics |
+| start_trace                   | Start OpenTelemetry trace                   | traceName, attributes                        | Tracing     |
+| add_trace_event               | Add event to trace                          | spanId, eventName, attributes                | Tracing     |
+| end_trace                     | End trace                                   | spanId, status, error                        | Tracing     |
+| query_traces                  | Query traces                                | serviceName, operationName, timeRange, limit | Tracing     |
+| generate_trace_report         | Generate trace report                       | timeRange, serviceName, outputFormat         | Tracing     |
+
+**Highlight.io Integration:**
+
+- Error reporting and trace forwarding via `HIGHLIGHT_PROJECT_ID`, `HIGHLIGHT_API_KEY`, and `HIGHLIGHT_OTLP_ENDPOINT` in `.env.agent.local`
+
+**OpenTelemetry/Jaeger Integration:**
+
+- Distributed tracing via `JAEGER_ENDPOINT` in `.env.agent.local`
+
 This reference consolidates all MCP tools currently available across the installed servers. Source data originates from `mcp_tools_comprehensive.csv` (2025-10-26). Use this document to understand capabilities when updating the registry, persona instructions, or troubleshooting workflows.
 
 ## GitHub MCP Server
