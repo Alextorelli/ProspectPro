@@ -4,14 +4,28 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import {
   CallToolRequestSchema,
   ListToolsRequestSchema,
+  Tool,
 } from "@modelcontextprotocol/sdk/types.js";
 import { access, constants, readFile, writeFile } from "fs/promises";
 import { convert } from "html-to-text";
 import fetch from "node-fetch";
 import { normalize, relative, resolve } from "path";
 import { simpleGit } from "simple-git";
+import {
+  KnowledgeGraphManager,
+  buildMemoryToolList,
+  executeMemoryTool,
+  initialiseKnowledgeGraph,
+} from "./memory.js";
+import {
+  SEQUENTIAL_THINKING_TOOL,
+  SequentialThinkingEngine,
+  SequentialThinkingOptions,
+  createSequentialThinkingEngine,
+} from "./sequential.js";
 
 const ALLOWED_PATH = process.env.ALLOWED_PATH || "/workspaces/ProspectPro";
+const CLI_ARGS = new Set(process.argv.slice(2));
 
 interface FetchOptions {
   url: string;
@@ -189,193 +203,260 @@ async function handleTimeConvert(options: TimeConvertOptions): Promise<string> {
   );
 }
 
-const server = new Server(
+const BASE_TOOL_DEFINITIONS: Tool[] = [
   {
-    name: "prospectpro-utility-mcp",
-    version: "1.0.0",
+    name: "fetch",
+    description:
+      "Fetch content from a URL with optional HTML-to-text conversion",
+    inputSchema: {
+      type: "object",
+      properties: {
+        url: {
+          type: "string",
+          description: "URL to fetch",
+        },
+        method: {
+          type: "string",
+          description: "HTTP method (default: GET)",
+          enum: ["GET", "POST", "PUT", "DELETE", "PATCH"],
+        },
+        headers: {
+          type: "object",
+          description: "Optional HTTP headers",
+          additionalProperties: { type: "string" },
+        },
+        raw: {
+          type: "boolean",
+          description: "Return raw response without HTML conversion",
+        },
+      },
+      required: ["url"],
+    },
   },
   {
-    capabilities: {
-      tools: {},
+    name: "fs_read",
+    description: "Read a file from the allowed workspace path",
+    inputSchema: {
+      type: "object",
+      properties: {
+        file_path: {
+          type: "string",
+          description: "Path to file (relative to workspace root)",
+        },
+      },
+      required: ["file_path"],
     },
-  }
-);
-
-server.setRequestHandler(ListToolsRequestSchema, async () => {
-  return {
-    tools: [
-      {
-        name: "fetch",
-        description:
-          "Fetch content from a URL with optional HTML-to-text conversion",
-        inputSchema: {
-          type: "object",
-          properties: {
-            url: {
-              type: "string",
-              description: "URL to fetch",
-            },
-            method: {
-              type: "string",
-              description: "HTTP method (default: GET)",
-              enum: ["GET", "POST", "PUT", "DELETE", "PATCH"],
-            },
-            headers: {
-              type: "object",
-              description: "Optional HTTP headers",
-              additionalProperties: { type: "string" },
-            },
-            raw: {
-              type: "boolean",
-              description: "Return raw response without HTML conversion",
-            },
-          },
-          required: ["url"],
+  },
+  {
+    name: "fs_write",
+    description: "Write content to a file in the allowed workspace path",
+    inputSchema: {
+      type: "object",
+      properties: {
+        file_path: {
+          type: "string",
+          description: "Path to file (relative to workspace root)",
+        },
+        content: {
+          type: "string",
+          description: "Content to write",
         },
       },
-      {
-        name: "fs_read",
-        description: "Read a file from the allowed workspace path",
-        inputSchema: {
-          type: "object",
-          properties: {
-            file_path: {
-              type: "string",
-              description: "Path to file (relative to workspace root)",
-            },
-          },
-          required: ["file_path"],
+      required: ["file_path", "content"],
+    },
+  },
+  {
+    name: "git_status",
+    description: "Get git repository status",
+    inputSchema: {
+      type: "object",
+      properties: {
+        repo_path: {
+          type: "string",
+          description: "Path to git repository (default: workspace root)",
         },
       },
-      {
-        name: "fs_write",
-        description: "Write content to a file in the allowed workspace path",
-        inputSchema: {
-          type: "object",
-          properties: {
-            file_path: {
-              type: "string",
-              description: "Path to file (relative to workspace root)",
-            },
-            content: {
-              type: "string",
-              description: "Content to write",
-            },
-          },
-          required: ["file_path", "content"],
+    },
+  },
+  {
+    name: "time_now",
+    description: "Get current time in specified timezone",
+    inputSchema: {
+      type: "object",
+      properties: {
+        timezone: {
+          type: "string",
+          description: "IANA timezone name (default: UTC)",
         },
       },
-      {
-        name: "git_status",
-        description: "Get git repository status",
-        inputSchema: {
-          type: "object",
-          properties: {
-            repo_path: {
-              type: "string",
-              description: "Path to git repository (default: workspace root)",
-            },
-          },
+    },
+  },
+  {
+    name: "time_convert",
+    description: "Convert time between timezones",
+    inputSchema: {
+      type: "object",
+      properties: {
+        time: {
+          type: "string",
+          description: "Time to convert (ISO 8601 format)",
+        },
+        source_timezone: {
+          type: "string",
+          description: "Source IANA timezone",
+        },
+        target_timezone: {
+          type: "string",
+          description: "Target IANA timezone",
         },
       },
-      {
-        name: "time_now",
-        description: "Get current time in specified timezone",
-        inputSchema: {
-          type: "object",
-          properties: {
-            timezone: {
-              type: "string",
-              description: "IANA timezone name (default: UTC)",
-            },
-          },
-        },
-      },
-      {
-        name: "time_convert",
-        description: "Convert time between timezones",
-        inputSchema: {
-          type: "object",
-          properties: {
-            time: {
-              type: "string",
-              description: "Time to convert (ISO 8601 format)",
-            },
-            source_timezone: {
-              type: "string",
-              description: "Source IANA timezone",
-            },
-            target_timezone: {
-              type: "string",
-              description: "Target IANA timezone",
-            },
-          },
-          required: ["time", "source_timezone", "target_timezone"],
-        },
-      },
-    ],
-  };
-});
+      required: ["time", "source_timezone", "target_timezone"],
+    },
+  },
+];
 
-server.setRequestHandler(CallToolRequestSchema, async (request) => {
-  try {
-    const { name, arguments: args } = request.params;
+const BASE_TOOL_HANDLERS: Record<string, (args: unknown) => Promise<string>> = {
+  fetch: (args) => handleFetch(args as FetchOptions),
+  fs_read: (args) => handleFSRead(args as FSReadOptions),
+  fs_write: (args) => handleFSWrite(args as FSWriteOptions),
+  git_status: (args) => handleGitStatus(args as GitStatusOptions),
+  time_now: (args) => handleTimeNow(args as TimeNowOptions),
+  time_convert: (args) => handleTimeConvert(args as TimeConvertOptions),
+};
 
-    let result: string;
-
-    switch (name) {
-      case "fetch":
-        result = await handleFetch(args as unknown as FetchOptions);
-        break;
-      case "fs_read":
-        result = await handleFSRead(args as unknown as FSReadOptions);
-        break;
-      case "fs_write":
-        result = await handleFSWrite(args as unknown as FSWriteOptions);
-        break;
-      case "git_status":
-        result = await handleGitStatus(args as unknown as GitStatusOptions);
-        break;
-      case "time_now":
-        result = await handleTimeNow(args as unknown as TimeNowOptions);
-        break;
-      case "time_convert":
-        result = await handleTimeConvert(args as unknown as TimeConvertOptions);
-        break;
-      default:
-        throw new Error(`Unknown tool: ${name}`);
-    }
-
-    return {
-      content: [
-        {
-          type: "text",
-          text: result,
-        },
-      ],
-    };
-  } catch (error) {
-    return {
-      content: [
-        {
-          type: "text",
-          text: `Error: ${
-            error instanceof Error ? error.message : String(error)
-          }`,
-        },
-      ],
-      isError: true,
-    };
-  }
-});
-
-async function main() {
-  const transport = new StdioServerTransport();
-  await server.connect(transport);
-  console.error("ProspectPro Utility MCP Server running on stdio");
+interface RuntimeContext {
+  memoryManager: KnowledgeGraphManager;
+  memoryFilePath: string;
+  sequentialEngine: SequentialThinkingEngine;
+  memoryTools: Tool[];
+  memoryToolNames: Set<string>;
 }
 
-main().catch((error) => {
+async function createRuntime(
+  options: { sequential?: SequentialThinkingOptions } = {}
+): Promise<RuntimeContext> {
+  const { manager, memoryFilePath } = await initialiseKnowledgeGraph();
+  const sequentialEngine = createSequentialThinkingEngine(options.sequential);
+  const memoryTools = buildMemoryToolList();
+  const memoryToolNames = new Set(memoryTools.map((tool) => tool.name));
+
+  return {
+    memoryManager: manager,
+    memoryFilePath,
+    sequentialEngine,
+    memoryTools,
+    memoryToolNames,
+  };
+}
+
+function formatResult(result: unknown): string {
+  return typeof result === "string" ? result : JSON.stringify(result, null, 2);
+}
+
+async function runServer(): Promise<void> {
+  const runtime = await createRuntime();
+
+  const server = new Server(
+    {
+      name: "prospectpro-utility-mcp",
+      version: "1.1.0",
+    },
+    {
+      capabilities: {
+        tools: {},
+      },
+    }
+  );
+
+  server.setRequestHandler(ListToolsRequestSchema, async () => ({
+    tools: [
+      ...BASE_TOOL_DEFINITIONS,
+      ...runtime.memoryTools,
+      SEQUENTIAL_THINKING_TOOL,
+    ],
+  }));
+
+  server.setRequestHandler(CallToolRequestSchema, async (request) => {
+    const { name, arguments: args } = request.params;
+
+    try {
+      const baseHandler = BASE_TOOL_HANDLERS[name];
+      if (baseHandler) {
+        const result = await baseHandler(args);
+        return {
+          content: [
+            {
+              type: "text",
+              text: result,
+            },
+          ],
+        };
+      }
+
+      if (runtime.memoryToolNames.has(name)) {
+        const result = await executeMemoryTool(
+          runtime.memoryManager,
+          name,
+          (args as Record<string, unknown>) ?? undefined
+        );
+        return {
+          content: [
+            {
+              type: "text",
+              text: formatResult(result),
+            },
+          ],
+        };
+      }
+
+      if (name === SEQUENTIAL_THINKING_TOOL.name) {
+        return runtime.sequentialEngine.processThought(args);
+      }
+
+      throw new Error(`Unknown tool: ${name}`);
+    } catch (error) {
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Error: ${
+              error instanceof Error ? error.message : String(error)
+            }`,
+          },
+        ],
+        isError: true,
+      };
+    }
+  });
+
+  const transport = new StdioServerTransport();
+  await server.connect(transport);
+  console.error(
+    `ProspectPro Utility MCP Server running on stdio (memory file: ${runtime.memoryManager.filePath})`
+  );
+}
+
+async function runSelfTest(): Promise<void> {
+  const runtime = await createRuntime({
+    sequential: { disableThoughtLogging: true },
+  });
+
+  await runtime.memoryManager.readGraph();
+  await runtime.sequentialEngine.selfTest();
+
+  console.log("Utility MCP self-test completed successfully");
+}
+
+async function bootstrap(): Promise<void> {
+  if (CLI_ARGS.has("--test")) {
+    await runSelfTest();
+    return;
+  }
+
+  await runServer();
+}
+
+bootstrap().catch((error) => {
   console.error("Fatal error:", error);
   process.exit(1);
 });
