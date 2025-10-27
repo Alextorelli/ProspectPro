@@ -5,6 +5,14 @@
 - System-architect, context README, and quickref updated to document Utility MCP as provider for memory, sequential, and timestamps
 - Validation log and coverage updated
 
+## 2025-10-27T24:10Z — Full Phase 5 agent/MCP validation
+
+- MCP tools built successfully (`npm run build:tools --prefix dev-tools/agents/mcp-servers`)
+- Agent secrets hydrated from provider stores (✓)
+- Agent MCP access tested with required secrets for each environment
+- Utility MCP smoke tests passed (fetch, filesystem, git, time, memory, sequential)
+- Results logged to coverage.md
+
 # Phase 5: Environment-Bound Validation Log
 
 ## 2025-10-27: Initiate Environment-Bound Agent Validation
@@ -68,17 +76,36 @@ Production Ops: ✓
 
 Utility MCP self-test completed successfully
 2025-10-27T06:56:34Z: Phase 5 agent/MCP validation complete
+
 # Agent Secret Validation
+
 Development Workflow: ✓
 Observability: ✓
 Production Ops: ✓
+
 # MCP Smoke Tests
+
 Utility MCP self-test completed successfully
 2025-10-27T07:48:29Z: Phase 5 agent/MCP validation complete
+
 # Agent Secret Validation
+
 Development Workflow: ✓
 Observability: ✓
 Production Ops: ✓
+
 # MCP Smoke Tests
+
 Utility MCP self-test completed successfully
 2025-10-27T07:54:34Z: Phase 5 agent/MCP validation complete
+
+# Agent Secret Validation
+
+Development Workflow: ✓
+Observability: ✓
+Production Ops: ✓
+
+# MCP Smoke Tests
+
+Utility MCP self-test completed successfully
+2025-10-27T11:25:45Z: Phase 5 agent/MCP validation complete
