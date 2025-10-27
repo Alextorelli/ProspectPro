@@ -64,7 +64,7 @@ dev-tools/
 |   |   |   |-- postgresql-server-tools.js
 |   |   |   |-- production-server-tools.js
 |   |   |   |-- README.md
-|   |   |   `-- supabase-troubleshooting-server-tools.js
+|   |   |   `-- observability-server-tools.js
 |   |   |-- active-registry.json
 |   |   |-- MCP-package.json
 |   |   |-- observability-server.js

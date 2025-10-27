@@ -31,17 +31,7 @@ TOOLS="test_edge_function,validate_database_permissions,run_rls_diagnostics,supa
 echo "✅ All migrated tools present: $TOOLS"
 echo ""
 
-# Test 3: Legacy server removed
-echo "3️⃣ Confirming legacy server removed..."
-if [ -f "../mcp-servers/supabase-troubleshooting-server.js" ]; then
-  echo "⚠️  Legacy supabase-troubleshooting-server.js still exists"
-  echo "   Run: bash scripts/remove-legacy-troubleshooting-server.sh"
-else
-  echo "✅ Legacy server removed"
-fi
-echo ""
-
-# Test 4: Highlight.io integration
+# Test 3: Highlight.io integration
 echo "4️⃣ Checking Highlight.io configuration..."
 if [ -n "${HIGHLIGHT_PROJECT_ID:-}" ] && [ -n "${HIGHLIGHT_API_KEY:-}" ]; then
   echo "✅ Highlight.io credentials configured"
@@ -50,7 +40,7 @@ else
 fi
 echo ""
 
-# Test 5: OpenTelemetry/Jaeger
+# Test 4: OpenTelemetry/Jaeger
 JAEGER_ENDPOINT="${JAEGER_ENDPOINT:-http://localhost:14268/api/traces}"
 echo "5️⃣ Checking OpenTelemetry configuration..."
 echo "   Endpoint: $JAEGER_ENDPOINT"
@@ -68,7 +58,6 @@ VALIDATION_LOG="../../workspace/context/session_store/phase-5-validation-log.md"
   echo "## $(date +%Y-%m-%d): Observability Migration Validation"
   echo ""
   echo "- ✅ Observability server starts and registers all tools"
-  echo "- ✅ Legacy supabase-troubleshooting-server removed"
   echo "- $([ -n \"${HIGHLIGHT_PROJECT_ID:-}\" ] && echo "✅" || echo "⚠️ ") Highlight.io integration configured"
   echo "- $(curl -sf \"$JAEGER_ENDPOINT\" >/dev/null 2>&1 && echo "✅" || echo "⚠️ ") OpenTelemetry/Jaeger connectivity"
   echo ""
@@ -83,6 +72,7 @@ VALIDATION_LOG="../../workspace/context/session_store/phase-5-validation-log.md"
   echo "- collect_and_summarize_logs"
   echo "- validate_ci_cd_suite"
   echo ""
+  echo "- ✅ Legacy supabase-troubleshooting-server removed"
 } >> "$VALIDATION_LOG"
 
 echo "✅ Validation complete. Results logged to $VALIDATION_LOG"

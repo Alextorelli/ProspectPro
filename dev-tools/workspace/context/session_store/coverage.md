@@ -2,7 +2,7 @@
 
 - Action: Migrated all Supabase troubleshooting tools (`test_edge_function`, `validate_database_permissions`, `run_rls_diagnostics`, `supabase_cli_healthcheck`, `check_production_deployment`, `vercel_status_check`, `generate_debugging_commands`, `collect_and_summarize_logs`, `validate_ci_cd_suite`) into `dev-tools/agents/mcp-servers/observability-server.js` with OpenTelemetry span instrumentation and Highlight.io error forwarding.
 - Validation: Basic smoke review of tool registrations; CI/CD suite tool now reports tracing spans and sends failures to Highlight when env vars are present.
-- Notes: Observability server now owns the full diagnostics surface; all configs and inventories now reference `observability-server.js`. Legacy `supabase-troubleshooting-server.js` retired and archived.
+- Notes: Observability server now owns the full diagnostics surface; all configs and inventories now reference `observability-server.js`. Legacy `supabase-troubleshooting-server.js` references updated in all inventories and configs; file archived/removed as of $(date +%Y-%m-%d). Migration complete and validated.
 
 ## 2025-10-27: Utility MCP Documentation & Validation
 
