@@ -1,4 +1,3 @@
-'''
 **Step 1: Update all references from `supabase-troubleshooting-server.js` to observability-server.js**
 
 ```javascript
