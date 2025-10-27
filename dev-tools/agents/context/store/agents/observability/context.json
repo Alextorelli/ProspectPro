@@ -8,9 +8,9 @@
   },
   "longTermMemory": [],
   "metadata": {
-    "environment": "development",
+    "environment": "production",
     "version": "1.0.0",
-    "lastCheckpoint": "2025-10-20T06:40:39.982Z",
-    "checksum": "43b55508ba8cb6dd67a958be6d3b581d48c4f2fbcbd486a4517d7aba8652c363"
+    "lastCheckpoint": "2025-10-27T23:59:00.000Z",
+    "checksum": "46932bb9329db0ca14a3cb00d8b225d65ccdfd10032f5e4163cd32a3ad3e49b0"
   }
 }
