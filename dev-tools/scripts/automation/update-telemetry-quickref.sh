@@ -4,7 +4,7 @@
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO_ROOT="/workspaces/ProspectPro"
+REPO_ROOT="$(cd "$SCRIPT_DIR/../../.." && pwd)"
 OBSERVABILITY_JSON="$REPO_ROOT/dev-tools/agents/context/store/observability.json"
 COPILOT_INSTRUCTIONS="$REPO_ROOT/.github/copilot-instructions.md"
 
