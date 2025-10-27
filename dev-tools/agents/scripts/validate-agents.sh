@@ -19,12 +19,14 @@ cd "$ROOT_DIR/dev-tools/agents/mcp-servers/utility" && npm run build && cd -
   npx --yes dotenv-cli -e "$ENV_FILE" -- node -e "console.log('Production Ops:', process.env.VERCEL_TOKEN ? '✓' : '✗')"
 } | tee -a "$LOG_FILE"
 
-# Smoke test MCPs
+# Smoke test MCPs (run from mcp-servers root for correct context)
+cd "$ROOT_DIR/dev-tools/agents/mcp-servers"
 {
   echo "# MCP Smoke Tests"
-  npx tsx "$ROOT_DIR/dev-tools/agents/mcp-servers/mcp-tools/memory/index.ts" --store "$ROOT_DIR/dev-tools/workspace/context/session_store/memory.jsonl" --dry-run
-  npx tsx "$ROOT_DIR/dev-tools/agents/mcp-servers/mcp-tools/sequential/index.ts" --ledger "$ROOT_DIR/dev-tools/workspace/context/session_store/sequential-thoughts.jsonl" --dry-run
-  node "$ROOT_DIR/dev-tools/agents/mcp-servers/utility/dist/index.js" --test || true
+  npx tsx "mcp-tools/memory/index.ts" --store "$ROOT_DIR/dev-tools/workspace/context/session_store/memory.jsonl" --dry-run
+  npx tsx "mcp-tools/sequential/index.ts" --ledger "$ROOT_DIR/dev-tools/workspace/context/session_store/sequential-thoughts.jsonl" --dry-run
+  node "utility/dist/index.js" --test || true
 } | tee -a "$LOG_FILE"
+cd "$ROOT_DIR"
 
 echo "$(date -u +%Y-%m-%dT%H:%M:%SZ): Phase 5 agent/MCP validation complete" | tee -a "$LOG_FILE" >> "$COVERAGE_FILE"
