@@ -1,11 +1,11 @@
-# MCP Mode Tool Matrix
+# MCP Mode Tool Matrix (Unified Utility MCP)
 
-| Agent                | supabase | github | playwright | context7 | memory | sequentialthinking |
-| -------------------- | -------- | ------ | ---------- | -------- | ------ | ------------------ |
-| Development Workflow | ✓        | ✓      | ✓          | ✓        | ✓      | ✓                  |
-| Observability        | ✓        |        |            |          | ✓      | ✓                  |
-| Production Ops       | ✓        | ✓      |            |          | ✓      | ✓                  |
-| System Architect     | ✓        | ✓      | ✓          | ✓        | ✓      | ✓                  |
+| Agent                | supabase | github | playwright | context7 | utility |
+| -------------------- | -------- | ------ | ---------- | -------- | ------- |
+| Development Workflow | ✓        | ✓      | ✓          | ✓        | ✓       |
+| Observability        | ✓        |        |            |          | ✓       |
+| Production Ops       | ✓        | ✓      |            |          | ✓       |
+| System Architect     | ✓        | ✓      | ✓          | ✓        | ✓       |
 
 - ✓ = Agent has access to this MCP server
-- See `mece-agent-mcp-integration-plan.md` for full taxonomy and responsibilities.
+- Utility MCP provides fetch, filesystem, git, time, memory, and sequentialthinking tools for all agents. See `mece-agent-mcp-integration-plan.md` for full taxonomy and responsibilities.
