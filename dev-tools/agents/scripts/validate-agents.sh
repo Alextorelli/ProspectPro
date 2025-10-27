@@ -23,9 +23,12 @@ cd "$ROOT_DIR/dev-tools/agents/mcp-servers/utility" && npm run build && cd -
 cd "$ROOT_DIR/dev-tools/agents/mcp-servers"
 {
   echo "# MCP Smoke Tests"
-  npx tsx "mcp-tools/memory/index.ts" --store "$ROOT_DIR/dev-tools/workspace/context/session_store/memory.jsonl" --dry-run
-  npx tsx "mcp-tools/sequential/index.ts" --ledger "$ROOT_DIR/dev-tools/workspace/context/session_store/sequential-thoughts.jsonl" --dry-run
-  node "utility/dist/index.js" --test || true
+  echo "## Utility MCP: fetch, filesystem, git, time"
+  node utility/dist/index.js --test || true
+  echo "## Memory MCP"
+  npx tsx mcp-tools/memory/index.ts --store "$ROOT_DIR/dev-tools/workspace/context/session_store/memory.jsonl" --dry-run || true
+  echo "## Sequential Thinking MCP"
+  npx tsx mcp-tools/sequential/index.ts --ledger "$ROOT_DIR/dev-tools/workspace/context/session_store/sequential-thoughts.jsonl" --dry-run || true
 } | tee -a "$LOG_FILE"
 cd "$ROOT_DIR"
 
