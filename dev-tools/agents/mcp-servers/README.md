@@ -18,22 +18,23 @@ This directory contains the **enhanced MCP server implementation** that provides
 
 - Production Server (`production-server.js`)
 - Development Server (`development-server.js`)
-- Observability Server (`observability-server.js`)
+- Observability Server (`observability-server.js`) — now includes Highlight.io error reporting and OpenTelemetry/Jaeger tracing
+- Utility MCP (unified): provides fetch, filesystem, git, time, memory, and chain-of-thought tools for all agents
 
 **Retired:**
 
 - PostgreSQL MCP Server (all Postgres/DB tooling now handled by Supabase MCP and Drizzle ORM)
+- Legacy troubleshooting server (supabase-troubleshooting-server.js) — removed
 
 ---
 
 ### 4. Cognitive Extensions (Sequential + Memory)
 
-ProspectPro ships two lightweight cognitive servers alongside the enrichment stack:
+ProspectPro now ships a unified Utility MCP server for cognitive extensions:
 
-- **Sequential Thinking** (`mcp-tools/sequential/`): streams structured reasoning steps to `dev-tools/agents/context/session_store/sequential-thoughts.jsonl` by default. Override via `SEQUENTIAL_LOG_PATH`; suppress persistence with `DISABLE_THOUGHT_LOGGING=true`.
-- **Memory Graph** (`mcp-tools/memory/`): manages a JSONL knowledge graph at `dev-tools/agents/context/session_store/memory.jsonl`. Override via `MCP_MEMORY_FILE_PATH`. A snapshot line is appended whenever `read_graph` is executed.
-
-Run `npm run build:tools` in `dev-tools/agents/mcp-servers/` after editing these packages so the registry (`active-registry.json`) can execute the latest `dist/` output.
+- **Utility MCP**: Streams structured reasoning steps to `dev-tools/agents/context/session_store/sequential-thoughts.jsonl` and manages a JSONL knowledge graph at `dev-tools/agents/context/session_store/memory.jsonl`. Override via `SEQUENTIAL_LOG_PATH` and `MCP_MEMORY_FILE_PATH`.
+- All agents reference canonical secrets from `.env.agent.local` (see `.env.agent.example` for template).
+- Run `npm run build:tools` in `dev-tools/agents/mcp-servers/` after editing these packages so the registry (`active-registry.json`) can execute the latest `dist/` output.
 
 ### 1. Production Server (`production-server.js`) - **v2.1.0**
 
@@ -76,29 +77,30 @@ Run `npm run build:tools` in `dev-tools/agents/mcp-servers/` after editing these
 - `generate_debugging_commands` - Generate curl/CLI commands
 - `collect_and_summarize_logs` - Fetch and analyze logs
 - `validate_ci_cd_suite` - Run test suite with tracing
-- `query_traces` - Query historical traces
-- `generate_trace_report` - Generate trace analysis
-- `start_trace` - Start distributed trace
-- `add_trace_event` - Add event to active span
-- `end_trace` - Complete trace with status
-- `health_check` - Server health check
+- `start_trace`, `add_trace_event`, `end_trace`, `query_traces`, `generate_trace_report` — OpenTelemetry/Jaeger tracing
 
-**Highlight.io Integration**:
+**Highlight.io Integration:**
 
-- Error reporting and session replay for all diagnostics tools
-- Required environment variables: `HIGHLIGHT_PROJECT_ID`, `HIGHLIGHT_API_KEY`
-- See `.env.agent.example` for setup
+- Error reporting and trace forwarding via `HIGHLIGHT_PROJECT_ID`, `HIGHLIGHT_API_KEY`, and `HIGHLIGHT_OTLP_ENDPOINT` in `.env.agent.local`
 
-**OpenTelemetry/Jaeger Integration**:
+**OpenTelemetry/Jaeger Integration:**
 
-- Distributed tracing for all diagnostics and workflow tools
-- Default endpoint: `JAEGER_ENDPOINT=http://localhost:14268/api/traces`
+- Distributed tracing via `JAEGER_ENDPOINT` in `.env.agent.local`
 
-**Documentation Updated 2025-10-27**:
+---
 
-- All references to legacy troubleshooting server removed
-- Observability workflow and tool reference updated for Highlight.io and OpenTelemetry instrumentation
-- See `dev-tools/workspace/context/session_store/mece-agent-mcp-integration-plan.md` for migration checklist
+## Environment & Secrets
+
+- All agents reference canonical secrets from `.env.agent.local` (see `.env.agent.example` for template)
+- Utility MCP provides memory/sequential features and pulls secrets from `.env.agent.local`
+
+---
+
+## Migration Notes
+
+- All legacy troubleshooting server references removed
+- Utility MCP is now the unified provider for infrastructure, memory, and chain-of-thought tools
+- Observability workflow updated for Highlight.io and OpenTelemetry instrumentation
 
 ---
 
