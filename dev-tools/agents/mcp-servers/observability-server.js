@@ -56,10 +56,403 @@ class ObservabilityServer {
   }
 
   setupToolHandlers() {
-    // No-op: all tool definitions are registered in setRequestHandler(ListToolsRequestSchema, ...) below
-  }
+    const toolDefinitions = [
+      {
+        name: "start_trace",
+        description: "Start a new distributed trace for workflow monitoring",
+        inputSchema: {
+          type: "object",
+          properties: {
+            traceName: {
+              type: "string",
+              description: "Name of the trace/workflow",
+            },
+            attributes: {
+              type: "object",
+              description: "Initial trace attributes",
+            },
+          },
+          required: ["traceName"],
+        },
+      },
+      {
+        name: "add_trace_event",
+        description: "Add an event to an active trace span",
+        inputSchema: {
+          type: "object",
+          properties: {
+            spanId: {
+              type: "string",
+              description: "Span identifier",
+            },
+            eventName: {
+              type: "string",
+              description: "Event name",
+            },
+            attributes: {
+              type: "object",
+              description: "Event attributes",
+            },
+          },
+          required: ["spanId", "eventName"],
+        },
+      },
+      {
+        name: "end_trace",
+        description: "End a trace span with final status",
+        inputSchema: {
+          type: "object",
+          properties: {
+            spanId: {
+              type: "string",
+              description: "Span identifier",
+            },
+            status: {
+              type: "string",
+              enum: ["success", "error"],
+              description: "Final span status",
+            },
+            error: {
+              type: "string",
+              description: "Error message if status is error",
+            },
+          },
+          required: ["spanId", "status"],
+        },
+      },
+      {
+        name: "query_traces",
+        description: "Query trace data for analysis and debugging",
+        inputSchema: {
+          type: "object",
+          properties: {
+            serviceName: {
+              type: "string",
+              description: "Service name to filter traces",
+            },
+            operationName: {
+              type: "string",
+              description: "Operation name to filter traces",
+            },
+            timeRange: {
+              type: "object",
+              properties: {
+                start: {
+                  type: "string",
+                  description: "Start time (ISO 8601)",
+                },
+                end: {
+                  type: "string",
+                  description: "End time (ISO 8601)",
+                },
+              },
+            },
+            limit: {
+              type: "integer",
+              description: "Maximum number of traces to return",
+              default: 10,
+            },
+          },
+        },
+      },
+      {
+        name: "generate_trace_report",
+        description:
+          "Generate performance and error analysis report from traces",
+        inputSchema: {
+          type: "object",
+          properties: {
+            timeRange: {
+              type: "object",
+              properties: {
+                start: {
+                  type: "string",
+                  description: "Start time (ISO 8601)",
+                },
+                end: {
+                  type: "string",
+                  description: "End time (ISO 8601)",
+                },
+              },
+            },
+            serviceName: {
+              type: "string",
+              description: "Service name to analyze",
+            },
+            outputFormat: {
+              type: "string",
+              enum: ["json", "markdown", "html"],
+              default: "markdown",
+            },
+          },
+          required: ["timeRange"],
+        },
+      },
+      {
+        name: "health_check",
+        description: "Check observability system health and connectivity",
+        inputSchema: {
+          type: "object",
+          properties: {},
+        },
+      },
+      {
+        name: "test_edge_function",
+        description:
+          "Test Supabase Edge Function connectivity and authentication (smoke test)",
+        inputSchema: {
+          type: "object",
+          properties: {
+            functionName: {
+              type: "string",
+              description: "Name of the Edge Function to test",
+              default: "business-discovery",
+            },
+            anonKey: {
+              type: "string",
+              description: "Supabase anon key for authentication",
+            },
+            testPayload: {
+              type: "object",
+              description: "Test payload to send to function",
+              default: { businessType: "test", location: "test" },
+            },
+          },
+          required: ["functionName", "anonKey"],
+        },
+      },
+      {
+        name: "validate_database_permissions",
+        description: "Check database RLS policies and permissions",
+        inputSchema: {
+          type: "object",
+          properties: {
+            supabaseUrl: {
+              type: "string",
+              description: "Supabase project URL",
+            },
+            anonKey: {
+              type: "string",
+              description: "Supabase anon key",
+            },
+          },
+          required: ["supabaseUrl", "anonKey"],
+        },
+      },
+      {
+        name: "run_rls_diagnostics",
+        description: "Generate and execute RLS diagnostic queries",
+        inputSchema: {
+          type: "object",
+          properties: {
+            supabaseUrl: {
+              type: "string",
+              description: "Supabase project URL",
+            },
+            anonKey: {
+              type: "string",
+              description: "Supabase anon key",
+            },
+          },
+          required: ["supabaseUrl", "anonKey"],
+        },
+      },
+      {
+        name: "supabase_cli_healthcheck",
+        description: "Run Supabase CLI healthcheck and return status/results",
+        inputSchema: {
+          type: "object",
+          properties: {
+            projectDir: {
+              type: "string",
+              description:
+                "Path to Supabase project directory (default: ./supabase)",
+              default: "./supabase",
+            },
+          },
+          required: [],
+        },
+      },
+      {
+        name: "validate_ci_cd_suite",
+        description:
+          "Run and validate the CI/CD test suite, summarize results, and report errors to Highlight.io and OpenTelemetry",
+        inputSchema: {
+          type: "object",
+          properties: {
+            suite: {
+              type: "string",
+              description:
+                "Test suite to run (e.g. 'full', 'db', 'edge', 'frontend')",
+              default: "full",
+            },
+          },
+          required: [],
+        },
+      },
+      {
+        name: "collect_and_summarize_logs",
+        description:
+          "Collect recent logs from Supabase and Vercel, summarize errors and warnings",
+        inputSchema: {
+          type: "object",
+          properties: {
+            supabaseFunction: {
+              type: "string",
+              description: "Supabase Edge Function name (optional)",
+            },
+            vercelUrl: {
+              type: "string",
+              description: "Vercel deployment URL (optional)",
+            },
+            sinceMinutes: {
+              type: "integer",
+              description:
+                "How many minutes back to collect logs (default: 60)",
+              default: 60,
+            },
+          },
+          required: [],
+        },
+      },
+      {
+        name: "generate_debugging_commands",
+        description:
+          "Generate recommended CLI and HTTP commands for debugging Supabase and Vercel deployments",
+        inputSchema: {
+          type: "object",
+          properties: {
+            supabaseUrl: {
+              type: "string",
+              description: "Supabase project URL (optional)",
+            },
+            vercelUrl: {
+              type: "string",
+              description: "Vercel deployment URL (optional)",
+            },
+          },
+          required: [],
+        },
+      },
+      {
+        name: "vercel_status_check",
+        description:
+          "Check the status of a Vercel deployment (frontend health, build info, etc)",
+        inputSchema: {
+          type: "object",
+          properties: {
+            vercelUrl: {
+              type: "string",
+              description:
+                "Vercel deployment URL (e.g. https://prospectpro.vercel.app)",
+            },
+            showHeaders: {
+              type: "boolean",
+              description: "Include HTTP response headers in output",
+              default: false,
+            },
+          },
+          required: ["vercelUrl"],
+        },
+      },
+      {
+        name: "check_production_deployment",
+        description:
+          "Check the status and health of the production deployment (Supabase + Vercel)",
+        inputSchema: {
+          type: "object",
+          properties: {
+            supabaseUrl: {
+              type: "string",
+              description:
+                "Supabase project URL (e.g. https://xyz.supabase.co)",
+            },
+            vercelUrl: {
+              type: "string",
+              description:
+                "Vercel frontend deployment URL (e.g. https://prospectpro.vercel.app)",
+            },
+          },
+          required: ["supabaseUrl", "vercelUrl"],
+        },
+      },
+    ];
+
+    this.toolDefinitions = toolDefinitions;
+
+    this.server.setRequestHandler(ListToolsRequestSchema, async () => ({
+      tools: toolDefinitions,
+    }));
+
+    this.server.setRequestHandler(CallToolRequestSchema, async (request) => {
+      const { name, arguments: args } = request.params;
+
+      return tracer.trace(`observability.${name}`, async (span) => {
+        try {
+          span.setAttributes({
+            "observability.operation": name,
+            "observability.request_id":
+              globalThis.crypto?.randomUUID?.() ||
+              Math.random().toString(36).slice(2),
+          });
+
+          let result;
+
+          if (name === "start_trace") {
+            result = await this.startTrace(args);
+          } else if (name === "add_trace_event") {
+            result = await this.addTraceEvent(args);
+          } else if (name === "end_trace") {
+            result = await this.endTrace(args);
+          } else if (name === "query_traces") {
+            result = await this.queryTraces(args);
+          } else if (name === "generate_trace_report") {
+            result = await this.generateTraceReport(args);
+          } else if (name === "health_check") {
+            result = await this.healthCheck();
+          } else if (name === "test_edge_function") {
+            result = await this.testEdgeFunction(args);
+          } else if (name === "validate_database_permissions") {
+            result = await this.validateDatabasePermissions(args);
+          } else if (name === "run_rls_diagnostics") {
+            result = await this.runRlsDiagnostics(args);
+          } else if (name === "supabase_cli_healthcheck") {
+            result = await this.supabaseCliHealthcheck(args);
           } else if (name === "validate_ci_cd_suite") {
             result = await this.validateCiCdSuite(args, span);
+          } else if (name === "collect_and_summarize_logs") {
+            result = await this.collectAndSummarizeLogs(args);
+          } else if (name === "generate_debugging_commands") {
+            result = await this.generateDebuggingCommands(args);
+          } else {
+            throw new Error(`Unknown tool: ${name}`);
+          }
+
+          span.setStatus({ code: SpanStatusCode.OK });
+          return result;
+        } catch (error) {
+          span.setStatus({
+            code: SpanStatusCode.ERROR,
+            message: error.message,
+          });
+          span.recordException(error);
+
+          return {
+            content: [
+              {
+                type: "text",
+                text: JSON.stringify({
+                  error: error.message,
+                  timestamp: new Date().toISOString(),
+                }),
+              },
+            ],
+            isError: true,
+          };
+        }
+      });
+    });
+  }
   async validateCiCdSuite({ suite = "full" } = {}, span) {
     // Run the appropriate npm script for the suite
     const { exec } = await import("child_process");
@@ -73,9 +466,11 @@ class ObservabilityServer {
     } else if (suite === "frontend") {
       command = "npm test";
     } else {
-      command = "npm test && npm run supabase:test:db && npm run supabase:test:functions";
+      command =
+        "npm test && npm run supabase:test:db && npm run supabase:test:functions";
     }
-    let stdout = "", stderr = "";
+    let stdout = "",
+      stderr = "";
     let errorObj = null;
     try {
       const result = await execAsync(command);
@@ -101,14 +496,18 @@ class ObservabilityServer {
     }
     // Highlight.io: report error if present
     try {
-      if (errorObj && process.env.HIGHLIGHT_PROJECT_ID && process.env.HIGHLIGHT_API_KEY) {
+      if (
+        errorObj &&
+        process.env.HIGHLIGHT_PROJECT_ID &&
+        process.env.HIGHLIGHT_API_KEY
+      ) {
         const fetch = (await import("node-fetch")).default;
         await fetch("https://api.highlight.io/v1/errors", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
             "x-highlight-project": process.env.HIGHLIGHT_PROJECT_ID,
-            "Authorization": `Bearer ${process.env.HIGHLIGHT_API_KEY}`,
+            Authorization: `Bearer ${process.env.HIGHLIGHT_API_KEY}`,
           },
           body: JSON.stringify({
             error: {
@@ -124,7 +523,8 @@ class ObservabilityServer {
       }
     } catch (highlightErr) {
       // Do not throw, but annotate span
-      if (span) span.addEvent("highlight.io error", { error: highlightErr.message });
+      if (span)
+        span.addEvent("highlight.io error", { error: highlightErr.message });
     }
     // Summarize results
     const summary = errorObj
@@ -138,15 +538,20 @@ class ObservabilityServer {
         },
         {
           type: "text",
-          text: `---\nCommand: ${command}\n\nFull output:\n${stdout.slice(0, 2000)}\n\nErrors:\n${stderr.slice(0, 2000)}`,
+          text: `---\nCommand: ${command}\n\nFull output:\n${stdout.slice(
+            0,
+            2000
+          )}\n\nErrors:\n${stderr.slice(0, 2000)}`,
         },
       ],
       isError: !!errorObj,
     };
   }
-          } else if (name === "collect_and_summarize_logs") {
-            result = await this.collectAndSummarizeLogs(args);
-  async collectAndSummarizeLogs({ supabaseFunction, vercelUrl, sinceMinutes = 60 }) {
+  async collectAndSummarizeLogs({
+    supabaseFunction,
+    vercelUrl,
+    sinceMinutes = 60,
+  }) {
     // Collect logs from Supabase Edge Function (via CLI) and Vercel (via HTTP)
     const logs = [];
     // Supabase logs (if function specified)
@@ -164,33 +569,50 @@ class ObservabilityServer {
           error: stderr,
         });
       } catch (err) {
-        logs.push({ source: `supabase:${supabaseFunction}`, error: err.message });
+        logs.push({
+          source: `supabase:${supabaseFunction}`,
+          error: err.message,
+        });
       }
     }
     // Vercel logs (if URL specified)
     if (vercelUrl) {
       const fetch = (await import("node-fetch")).default;
       try {
-        const res = await fetch(vercelUrl.replace(/\/$/, "") + "/api/logs?since=" + encodeURIComponent(Date.now() - sinceMinutes * 60000));
+        const res = await fetch(
+          vercelUrl.replace(/\/$/, "") +
+            "/api/logs?since=" +
+            encodeURIComponent(Date.now() - sinceMinutes * 60000)
+        );
         const text = await res.text();
-        logs.push({ source: `vercel:${vercelUrl}`, output: text, status: res.status });
+        logs.push({
+          source: `vercel:${vercelUrl}`,
+          output: text,
+          status: res.status,
+        });
       } catch (err) {
         logs.push({ source: `vercel:${vercelUrl}`, error: err.message });
       }
     }
     // Summarize errors/warnings
-    const summary = logs.map((entry) => {
-      if (entry.output) {
-        const lines = entry.output.split(/\r?\n/);
-        const errors = lines.filter((l) => /error|fail|exception/i.test(l));
-        const warnings = lines.filter((l) => /warn|deprecated/i.test(l));
-        return `Source: ${entry.source}\nErrors: ${errors.length}\nWarnings: ${warnings.length}\nSample Errors:\n${errors.slice(0,3).join("\n")}\n`;
-      } else if (entry.error) {
-        return `Source: ${entry.source}\nError: ${entry.error}\n`;
-      } else {
-        return `Source: ${entry.source}\nNo log output.\n`;
-      }
-    }).join("\n");
+    const summary = logs
+      .map((entry) => {
+        if (entry.output) {
+          const lines = entry.output.split(/\r?\n/);
+          const errors = lines.filter((l) => /error|fail|exception/i.test(l));
+          const warnings = lines.filter((l) => /warn|deprecated/i.test(l));
+          return `Source: ${entry.source}\nErrors: ${
+            errors.length
+          }\nWarnings: ${warnings.length}\nSample Errors:\n${errors
+            .slice(0, 3)
+            .join("\n")}\n`;
+        } else if (entry.error) {
+          return `Source: ${entry.source}\nError: ${entry.error}\n`;
+        } else {
+          return `Source: ${entry.source}\nNo log output.\n`;
+        }
+      })
+      .join("\n");
     return {
       content: [
         {
@@ -199,20 +621,28 @@ class ObservabilityServer {
         },
         ...logs.map((entry) => ({
           type: "text",
-          text: `---\nSource: ${entry.source}\n${entry.output ? entry.output.slice(0, 2000) : entry.error || "No output"}`,
+          text: `---\nSource: ${entry.source}\n${
+            entry.output
+              ? entry.output.slice(0, 2000)
+              : entry.error || "No output"
+          }`,
         })),
       ],
     };
   }
-          } else if (name === "generate_debugging_commands") {
-            result = await this.generateDebuggingCommands(args);
   async generateDebuggingCommands({ supabaseUrl, vercelUrl }) {
     // Generate recommended CLI and HTTP commands for debugging
     const commands = [];
     if (supabaseUrl) {
       commands.push(
-        `# Supabase API Health\ncurl -i '${supabaseUrl.replace(/\/$/, "")}/rest/v1/'`,
-        `# Supabase Auth Test\ncurl -i -X POST '${supabaseUrl.replace(/\/$/, "")}/auth/v1/token' -H 'Content-Type: application/json' -d '{"email":"test@example.com","password":"test123"}'`
+        `# Supabase API Health\ncurl -i '${supabaseUrl.replace(
+          /\/$/,
+          ""
+        )}/rest/v1/'`,
+        `# Supabase Auth Test\ncurl -i -X POST '${supabaseUrl.replace(
+          /\/$/,
+          ""
+        )}/auth/v1/token' -H 'Content-Type: application/json' -d '{"email":"test@example.com","password":"test123"}'`
       );
       commands.push(
         `# Supabase CLI Healthcheck\nnpx --yes supabase@latest healthcheck --project-url '${supabaseUrl}'`
@@ -220,7 +650,10 @@ class ObservabilityServer {
     }
     if (vercelUrl) {
       commands.push(
-        `# Vercel Frontend Health\ncurl -i '${vercelUrl.replace(/\/$/, "")}/api/health' || curl -i '${vercelUrl.replace(/\/$/, "")}/'`
+        `# Vercel Frontend Health\ncurl -i '${vercelUrl.replace(
+          /\/$/,
+          ""
+        )}/api/health' || curl -i '${vercelUrl.replace(/\/$/, "")}/'`
       );
     }
     commands.push(
@@ -230,13 +663,13 @@ class ObservabilityServer {
       content: [
         {
           type: "text",
-          text: `Recommended Debugging Commands:\n\n${commands.join("\n\n")}\n\nCopy and run these commands in your terminal to debug deployment issues.`,
+          text: `Recommended Debugging Commands:\n\n${commands.join(
+            "\n\n"
+          )}\n\nCopy and run these commands in your terminal to debug deployment issues.`,
         },
       ],
     };
   }
-          } else if (name === "vercel_status_check") {
-            result = await this.vercelStatusCheck(args);
   async vercelStatusCheck({ vercelUrl, showHeaders = false }) {
     // Check Vercel deployment health (try /api/health, then /, then /index.html)
     const fetch = (await import("node-fetch")).default;
@@ -254,7 +687,9 @@ class ObservabilityServer {
           status: res.status,
           ok: res.ok,
           statusText: res.statusText,
-          ...(showHeaders ? { headers: Object.fromEntries(res.headers.entries()) } : {}),
+          ...(showHeaders
+            ? { headers: Object.fromEntries(res.headers.entries()) }
+            : {}),
         };
         if (res.ok) break;
       } catch (err) {
@@ -266,21 +701,26 @@ class ObservabilityServer {
         {
           type: "text",
           text:
-            `Vercel Deployment Status Check:\n\n${JSON.stringify(result, null, 2)}\n\n` +
-            (result.ok ? "✅ Vercel deployment is healthy." : "❌ Vercel deployment is not healthy or unreachable."),
+            `Vercel Deployment Status Check:\n\n${JSON.stringify(
+              result,
+              null,
+              2
+            )}\n\n` +
+            (result.ok
+              ? "✅ Vercel deployment is healthy."
+              : "❌ Vercel deployment is not healthy or unreachable."),
         },
       ],
     };
   }
-          } else if (name === "check_production_deployment") {
-            result = await this.checkProductionDeployment(args);
   async checkProductionDeployment({ supabaseUrl, vercelUrl }) {
     // Check Supabase API health
     const supabaseHealthUrl = supabaseUrl.replace(/\/$/, "") + "/rest/v1/";
     // Check Vercel frontend health (assume /api/health or / for now)
     const vercelHealthUrl = vercelUrl.replace(/\/$/, "") + "/api/health";
     const fetch = (await import("node-fetch")).default;
-    let supabaseStatus = {}, vercelStatus = {};
+    let supabaseStatus = {},
+      vercelStatus = {};
     try {
       const supabaseRes = await fetch(supabaseHealthUrl, { method: "GET" });
       supabaseStatus = {
@@ -319,7 +759,15 @@ class ObservabilityServer {
         {
           type: "text",
           text:
-            `Production Deployment Health Check Results:\n\nSupabase API:\n${JSON.stringify(supabaseStatus, null, 2)}\n\nVercel Frontend:\n${JSON.stringify(vercelStatus, null, 2)}\n\n` +
+            `Production Deployment Health Check Results:\n\nSupabase API:\n${JSON.stringify(
+              supabaseStatus,
+              null,
+              2
+            )}\n\nVercel Frontend:\n${JSON.stringify(
+              vercelStatus,
+              null,
+              2
+            )}\n\n` +
             (supabaseStatus.ok && vercelStatus.ok
               ? "✅ Both Supabase and Vercel deployments are healthy."
               : "❌ One or more services are reporting errors. See details above."),
@@ -327,39 +775,6 @@ class ObservabilityServer {
       ],
     };
   }
-      const { name, arguments: args } = request.params;
-
-      return await tracer.trace(`observability.${name}`, async (span) => {
-        try {
-          span.setAttributes({
-            "observability.operation": name,
-            "observability.request_id": (globalThis.crypto?.randomUUID?.() || Math.random().toString(36).slice(2)),
-          });
-
-          let result;
-          if (name === "start_trace") {
-            result = await this.startTrace(args);
-          } else if (name === "add_trace_event") {
-            result = await this.addTraceEvent(args);
-          } else if (name === "end_trace") {
-            result = await this.endTrace(args);
-          } else if (name === "query_traces") {
-            result = await this.queryTraces(args);
-          } else if (name === "generate_trace_report") {
-            result = await this.generateTraceReport(args);
-          } else if (name === "health_check") {
-            result = await this.healthCheck();
-          } else if (name === "test_edge_function") {
-            result = await this.testEdgeFunction(args);
-          } else if (name === "validate_database_permissions") {
-            result = await this.validateDatabasePermissions(args);
-          } else if (name === "run_rls_diagnostics") {
-            result = await this.runRlsDiagnostics(args);
-          } else if (name === "supabase_cli_healthcheck") {
-            result = await this.supabaseCliHealthcheck(args);
-          } else {
-            throw new Error(`Unknown tool: ${name}`);
-          }
   async supabaseCliHealthcheck({ projectDir = "./supabase" } = {}) {
     // Run `supabase healthcheck` in the given directory
     const { exec } = await import("child_process");
@@ -372,7 +787,9 @@ class ObservabilityServer {
         content: [
           {
             type: "text",
-            text: `Supabase CLI Healthcheck Results (dir: ${projectDir}):\n\nCommand: ${command}\n\nOutput:\n${stdout}\n${stderr ? `Errors:\n${stderr}` : ""}`,
+            text: `Supabase CLI Healthcheck Results (dir: ${projectDir}):\n\nCommand: ${command}\n\nOutput:\n${stdout}\n${
+              stderr ? `Errors:\n${stderr}` : ""
+            }`,
           },
         ],
       };
@@ -399,37 +816,18 @@ class ObservabilityServer {
       ],
     };
   }
-
-          span.setStatus({ code: SpanStatusCode.OK });
-          return result;
-        } catch (error) {
-          span.setStatus({
-            code: SpanStatusCode.ERROR,
-            message: error.message,
-          });
-          span.recordException(error);
-
-          return {
-            content: [
-              {
-                type: "text",
-                text: JSON.stringify({
-                  error: error.message,
-                  timestamp: new Date().toISOString(),
-                }),
-              },
-            ],
-            isError: true,
-          };
-        }
-      });
-    });
   // --- Supabase Diagnostics Tools ---
-  async testEdgeFunction({ functionName, anonKey, testPayload = { businessType: "test", location: "test" } }) {
+  async testEdgeFunction({
+    functionName,
+    anonKey,
+    testPayload = { businessType: "test", location: "test" },
+  }) {
     const url = `https://sriycekxdqnesdsgwiuc.supabase.co/functions/v1/${functionName}`;
-    const curlCommand = `curl -X POST '${url}' \\\n  -H 'Authorization: Bearer ${anonKey}' \\\n  -H 'Content-Type: application/json' \\\n  -d '${JSON.stringify(testPayload)}'`;
-    const { exec } = await import('child_process');
-    const { promisify } = await import('util');
+    const curlCommand = `curl -X POST '${url}' \\\n  -H 'Authorization: Bearer ${anonKey}' \\\n  -H 'Content-Type: application/json' \\\n  -d '${JSON.stringify(
+      testPayload
+    )}'`;
+    const { exec } = await import("child_process");
+    const { promisify } = await import("util");
     const execAsync = promisify(exec);
     try {
       const { stdout, stderr } = await execAsync(curlCommand);
@@ -443,7 +841,13 @@ class ObservabilityServer {
         content: [
           {
             type: "text",
-            text: `Edge Function Test Results for '${functionName}':\n\nCommand executed:\n${curlCommand}\n\nResponse:\n${JSON.stringify(result, null, 2)}\n\nStatus: ${stderr ? "ERROR" : "SUCCESS"}\n${stderr ? `Error: ${stderr}` : ""}`,
+            text: `Edge Function Test Results for '${functionName}':\n\nCommand executed:\n${curlCommand}\n\nResponse:\n${JSON.stringify(
+              result,
+              null,
+              2
+            )}\n\nStatus: ${stderr ? "ERROR" : "SUCCESS"}\n${
+              stderr ? `Error: ${stderr}` : ""
+            }`,
           },
         ],
       };
@@ -460,7 +864,7 @@ class ObservabilityServer {
   }
 
   async validateDatabasePermissions({ supabaseUrl, anonKey }) {
-    const { createClient } = await import('@supabase/supabase-js');
+    const { createClient } = await import("@supabase/supabase-js");
     try {
       const supabase = createClient(supabaseUrl, anonKey);
       const tests = [
@@ -495,17 +899,20 @@ class ObservabilityServer {
             type: "text",
             text: `Database Permissions Validation Results:\n\n${results
               .map(
-                (r) => `Table: ${r.table}\nStatus: ${r.status}\n${r.error ? `Error: ${r.error}` : ""}\n${r.count ? `Access: ${r.count}` : ""}\n`
+                (r) =>
+                  `Table: ${r.table}\nStatus: ${r.status}\n${
+                    r.error ? `Error: ${r.error}` : ""
+                  }\n${r.count ? `Access: ${r.count}` : ""}\n`
               )
               .join("\n")}\n\nSummary:\n${
-                results.every((r) => r.status === "SUCCESS")
-                  ? "✅ All database permissions are correctly configured"
-                  : "❌ Database permission issues detected - check RLS policies"
-              }\n\nRecommended actions:\n${
-                results.some((r) => r.status === "FAILED")
-                  ? "1. Run /database/rls-setup.sql in Supabase SQL editor\n2. Verify anon key is correct\n3. Check table existence"
-                  : "Database permissions are working correctly"
-              }`,
+              results.every((r) => r.status === "SUCCESS")
+                ? "✅ All database permissions are correctly configured"
+                : "❌ Database permission issues detected - check RLS policies"
+            }\n\nRecommended actions:\n${
+              results.some((r) => r.status === "FAILED")
+                ? "1. Run /database/rls-setup.sql in Supabase SQL editor\n2. Verify anon key is correct\n3. Check table existence"
+                : "Database permissions are working correctly"
+            }`,
           },
         ],
       };
@@ -519,7 +926,6 @@ class ObservabilityServer {
         ],
       };
     }
-  }
   }
 
   async startTrace({ traceName, attributes = {} }) {
