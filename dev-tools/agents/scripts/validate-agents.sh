@@ -6,8 +6,8 @@ ENV_FILE="dev-tools/agents/.env.agent.local"
 LOG_FILE="dev-tools/workspace/context/session_store/phase-5-validation-log.md"
 COVERAGE_FILE="dev-tools/workspace/context/session_store/coverage.md"
 
-# Build MCP tools
-npm run build --prefix dev-tools/agents/mcp-servers/utility
+# Build utility MCP tools
+cd dev-tools/agents/mcp-servers/utility && npm run build && cd -
 
 # Test agent secrets
 {
