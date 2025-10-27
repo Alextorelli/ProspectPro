@@ -1,3 +1,9 @@
+## 2025-10-27: Observability MCP Supabase Diagnostics Migration
+
+- Action: Migrated all Supabase troubleshooting tools (`test_edge_function`, `validate_database_permissions`, `run_rls_diagnostics`, `supabase_cli_healthcheck`, `check_production_deployment`, `vercel_status_check`, `generate_debugging_commands`, `collect_and_summarize_logs`, `validate_ci_cd_suite`) into `dev-tools/agents/mcp-servers/observability-server.js` with OpenTelemetry span instrumentation and Highlight.io error forwarding.
+- Validation: Basic smoke review of tool registrations; CI/CD suite tool now reports tracing spans and sends failures to Highlight when env vars are present.
+- Notes: Observability server now owns the full diagnostics surface; next step is to retire `supabase-troubleshooting-server.js` once downstream configs reference the consolidated server.
+
 ## 2025-10-27: Utility MCP Documentation & Validation
 
 - Action: Updated system-architect, context README, and quickref to document Utility MCP as provider for memory, sequential, and timestamps
@@ -335,5 +341,5 @@ ev## 2025-10-23: Codespaces Bootstrap Realignment
   2025-10-27T06:00:34Z: Phase 5 agent/MCP validation complete
   2025-10-27T06:13:21Z: Phase 5 agent/MCP validation complete
   2025-10-27T06:56:34Z: Phase 5 agent/MCP validation complete
-2025-10-27T07:48:29Z: Phase 5 agent/MCP validation complete
-2025-10-27T07:54:34Z: Phase 5 agent/MCP validation complete
+  2025-10-27T07:48:29Z: Phase 5 agent/MCP validation complete
+  2025-10-27T07:54:34Z: Phase 5 agent/MCP validation complete

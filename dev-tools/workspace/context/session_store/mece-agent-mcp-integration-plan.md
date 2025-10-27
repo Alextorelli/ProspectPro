@@ -44,3 +44,16 @@
 7. **Final Verification**
    - Run targeted workflow dry runs using `dotenv -e .env.agent.local -- <workflow command>`.
    - Capture final state in `coverage.md` and prepare a PR checklist referencing the removal of legacy MCP tooling.
+
+## 2025-10-27 Progress Update
+
+- Observability MCP now includes the full Supabase diagnostics toolset with Jaeger tracing and Highlight.io error reporting. See `dev-tools/agents/mcp-servers/observability-server.js` for consolidated implementations.
+- Coverage log updated to track migration status and tracing/error-forwarding instrumentation.
+
+### Remaining Actions to Complete Integration
+
+1. Redirect any workflows, manifests, or task runners still pointing to `supabase-troubleshooting-server.js` so they invoke the observability server exclusively.
+2. Validate Highlight.io credentials in `.env.agent.local` (requires `HIGHLIGHT_PROJECT_ID` and `HIGHLIGHT_API_KEY`) and perform a smoke failure to confirm error forwarding.
+3. Run the observability-focused validation script (or extend `dev-tools/agents/scripts/validate-agents.sh`) to execute the migrated tools and capture results in `phase-5-validation-log.md`.
+4. Retire `supabase-troubleshooting-server.js` after downstream dependencies are updated; log the removal in `coverage.md` and refresh inventories.
+5. Update documentation (Observability workflow README, MCP tool reference) to reflect the new tool locations and Highlight/Otel instrumentation expectations.
