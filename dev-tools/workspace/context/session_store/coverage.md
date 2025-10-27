@@ -3,10 +3,9 @@
 - **Action**: Initiated Phase 5 environment-bound agent validation per MECE integration plan.
 - **Results**:
   - MCP tools built successfully.
-  - Memory MCP: smoke test passed (dry-run mode).
-  - Sequential Thinking MCP: smoke test passed (dry-run mode).
-  - Agent MCP access checks: required secrets (AGENT_DEV_SUPABASE_URL, CONTEXT7_API_KEY, VERCEL_TOKEN) not set; all returned '✗'.
-- **Next Steps**: Hydrate `dev-tools/agents/.env.agent.local` from provider secret stores (Vercel, Supabase, GitHub) and re-run MCP access checks with `dotenv -e dev-tools/agents/.env.agent.local -- <command>`. Once secrets are set, repeat validation and log results here.
+  - Utility MCP (fetch/fs/git/time/memory/sequential) self-test passed via `node utility/dist/index.js --test`.
+  - Agent MCP access checks: canonical secrets (SUPABASE_URL, CONTEXT7_API_KEY, VERCEL_TOKEN) detected.
+- **Next Steps**: Monitor consolidated utility server performance in subsequent Phase 5 runs and update MCP_MODE_TOOL_MATRIX.md with unified capabilities before wiring CI health checks.
 
 ## 2025-10-27: Sequential & Memory MCP Realignment
 
@@ -325,4 +324,5 @@ ev## 2025-10-23: Codespaces Bootstrap Realignment
 - Updated `MCP-package.json` scripts: only canonical MCPs (memory, sequential, supabase, github, playwright, context7) remain.
 - Refreshed `tool-reference.md`: removed Stripe, Postman, troubleshooting, and legacy MCPs; only canonical MCPs documented.
 - All changes align with the MECE integration plan and agent/MCP matrix.
-2025-10-27T03:25:18Z: Environment-bound agent validation complete with utility MCP
+  2025-10-27T03:25:18Z: Environment-bound agent validation complete with utility MCP
+  2025-10-27T05:45:13Z: Phase 5 agent/MCP validation complete

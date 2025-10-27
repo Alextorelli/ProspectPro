@@ -8,10 +8,9 @@
     "start:production": "node environments/production.js",
     "start:development": "node environments/development.js",
     "start:troubleshooting": "node environments/troubleshooting.js",
-    "start:memory": "node mcp-tools/memory/dist/index.js",
-    "start:sequential": "node mcp-tools/sequential/dist/index.js",
-    "start:all": "concurrently \"npm run start:production\" \"npm run start:development\" \"npm run start:troubleshooting\" \"npm run start:memory\" \"npm run start:sequential\"",
-    "build:tools": "npm run build --prefix mcp-tools/memory && npm run build --prefix mcp-tools/sequential",
+    "start:utility": "node utility/dist/index.js",
+    "start:all": "concurrently \"npm run start:production\" \"npm run start:development\" \"npm run start:troubleshooting\" \"npm run start:utility\"",
+    "build:tools": "npm run build --prefix utility",
     "validate": "echo '✅ All MCP servers validated successfully'",
     "install:deps": "npm install"
   },

@@ -1,3 +1,4 @@
+import { Tool } from "@modelcontextprotocol/sdk/types.js";
 export interface ThoughtData {
     thought: string;
     thoughtNumber: number;
@@ -13,13 +14,15 @@ export interface SequentialThinkingOptions {
     disableThoughtLogging?: boolean;
     logPath?: string;
 }
-export declare class SequentialThinkingServer {
+declare const SEQUENTIAL_THINKING_TOOL: Tool;
+export declare class SequentialThinkingEngine {
     private readonly thoughtHistory;
     private readonly branches;
     private readonly disableThoughtLogging;
     private readonly logPath;
     private logPrepared;
     constructor(options?: SequentialThinkingOptions);
+    get tool(): Tool;
     private prepareLogFile;
     private appendThought;
     private validateThoughtData;
@@ -31,7 +34,8 @@ export declare class SequentialThinkingServer {
         }>;
         isError?: boolean;
     }>;
-    reset(): void;
+    selfTest(): Promise<void>;
 }
-export declare function createSequentialThinkingServer(options?: SequentialThinkingOptions): SequentialThinkingServer;
-//# sourceMappingURL=lib.d.ts.map
+export declare function createSequentialThinkingEngine(options?: SequentialThinkingOptions): SequentialThinkingEngine;
+export { SEQUENTIAL_THINKING_TOOL };
+//# sourceMappingURL=sequential.d.ts.map

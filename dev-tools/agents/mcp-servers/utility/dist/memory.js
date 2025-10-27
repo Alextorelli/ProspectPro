@@ -3,7 +3,7 @@ import path from "path";
 const DEFAULT_MEMORY_PATH = path.resolve(process.cwd(), process.env.MCP_MEMORY_FILE_PATH ||
     process.env.MEMORY_FILE_PATH ||
     "dev-tools/agents/context/session_store/memory.jsonl");
-export async function resolveMemoryFilePath(options = {}) {
+async function resolveMemoryFilePath(options = {}) {
     const resolvedPath = path.resolve(options.memoryFilePath ?? DEFAULT_MEMORY_PATH);
     await mkdir(path.dirname(resolvedPath), { recursive: true });
     if (resolvedPath.endsWith(".jsonl")) {
@@ -18,7 +18,7 @@ export async function resolveMemoryFilePath(options = {}) {
             }
         }
         catch {
-            // ignore missing legacy file
+            // legacy file not found; ignore
         }
         return resolvedPath;
     }
@@ -27,8 +27,12 @@ export async function resolveMemoryFilePath(options = {}) {
     return jsonlPath;
 }
 export class KnowledgeGraphManager {
+    memoryFilePath;
     constructor(memoryFilePath) {
         this.memoryFilePath = memoryFilePath;
+    }
+    get filePath() {
+        return this.memoryFilePath;
     }
     async loadGraph() {
         try {
@@ -47,7 +51,7 @@ export class KnowledgeGraphManager {
                         observations: item.observations ?? [],
                     });
                 }
-                if (item.type === "relation") {
+                else if (item.type === "relation") {
                     graph.relations.push({
                         from: item.from,
                         to: item.to,
@@ -79,8 +83,7 @@ export class KnowledgeGraphManager {
                 relationType: relation.relationType,
             })),
         ];
-        const payload = lines.join("\n");
-        await writeFile(this.memoryFilePath, payload);
+        await writeFile(this.memoryFilePath, lines.join("\n"));
     }
     ensureEntityExists(graph, entityName) {
         const entity = graph.entities.find((item) => item.name === entityName);
@@ -180,8 +183,15 @@ export class KnowledgeGraphManager {
         await appendFile(this.memoryFilePath, `${JSON.stringify({ type: "snapshot", ...payload })}\n`);
     }
 }
-export function buildToolList() {
-    return [
+export async function initialiseKnowledgeGraph(options = {}) {
+    const memoryFilePath = await resolveMemoryFilePath(options);
+    return {
+        manager: new KnowledgeGraphManager(memoryFilePath),
+        memoryFilePath,
+    };
+}
+export function buildMemoryToolList() {
+    const tools = [
         {
             name: "create_entities",
             description: "Create multiple new entities in the knowledge graph",
@@ -361,8 +371,9 @@ export function buildToolList() {
             },
         },
     ];
+    return tools;
 }
-export async function handleToolCall(manager, toolName, args) {
+export async function executeMemoryTool(manager, toolName, args) {
     switch (toolName) {
         case "create_entities":
             return manager.createEntities((args?.entities ?? []));
@@ -379,24 +390,17 @@ export async function handleToolCall(manager, toolName, args) {
         case "delete_relations":
             await manager.deleteRelations((args?.relations ?? []));
             return { status: "ok" };
-        case "read_graph":
-            return manager.readGraph();
+        case "read_graph": {
+            const graph = await manager.readGraph();
+            await manager.appendSnapshot();
+            return graph;
+        }
         case "search_nodes":
             return manager.searchNodes(String(args?.query ?? ""));
         case "open_nodes":
             return manager.openNodes((args?.names ?? []));
         default:
-            throw new Error(`Unknown tool: ${toolName}`);
+            throw new Error(`Unknown memory tool: ${toolName}`);
     }
 }
-export async function writeSnapshot(manager) {
-    await manager.appendSnapshot();
-}
-export async function initialiseKnowledgeGraph(options = {}) {
-    const memoryFilePath = await resolveMemoryFilePath(options);
-    return {
-        manager: new KnowledgeGraphManager(memoryFilePath),
-        memoryFilePath,
-    };
-}
-//# sourceMappingURL=lib.js.map
+//# sourceMappingURL=memory.js.map

@@ -82,29 +82,28 @@ This reference consolidates all MCP tools currently available across the install
 | resolve-library-id | Resolves a general library name into a Context7-compatible library ID      | libraryName                                | Documentation |
 | get-library-docs   | Fetches documentation for a library using a Context7-compatible library ID | context7CompatibleLibraryID, topic, tokens | Documentation |
 
-## Sequential Thinking MCP
+## ProspectPro Utility MCP (Consolidated)
 
-| Tool                | Description                                                                            | Parameters                                                                                                                           | Category  |
-| ------------------- | -------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ | --------- |
-| sequential_thinking | Facilitates a detailed, step-by-step thinking process for problem-solving and analysis | thought, nextThoughtNeeded, thoughtNumber, totalThoughts, isRevision, revisesThought, branchFromThought, branchId, needsMoreThoughts | Cognitive |
+| Tool                | Description                                                                            | Parameters                                                                                                                           | Category        |
+| ------------------- | -------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ | --------------- |
+| fetch               | Fetch content from a URL with optional HTML-to-text conversion                         | url, method, headers, raw                                                                                                            | HTTP/IO         |
+| fs_read             | Read a file from the allowed workspace path                                            | file_path                                                                                                                            | Filesystem      |
+| fs_write            | Write content to a file within the allowed workspace path                              | file_path, content                                                                                                                   | Filesystem      |
+| git_status          | Display git repository status for a workspace path                                     | repo_path                                                                                                                            | Git             |
+| time_now            | Return the current time in the requested timezone                                      | timezone                                                                                                                             | Time            |
+| time_convert        | Convert a timestamp between timezones                                                  | time, source_timezone, target_timezone                                                                                               | Time            |
+| sequential_thinking | Facilitates a detailed, step-by-step thinking process for problem-solving and analysis | thought, nextThoughtNeeded, thoughtNumber, totalThoughts, isRevision, revisesThought, branchFromThought, branchId, needsMoreThoughts | Cognitive       |
+| create_entities     | Create multiple new entities in the knowledge graph                                    | entities                                                                                                                             | Knowledge Graph |
+| create_relations    | Create multiple new relations between entities                                         | relations                                                                                                                            | Knowledge Graph |
+| add_observations    | Add new observations to existing entities                                              | observations                                                                                                                         | Knowledge Graph |
+| delete_entities     | Remove entities and their relations                                                    | entityNames                                                                                                                          | Knowledge Graph |
+| delete_observations | Remove specific observations from entities                                             | deletions                                                                                                                            | Knowledge Graph |
+| delete_relations    | Remove specific relations from the graph                                               | relations                                                                                                                            | Knowledge Graph |
+| read_graph          | Read the entire knowledge graph                                                        | —                                                                                                                                    | Knowledge Graph |
+| search_nodes        | Search for nodes based on query                                                        | query                                                                                                                                | Knowledge Graph |
+| open_nodes          | Retrieve specific nodes by name                                                        | names                                                                                                                                | Knowledge Graph |
 
-> Default thought ledger: `dev-tools/agents/context/session_store/sequential-thoughts.jsonl` (override via `SEQUENTIAL_LOG_PATH`). Set `DISABLE_THOUGHT_LOGGING=true` to suppress persistence during sensitive sessions.
-
-## Memory MCP
-
-| Tool                | Description                                         | Parameters   | Category        |
-| ------------------- | --------------------------------------------------- | ------------ | --------------- |
-| create_entities     | Create multiple new entities in the knowledge graph | entities     | Knowledge Graph |
-| create_relations    | Create multiple new relations between entities      | relations    | Knowledge Graph |
-| add_observations    | Add new observations to existing entities           | observations | Knowledge Graph |
-| delete_entities     | Remove entities and their relations                 | entityNames  | Knowledge Graph |
-| delete_observations | Remove specific observations from entities          | deletions    | Knowledge Graph |
-| delete_relations    | Remove specific relations from the graph            | relations    | Knowledge Graph |
-| read_graph          | Read the entire knowledge graph                     | —            | Knowledge Graph |
-| search_nodes        | Search for nodes based on query                     | query        | Knowledge Graph |
-| open_nodes          | Retrieve specific nodes by name                     | names        | Knowledge Graph |
-
-> Default knowledge graph store: `dev-tools/agents/context/session_store/memory.jsonl`. Override with `MCP_MEMORY_FILE_PATH`. A snapshot entry is appended whenever `read_graph` is invoked.
+> Default workspace root: `${ALLOWED_PATH:-/workspaces/ProspectPro}`. Knowledge graph snapshots are stored at `${MCP_MEMORY_FILE_PATH:-dev-tools/agents/context/session_store/memory.jsonl}`. Sequential thought logs default to `${SEQUENTIAL_LOG_PATH:-dev-tools/agents/context/session_store/sequential-thoughts.jsonl}` and honor `DISABLE_THOUGHT_LOGGING=true`.
 
 ## Usage Notes
 

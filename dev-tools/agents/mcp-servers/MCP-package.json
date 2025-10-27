@@ -6,9 +6,8 @@
   "type": "module",
   "main": "production-server.js",
   "scripts": {
-    "start:memory": "node mcp-tools/memory/dist/index.js",
-    "start:sequential": "node mcp-tools/sequential/dist/index.js",
-    "build:tools": "npm run build --prefix mcp-tools/memory && npm run build --prefix mcp-tools/sequential",
+    "start:utility": "node utility/dist/index.js",
+    "build:tools": "npm run build --prefix utility",
     "test": "node test-servers.js",
     "validate": "npm run test && echo '✅ All canonical MCP servers validated successfully'",
     "install:deps": "npm install"

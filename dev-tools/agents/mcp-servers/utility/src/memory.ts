@@ -1,3 +1,4 @@
+import { Tool } from "@modelcontextprotocol/sdk/types.js";
 import {
   access,
   appendFile,
@@ -303,8 +304,8 @@ export async function initialiseKnowledgeGraph(
   } as const;
 }
 
-export function buildMemoryToolList() {
-  return [
+export function buildMemoryToolList(): Tool[] {
+  const tools = [
     {
       name: "create_entities",
       description: "Create multiple new entities in the knowledge graph",
@@ -487,7 +488,9 @@ export function buildMemoryToolList() {
         additionalProperties: false,
       },
     },
-  ];
+  ] satisfies Tool[];
+
+  return tools;
 }
 
 export async function executeMemoryTool(

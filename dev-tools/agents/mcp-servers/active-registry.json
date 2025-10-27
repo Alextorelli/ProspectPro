@@ -2,24 +2,6 @@
   "version": "3.0",
   "last_updated": "2025-10-27",
   "servers": {
-    "memory": {
-      "type": "stdio",
-      "package": "local",
-      "invocation": "node",
-      "script_path": "./mcp-tools/memory/dist/index.js",
-      "env": {
-        "NODE_ENV": "memory",
-        "MCP_MEMORY_FILE_PATH": "${env:MCP_MEMORY_FILE_PATH:-dev-tools/agents/context/session_store/memory.jsonl}"
-      },
-      "capabilities": [
-        "long_term_memory",
-        "session_recall",
-        "conversation_indexing"
-      ],
-      "health_check_url": null,
-      "startup_timeout_ms": 4000,
-      "response_time_p95_target_ms": 400
-    },
     "supabase": {
       "type": "http",
       "package": "@supabase/mcp",
@@ -84,24 +66,6 @@
       "startup_timeout_ms": 3000,
       "response_time_p95_target_ms": 500
     },
-    "sequentialthinking": {
-      "type": "stdio",
-      "package": "local",
-      "invocation": "node",
-      "script_path": "./mcp-tools/sequential/dist/index.js",
-      "env": {
-        "NODE_ENV": "sequential",
-        "SEQUENTIAL_LOG_PATH": "${env:SEQUENTIAL_LOG_PATH:-dev-tools/agents/context/session_store/sequential-thoughts.jsonl}"
-      },
-      "capabilities": [
-        "scenario_analysis",
-        "chain_of_thought",
-        "decision_logging"
-      ],
-      "health_check_url": null,
-      "startup_timeout_ms": 4000,
-      "response_time_p95_target_ms": 450
-    },
     "utility": {
       "type": "stdio",
       "package": "local",
@@ -109,7 +73,9 @@
       "script_path": "./utility/dist/index.js",
       "env": {
         "NODE_ENV": "utility",
-        "ALLOWED_PATH": "${env:ALLOWED_PATH:-/workspaces/ProspectPro}"
+        "ALLOWED_PATH": "${env:ALLOWED_PATH:-/workspaces/ProspectPro}",
+        "MCP_MEMORY_FILE_PATH": "${env:MCP_MEMORY_FILE_PATH:-dev-tools/agents/context/session_store/memory.jsonl}",
+        "SEQUENTIAL_LOG_PATH": "${env:SEQUENTIAL_LOG_PATH:-dev-tools/agents/context/session_store/sequential-thoughts.jsonl}"
       },
       "capabilities": [
         "http_fetch",
@@ -117,7 +83,13 @@
         "filesystem_read",
         "filesystem_write",
         "git_status",
-        "timezone_conversion"
+        "timezone_conversion",
+        "long_term_memory",
+        "session_recall",
+        "conversation_indexing",
+        "scenario_analysis",
+        "chain_of_thought",
+        "decision_logging"
       ],
       "health_check_url": null,
       "startup_timeout_ms": 3000,

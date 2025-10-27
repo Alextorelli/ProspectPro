@@ -19,16 +19,11 @@ cd "$ROOT_DIR/dev-tools/agents/mcp-servers/utility" && npm run build && cd -
   npx --yes dotenv-cli -e "$ENV_FILE" -- node -e "console.log('Production Ops:', process.env.VERCEL_TOKEN ? '✓' : '✗')"
 } | tee -a "$LOG_FILE"
 
-# Smoke test MCPs (run from mcp-servers root for correct context)
+# Smoke test consolidated MCP (run from mcp-servers root for correct context)
 cd "$ROOT_DIR/dev-tools/agents/mcp-servers"
 {
   echo "# MCP Smoke Tests"
-  echo "## Utility MCP: fetch, filesystem, git, time"
-  node utility/dist/index.js --test || true
-  echo "## Memory MCP"
-  npx tsx mcp-tools/memory/index.ts --store "$ROOT_DIR/dev-tools/workspace/context/session_store/memory.jsonl" --dry-run || true
-  echo "## Sequential Thinking MCP"
-  npx tsx mcp-tools/sequential/index.ts --ledger "$ROOT_DIR/dev-tools/workspace/context/session_store/sequential-thoughts.jsonl" --dry-run || true
+  node utility/dist/index.js --test
 } | tee -a "$LOG_FILE"
 cd "$ROOT_DIR"
 

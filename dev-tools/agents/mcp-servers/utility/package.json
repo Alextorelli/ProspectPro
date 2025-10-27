@@ -1,7 +1,7 @@
 {
   "name": "@prospectpro/utility-mcp",
-  "version": "1.0.0",
-  "description": "Unified utility MCP server providing fetch, filesystem, git, and time tools",
+  "version": "1.1.0",
+  "description": "Unified utility MCP server providing fetch, filesystem, git, time, memory, and sequential thinking tools",
   "type": "module",
   "main": "dist/index.js",
   "scripts": {
@@ -15,12 +15,15 @@
     "fetch",
     "filesystem",
     "git",
-    "time"
+    "time",
+    "memory",
+    "sequential"
   ],
   "author": "ProspectPro Team",
   "license": "MIT",
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.0.4",
+    "chalk": "^5.3.0",
     "html-to-text": "^9.0.5",
     "node-fetch": "^3.3.2",
     "simple-git": "^3.25.0"
