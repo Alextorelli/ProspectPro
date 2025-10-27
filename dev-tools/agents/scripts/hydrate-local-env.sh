@@ -17,9 +17,6 @@ require_cli vercel
 if [[ -n "${SUPABASE_PROJECT_REF:-}" ]]; then
   require_cli supabase
 fi
-if [[ -n "${GCLOUD_PROJECT:-}" && -n "${GCLOUD_SECRET_NAMES:-}" ]]; then
-  require_cli gcloud
-fi
 
 echo "# ProspectPro Agent Credentials (hydrated)" >"$tmp"
 echo "# Generated $(date -u +%Y-%m-%dT%H:%M:%SZ)" >>"$tmp"
@@ -35,20 +32,7 @@ if [[ -n "${SUPABASE_PROJECT_REF:-}" ]]; then
     jq -r '.[] | select(.name | test("^(AGENT_|VITE_|SUPABASE_|VERCEL_|GITHUB_)")) | "\(.name)=\(.value)"' >>"$tmp"
 fi
 
-if [[ -n "${GCLOUD_PROJECT:-}" && -n "${GCLOUD_SECRET_NAMES:-}" ]]; then
-  echo >>"$tmp"
-  echo "# Google Cloud secrets" >>"$tmp"
-  IFS=',' read -ra secrets <<<"${GCLOUD_SECRET_NAMES}"
-  for raw in "${secrets[@]}"; do
-    secret="$(echo "$raw" | xargs)"
-    [[ -z "$secret" ]] && continue
-    if value="$(gcloud secrets versions access latest --secret="${secret}" --project="${GCLOUD_PROJECT}" 2>/dev/null)"; then
-      printf "%s=%s\n" "${secret}" "${value}" >>"$tmp"
-    else
-      echo "⚠️  Unable to access secret ${secret}; skipping." >&2
-    fi
-  done
-fi
+
 
 if [[ -n "${GH_TOKEN:-}" ]]; then
   echo >>"$tmp"
