@@ -2,13 +2,13 @@
   "name": "prospectpro-mcp-servers",
   "version": "2.1.0",
   "private": true,
-  "description": "Consolidated MCP servers for ProspectPro Supabase-First AI development",
+  "description": "Canonical MCP servers for ProspectPro: supabase, github, playwright, context7, utility (unified)",
   "type": "module",
-  "main": "production-server.js",
+  "main": "utility/dist/index.js",
   "scripts": {
     "start:utility": "node utility/dist/index.js",
     "build:tools": "npm run build --prefix utility",
-    "test": "node test-servers.js",
+    "test": "node utility/dist/index.js --test",
     "validate": "npm run test && echo '✅ All canonical MCP servers validated successfully'",
     "install:deps": "npm install"
   },
@@ -25,8 +25,11 @@
     "ai",
     "prospectpro",
     "supabase",
-    "edge-functions",
-    "serverless"
+    "github",
+    "playwright",
+    "context7",
+    "utility",
+    "unified"
   ],
   "author": "Alex Torelli",
   "license": "MIT",
