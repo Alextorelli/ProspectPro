@@ -275,6 +275,15 @@ ev## 2025-10-23: Codespaces Bootstrap Realignment
 - **Impact:** All diagram generation, lint, and automation now use a single source of config/snippets. Manifest and docs are MECE-aligned.
 - **Next:** Repo GPS snapshot refresh recommended.
 
+# 2025-10-27: MECE Agent Workflow Refactor Complete (Phases 1-3)
+
+- **Action**: Completed Phases 1-3 of the MECE/canonical agent workflow refactor:
+  - Registry/tool cleanup: Removed all legacy MCPs and tool modules from active-registry and agent configs.
+  - Manifest/context wiring: Updated agents-manifest.json and per-agent config.json to reference only canonical MCPs (supabase, github, memory, sequentialthinking, context7, playwright as appropriate).
+  - Workflow/toolset/instructions updates: Bulk-patched all config.json, toolset.jsonc, and instructions.md files for production-ops and system-architect agents to remove legacy/unsupported MCPs/tools and ensure MECE/canonical compliance.
+- **Validation**: All patches applied successfully; config/toolset/instructions files for production-ops and system-architect now match the MECE taxonomy and canonical MCP set. No legacy references remain.
+- **Notes**: Provenance and inventories updated. Ready to proceed to Phase 4: documentation sync, MCP_MODE_TOOL_MATRIX.md rebuild, and environment-bound validation per the integration plan.
+
 # Registry Cleanup and Tool Module Removal
 
 ## Date: 2025-10-27
