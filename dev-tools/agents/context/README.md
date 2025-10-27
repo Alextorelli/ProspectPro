@@ -1,4 +1,4 @@
-ProspectPro uses a persistent context store to coordinate MCP-aware agents while keeping working memory manageable. The implementation follows the **Write → Select → Compress → Isolate** pattern defined in the MCP context management playbook. All DB/migration/testing is handled via Supabase MCP and Drizzle ORM. Legacy PostgreSQL MCP and custom scripts are deprecated and must not be used.
+ProspectPro uses a persistent context store to coordinate MCP-aware agents while keeping working memory manageable. The implementation follows the **Write → Select → Compress → Isolate** pattern defined in the MCP context management playbook. All DB/migration/testing is handled via Supabase MCP and Drizzle ORM. Memory, sequential thinking, and all timestamps are provided by Utility MCP (see `time_now`, `time_convert`). ContextManager pulls secrets from `.env.agent.local`. Legacy PostgreSQL MCP and custom scripts are deprecated and must not be used.
 
 ## Directory Layout
 
@@ -23,7 +23,7 @@ reason: "P0 incident response (Supabase MCP, Drizzle ORM only)",
 requireApproval: true,
 });
 
-The context store is the single source of truth for cross-agent coordination. Agents MUST go through the context manager APIs rather than reading files directly to ensure consistency with MCP workflows. For troubleshooting, always use dry-run, validate environment mapping, and reference only the canonical automation scripts and tools (Supabase MCP, Drizzle ORM). Legacy or custom DB tooling is not permitted.
+The context store is the single source of truth for cross-agent coordination. Agents MUST go through the context manager APIs rather than reading files directly to ensure consistency with MCP workflows. For troubleshooting, always use dry-run, validate environment mapping, and reference only the canonical automation scripts and tools (Supabase MCP, Drizzle ORM, Utility MCP for memory/sequential/timestamps). Legacy or custom DB tooling is not permitted.
 
 # ProspectPro Context Store
 

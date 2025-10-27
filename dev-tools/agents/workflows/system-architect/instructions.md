@@ -19,6 +19,7 @@
 
 1. `supabase` — Schema design, migration validation, query optimization
 2. `supabase-troubleshooting` — Architecture impact analysis, error correlation
+3. `utility` — Provides fetch (HTTP/HTML), filesystem (read/write), git status, and time utilities (`time_now`, `time_convert`) for architectural timeline, memory, and sequential thinking. All ContextManager timestamps and memory operations are routed through Utility MCP. Secrets are pulled from `.env.agent.local`.
 
 **Key Tool Usage Patterns:**
 
@@ -39,7 +40,7 @@ await mcp.supabase_troubleshooting.correlate_errors({ timeWindowStart });
 2. **Zero Fake Data**: Verified contacts only (Hunter.io, NeverBounce, licensing boards). **Always audit enrichment results for zero-fake-data compliance using MCP tools.**
 3. **MCP-First Workflows**: Replace custom scripts with MCP tools (target 80%+ reduction). Never rely on manual API clients or ad-hoc scripts for production validation.
 4. **OpenTelemetry Observability**: All critical paths instrumented with trace spans
-5. **Environment Switch Guidance**: Use ContextManager to switch between local, troubleshooting, and production. Always export `SUPABASE_SESSION_JWT` for authenticated calls. Validate environment with `supabase:link` and `supabase:ensure-session` tasks.
+5. **Environment Switch Guidance**: Use ContextManager to switch between local, troubleshooting, and production. ContextManager timestamps and memory are sourced via Utility MCP (`time_now`/`time_convert`); confirm Utility MCP is reachable before switching or checkpointing. Always export `SUPABASE_SESSION_JWT` for authenticated calls. Validate environment with `supabase:link` and `supabase:ensure-session` tasks.
 
 ### Design Review Checklist
 

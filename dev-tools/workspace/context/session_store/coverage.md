@@ -1,3 +1,9 @@
+## 2025-10-27: Utility MCP Documentation & Validation
+
+- Action: Updated system-architect, context README, and quickref to document Utility MCP as provider for memory, sequential, and timestamps
+- Validation: Ran `dev-tools/agents/scripts/validate-agents.sh` — all agent secrets detected, Utility MCP self-test passed (fetch, fs, git, time, memory, sequential)
+- Notes: Phase 5 doc and wiring update complete; ready for CI and MCP_MODE_TOOL_MATRIX.md refresh
+
 # 2025-10-27: Phase 5 Validation (Partial)
 
 - **Action**: Initiated Phase 5 environment-bound agent validation per MECE integration plan.
@@ -326,5 +332,6 @@ ev## 2025-10-23: Codespaces Bootstrap Realignment
 - All changes align with the MECE integration plan and agent/MCP matrix.
   2025-10-27T03:25:18Z: Environment-bound agent validation complete with utility MCP
   2025-10-27T05:45:13Z: Phase 5 agent/MCP validation complete
-2025-10-27T06:00:34Z: Phase 5 agent/MCP validation complete
-2025-10-27T06:13:21Z: Phase 5 agent/MCP validation complete
+  2025-10-27T06:00:34Z: Phase 5 agent/MCP validation complete
+  2025-10-27T06:13:21Z: Phase 5 agent/MCP validation complete
+  2025-10-27T06:56:34Z: Phase 5 agent/MCP validation complete

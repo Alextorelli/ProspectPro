@@ -39,5 +39,5 @@ EnvironmentContextManager.switchEnvironment({
 const env = EnvironmentContextManager.getCurrentEnvironment();
 ```
 
-// All DB/migration/testing is handled via Supabase MCP and Drizzle ORM. Do not use legacy PostgreSQL MCP, custom scripts, or deprecated tools.
+// All DB/migration/testing is handled via Supabase MCP and Drizzle ORM. Memory, sequential thinking, and all timestamps are provided by Utility MCP (see `time_now`, `time_convert`). ContextManager pulls secrets from `.env.agent.local`. Do not use legacy PostgreSQL MCP, custom scripts, or deprecated tools.
 // Always reference canonical automation scripts in scripts/operations/ at the repo root. Use --dry-run and environment-loader contract for safe diagnostics and context recovery.
