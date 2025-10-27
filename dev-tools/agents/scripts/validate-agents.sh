@@ -2,12 +2,14 @@
 # validate-agents.sh: Phase 5 agent/MCP validation
 set -euo pipefail
 
-ENV_FILE="dev-tools/agents/.env.agent.local"
-LOG_FILE="dev-tools/workspace/context/session_store/phase-5-validation-log.md"
-COVERAGE_FILE="dev-tools/workspace/context/session_store/coverage.md"
+
+ROOT_DIR="$(cd "$(dirname "$0")/../../.." && pwd)"
+ENV_FILE="$ROOT_DIR/dev-tools/agents/.env.agent.local"
+LOG_FILE="$ROOT_DIR/dev-tools/workspace/context/session_store/phase-5-validation-log.md"
+COVERAGE_FILE="$ROOT_DIR/dev-tools/workspace/context/session_store/coverage.md"
 
 # Build utility MCP tools
-cd dev-tools/agents/mcp-servers/utility && npm run build && cd -
+cd "$ROOT_DIR/dev-tools/agents/mcp-servers/utility" && npm run build && cd -
 
 # Test agent secrets
 {
@@ -20,9 +22,9 @@ cd dev-tools/agents/mcp-servers/utility && npm run build && cd -
 # Smoke test MCPs
 {
   echo "# MCP Smoke Tests"
-  npx tsx dev-tools/agents/mcp-servers/mcp-tools/memory/index.ts --store dev-tools/workspace/context/session_store/memory.jsonl --dry-run
-  npx tsx dev-tools/agents/mcp-servers/mcp-tools/sequential/index.ts --ledger dev-tools/workspace/context/session_store/sequential-thoughts.jsonl --dry-run
-  node dev-tools/agents/mcp-servers/utility/dist/index.js --test || true
+  npx tsx "$ROOT_DIR/dev-tools/agents/mcp-servers/mcp-tools/memory/index.ts" --store "$ROOT_DIR/dev-tools/workspace/context/session_store/memory.jsonl" --dry-run
+  npx tsx "$ROOT_DIR/dev-tools/agents/mcp-servers/mcp-tools/sequential/index.ts" --ledger "$ROOT_DIR/dev-tools/workspace/context/session_store/sequential-thoughts.jsonl" --dry-run
+  node "$ROOT_DIR/dev-tools/agents/mcp-servers/utility/dist/index.js" --test || true
 } | tee -a "$LOG_FILE"
 
 echo "$(date -u +%Y-%m-%dT%H:%M:%SZ): Phase 5 agent/MCP validation complete" | tee -a "$LOG_FILE" >> "$COVERAGE_FILE"
