@@ -52,8 +52,10 @@
 
 ### Remaining Actions to Complete Integration
 
-1. Redirect any workflows, manifests, or task runners still pointing to `supabase-troubleshooting-server.js` so they invoke the observability server exclusively.
-2. Validate Highlight.io credentials in `.env.agent.local` (requires `HIGHLIGHT_PROJECT_ID` and `HIGHLIGHT_API_KEY`) and perform a smoke failure to confirm error forwarding.
-3. Run the observability-focused validation script (or extend `dev-tools/agents/scripts/validate-agents.sh`) to execute the migrated tools and capture results in `phase-5-validation-log.md`.
-4. Retire `supabase-troubleshooting-server.js` after downstream dependencies are updated; log the removal in `coverage.md` and refresh inventories.
-5. Update documentation (Observability workflow README, MCP tool reference) to reflect the new tool locations and Highlight/Otel instrumentation expectations.
+#### Integration Completion Checklist
+
+- [ ] 1. Redirect all workflows, manifests, and task runners to use `observability-server.js` (not `supabase-troubleshooting-server.js`).
+- [ ] 2. Validate Highlight.io credentials in `.env.agent.local` (`HIGHLIGHT_PROJECT_ID`, `HIGHLIGHT_API_KEY`) and trigger a failing `validate_ci_cd_suite` to confirm error forwarding.
+- [ ] 3. Run or extend `dev-tools/agents/scripts/validate-agents.sh` to exercise all migrated tools and log results in `phase-5-validation-log.md`.
+- [ ] 4. Remove `supabase-troubleshooting-server.js` after confirming no downstream dependencies; log removal in `coverage.md` and update inventories.
+- [ ] 5. Update documentation (Observability workflow README, MCP tool reference) to reflect new tool locations and Highlight/Otel instrumentation.
