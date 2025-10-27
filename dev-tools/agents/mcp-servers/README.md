@@ -18,7 +18,7 @@ This directory contains the **enhanced MCP server implementation** that provides
 
 - Production Server (`production-server.js`)
 - Development Server (`development-server.js`)
-- Troubleshooting Server (`supabase-troubleshooting-server.js`)
+- Observability Server (`observability-server.js`)
 
 **Retired:**
 
@@ -61,36 +61,34 @@ Run `npm run build:tools` in `dev-tools/agents/mcp-servers/` after editing these
 - Circuit breaker pattern testing
 - Caching efficiency benchmarks
 
-### 3. Troubleshooting Server (`supabase-troubleshooting-server.js`) - **v1.1.0**
+### 3. Observability Server (`observability-server.js`) - **v2.0.0**
 
-**Purpose**: Systematic debugging of email enrichment architecture, Hunter.io/NeverBounce integration issues, and deliverability validation failures
+**Purpose**: Distributed tracing, monitoring, and Supabase diagnostics with OpenTelemetry and Highlight.io error reporting
 
-**Enrichment Troubleshooting Capabilities** (6 enhanced tools):
+**Observability & Diagnostics Capabilities** (15 tools):
 
-#### Email Enrichment Testing
+- `test_edge_function` - Smoke test Edge Functions (tracing + error reporting)
+- `validate_database_permissions` - Check RLS policies and DB permissions
+- `run_rls_diagnostics` - Generate RLS diagnostic SQL
+- `supabase_cli_healthcheck` - CLI status check
+- `check_production_deployment` - Full deployment health check
+- `vercel_status_check` - Vercel deployment status
+- `generate_debugging_commands` - Generate curl/CLI commands
+- `collect_and_summarize_logs` - Fetch and analyze logs
+- `validate_ci_cd_suite` - Run test suite with tracing
+- `query_traces` - Query historical traces
+- `generate_trace_report` - Generate trace analysis
+- `start_trace` - Start distributed trace
+- `add_trace_event` - Add event to active span
+- `end_trace` - Complete trace with status
+- `health_check` - Server health check
 
-- `test_edge_function` - Test Hunter.io/NeverBounce Edge Functions with API authentication
-- `generate_debugging_commands` - Create enrichment curl commands and testing scripts
+**When to Use Observability Server**:
 
-#### Email Verification Diagnosis
-
-- `validate_database_permissions` - Check enrichment_data JSONB permissions and RLS policies
-- `diagnose_anon_key_mismatch` - Compare frontend publishable key vs Supabase settings and confirm session token retrieval
-- `run_rls_diagnostics` - Generate email enrichment diagnostic queries
-
-#### Enrichment Deployment Validation
-
-- `check_vercel_deployment` - Validate deployment with verified email display and deliverability scores
-
-**When to Use Troubleshooting Server**:
-
-- Hunter.io email discovery fails or returns no results
-- NeverBounce verification returns authentication errors
-- Enrichment orchestrator exceeds budget limits
-- Circuit breakers not resetting after failures
-- Email verification cache not working
-- Apollo API (optional) returns cost errors
-- Deliverability scores not displaying correctly
+- Edge Function or enrichment failures
+- RLS or database permission issues
+- CI/CD or deployment health checks
+- Error reporting and tracing validation
 
 ---
 
@@ -105,8 +103,9 @@ npm run start:production
 # Start development server
 npm run start:development
 
-# Start troubleshooting server (for debugging deployment issues)
-npm run start:troubleshooting
+
+# Start observability server (for diagnostics, tracing, and error reporting)
+npm run start:observability
 
 # Start all servers
 npm run start:all
@@ -119,18 +118,18 @@ npm run test
 
 ### Frontend Shows "Discovery Failed" or "API request failed: 404"
 
-**IMMEDIATE DIAGNOSIS** with MCP Troubleshooting Server:
+**IMMEDIATE DIAGNOSIS** with Observability MCP Server:
 
 ```bash
-npm run start:troubleshooting
+npm run start:observability
 ```
 
 In your AI assistant, use these MCP tools in systematic order:
 
 1. `test_edge_function` - Verify backend works independently of frontend
-2. `diagnose_anon_key_mismatch` - Check for publishable key sync + session token availability (90% of problems)
-3. `validate_database_permissions` - Verify RLS policies are configured correctly
-4. `check_vercel_deployment` - Validate frontend deployment status
+2. `validate_database_permissions` - Verify RLS policies are configured correctly
+3. `run_rls_diagnostics` - Generate diagnostic SQL for RLS
+4. `check_production_deployment` - Validate frontend/backend deployment status
 5. `generate_debugging_commands` - Get custom debugging scripts for your config
 
 **Manual Quick Test** (if MCP not available):
