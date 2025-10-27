@@ -57,6 +57,25 @@ class ObservabilityServer {
 
   setupToolHandlers() {
         {
+          name: "vercel_status_check",
+          description: "Check the status of a Vercel deployment (frontend health, build info, etc)",
+          inputSchema: {
+            type: "object",
+            properties: {
+              vercelUrl: {
+                type: "string",
+                description: "Vercel deployment URL (e.g. https://prospectpro.vercel.app)",
+              },
+              showHeaders: {
+                type: "boolean",
+                description: "Include HTTP response headers in output",
+                default: false,
+              },
+            },
+            required: ["vercelUrl"],
+          },
+        },
+        {
           name: "check_production_deployment",
           description: "Check the status and health of the production deployment (Supabase + Vercel)",
           inputSchema: {
@@ -288,6 +307,43 @@ class ObservabilityServer {
     }));
 
     this.server.setRequestHandler(CallToolRequestSchema, async (request) => {
+          } else if (name === "vercel_status_check") {
+            result = await this.vercelStatusCheck(args);
+  async vercelStatusCheck({ vercelUrl, showHeaders = false }) {
+    // Check Vercel deployment health (try /api/health, then /, then /index.html)
+    const fetch = (await import("node-fetch")).default;
+    const urlsToTry = [
+      vercelUrl.replace(/\/$/, "") + "/api/health",
+      vercelUrl.replace(/\/$/, ""),
+      vercelUrl.replace(/\/$/, "") + "/index.html",
+    ];
+    let result = {};
+    for (const url of urlsToTry) {
+      try {
+        const res = await fetch(url, { method: "GET" });
+        result = {
+          url,
+          status: res.status,
+          ok: res.ok,
+          statusText: res.statusText,
+          ...(showHeaders ? { headers: Object.fromEntries(res.headers.entries()) } : {}),
+        };
+        if (res.ok) break;
+      } catch (err) {
+        result = { url, error: err.message };
+      }
+    }
+    return {
+      content: [
+        {
+          type: "text",
+          text:
+            `Vercel Deployment Status Check:\n\n${JSON.stringify(result, null, 2)}\n\n` +
+            (result.ok ? "✅ Vercel deployment is healthy." : "❌ Vercel deployment is not healthy or unreachable."),
+        },
+      ],
+    };
+  }
           } else if (name === "check_production_deployment") {
             result = await this.checkProductionDeployment(args);
   async checkProductionDeployment({ supabaseUrl, vercelUrl }) {
