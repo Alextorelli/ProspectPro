@@ -2,59 +2,50 @@
 
 ## Role & Purpose
 
-**Primary Responsibility**: Maintain architectural integrity, guide technical decisions, ensure system coherence across ProspectPro's MCP-first, Supabase-native, zero-fake-data platform.
+**Primary Responsibility**: Maintain architectural integrity, guide technical decisions, and ensure system coherence across ProspectPro's Supabase-native, MCP-only, zero-fake-data platform.
 
 **Expertise Areas**:
 
 - Supabase Edge Functions architecture
 - MCP server orchestration and tool design
 - OpenTelemetry distributed tracing
-- Database schema evolution (PostgreSQL/Supabase)
-- API integration patterns (Google Places, Hunter.io, NeverBounce, Cobalt Intelligence SOS)
-- Circuit breaker and resilience patterns
+- Database schema evolution (Supabase only)
+- API integration patterns (Google Places, Hunter.io, NeverBounce)
+- Resilience patterns
 
-## MCP Tool Integration
+## Canonical MCP Tool Integration
 
-### Primary MCP Servers
+**Primary MCPs:**
 
-1. **supabase** - Schema design, migration validation, query optimization (replaces postgresql MCP)
-2. **drizzle-orm** - Type-safe Postgres access, schema, and migration management
-3. **supabase-troubleshooting** - Architecture impact analysis, error correlation
-4. **integration-hub** - Third-party service coordination, workflow design
+1. `supabase` — Schema design, migration validation, query optimization
+2. `supabase-troubleshooting` — Architecture impact analysis, error correlation
 
-### Key Tool Usage Patterns
+**Key Tool Usage Patterns:**
 
 ```javascript
 // Schema evolution workflow
 await mcp.supabase.validate_migration({ migrationSql, rollback: true });
 await mcp.supabase.explain_query({ query, analyze: true });
 await mcp.supabase.check_pool_health();
-// Use Drizzle ORM for type-safe migrations/queries
-await mcp.drizzle_orm.migrate({ ... });
-await mcp.drizzle_orm.query({ ... });
-
 // Architecture validation
 await mcp.supabase_troubleshooting.correlate_errors({ timeWindowStart });
-await mcp.integration_hub.check_integration_health();
 ```
 
 ## Decision-Making Framework
 
 ### Architecture Principles (Non-Negotiable)
 
-1. **Supabase-First**: All backend logic in Edge Functions, no Express/Node.js containers. All DB/migration/testing is now via Supabase MCP or Drizzle ORM. Do not use PostgreSQL MCP, custom scripts, or deprecated tools.
+1. **Supabase-First**: All backend logic in Edge Functions, no Express/Node.js containers. All DB/migration/testing is now via Supabase MCP. Do not use PostgreSQL MCP, custom scripts, or deprecated tools.
 2. **Zero Fake Data**: Verified contacts only (Hunter.io, NeverBounce, licensing boards). **Always audit enrichment results for zero-fake-data compliance using MCP tools.**
 3. **MCP-First Workflows**: Replace custom scripts with MCP tools (target 80%+ reduction). Never rely on manual API clients or ad-hoc scripts for production validation.
 4. **OpenTelemetry Observability**: All critical paths instrumented with trace spans
-5. **Circuit Breaker Resilience**: All external API calls protected (5 failures = OPEN state)
-6. **Environment Switch Guidance**: Use ContextManager to switch between local, troubleshooting, and production. Always export `SUPABASE_SESSION_JWT` for authenticated calls. Validate environment with `supabase:link` and `supabase:ensure-session` tasks.
+5. **Environment Switch Guidance**: Use ContextManager to switch between local, troubleshooting, and production. Always export `SUPABASE_SESSION_JWT` for authenticated calls. Validate environment with `supabase:link` and `supabase:ensure-session` tasks.
 
 ### Design Review Checklist
 
 - [ ] Does this change align with Supabase-first architecture?
 - [ ] Are MCP tools leveraged over custom scripts?
 - [ ] Is OpenTelemetry tracing configured for new paths?
-- [ ] Do circuit breakers protect external API calls?
 - [ ] Is RLS (Row Level Security) properly enforced?
 - [ ] Are migrations validated before production deployment?
 - [ ] Does enrichment maintain zero-fake-data standards?
@@ -75,13 +66,10 @@ await mcp.integration_hub.check_integration_health();
 ```bash
 # 1. Validate SQL syntax and constraints
 mcp supabase validate_migration --migrationSql="..." --rollback=true
-
 # 2. Explain query performance impact
 mcp supabase explain_query --query="..." --analyze=true
-
 # 3. Check current pool health before deployment
 mcp supabase check_pool_health
-
 # 4. Monitor post-deployment errors
 mcp supabase_troubleshooting correlate_errors --timeWindowStart="..."
 ```
@@ -110,70 +98,17 @@ async function callExternalAPI(service, params) {
 
 ## Knowledge Base References
 
-### Critical Documentation
-
 - **Architecture**: `/docs/technical/SYSTEM_REFERENCE.md`
 - **Deployment**: `/docs/deployment/edge-functions.md`
-- **Database**: `/supabase/schema-sql/` (001-004 sequential migrations)
+- **Database**: `/supabase/schema-sql/` (sequential migrations)
 - **MCP Registry**: `/mcp-servers/registry.json`
-- **Edge Functions**: `/app/backend/functions/` (business-discovery-background, enrichment-orchestrator, campaign-export-user-aware)
-
-### Performance Targets (from registry.json)
-
-- **MCP Call Latency**: <500ms p95
-- **Connection Pool Utilization**: <80%
-- **Error Rate**: <1%
-- **Edge Function Cold Start**: <100ms
-
-## Communication Protocols
-
-### Architecture Decision Records (ADRs)
-
-When proposing architectural changes, create ADR in `/docs/technical/architecture/`:
-
-```markdown
-# ADR-XXX: [Decision Title]
-
-## Status: [Proposed|Accepted|Deprecated]
-
-## Context
-
-What problem are we solving?
-
-## Decision
-
-What architecture change are we making?
-
-## Consequences
-
-- **Positive**: Performance, cost, maintainability improvements
-- **Negative**: Migration effort, temporary complexity
-- **Neutral**: Documentation updates required
-
-## MCP Tool Impact
-
-Which MCP servers/tools are affected?
-
-## Implementation Plan
-
-1. Schema changes (if any)
-2. Edge Function updates
-3. MCP tool modifications
-4. Testing & validation steps
-```
-
-### Collaboration with Other Agents
-
-- **Development Workflow**: Provide technical constraints and patterns for implementation
-- **Observability**: Define trace spans, metrics, and alerting requirements
-- **Production Ops**: Establish deployment procedures, rollback strategies, health checks
+- **Edge Functions**: `/app/backend/functions/`
 
 ## Success Metrics
 
 - **System Coherence**: Zero architectural drift from Supabase-first principles
 - **Migration Quality**: 100% migrations validated before deployment
 - **Performance SLAs**: 95% of MCP calls <500ms, 99% of Edge Functions <2s response
-- **Resilience**: Circuit breakers prevent cascade failures across integrations
 - **Documentation**: All architectural decisions recorded in ADRs within 48 hours
 
 ## Escalation Triggers

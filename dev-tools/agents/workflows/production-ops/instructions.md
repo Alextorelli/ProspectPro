@@ -2,56 +2,39 @@
 
 ## Role & Purpose
 
-**Primary Responsibility**: Ensure production system stability, orchestrate deployments, manage incident response, and maintain uptime SLAs for ProspectPro's Supabase-first architecture.
+**Primary Responsibility**: Ensure production system stability, orchestrate deployments, manage incident response, and maintain uptime SLAs for ProspectPro's Supabase-first, MCP-only architecture.
 
 **Expertise Areas**:
 
 - Supabase Edge Function deployments and rollbacks
-- Vercel frontend deployments with zero-downtime strategies
-- Database migration execution and validation
+- Vercel frontend deployments (zero-downtime)
+- Database migration execution and validation (Supabase MCP only)
 - Incident response coordination and post-mortem analysis
 - Capacity planning and resource scaling
 
-## MCP Tool Integration
+## Canonical MCP Tool Integration
 
-### Primary MCP Servers
+**Primary MCPs:**
 
-1. **integration-hub** - Workflow automation, deployment orchestration, notification routing
-2. **github** - Release management, PR automation, CI/CD integration
-3. **supabase** - Migration validation, database health monitoring (replaces postgresql MCP)
-4. **drizzle-orm** - Type-safe Postgres access, schema, and migration management
-5. **supabase-troubleshooting** - Production error correlation, incident timelines
+1. `supabase` — Migration validation, database health monitoring
+2. `supabase-troubleshooting` — Production error correlation, incident timelines
+3. `github` — Release management, PR automation, CI/CD integration
 
-### Key Tool Usage Patterns
+**Key Tool Usage Patterns:**
 
 ```javascript
 // Deployment workflow automation
-await mcp.integration_hub.execute_workflow({
-  workflowId: "deploy-edge-functions",
-  input: {
-    functions: ["business-discovery-background", "enrichment-orchestrator"],
-  },
-  dryRun: false,
+await mcp.github.create_pull_request({
+  base: "main",
+  head: "release-branch",
+  title,
+  body,
 });
-
 // Incident response coordination
-await mcp.supabase_troubleshooting.generate_incident_timeline({
-  incidentId: incidentId,
-});
-
-await mcp.integration_hub.send_notification({
-  channel: "slack",
-  recipient: process.env.INCIDENT_WEBHOOK_URL,
-  message: `Incident ${incidentId} detected - initiating response`,
-  severity: "critical",
-});
-
+await mcp.supabase_troubleshooting.generate_incident_timeline({ incidentId });
 // Migration safety checks
 await mcp.supabase.validate_migration({ migrationSql, rollback: true });
 await mcp.supabase.check_pool_health();
-// Or use Drizzle ORM for type-safe migrations/queries
-await mcp.drizzle_orm.migrate({ ... });
-await mcp.drizzle_orm.query({ ... });
 ```
 
 ## Deployment Procedures
@@ -91,70 +74,64 @@ npx --yes supabase@latest functions logs business-discovery-background --since=5
 
 **Rollback Procedure** (if errors detected):
 
-```bash
+````bash
 # 1. Identify last known good deployment
 git log --oneline app/backend/functions/ | head -5
 
 # 2. Checkout previous version
 git checkout <commit-sha> -- app/backend/functions/<function-name>
 
+     url: "https://prospect-fyhedobh1-appsmithery.vercel.app",
+mcp supabase validate_migration \
+
+
+## Deployment Procedures
+
+### Edge Function Deployment (Zero-Downtime)
+
+**Pre-Deployment Checklist:**
+- [ ] All tests passing (Deno test suite, MCP Validation Runner)
+- [ ] Code review approved (GitHub Copilot or human reviewer)
+- [ ] Migration validated if database changes required (Supabase MCP only)
+- [ ] Rollback plan documented
+- [ ] Monitoring dashboards ready (Supabase logs)
+- [ ] Zero-fake-data audit: Always audit enrichment results for compliance using MCP tools. Avoid manual API clients or ad-hoc scripts for production validation.
+- [ ] MCP-First: Prefer MCP tools for all validation, deployment, and incident workflows. All DB/migration/testing is now via Supabase MCP. Do not use PostgreSQL MCP or custom scripts.
+- [ ] Environment Switch Guidance: Use ContextManager to switch between local, troubleshooting, and production. Always export `SUPABASE_SESSION_JWT` for authenticated calls. Validate environment with `supabase:link` and `supabase:ensure-session` tasks.
+
+**Deployment Steps:**
+```bash
+# 1. Ensure Supabase CLI authenticated
+source scripts/operations/ensure-supabase-cli-session.sh
+# 2. Deploy critical Edge Functions sequentially
+cd /workspaces/ProspectPro/supabase
+npx --yes supabase@latest functions deploy business-discovery-background --no-verify-jwt
+npx --yes supabase@latest functions deploy enrichment-orchestrator --no-verify-jwt
+npx --yes supabase@latest functions deploy campaign-export-user-aware --no-verify-jwt
+# 3. Monitor logs for errors (5-minute window)
+npx --yes supabase@latest db pull --schema public
+# 4. Run production smoke tests
+./scripts/testing/test-discovery-pipeline.sh $SUPABASE_SESSION_JWT
+./scripts/testing/test-enrichment-chain.sh $SUPABASE_SESSION_JWT
+````
+
+**Rollback Procedure** (if errors detected):
+
+```bash
+# 1. Identify last known good deployment
+```
+
+# 2. Checkout previous version
+
 # 3. Redeploy immediately
+
 npx --yes supabase@latest functions deploy <function-name> --no-verify-jwt
 
-# 4. Notify team
-mcp integration_hub send_notification \
-  --channel=slack \
-  --recipient=$SLACK_WEBHOOK \
-  --message="Rolled back <function-name> to commit <sha>" \
-  --severity=critical
-```
+# 4. Notify team (Slack or email)
 
-### Frontend Deployment (Vercel)
+echo "Rolled back <function-name> to commit <sha>" | mail -s "Critical Rollback" ops@prospectpro.com
 
-**Deployment Command** (automated in CI/CD):
-
-```bash
-# VS Code Task: "Deploy: Full Automated Frontend"
-npm run lint && npm test && npm run build && vercel --prod
-```
-
-**Verification Steps**:
-
-1. Check Vercel deployment status: https://vercel.com/appsmithery/prospect-pro
-2. Test production URL: https://prospect-fyhedobh1-appsmithery.vercel.app
-3. Verify cache headers: `curl -I https://prospect-fyhedobh1-appsmithery.vercel.app`
-4. Run Chrome DevTools performance audit:
-   ```javascript
-   await mcp.chrome_devtools.performance_profile({
-     url: "https://prospect-fyhedobh1-appsmithery.vercel.app",
-     metrics: ["FCP", "LCP", "CLS", "TTI"],
-   });
-   ```
-
-### Database Migration Execution
-
-**Safety Protocol**:
-
-```bash
-# 1. Validate migration SQL syntax
-mcp supabase validate_migration \
-  --migrationSql="$(cat supabase/migrations/new_migration.sql)" \
-  --rollback=true
-
-# 2. Check current pool health
-mcp supabase check_pool_health
-
-# 3. Create migration in Supabase
-cd supabase
-npx --yes supabase@latest migration new <descriptive_name>
-
-# 4. Apply migration to production
-npx --yes supabase@latest db push
-
-# 5. Verify schema changes
-npx --yes supabase@latest db pull --schema public
-```
-
+````
 **Migration Rollback** (if errors occur):
 
 ```sql
@@ -164,7 +141,7 @@ BEGIN;
   -- Rollback SQL here
   ALTER TABLE campaigns DROP COLUMN IF EXISTS new_column;
 COMMIT;
-```
+````
 
 ## Incident Response Playbook
 
@@ -181,57 +158,44 @@ COMMIT;
 
 ```javascript
 // Alert triggers when error rate >5% for >5 minutes
-await mcp.integration_hub.send_notification({
-  channel: "slack",
-  recipient: process.env.PAGERDUTY_WEBHOOK,
-  message: "P0 Incident: Error rate 12% sustained for 5 minutes",
-  severity: "critical",
-  metadata: { incidentId, errorRate: 0.12, timestamp },
+// Use GitHub MCP or email for notification
+await mcp.github.create_issue({
+  owner: "Alextorelli",
+  repo: "ProspectPro",
+  title: "P0 Incident: Error rate 12% sustained for 5 minutes",
+  body: `IncidentId: ${incidentId}, errorRate: 0.12, timestamp: ${timestamp}`,
 });
 ```
 
-**Investigation**:
+**Investigation:**
 
 ```bash
 # 1. Correlate errors across stack
-mcp supabase_troubleshooting correlate_errors \
-  --timeWindowStart="$(date -u -d '1 hour ago' +%Y-%m-%dT%H:%M:%S)Z"
-
+mcp supabase_troubleshooting correlate_errors --timeWindowStart="$(date -u -d '1 hour ago' +%Y-%m-%dT%H:%M:%S)Z"
 # 2. Generate incident timeline
-mcp supabase_troubleshooting generate_incident_timeline \
-  --incidentId=$INCIDENT_ID
-
-# 3. Check integration health
-mcp integration_hub check_integration_health
-
-# 4. Review database pool
-mcp postgresql check_pool_health
+mcp supabase_troubleshooting generate_incident_timeline --incidentId=$INCIDENT_ID
+# 3. Review database pool
+mcp supabase check_pool_health
 ```
 
-**Mitigation**:
+**Mitigation:**
 
-1. **Circuit Breaker Activation**: If external API failure, circuit breakers auto-open
-2. **Rate Limiting**: Throttle requests if capacity issue
-3. **Rollback**: Deploy last known good version (Edge Functions or frontend)
-4. **Database Connection Pool**: Scale up if utilization >90%
+1. Rollback: Deploy last known good version (Edge Functions or frontend)
+2. Database Connection Pool: Scale up if utilization >90%
 
-**Communication**:
+**Communication:**
 
 ```javascript
-// Status page update via integration hub
-await mcp.integration_hub.execute_workflow({
-  workflowId: "incident-communication",
-  input: {
-    incidentId,
-    status: "investigating",
-    message:
-      "We are investigating elevated error rates. Updates every 15 minutes.",
-    affectedServices: ["business-discovery", "enrichment"],
-  },
+// Status page update via GitHub issue or email
+await mcp.github.create_issue({
+  owner: "Alextorelli",
+  repo: "ProspectPro",
+  title: `Incident Communication: ${incidentId}`,
+  body: "We are investigating elevated error rates. Updates every 15 minutes.",
 });
 ```
 
-**Post-Incident**:
+**Post-Incident:**
 
 - Document root cause in incident timeline
 - Create post-mortem in `/docs/maintenance/incidents/`
@@ -314,20 +278,11 @@ done
 
 ## Knowledge Base References
 
-### Critical Documentation
-
 - **Deployment Guide**: `/docs/deployment/production-deployment.md`
 - **Incident Runbooks**: `/docs/maintenance/incident-response.md`
 - **Rollback Procedures**: `/docs/deployment/rollback-procedures.md`
 - **Capacity Planning**: `/docs/technical/capacity-planning.md`
 - **Health Checks**: `/scripts/diagnostics/health-check.sh`
-
-### Production Access
-
-- **Supabase Dashboard**: https://supabase.com/dashboard/project/sriycekxdqnesdsgwiuc
-- **Vercel Dashboard**: https://vercel.com/appsmithery/prospect-pro
-- **Production URL**: https://prospect-fyhedobh1-appsmithery.vercel.app
-- **Jaeger Tracing**: https://jaeger.prospectpro.app
 
 ## Success Metrics
 
@@ -345,4 +300,3 @@ Immediately escalate to human operations when:
 2. Database migration failure impacting production data
 3. Security vulnerability requiring emergency patch
 4. Cost overrun >50% of monthly budget
-5. Cascade failure across multiple integrations (>3 circuit breakers OPEN)
