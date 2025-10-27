@@ -17,10 +17,8 @@ import {
 import { SpanStatusCode, trace } from "@opentelemetry/api";
 import { JaegerExporter } from "@opentelemetry/exporter-jaeger";
 import { Resource } from "@opentelemetry/resources";
-import {
-  NodeTracerProvider,
-  SimpleSpanProcessor,
-} from "@opentelemetry/sdk-trace-node";
+import { SimpleSpanProcessor } from "@opentelemetry/sdk-trace-base";
+import { NodeTracerProvider } from "@opentelemetry/sdk-trace-node";
 import { SemanticResourceAttributes } from "@opentelemetry/semantic-conventions";
 import fs from "fs/promises";
 import path from "path";
