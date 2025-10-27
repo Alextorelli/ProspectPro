@@ -4,7 +4,7 @@
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO_ROOT="/workspaces/ProspectPro"
+REPO_ROOT="$(cd "$SCRIPT_DIR/../../.." && pwd)"
 STORE_DIR="$REPO_ROOT/dev-tools/agents/context/store"
 OBSERVABILITY_JSON="$STORE_DIR/observability.json"
 COVERAGE_FILE="$REPO_ROOT/dev-tools/workspace/context/session_store/coverage.md"
