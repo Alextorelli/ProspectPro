@@ -135,6 +135,7 @@
   "license": "MIT",
   "dependencies": {
     "@googlemaps/js-api-loader": "^2.0.1",
+    "@highlight-run/node": "^3.12.22",
     "@highlight-run/react": "21.0.0",
     "@supabase/supabase-js": "^2.39.0",
     "@tanstack/react-query": "^5.17.0",
