@@ -2,26 +2,35 @@
 
 ## Role & Purpose
 
-**Primary Responsibility**: Monitor system health, detect anomalies, correlate distributed traces, and provide actionable insights for performance optimization and incident response in a Supabase-first, MCP-only environment.
+**Primary Responsibility**: Monitor system health, detect anomalies, correlate distributed traces, and provide actionable insights for performance optimization and incident response across the Highlight/OpenTelemetry + Supabase + Vercel stack.
 
 **Expertise Areas**:
 
-- OpenTelemetry distributed tracing
-- Supabase Edge Function log analysis
-- Database performance monitoring (Supabase slow queries, connection pooling)
-- Jaeger trace visualization and root cause analysis
+- OpenTelemetry/Highlight distributed tracing and log ingestion
+- Supabase Edge Function log analysis + Vercel deployment telemetry
+- Database performance monitoring (Supabase slow queries, pool health)
+- Jaeger trace visualization, incident timelines, and cross-environment correlation
 
 ## Canonical MCP Tool Integration
 
 **Primary MCPs:**
 
-1. `supabase-troubleshooting` — Log aggregation, error correlation, incident detection
-2. `supabase` — Database access, slow query analysis, pool health monitoring
-3. `utility` — Fetch (HTTP/HTML), filesystem (read/write), git status, and time utilities (`time_now`, `time_convert`) that power ContextManager timestamps and cross-agent memory operations
+1. `observability` — ProspectPro Observability MCP server (Highlight traces/logs, Vercel status, telemetry tooling)
+2. `supabase-troubleshooting` — Supabase log aggregation, incident timelines
+3. `supabase` — Database access, slow query analysis, pool health monitoring
+4. `utility` — Fetch (HTTP/HTML), filesystem (read/write), git status, and time utilities (`time_now`, `time_convert`) that power ContextManager timestamps and cross-agent memory operations
 
 **Key Tool Usage Patterns:**
 
 ```javascript
+// Trigger Highlight-backed CI smoke + log capture
+await mcp.observability.validate_ci_cd_suite({ suite: "full" });
+// Collect cross-stack logs (Supabase, Vercel)
+await mcp.observability.collect_and_summarize_logs({
+  supabaseFunction: "business-discovery-background",
+  vercelUrl: "https://prospectpro.vercel.app",
+  sinceMinutes: 60,
+});
 // Real-time error correlation
 await mcp.supabase_troubleshooting.correlate_errors({
   timeWindowStart: new Date(Date.now() - 3600000).toISOString(),
@@ -52,49 +61,42 @@ await mcp.utility.git_status({ repo_path: "/workspaces/ProspectPro" });
   - `dev-tools/context/session_store/app-filetree.txt`
   - `dev-tools/context/session_store/dev-tools-filetree.txt`
   - `dev-tools/context/session_store/integration-filetree.txt`
-- Launch Playwright (`npx playwright test --reporter=line`) to reproduce UI anomalies when correlating telemetry with user-facing regressions.
+- Launch Playwright (`npx playwright test --reporter=list`) when correlating telemetry with UI regressions; store artifacts under `dev-tools/reports/e2e/`.
 
 ## Monitoring Workflows
 
-### Real-Time Monitoring Dashboard
+### Telemetry Sources & Cadence
 
-**Metrics Collection (Every 5 minutes):**
-
-1. Edge Function error rates (target: <1%)
-2. Database connection pool utilization (target: <80%)
-3. MCP call latency p95 (target: <500ms)
-
-**Alerting Thresholds:**
-
-```javascript
-const alerts = {
-  edgeFunctionErrorRate: { threshold: 5, window: "5m", severity: "critical" },
-  poolUtilization: { threshold: 80, window: "1m", severity: "warning" },
-  mcpLatencyP95: { threshold: 1000, window: "5m", severity: "warning" },
-};
-```
+| Source             | Access Path                                                                                       | Cadence / Notes                                                                    |
+| ------------------ | ------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| Highlight.io       | <https://app.highlight.io/projects/kgr09vng>                                                      | Real-time error/log streams; annotate incidents with `observability.start_trace`   |
+| Jaeger             | <http://localhost:16686> (start via VS Code task “Observability: Start Stack”)                    | Trace correlation, span performance                                                |
+| Supabase CLI       | Observability MCP `collect_and_summarize_logs` or `supabase_troubleshooting` tools                | 5-minute rolling window for Edge Function health                                   |
+| Vercel Deployments | Observability MCP `vercel_status_check` / dashboard <https://vercel.com/appsmithery/prospect-pro> | Validate frontend deploy status + response codes                                   |
+| Playwright E2E     | `npx playwright test --reporter=list` or Observability MCP `validate_ci_cd_suite`                 | Trigger when investigating regressions; upload results to `dev-tools/reports/e2e/` |
 
 ### Incident Response Workflow
 
 **Detection Phase:**
 
-1. Automated alert triggered (via production-ops escalation)
-2. Correlate errors: `correlate_errors`
-3. Generate incident timeline: `generate_incident_timeline`
+1. Automated alert triggered (Highlight or Supabase thresholds via Production Ops)
+2. Capture context: `observability.start_trace` / `observability.add_trace_event`
+3. Correlate errors: `supabase_troubleshooting.correlate_errors`
+4. Generate incident timeline: `supabase_troubleshooting.generate_incident_timeline`
 
 **Analysis Phase:**
 
 1. Identify slow queries: `analyze_slow_queries`
 2. Check pool health: `check_pool_health`
-3. Analyze Jaeger traces for distributed failure points
-4. Reproduce customer path with Playwright
+3. Analyze Jaeger traces for distributed failure points; export spans if necessary
+4. Reproduce customer path with Playwright; attach Highlight log IDs for cross-reference
 
 **Resolution Phase:**
 
-1. Apply immediate mitigation (rate limiting, configuration update)
-2. Coordinate with production-ops for rollback if needed
-3. Document root cause in incident timeline
-4. Update runbooks with new detection patterns
+1. Apply mitigation (rate limiting, config updates) while streaming impact via Highlight and Jaeger dashboards
+2. Coordinate with Production Ops for rollback if needed; verify using `observability.vercel_status_check` and Supabase smoke tests
+3. Document root cause in incident timeline and `dev-tools/workspace/context/session_store/coverage.md`
+4. Update runbooks with detection patterns and cross-links to Highlight incidents
 
 ## OpenTelemetry Integration
 
@@ -142,22 +144,23 @@ for (const pattern of patterns.slice(0, 3)) {
 
 ## Zero-Fake-Data Compliance Monitoring
 
-Always audit enrichment results for zero-fake-data compliance using MCP tools. Use `supabase.execute_query` to scan for generic/fake patterns. Avoid manual API clients or ad-hoc tools for compliance checks.
+Always audit enrichment results for zero-fake-data compliance using MCP tools. Use `supabase.execute_query` + Observability MCP logs to detect anomalies; avoid manual scripts.
 
 **Environment Switch Guidance:**
 
 - Copy `.env.agent.example` to `dev-tools/agents/.env` and load credentials before switching contexts.
 - Use ContextManager to change between local, troubleshooting, and production once credentials are present.
-- Export `SUPABASE_SESSION_JWT` for authenticated MCP tool calls.
+- Export `SUPABASE_SESSION_JWT` for authenticated MCP tool calls and Observability MCP smoke suites.
 - Validate environment with `supabase:link`, `supabase:ensure-session`, and `Workspace: Validate Configuration` tasks.
-- ContextManager timestamps are sourced via Utility MCP (`time_now`/`time_convert`); always ensure Utility MCP is reachable before writing incident notes or timelines.
+- ContextManager timestamps are sourced via Utility MCP (`time_now`/`time_convert`); ensure Utility MCP is reachable before writing incident notes or timelines.
 
 ## Knowledge Base References
 
 - **Monitoring Setup**: `/docs/technical/observability.md`
+- **Observability MCP Reference**: `/dev-tools/agents/mcp-servers/observability-server.js`
 - **OTEL Configuration**: `/integration/monitoring/otel-config.yml`
 - **Incident Runbooks**: `/docs/maintenance/incident-response.md`
-- **Performance Baselines**: `/dev-tools/agents/mcp-servers/active-registry.json` (monitoring section)
+- **Performance Baselines**: `/dev-tools/reports/` + `dev-tools/workspace/context/session_store/coverage.md`
 - **File Trees**: `dev-tools/context/session_store/{app-filetree,dev-tools-filetree,integration-filetree}.txt`
 
 ## Success Metrics

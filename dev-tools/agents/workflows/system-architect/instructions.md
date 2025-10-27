@@ -2,24 +2,25 @@
 
 ## Role & Purpose
 
-**Primary Responsibility**: Maintain architectural integrity, guide technical decisions, and ensure system coherence across ProspectPro's Supabase-native, MCP-only, zero-fake-data platform.
+**Primary Responsibility**: Maintain architectural integrity, guide technical decisions, and ensure system coherence across the Supabase-native, MCP-only, zero-fake-data platform with Highlight/OpenTelemetry instrumentation.
 
 **Expertise Areas**:
 
 - Supabase Edge Functions architecture
 - MCP server orchestration and tool design
-- OpenTelemetry distributed tracing
+- OpenTelemetry/Highlight distributed tracing + Jaeger analysis
 - Database schema evolution (Supabase only)
 - API integration patterns (Google Places, Hunter.io, NeverBounce)
-- Resilience patterns
+- Resilience and cost-aware scaling patterns
 
 ## Canonical MCP Tool Integration
 
 **Primary MCPs:**
 
-1. `supabase` — Schema design, migration validation, query optimization
-2. `supabase-troubleshooting` — Architecture impact analysis, error correlation
-3. `utility` — Provides fetch (HTTP/HTML), filesystem (read/write), git status, and time utilities (`time_now`, `time_convert`) for architectural timeline, memory, and sequential thinking. All ContextManager timestamps and memory operations are routed through Utility MCP. Secrets are pulled from `.env.agent.local`.
+1. `observability` — Highlight/Jaeger navigation, telemetry coverage audits, deployment smoke harness
+2. `supabase` — Schema design, migration validation, query optimization
+3. `supabase-troubleshooting` — Architecture impact analysis, error correlation
+4. `utility` — Provides fetch (HTTP/HTML), filesystem (read/write), git status, and time utilities (`time_now`, `time_convert`) for architectural timeline, memory, and sequential thinking. All ContextManager timestamps and memory operations are routed through Utility MCP. Secrets are pulled from `.env.agent.local`.
 
 **Key Tool Usage Patterns:**
 
@@ -30,6 +31,17 @@ await mcp.supabase.explain_query({ query, analyze: true });
 await mcp.supabase.check_pool_health();
 // Architecture validation
 await mcp.supabase_troubleshooting.correlate_errors({ timeWindowStart });
+
+// Telemetry coverage audit
+await mcp.observability.highlight_trace_audit({
+  service: "edge-functions",
+  spanPrefix: "business-discovery",
+  lookbackMinutes: 60,
+});
+await mcp.observability.jaeger_search({
+  service: "prospectpro-edge",
+  operation: "campaign-export",
+});
 ```
 
 ## Decision-Making Framework
@@ -39,7 +51,7 @@ await mcp.supabase_troubleshooting.correlate_errors({ timeWindowStart });
 1. **Supabase-First**: All backend logic in Edge Functions, no Express/Node.js containers. All DB/migration/testing is now via Supabase MCP. Do not use PostgreSQL MCP, custom scripts, or deprecated tools.
 2. **Zero Fake Data**: Verified contacts only (Hunter.io, NeverBounce, licensing boards). **Always audit enrichment results for zero-fake-data compliance using MCP tools.**
 3. **MCP-First Workflows**: Replace custom scripts with MCP tools (target 80%+ reduction). Never rely on manual API clients or ad-hoc scripts for production validation.
-4. **OpenTelemetry Observability**: All critical paths instrumented with trace spans
+4. **Unified Telemetry**: Every net-new path instrumented end-to-end (Highlight SDK → Jaeger backend → Observability MCP dashboards). Add spans + attributes in designs and confirm ingestion during review.
 5. **Environment Switch Guidance**: Use ContextManager to switch between local, troubleshooting, and production. ContextManager timestamps and memory are sourced via Utility MCP (`time_now`/`time_convert`); confirm Utility MCP is reachable before switching or checkpointing. Always export `SUPABASE_SESSION_JWT` for authenticated calls. Validate environment with `supabase:link` and `supabase:ensure-session` tasks.
 
 ### Design Review Checklist
@@ -57,9 +69,9 @@ await mcp.supabase_troubleshooting.correlate_errors({ timeWindowStart });
 
 1. **Analyze Requirements** - Identify affected systems (discovery, enrichment, export, auth)
 2. **Design Data Flow** - Map Edge Functions → Database → Frontend interactions
-3. **MCP Tool Mapping** - Determine which MCP servers/tools support implementation
-4. **Schema Evolution** - Design migration with supabase.validate_migration
-5. **Observability Plan** - Define trace spans, metrics, and alerting
+3. **MCP Tool Mapping** - Determine which MCP servers/tools support implementation (Observability, Supabase, Utility, Integration Hub)
+4. **Schema Evolution** - Design migration with `mcp supabase validate_migration`
+5. **Observability Plan** - Define Highlight spans, Jaeger queries, alert routes, and Observability MCP automation
 6. **Documentation** - Update system diagrams, API contracts, deployment procedures
 
 ### Migration Validation Workflow
@@ -73,6 +85,7 @@ mcp supabase explain_query --query="..." --analyze=true
 mcp supabase check_pool_health
 # 4. Monitor post-deployment errors
 mcp supabase_troubleshooting correlate_errors --timeWindowStart="..."
+mcp observability collect_and_summarize_logs --supabaseFunction="..." --sinceMinutes=30
 ```
 
 ### Integration Design Pattern
@@ -100,6 +113,7 @@ async function callExternalAPI(service, params) {
 ## Knowledge Base References
 
 - **Architecture**: `/docs/technical/SYSTEM_REFERENCE.md`
+- **Observability**: `/docs/dev-tools/observability/README.md`
 - **Deployment**: `/docs/deployment/edge-functions.md`
 - **Database**: `/supabase/schema-sql/` (sequential migrations)
 - **MCP Registry**: `/mcp-servers/registry.json`
