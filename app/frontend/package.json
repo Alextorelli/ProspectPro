@@ -1,0 +1,21 @@
+{
+  "name": "prospectpro-frontend",
+  "version": "1.0.0",
+  "description": "ProspectPro Frontend with Highlight integration",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "vite",
+    "build": "vite build",
+    "lint": "eslint . --ext .js,.jsx,.ts,.tsx"
+  },
+  "dependencies": {
+    "highlight.run": "9.20.0",
+    "@highlight-run/react": "21.0.0"
+  },
+  "devDependencies": {
+    "vite": "^4.0.0",
+    "eslint": "^8.0.0"
+  },
+  "author": "Alex Torelli",
+  "license": "MIT"
+}
