@@ -1,4 +1,66 @@
-#!/usr/bin/env node
+// --- Highlight.io Manual Error Reporting & Tracing Examples ---
+// Utility to report errors manually (simulate HTTP handler usage)
+function onError(requestOrError, errorMaybe) {
+  // If called as onError(error), treat first arg as error
+  let error, headers;
+  if (requestOrError && requestOrError.headers) {
+    headers = requestOrError.headers;
+    error = errorMaybe;
+  } else {
+    error = requestOrError;
+    headers = {};
+  }
+  const parsed = H.parseHeaders(headers);
+  H.consumeError(error, parsed?.secureSessionId, parsed?.requestId);
+}
+
+// Example: function with Highlight tracing
+async function functionToTrace(input) {
+  const { span, ctx } = H.startWithHeaders(
+    "functionToTrace",
+    {},
+    { custom_property: input }
+  );
+  // Simulate child span context
+  const api = await import("@opentelemetry/api");
+  api.context.with(ctx, () => {
+    anotherFunction();
+  });
+  // ...
+  span.end();
+}
+
+function anotherFunction() {
+  const { span } = H.startWithHeaders("anotherFunction", {});
+  // ...
+  span.end();
+}
+
+// Example: simulate logs and error reporting
+function highlightDemoLogsAndErrors() {
+  console.log("hey there!");
+  console.warn("whoa there", { key: "value" });
+  try {
+    throw new Error("example error!");
+  } catch (e) {
+    onError(e);
+  }
+}
+
+// Example: simulate H.runWithHeaders (for HTTP handlers)
+async function highlightRunWithHeadersDemo() {
+  // Simulate HTTP headers
+  const fakeHeaders = { "x-fake-header": "demo" };
+  H.runWithHeaders(fakeHeaders, () => {
+    const { span } = H.startWithHeaders("custom-span", {});
+    const err = new Error("this is a test error");
+    console.info("Sending error to highlight");
+    H.consumeError(err);
+    // Simulate response
+    // res.send('Hello World!');
+    span.end();
+  });
+}
 
 /**
  * ProspectPro Observability MCP Server
@@ -60,6 +122,11 @@ class ObservabilityServer {
     );
 
     this.setupToolHandlers();
+    // --- Highlight.io Demo: Manual error/log reporting and tracing ---
+    highlightDemoLogsAndErrors();
+    functionToTrace(42);
+    // highlightRunWithHeadersDemo();
+    // --- End Demo ---
   }
 
   setupToolHandlers() {
