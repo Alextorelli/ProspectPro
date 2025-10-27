@@ -57,6 +57,21 @@ class ObservabilityServer {
 
   setupToolHandlers() {
         {
+          name: "validate_ci_cd_suite",
+          description: "Run and validate the CI/CD test suite, summarize results, and report errors to Highlight.io and OpenTelemetry",
+          inputSchema: {
+            type: "object",
+            properties: {
+              suite: {
+                type: "string",
+                description: "Test suite to run (e.g. 'full', 'db', 'edge', 'frontend')",
+                default: "full",
+              },
+            },
+            required: [],
+          },
+        },
+        {
           name: "collect_and_summarize_logs",
           description: "Collect recent logs from Supabase and Vercel, summarize errors and warnings",
           inputSchema: {
@@ -348,6 +363,92 @@ class ObservabilityServer {
     }));
 
     this.server.setRequestHandler(CallToolRequestSchema, async (request) => {
+          } else if (name === "validate_ci_cd_suite") {
+            result = await this.validateCiCdSuite(args, span);
+  async validateCiCdSuite({ suite = "full" } = {}, span) {
+    // Run the appropriate npm script for the suite
+    const { exec } = await import("child_process");
+    const { promisify } = await import("util");
+    const execAsync = promisify(exec);
+    let command;
+    if (suite === "db") {
+      command = "npm run supabase:test:db";
+    } else if (suite === "edge") {
+      command = "npm run supabase:test:functions";
+    } else if (suite === "frontend") {
+      command = "npm test";
+    } else {
+      command = "npm test && npm run supabase:test:db && npm run supabase:test:functions";
+    }
+    let stdout = "", stderr = "";
+    let errorObj = null;
+    try {
+      const result = await execAsync(command);
+      stdout = result.stdout;
+      stderr = result.stderr;
+    } catch (error) {
+      stdout = error.stdout || "";
+      stderr = error.stderr || error.message;
+      errorObj = error;
+    }
+    // OpenTelemetry: annotate span with test results
+    if (span) {
+      span.setAttribute("ci_cd.suite", suite);
+      span.setAttribute("ci_cd.command", command);
+      span.setAttribute("ci_cd.stderr", stderr.slice(0, 500));
+      span.setAttribute("ci_cd.stdout", stdout.slice(0, 500));
+      if (errorObj) {
+        span.setStatus({ code: SpanStatusCode.ERROR, message: stderr });
+        span.recordException(errorObj);
+      } else {
+        span.setStatus({ code: SpanStatusCode.OK });
+      }
+    }
+    // Highlight.io: report error if present
+    try {
+      if (errorObj && process.env.HIGHLIGHT_PROJECT_ID && process.env.HIGHLIGHT_API_KEY) {
+        const fetch = (await import("node-fetch")).default;
+        await fetch("https://api.highlight.io/v1/errors", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-highlight-project": process.env.HIGHLIGHT_PROJECT_ID,
+            "Authorization": `Bearer ${process.env.HIGHLIGHT_API_KEY}`,
+          },
+          body: JSON.stringify({
+            error: {
+              message: stderr,
+              stack: errorObj.stack,
+              suite,
+              timestamp: new Date().toISOString(),
+            },
+            environment: process.env.NODE_ENV || "development",
+            service: "prospectpro-observability",
+          }),
+        });
+      }
+    } catch (highlightErr) {
+      // Do not throw, but annotate span
+      if (span) span.addEvent("highlight.io error", { error: highlightErr.message });
+    }
+    // Summarize results
+    const summary = errorObj
+      ? `❌ CI/CD suite '${suite}' failed.\n\nError: ${stderr.slice(0, 500)}`
+      : `✅ CI/CD suite '${suite}' passed.\n\nOutput:\n${stdout.slice(0, 500)}`;
+    return {
+      content: [
+        {
+          type: "text",
+          text: summary,
+        },
+        {
+          type: "text",
+          text: `---\nCommand: ${command}\n\nFull output:\n${stdout.slice(0, 2000)}\n\nErrors:\n${stderr.slice(0, 2000)}`,
+        },
+      ],
+      isError: !!errorObj,
+    };
+  }
           } else if (name === "collect_and_summarize_logs") {
             result = await this.collectAndSummarizeLogs(args);
   async collectAndSummarizeLogs({ supabaseFunction, vercelUrl, sinceMinutes = 60 }) {
