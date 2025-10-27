@@ -237,7 +237,21 @@ class TaskLedger {
       "ledgers",
       options?.filename ?? defaultLedgerFile
     );
-    this.dateProvider = options?.dateProvider ?? (() => new Date());
+    this.dateProvider =
+      options?.dateProvider ??
+      (() => {
+        try {
+          const { execSync } = require("child_process");
+          const ts = execSync(
+            "node ./dev-tools/agents/context/get-canonical-timestamp.js"
+          )
+            .toString()
+            .trim();
+          return new Date(ts);
+        } catch {
+          return new Date();
+        }
+      });
   }
 
   async list(): Promise<TaskLedgerEntry[]> {
