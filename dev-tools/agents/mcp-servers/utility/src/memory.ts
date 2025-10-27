@@ -294,7 +294,7 @@ const DEFAULT_MEMORY_PATH = path.resolve(
   process.cwd(),
   process.env.MCP_MEMORY_FILE_PATH ||
     process.env.MEMORY_FILE_PATH ||
-  "dev-tools/workspace/context/session_store/memory.jsonl"
+    "dev-tools/workspace/context/session_store/memory.jsonl"
 );
 
 async function resolveMemoryFilePath(
