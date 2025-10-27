@@ -83,12 +83,22 @@ Run `npm run build:tools` in `dev-tools/agents/mcp-servers/` after editing these
 - `end_trace` - Complete trace with status
 - `health_check` - Server health check
 
-**When to Use Observability Server**:
+**Highlight.io Integration**:
 
-- Edge Function or enrichment failures
-- RLS or database permission issues
-- CI/CD or deployment health checks
-- Error reporting and tracing validation
+- Error reporting and session replay for all diagnostics tools
+- Required environment variables: `HIGHLIGHT_PROJECT_ID`, `HIGHLIGHT_API_KEY`
+- See `.env.agent.example` for setup
+
+**OpenTelemetry/Jaeger Integration**:
+
+- Distributed tracing for all diagnostics and workflow tools
+- Default endpoint: `JAEGER_ENDPOINT=http://localhost:14268/api/traces`
+
+**Documentation Updated 2025-10-27**:
+
+- All references to legacy troubleshooting server removed
+- Observability workflow and tool reference updated for Highlight.io and OpenTelemetry instrumentation
+- See `dev-tools/workspace/context/session_store/mece-agent-mcp-integration-plan.md` for migration checklist
 
 ---
 
