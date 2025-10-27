@@ -19,6 +19,7 @@
 1. `supabase` — Migration validation, database health monitoring
 2. `supabase-troubleshooting` — Production error correlation, incident timelines
 3. `github` — Release management, PR automation, CI/CD integration
+4. `utility` — Fetch (HTTP/HTML), filesystem (read/write), git status, and time utilities (`time_now`, `time_convert`) used for deployment ledgers, rollout windows, and ContextManager timestamps
 
 **Key Tool Usage Patterns:**
 
@@ -35,6 +36,15 @@ await mcp.supabase_troubleshooting.generate_incident_timeline({ incidentId });
 // Migration safety checks
 await mcp.supabase.validate_migration({ migrationSql, rollback: true });
 await mcp.supabase.check_pool_health();
+
+// Deployment book-keeping (Utility MCP)
+const nowUtc = await mcp.utility.time_now({ timezone: "UTC" });
+await mcp.utility.fs_write({
+  file_path:
+    "dev-tools/workspace/context/session_store/production-deploy-log.md",
+  content: `\n${nowUtc} — Deployment window opened for ${releaseTag}`,
+});
+await mcp.utility.git_status({ repo_path: "/workspaces/ProspectPro" });
 ```
 
 ## Deployment Procedures

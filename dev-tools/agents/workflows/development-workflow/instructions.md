@@ -50,7 +50,7 @@ const converted = await mcp.utility.time_convert({ time: now, source_timezone: "
 - Copy `dev-tools/agents/.env.agent.example` to `dev-tools/agents/.env` and populate Supabase/GitHub/Vercel variables for each environment.
 - Load credentials with `dotenv -e dev-tools/agents/.env -- <command>` or source the file before running MCP tasks.
 - Reference file tree snapshots for fast jumps: `dev-tools/context/session_store/app-filetree.txt`, `dev-tools/context/session_store/dev-tools-filetree.txt`, and `dev-tools/context/session_store/integration-filetree.txt`.
-- `ContextManager` will pick up the active environment once the `.env` file is present; use it alongside the VS Code tasks for environment switches.
+- `ContextManager` will pick up the active environment once the `.env` file is present; use it alongside the VS Code tasks for environment switches. ContextManager timestamps run through Utility MCP (`time_now`/`time_convert`), so confirm Utility MCP is reachable before switching environments or logging checkpoints.
 
 ### Feature Development Lifecycle
 
@@ -323,7 +323,7 @@ await mcp.drizzle_orm.query({ ... });
 - Copy `dev-tools/agents/.env.agent.example` to `dev-tools/agents/.env` and populate Supabase/Vercel variables for each environment.
 - Load credentials with `dotenv -e dev-tools/agents/.env -- <command>` or source the file before running MCP tasks.
 - Reference file tree snapshots for fast jumps: `dev-tools/context/session_store/app-filetree.txt`, `dev-tools/context/session_store/dev-tools-filetree.txt`, and `dev-tools/context/session_store/integration-filetree.txt`.
-- `ContextManager` will pick up the active environment once the `.env` file is present; use it alongside the VS Code tasks for environment switches.
+- `ContextManager` will pick up the active environment once the `.env` file is present; use it alongside the VS Code tasks for environment switches. ContextManager timestamps run through Utility MCP (`time_now`/`time_convert`), so confirm Utility MCP is reachable before switching environments or logging checkpoints.
 
 ### Feature Development Lifecycle
 
@@ -358,6 +358,7 @@ await mcp.drizzle_orm.query({ ... });
 **Environment Switch Guidance**:
 
 - Use ContextManager to switch between local, troubleshooting, and production after loading `dev-tools/agents/.env`.
+- Confirm Utility MCP is reachable before changing environments; ContextManager timestamps and checkpoint metadata are sourced via Utility MCP time tools.
 - Export `SUPABASE_SESSION_JWT` (from the `.env` or ContextManager) for authenticated Edge Function and MCP tool calls.
 - Validate environment with `supabase:link`, `supabase:ensure-session`, and the `Workspace: Validate Configuration` task.
 

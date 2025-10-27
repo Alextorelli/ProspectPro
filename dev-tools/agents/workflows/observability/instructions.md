@@ -17,6 +17,7 @@
 
 1. `supabase-troubleshooting` — Log aggregation, error correlation, incident detection
 2. `supabase` — Database access, slow query analysis, pool health monitoring
+3. `utility` — Fetch (HTTP/HTML), filesystem (read/write), git status, and time utilities (`time_now`, `time_convert`) that power ContextManager timestamps and cross-agent memory operations
 
 **Key Tool Usage Patterns:**
 
@@ -28,6 +29,19 @@ await mcp.supabase_troubleshooting.correlate_errors({
 // Performance monitoring
 await mcp.supabase.analyze_slow_queries({ thresholdMs: 1000, limit: 20 });
 await mcp.supabase.check_pool_health();
+
+// Context-aware diagnostics via Utility MCP
+const nowUtc = await mcp.utility.time_now({ timezone: "UTC" });
+const localWindow = await mcp.utility.time_convert({
+  time: nowUtc,
+  source_timezone: "UTC",
+  target_timezone: "America/Los_Angeles",
+});
+const latestDeploymentNotes = await mcp.utility.fs_read({
+  file_path:
+    "dev-tools/workspace/context/session_store/production-deploy-log.md",
+});
+await mcp.utility.git_status({ repo_path: "/workspaces/ProspectPro" });
 ```
 
 ## Credential Loading & Navigation
@@ -136,6 +150,7 @@ Always audit enrichment results for zero-fake-data compliance using MCP tools. U
 - Use ContextManager to change between local, troubleshooting, and production once credentials are present.
 - Export `SUPABASE_SESSION_JWT` for authenticated MCP tool calls.
 - Validate environment with `supabase:link`, `supabase:ensure-session`, and `Workspace: Validate Configuration` tasks.
+- ContextManager timestamps are sourced via Utility MCP (`time_now`/`time_convert`); always ensure Utility MCP is reachable before writing incident notes or timelines.
 
 ## Knowledge Base References
 
