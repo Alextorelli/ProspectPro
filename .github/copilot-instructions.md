@@ -29,7 +29,7 @@
 
 - **Chat modes**: `Development Workflow`, `Observability`, `Production Ops`, `System Architect` found under `.github/chatmodes/`.
 - **Mermaid diagrams**: Author in `docs/{app,dev-tools,integration}/diagrams/`; validate via `npm run docs:prepare` before publishing.
-- **MCP Servers**: Located in `dev-tools/agents/mcp-servers/`; start troubleshooting with `npm run mcp:troubleshoot` (root) or `npm run start:troubleshooting` (from `dev-tools/agents/mcp-servers/`).
+- **MCP Servers**: `dev-tools/agents/mcp-servers/` hosts the sources; configuration is centralized in `.vscode/mcp_config.json` (referenced via `.vscode/settings.json`), and changes must be logged in `docs/tooling/settings-staging.md`. Rebuild the Utility MCP with `npm run build --prefix dev-tools/agents/mcp-servers/utility` after config updates. Start troubleshooting with `npm run mcp:troubleshoot` (root) or `npm run start:troubleshooting` (from `dev-tools/agents/mcp-servers/`).
 - **Supabase CLI**: Run from `/workspaces/ProspectPro/supabase` (symlinked to `app/backend/`) via `npx --yes supabase@latest`; keep auth fresh with `dev-tools/scripts/operations/ensure-supabase-cli-session.sh`.
 - **Automation scripts**: `dev-tools/scripts/automation/` and `dev-tools/automation/ci-cd/` handle log pulls, Vercel checks, and context snapshots; outputs captured in `dev-tools/reports/` once finalized.
 
