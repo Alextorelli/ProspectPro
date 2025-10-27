@@ -325,3 +325,4 @@ ev## 2025-10-23: Codespaces Bootstrap Realignment
 - Updated `MCP-package.json` scripts: only canonical MCPs (memory, sequential, supabase, github, playwright, context7) remain.
 - Refreshed `tool-reference.md`: removed Stripe, Postman, troubleshooting, and legacy MCPs; only canonical MCPs documented.
 - All changes align with the MECE integration plan and agent/MCP matrix.
+2025-10-27T03:25:18Z: Environment-bound agent validation complete with utility MCP

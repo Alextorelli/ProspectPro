@@ -325,22 +325,22 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
     switch (name) {
       case "fetch":
-        result = await handleFetch(args as FetchOptions);
+        result = await handleFetch(args as unknown as FetchOptions);
         break;
       case "fs_read":
-        result = await handleFSRead(args as FSReadOptions);
+        result = await handleFSRead(args as unknown as FSReadOptions);
         break;
       case "fs_write":
-        result = await handleFSWrite(args as FSWriteOptions);
+        result = await handleFSWrite(args as unknown as FSWriteOptions);
         break;
       case "git_status":
-        result = await handleGitStatus(args as GitStatusOptions);
+        result = await handleGitStatus(args as unknown as GitStatusOptions);
         break;
       case "time_now":
-        result = await handleTimeNow(args as TimeNowOptions);
+        result = await handleTimeNow(args as unknown as TimeNowOptions);
         break;
       case "time_convert":
-        result = await handleTimeConvert(args as TimeConvertOptions);
+        result = await handleTimeConvert(args as unknown as TimeConvertOptions);
         break;
       default:
         throw new Error(`Unknown tool: ${name}`);

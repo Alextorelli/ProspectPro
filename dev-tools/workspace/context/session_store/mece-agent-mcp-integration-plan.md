@@ -2,11 +2,11 @@
 
 ## Environment-Bound Agent Matrix
 
-| Agent                    | Primary Env  | MCP Servers                                                                                                           | Core Responsibilities                                                                 | Toolset Focus                                                                                                  |
-| ------------------------ | ------------ | --------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| Agent                    | Primary Env  | MCP Servers                                                                                                             | Core Responsibilities                                                                 | Toolset Focus                                                                                                  |
+| ------------------------ | ------------ | ----------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
 | **Development Workflow** | DEV          | supabase, `github/github-mcp-server`, `microsoft/playwright-mcp`, `context7`, `memory`, `sequentialthinking`, `utility` | Feature development, E2E testing, PR workflows, local iteration                       | React DevTools, Playwright suite, GitHub PR/CI tasks, Supabase dev queries, Context7 code search               |
-| **Observability**        | STAGING      | supabase, `memory`, `sequentialthinking`, `utility`                                                                    | Log analysis, performance monitoring, anomaly detection, staging validation           | Supabase logs/metrics, pre-prod smoke tests                                                                    |
-| **Production Ops**       | PROD         | supabase, `github/github-mcp-server`, `memory`, `sequentialthinking`, `utility`                                        | Deployment orchestration, incident response, rollback procedures, health monitoring   | Vercel deploys, Supabase function deploys, GitHub releases                                                     |
+| **Observability**        | STAGING      | supabase, `memory`, `sequentialthinking`, `utility`                                                                     | Log analysis, performance monitoring, anomaly detection, staging validation           | Supabase logs/metrics, pre-prod smoke tests                                                                    |
+| **Production Ops**       | PROD         | supabase, `github/github-mcp-server`, `memory`, `sequentialthinking`, `utility`                                         | Deployment orchestration, incident response, rollback procedures, health monitoring   | Vercel deploys, Supabase function deploys, GitHub releases                                                     |
 | **System Architect**     | DEV (Design) | supabase, `github/github-mcp-server`, `microsoft/playwright-mcp`, `context7`, `memory`, `sequentialthinking`, `utility` | Schema evolution, integration design, architecture decisions, technical debt planning | Supabase migrations, GitHub architecture PRs, Playwright contract tests, Mermaid diagrams, Context7 code graph |
 
 ## Segregation of Duties
@@ -45,7 +45,7 @@ All agents inherit from `agents-manifest.json`:
 
 ```json
 {
-  "sharedMcpServers": ["memory", "sequentialthinking"],
+  "sharedMcpServers": ["memory", "sequentialthinking", "utility"],
   "contextStore": "dev-tools/agents/context/store/agents/",
   "sessionStore": "dev-tools/workspace/context/session_store/",
   "environments": {
@@ -59,6 +59,8 @@ All agents inherit from `agents-manifest.json`:
 **Memory MCP**: Cross-agent knowledge sharing (e.g., Production Ops logs incident context for Development Workflow to reference in hotfix)
 
 **Sequential Thinking MCP**: Multi-step reasoning chains persisted in `session_store/sequential-thoughts.jsonl`; each agent's thought ledger tagged with `agentId` for isolation
+
+**Utility MCP**: Shared infrastructure providing fetch (HTTP/HTML), filesystem (read/write), git status, and timezone conversion tools to all agents; operates within `ALLOWED_PATH` sandbox for security
 
 ## Secret Management Workflow
 
@@ -181,20 +183,27 @@ For each agent in `dev-tools/agents/workflows/{agent}/`:
 ### Phase 5: Validation
 
 ```bash
-# Build MCP tools
+# Build MCP tools (including new utility MCP)
 npm run build:tools --prefix dev-tools/agents/mcp-servers
+
+# Install utility MCP dependencies
+cd dev-tools/agents/mcp-servers/utility && npm install && npm run build && cd -
 
 # Test each agent's MCP access (from dev-tools/agents/)
 npx --yes dotenv-cli -e dev-tools/agents/.env.agent.local -- node -e "console.log('Development Workflow:', process.env.AGENT_DEV_SUPABASE_URL ? '✓' : '✗')"
 npx --yes dotenv-cli -e dev-tools/agents/.env.agent.local -- node -e "console.log('Observability:', process.env.CONTEXT7_API_KEY ? '✓' : '✗')"
 npx --yes dotenv-cli -e dev-tools/agents/.env.agent.local -- node -e "console.log('Production Ops:', process.env.VERCEL_TOKEN ? '✓' : '✗')"
 
-# Smoke test memory/sequential MCPs
+# Smoke test memory/sequential/utility MCPs
 npx tsx mcp-servers/mcp-tools/memory/index.ts --store ../workspace/context/session_store/memory.jsonl --dry-run
 npx tsx mcp-servers/mcp-tools/sequential/index.ts --ledger ../workspace/context/session_store/sequential-thoughts.jsonl --dry-run
+node mcp-servers/utility/dist/index.js --test
+
+# Validate utility MCP tools are accessible in active-registry.json
+cat mcp-servers/active-registry.json | grep -A 15 '"utility"'
 
 # Log results
-echo "$(date): Environment-bound agent validation complete" >> ../workspace/context/session_store/coverage.md
+echo "$(date): Environment-bound agent validation complete with utility MCP" >> ../workspace/context/session_store/coverage.md
 ```
 
 ## Key Benefits of This Structure
@@ -205,3 +214,4 @@ echo "$(date): Environment-bound agent validation complete" >> ../workspace/cont
 4. **Secrets Isolation**: Per-environment credentials prevent accidental cross-env operations
 5. **Tooling Efficiency**: Supabase MCP consolidates all DB/Edge Function access; eliminates redundant server implementations
 6. **Context7 Optimization**: Context7 is leveraged only by Development Workflow and System Architect agents for code search, dependency graphing, and symbol analysis—maximizing value for code planning and authoring while keeping runtime/ops agents focused on observability and deployment.
+7. **Utility MCP Standardization**: Shared fetch/fs/git/time infrastructure eliminates tool duplication across agents; sandboxed filesystem access prevents unauthorized file operations
