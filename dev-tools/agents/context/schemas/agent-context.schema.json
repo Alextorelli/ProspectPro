@@ -56,6 +56,15 @@
           "payload": { "type": "object" },
           "createdAt": { "type": "string", "format": "date-time" },
           "lastAccessed": { "type": "string", "format": "date-time" },
+          "expiresAt": {
+            "type": ["string", "null"],
+            "format": "date-time",
+            "description": "Optional expiration timestamp for TTL/retention."
+          },
+          "ttlSeconds": {
+            "type": ["integer", "null"],
+            "description": "Optional TTL in seconds for this memory item."
+          },
           "environment": {
             "type": ["string", "null"],
             "enum": ["production", "development", "troubleshooting", null]
