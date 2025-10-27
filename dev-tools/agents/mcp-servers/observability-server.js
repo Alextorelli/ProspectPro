@@ -74,6 +74,21 @@ class ObservabilityServer {
             required: ["supabaseUrl", "anonKey"],
           },
         },
+        {
+          name: "supabase_cli_healthcheck",
+          description: "Run Supabase CLI healthcheck and return status/results",
+          inputSchema: {
+            type: "object",
+            properties: {
+              projectDir: {
+                type: "string",
+                description: "Path to Supabase project directory (default: ./supabase)",
+                default: "./supabase",
+              },
+            },
+            required: [],
+          },
+        },
     this.server.setRequestHandler(ListToolsRequestSchema, async () => ({
       tools: [
         {
@@ -283,9 +298,39 @@ class ObservabilityServer {
             result = await this.validateDatabasePermissions(args);
           } else if (name === "run_rls_diagnostics") {
             result = await this.runRlsDiagnostics(args);
+          } else if (name === "supabase_cli_healthcheck") {
+            result = await this.supabaseCliHealthcheck(args);
           } else {
             throw new Error(`Unknown tool: ${name}`);
           }
+  async supabaseCliHealthcheck({ projectDir = "./supabase" } = {}) {
+    // Run `supabase healthcheck` in the given directory
+    const { exec } = await import("child_process");
+    const { promisify } = await import("util");
+    const execAsync = promisify(exec);
+    const command = `npx --yes supabase@latest healthcheck`;
+    try {
+      const { stdout, stderr } = await execAsync(command, { cwd: projectDir });
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Supabase CLI Healthcheck Results (dir: ${projectDir}):\n\nCommand: ${command}\n\nOutput:\n${stdout}\n${stderr ? `Errors:\n${stderr}` : ""}`,
+          },
+        ],
+      };
+    } catch (error) {
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Supabase CLI healthcheck failed: ${error.message}`,
+          },
+        ],
+        isError: true,
+      };
+    }
+  }
   async runRlsDiagnostics({ supabaseUrl, anonKey }) {
     const diagnosticSQL = `-- RLS Diagnostics for ProspectPro\nSELECT schemaname, tablename, rowsecurity as rls_enabled, (SELECT count(*) FROM pg_policies WHERE schemaname = 'public' AND tablename = t.tablename) as policy_count FROM pg_tables t WHERE schemaname = 'public' AND tablename IN ('campaigns', 'leads', 'dashboard_exports');\n\n-- Check specific policies\nSELECT schemaname, tablename, policyname, permissive, roles, cmd FROM pg_policies WHERE schemaname = 'public' AND tablename IN ('campaigns', 'leads', 'dashboard_exports');`;
     return {
