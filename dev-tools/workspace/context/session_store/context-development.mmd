@@ -1,93 +1,60 @@
 %%{init: { "theme": "dark", "fontFamily": "Inter", "flowchart": { "htmlLabels": false, "curve": "monotoneX" } }}%%
-flowchart TB
-    subgraph ENV["🛠️ Development Environment"]
+flowchart LR
+    subgraph DEV_FLOW["💻 Dev Workflow Agent"]
         direction TB
-        ENV_LABEL["Unrestricted · Rapid Iteration · Full MCP Access"]
+        DEV_START["🚀 Start"]
+        DEV_ORCH["�� Orchestrator<br/>Launch Build"]
+        DEV_MEM["🧠 Load Context<br/>80 entries"]
+        DEV_MCP["🌐 MCP Mesh<br/>Code · Test · Data"]
+        DEV_SIG["📡 Build Signals<br/>Test Results"]
+        DEV_SAVE["💾 Checkpoint<br/>Auto-save"]
+        DEV_END["✅ Complete"]
+        
+        DEV_START --> DEV_ORCH
+        DEV_ORCH --> DEV_MEM
+        DEV_MEM --> DEV_MCP
+        DEV_MCP --> DEV_SIG
+        DEV_SIG --> DEV_SAVE
+        DEV_SAVE --> DEV_END
+        DEV_END -.-> DEV_START
     end
 
-    subgraph ORCH["🧠 Agent Orchestration"]
+    subgraph ARCH_FLOW["🏗️ System Architect Agent"]
         direction TB
-        AO["🤖 Agent Orchestrator"]
+        ARCH_START["🚀 Start"]
+        ARCH_ORCH["🧠 Orchestrator<br/>Design System"]
+        ARCH_MEM["🧠 Load Context<br/>Unlimited LTM"]
+        ARCH_MCP["🌐 MCP Mesh<br/>Research · Design"]
+        ARCH_SIG["📐 Design Artifacts<br/>Decisions"]
+        ARCH_SAVE["💾 Checkpoint<br/>Auto-save"]
+        ARCH_END["✅ Complete"]
+        
+        ARCH_START --> ARCH_ORCH
+        ARCH_ORCH --> ARCH_MEM
+        ARCH_MEM --> ARCH_MCP
+        ARCH_MCP --> ARCH_SIG
+        ARCH_SIG --> ARCH_SAVE
+        ARCH_SAVE --> ARCH_END
+        ARCH_END -.-> ARCH_START
+    end
+
+    subgraph SHARED["🔄 Shared Infrastructure"]
+        direction TB
+        ENV["🛠️ Development<br/>Unrestricted"]
         CM["🗂️ Context Manager"]
-        EM["🌍 Environment Manager"]
+        MEMORY["🧠 Memory Store<br/>Scratchpad · LTM · Checkpoints"]
+        MCP["🌐 Full MCP Access<br/>Supabase · GitHub · Playwright · Context7 · Utility"]
     end
 
-    subgraph AGENTS["👥 Active Agents"]
-        direction LR
-        DEV["💻 Dev Workflow<br/><i>Primary Agent</i>"]
-        ARCH["🏗️ System Architect<br/><i>Design & Research</i>"]
-    end
+    DEV_FLOW -.-> SHARED
+    ARCH_FLOW -.-> SHARED
+    SHARED -.-> DEV_FLOW
+    SHARED -.-> ARCH_FLOW
 
-    subgraph MEMORY["🧠 Memory & Context Store"]
-        direction TB
-        subgraph STORES["📦 Session Stores"]
-            direction LR
-            SCRATCH["📝 Scratchpad<br/><i>80 entries max</i>"]
-            LTM["🗄️ Long-term Memory<br/><i>Unlimited</i>"]
-            CHKPT["📸 Checkpoints<br/><i>Auto-save enabled</i>"]
-        end
-        subgraph SCHEMAS["📐 Active Schemas"]
-            direction LR
-            AGENT_CTX["📄 Agent Context"]
-            ENV_CTX["🌍 Environment Context"]
-            TASK_LED["📋 Task Ledger"]
-        end
-    end
-
-    subgraph MCP["🌐 MCP Mesh - Full Access"]
-        direction LR
-        UT["🧰 Utility MCP"]
-        SUP["🗄️ Supabase MCP"]
-        GH["📁 GitHub MCP"]
-        PW["🧪 Playwright MCP"]
-        C7["🛰️ Context7 MCP"]
-    end
-
-    subgraph SIGNALS["📡 Development Signals"]
-        direction TB
-        BUILD["🔨 Build Signals"]
-        TEST["✅ Test Results"]
-        DESIGN["📐 Design Decisions"]
-    end
-
-    %% Orchestration Flow
-    ENV_LABEL -.-> EM
-    CM -- "Stage Dev Context" --> AO
-    AO -- "Route to Dev/Arch" --> AGENTS
-    
-    %% Agent-specific workflows
-    AO -- "Launch Build Cycle" --> DEV
-    AO -- "Design System" --> ARCH
-
-    %% Agent → MCP interactions (unrestricted)
-    DEV -- "Code · Test · Data · Deploy Local" --> MCP
-    ARCH -- "Research · Design · Prototype" --> MCP
-
-    %% MCP → Signals feedback
-    MCP -- "Build Status" --> BUILD
-    MCP -- "Test Coverage" --> TEST
-    MCP -- "Design Artifacts" --> DESIGN
-
-    %% Signals → Orchestration loop
-    BUILD -.-> AO
-    TEST -.-> DEV
-    DESIGN -.-> ARCH
-
-    %% Context Management (bidirectional, high frequency)
-    CM <--> MEMORY
-    AGENTS <===> MEMORY
-    EM <--> MEMORY
-
-    %% MCP Utility provides core services
-    UT -- "Memory · Sequential · Time" --> MEMORY
-    MEMORY -- "Frequent Checkpoints" --> UT
-
-    %% Container-level relationships
-    ORCH <--> AGENTS
-    AGENTS <==> MCP
-    MCP <.-> SIGNALS
-    SIGNALS <.-> ORCH
-
-    style DEV fill:#2d5016,stroke:#4ade80,stroke-width:3px
-    style ARCH fill:#1e3a5f,stroke:#60a5fa,stroke-width:3px
-    style ENV_LABEL fill:#065f46,stroke:#10b981,stroke-width:2px
+    style DEV_FLOW fill:#1a3a1a,stroke:#4ade80,stroke-width:2px
+    style ARCH_FLOW fill:#1a2a4a,stroke:#60a5fa,stroke-width:2px
+    style SHARED fill:#1a1a2a,stroke:#a78bfa,stroke-width:2px
+    style DEV_START fill:#2d5016,stroke:#4ade80,stroke-width:3px
+    style ARCH_START fill:#1e3a5f,stroke:#60a5fa,stroke-width:3px
+    style DEV_END fill:#2d5016,stroke:#4ade80,stroke-width:3px
+    style ARCH_END fill:#1e3a5f,stroke:#60a5fa,stroke-width:3px

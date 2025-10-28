@@ -1,90 +1,60 @@
 %%{init: { "theme": "dark", "fontFamily": "Inter", "flowchart": { "htmlLabels": false, "curve": "monotoneX" } }}%%
-flowchart TB
-    subgraph ENV["📊 Staging/Observability Environment"]
+flowchart LR
+    subgraph OBS_FLOW["📈 Observability Agent"]
         direction TB
-        ENV_LABEL["Monitoring · Diagnostics · Read-Mostly Access"]
+        OBS_START["🚀 Start"]
+        OBS_ORCH["🧠 Orchestrator<br/>Monitor Stack"]
+        OBS_MEM["�� Load Context<br/>60 entries"]
+        OBS_MCP["�� MCP Mesh<br/>Query Metrics · Logs"]
+        OBS_SIG["📊 Metrics<br/>📜 Logs · 🚨 Alerts"]
+        OBS_SAVE["💾 Checkpoint<br/>Hourly"]
+        OBS_END["✅ Complete"]
+        
+        OBS_START --> OBS_ORCH
+        OBS_ORCH --> OBS_MEM
+        OBS_MEM --> OBS_MCP
+        OBS_MCP --> OBS_SIG
+        OBS_SIG --> OBS_SAVE
+        OBS_SAVE --> OBS_END
+        OBS_END -.-> OBS_START
     end
 
-    subgraph ORCH["🧠 Agent Orchestration"]
+    subgraph DEV_FLOW["💻 Dev Workflow Agent (Support)"]
         direction TB
-        AO["🤖 Agent Orchestrator"]
+        DEV_START["🚀 Start"]
+        DEV_ORCH["🧠 Orchestrator<br/>Support Diagnostics"]
+        DEV_MEM["🧠 Load Context<br/>Limited Write"]
+        DEV_MCP["🌐 MCP Mesh<br/>Diagnostics"]
+        DEV_SIG["🔍 Diagnostic Results"]
+        DEV_SAVE["💾 Checkpoint<br/>Selective"]
+        DEV_END["✅ Complete"]
+        
+        DEV_START --> DEV_ORCH
+        DEV_ORCH --> DEV_MEM
+        DEV_MEM --> DEV_MCP
+        DEV_MCP --> DEV_SIG
+        DEV_SIG --> DEV_SAVE
+        DEV_SAVE --> DEV_END
+        DEV_END -.-> DEV_START
+    end
+
+    subgraph SHARED["🔄 Shared Infrastructure"]
+        direction TB
+        ENV["📊 Staging/Observability<br/>Read-Mostly"]
         CM["🗂️ Context Manager"]
-        EM["🌍 Environment Manager"]
+        MEMORY["🧠 Memory Store<br/>Metrics · Baselines · Checkpoints"]
+        MCP["🌐 Read-Focus MCP<br/>Supabase (RO) · Utility"]
     end
 
-    subgraph AGENTS["👥 Active Agents"]
-        direction LR
-        OBS["📈 Observability<br/><i>Primary Agent</i>"]
-        DEV["💻 Dev Workflow<br/><i>Support Role</i>"]
-    end
+    OBS_FLOW -.-> SHARED
+    DEV_FLOW -.-> SHARED
+    SHARED -.-> OBS_FLOW
+    SHARED -.-> DEV_FLOW
 
-    subgraph MEMORY["🧠 Memory & Context Store"]
-        direction TB
-        subgraph STORES["📦 Session Stores"]
-            direction LR
-            SCRATCH["📝 Scratchpad<br/><i>60 entries max</i>"]
-            LTM["🗄️ Long-term Memory<br/><i>Metrics & Baselines</i>"]
-            CHKPT["📸 Checkpoints<br/><i>Hourly snapshots</i>"]
-        end
-        subgraph SCHEMAS["📐 Active Schemas"]
-            direction LR
-            AGENT_CTX["📄 Agent Context"]
-            ENV_CTX["🌍 Environment Context"]
-            TASK_LED["📋 Task Ledger"]
-        end
-    end
-
-    subgraph MCP["🌐 MCP Mesh - Read Focus"]
-        direction LR
-        UT["🧰 Utility MCP"]
-        SUP["🗄️ Supabase MCP<br/><i>Read-only</i>"]
-    end
-
-    subgraph SIGNALS["📡 Observability Signals"]
-        direction TB
-        METRICS["📊 Performance Metrics"]
-        LOGS["📜 System Logs"]
-        ALERTS["🚨 Alert Triggers"]
-    end
-
-    %% Orchestration Flow
-    ENV_LABEL -.-> EM
-    CM -- "Stage Observability Context" --> AO
-    AO -- "Route to Observability" --> AGENTS
-    
-    %% Agent-specific workflows
-    AO -- "Monitor Stack" --> OBS
-    AO -- "Support Diagnostics" --> DEV
-
-    %% Agent → MCP interactions (read-heavy)
-    OBS -- "Query Metrics · Analyze Logs" --> MCP
-    DEV -- "Limited Write · Diagnostics" --> MCP
-
-    %% MCP → Signals feedback
-    MCP -- "Stream Metrics" --> METRICS
-    MCP -- "Capture Logs" --> LOGS
-    MCP -- "Detect Anomalies" --> ALERTS
-
-    %% Signals → Orchestration loop
-    METRICS -.-> OBS
-    LOGS -.-> OBS
-    ALERTS -.-> AO
-
-    %% Context Management (read-heavy, selective writes)
-    CM <--> MEMORY
-    AGENTS <-.-> MEMORY
-    EM <--> MEMORY
-
-    %% MCP Utility provides core services
-    UT -- "Memory · Sequential · Time" --> MEMORY
-    MEMORY -- "Periodic Checkpoints" --> UT
-
-    %% Container-level relationships
-    ORCH <--> AGENTS
-    AGENTS <.-> MCP
-    MCP <==> SIGNALS
-    SIGNALS <.-> ORCH
-
-    style OBS fill:#4c1d95,stroke:#a78bfa,stroke-width:3px
-    style DEV fill:#1e3a5f,stroke:#60a5fa,stroke-width:2px,stroke-dasharray: 5 5
-    style ENV_LABEL fill:#4338ca,stroke:#818cf8,stroke-width:2px
+    style OBS_FLOW fill:#2a1a4a,stroke:#a78bfa,stroke-width:2px
+    style DEV_FLOW fill:#1a2a3a,stroke:#60a5fa,stroke-width:2px,stroke-dasharray: 5 5
+    style SHARED fill:#1a1a2a,stroke:#818cf8,stroke-width:2px
+    style OBS_START fill:#4c1d95,stroke:#a78bfa,stroke-width:3px
+    style DEV_START fill:#1e3a5f,stroke:#60a5fa,stroke-width:2px,stroke-dasharray: 5 5
+    style OBS_END fill:#4c1d95,stroke:#a78bfa,stroke-width:3px
+    style DEV_END fill:#1e3a5f,stroke:#60a5fa,stroke-width:2px,stroke-dasharray: 5 5
