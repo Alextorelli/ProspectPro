@@ -48,3 +48,25 @@
 - Enhanced CI workflows with automated artifact collection
 - All logs now route to `dev-tools/reports/ci/`
 
+
+## 2025-10-28: Staging Environment Alignment
+
+**Updated `integration/environments/staging.json`**:
+- Environment name: "troubleshooting" → "staging"
+- Deployment URL: `https://prospectpro-troubleshoot.vercel.app` → `https://prospect-5i7mc1o2c-appsmithery.vercel.app`
+- Feature flags aligned with production (async discovery, realtime campaigns enabled)
+- Permissions updated for automated deployment workflows
+
+**Validation**: `npm run validate:contexts` succeeds (deployment URL validation deferred).
+
+
+## 2025-10-28: Staging Environment Alignment
+
+**Updated `integration/environments/staging.json`**:
+- Environment name: "troubleshooting" → "staging"
+- Deployment URL: `https://prospectpro-troubleshoot.vercel.app` → `https://prospect-5i7mc1o2c-appsmithery.vercel.app`
+- Feature flags aligned with production (async discovery, realtime campaigns enabled)
+- Permissions updated for automated deployment workflows
+
+**Validation**: `npm run validate:contexts` succeeds (deployment URL validation deferred).
+

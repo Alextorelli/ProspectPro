@@ -1,6 +1,6 @@
 {
   "name": "staging",
-  "description": "Troubleshooting environment for diagnostics, context recovery, and safe dry-run operations.",
+  "description": "Persistent staging environment for QA validation and agent testing before production deployment",
   "supabase": {
     "projectRef": "troubleshoot-sriycekxdqnesdsgwiuc",
     "apiUrl": "https://troubleshoot-sriycekxdqnesdsgwiuc.supabase.co",
@@ -8,8 +8,8 @@
     "serviceRoleKey": null
   },
   "vercel": {
-    "deploymentUrl": "https://prospectpro-troubleshoot.vercel.app",
-    "projectName": "prospect-pro-troubleshoot"
+    "deploymentUrl": "https://prospect-5i7mc1o2c-appsmithery.vercel.app",
+    "projectName": "prospect-pro"
   },
   "apiRateLimits": {
     "hunter_io": {
@@ -29,9 +29,9 @@
     }
   },
   "featureFlags": {
-    "enableAsyncDiscovery": false,
+    "enableAsyncDiscovery": true,
     "enableZeroFakeDataAudits": true,
-    "enableRealtimeCampaigns": false,
+    "enableRealtimeCampaigns": true,
     "enableNewUI": false
   },
   "monitoring": {
@@ -41,7 +41,7 @@
   },
   "permissions": {
     "writeOperations": false,
-    "canDeploy": false,
+    "canDeploy": true,
     "canFetchLogs": true,
     "canRunTests": false,
     "requiresApproval": false

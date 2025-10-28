@@ -409,3 +409,33 @@ ev## 2025-10-23: Codespaces Bootstrap Realignment
 
 **Validation**: All contexts pass `npm run validate:contexts`
 
+
+## 2025-10-28: Staging Environment Configuration Update
+
+**Changes**:
+- Renamed environment from "troubleshooting" to "staging" for consistency
+- Updated Vercel deployment URL to recent production deployment: `https://prospect-5i7mc1o2c-appsmithery.vercel.app`
+- Enabled async discovery and realtime campaigns to match production feature set
+- Updated permissions: `canDeploy: true`, `requiresApproval: false` for agent automation
+
+**Validation**: `npm run validate:contexts` passes (URL accessibility deferred to runtime)
+
+**Related**:
+- Staging alias workflow documented in `.github/chatmodes/*.chatmode.md`
+- Deployment scripts: `npm run deploy:staging:alias`
+
+
+## 2025-10-28: Staging Environment Configuration Update
+
+**Changes**:
+- Renamed environment from "troubleshooting" to "staging" for consistency
+- Updated Vercel deployment URL to recent production deployment: `https://prospect-5i7mc1o2c-appsmithery.vercel.app`
+- Enabled async discovery and realtime campaigns to match production feature set
+- Updated permissions: `canDeploy: true`, `requiresApproval: false` for agent automation
+
+**Validation**: `npm run validate:contexts` passes (URL accessibility deferred to runtime)
+
+**Related**:
+- Staging alias workflow documented in `.github/chatmodes/*.chatmode.md`
+- Deployment scripts: `npm run deploy:staging:alias`
+
