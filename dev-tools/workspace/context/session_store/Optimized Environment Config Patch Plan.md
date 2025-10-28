@@ -13,6 +13,19 @@
 1. Update staging.json deployment URL to new alias
 2. Rename environment from "troubleshooting" to "staging" for consistency
 3. Align feature flags with staging purpose (enable async discovery for realistic testing)
+4. Ensure environment secrets align with canonical agent tooling `.env.agent.local` (Supabase, Highlight, Vercel tokens)
+5. Confirm production references the stable custom domain `https://prospectpro.appsmithery.co`
+6. Verify monitoring endpoints (Highlight.io, Jaeger, Supabase logs) for each environment remain accurate
+7. Validate staging alias automation via Vercel CLI and preview deployments
+
+### Preflight Validation Checklist
+
+- [ ] Export/confirm `.env` variables used by agents/MCPs (`dev-tools/agents/.env.agent.local`) match environment config keys (`SUPABASE_URL`, `SUPABASE_ANON_KEY`, `HIGHLIGHT_PROJECT_ID`, etc.).
+- [ ] Production: confirm monitoring endpoints point to Highlight.io dashboards, React DevTools overlays, and Supabase log dashboards.
+- [ ] Development: verify Supabase project reference and anon key placeholders are correct; update before running automation if real keys exist.
+- [ ] Staging: run `npm run env:pull -- --environment=preview` and `npx --yes vercel@latest alias ls` to ensure preview deployments are aliased to `staging.prospectpro.appsmithery.co`.
+- [ ] Validate staging telemetry endpoints (Highlight OTLP, Jaeger URLs) accept inbound traces; update to shared observability endpoints if required.
+- [ ] Document any discrepancies or exceptions in `docs/tooling/settings-staging.md` before applying patches.
 
 ---
 
@@ -51,11 +64,19 @@ fi
 
 echo "✓ JSON validation passed"
 
-# Update documentation
+# Update documentation and sync preview environment secrets
 npm run docs:update
+npm run env:pull -- --environment=preview
 
-# Validate contexts
+# Validate contexts and staging alias mapping
 npm run validate:contexts
+npx --yes vercel@latest alias ls | grep -q "staging.prospectpro.appsmithery.co" || {
+  echo "❌ staging alias not found";
+  exit 1;
+}
+
+# Optional: launch React DevTools overlay to confirm Highlight instrumentation
+# npm run devtools:react
 
 # Log to coverage.md
 cat >> "$COVERAGE" << EOF
@@ -68,7 +89,7 @@ cat >> "$COVERAGE" << EOF
 - Enabled async discovery and realtime campaigns to match production feature set
 - Updated permissions: \`canDeploy: true\`, \`requiresApproval: false\` for agent automation
 
-**Validation**: Environment schema passes \`npm run validate:contexts\`
+**Validation**: \`npm run validate:contexts\` passes and staging alias resolves via \`vercel alias ls\`
 
 **Related**:
 - Staging alias workflow documented in \`.github/chatmodes/*.chatmode.md\`
@@ -87,7 +108,7 @@ cat >> "$SETTINGS_STAGING" << EOF
 - Feature flags aligned with production (async discovery, realtime campaigns enabled)
 - Permissions updated for automated deployment workflows
 
-**Validation**: All environment configs pass schema validation.
+**Validation**: \`npm run validate:contexts\` succeeds and staging alias points to \`https://staging.prospectpro.appsmithery.co\`.
 
 EOF
 
