@@ -1,3 +1,29 @@
+---
+
+## Monitoring Endpoint Validation (2025-10-28)
+
+**Production:**
+- otelEndpoint: `https://otel.prospectpro.app/v1/traces` (cloud, correct)
+- jaegerUrl: `https://jaeger.prospectpro.app` (cloud, correct)
+- logDashboard: Supabase project dashboard (correct)
+
+**Staging:**
+- otelEndpoint: `http://localhost:4318/v1/traces` (**local only, not cloud-accessible**)
+- jaegerUrl: `http://localhost:16686` (**local only, not cloud-accessible**)
+- logDashboard: Supabase project dashboard (OK)
+
+**Development:**
+- otelEndpoint: `http://localhost:4318/v1/traces` (local, expected for dev)
+- jaegerUrl: `http://localhost:16686` (local, expected for dev)
+- logDashboard: `http://localhost:3000/logs` (local, expected for dev)
+
+### Remediation Recommendations
+
+- [ ] Update staging otelEndpoint and jaegerUrl to use shared or cloud observability endpoints for integration testing and remote trace visibility.
+- [ ] Document any exceptions or temporary local endpoints in `docs/tooling/settings-staging.md`.
+- [ ] Confirm production endpoints remain stable and cloud-accessible.
+
+**Next:** Propose patch for staging monitoring URLs, or coordinate with observability team to provision shared endpoints.
 # Optimized Environment Config Patch Strategy
 
 ## Validation Summary
