@@ -1,23 +1,19 @@
 %%{init: { "theme": "dark", "fontFamily": "Inter", "flowchart": { "htmlLabels": false, "curve": "monotoneX" } }}%%
 flowchart TB
     subgraph ENV["🛠️ Development Environment"]
-        ENV_LABEL["Unrestricted · Rapid Iteration · Full MCP Access"]
-    end
-    
+   
     subgraph ORCH["🧠 Orchestration Layer"]
         direction LR
         CM["🗂️ Context Manager"]
-        AO["🤖 Agent Orchestrator"]
         EM["🌍 Environment Manager"]
     end
 
-    ENV --> EM
-    EM --> ORCH
+    EM --> AO
     CM --> AO
 
     subgraph AGENTS["👥 Agent Workflows"]
         direction LR
-        
+                AO["🤖 Agent Orchestrator"]
         subgraph DEV_FLOW["💻 Dev Workflow Agent"]
             direction TB
             DEV_START["🚀 Start"]
@@ -41,7 +37,6 @@ flowchart TB
             ARCH_MEM["🧠 Load Context<br/>Unlimited LTM"]
             ARCH_MCP["🌐 MCP Mesh<br/>Research · Design"]
             ARCH_SIG["📐 Design Artifacts<br/>Decisions"]
-            ARCH_SAVE["💾 Checkpoint<br/>Auto-save"]
             ARCH_END["✅ Complete"]
             
             ARCH_START --> ARCH_MEM
@@ -52,6 +47,7 @@ flowchart TB
             ARCH_END -.-> ARCH_START
         end
     end
+end
 
     AO -- "Launch Build" --> DEV_START
     AO -- "Design System" --> ARCH_START
@@ -61,6 +57,8 @@ flowchart TB
         MEMORY["🧠 Memory Store<br/>Scratchpad · LTM · Checkpoints"]
         MCP["🌐 Full MCP Access<br/>Supabase · GitHub · Playwright<br/>Context7 · Utility"]
     end
+
+
 
     AGENTS <==> SHARED
     ORCH <--> SHARED
