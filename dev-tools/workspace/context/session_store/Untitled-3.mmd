@@ -1,0 +1,120 @@
+---
+query: >-
+  revise again:
+
+  %%{init: { "theme": "dark", "fontFamily": "Inter", "flowchart": {
+  "htmlLabels": false, "curve": "monotoneX" } }}%%
+
+  flowchart TB
+      subgraph ProspectPro["ProspectPro Platform"]
+          VS["VS Code Integration"]
+          CLI["Observability CLI"]
+          WS["Workspace Management"]
+      end
+
+      subgraph Orchestration["Agent Orchestration Layer"]
+          AO["Agent Orchestrator"]
+          CM["Context Manager"]
+          MR["MCP Registry"]
+      end
+
+      subgraph Agents["Specialized Agents"]
+          DEV["Development Agent"]
+          OBS["Observability Agent"]
+          OPS["Production Ops Agent"]
+          ARCH["System Architect Agent"]
+      end
+
+      subgraph MCPInfra["MCP Server Infrastructure"]
+          SUP["Supabase MCP"]
+          GH["GitHub MCP"]
+          PW["Playwright MCP"]
+          C7["Context7 MCP"]
+          UT["Utility MCP"]
+      end
+
+      subgraph Integrations["External Integrations"]
+          SB["Supabase Backend"]
+          GHR["GitHub Repository"]
+          OTEL["OpenTelemetry Collector"]
+      end
+
+      VS --> AO --> VS
+      CLI --> OBS --> CLI
+      WS --> CM --> WS
+      AO --> CM --> AO
+      AO --> Agents --> AO
+
+      CM --> MR --> MCPInfra --> CM
+
+      DEV --> SUP --> DEV
+      DEV --> PW --> DEV
+
+      OBS --> UT --> OBS
+      UT --> OTEL --> UT
+
+      OPS --> GH --> OPS
+
+      ARCH --> C7 --> ARCH
+
+      SUP --> SB --> SUP
+      GH --> GHR --> GH
+references:
+  - "File: /home/node/.aitk/instructions/tools.instructions.md"
+  - "File: /.github/copilot-instructions.md"
+generationTime: 2025-10-28T08:38:00.881Z
+---
+%%{init: { "theme": "dark", "fontFamily": "Inter", "flowchart": { "htmlLabels": false, "curve": "monotoneX" } }}%%
+flowchart TB
+    subgraph PROSPECT["🚀 ProspectPro Platform"]
+        VS@{ shape: rounded, label: "🧩 VS Code Integration" }
+        CLI@{ shape: rounded, label: "📊 Observability CLI" }
+        WS@{ shape: rounded, label: "🗃️ Workspace Management" }
+    end
+
+    subgraph ORCH["🧠 Agent Orchestration"]
+        AO@{ shape: fork, label: "🧠 Agent Orchestrator" }
+        CM@{ shape: rounded, label: "🗂️ Context Manager" }
+        MR@{ shape: doc, label: "📚 MCP Registry" }
+    end
+
+    subgraph AGENTS["🤖 Specialized Agents"]
+        DEV@{ shape: rounded, label: "🛠️ Development" }
+        OBS@{ shape: rounded, label: "📈 Observability" }
+        OPS@{ shape: rounded, label: "🚀 Production Ops" }
+        ARCH@{ shape: rounded, label: "🏗️ System Architect" }
+    end
+
+    subgraph MCPINFRA["🛎️ MCP Servers"]
+        SUP@{ shape: cyl, label: "🗄️ Supabase MCP" }
+        GH@{ shape: cyl, label: "📁 GitHub MCP" }
+        PW@{ shape: cyl, label: "🧪 Playwright MCP" }
+        C7@{ shape: cyl, label: "🛰️ Context7 MCP" }
+        UT@{ shape: cyl, label: "🧰 Utility MCP" }
+    end
+
+    subgraph INTEGRATIONS["🌐 External Integrations"]
+        SB@{ shape: lin-cyl, label: "🗃️ Supabase Backend" }
+        GHR@{ shape: lin-cyl, label: "📦 GitHub Repo" }
+        OTEL@{ shape: bolt, label: "⚡ OpenTelemetry Collector" }
+    end
+
+    VS --> AO --> VS
+    CLI --> OBS --> CLI
+    WS --> CM --> WS
+    AO --> CM --> AO
+    AO --> AGENTS --> AO
+
+    CM --> MR --> MCPINFRA --> CM
+
+    DEV --> SUP --> DEV
+    DEV --> PW --> DEV
+
+    OBS --> UT --> OBS
+    UT --> OTEL --> UT
+
+    OPS --> GH --> OPS
+    ARCH --> C7 --> ARCH
+
+    SUP --> SB --> SUP
+    GH --> GHR --> GH

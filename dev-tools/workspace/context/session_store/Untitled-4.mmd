@@ -1,0 +1,51 @@
+---
+query: >
+  revise and simplify, use our  formatting/configs/icons/shapes etc.:
+
+
+  %%{init: { "theme": "dark", "fontFamily": "Inter", "sequence": {
+  "mirrorActors": false, "useMaxWidth": false } }}%%
+
+  sequenceDiagram
+      participant U as Alex (User)
+      participant CM as Context Manager
+      participant AO as Agent Orchestrator
+      participant DEV as Dev Workflow Agent
+      participant OPS as Production Ops Agent
+      participant MCP as MCP Mesh
+
+      U->>CM: Submit feature context
+      CM->>AO: Forward routed brief
+      AO->>DEV: Start build iteration
+      DEV->>MCP: Code · Test · Data ops
+      MCP-->>DEV: Tool feedback
+      DEV-->>AO: Build status
+      AO->>OPS: Request deployment
+      OPS->>MCP: Deploy & observe
+      MCP-->>OPS: Release telemetry
+      OPS-->>AO: Deployment status
+      AO-->>CM: Update session context
+      CM-->>U: Confirm feature readiness
+generationTime: 2025-10-28T08:34:13.135Z
+---
+%%{init: { "theme": "dark", "fontFamily": "Inter", "sequence": { "mirrorActors": false, "useMaxWidth": false } }}%%
+sequenceDiagram
+    participant U as 🧑 Alex (User)
+    participant CM as 🗂️ Context Manager
+    participant AO as 🧠 Agent Orchestrator
+    participant DEV as 🛠️ Dev Workflow Agent
+    participant OPS as 🚀 Production Ops Agent
+    participant MCP as 🌐 MCP Mesh
+
+    U->>CM: Submit feature brief
+    CM->>AO: Route context
+    AO->>DEV: Kick off build
+    DEV->>MCP: Run code + tests + data ops
+    MCP-->>DEV: Tool feedback
+    DEV-->>AO: Build status
+    AO->>OPS: Request deploy
+    OPS->>MCP: Deploy & observe
+    MCP-->>OPS: Release telemetry
+    OPS-->>AO: Deployment status
+    AO-->>CM: Update session context
+    CM-->>U: Confirm readiness

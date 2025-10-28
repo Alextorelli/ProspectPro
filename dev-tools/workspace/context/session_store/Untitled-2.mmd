@@ -1,0 +1,84 @@
+---
+query: >-
+  now do the same for this:
+
+
+  %%{init: { "theme": "dark", "fontFamily": "Inter", "flowchart": {
+  "htmlLabels": false, "curve": "monotoneX" } }}%%
+
+  flowchart TB
+      subgraph CMS["Context Management System"]
+          CM["Context Manager (TypeScript Core)"]
+          subgraph Stores["Session Store Fabric"]
+              MF["Memory JSONL"]
+              ST["Sequential Thoughts"]
+              CS["Checkpoint System"]
+          end
+          subgraph Schemas["Context Schemas"]
+              AS["Agent Manifest"]
+              TM["Tool Matrix"]
+              QR["Quick Reference"]
+          end
+      end
+
+      subgraph AGENTS["Agent Workflows"]
+          DW["Development"]
+          OB["Observability"]
+          PO["Production Ops"]
+          SA["System Architect"]
+      end
+
+      subgraph UTILITY["Utility MCP Server"]
+          FS["Filesystem Ops"]
+          LM["Long-term Memory"]
+          SR["Session Recall"]
+          CT["Chain of Thought"]
+          DL["Decision Logging"]
+      end
+
+      CM --> Stores --> UTILITY --> CM
+      CM --> Schemas --> CM
+      Schemas --> AGENTS --> CM
+      AGENTS --> UTILITY --> AGENTS
+      UTILITY --> Stores
+references:
+  - "File: /home/node/.aitk/instructions/tools.instructions.md"
+  - "File: /.github/copilot-instructions.md"
+generationTime: 2025-10-28T08:37:03.720Z
+---
+%%{init: { "theme": "dark", "fontFamily": "Inter", "flowchart": { "htmlLabels": false, "curve": "monotoneX" } }}%%
+flowchart TB
+    subgraph CMS["🧩 Context Management"]
+        CM@{ shape: rounded, label: "🗂️ Context Manager\nTypeScript Core" }
+        subgraph STORES["🗃️ Session Stores"]
+            MF@{ shape: doc, label: "📝 Memory JSONL" }
+            ST@{ shape: procs, label: "🔁 Sequential Thoughts" }
+            CS@{ shape: cyl, label: "📦 Checkpoints" }
+        end
+        subgraph SCHEMAS["📐 Context Schemas"]
+            AS@{ shape: doc, label: "📄 Agent Manifest" }
+            TM@{ shape: doc, label: "🧰 Tool Matrix" }
+            QR@{ shape: doc, label: "⚡ Quick Reference" }
+        end
+    end
+
+    subgraph AGENTS["🤖 Agent Workflows"]
+        DW@{ shape: rounded, label: "🛠️ Development" }
+        OB@{ shape: rounded, label: "📊 Observability" }
+        PO@{ shape: rounded, label: "🚀 Production Ops" }
+        SA@{ shape: rounded, label: "🏗️ System Architect" }
+    end
+
+    subgraph UTILITY["🛎️ Utility MCP"]
+        FS@{ shape: rect, label: "📁 Filesystem Ops" }
+        LM@{ shape: lin-cyl, label: "🧠 Long-term Memory" }
+        SR@{ shape: rounded, label: "🔎 Session Recall" }
+        CT@{ shape: odd, label: "🧵 Chain of Thought" }
+        DL@{ shape: notch-rect, label: "🗒️ Decision Log" }
+    end
+
+    CM --> STORES --> UTILITY --> CM
+    CM --> SCHEMAS --> CM
+    SCHEMAS --> AGENTS --> CM
+    AGENTS --> UTILITY --> AGENTS
+    UTILITY --> STORES
