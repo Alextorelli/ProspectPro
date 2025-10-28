@@ -1,0 +1,53 @@
+graph TB
+    subgraph "ProspectPro Platform"
+        VS[VS Code Integration]
+        CLI[Observability CLI]
+        WS[Workspace Management]
+    end
+    
+    subgraph "Agent Orchestration Layer"
+        AO[Agent Orchestrator]
+        CM[Context Manager]
+        MR[MCP Registry]
+    end
+    
+    subgraph "Specialized Agents"
+        DEV[Development Agent<br/>- Code Generation<br/>- Testing<br/>- Debugging]
+        OBS[Observability Agent<br/>- OTEL Traces<br/>- Performance Metrics<br/>- Error Analysis]
+        OPS[Production Ops Agent<br/>- CI/CD Automation<br/>- Deployment<br/>- Incident Response]
+        ARCH[System Architect Agent<br/>- Design Planning<br/>- Documentation<br/>- Architecture Review]
+    end
+    
+    subgraph "MCP Server Infrastructure"
+        SUP[Supabase MCP<br/>Database, Functions, Storage]
+        GH[GitHub MCP<br/>Code, PRs, Actions]
+        PW[Playwright MCP<br/>E2E Testing, Automation]
+        C7[Context7 MCP<br/>Documentation, Examples]
+        UT[Utility MCP<br/>Memory, Filesystem, Git]
+    end
+    
+    subgraph "External Integrations"
+        SB[(Supabase Backend)]
+        GHR[(GitHub Repository)]
+        OTEL[OpenTelemetry Collector]
+    end
+    
+    VS --> AO
+    CLI --> OBS
+    WS --> CM
+    
+    AO --> DEV
+    AO --> OBS
+    AO --> OPS
+    AO --> ARCH
+    
+    CM --> MR
+    MR --> SUP
+    MR --> GH
+    MR --> PW
+    MR --> C7
+    MR --> UT
+    
+    SUP <--> SB
+    GH <--> GHR
+    UT --> OTEL

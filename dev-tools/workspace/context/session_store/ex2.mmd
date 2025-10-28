@@ -1,0 +1,18 @@
+sequenceDiagram
+    participant U as User
+    participant O as Orchestrator
+    participant A1 as Deploy Agent
+    participant A2 as Monitor Agent
+    participant S1 as CI/CD Server
+    participant S2 as Metrics Server
+    
+    U->>O: Deploy and monitor API
+    O->>A1: Execute deployment
+    A1->>S1: Deploy via MCP
+    S1-->>A1: Deployment complete
+    A1-->>O: Deployment successful
+    O->>A2: Start monitoring
+    A2->>S2: Monitor via MCP
+    S2-->>A2: Metrics data
+    A2-->>O: Monitoring active
+    O-->>U: Workflow complete

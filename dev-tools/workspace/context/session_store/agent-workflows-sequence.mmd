@@ -1,0 +1,32 @@
+sequenceDiagram
+    participant U as Alex (User)
+    participant CM as Context Manager
+    participant AO as Agent Orchestrator
+    participant DW as Dev Workflow Agent
+    participant PO as Production Ops Agent
+    participant SUP as Supabase MCP
+    participant GH as GitHub MCP
+    participant UT as Utility MCP
+    
+    U->>CM: Feature request with context
+    CM->>UT: Store session context
+    CM->>AO: Route to appropriate agent
+    
+    AO->>DW: Execute development workflow
+    DW->>SUP: Create database schema
+    SUP-->>DW: Schema created
+    DW->>GH: Create feature branch
+    GH-->>DW: Branch ready
+    DW->>UT: Log development progress
+    
+    DW-->>AO: Development complete
+    AO->>PO: Trigger deployment workflow
+    PO->>SUP: Deploy to staging
+    SUP-->>PO: Deployment successful
+    PO->>GH: Create pull request
+    GH-->>PO: PR created
+    PO->>UT: Update deployment logs
+    
+    PO-->>AO: Deployment complete
+    AO-->>CM: Update session context
+    CM-->>U: Feature deployed with telemetry

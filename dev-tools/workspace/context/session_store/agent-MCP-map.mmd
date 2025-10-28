@@ -1,0 +1,40 @@
+graph LR
+    subgraph "Development Workflow Agent"
+        DW1[Code Generation]
+        DW2[Testing Automation]
+        DW3[Database Operations]
+    end
+    
+    subgraph "Observability Agent"
+        OB1[Performance Monitoring]
+        OB2[Error Tracking]
+        OB3[Trace Analysis]
+    end
+    
+    subgraph "Production Ops Agent"
+        PO1[CI/CD Management]
+        PO2[Deployment Orchestration]
+        PO3[Incident Response]
+    end
+    
+    subgraph "System Architect Agent"
+        SA1[Architecture Planning]
+        SA2[Documentation Generation]
+        SA3[Design Patterns]
+    end
+    
+    DW1 --> GH[GitHub MCP<br/>Code Operations]
+    DW2 --> PW[Playwright MCP<br/>E2E Testing]
+    DW3 --> SUP[Supabase MCP<br/>Database & Functions]
+    
+    OB1 --> UT[Utility MCP<br/>Observability Server]
+    OB2 --> UT
+    OB3 --> UT
+    
+    PO1 --> GH
+    PO2 --> SUP
+    PO3 --> UT
+    
+    SA1 --> UT
+    SA2 --> C7[Context7 MCP<br/>Documentation]
+    SA3 --> C7

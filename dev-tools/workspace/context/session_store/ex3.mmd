@@ -1,0 +1,17 @@
+graph TD
+    A[User Request] --> B[Orchestrator]
+    B --> C[Classifier]
+    C --> D{Route to Agent}
+    
+    D --> E[Agent 1<br/>Deployment]
+    D --> F[Agent 2<br/>Monitoring] 
+    D --> G[Agent 3<br/>Analytics]
+    D --> H[Agent N<br/>Specialized]
+    
+    E <--> I[MCP Server 1<br/>CI/CD Tools]
+    F <--> J[MCP Server 2<br/>Metrics APIs]
+    G <--> K[MCP Server 3<br/>Databases]
+    H <--> L[MCP Server N<br/>External APIs]
+    
+    M[Context Store] <--> B
+    N[Agent Registry] <--> C

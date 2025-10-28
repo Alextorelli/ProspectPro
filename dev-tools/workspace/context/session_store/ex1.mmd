@@ -1,0 +1,10 @@
+graph TD
+    A[User] --> B[Host Application]
+    B --> C[MCP Client]
+    C <--> D[Transport Layer<br/>STDIO/HTTP+SSE<br/>JSON-RPC 2.0]
+    D <--> E[MCP Server]
+    E --> F[External Systems<br/>APIs, Databases, Files]
+    
+    G[Tools] --> E
+    H[Resources] --> E
+    I[Prompts] --> E

@@ -1,0 +1,50 @@
+graph TD
+    subgraph "Context Management System"
+        CM[Context Manager<br/>TypeScript Core]
+        
+        subgraph "Session Store"
+            MF[Memory JSONL<br/>Long-term Storage]
+            ST[Sequential Thoughts<br/>Chain of Reasoning]
+            CS[Checkpoint System<br/>State Snapshots]
+        end
+        
+        subgraph "Context Schemas"
+            AS[Agent Manifest<br/>Workflow Configs]
+            TM[Tool Matrix<br/>MCP Mappings]
+            QR[Quick Reference<br/>Context Patterns]
+        end
+    end
+    
+    CM --> MF
+    CM --> ST
+    CM --> CS
+    
+    CM --> AS
+    CM --> TM
+    CM --> QR
+    
+    subgraph "Agent Workflows"
+        DW[Development]
+        OB[Observability]
+        PO[Production-Ops]
+        SA[System-Architect]
+    end
+    
+    AS --> DW
+    AS --> OB
+    AS --> PO
+    AS --> SA
+    
+    subgraph "Utility MCP Server"
+        FS[Filesystem Operations]
+        LM[Long-term Memory]
+        SR[Session Recall]
+        CT[Chain of Thought]
+        DL[Decision Logging]
+    end
+    
+    CM <--> FS
+    CM <--> LM
+    CM <--> SR
+    CM <--> CT
+    CM <--> DL
