@@ -1,56 +1,72 @@
 %%{init: { "theme": "dark", "fontFamily": "Inter", "flowchart": { "htmlLabels": false, "curve": "monotoneX" } }}%%
-flowchart LR
-    subgraph DEV_FLOW["💻 Dev Workflow Agent"]
-        direction TB
-        DEV_START["🚀 Start"]
-        DEV_ORCH["�� Orchestrator<br/>Launch Build"]
-        DEV_MEM["🧠 Load Context<br/>80 entries"]
-        DEV_MCP["🌐 MCP Mesh<br/>Code · Test · Data"]
-        DEV_SIG["📡 Build Signals<br/>Test Results"]
-        DEV_SAVE["💾 Checkpoint<br/>Auto-save"]
-        DEV_END["✅ Complete"]
-        
-        DEV_START --> DEV_ORCH
-        DEV_ORCH --> DEV_MEM
-        DEV_MEM --> DEV_MCP
-        DEV_MCP --> DEV_SIG
-        DEV_SIG --> DEV_SAVE
-        DEV_SAVE --> DEV_END
-        DEV_END -.-> DEV_START
+flowchart TB
+    subgraph ENV["🛠️ Development Environment"]
+        ENV_LABEL["Unrestricted · Rapid Iteration · Full MCP Access"]
+    end
+    
+    subgraph ORCH["🧠 Orchestration Layer"]
+        direction LR
+        CM["🗂️ Context Manager"]
+        AO["🤖 Agent Orchestrator"]
+        EM["🌍 Environment Manager"]
     end
 
-    subgraph ARCH_FLOW["🏗️ System Architect Agent"]
-        direction TB
-        ARCH_START["🚀 Start"]
-        ARCH_ORCH["🧠 Orchestrator<br/>Design System"]
-        ARCH_MEM["🧠 Load Context<br/>Unlimited LTM"]
-        ARCH_MCP["🌐 MCP Mesh<br/>Research · Design"]
-        ARCH_SIG["📐 Design Artifacts<br/>Decisions"]
-        ARCH_SAVE["💾 Checkpoint<br/>Auto-save"]
-        ARCH_END["✅ Complete"]
+    ENV --> EM
+    EM --> ORCH
+    CM --> AO
+
+    subgraph AGENTS["👥 Agent Workflows"]
+        direction LR
         
-        ARCH_START --> ARCH_ORCH
-        ARCH_ORCH --> ARCH_MEM
-        ARCH_MEM --> ARCH_MCP
-        ARCH_MCP --> ARCH_SIG
-        ARCH_SIG --> ARCH_SAVE
-        ARCH_SAVE --> ARCH_END
-        ARCH_END -.-> ARCH_START
+        subgraph DEV_FLOW["💻 Dev Workflow Agent"]
+            direction TB
+            DEV_START["🚀 Start"]
+            DEV_MEM["🧠 Load Context<br/>80 entries"]
+            DEV_MCP["🌐 MCP Mesh<br/>Code · Test · Data"]
+            DEV_SIG["📡 Build Signals<br/>Test Results"]
+            DEV_SAVE["💾 Checkpoint<br/>Auto-save"]
+            DEV_END["✅ Complete"]
+            
+            DEV_START --> DEV_MEM
+            DEV_MEM --> DEV_MCP
+            DEV_MCP --> DEV_SIG
+            DEV_SIG --> DEV_SAVE
+            DEV_SAVE --> DEV_END
+            DEV_END -.-> DEV_START
+        end
+
+        subgraph ARCH_FLOW["🏗️ System Architect Agent"]
+            direction TB
+            ARCH_START["🚀 Start"]
+            ARCH_MEM["🧠 Load Context<br/>Unlimited LTM"]
+            ARCH_MCP["🌐 MCP Mesh<br/>Research · Design"]
+            ARCH_SIG["📐 Design Artifacts<br/>Decisions"]
+            ARCH_SAVE["💾 Checkpoint<br/>Auto-save"]
+            ARCH_END["✅ Complete"]
+            
+            ARCH_START --> ARCH_MEM
+            ARCH_MEM --> ARCH_MCP
+            ARCH_MCP --> ARCH_SIG
+            ARCH_SIG --> ARCH_SAVE
+            ARCH_SAVE --> ARCH_END
+            ARCH_END -.-> ARCH_START
+        end
     end
+
+    AO -- "Launch Build" --> DEV_START
+    AO -- "Design System" --> ARCH_START
 
     subgraph SHARED["🔄 Shared Infrastructure"]
-        direction TB
-        ENV["🛠️ Development<br/>Unrestricted"]
-        CM["🗂️ Context Manager"]
+        direction LR
         MEMORY["🧠 Memory Store<br/>Scratchpad · LTM · Checkpoints"]
-        MCP["🌐 Full MCP Access<br/>Supabase · GitHub · Playwright · Context7 · Utility"]
+        MCP["🌐 Full MCP Access<br/>Supabase · GitHub · Playwright<br/>Context7 · Utility"]
     end
 
-    DEV_FLOW -.-> SHARED
-    ARCH_FLOW -.-> SHARED
-    SHARED -.-> DEV_FLOW
-    SHARED -.-> ARCH_FLOW
+    AGENTS <==> SHARED
+    ORCH <--> SHARED
 
+    style ENV fill:#065f46,stroke:#10b981,stroke-width:2px
+    style ORCH fill:#1a1a2a,stroke:#a78bfa,stroke-width:2px
     style DEV_FLOW fill:#1a3a1a,stroke:#4ade80,stroke-width:2px
     style ARCH_FLOW fill:#1a2a4a,stroke:#60a5fa,stroke-width:2px
     style SHARED fill:#1a1a2a,stroke:#a78bfa,stroke-width:2px

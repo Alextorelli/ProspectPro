@@ -1,56 +1,72 @@
 %%{init: { "theme": "dark", "fontFamily": "Inter", "flowchart": { "htmlLabels": false, "curve": "monotoneX" } }}%%
-flowchart LR
-    subgraph OBS_FLOW["📈 Observability Agent"]
-        direction TB
-        OBS_START["🚀 Start"]
-        OBS_ORCH["🧠 Orchestrator<br/>Monitor Stack"]
-        OBS_MEM["�� Load Context<br/>60 entries"]
-        OBS_MCP["�� MCP Mesh<br/>Query Metrics · Logs"]
-        OBS_SIG["📊 Metrics<br/>📜 Logs · 🚨 Alerts"]
-        OBS_SAVE["💾 Checkpoint<br/>Hourly"]
-        OBS_END["✅ Complete"]
-        
-        OBS_START --> OBS_ORCH
-        OBS_ORCH --> OBS_MEM
-        OBS_MEM --> OBS_MCP
-        OBS_MCP --> OBS_SIG
-        OBS_SIG --> OBS_SAVE
-        OBS_SAVE --> OBS_END
-        OBS_END -.-> OBS_START
+flowchart TB
+    subgraph ENV["📊 Staging/Observability Environment"]
+        ENV_LABEL["Monitoring · Diagnostics · Read-Mostly Access"]
+    end
+    
+    subgraph ORCH["🧠 Orchestration Layer"]
+        direction LR
+        CM["🗂️ Context Manager"]
+        AO["🤖 Agent Orchestrator"]
+        EM["🌍 Environment Manager"]
     end
 
-    subgraph DEV_FLOW["💻 Dev Workflow Agent (Support)"]
-        direction TB
-        DEV_START["🚀 Start"]
-        DEV_ORCH["🧠 Orchestrator<br/>Support Diagnostics"]
-        DEV_MEM["🧠 Load Context<br/>Limited Write"]
-        DEV_MCP["🌐 MCP Mesh<br/>Diagnostics"]
-        DEV_SIG["🔍 Diagnostic Results"]
-        DEV_SAVE["💾 Checkpoint<br/>Selective"]
-        DEV_END["✅ Complete"]
+    ENV --> EM
+    EM --> ORCH
+    CM --> AO
+
+    subgraph AGENTS["👥 Agent Workflows"]
+        direction LR
         
-        DEV_START --> DEV_ORCH
-        DEV_ORCH --> DEV_MEM
-        DEV_MEM --> DEV_MCP
-        DEV_MCP --> DEV_SIG
-        DEV_SIG --> DEV_SAVE
-        DEV_SAVE --> DEV_END
-        DEV_END -.-> DEV_START
+        subgraph OBS_FLOW["📈 Observability Agent"]
+            direction TB
+            OBS_START["🚀 Start"]
+            OBS_MEM["🧠 Load Context<br/>60 entries"]
+            OBS_MCP["🌐 MCP Mesh<br/>Query Metrics · Logs"]
+            OBS_SIG["📊 Metrics<br/>📜 Logs · 🚨 Alerts"]
+            OBS_SAVE["💾 Checkpoint<br/>Hourly"]
+            OBS_END["✅ Complete"]
+            
+            OBS_START --> OBS_MEM
+            OBS_MEM --> OBS_MCP
+            OBS_MCP --> OBS_SIG
+            OBS_SIG --> OBS_SAVE
+            OBS_SAVE --> OBS_END
+            OBS_END -.-> OBS_START
+        end
+
+        subgraph DEV_FLOW["💻 Dev Workflow Agent (Support)"]
+            direction TB
+            DEV_START["🚀 Start"]
+            DEV_MEM["🧠 Load Context<br/>Limited Write"]
+            DEV_MCP["🌐 MCP Mesh<br/>Diagnostics"]
+            DEV_SIG["🔍 Diagnostic Results"]
+            DEV_SAVE["💾 Checkpoint<br/>Selective"]
+            DEV_END["✅ Complete"]
+            
+            DEV_START --> DEV_MEM
+            DEV_MEM --> DEV_MCP
+            DEV_MCP --> DEV_SIG
+            DEV_SIG --> DEV_SAVE
+            DEV_SAVE --> DEV_END
+            DEV_END -.-> DEV_START
+        end
     end
+
+    AO -- "Monitor Stack" --> OBS_START
+    AO -- "Support Diagnostics" --> DEV_START
 
     subgraph SHARED["🔄 Shared Infrastructure"]
-        direction TB
-        ENV["📊 Staging/Observability<br/>Read-Mostly"]
-        CM["🗂️ Context Manager"]
+        direction LR
         MEMORY["🧠 Memory Store<br/>Metrics · Baselines · Checkpoints"]
         MCP["🌐 Read-Focus MCP<br/>Supabase (RO) · Utility"]
     end
 
-    OBS_FLOW -.-> SHARED
-    DEV_FLOW -.-> SHARED
-    SHARED -.-> OBS_FLOW
-    SHARED -.-> DEV_FLOW
+    AGENTS <==> SHARED
+    ORCH <--> SHARED
 
+    style ENV fill:#4338ca,stroke:#818cf8,stroke-width:2px
+    style ORCH fill:#1a1a2a,stroke:#818cf8,stroke-width:2px
     style OBS_FLOW fill:#2a1a4a,stroke:#a78bfa,stroke-width:2px
     style DEV_FLOW fill:#1a2a3a,stroke:#60a5fa,stroke-width:2px,stroke-dasharray: 5 5
     style SHARED fill:#1a1a2a,stroke:#818cf8,stroke-width:2px
