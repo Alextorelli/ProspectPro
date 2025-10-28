@@ -77,3 +77,22 @@ Escalate immediately if a proposal violates zero-fake-data policy, bypasses Supa
 - \*\*Observability MCP Tools\*\*: Use `start_trace`, `validate_ci_cd_suite`, `collect_and_summarize_logs` for monitoring and diagnostics\.
 - \*\*E2E Testing\*\*: Run `npm run test:e2e` or VS Code Playwright explorer for full browser testing\.
 - \*\*Deployment Checks\*\*: Before production deploy, run Highlight error scan, Supabase healthcheck, and Vercel status validation\.
+
+## Staging Deployment
+
+Ensure architecture-impacting changes run through the staging alias workflow:
+
+```bash
+npm run deploy:preview
+STAGING_DEPLOY_URL=https://<preview-id>.vercel.app npm run deploy:staging:alias
+```
+
+- Confirm migration docs are logged in `docs/tooling/settings-staging.md` with risk and rollback notes.
+- Validate Supabase schema diffs and Vercel preview logs before production approvals.
+
+## Telemetry Quick Reference
+
+- Highlight traces: verify new instrumentation shows in staging dashboards.
+- Supabase Edge logs: leverage `dev-tools/scripts/diagnostics/edge-function-diagnostics.sh` (artifacts collected in `dev-tools/reports/ci/`).
+- MCP diagnostics: trigger `npm run mcp:troubleshoot` to bundle cross-system telemetry under `dev-tools/reports/ci/mcp-validation/<run>`.
+

@@ -69,3 +69,22 @@ Escalate to Production Ops for sustained alerts or OPEN circuit breakers; involv
 - \*\*Observability MCP Tools\*\*: Use `start_trace`, `validate_ci_cd_suite`, `collect_and_summarize_logs` for monitoring and diagnostics\.
 - \*\*E2E Testing\*\*: Run `npm run test:e2e` or VS Code Playwright explorer for full browser testing\.
 - \*\*Deployment Checks\*\*: Before production deploy, run Highlight error scan, Supabase healthcheck, and Vercel status validation\.
+
+## Staging Deployment
+
+Coordinate with Development Workflow to observe staging alias promotion:
+
+```bash
+npm run deploy:preview
+STAGING_DEPLOY_URL=https://<preview-id>.vercel.app npm run deploy:staging:alias
+```
+
+- Instrument staging validation runs in Highlight and confirm `dev-tools/reports/ci/playwright/<run>` is archived.
+- Surface any Supabase or Vercel anomalies before production sign-off.
+
+## Telemetry Quick Reference
+
+- Highlight dashboards: monitor staging alias traffic for regressions.
+- Supabase Edge logs: `dev-tools/scripts/diagnostics/edge-function-diagnostics.sh` (outputs archived in `dev-tools/reports/ci/`).
+- MCP troubleshooting bundle: `npm run mcp:troubleshoot` pushes artifacts to `dev-tools/reports/ci/mcp-validation/<run>`.
+

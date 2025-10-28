@@ -75,3 +75,22 @@ Escalate to System Architect for schema changes, to Production Ops for deploymen
 - \*\*Observability MCP Tools\*\*: Use `start_trace`, `validate_ci_cd_suite`, `collect_and_summarize_logs` for monitoring and diagnostics\.
 - \*\*E2E Testing\*\*: Run `npm run test:e2e` or VS Code Playwright explorer for full browser testing\.
 - \*\*Deployment Checks\*\*: Before production deploy, run Highlight error scan, Supabase healthcheck, and Vercel status validation\.
+
+## Staging Deployment
+
+Run the staging alias workflow before handoff to Production Ops:
+
+```bash
+npm run deploy:preview
+STAGING_DEPLOY_URL=https://<preview-id>.vercel.app npm run deploy:staging:alias
+```
+
+- Capture validation notes in `docs/tooling/settings-staging.md`.
+- Confirm staging availability via Vercel preview checks prior to production promotion.
+
+## Telemetry Quick Reference
+
+- Highlight traces & errors: review preview telemetry through Vercel Analytics dashboards.
+- Supabase Edge logs: run `dev-tools/scripts/diagnostics/edge-function-diagnostics.sh` (artifacts land in `dev-tools/reports/ci/`).
+- MCP health bundles: `npm run mcp:troubleshoot` packages diagnostics to `dev-tools/reports/ci/mcp-validation/<run>`.
+

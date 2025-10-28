@@ -86,3 +86,22 @@ Escalate to System Architect if migrations alter critical tables or zero-fake-da
 - \*\*Observability MCP Tools\*\*: Use `start_trace`, `validate_ci_cd_suite`, `collect_and_summarize_logs` for monitoring and diagnostics\.
 - \*\*E2E Testing\*\*: Run `npm run test:e2e` or VS Code Playwright explorer for full browser testing\.
 - \*\*Deployment Checks\*\*: Before production deploy, run Highlight error scan, Supabase healthcheck, and Vercel status validation\.
+
+## Staging Deployment
+
+Run the staging alias workflow immediately after validating preview builds:
+
+```bash
+npm run deploy:preview
+STAGING_DEPLOY_URL=https://<preview-id>.vercel.app npm run deploy:staging:alias
+```
+
+- Log deployment validation in `docs/tooling/settings-staging.md`.
+- Verify staging availability and Supabase connectivity before promoting to production.
+
+## Telemetry Quick Reference
+
+- Highlight & Vercel analytics: confirm no new errors prior to production promotion.
+- Supabase Edge logs: `dev-tools/scripts/diagnostics/edge-function-diagnostics.sh` (artifacts in `dev-tools/reports/ci/`).
+- MCP diagnostics: `npm run mcp:troubleshoot` for packaged incident bundles under `dev-tools/reports/ci/mcp-validation/<run>`.
+

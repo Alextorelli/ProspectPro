@@ -31,15 +31,20 @@ ProspectPro’s chat participants map 1:1 to the revised agent personas. This ke
 
 1. Stage rationale/risk/rollback in `docs/tooling/settings-staging.md`.
 2. Update agent instruction packs as needed.
-3. Refresh chatmodes and manifest:
+3. Validate staging alias workflow before production handoff:
+   ```bash
+   npm run deploy:preview
+   STAGING_DEPLOY_URL=https://<preview-id>.vercel.app npm run deploy:staging:alias
+   ```
+4. Refresh chatmodes and manifest:
    ```bash
    npm run mcp:chat:sync
    npm run mcp:chat:validate
    ```
-4. Run validation pipeline:
+5. Run validation pipeline:
    ```bash
    npm run docs:update && npm run lint && npm test && npm run supabase:test:db
    ```
-5. Archive execution summary (e.g., `dev-tools/workspace/context/session_store/archive/chatmode-persona-migration-2025-10-21.md`).
+6. Archive execution summary (e.g., `dev-tools/workspace/context/archive/chatmode-sync-2025-10-28/notes.md`).
 
 Maintain this alignment to ensure Copilot Chat responds with persona-specific playbooks that match the MCP toolkit and governance guardrails.
