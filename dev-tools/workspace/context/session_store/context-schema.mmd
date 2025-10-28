@@ -1,39 +1,89 @@
 %%{init: { "theme": "dark", "fontFamily": "Inter", "flowchart": { "htmlLabels": false, "curve": "monotoneX" } }}%%
 flowchart TB
-    subgraph ORCH["Agent Orchestration"]
-        direction LR
+    subgraph ORCH["🧠 Agent Orchestration"]
+        direction TB
         AO["🤖 Agent Orchestrator"]
         CM["🗂️ Context Manager"]
-        DEV["‍💻 Dev Agent"]
-        OPS["🚀 Ops Agent"]
+        EM["🌍 Environment Manager"]
     end
 
-    subgraph DATA["📊 Data & Telemetry"]
+    subgraph AGENTS["🛠️ Specialized Agents"]
+        direction LR
+        DEV["💻 Dev Workflow"]
+        OBS["📈 Observability"]
+        OPS["🚀 Production Ops"]
+        ARCH["🏗️ System Architect"]
+    end
+
+    subgraph MEMORY["🧠 Memory & Context Store"]
         direction TB
-        SIG@{shape: "doc", label: "📡 Pipeline Signals"}
-        TEL@{shape: "doc", label: "📈 Release Telemetry"}
+        subgraph STORES["📦 Session Stores"]
+            direction LR
+            SCRATCH["📝 Scratchpad"]
+            LTM["🗄️ Long-term Memory"]
+            CHKPT["📸 Checkpoints"]
+        end
+        subgraph SCHEMAS["📐 Schemas"]
+            direction LR
+            AGENT_CTX["📄 Agent Context"]
+            ENV_CTX["🌍 Environment Context"]
+            TASK_LED["📋 Task Ledger"]
+        end
     end
 
     subgraph MCP["🌐 MCP Mesh"]
-        direction TB
-        SUP@{shape: "cyl", label: "🗄️ Supabase"}
-        GH@{shape: "cyl", label: "� GitHub"}
-        PW@{shape: "cyl", label: "� Playwright"}
-        C7@{shape: "cyl", label: "🛰️ Context7"}
-        UT@{shape: "cyl", label: "🧰 Utility"}
+        direction LR
+        UT["🧰 Utility MCP"]
+        SUP["🗄️ Supabase MCP"]
+        GH["📁 GitHub MCP"]
+        PW["🧪 Playwright MCP"]
+        C7["🛰️ Context7 MCP"]
     end
 
+    subgraph SIGNALS["📡 Data & Telemetry"]
+        direction TB
+        PIPE["⚡ Pipeline Signals"]
+        TELEM["📊 Release Telemetry"]
+        LOGS["📜 Execution Logs"]
+    end
 
-    %% Core Workflow Cycle
+    %% Orchestration Flow
     CM -- "Stage Context" --> AO
+    AO -- "Route Task" --> AGENTS
+    
+    %% Agent-specific workflows
     AO -- "Launch Build" --> DEV
-    DEV -- "Execute Ops" --> MCP
-    MCP -- "Return Signals" --> SIG
-    SIG -.-> AO
-
+    AO -- "Monitor Stack" --> OBS
     AO -- "Request Deploy" --> OPS
+    AO -- "Design System" --> ARCH
+
+    %% Agent → MCP interactions
+    DEV -- "Code · Test · Data" --> MCP
+    OBS -- "Query Metrics" --> MCP
     OPS -- "Ship & Observe" --> MCP
-    MCP -- "Stream Telemetry" --> TEL
-    TEL -.-> CM
+    ARCH -- "Research · Design" --> MCP
 
+    %% MCP → Signals feedback
+    MCP -- "Return Signals" --> PIPE
+    MCP -- "Stream Telemetry" --> TELEM
+    MCP -- "Capture Logs" --> LOGS
 
+    %% Signals → Orchestration loop
+    PIPE -.-> AO
+    TELEM -.-> CM
+    LOGS -.-> OBS
+
+    %% Context Management (bidirectional)
+    CM <--> MEMORY
+    AGENTS <.-> MEMORY
+    EM <--> MEMORY
+
+    %% MCP Utility provides memory/sequential/time
+    UT -- "Memory · Sequential · Time" --> MEMORY
+    MEMORY -- "Query · Checkpoint" --> UT
+
+    %% Container-level relationships
+    ORCH <--> AGENTS
+    AGENTS <.-> MCP
+    MCP <.-> SIGNALS
+    SIGNALS <.-> ORCH

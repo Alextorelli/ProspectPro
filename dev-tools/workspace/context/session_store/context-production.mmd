@@ -1,0 +1,100 @@
+%%{init: { "theme": "dark", "fontFamily": "Inter", "flowchart": { "htmlLabels": false, "curve": "monotoneX" } }}%%
+flowchart TB
+    subgraph ENV["🚀 Production Environment"]
+        direction TB
+        ENV_LABEL["Read-Only · Approval Required · Restricted MCP Access"]
+    end
+
+    subgraph ORCH["🧠 Agent Orchestration"]
+        direction TB
+        AO["🤖 Agent Orchestrator"]
+        CM["🗂️ Context Manager"]
+        EM["🌍 Environment Manager<br/><i>Approval Gate Active</i>"]
+    end
+
+    subgraph AGENTS["👥 Active Agents"]
+        direction LR
+        OPS["🚀 Production Ops<br/><i>Primary Agent</i>"]
+        OBS["📈 Observability<br/><i>Support Role</i>"]
+    end
+
+    subgraph MEMORY["🧠 Memory & Context Store"]
+        direction TB
+        subgraph STORES["📦 Session Stores"]
+            direction LR
+            SCRATCH["📝 Scratchpad<br/><i>40 entries max</i>"]
+            LTM["🗄️ Long-term Memory<br/><i>Deploy History · Configs</i>"]
+            CHKPT["📸 Checkpoints<br/><i>Pre/Post Deploy</i>"]
+        end
+        subgraph SCHEMAS["📐 Active Schemas"]
+            direction LR
+            AGENT_CTX["📄 Agent Context"]
+            ENV_CTX["🌍 Environment Context"]
+            TASK_LED["📋 Task Ledger<br/><i>Audit Trail</i>"]
+        end
+    end
+
+    subgraph MCP["🌐 MCP Mesh - Restricted"]
+        direction LR
+        UT["🧰 Utility MCP<br/><i>Read-only</i>"]
+        SUP["🗄️ Supabase MCP<br/><i>Deploy only</i>"]
+        GH["📁 GitHub MCP<br/><i>PR/Release only</i>"]
+    end
+
+    subgraph SIGNALS["📡 Production Signals"]
+        direction TB
+        DEPLOY["🎯 Deploy Status"]
+        TELEM["📊 Release Telemetry"]
+        INCIDENT["🚨 Incident Alerts"]
+    end
+
+    subgraph APPROVAL["✋ Approval Layer"]
+        direction TB
+        HUMAN["👤 Human Approval Required"]
+    end
+
+    %% Orchestration Flow
+    ENV_LABEL -.-> EM
+    CM -- "Stage Production Context" --> AO
+    AO -- "Route to Ops" --> AGENTS
+    
+    %% Agent-specific workflows with approval
+    AO -- "Request Deploy" --> APPROVAL
+    APPROVAL -- "Approved" --> OPS
+    AO -- "Monitor Production" --> OBS
+
+    %% Agent → MCP interactions (restricted)
+    OPS -- "Ship & Observe<br/><i>Approved Actions Only</i>" --> MCP
+    OBS -- "Read Telemetry · Monitor" --> MCP
+
+    %% MCP → Signals feedback
+    MCP -- "Deploy Outcome" --> DEPLOY
+    MCP -- "Stream Telemetry" --> TELEM
+    MCP -- "Critical Alerts" --> INCIDENT
+
+    %% Signals → Orchestration loop
+    DEPLOY -.-> AO
+    TELEM -.-> CM
+    INCIDENT ==> OPS
+
+    %% Context Management (read-only, audit trail)
+    CM <--> MEMORY
+    AGENTS <-.-> MEMORY
+    EM <--> MEMORY
+
+    %% MCP Utility provides core services (restricted)
+    UT -- "Memory · Sequential · Time" --> MEMORY
+    MEMORY -- "Mandatory Checkpoints" --> UT
+
+    %% Container-level relationships
+    ORCH <--> AGENTS
+    AGENTS <.-> MCP
+    MCP <==> SIGNALS
+    SIGNALS <.-> ORCH
+    APPROVAL -.-> EM
+
+    style OPS fill:#7f1d1d,stroke:#f87171,stroke-width:3px
+    style OBS fill:#4c1d95,stroke:#a78bfa,stroke-width:2px,stroke-dasharray: 5 5
+    style ENV_LABEL fill:#991b1b,stroke:#ef4444,stroke-width:2px
+    style APPROVAL fill:#854d0e,stroke:#fbbf24,stroke-width:3px
+    style HUMAN fill:#854d0e,stroke:#fbbf24,stroke-width:2px

@@ -1,0 +1,90 @@
+%%{init: { "theme": "dark", "fontFamily": "Inter", "flowchart": { "htmlLabels": false, "curve": "monotoneX" } }}%%
+flowchart TB
+    subgraph ENV["📊 Staging/Observability Environment"]
+        direction TB
+        ENV_LABEL["Monitoring · Diagnostics · Read-Mostly Access"]
+    end
+
+    subgraph ORCH["🧠 Agent Orchestration"]
+        direction TB
+        AO["🤖 Agent Orchestrator"]
+        CM["🗂️ Context Manager"]
+        EM["🌍 Environment Manager"]
+    end
+
+    subgraph AGENTS["👥 Active Agents"]
+        direction LR
+        OBS["📈 Observability<br/><i>Primary Agent</i>"]
+        DEV["💻 Dev Workflow<br/><i>Support Role</i>"]
+    end
+
+    subgraph MEMORY["🧠 Memory & Context Store"]
+        direction TB
+        subgraph STORES["📦 Session Stores"]
+            direction LR
+            SCRATCH["📝 Scratchpad<br/><i>60 entries max</i>"]
+            LTM["🗄️ Long-term Memory<br/><i>Metrics & Baselines</i>"]
+            CHKPT["📸 Checkpoints<br/><i>Hourly snapshots</i>"]
+        end
+        subgraph SCHEMAS["📐 Active Schemas"]
+            direction LR
+            AGENT_CTX["📄 Agent Context"]
+            ENV_CTX["🌍 Environment Context"]
+            TASK_LED["📋 Task Ledger"]
+        end
+    end
+
+    subgraph MCP["🌐 MCP Mesh - Read Focus"]
+        direction LR
+        UT["🧰 Utility MCP"]
+        SUP["🗄️ Supabase MCP<br/><i>Read-only</i>"]
+    end
+
+    subgraph SIGNALS["📡 Observability Signals"]
+        direction TB
+        METRICS["📊 Performance Metrics"]
+        LOGS["📜 System Logs"]
+        ALERTS["🚨 Alert Triggers"]
+    end
+
+    %% Orchestration Flow
+    ENV_LABEL -.-> EM
+    CM -- "Stage Observability Context" --> AO
+    AO -- "Route to Observability" --> AGENTS
+    
+    %% Agent-specific workflows
+    AO -- "Monitor Stack" --> OBS
+    AO -- "Support Diagnostics" --> DEV
+
+    %% Agent → MCP interactions (read-heavy)
+    OBS -- "Query Metrics · Analyze Logs" --> MCP
+    DEV -- "Limited Write · Diagnostics" --> MCP
+
+    %% MCP → Signals feedback
+    MCP -- "Stream Metrics" --> METRICS
+    MCP -- "Capture Logs" --> LOGS
+    MCP -- "Detect Anomalies" --> ALERTS
+
+    %% Signals → Orchestration loop
+    METRICS -.-> OBS
+    LOGS -.-> OBS
+    ALERTS -.-> AO
+
+    %% Context Management (read-heavy, selective writes)
+    CM <--> MEMORY
+    AGENTS <-.-> MEMORY
+    EM <--> MEMORY
+
+    %% MCP Utility provides core services
+    UT -- "Memory · Sequential · Time" --> MEMORY
+    MEMORY -- "Periodic Checkpoints" --> UT
+
+    %% Container-level relationships
+    ORCH <--> AGENTS
+    AGENTS <.-> MCP
+    MCP <==> SIGNALS
+    SIGNALS <.-> ORCH
+
+    style OBS fill:#4c1d95,stroke:#a78bfa,stroke-width:3px
+    style DEV fill:#1e3a5f,stroke:#60a5fa,stroke-width:2px,stroke-dasharray: 5 5
+    style ENV_LABEL fill:#4338ca,stroke:#818cf8,stroke-width:2px
