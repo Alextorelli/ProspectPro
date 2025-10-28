@@ -376,3 +376,21 @@ ev## 2025-10-23: Codespaces Bootstrap Realignment
   2025-10-27T07:54:34Z: Phase 5 agent/MCP validation complete
   2025-10-27T11:25:45Z: Phase 5 agent/MCP validation complete
 - 2025-10-27: Synced observability endpoints across all agent contexts from observability.json source of truth.
+
+## 2025-10-28: Agent Workflow Flattening
+
+**Change**: Flattened `dev-tools/agents/workflows/*/` subdirectories into single-level persona-prefixed files.
+
+**Actions**:
+- Moved `config.json`, `instructions.md`, `toolset.jsonc` from nested directories to flat files.
+- Removed all `.gitkeep` files.
+- Updated references in:
+  - Chat modes (`.github/chatmodes/*.chatmode.md`)
+  - Documentation (`docs/**/*.md`, `.github/copilot-instructions.md`)
+  - Automation scripts (`dev-tools/scripts/**/*.sh`)
+  - Context store (`dev-tools/agents/context/store/*.json`)
+
+**Result**: Improved agent discovery, consistent with flat context store layout, single directory scan for all personas.
+
+**Inventories Updated**: `dev-tools-filetree.txt`
+
