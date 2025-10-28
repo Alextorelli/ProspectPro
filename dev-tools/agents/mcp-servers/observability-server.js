@@ -77,16 +77,23 @@ import {
   ListToolsRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js";
 import { SpanStatusCode, trace } from "@opentelemetry/api";
-// JaegerExporter removed; using Highlight OTLP only
 import { Resource } from "@opentelemetry/resources";
 import { NodeTracerProvider } from "@opentelemetry/sdk-trace-node";
 import { SemanticResourceAttributes } from "@opentelemetry/semantic-conventions";
 import fs from "fs/promises";
 import path from "path";
 
+const highlightProjectId =
+  process.env.HIGHLIGHT_PROJECT_ID ??
+  process.env.NEXT_PUBLIC_HIGHLIGHT_PROJECT_ID ??
+  "";
+
+const highlightServiceName =
+  process.env.HIGHLIGHT_SERVICE_NAME ?? "observability-server";
+
 H.init({
-  projectID: process.env.HIGHLIGHT_PROJECT_ID ?? "kgr09vng",
-  serviceName: "observability-server",
+  projectID: highlightProjectId || "kgr09vng",
+  serviceName: highlightServiceName,
   environment: process.env.NODE_ENV ?? "development",
 });
 
@@ -96,7 +103,7 @@ const resource = new Resource({
 });
 
 const tracerProvider = new NodeTracerProvider({ resource });
-// Only Highlight OTLP exporter should be configured here
+// Highlight OTLP exporter is configured via environment variables
 tracerProvider.register();
 
 const tracer = trace.getTracer("prospectpro-observability", "1.0.0");
@@ -564,18 +571,18 @@ class ObservabilityServer {
     }
     // Highlight.io: report error if present
     try {
-      if (
-        errorObj &&
-        process.env.HIGHLIGHT_PROJECT_ID &&
-        process.env.HIGHLIGHT_API_KEY
-      ) {
+      const highlightBackendKey =
+        process.env.HIGHLIGHT_BACKEND_API_KEY || process.env.HIGHLIGHT_API_KEY;
+
+      if (errorObj && highlightProjectId && highlightBackendKey) {
         const fetch = (await import("node-fetch")).default;
+
         await fetch("https://api.highlight.io/v1/errors", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            "x-highlight-project": process.env.HIGHLIGHT_PROJECT_ID,
-            Authorization: `Bearer ${process.env.HIGHLIGHT_API_KEY}`,
+            "x-highlight-project": highlightProjectId,
+            Authorization: `Bearer ${highlightBackendKey}`,
           },
           body: JSON.stringify({
             error: {
@@ -585,7 +592,7 @@ class ObservabilityServer {
               timestamp: new Date().toISOString(),
             },
             environment: process.env.NODE_ENV || "development",
-            service: "prospectpro-observability",
+            service: highlightServiceName,
           }),
         });
       }
@@ -1284,13 +1291,17 @@ class ObservabilityServer {
         tracer_provider: {
           status: tracerProvider ? "active" : "inactive",
         },
+        log_drain: {
+          endpoint: process.env.HIGHLIGHT_LOGDRAIN_ENDPOINT || null,
+          secret_configured: Boolean(process.env.HIGHLIGHT_LOGDRAIN_SECRET),
+        },
         active_spans: {
           count: this.activeSpans?.size || 0,
         },
       },
     };
 
-    // Jaeger connectivity check removed
+    // Extend with Highlight OTLP/log drain checks if needed
 
     return {
       content: [

@@ -92,8 +92,8 @@ services:
       - component: "database-proxy"
       - capabilities: "query-optimization,connection-pooling"
 
-  supabase-troubleshooting:
-    name: "prospectpro-supabase-troubleshooting"
+  supabase-staging:
+    name: "prospectpro-supabase-staging"
     attributes:
       - component: "diagnostics"
       - capabilities: "health-checks,debugging,validation"
@@ -136,14 +136,13 @@ workflows:
 environments:
   development:
     exporters:
-  # - jaeger (removed)
       - console
+      - otlp
     sampler:
       always_on: {}
 
-  troubleshooting:
+  staging:
     exporters:
-      - jaeger
       - otlp
     sampler:
       trace_id_ratio:

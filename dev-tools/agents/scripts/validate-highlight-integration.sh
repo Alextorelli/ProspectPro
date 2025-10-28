@@ -14,8 +14,8 @@ source .env.agent.local
 
 # Check required variables
 MISSING_VARS=()
-[ -z "${HIGHLIGHT_PROJECT_ID:-}" ] && MISSING_VARS+=("HIGHLIGHT_PROJECT_ID")
-[ -z "${HIGHLIGHT_API_KEY:-}" ] && MISSING_VARS+=("HIGHLIGHT_API_KEY")
+[ -z "${HIGHLIGHT_PROJECT_ID:-${NEXT_PUBLIC_HIGHLIGHT_PROJECT_ID:-}}" ] && MISSING_VARS+=("HIGHLIGHT_PROJECT_ID")
+[ -z "${HIGHLIGHT_BACKEND_API_KEY:-${HIGHLIGHT_API_KEY:-}}" ] && MISSING_VARS+=("HIGHLIGHT_BACKEND_API_KEY")
 
 if [ ${#MISSING_VARS[@]} -gt 0 ]; then
   echo "❌ Missing required Highlight.io credentials:"
@@ -45,7 +45,8 @@ node observability-cli.js <<EOF || true
 EOF
 
 echo ""
+PROJECT_ID=${HIGHLIGHT_PROJECT_ID:-${NEXT_PUBLIC_HIGHLIGHT_PROJECT_ID:-unknown}}
 echo "✅ Test triggered. Check Highlight.io dashboard:"
-echo "   https://app.highlight.io/${HIGHLIGHT_PROJECT_ID}/errors"
+echo "   https://app.highlight.io/${PROJECT_ID}/errors"
 echo ""
 echo "Expected: Error reported with suite='intentionally_failing_test'"

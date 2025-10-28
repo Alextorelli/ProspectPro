@@ -35,8 +35,14 @@
   },
   "monitoring": {
     "otelEndpoint": "https://otel.prospectpro.app/v1/traces",
-
     "logDashboard": "https://supabase.com/dashboard/project/sriycekxdqnesdsgwiuc/logs"
+  },
+  "highlight": {
+    "projectIdEnv": "NEXT_PUBLIC_HIGHLIGHT_PROJECT_ID",
+    "backendApiKeyEnv": "HIGHLIGHT_BACKEND_API_KEY",
+    "logDrainEndpointEnv": "HIGHLIGHT_LOGDRAIN_ENDPOINT",
+    "logDrainSecretEnv": "HIGHLIGHT_LOGDRAIN_SECRET",
+    "serviceName": "prospect-pro"
   },
   "permissions": {
     "writeOperations": false,

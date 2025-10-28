@@ -36,8 +36,14 @@
   },
   "monitoring": {
     "otelEndpoint": "http://localhost:4318/v1/traces",
-
     "logDashboard": "http://localhost:3000/logs"
+  },
+  "highlight": {
+    "projectIdEnv": "VITE_HIGHLIGHT_PROJECT_ID",
+    "backendApiKeyEnv": "HIGHLIGHT_BACKEND_API_KEY",
+    "logDrainEndpointEnv": "HIGHLIGHT_LOGDRAIN_ENDPOINT",
+    "logDrainSecretEnv": "HIGHLIGHT_LOGDRAIN_SECRET",
+    "serviceName": "prospect-pro-dev"
   },
   "permissions": {
     "writeOperations": true,

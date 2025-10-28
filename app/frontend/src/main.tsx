@@ -6,18 +6,28 @@ import { BrowserRouter } from "react-router-dom";
 import App from "./App";
 import "./index.css";
 import { supabase } from "./lib/supabase";
-// Initialize Highlight.io for frontend monitoring
-H.init("kgr09vng", {
-  serviceName: "frontend-app",
-  tracingOrigins: true,
-  networkRecording: {
-    enabled: true,
-    recordHeadersAndBody: true,
-    urlBlocklist: [
-      // Add URLs to exclude from recording if needed
-    ],
-  },
-});
+const highlightProjectId =
+  import.meta.env.VITE_HIGHLIGHT_PROJECT_ID ??
+  import.meta.env.NEXT_PUBLIC_HIGHLIGHT_PROJECT_ID ??
+  "";
+
+if (highlightProjectId) {
+  H.init(highlightProjectId, {
+    serviceName: import.meta.env.VITE_HIGHLIGHT_SERVICE_NAME ?? "frontend-app",
+    tracingOrigins: true,
+    networkRecording: {
+      enabled: true,
+      recordHeadersAndBody: true,
+      urlBlocklist: [
+        // Add URLs to exclude from recording if needed
+      ],
+    },
+  });
+} else {
+  console.warn(
+    "Highlight project ID missing. Set VITE_HIGHLIGHT_PROJECT_ID or NEXT_PUBLIC_HIGHLIGHT_PROJECT_ID."
+  );
+}
 
 if (typeof window !== "undefined") {
   (window as typeof window & { __supabase?: typeof supabase }).__supabase =
