@@ -13,7 +13,7 @@
     "@highlight-run/react": "21.0.0"
   },
   "devDependencies": {
-    "vite": "^4.0.0",
+    "vite": "^7.1.12",
     "eslint": "^8.0.0"
   },
   "author": "Alex Torelli",
