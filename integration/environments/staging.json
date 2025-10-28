@@ -1,5 +1,5 @@
 {
-  "name": "troubleshooting",
+  "name": "staging",
   "description": "Troubleshooting environment for diagnostics, context recovery, and safe dry-run operations.",
   "supabase": {
     "projectRef": "troubleshoot-sriycekxdqnesdsgwiuc",
