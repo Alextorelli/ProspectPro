@@ -35,7 +35,7 @@
   },
   "monitoring": {
     "otelEndpoint": "https://otel.prospectpro.app/v1/traces",
-    "jaegerUrl": "https://jaeger.prospectpro.app",
+
     "logDashboard": "https://supabase.com/dashboard/project/sriycekxdqnesdsgwiuc/logs"
   },
   "permissions": {

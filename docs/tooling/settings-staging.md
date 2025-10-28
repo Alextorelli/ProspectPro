@@ -1,3 +1,12 @@
+## 2025-10-28: Observability Standardization
+
+**Jaeger deprecation:**
+
+- All Jaeger exporter configs, endpoints, and env keys have been removed from the codebase and environment configs.
+- Highlight.io (OTLP + log drain) is now the sole observability backend for all environments.
+- Staging and production inherit Highlight credentials from Vercel environment groups.
+- See patch log in dev-tools/workspace/context/session_store/Optimized Environment Config Patch Plan.md for details.
+
 # settings-staging.md
 
 ## MCP Config Update – October 27, 2025

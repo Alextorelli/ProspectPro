@@ -36,7 +36,7 @@
   },
   "monitoring": {
     "otelEndpoint": "http://localhost:4318/v1/traces",
-    "jaegerUrl": "http://localhost:16686",
+
     "logDashboard": "https://supabase.com/dashboard/project/troubleshoot-sriycekxdqnesdsgwiuc/logs"
   },
   "permissions": {

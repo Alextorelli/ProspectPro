@@ -33,9 +33,7 @@ otel:
 
   # Exporters configuration
   exporters:
-    # Jaeger exporter for trace visualization
-    jaeger:
-      endpoint: "${JAEGER_ENDPOINT:http://localhost:14268/api/traces}"
+    # Jaeger exporter removed; use Highlight OTLP only
       tls:
         insecure: true # For local development
 
@@ -138,7 +136,7 @@ workflows:
 environments:
   development:
     exporters:
-      - jaeger
+  # - jaeger (removed)
       - console
     sampler:
       always_on: {}

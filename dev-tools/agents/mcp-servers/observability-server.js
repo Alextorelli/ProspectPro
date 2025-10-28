@@ -66,7 +66,7 @@ async function highlightRunWithHeadersDemo() {
  * ProspectPro Observability MCP Server
  * Distributed tracing and monitoring for AI agent workflows
  *
- * OpenTelemetry instrumented with Jaeger backend
+ * OpenTelemetry instrumented with Highlight backend only
  */
 
 import { H } from "@highlight-run/node";
@@ -77,9 +77,8 @@ import {
   ListToolsRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js";
 import { SpanStatusCode, trace } from "@opentelemetry/api";
-import { JaegerExporter } from "@opentelemetry/exporter-jaeger";
+// JaegerExporter removed; using Highlight OTLP only
 import { Resource } from "@opentelemetry/resources";
-import { SimpleSpanProcessor } from "@opentelemetry/sdk-trace-base";
 import { NodeTracerProvider } from "@opentelemetry/sdk-trace-node";
 import { SemanticResourceAttributes } from "@opentelemetry/semantic-conventions";
 import fs from "fs/promises";
@@ -91,18 +90,13 @@ H.init({
   environment: process.env.NODE_ENV ?? "development",
 });
 
-// Initialize OpenTelemetry with Jaeger exporter
 const resource = new Resource({
   [SemanticResourceAttributes.SERVICE_NAME]: "prospectpro-observability",
   [SemanticResourceAttributes.SERVICE_VERSION]: "1.0.0",
 });
 
-const jaegerExporter = new JaegerExporter({
-  endpoint: process.env.JAEGER_ENDPOINT || "http://localhost:14268/api/traces",
-});
-
 const tracerProvider = new NodeTracerProvider({ resource });
-tracerProvider.addSpanProcessor(new SimpleSpanProcessor(jaegerExporter));
+// Only Highlight OTLP exporter should be configured here
 tracerProvider.register();
 
 const tracer = trace.getTracer("prospectpro-observability", "1.0.0");
@@ -1287,11 +1281,6 @@ class ObservabilityServer {
       status: "healthy",
       timestamp: new Date().toISOString(),
       checks: {
-        jaeger_connection: {
-          status: "unknown",
-          endpoint:
-            process.env.JAEGER_ENDPOINT || "http://localhost:14268/api/traces",
-        },
         tracer_provider: {
           status: tracerProvider ? "active" : "inactive",
         },
@@ -1301,14 +1290,7 @@ class ObservabilityServer {
       },
     };
 
-    // Test Jaeger connectivity (simplified)
-    try {
-      // In a real implementation, this would make a test request to Jaeger
-      health.checks.jaeger_connection.status = "connected";
-    } catch (error) {
-      health.checks.jaeger_connection.status = "disconnected";
-      health.checks.jaeger_connection.error = error.message;
-    }
+    // Jaeger connectivity check removed
 
     return {
       content: [
