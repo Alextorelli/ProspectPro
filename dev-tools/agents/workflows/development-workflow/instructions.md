@@ -43,6 +43,7 @@ Own day-to-day product development, enforce code quality, and orchestrate MCP-fi
 3. **Environment validation**: `Supabase: Ensure Session`, `Supabase: Link Project`, and `Workspace: Validate Configuration` tasks at session start.
 4. **MCP-first**: no PostgreSQL MCP or ad-hoc curl scripts; use listed MCP calls (Supabase, Observability, etc.).
 5. **Zero-fake-data**: confirm enrichment authenticity using Supabase queries and Highlight logs when touching lead data.
+6. **Staging alias**: deploy previews with `npm run deploy:preview` and, when validation passes, promote to the persistent QA domain via `npm run deploy:staging:alias` (requires `STAGING_DEPLOY_URL` env var). Staging lives at <https://staging.prospectpro.appsmithery.co>.
 
 ## Testing Hierarchy
 
@@ -82,6 +83,8 @@ npx playwright test --reporter=list
 | Dev server              | `npm run dev`                                                                              |
 | React DevTools bridge   | `npm run devtools:react`                                                                   |
 | Full validation         | VS Code “Test: Full Stack Validation”                                                      |
+| Preview deploy          | `npm run deploy:preview`                                                                   |
+| Promote preview → QA    | `STAGING_DEPLOY_URL=<url> npm run deploy:staging:alias`                                    |
 | Frontend deploy         | VS Code “Deploy: Full Automated Frontend”                                                  |
 | Start observability MCP | `npm run mcp:start` (root) or `npm run start:production` in `dev-tools/agents/mcp-servers` |
 

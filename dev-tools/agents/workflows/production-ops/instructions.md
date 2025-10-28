@@ -36,11 +36,11 @@ await mcp.github.create_pull_request({
 // Production telemetry sweep (Highlight + Supabase + Vercel)
 await mcp.observability.collect_and_summarize_logs({
   supabaseFunction: "business-discovery-background",
-  vercelUrl: "https://prospectpro.vercel.app",
+  vercelUrl: "https://prospectpro.appsmithery.co",
   sinceMinutes: 30,
 });
 await mcp.observability.vercel_status_check({
-  vercelUrl: "https://prospectpro.vercel.app",
+  vercelUrl: "https://prospectpro.appsmithery.co",
 });
 
 // Incident response coordination
@@ -89,10 +89,14 @@ npx --yes supabase@latest functions deploy campaign-export-user-aware --no-verif
 # 3. Monitor telemetry (Highlight + Supabase + Vercel)
 mcp observability collect_and_summarize_logs \
   --supabaseFunction business-discovery-background \
-  --vercelUrl https://prospectpro.vercel.app \
+  --vercelUrl https://prospectpro.appsmithery.co \
   --sinceMinutes 10
 
-# 4. Run production smoke tests (Highlight ingests failures automatically)
+# 4. Promote validated preview to staging alias for QA sign-off
+# (Provide the preview URL from the latest `npm run deploy:preview` output)
+STAGING_DEPLOY_URL=https://<preview-id>.vercel.app npm run deploy:staging:alias
+
+# 5. Run production smoke tests (Highlight ingests failures automatically)
 mcp observability validate_ci_cd_suite --suite full
 ```
 
@@ -154,7 +158,7 @@ mcp supabase_troubleshooting generate_incident_timeline --incidentId=$INCIDENT_I
 mcp observability open_highlight_dashboard --project prospectpro --incidentId $INCIDENT_ID
 
 # Check Vercel status
-mcp observability vercel_status_check --vercelUrl https://prospectpro.vercel.app
+mcp observability vercel_status_check --vercelUrl https://prospectpro.appsmithery.co
 
 # Review database pool health
 mcp supabase check_pool_health
@@ -241,7 +245,7 @@ mcp supabase execute_query --query "SELECT 1" || alert
 mcp integration_hub check_integration_health || alert
 
 # 4. Frontend accessibility + status
-mcp observability vercel_status_check --vercelUrl https://prospectpro.vercel.app || alert
+mcp observability vercel_status_check --vercelUrl https://prospectpro.appsmithery.co || alert
 
 # 5. Highlight/Observability MCP smoke
 mcp observability start_trace --traceName "healthcheck" || true

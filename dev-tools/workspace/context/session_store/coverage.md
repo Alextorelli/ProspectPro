@@ -1,3 +1,9 @@
+# 2025-10-28: Staging Subdomain Alias
+
+- Added `deploy:staging:alias` npm script for Vercel preview → staging alias automation.
+- Documented staging hostname (`staging.prospectpro.appsmithery.co`) in runtime/E2E guides.
+- Logged alias workflow updates in settings-staging.md; inventories refreshed via `npm run docs:update`.
+
 # 2025-10-27: Session Store Cleanup & Doc Refresh
 
 - Action: Removed empty session_store/ directory after context store migration. Confirmed all agent context files are now flat and environment overlays are loaded from shared/environments/.
