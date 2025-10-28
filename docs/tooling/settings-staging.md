@@ -34,3 +34,9 @@
 - Refreshed inventories with `npm run docs:update`.
 
 **Action:** Review and merge these changes, then run `npm run docs:update` to update all inventories and documentation references.
+
+## 2025-10-28: Staging Subdomain Alias
+
+- Added npm script: `deploy:staging:alias` to automate Vercel preview → staging subdomain aliasing.
+- Staging hostname `staging.prospectpro.appsmithery.co` now documented in runtime and E2E docs.
+- Alias creation and usage logged for agent/QA workflows.

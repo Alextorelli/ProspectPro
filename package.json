@@ -4,6 +4,7 @@
   "type": "module",
   "description": "ProspectPro - Verified Business Intelligence Platform with Zero Fake Data Policy",
   "scripts": {
+    "deploy:staging:alias": "npx vercel@48.6.0 alias set $STAGING_DEPLOY_URL staging.prospectpro.appsmithery.co",
     "env:pull": "npx vercel@48.6.0 env pull .env.local",
     "deploy:preview": "npx vercel@48.6.0",
     "deploy:prod": "npm run lint && npm test && npx playwright test && npx vercel@48.6.0 --prod",

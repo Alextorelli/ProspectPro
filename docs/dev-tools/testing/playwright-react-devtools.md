@@ -1,5 +1,10 @@
 # Playwright + React DevTools E2E Suite Workplan (Temp)
 
+## Staging Environment
+
+- Staging preview alias: https://staging.prospectpro.appsmithery.co (set via `npm run deploy:staging:alias`)
+- Use this domain for persistent QA, agent, and E2E validation.
+
 ## Phase 0 — Readiness
 
 - Confirm `microsoft/playwright-mcp` registry entry resolves with `npm run build:tools` and `npx playwright install`.
