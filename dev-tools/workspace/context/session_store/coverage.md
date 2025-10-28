@@ -394,3 +394,18 @@ ev## 2025-10-23: Codespaces Bootstrap Realignment
 
 **Inventories Updated**: `dev-tools-filetree.txt`
 
+
+## 2025-10-28: Chatmode & CI Workflow Sync
+
+**Changes**:
+- Updated all chatmode files to reference flattened workflow paths
+- Injected staging deployment instructions and telemetry endpoints
+- Refreshed chatmode-manifest.json with new npm scripts
+- Enhanced CI workflows with artifact collection and observability logging
+
+**Artifacts**:
+- CI logs now captured in `dev-tools/reports/ci/<workflow>/<run>`
+- Chatmode manifest includes deployment script reference
+
+**Validation**: All contexts pass `npm run validate:contexts`
+

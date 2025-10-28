@@ -1,47 +1,25 @@
-# ProspectPro Chat Modes (Persona Aligned)
+# Custom Agent Chat Modes
 
-ProspectPro ships **four chat participants** that mirror the MCP agent personas. Each mode produces a full plan in one response and enforces Supabase-first, MCP-first, zero-fake-data governance.
+## Available Modes
 
-| Mode File                          | Mission                                                   | Trigger Scenarios                                        | Core MCP Servers                                                      |
-| ---------------------------------- | --------------------------------------------------------- | -------------------------------------------------------- | --------------------------------------------------------------------- |
-| `System Architect.chatmode.md`     | Architecture reviews, schema planning, integration design | New migrations, external services, structural refactors  | `postgresql`, `supabase-troubleshooting`, `integration-hub`           |
-| `Production Ops.chatmode.md`       | Deployments, incident response, rollback orchestration    | Shipping edge/frontend updates, outages, rollback calls  | `integration-hub`, `supabase-troubleshooting`, `postgresql`, `github` |
-| `Observability.chatmode.md`        | OTEL spans, diagnostics, compliance monitoring            | Error spikes, latency regressions, zero-fake-data audits | `supabase-troubleshooting`, `postgresql`, `integration-hub`           |
-| `Development Workflow.chatmode.md` | Feature delivery, testing automation, MCP adoption        | Feature work, QA pipelines, PR preparation               | `chrome-devtools`, `github`, `integration-hub`, `postgresql`          |
+| Mode | File | Workflows |
+|------|------|-----------|
+| Development Workflow | `Development Workflow.chatmode.md` | `development-workflow.{instructions,toolset}` |
+| Production Ops | `Production Ops.chatmode.md` | `production-ops.{instructions,toolset}` |
+| Observability | `Observability.chatmode.md` | `observability.{instructions,toolset}` |
+| System Architect | `System Architect.chatmode.md` | `system-architect.{instructions,toolset}` |
 
-## Activation Workflow
+## Deployment Scripts
 
-1. Open Copilot Chat (`Ctrl+Alt+I`).
-2. Reference a mode: `@workspace Apply .github/chatmodes/System Architect.chatmode.md to review this migration`.
-3. Attach supporting files (`#file scripts/operations/ensure-supabase-cli-session.sh`).
-4. Execute the plan returned by the persona (diagnosis → actions → validation → traceability).
+- `npm run env:pull` - Sync Vercel environment variables
+- `npm run deploy:preview` - Deploy preview build
+- `npm run deploy:staging:alias` - Alias to staging subdomain
+- `npm run deploy:prod` - Full production deployment
 
-## Mandatory Tasks
+## Staging Workflow
 
-- `npm run mcp:chat:sync` _(VS Code task: MCP: Sync Chat Participants)_
-- `npm run mcp:chat:validate` _(VS Code task: MCP: Run Chat Validation)_
-- `npm run docs:update && npm run lint && npm test && npm run supabase:test:db`
+1. Deploy preview: `npm run deploy:preview`
+2. Get preview URL from output
+3. Alias to staging: `npm run deploy:staging:alias`
 
-## Governance Guardrails
-
-- Stage all `.github/` / `.vscode/` changes in `docs/tooling/settings-staging.md` with rationale, risk, rollback.
-- Archive chatmode rollouts under `dev-tools/workspace/context/session_store/archive/`.
-- Audit enrichment changes with MCP tools to maintain zero-fake-data compliance.
-- Keep OTEL spans, circuit breakers, and Supabase auth helpers intact when delivering fixes.
-
-## Maintenance Checklist
-
-- [ ] Chatmode prompts match latest personas and tooling
-- [ ] `chatmode-manifest.json` regenerated and committed
-- [ ] Documentation (`README.md`, `IMPLEMENTATION_SUMMARY.md`, platform playbooks) updated
-- [ ] Validation pipeline executed and logged in staging doc
-- [ ] Archive created with manifest + validation output
-
-## Reference
-
-- Agent instructions: `dev-tools/agents/workflows/**`
-- MCP registry: `dev-tools/agents/mcp-servers/registry.json`
-- Governance: `docs/tooling/settings-staging.md`
-- System architecture: `docs/technical/SYSTEM_REFERENCE.md`
-
-Keep chatmodes synchronized with their agent counterparts so Codespaces automation, MCP tooling, and governance stay aligned.
+See `chatmode-manifest.json` for full configuration.

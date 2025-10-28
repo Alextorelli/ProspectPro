@@ -40,3 +40,11 @@
 - Added npm script: `deploy:staging:alias` to automate Vercel preview → staging subdomain aliasing.
 - Staging hostname `staging.prospectpro.appsmithery.co` now documented in runtime and E2E docs.
 - Alias creation and usage logged for agent/QA workflows.
+
+## 2025-10-28: Chatmode & Workflow Sync
+
+- Flattened workflow references in all chatmode files
+- Added staging deployment instructions to chatmodes
+- Enhanced CI workflows with automated artifact collection
+- All logs now route to `dev-tools/reports/ci/`
+
