@@ -1,82 +1,60 @@
 %%{init: { "theme": "dark", "fontFamily": "Inter", "flowchart": { "htmlLabels": false, "curve": "monotoneX" } }}%%
-flowchart TB
-    subgraph ENV["🚀 Production Environment"]
-        ENV_LABEL["Read-Only · Approval Required · Restricted MCP Access"]
-    end
-    
-    subgraph ORCH["🧠 Orchestration Layer"]
-        direction LR
-        CM["🗂️ Context Manager"]
-        AO["🤖 Agent Orchestrator"]
-        EM["🌍 Environment Manager<br/><i>Approval Gate Active</i>"]
-    end
-
-    ENV --> EM
-    EM --> ORCH
-    CM --> AO
-
-    subgraph APPROVAL["✋ Approval Layer"]
-        HUMAN["👤 Human Approval Required"]
-    end
-
-    AO --> APPROVAL
-
-    subgraph AGENTS["👥 Agent Workflows"]
-        direction LR
+flowchart LR
+    subgraph OPS_FLOW["🚀 Production Ops Agent"]
+        direction TB
+        OPS_START["🚀 Start"]
+        OPS_ORCH["🧠 Orchestrator<br/>Request Deploy"]
+        OPS_APPROVE["✋ Human Approval<br/>Required"]
+        OPS_MEM["🧠 Load Context<br/>40 entries · Audit"]
+        OPS_MCP["🌐 MCP Mesh<br/>Ship & Observe"]
+        OPS_SIG["🎯 Deploy Status<br/>📊 Telemetry"]
+        OPS_SAVE["💾 Checkpoint<br/>Pre/Post Deploy"]
+        OPS_END["✅ Complete"]
         
-        subgraph OPS_FLOW["🚀 Production Ops Agent"]
-            direction TB
-            OPS_START["🚀 Start"]
-            OPS_MEM["🧠 Load Context<br/>40 entries · Audit"]
-            OPS_MCP["🌐 MCP Mesh<br/>Ship & Observe"]
-            OPS_SIG["🎯 Deploy Status<br/>📊 Telemetry"]
-            OPS_SAVE["💾 Checkpoint<br/>Pre/Post Deploy"]
-            OPS_END["✅ Complete"]
-            
-            OPS_START --> OPS_MEM
-            OPS_MEM --> OPS_MCP
-            OPS_MCP --> OPS_SIG
-            OPS_SIG --> OPS_SAVE
-            OPS_SAVE --> OPS_END
-            OPS_END -.-> OPS_START
-        end
-
-        subgraph OBS_FLOW["📈 Observability Agent (Support)"]
-            direction TB
-            OBS_START["🚀 Start"]
-            OBS_MEM["🧠 Load Context<br/>Read-Only"]
-            OBS_MCP["🌐 MCP Mesh<br/>Read Telemetry"]
-            OBS_SIG["🚨 Incident Alerts<br/>📊 Metrics"]
-            OBS_SAVE["💾 Checkpoint<br/>Incident Only"]
-            OBS_END["✅ Complete"]
-            
-            OBS_START --> OBS_MEM
-            OBS_MEM --> OBS_MCP
-            OBS_MCP --> OBS_SIG
-            OBS_SIG --> OBS_SAVE
-            OBS_SAVE --> OBS_END
-            OBS_END -.-> OBS_START
-        end
+        OPS_START --> OPS_ORCH
+        OPS_ORCH --> OPS_APPROVE
+        OPS_APPROVE -- "Approved" --> OPS_MEM
+        OPS_APPROVE -- "Rejected" -.-> OPS_END
+        OPS_MEM --> OPS_MCP
+        OPS_MCP --> OPS_SIG
+        OPS_SIG --> OPS_SAVE
+        OPS_SAVE --> OPS_END
+        OPS_END -.-> OPS_START
     end
 
-    APPROVAL -- "Approved" --> OPS_START
-    APPROVAL -- "Rejected" -.-> AO
-    AO -- "Monitor Production" --> OBS_START
-    OBS_SIG -- "Critical Incident" ==> APPROVAL
+    subgraph OBS_FLOW["📈 Observability Agent (Support)"]
+        direction TB
+        OBS_START["🚀 Start"]
+        OBS_ORCH["🧠 Orchestrator<br/>Monitor Production"]
+        OBS_MEM["🧠 Load Context<br/>Read-Only"]
+        OBS_MCP["🌐 MCP Mesh<br/>Read Telemetry"]
+        OBS_SIG["🚨 Incident Alerts<br/>📊 Metrics"]
+        OBS_SAVE["💾 Checkpoint<br/>Incident Only"]
+        OBS_END["✅ Complete"]
+        
+        OBS_START --> OBS_ORCH
+        OBS_ORCH --> OBS_MEM
+        OBS_MEM --> OBS_MCP
+        OBS_MCP --> OBS_SIG
+        OBS_SIG --> OBS_SAVE
+        OBS_SAVE --> OBS_END
+        OBS_SIG -- "Critical" ==> OPS_ORCH
+        OBS_END -.-> OBS_START
+    end
 
     subgraph SHARED["🔄 Shared Infrastructure"]
-        direction LR
+        direction TB
+        ENV["🚀 Production<br/>Read-Only · Approval Required"]
+        CM["🗂️ Context Manager"]
         MEMORY["🧠 Memory Store<br/>Deploy History · Configs · Audit"]
-        MCP["🌐 Restricted MCP<br/>Supabase (Deploy) · GitHub (PR)<br/>Utility (RO)"]
+        MCP["🌐 Restricted MCP<br/>Supabase (Deploy) · GitHub (PR) · Utility (RO)"]
     end
 
-    AGENTS <==> SHARED
-    ORCH <--> SHARED
-    APPROVAL -.-> EM
+    OPS_FLOW -.-> SHARED
+    OBS_FLOW -.-> SHARED
+    SHARED -.-> OPS_FLOW
+    SHARED -.-> OBS_FLOW
 
-    style ENV fill:#991b1b,stroke:#ef4444,stroke-width:2px
-    style ORCH fill:#1a1a1a,stroke:#ef4444,stroke-width:2px
-    style APPROVAL fill:#854d0e,stroke:#fbbf24,stroke-width:3px
     style OPS_FLOW fill:#3a1a1a,stroke:#f87171,stroke-width:2px
     style OBS_FLOW fill:#2a1a3a,stroke:#a78bfa,stroke-width:2px,stroke-dasharray: 5 5
     style SHARED fill:#1a1a1a,stroke:#ef4444,stroke-width:2px
@@ -84,4 +62,4 @@ flowchart TB
     style OBS_START fill:#4c1d95,stroke:#a78bfa,stroke-width:2px,stroke-dasharray: 5 5
     style OPS_END fill:#7f1d1d,stroke:#f87171,stroke-width:3px
     style OBS_END fill:#4c1d95,stroke:#a78bfa,stroke-width:2px,stroke-dasharray: 5 5
-    style HUMAN fill:#854d0e,stroke:#fbbf24,stroke-width:2px
+    style OPS_APPROVE fill:#854d0e,stroke:#fbbf24,stroke-width:3px
