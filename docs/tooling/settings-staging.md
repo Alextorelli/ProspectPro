@@ -19,3 +19,18 @@
 - This resolves parse errors and ensures only supported MCPs are loaded.
 
 **Action:** Reload VS Code to apply changes.
+
+## 2025-10-28: Vercel/Agent Workflow Optimization
+
+- Pinned Node to v20 for Vercel parity; recommend `npx vercel@48.6.0` for all CLI usage (no global install).
+- Added baseline npm scripts: `env:pull`, `deploy:preview`, `deploy:prod` (runs lint/test/playwright before prod deploy).
+- Standardized `npm run mcp:troubleshoot` and `npm run docs:update` as required tools for all devs/agents.
+- Documented staging as a Vercel Preview alias (not a paid target); recommend `vercel alias set <deploy> staging.prospectpro.appsmithery.co` for persistent QA.
+- Updated workflow docs: local bootstrap via `npm run dev`, integration check with `vercel dev`, feature testing with `npm run lint`, `npm test`, `npx playwright test`, `npm run validate:contexts`.
+- Added automation task: Deploy Summary watcher (Observability MCP).
+- Build config: Use repo-specific minimal `vercel.json` for React/Vite; secrets managed via dashboard only.
+- Testing: Noted existing CI workflows (`docs-automation.yml`, `playwright.yml`, `mcp-agent-validation.yml`); recommend Vercel check suite after Playwright CI is stable.
+- Maintenance: Monthly run of `dev-tools/scripts/automation/remove-legacy-paths.sh`, log results in `dev-tools/reports/`.
+- Refreshed inventories with `npm run docs:update`.
+
+**Action:** Review and merge these changes, then run `npm run docs:update` to update all inventories and documentation references.
