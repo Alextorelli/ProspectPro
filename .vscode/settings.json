@@ -187,5 +187,6 @@
   "mermaidChart.defaultTheme": "dark",
   "mermaidChart.externalSnippets": ["docs/shared/mermaid/config/mermaid.json"],
   "vitest.nodeEnv": {},
-  "deno.cacheOnSave": false
+  "deno.cacheOnSave": false,
+  "chat.mcp.autostart": "never"
 }
