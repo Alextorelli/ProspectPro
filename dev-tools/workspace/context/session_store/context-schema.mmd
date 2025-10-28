@@ -1,0 +1,39 @@
+%%{init: { "theme": "dark", "fontFamily": "Inter", "flowchart": { "htmlLabels": false, "curve": "monotoneX" } }}%%
+flowchart TB
+    subgraph ORCH["Agent Orchestration"]
+        direction LR
+        AO["🤖 Agent Orchestrator"]
+        CM["🗂️ Context Manager"]
+        DEV["‍💻 Dev Agent"]
+        OPS["🚀 Ops Agent"]
+    end
+
+    subgraph DATA["📊 Data & Telemetry"]
+        direction TB
+        SIG@{shape: "doc", label: "📡 Pipeline Signals"}
+        TEL@{shape: "doc", label: "📈 Release Telemetry"}
+    end
+
+    subgraph MCP["🌐 MCP Mesh"]
+        direction TB
+        SUP@{shape: "cyl", label: "🗄️ Supabase"}
+        GH@{shape: "cyl", label: "� GitHub"}
+        PW@{shape: "cyl", label: "� Playwright"}
+        C7@{shape: "cyl", label: "🛰️ Context7"}
+        UT@{shape: "cyl", label: "🧰 Utility"}
+    end
+
+
+    %% Core Workflow Cycle
+    CM -- "Stage Context" --> AO
+    AO -- "Launch Build" --> DEV
+    DEV -- "Execute Ops" --> MCP
+    MCP -- "Return Signals" --> SIG
+    SIG -.-> AO
+
+    AO -- "Request Deploy" --> OPS
+    OPS -- "Ship & Observe" --> MCP
+    MCP -- "Stream Telemetry" --> TEL
+    TEL -.-> CM
+
+
