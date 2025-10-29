@@ -1,3 +1,18 @@
+# 2025-10-29: Taskfile Root & Agent Taskfile Migration
+
+- Completed: Root `dev-tools/testing/Taskfile.yml` migration, YAML structure fix, and lint validation (all errors resolved, Task CLI ready).
+- Scaffolded per-agent Taskfiles for all major agents (business-discovery, enrichment-orchestrator, export-diagnostics, client-service-layer, context, etc.) in `dev-tools/testing/agents/<agent>/Taskfile.yml`.
+- Confirmed Task CLI discovers and lists all agent/unit/integration/e2e tasks as intended.
+- All changes align with the automation plan in `automated-tooling-update.md` and `Optimized Environment Config Patch Plan.md`.
+
+## Remaining Tasks
+
+- [ ] Update npm scripts (shims) to invoke Task CLI for agent test orchestration (e.g., `test:agents`, `test:agents:unit`, etc.)
+- [ ] Integrate Taskfile runners into `.vscode/tasks.json` and `launch.json` (replace legacy scripts with Task CLI wrappers)
+- [ ] Refresh inventories: run `npm run docs:update` and update `*-filetree.txt` in session_store
+- [ ] Stage and document all `.vscode`/CI changes in `docs/tooling/settings-staging.md`
+- [ ] Run post-migration validation: execute `task agents:test:full` and confirm all tests/coverage/artifacts are generated as expected
+- [ ] Log provenance and validation results in `coverage.md` and session_store
 # 2025-10-29: Agent Test Suite ESM/Spy Fix & Validation
 
 - Completed ESM-safe refactor of agent/unit/integration tests (ConfigLocator, MCPClientManager, etc.)
