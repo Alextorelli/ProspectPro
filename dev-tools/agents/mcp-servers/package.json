@@ -8,6 +8,7 @@
     "start:production": "node environments/production.js",
     "start:development": "node environments/development.js",
     "start:troubleshooting": "node environments/troubleshooting.js",
+    "start:observability": "node observability-server.js",
     "start:utility": "node utility/dist/index.js",
     "start:all": "concurrently \"npm run start:production\" \"npm run start:development\" \"npm run start:troubleshooting\" \"npm run start:utility\"",
     "build:tools": "npm run build --prefix utility",
