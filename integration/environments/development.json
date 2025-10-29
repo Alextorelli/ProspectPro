@@ -1,59 +1,44 @@
 {
   "name": "development",
   "description": "Local development sandbox with unrestricted access for rapid iteration",
+  "url": "http://localhost:5173",
   "supabase": {
-    "projectRef": "dev-sriycekxdqnesdsgwiuc",
-    "apiUrl": "http://localhost:54321",
-    "anonKey": "sb_publishable_your_key_here",
-    "serviceRoleKey": null
-  },
-  "vercel": {
-    "deploymentUrl": "http://localhost:5173",
-    "projectName": "prospect-pro-dev"
-  },
-  "apiRateLimits": {
-    "hunter_io": {
-      "monthlyLimit": 100,
-      "alertThreshold": 80,
-      "unit": "searches"
-    },
-    "neverbounce": {
-      "monthlyLimit": 1000,
-      "alertThreshold": 750,
-      "unit": "verifications"
-    },
-    "google_places": {
-      "monthlyLimit": 10000,
-      "alertThreshold": 8000,
-      "unit": "requests"
-    }
-  },
-  "featureFlags": {
-    "enableAsyncDiscovery": true,
-    "enableZeroFakeDataAudits": true,
-    "enableRealtimeCampaigns": true,
-    "enableExperimentalMcpTools": true
-  },
-  "monitoring": {
-    "otelEndpoint": "http://localhost:4318/v1/traces",
-    "logDashboard": "http://localhost:3000/logs"
-  },
-  "highlight": {
-    "projectIdEnv": "VITE_HIGHLIGHT_PROJECT_ID",
-    "backendApiKeyEnv": "HIGHLIGHT_BACKEND_API_KEY",
-    "logDrainEndpointEnv": "HIGHLIGHT_LOGDRAIN_ENDPOINT",
-    "logDrainSecretEnv": "HIGHLIGHT_LOGDRAIN_SECRET",
-    "serviceName": "prospect-pro-dev"
+    "projectRef": "sriycekxdqnesdsgwiuc",
+    "url": "https://sriycekxdqnesdsgwiuc.supabase.co",
+    "anonKey": "${VITE_SUPABASE_ANON_KEY}",
+    "serviceRoleKey": "${SUPABASE_SERVICE_ROLE_KEY}"
   },
   "permissions": {
     "writeOperations": true,
-    "canDeploy": true,
+    "canDeploy": false,
     "canFetchLogs": true,
     "canRunTests": true,
-    "requiresApproval": false
+    "requiresApproval": false,
+    "allowedMcpTools": [
+      "supabase:query",
+      "supabase:insert",
+      "supabase:update",
+      "utility:memory",
+      "observability:log"
+    ]
   },
-  "constraints": {
-    "maxScratchpadEntries": 100,
-    "maxTaskConcurrency": 6
+  "flags": {
+    "enableAsyncDiscovery": true,
+    "enableRealtimeCampaigns": false,
+    "enableDebugMode": true
+  },
+  "env": {
+    "NODE_ENV": "development",
+    "VITE_SUPABASE_URL": "https://sriycekxdqnesdsgwiuc.supabase.co",
+    "VITE_SUPABASE_ANON_KEY": "${VITE_SUPABASE_ANON_KEY}"
+  },
+  "mcpServers": {
+    "command": "node",
+    "args": [
+      "dev-tools/agents/mcp-servers/environments/development.js"
+    ],
+    "env": {
+      "ENVIRONMENT": "development"
+    }
   }
 }

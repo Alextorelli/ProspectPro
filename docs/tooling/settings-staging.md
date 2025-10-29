@@ -1,3 +1,17 @@
+## 2025-10-29: Context, Launch, and MCP Alignment (Staged)
+
+**Planned .vscode/.github config changes:**
+
+- Update `.vscode/launch.json` to replace deprecated `integration/environments/*.env` references with generated `.env.<env>` files under `dev-tools/agents`.
+- Update `.vscode/tasks.json` to use context-manager environment switch commands instead of `generate-configs.mjs --env`, preserving all required task inputs (e.g., sessionJWT, functionName).
+- Ensure `.vscode/mcp_config.json` memory path points to `dev-tools/workspace/context/session_store/memory.jsonl` and matches the Utility MCP config.
+- Document all MCP config changes and memory path updates here before applying to live config.
+- All changes staged here before live edits; after validation, merge and run `npm run docs:update` to refresh inventories.
+
+**Action:**
+
+- After staging, proceed with environment regeneration, agent context switching, MCP rebuild, and suite restart as described in the alignment plan.
+
 ## 2025-10-28: Observability Standardization
 
 **Jaeger deprecation:**

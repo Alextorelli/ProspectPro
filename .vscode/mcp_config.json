@@ -51,7 +51,9 @@
     "utility": {
       "type": "stdio",
       "command": "node",
-      "args": ["./dev-tools/agents/mcp-servers/utility/dist/index.js"],
+      "args": [
+        "./dev-tools/agents/mcp-servers/utility/dist/index.js"
+      ],
       "env": {
         "MCP_MEMORY_FILE_PATH": "${input:memory_file_path}"
       }
@@ -70,7 +72,9 @@
     "microsoft/playwright-mcp": {
       "type": "stdio",
       "command": "npx",
-      "args": ["@playwright/mcp@latest"],
+      "args": [
+        "@playwright/mcp@latest"
+      ],
       "env": {
         "BROWSER_URL": "${input:browser_url}",
         "HEADLESS": "${input:headless}",
@@ -83,6 +87,35 @@
       "url": "https://mcp.context7.com/mcp",
       "headers": {
         "CONTEXT7_API_KEY": "${input:context7_api_key}"
+      }
+    }
+  },
+  "mcpServers": {
+    "development-mcp": {
+      "command": "node",
+      "args": [
+        "dev-tools/agents/mcp-servers/environments/development.js"
+      ],
+      "env": {
+        "ENVIRONMENT": "development"
+      }
+    },
+    "staging-mcp": {
+      "command": "node",
+      "args": [
+        "dev-tools/agents/mcp-servers/environments/production.js"
+      ],
+      "env": {
+        "ENVIRONMENT": "staging"
+      }
+    },
+    "production-mcp": {
+      "command": "node",
+      "args": [
+        "dev-tools/agents/mcp-servers/environments/production.js"
+      ],
+      "env": {
+        "ENVIRONMENT": "production"
       }
     }
   }

@@ -1,59 +1,50 @@
 {
   "name": "staging",
   "description": "Persistent staging environment for QA validation and agent testing before production deployment",
+  "url": "https://prospect-5i7mc1o2c-appsmithery.vercel.app",
   "supabase": {
-    "projectRef": "troubleshoot-sriycekxdqnesdsgwiuc",
-    "apiUrl": "https://troubleshoot-sriycekxdqnesdsgwiuc.supabase.co",
-    "anonKey": null,
-    "serviceRoleKey": null
+    "projectRef": "sriycekxdqnesdsgwiuc",
+    "url": "https://sriycekxdqnesdsgwiuc.supabase.co",
+    "anonKey": "${VITE_SUPABASE_ANON_KEY}",
+    "serviceRoleKey": "${SUPABASE_SERVICE_ROLE_KEY}"
   },
   "vercel": {
     "deploymentUrl": "https://prospect-5i7mc1o2c-appsmithery.vercel.app",
-    "projectName": "prospect-pro"
-  },
-  "apiRateLimits": {
-    "hunter_io": {
-      "monthlyLimit": 100,
-      "alertThreshold": 80,
-      "unit": "searches"
-    },
-    "neverbounce": {
-      "monthlyLimit": 1000,
-      "alertThreshold": 800,
-      "unit": "verifications"
-    },
-    "google_places": {
-      "monthlyLimit": 5000,
-      "alertThreshold": 4000,
-      "unit": "requests"
-    }
-  },
-  "featureFlags": {
-    "enableAsyncDiscovery": true,
-    "enableZeroFakeDataAudits": true,
-    "enableRealtimeCampaigns": true,
-    "enableNewUI": false
-  },
-  "monitoring": {
-    "otelEndpoint": "http://localhost:4318/v1/traces",
-    "logDashboard": "https://supabase.com/dashboard/project/troubleshoot-sriycekxdqnesdsgwiuc/logs"
-  },
-  "highlight": {
-    "projectIdEnv": "NEXT_PUBLIC_HIGHLIGHT_PROJECT_ID",
-    "backendApiKeyEnv": "HIGHLIGHT_BACKEND_API_KEY",
-    "logDrainEndpointEnv": "HIGHLIGHT_LOGDRAIN_ENDPOINT",
-    "logDrainSecretEnv": "HIGHLIGHT_LOGDRAIN_SECRET",
-    "serviceName": "prospect-pro-staging"
+    "projectName": "prospect-pro",
+    "teamSlug": "appsmithery"
   },
   "permissions": {
-    "writeOperations": false,
+    "writeOperations": true,
     "canDeploy": true,
     "canFetchLogs": true,
-    "canRunTests": false,
-    "requiresApproval": false
+    "canRunTests": true,
+    "requiresApproval": false,
+    "allowedMcpTools": [
+      "supabase:query",
+      "supabase:insert",
+      "supabase:update",
+      "utility:memory",
+      "observability:log",
+      "observability:trace"
+    ]
   },
-  "constraints": {
-    "maxScratchpadEntries": 25,
-    "maxTaskConcurrency": 1
+  "flags": {
+    "enableAsyncDiscovery": true,
+    "enableRealtimeCampaigns": true,
+    "enableDebugMode": false
+  },
+  "env": {
+    "NODE_ENV": "staging",
+    "VITE_SUPABASE_URL": "https://sriycekxdqnesdsgwiuc.supabase.co",
+    "VITE_SUPABASE_ANON_KEY": "${VITE_SUPABASE_ANON_KEY}"
+  },
+  "mcpServers": {
+    "command": "node",
+    "args": [
+      "dev-tools/agents/mcp-servers/environments/production.js"
+    ],
+    "env": {
+      "ENVIRONMENT": "staging"
+    }
   }
 }

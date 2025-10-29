@@ -9,7 +9,7 @@ const REPO_ROOT = resolve(__dirname, "../../..");
 
 const ENVIRONMENTS_SOURCE = resolve(
   REPO_ROOT,
-  "integration/environments/config/environments.yml"
+  "integration/environments/environments.yml"
 );
 const OUTPUT_DIR = resolve(REPO_ROOT, "integration/environments");
 const MCP_CONFIG_PATH = resolve(REPO_ROOT, ".vscode/mcp_config.json");

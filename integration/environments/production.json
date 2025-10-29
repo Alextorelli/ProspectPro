@@ -1,58 +1,48 @@
 {
   "name": "production",
   "description": "Live ProspectPro environment with verified customer data",
+  "url": "https://prospectpro.appsmithery.co",
   "supabase": {
     "projectRef": "sriycekxdqnesdsgwiuc",
-    "apiUrl": "https://sriycekxdqnesdsgwiuc.supabase.co",
-    "anonKey": null,
-    "serviceRoleKey": null
+    "url": "https://sriycekxdqnesdsgwiuc.supabase.co",
+    "anonKey": "${VITE_SUPABASE_ANON_KEY}",
+    "serviceRoleKey": "${SUPABASE_SERVICE_ROLE_KEY}"
   },
   "vercel": {
-    "deploymentUrl": "https://prospect-fyhedobh1-appsmithery.vercel.app",
-    "projectName": "prospect-pro"
-  },
-  "apiRateLimits": {
-    "hunter_io": {
-      "monthlyLimit": 500,
-      "alertThreshold": 400,
-      "unit": "searches"
-    },
-    "neverbounce": {
-      "monthlyLimit": 10000,
-      "alertThreshold": 8000,
-      "unit": "verifications"
-    },
-    "google_places": {
-      "monthlyLimit": 40000,
-      "alertThreshold": 32000,
-      "unit": "requests"
-    }
-  },
-  "featureFlags": {
-    "enableAsyncDiscovery": true,
-    "enableZeroFakeDataAudits": true,
-    "enableRealtimeCampaigns": true
-  },
-  "monitoring": {
-    "otelEndpoint": "https://otel.prospectpro.app/v1/traces",
-    "logDashboard": "https://supabase.com/dashboard/project/sriycekxdqnesdsgwiuc/logs"
-  },
-  "highlight": {
-    "projectIdEnv": "NEXT_PUBLIC_HIGHLIGHT_PROJECT_ID",
-    "backendApiKeyEnv": "HIGHLIGHT_BACKEND_API_KEY",
-    "logDrainEndpointEnv": "HIGHLIGHT_LOGDRAIN_ENDPOINT",
-    "logDrainSecretEnv": "HIGHLIGHT_LOGDRAIN_SECRET",
-    "serviceName": "prospect-pro"
+    "deploymentUrl": "https://prospectpro.appsmithery.co",
+    "projectName": "prospect-pro",
+    "teamSlug": "appsmithery"
   },
   "permissions": {
     "writeOperations": false,
-    "canDeploy": false,
+    "canDeploy": true,
     "canFetchLogs": true,
     "canRunTests": false,
-    "requiresApproval": true
+    "requiresApproval": true,
+    "allowedMcpTools": [
+      "supabase:query",
+      "observability:log",
+      "observability:trace",
+      "observability:error"
+    ]
   },
-  "constraints": {
-    "maxScratchpadEntries": 50,
-    "maxTaskConcurrency": 2
+  "flags": {
+    "enableAsyncDiscovery": true,
+    "enableRealtimeCampaigns": true,
+    "enableDebugMode": false
+  },
+  "env": {
+    "NODE_ENV": "production",
+    "VITE_SUPABASE_URL": "https://sriycekxdqnesdsgwiuc.supabase.co",
+    "VITE_SUPABASE_ANON_KEY": "${VITE_SUPABASE_ANON_KEY}"
+  },
+  "mcpServers": {
+    "command": "node",
+    "args": [
+      "dev-tools/agents/mcp-servers/environments/production.js"
+    ],
+    "env": {
+      "ENVIRONMENT": "production"
+    }
   }
 }
