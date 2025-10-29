@@ -5,7 +5,7 @@ import { defineConfig } from "vitest/config";
 const frontendRoot = path.resolve(__dirname, "app/frontend");
 
 // https://vitejs.dev/config/
-export default defineConfig({
+const frontendConfig = defineConfig({
   root: frontendRoot,
   plugins: [react()],
   resolve: {
@@ -38,3 +38,5 @@ export default defineConfig({
     css: true,
   },
 });
+
+export default [frontendConfig];
