@@ -51,6 +51,19 @@
 - Run `npm run docs:update` to regenerate indices (CODEBASE_INDEX, SYSTEM_REFERENCE) that reference testing assets or new observability utilities.
 - Record any monitoring endpoint updates (e.g., staging Highlight OTLP or Jaeger URLs) in `docs/tooling/settings-staging.md` alongside the Highlight node rollout.
 
+7. **Taskfile migration & VS Code shims**
+
+- Implement the Taskfile blueprint by authoring a curated root `Taskfile.yml` that exposes only entrypoints such as `bootstrap`, `test:all`, `deploy:frontend`, and `agents:<name>:orchestrate`, delegating to MECE domain Taskfiles under `dev-tools/tasks/`.
+- Scaffold domain-specific Taskfiles for `environment`, `supabase`, `edge`, `testing`, `observability`, `docs`, `roadmap`, `workspace`, and `context`, plus agent aggregators that include `dev-tools/testing/agents/<agent>/Taskfile.yml` for test fan-out.
+- Reduce `.vscode/tasks.json` to thin shims that shell into `task <target>` while preserving existing `inputs`, and document all editor configuration changes in `docs/tooling/settings-staging.md` prior to editing `.vscode/` assets.
+- Ensure secrets are managed through Taskfile `dotenv` / `env` blocks and environment helper tasks that load `integration/environments/*.json` overlays into session-scoped `.env` files.
+
+8. **Post-migration snapshot & inventory refresh**
+
+- After Taskfile migration completes, run repository and Supabase snapshot utilities (`node scripts/context/fetch-repo-context.js`, `node scripts/context/fetch-supabase-context.js`) to capture the updated automation topology.
+- Regenerate inventories (`repo-tree-summary.txt`, `app-filetree.txt`, `dev-tools-filetree.txt`, `integration-filetree.txt`) and append provenance to `coverage.md`, noting readiness to purge deprecated files.
+- Archive the snapshot artifacts under `dev-tools/workspace/context/session_store/` to support rollback and future audits.
+
 ## Supporting Notes
 
 - **Existing monitoring**: The React app already initialises Highlight’s browser SDK; staging and production configs reference shared OTLP endpoints. Supabase edge functions emit structured logs, and the MCP log forwarder captures automation telemetry into `dev-tools/reports/`.
@@ -66,7 +79,9 @@
 3. Commit Vitest/Playwright configuration wrappers and update `vite.config.ts` accordingly.
 4. Relocate existing specs/fixtures into the new agent-aware layout and enrich `setup.ts`.
 5. Stage editor/CI updates through `docs/tooling/settings-staging.md`, refresh inventories, and regenerate documentation indices.
-6. Validate the flow by running `task agents:test:full` (or the npm shim) and confirm telemetry artifacts land in `dev-tools/testing/reports/`.
+6. Implement the Taskfile blueprint (root Taskfile plus MECE domain Taskfiles) and convert `.vscode/tasks.json` into Task CLI shims.
+7. Validate critical flows (`task supabase:migrations:list`, `task agents:business-discovery:orchestrate`, `task observability:start`) and confirm telemetry artifacts land in `dev-tools/testing/reports/`.
+8. Capture post-migration snapshots and refreshed inventories to identify deprecated assets for removal.
 
 ---
 
