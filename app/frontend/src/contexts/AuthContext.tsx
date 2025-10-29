@@ -6,6 +6,7 @@ import React, {
   useRef,
   useState,
 } from "react";
+import { identifyHighlightUser, isHighlightEnabled } from "../lib/highlight";
 import { supabase } from "../lib/supabase";
 
 interface AuthContextType {
@@ -27,6 +28,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const [session, setSession] = useState<Session | null>(null);
   const [sessionUserId, setSessionUserId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const highlightUserIdentifierRef = useRef<string | null>(null);
   const lastAuthSnapshotRef = useRef<{
     event: AuthChangeEvent | null;
     userId: string | null;
@@ -110,6 +112,43 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
     return () => subscription.unsubscribe();
   }, []);
+
+  useEffect(() => {
+    if (!isHighlightEnabled()) {
+      return;
+    }
+
+    if (!user) {
+      highlightUserIdentifierRef.current = null;
+      return;
+    }
+
+    const identifier = user.email ?? user.id;
+
+    if (!identifier) {
+      return;
+    }
+
+    if (highlightUserIdentifierRef.current === identifier) {
+      return;
+    }
+
+    highlightUserIdentifierRef.current = identifier;
+
+    identifyHighlightUser(identifier, {
+      id: user.id,
+      email: user.email ?? undefined,
+      aud: user.aud ?? undefined,
+      role: user.role ?? undefined,
+      highlightDisplayName:
+        typeof user.user_metadata?.full_name === "string"
+          ? user.user_metadata.full_name
+          : user.email ?? undefined,
+      isEmailConfirmed: Boolean(user.email_confirmed_at),
+      hasPhone: Boolean(user.phone),
+      lastSignInAt: user.last_sign_in_at ?? undefined,
+    });
+  }, [user]);
 
   const signIn = async (email: string, password: string) => {
     const { error } = await supabase.auth.signInWithPassword({
