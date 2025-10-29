@@ -1,3 +1,67 @@
+# Monitoring & Testing Consolidation Plan (2025-10-29)
+
+## Current Snapshot vs Target State
+
+| Area | Current state | To-be (streamlined) |
+| --- | --- | --- |
+| **Highlight observability** | Frontend loads browser SDK; backend/dev-tools emit only Supabase/MCP logs. No full-stack correlation. | Add `dev-tools/observability/highlight-node/` wrapping `@highlight-run/node` (per Highlight Node docs). Single initializer exposes `initHighlightNode()` plus middleware/utilities so server code, agents, and Supabase functions can forward traces. Frontend keeps existing browser bootstrapping, referencing the new helper for cross-linking. Fallback to noop when credentials are absent. |
+| **Telemetry storage** | Artifacts scattered (browser Highlight, Supabase logs, ad-hoc reports). | Persist long-lived telemetry and coverage under `dev-tools/reports/` with subfolders for Highlight payload mirrors, Playwright traces, and Vitest coverage. Record environment wiring and any exceptions in `docs/tooling/settings-staging.md` prior to enabling new pipelines. |
+| **Testing tools** | Vitest (frontend only), Playwright (single spec), Deno harness (edge functions), manual React DevTools workflow. Entry points spread across npm scripts and large `.vscode/tasks.json`. | Standardise on Vitest + Playwright + Deno. Relocate suites to `dev-tools/testing/agents/<agent>/{unit,integration,e2e}` and use `tests/smoke/` for cross-app Playwright. Retire the standalone React DevTools workflow or wrap it as an optional Taskfile goal. |
+| **Automation** | Mixed npm scripts and VS Code tasks with no agent-level orchestration. | Introduce `dev-tools/testing/Taskfile.yml` and per-agent Taskfiles powering `task agents:test:{unit,integration,e2e,full}`. Provide a thin npm shim (`"test:agents": "task -d dev-tools/testing agents:test:full"`) and, once staged, point VS Code tasks at the Taskfile runners. |
+| **Configs** | Single Vitest config (`app/frontend/vitest.config.ts`) and root `playwright.config.ts` hard-coded to localhost. | Add `dev-tools/testing/configs/vitest.agents.config.ts` (Node environment, shared setup) and `dev-tools/testing/configs/playwright.agents.config.ts` (per-agent `testDir`, reporters, `PLAYWRIGHT_BASE_URL` env override). Limit the root Vite config to frontend projects only. |
+| **Setup utilities** | `dev-tools/testing/utils/setup.ts` is an empty stub. | Expand setup with deterministic fixtures and Supabase test stubs (no service-role secrets), and optionally call the shared Highlight Node helper. |
+| **Governance** | Manual inventory updates after ad-hoc changes. | After restructuring, refresh `session_store/*-filetree.txt`, append provenance notes to `coverage.md`, run `npm run docs:update`, and stage all `.vscode` or CI changes via `docs/tooling/settings-staging.md`. |
+
+## Implementation Blueprint
+
+1. **Highlight Node wrapper**
+  - Create `dev-tools/observability/highlight-node/` with:
+    - `index.ts` exporting `initHighlightNode`, request/edge helper hooks, and a noop fallback when Highlight env vars are missing.
+    - A README referencing Highlight docs (`/docs/sdk/nodejs`, `/docs/getting-started/server/js/nodejs`, `/docs/getting-started/frontend-backend-mapping`).
+    - Optional adapters for Express/Fastify-like handlers to ease reuse across agents and Supabase edge functions.
+  - Update backend functions and future agent services to consume the wrapper instead of embedding SDK logic per codepath.
+
+2. **Taskfile hierarchy**
+  - Add `dev-tools/testing/Taskfile.yml` defining `agents:test:{unit,integration,e2e,full}`, lint shortcuts, and report consolidation.
+  - Place per-agent Taskfiles beside the suites (`dev-tools/testing/agents/<agent>/Taskfile.yml`) to expose focused targets such as `task unit`, `task e2e`, and `task debug:e2e`.
+  - Provide an npm shim (`"test:agents": "task -d dev-tools/testing agents:test:full"`) and, once vetted, update VS Code task entries to invoke `task` commands instead of bespoke scripts.
+
+3. **Testing configs**
+  - Create `dev-tools/testing/configs/vitest.agents.config.ts` using the Node environment, shared setup file, coverage output under `dev-tools/testing/reports/coverage/`, and path aliases for agent fixtures.
+  - Create `dev-tools/testing/configs/playwright.agents.config.ts` delegating to `@playwright/test` with per-agent `testDir`, JSON/HTML reporters stored under `dev-tools/testing/reports/playwright/`, and `baseURL` derived from `PLAYWRIGHT_BASE_URL` (fallback staging URL).
+  - Trim the root `vite.config.ts` so the frontend project points at `app/frontend/vitest.config.ts` only.
+
+4. **Suite relocation**
+  - Move agent Vitest and Playwright specs into `dev-tools/testing/agents/<agent>/{unit,integration,playwright}` and centralise fixtures in `dev-tools/testing/utils/fixtures/`.
+  - Keep `tests/` for Playwright smoke packs (e.g., high-level auth/campaign/export flows) and document this scope in `tests/README.md`.
+  - Flesh out `dev-tools/testing/utils/setup.ts` with deterministic seeding helpers and conditional Highlight node bootstrapping.
+
+5. **Editor & automation alignment**
+  - Stage updates to `.vscode/tasks.json` and `.vscode/launch.json` so Task Explorer and debugging flows call the new Taskfile recipes rather than custom scripts.
+  - Note the adjustments in `docs/tooling/settings-staging.md` before merging, and keep extensions (Vitest, Playwright) in auto-detect mode for project discovery.
+
+6. **Inventory & documentation hygiene**
+  - After moving files, refresh `dev-tools/workspace/context/session_store/app-filetree.txt` and `dev-tools-filetree.txt` and log the restructuring in `dev-tools/workspace/context/session_store/coverage.md`.
+  - Run `npm run docs:update` to regenerate indices (CODEBASE_INDEX, SYSTEM_REFERENCE) that reference testing assets or new observability utilities.
+  - Record any monitoring endpoint updates (e.g., staging Highlight OTLP or Jaeger URLs) in `docs/tooling/settings-staging.md` alongside the Highlight node rollout.
+
+## Supporting Notes
+
+- **Existing monitoring**: The React app already initialises Highlight’s browser SDK; staging and production configs reference shared OTLP endpoints. Supabase edge functions emit structured logs, and the MCP log forwarder captures automation telemetry into `dev-tools/reports/`.
+- **Testing trio**: Vitest covers frontend utilities, Playwright drives UI smoke tests, and the Deno harness validates Supabase edge functions under `app/backend/functions/tests/`. The new structure keeps this minimal toolset while improving discoverability and automation.
+- **VS Code workflows**: Test Explorer already surfaces Vitest and Playwright via installed extensions; once Taskfiles are registered, agents can trigger domain-specific runs directly from VS Code without switching to bespoke npm scripts.
+- **Highlight goal**: Implementing the node wrapper enables full-stack session mapping per Highlight’s guidance while avoiding duplicated `H.init` calls across services.
+- **Governance reminder**: No `.vscode` or `.github` changes should bypass `docs/tooling/settings-staging.md`, and all telemetry endpoint adjustments must be tracked for observability audits.
+
+## Immediate Next Steps
+
+1. Scaffold the Highlight Node helper package with documentation links and noop fallback.
+2. Author the root and per-agent Taskfiles, plus the supporting npm shim.
+3. Commit Vitest/Playwright configuration wrappers and update `vite.config.ts` accordingly.
+4. Relocate existing specs/fixtures into the new agent-aware layout and enrich `setup.ts`.
+5. Stage editor/CI updates through `docs/tooling/settings-staging.md`, refresh inventories, and regenerate documentation indices.
+6. Validate the flow by running `task agents:test:full` (or the npm shim) and confirm telemetry artifacts land in `dev-tools/testing/reports/`.
+
 ---
 
 ## Monitoring Endpoint Validation (2025-10-28)

@@ -186,7 +186,7 @@
   "vitest.nodeEnv": {},
   "deno.cacheOnSave": false,
   "chat.mcp.autostart": "never",
-  "chat.agent.thinkingStyle": "expanded",
+  "chat.agent.thinkingStyle": "collapsed",
   "chat.allowAnonymousAccess": true,
   "chat.mcp.assisted.nuget.enabled": true,
   "chat.setup.signInDialogVariant": "default",
