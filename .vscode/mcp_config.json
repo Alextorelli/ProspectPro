@@ -5,7 +5,7 @@
       "type": "promptString",
       "description": "Path to the Utility MCP memory store",
       "password": false,
-      "default": "${workspaceFolder}/dev-tools/agents/context/session_store/memory.jsonl"
+      "default": "${workspaceFolder}/dev-tools/workspace/context/session_store/memory.jsonl"
     },
     {
       "id": "browser_url",

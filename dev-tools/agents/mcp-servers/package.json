@@ -10,7 +10,7 @@
     "start:troubleshooting": "node environments/troubleshooting.js",
     "start:observability": "node observability-server.js",
     "start:utility": "node utility/dist/index.js",
-    "start:all": "concurrently \"npm run start:production\" \"npm run start:development\" \"npm run start:troubleshooting\" \"npm run start:utility\"",
+    "start:all": "concurrently \"npm run start:production\" \"npm run start:development\" \"npm run start:troubleshooting\" \"npm run start:observability\" \"npm run start:utility\"",
     "build:tools": "npm run build --prefix utility",
     "validate": "echo '✅ All MCP servers validated successfully'",
     "install:deps": "npm install"
