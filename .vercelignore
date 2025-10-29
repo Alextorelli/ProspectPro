@@ -17,10 +17,8 @@ dist
 build
 
 # === Environment & Development Files ===
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+.env*
+*.env.local
 
 # === Archive & Legacy Files ===
 archive/

@@ -70,17 +70,14 @@ yarn-debug.log*
 yarn-error.log*
 
 # Environment variables
+# Canonical secrets live in .env.local generated via `npm run env:pull:*` tasks.
+# All other copies stay untracked unless explicitly whitelisted below.
 .env
-!.env.example
-!.env.docker
-.env.local
-.env.preview
-.env.production
-.env.runtime
-.env.development.local
-.env.test.local
-.env.production.local
-.env.vercel
+.env.*
+!/.env.example
+!/.env.sync
+!/.env.docker
+!dev-tools/agents/.env.agent.example
 dev-tools/agents/.env.agent.local
 
 # Docker runtime files

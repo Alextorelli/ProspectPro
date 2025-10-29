@@ -1,8 +1,8 @@
-# Supabase
+# Supabase CLI artifacts
 .branches
 .temp
 
-# dotenvx
+# Local environment snapshots (hydrated via root npm run env:pull:* commands)
 .env.keys
 .env.local
 .env.*.local
