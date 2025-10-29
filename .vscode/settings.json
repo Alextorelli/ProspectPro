@@ -184,7 +184,7 @@
   "mermaidChart.defaultTheme": "dark",
   "mermaidChart.externalSnippets": ["docs/shared/mermaid/config/mermaid.json"],
   "vitest.nodeEnv": {},
-  "deno.cacheOnSave": false,
+  "deno.cacheOnSave": true,
   "chat.mcp.autostart": "never",
   "chat.agent.thinkingStyle": "collapsed",
   "chat.allowAnonymousAccess": true,
@@ -210,5 +210,12 @@
   "github.copilot.chat.languageContext.typescript.enabled": true,
   "github.copilot.chat.newWorkspace.useContext7": true,
   "debug.javascript.unmapMissingSources": true,
-  "json.trace.server": "messages"
+  "json.trace.server": "messages",
+  "deno.internalDebug": true,
+  "deno.logFile": true,
+  "deno.cache": "/workspaces/ProspectPro/.deno_lsp",
+  "deno.codeLens.implementations": true,
+  "deno.codeLens.references": true,
+  "deno.codeLens.referencesAllFunctions": true,
+  "deno.codeLens.test": true
 }
