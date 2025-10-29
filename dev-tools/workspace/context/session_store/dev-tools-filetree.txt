@@ -243,6 +243,8 @@ dev-tools/
 |       |   |-- agent-MCP-map.mmd
 |       |   |-- agent-workflows-sequence.mmd
 |       |   |-- app-filetree.txt
+|       |   |-- automated-agent-update.md
+|       |   |-- client-service-layer-rename-status.md
 |       |   |-- context-development.mmd
 |       |   |-- context-mgmt.mmd
 |       |   |-- context-production.mmd
@@ -254,6 +256,7 @@ dev-tools/
 |       |   |-- ex3.mmd
 |       |   |-- mcp-integration-plan.md
 |       |   |-- mece-agent-mcp-integration-plan.md
+|       |   |-- Optimized Agents Config Patch Plan.md
 |       |   |-- patch-execution.sh
 |       |   |-- patch-implementation.sh
 |       |   |-- phase-5-validation-log.md
@@ -266,14 +269,13 @@ dev-tools/
 |       |   `-- ollama-helper.sh
 |       |-- session_store/
 |       |   |-- diagnostics/
+|       |   |-- Agent Testing Refactor Playbook (2025-.md
 |       |   |-- app-filetree.txt
-|       |   |-- automated-tooling-update.md
-|       |   |-- client-service-layer-rename-status.md
+|       |   |-- automated-agent-refactor.sh
 |       |   |-- coverage.md
 |       |   |-- dev-tools-filetree.txt
 |       |   |-- integration-filetree.txt
 |       |   |-- live-tooling-list.txt
-|       |   |-- Optimized Environment Config Patch Plan.md
 |       |   |-- rename-finalization-20251029-111629.log
 |       |   `-- repo-tree-summary.txt
 |       `-- event-bus.ts
