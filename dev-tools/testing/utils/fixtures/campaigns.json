@@ -1,0 +1,9 @@
+{
+  "test_campaign": {
+    "id": "cmp_test_001",
+    "business_type": "Coffee Shops",
+    "location": "Seattle, WA",
+    "status": "completed",
+    "test_data": true
+  }
+}

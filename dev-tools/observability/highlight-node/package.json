@@ -1,0 +1,19 @@
+{
+  "name": "@prospectpro/highlight-node",
+  "version": "1.0.0",
+  "description": "Shared Highlight.io Node.js wrapper for ProspectPro backend telemetry",
+  "main": "index.ts",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@highlight-run/node": "^4.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0",
+    "vitest": "^1.0.0"
+  }
+}
