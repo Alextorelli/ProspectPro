@@ -6,6 +6,7 @@ import { BrowserRouter } from "react-router-dom";
 import App from "./App";
 import "./index.css";
 import { supabase } from "./lib/supabase";
+
 const highlightProjectId =
   import.meta.env.VITE_HIGHLIGHT_PROJECT_ID ??
   import.meta.env.NEXT_PUBLIC_HIGHLIGHT_PROJECT_ID ??
