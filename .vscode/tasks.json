@@ -1,3 +1,99 @@
+    {
+      "label": "Test: Agents (Full Suite)",
+      "type": "shell",
+      "command": "npm run test:agents",
+      "group": "test",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Test: Agent Unit Tests",
+      "type": "shell",
+      "command": "npm run test:agents:unit",
+      "group": "test",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": ["$tsc"]
+    },
+    {
+      "label": "Test: Agent Integration Tests",
+      "type": "shell",
+      "command": "npm run test:agents:integration",
+      "group": "test",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": ["$tsc"]
+    },
+    {
+      "label": "Test: Agent E2E Tests",
+      "type": "shell",
+      "command": "npm run test:agents:e2e",
+      "group": "test",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Test: Agents Watch Mode",
+      "type": "shell",
+      "command": "npm run test:agents:watch",
+      "group": "test",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Test: Agents Coverage",
+      "type": "shell",
+      "command": "npm run test:agents:coverage",
+      "group": "test",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Test: Agents Lint",
+      "type": "shell",
+      "command": "npm run test:agents:lint",
+      "group": "test",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": ["$eslint-stylish"]
+    },
+    {
+      "label": "Test: Agents Clean",
+      "type": "shell",
+      "command": "npm run test:agents:clean",
+      "group": "test",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
 {
   "version": "2.0.0",
   "tasks": [

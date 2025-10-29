@@ -8,7 +8,7 @@ tasks:
   agents:test:unit:
     desc: Run all agent unit tests (Vitest)
     cmds:
-      - npx vitest --config {{.VITEST_CONFIG}} run --dir agents --include '**/unit/**/*.test.ts'
+      - npx vitest --config {{.VITEST_CONFIG}} run agents/unit
     sources:
       - agents/**/unit/**/*.test.ts
     generates:
@@ -17,7 +17,7 @@ tasks:
   agents:test:integration:
     desc: Run all agent integration tests (Vitest)
     cmds:
-      - npx vitest --config {{.VITEST_CONFIG}} run --dir agents --include '**/integration/**/*.test.ts'
+      - npx vitest --config {{.VITEST_CONFIG}} run agents/integration
     sources:
       - agents/**/integration/**/*.test.ts
     generates:

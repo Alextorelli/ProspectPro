@@ -13,6 +13,7 @@
 - [ ] Stage and document all `.vscode`/CI changes in `docs/tooling/settings-staging.md`
 - [ ] Run post-migration validation: execute `task agents:test:full` and confirm all tests/coverage/artifacts are generated as expected
 - [ ] Log provenance and validation results in `coverage.md` and session_store
+
 # 2025-10-29: Agent Test Suite ESM/Spy Fix & Validation
 
 - Completed ESM-safe refactor of agent/unit/integration tests (ConfigLocator, MCPClientManager, etc.)
