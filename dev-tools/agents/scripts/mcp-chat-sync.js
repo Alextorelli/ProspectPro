@@ -29,5 +29,35 @@ async function buildManifest() {
     throw new Error("No .chatmode.md files found in .github/chatmodes");
   }
 
-  // MOVED: This script now lives in dev-tools/agents/scripts/mcp-chat-sync.js
+  // Compose manifest object
+  const manifest = {
+    version: "2.0.0",
     generatedAt: new Date().toISOString(),
+    chatmodes: modes.map((id) => {
+      // Try to find the .chatmode.md file for this id
+      const file =
+        entries.find((entry) => slugify(entry.name) === id)?.name ||
+        `${id}.chatmode.md`;
+      return {
+        id,
+        name: id.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
+        file,
+        workflows: [], // Optionally fill in workflows if needed
+      };
+    }),
+  };
+  await fs.writeFile(manifestPath, JSON.stringify(manifest, null, 2));
+  console.log(`Chatmode manifest generated: ${manifestPath}`);
+}
+
+async function main() {
+  try {
+    await buildManifest();
+    process.exit(0);
+  } catch (err) {
+    console.error(err);
+    process.exit(1);
+  }
+}
+
+main();

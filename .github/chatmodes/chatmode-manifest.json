@@ -1,53 +1,30 @@
 {
   "version": "2.0.0",
+  "generatedAt": "2025-10-29T07:05:09.431Z",
   "chatmodes": [
     {
       "id": "development-workflow",
       "name": "Development Workflow",
       "file": "Development Workflow.chatmode.md",
-      "workflows": [
-        "dev-tools/agents/workflows/development-workflow.instructions.md",
-        "dev-tools/agents/workflows/development-workflow.toolset.jsonc"
-      ]
-    },
-    {
-      "id": "production-ops",
-      "name": "Production Ops",
-      "file": "Production Ops.chatmode.md",
-      "workflows": [
-        "dev-tools/agents/workflows/production-ops.instructions.md",
-        "dev-tools/agents/workflows/production-ops.toolset.jsonc"
-      ]
+      "workflows": []
     },
     {
       "id": "observability",
       "name": "Observability",
       "file": "Observability.chatmode.md",
-      "workflows": [
-        "dev-tools/agents/workflows/observability.instructions.md",
-        "dev-tools/agents/workflows/observability.toolset.jsonc"
-      ]
+      "workflows": []
+    },
+    {
+      "id": "production-ops",
+      "name": "Production Ops",
+      "file": "Production Ops.chatmode.md",
+      "workflows": []
     },
     {
       "id": "system-architect",
       "name": "System Architect",
       "file": "System Architect.chatmode.md",
-      "workflows": [
-        "dev-tools/agents/workflows/system-architect.instructions.md",
-        "dev-tools/agents/workflows/system-architect.toolset.jsonc"
-      ]
+      "workflows": []
     }
-  ],
-  "deployment": {
-    "scripts": {
-      "env:pull": "Sync Vercel environment variables",
-      "deploy:preview": "Deploy preview build to Vercel",
-      "deploy:staging:alias": "Alias preview to staging subdomain",
-      "deploy:prod": "Full production deployment with validation"
-    },
-    "staging": {
-      "domain": "staging.prospectpro.appsmithery.co",
-      "workflow": "Preview deploy + alias via npm scripts"
-    }
-  }
+  ]
 }
