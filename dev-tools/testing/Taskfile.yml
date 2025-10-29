@@ -1,0 +1,57 @@
+version: "3"
+
+tasks:
+  agents:test:unit:
+    desc: Run all agent unit tests (Vitest)
+    dir: dev-tools/testing
+    cmds:
+      - npx vitest --config ./configs/vitest.agents.config.ts run
+
+  agents:test:integration:
+    desc: Run all agent integration tests (Vitest)
+    dir: dev-tools/testing
+    cmds:
+      - npx vitest --config ./configs/vitest.agents.config.ts run --dir agents --include integration
+
+  agents:test:e2e:
+    desc: Run all agent E2E tests (Playwright)
+    dir: dev-tools/testing
+    cmds:
+      - npx playwright test --config=./configs/playwright.agents.config.ts
+
+  agents:test:full:
+    desc: Run all agent test suites (unit, integration, e2e)
+    deps: [agents:test:unit, agents:test:integration, agents:test:e2e]
+
+  lint:
+    desc: Lint all agent and test code
+    dir: dev-tools/testing
+    cmds:
+      - npx eslint agents/ utils/ configs/ --ext .ts,.tsx
+
+  report:coverage:
+    desc: Generate and consolidate coverage reports
+    dir: dev-tools/testing
+    cmds:
+      - npx vitest --config ./configs/vitest.agents.config.ts run --coverage
+      - npx playwright show-report --config=./configs/playwright.agents.config.ts
+
+      # Per-agent Taskfiles should be placed in dev-tools/testing/agents/<agent>/Taskfile.yml
+      # Example agent Taskfile:
+      # version: '3'
+      # tasks:
+      #   unit:
+      #     desc: Run unit tests for this agent
+      #     cmds:
+      #       - npx vitest run --dir unit
+      #   e2e:
+      #     desc: Run E2E tests for this agent
+      #     cmds:
+      #       - npx playwright test --dir e2e
+
+      - echo "✓ Reports cleaned"
+
+  reports:open:
+    desc: Open Playwright HTML report
+    cmds:
+      - npx playwright show-report {{.REPORTS_DIR}}/playwright
