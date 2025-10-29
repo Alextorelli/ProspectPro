@@ -120,3 +120,12 @@
 - Consolidated environments and utility server
 - Ran npm run docs:update and repo:scan to refresh all inventories
 - All changes staged and validated
+
+## 2025-10-29: Agent Test Suite Consolidation
+
+- Test suites relocated to dev-tools/testing/agents/<agent>/{unit,e2e}
+- Fixtures centralized in dev-tools/testing/utils/fixtures/
+- Taskfile.yml added for unified agent test orchestration
+- Vitest/Playwright config wrappers updated for agent-centric runs
+- setup.ts expanded for deterministic seeding and Highlight node bootstrapping
+- Documentation and inventories refreshed

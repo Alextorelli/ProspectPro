@@ -1,6 +1,5 @@
-
 // Shared Vitest setup for dev tools test suite
-import { afterAll, beforeAll } from 'vitest';
+import { afterAll, beforeAll } from "vitest";
 
 // Deterministic seeding helper
 export function seedRandom(seed: number) {
@@ -16,7 +15,7 @@ let highlightInit = () => {};
 try {
   // Dynamically import highlight-node if present
   // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const { initHighlightNode } = require('../../observability/highlight-node');
+  const { initHighlightNode } = require("../../observability/highlight-node");
   highlightInit = () => {
     if (process.env.HIGHLIGHT_PROJECT_ID) {
       initHighlightNode({ projectID: process.env.HIGHLIGHT_PROJECT_ID });

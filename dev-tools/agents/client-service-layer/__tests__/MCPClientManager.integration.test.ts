@@ -1,19 +1,9 @@
 import * as fs from "fs";
 import * as path from "path";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { ConfigLocator } from "../src/ConfigLocator";
-import { MockMCPClientAdapter } from "../src/MCPClientAdapter";
-import { MCPClientManager } from "../src/MCPClientManager";
-import { TelemetrySink } from "../src/TelemetrySink";
 import { WorkspaceContext } from "../src/WorkspaceContext";
-
-// Mock fs for creating temporary config files
-jest.mock("fs", () => ({
-  ...jest.requireActual("fs"),
-  existsSync: jest.fn(),
-  readFileSync: jest.fn(),
-}));
-
-const mockedFs = fs as jest.Mocked<typeof fs>;
+// (imports moved to top, remove these duplicates)
 
 describe("MCPClientManager Integration Tests", () => {
   let tempDir: string;
@@ -40,7 +30,7 @@ describe("MCPClientManager Integration Tests", () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     // Setup temporary directory and config
     tempDir = "/tmp/mcp-test";
@@ -49,18 +39,17 @@ describe("MCPClientManager Integration Tests", () => {
 
     // Setup telemetry sink with spies
     telemetrySink = {
-      info: jest.fn(),
-      warn: jest.fn(),
-      error: jest.fn(),
-      event: jest.fn(),
+      info: vi.fn(),
+      warn: vi.fn(),
+      error: vi.fn(),
+      event: vi.fn(),
     };
 
-    // Mock fs to return our test config
-    mockedFs.existsSync.mockImplementation((filePath) => {
+    // Mock fs.existsSync and fs.readFileSync
+    vi.spyOn(fs, "existsSync").mockImplementation((filePath) => {
       return filePath === path.join(tempDir, ".vscode/mcp_config.json");
     });
-
-    mockedFs.readFileSync.mockImplementation((filePath) => {
+    vi.spyOn(fs, "readFileSync").mockImplementation((filePath) => {
       if (filePath === path.join(tempDir, ".vscode/mcp_config.json")) {
         return JSON.stringify(mockConfig);
       }
@@ -149,17 +138,16 @@ describe("MCPClientManager Integration Tests", () => {
     it("should handle retry logic on connection failures", async () => {
       // Mock adapter to fail first connection attempt
       let connectionAttempts = 0;
+
       const flakyAdapter = {
-        createClient: jest
-          .fn()
-          .mockImplementation(async (serverName, config) => {
-            connectionAttempts++;
-            if (connectionAttempts === 1) {
-              throw new Error("Connection failed");
-            }
-            return clientAdapter.createClient(serverName, config);
-          }),
-        dispose: jest.fn(),
+        createClient: vi.fn().mockImplementation(async (serverName, config) => {
+          connectionAttempts++;
+          if (connectionAttempts === 1) {
+            throw new Error("Connection failed");
+          }
+          return clientAdapter.createClient(serverName, config);
+        }),
+        dispose: vi.fn(),
       };
 
       const flakyManager = new MCPClientManager({

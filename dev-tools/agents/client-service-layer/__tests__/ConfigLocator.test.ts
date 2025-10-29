@@ -1,13 +1,16 @@
 import * as fs from "fs";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ConfigLocator } from "../src/ConfigLocator";
 
-// Mock dependencies (keep real path.join; only mock fs)
-jest.mock("fs");
-const mockedFs = fs as jest.Mocked<typeof fs>;
+vi.mock("fs");
+const mockedFs = fs as unknown as {
+  existsSync: ReturnType<typeof vi.fn>;
+  readFileSync: ReturnType<typeof vi.fn>;
+};
 
 describe("ConfigLocator", () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe("loadConfig", () => {

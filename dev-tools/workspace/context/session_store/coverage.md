@@ -496,3 +496,12 @@ ev## 2025-10-23: Codespaces Bootstrap Realignment
 - Ensured only canonical utility/ directory and lockfile remain
 - Refreshed inventories and documentation via npm run docs:update and repo:scan
 - All changes validated and provenance logged
+
+## 2025-10-29: Agent Test Suite Consolidation
+
+- Consolidated agent test suites under dev-tools/testing/agents/<agent>/{unit,e2e}
+- Centralized fixtures in dev-tools/testing/utils/fixtures/
+- Created unified Taskfile.yml for agent-centric test orchestration
+- Added/updated Vitest and Playwright config wrappers for agents
+- Expanded setup.ts with deterministic seeding and Highlight node bootstrapping
+- Refreshed documentation and inventories

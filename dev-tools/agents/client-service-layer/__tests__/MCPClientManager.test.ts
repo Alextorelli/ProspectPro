@@ -1,8 +1,8 @@
 import { ConfigLocator } from "../src/ConfigLocator";
 import { MCPClientManager } from "../src/MCPClientManager";
-import { TelemetrySink } from "../src/TelemetrySink";
 import { WorkspaceContext } from "../src/WorkspaceContext";
 
+import { beforeEach, describe, expect, it, vi } from "vitest";
 // Mock dependencies
 const mockConfigLocator = new ConfigLocator("/workspace");
 
@@ -11,18 +11,18 @@ const mockWorkspaceContext = new WorkspaceContext({
 });
 
 const mockTelemetrySink = {
-  info: jest.fn(),
-  warn: jest.fn(),
-  error: jest.fn(),
-  event: jest.fn(),
-} as jest.Mocked<TelemetrySink>;
+  info: vi.fn(),
+  warn: vi.fn(),
+  error: vi.fn(),
+  event: vi.fn(),
+};
 
 describe("MCPClientManager", () => {
   let clientManager: MCPClientManager;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.spyOn(mockConfigLocator, "loadConfig");
+    vi.clearAllMocks();
+    vi.spyOn(mockConfigLocator, "loadConfig");
     // Reset telemetry sink mocks
     mockTelemetrySink.info.mockReset();
     mockTelemetrySink.warn.mockReset();
@@ -43,9 +43,9 @@ describe("MCPClientManager", () => {
         warnings: [],
       };
 
-      (mockConfigLocator.loadConfig as jest.Mock).mockReturnValue(
-        mockConfigResult
-      );
+      (
+        mockConfigLocator.loadConfig as unknown as ReturnType<typeof vi.fn>
+      ).mockReturnValue(mockConfigResult);
 
       await clientManager.initialize();
 
@@ -65,9 +65,9 @@ describe("MCPClientManager", () => {
         warnings: ["Primary config not found"],
       };
 
-      (mockConfigLocator.loadConfig as jest.Mock).mockReturnValue(
-        mockConfigResult
-      );
+      (
+        mockConfigLocator.loadConfig as unknown as ReturnType<typeof vi.fn>
+      ).mockReturnValue(mockConfigResult);
 
       await clientManager.initialize();
 
@@ -78,7 +78,9 @@ describe("MCPClientManager", () => {
 
     it("should throw error on config load failure", async () => {
       const error = new Error("Config load failed");
-      (mockConfigLocator.loadConfig as jest.Mock).mockImplementation(() => {
+      (
+        mockConfigLocator.loadConfig as unknown as ReturnType<typeof vi.fn>
+      ).mockImplementation(() => {
         throw error;
       });
 
@@ -99,9 +101,9 @@ describe("MCPClientManager", () => {
         source: "/workspace/.vscode/mcp_config.json",
         warnings: [],
       };
-      (mockConfigLocator.loadConfig as jest.Mock).mockReturnValue(
-        mockConfigResult
-      );
+      (
+        mockConfigLocator.loadConfig as unknown as ReturnType<typeof vi.fn>
+      ).mockReturnValue(mockConfigResult);
       await clientManager.initialize();
     });
 
@@ -138,13 +140,14 @@ describe("MCPClientManager", () => {
         source: "/workspace/.vscode/mcp_config.json",
         warnings: [],
       };
-      (mockConfigLocator.loadConfig as jest.Mock).mockReturnValue(
-        mockConfigResult
-      );
+      (
+        mockConfigLocator.loadConfig as unknown as ReturnType<typeof vi.fn>
+      ).mockReturnValue(mockConfigResult);
       await clientManager.initialize();
 
       let attempts = 0;
-      const operation = jest.fn().mockImplementation(() => {
+
+      const operation = vi.fn().mockImplementation(() => {
         attempts++;
         if (attempts < 2) {
           throw new Error("Temporary failure");
@@ -173,7 +176,7 @@ describe("MCPClientManager", () => {
       );
       await clientManager.initialize();
 
-      const operation = jest
+      const operation = vi
         .fn()
         .mockRejectedValue(new Error("Persistent failure"));
 
@@ -194,10 +197,10 @@ describe("MCPClientManager", () => {
         serverName: "test",
         config: { command: "test" },
         isConnected: true,
-        connect: jest.fn(),
-        disconnect: jest.fn(),
-        listTools: jest.fn(),
-        callTool: jest.fn(),
+        connect: vi.fn(),
+        disconnect: vi.fn(),
+        listTools: vi.fn(),
+        callTool: vi.fn(),
       };
       await clientManager.dispose(mockClient);
 
@@ -213,10 +216,10 @@ describe("MCPClientManager", () => {
         serverName: "test",
         config: { command: "test" },
         isConnected: true,
-        connect: jest.fn(),
-        disconnect: jest.fn().mockRejectedValue(new Error("Disconnect failed")),
-        listTools: jest.fn(),
-        callTool: jest.fn(),
+        connect: vi.fn(),
+        disconnect: vi.fn().mockRejectedValue(new Error("Disconnect failed")),
+        listTools: vi.fn(),
+        callTool: vi.fn(),
       };
 
       await expect(clientManager.dispose(mockClient)).resolves.toBeUndefined();

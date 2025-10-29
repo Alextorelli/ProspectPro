@@ -5,17 +5,27 @@ export default defineConfig({
   test: {
     environment: "node",
     globals: true,
-    setupFiles: ["./utils/setup.ts"],
+    setupFiles: ["dev-tools/testing/utils/setup.ts"],
     coverage: {
       provider: "v8",
       reportsDirectory: "./reports/coverage",
       reporter: ["text", "html", "json"],
       include: [
         "agents/**/*.test.ts",
-        "agents/**/*.spec.ts",
         "agents/**/*.integration.ts",
+        "unit/**/*.test.ts",
+        "unit/**/*.integration.ts",
+        "**/__tests__/**/*.test.ts",
+        "**/__tests__/**/*.integration.ts",
       ],
-      exclude: ["**/node_modules/**", "**/dist/**", "**/e2e/**"],
+      exclude: [
+        "**/node_modules/**",
+        "**/dist/**",
+        "**/e2e/**",
+        "**/*.spec.ts",
+        "**/e2e/**/*.ts",
+        "**/e2e/**/*.js",
+      ],
     },
     reporters: [
       "default",
