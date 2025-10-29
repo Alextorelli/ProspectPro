@@ -1,3 +1,10 @@
+## 2025-10-29: Taskfile Integration for Agent Testing
+
+- Added direct Task CLI runners to `.vscode/tasks.json` for all agent test orchestration targets (unit, integration, e2e, full, watch, coverage, lint, clean).
+- These tasks invoke `task` in `dev-tools/testing` and are discoverable in the VS Code Test group.
+- This enables direct Taskfile-driven test runs, bypassing npm shims if desired.
+- All changes staged here for review before merging to live config.
+
 ## 2025-10-29: Context, Launch, and MCP Alignment (Staged)
 
 **Planned .vscode/.github config changes:**

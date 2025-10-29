@@ -153,6 +153,7 @@ dev-tools/
 |   |   |-- sample-automation.sh
 |   |   |-- scaffold-highlight-node.sh
 |   |   |-- start-ollama.sh
+|   |   |-- test-path-rewrite.txt
 |   |   |-- update-agent-telemetry-context.sh
 |   |   |-- update-chatmodes.sh
 |   |   |-- update-telemetry-quickref.sh
@@ -169,20 +170,35 @@ dev-tools/
 |   |   `-- validate-ignore-config.cjs
 |   `-- README.md
 |-- testing/
+|   |-- .task/
+|   |   `-- checksum/
 |   |-- agents/
-|   |   `-- business-discovery/
-|   |       |-- e2e/
-|   |       |   `-- business-discovery.spec.ts
-|   |       `-- unit/
-|   |           `-- business-discovery.test.ts
+|   |   |-- business-discovery/
+|   |   |   |-- e2e/
+|   |   |   |   `-- business-discovery.spec.ts
+|   |   |   `-- unit/
+|   |   |       `-- business-discovery.test.ts
+|   |   |-- client-service-layer/
+|   |   |   `-- Taskfile.yml
+|   |   |-- context/
+|   |   |   `-- Taskfile.yml
+|   |   `-- mcp-servers/
+|   |       `-- Taskfile.yml
 |   |-- business-discovery/
 |   |   |-- e2e/
-|   |   |   `-- business-discovery.spec.ts
 |   |   `-- unit/
-|   |       `-- business-discovery.test.ts
 |   |-- configs/
 |   |   |-- playwright.agents.config.ts
 |   |   `-- vitest.agents.config.ts
+|   |-- dev-tools/
+|   |   |-- testing/
+|   |   |   `-- fixtures/
+|   |   |       `-- sample-mcp-response.json
+|   |   `-- workspace/
+|   |       `-- context/
+|   |           `-- session_store/
+|   |               `-- diagnostics/
+|   |                   `-- mcp-diagnostics-test.json
 |   |-- fixtures/
 |   |   |-- fixture-dataset.json
 |   |   |-- sample-mcp-response.json
@@ -192,6 +208,13 @@ dev-tools/
 |   |   |-- api/
 |   |   |   `-- README.md
 |   |   `-- context.test.js
+|   |-- reports/
+|   |   |-- playwright/
+|   |   |   |-- html/
+|   |   |   |   `-- index.html
+|   |   |   |-- .last-run.json
+|   |   |   `-- playwright-report.json
+|   |   `-- vitest-results.json
 |   |-- unit/
 |   |   |-- app/
 |   |   |   `-- agents.spec.ts
@@ -248,6 +271,7 @@ dev-tools/
 |       |   |-- compile.sh
 |       |   `-- ollama-helper.sh
 |       |-- session_store/
+|       |   |-- diagnostics/
 |       |   |-- app-filetree.txt
 |       |   |-- automated-tooling-update.md
 |       |   |-- client-service-layer-rename-status.md

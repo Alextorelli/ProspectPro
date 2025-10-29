@@ -35,6 +35,7 @@ ProspectPro/
 |   |-- symlinks/
 |   `-- templates/
 |-- playwright-report/
+|-- reports/
 |-- supabase/
 |   |-- .branches/
 |   |-- .temp/

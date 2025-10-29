@@ -38,7 +38,7 @@
     "quiet": false,
     "projects": [
       {
-        "outputDir": "/workspaces/ProspectPro/dev-tools/testing/reports/playwright",
+        "outputDir": "/workspaces/ProspectPro/dev-tools/testing/reports/playwright/results",
         "repeatEach": 1,
         "retries": 0,
         "metadata": {},
@@ -52,7 +52,7 @@
         "timeout": 30000
       },
       {
-        "outputDir": "/workspaces/ProspectPro/dev-tools/testing/reports/playwright",
+        "outputDir": "/workspaces/ProspectPro/dev-tools/testing/reports/playwright/results",
         "repeatEach": 1,
         "retries": 0,
         "metadata": {},
@@ -66,7 +66,7 @@
         "timeout": 30000
       },
       {
-        "outputDir": "/workspaces/ProspectPro/dev-tools/testing/reports/playwright",
+        "outputDir": "/workspaces/ProspectPro/dev-tools/testing/reports/playwright/results",
         "repeatEach": 1,
         "retries": 0,
         "metadata": {},
@@ -90,27 +90,13 @@
   "suites": [],
   "errors": [
     {
-      "message": "SyntaxError: /workspaces/ProspectPro/dev-tools/testing/agents/business-discovery/e2e/business-discovery.spec.ts: Unexpected token (8:0)\n\n  6 |   });\n  7 | });\n> 8 |\n    | ^",
-      "stack": "SyntaxError: /workspaces/ProspectPro/dev-tools/testing/agents/business-discovery/e2e/business-discovery.spec.ts: Unexpected token (8:0)\n\n  6 |   });\n  7 | });\n> 8 |\n    | ^",
-      "location": {
-        "file": "/workspaces/ProspectPro/dev-tools/testing/agents/business-discovery/e2e/business-discovery.spec.ts",
-        "line": 8,
-        "column": 0
-      },
-      "snippet": "\u001b[90m   at \u001b[39mbusiness-discovery/e2e/business-discovery.spec.ts:8\n\n\u001b[0m \u001b[90m 6 |\u001b[39m   })\u001b[33m;\u001b[39m\n \u001b[90m 7 |\u001b[39m })\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 8 |\u001b[39m\u001b[0m"
-    },
-    {
       "message": "TypeError: Cannot redefine property: Symbol($$jest-matchers-object)",
       "stack": "TypeError: Cannot redefine property: Symbol($$jest-matchers-object)\n    at /workspaces/ProspectPro/node_modules/@vitest/expect/dist/index.js:667:9"
-    },
-    {
-      "message": "Error: No tests found",
-      "stack": "Error: No tests found"
     }
   ],
   "stats": {
-    "startTime": "2025-10-29T20:46:20.796Z",
-    "duration": 128.46499999999992,
+    "startTime": "2025-10-29T21:58:40.545Z",
+    "duration": 207.154,
     "expected": 0,
     "skipped": 0,
     "unexpected": 0,
