@@ -6,8 +6,8 @@
   "scripts": {
     "deploy:staging:alias": "npx vercel@48.6.0 alias set $STAGING_DEPLOY_URL staging.prospectpro.appsmithery.co",
     "env:pull": "npx vercel@48.6.0 env pull .env.local",
-    "deploy:preview": "npx vercel@48.6.0",
-    "deploy:prod": "npm run lint && npm test && npx playwright test && npx vercel@48.6.0 --prod",
+    "deploy:preview": "dotenv -e .env.preview -- npx vercel@48.6.0",
+    "deploy:prod": "dotenv -e .env.production -- bash -lc 'npm run lint && npm test && npx playwright test && npx vercel@48.6.0 --prod'",
     "devtools:start": "bash scripts/automation/react-devtools-start.sh",
     "vercel:validate": "bash scripts/automation/vercel-validate.sh",
     "redis:observe": "bash scripts/automation/redis-observability.sh",

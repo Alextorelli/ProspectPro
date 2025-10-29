@@ -10,10 +10,14 @@ const highlightProjectId =
   import.meta.env.VITE_HIGHLIGHT_PROJECT_ID ??
   import.meta.env.NEXT_PUBLIC_HIGHLIGHT_PROJECT_ID ??
   "";
+const highlightServiceName =
+  import.meta.env.VITE_HIGHLIGHT_SERVICE_NAME ??
+  import.meta.env.NEXT_PUBLIC_HIGHLIGHT_SERVICE_NAME ??
+  "frontend-app";
 
 if (highlightProjectId) {
   H.init(highlightProjectId, {
-    serviceName: import.meta.env.VITE_HIGHLIGHT_SERVICE_NAME ?? "frontend-app",
+    serviceName: highlightServiceName,
     tracingOrigins: true,
     networkRecording: {
       enabled: true,
