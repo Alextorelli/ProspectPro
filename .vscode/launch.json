@@ -1,37 +1,68 @@
 {
   "version": "0.2.0",
   "configurations": [
+    // --- Edge Function Debugging (Environment-Aware) ---
     {
-      "name": "Test Business Discovery Optimized",
+      "name": "Test Business Discovery Optimized (dev)",
       "type": "node",
       "request": "launch",
       "program": "${workspaceFolder}/app/backend/functions/business-discovery-optimized/index.ts",
-      "env": {
-        "SUPABASE_URL": "https://sriycekxdqnesdsgwiuc.supabase.co",
-        "SUPABASE_ANON_KEY": "${env:SUPABASE_ANON_KEY}"
-      },
+      "envFile": "${workspaceFolder}/integration/environments/development.env",
       "console": "integratedTerminal",
       "skipFiles": ["<node_internals>/**"]
     },
     {
-      "name": "Test Campaign Export",
+      "name": "Test Business Discovery Optimized (staging)",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/app/backend/functions/business-discovery-optimized/index.ts",
+      "envFile": "${workspaceFolder}/integration/environments/staging.env",
+      "console": "integratedTerminal",
+      "skipFiles": ["<node_internals>/**"]
+    },
+    {
+      "name": "Test Business Discovery Optimized (prod)",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/app/backend/functions/business-discovery-optimized/index.ts",
+      "envFile": "${workspaceFolder}/integration/environments/production.env",
+      "console": "integratedTerminal",
+      "skipFiles": ["<node_internals>/**"]
+    },
+    {
+      "name": "Test Campaign Export (dev)",
       "type": "node",
       "request": "launch",
       "program": "${workspaceFolder}/app/backend/functions/campaign-export/index.ts",
-      "env": {
-        "SUPABASE_URL": "https://sriycekxdqnesdsgwiuc.supabase.co"
-      },
+      "envFile": "${workspaceFolder}/integration/environments/development.env",
       "console": "integratedTerminal",
       "skipFiles": ["<node_internals>/**"]
     },
     {
-      "name": "Debug MCP Production Server v4.1",
+      "name": "Test Campaign Export (staging)",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/app/backend/functions/campaign-export/index.ts",
+      "envFile": "${workspaceFolder}/integration/environments/staging.env",
+      "console": "integratedTerminal",
+      "skipFiles": ["<node_internals>/**"]
+    },
+    {
+      "name": "Test Campaign Export (prod)",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/app/backend/functions/campaign-export/index.ts",
+      "envFile": "${workspaceFolder}/integration/environments/production.env",
+      "console": "integratedTerminal",
+      "skipFiles": ["<node_internals>/**"]
+    },
+    // --- MCP Server Debugging (Environment-Aware) ---
+    {
+      "name": "Debug MCP Server (dev)",
       "type": "node",
       "request": "launch",
       "program": "${workspaceFolder}/dev-tools/agents/mcp-servers/observability-server.js",
-      "env": {
-        "NODE_ENV": "development"
-      },
+      "envFile": "${workspaceFolder}/integration/environments/development.env",
       "console": "integratedTerminal",
       "skipFiles": ["<node_internals>/**", "**/node_modules/**"],
       "outFiles": ["${workspaceFolder}/**/*.js"],
@@ -41,13 +72,11 @@
       ]
     },
     {
-      "name": "Debug MCP Development Server",
+      "name": "Debug MCP Server (staging)",
       "type": "node",
       "request": "launch",
       "program": "${workspaceFolder}/dev-tools/agents/mcp-servers/observability-server.js",
-      "env": {
-        "NODE_ENV": "development"
-      },
+      "envFile": "${workspaceFolder}/integration/environments/staging.env",
       "console": "integratedTerminal",
       "skipFiles": ["<node_internals>/**", "**/node_modules/**"],
       "outFiles": ["${workspaceFolder}/**/*.js"],
@@ -57,13 +86,11 @@
       ]
     },
     {
-      "name": "Debug MCP Troubleshooting Server",
+      "name": "Debug MCP Server (prod)",
       "type": "node",
       "request": "launch",
       "program": "${workspaceFolder}/dev-tools/agents/mcp-servers/observability-server.js",
-      "env": {
-        "NODE_ENV": "development"
-      },
+      "envFile": "${workspaceFolder}/integration/environments/production.env",
       "console": "integratedTerminal",
       "skipFiles": ["<node_internals>/**", "**/node_modules/**"],
       "outFiles": ["${workspaceFolder}/**/*.js"],
@@ -72,17 +99,14 @@
         "!**/node_modules/**"
       ]
     },
+    // --- Local Supabase Stack (Environment-Aware) ---
     {
-      "name": "Local Supabase Stack",
+      "name": "Local Supabase Stack (dev)",
       "type": "node",
       "request": "launch",
       "preLaunchTask": "Supabase: Start Local Stack",
       "program": "${input:functionPath}",
-      "env": {
-        "SUPABASE_URL": "http://127.0.0.1:54321",
-        "SUPABASE_ANON_KEY": "${env:SUPABASE_ANON_KEY}",
-        "SUPABASE_SERVICE_ROLE_KEY": "${env:SUPABASE_SERVICE_ROLE_KEY}"
-      },
+      "envFile": "${workspaceFolder}/integration/environments/development.env",
       "console": "integratedTerminal",
       "skipFiles": ["<node_internals>/**"],
       "resolveSourceMapLocations": [
@@ -90,6 +114,7 @@
         "!**/node_modules/**"
       ]
     },
+    // --- Diagnostics and Utility Launches ---
     {
       "name": "Debug Supabase Diagnostics",
       "type": "node",
@@ -111,11 +136,11 @@
     },
     {
       "name": "Debug Vercel Preview (React DevTools)",
-      "type": "pwa-chrome",
+      "type": "chrome",
       "request": "launch",
       "url": "https://prospect-fyhedobh1-appsmithery.vercel.app",
       "webRoot": "${workspaceFolder}/public",
-      "breakOnLoad": true,
+
       "runtimeArgs": ["--auto-open-devtools-for-tabs"],
       "presentation": {
         "panel": "dedicated"
@@ -124,10 +149,24 @@
   ],
   "compounds": [
     {
-      "name": "Debug Edge Functions",
+      "name": "Debug Edge Functions (dev)",
       "configurations": [
-        "Test Business Discovery Optimized",
-        "Test Campaign Export"
+        "Test Business Discovery Optimized (dev)",
+        "Test Campaign Export (dev)"
+      ]
+    },
+    {
+      "name": "Debug Edge Functions (staging)",
+      "configurations": [
+        "Test Business Discovery Optimized (staging)",
+        "Test Campaign Export (staging)"
+      ]
+    },
+    {
+      "name": "Debug Edge Functions (prod)",
+      "configurations": [
+        "Test Business Discovery Optimized (prod)",
+        "Test Campaign Export (prod)"
       ]
     }
   ],

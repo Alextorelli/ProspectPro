@@ -2,6 +2,83 @@
   "version": "2.0.0",
   "tasks": [
     {
+      "label": "Env: Generate All Configs",
+      "type": "shell",
+      "command": "node",
+      "args": ["dev-tools/scripts/automation/generate-configs.mjs"],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Env: Switch to Development",
+      "type": "shell",
+      "command": "node",
+      "args": [
+        "dev-tools/scripts/automation/generate-configs.mjs",
+        "--env=development"
+      ],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Env: Switch to Staging",
+      "type": "shell",
+      "command": "node",
+      "args": [
+        "dev-tools/scripts/automation/generate-configs.mjs",
+        "--env=staging"
+      ],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Env: Switch to Production",
+      "type": "shell",
+      "command": "node",
+      "args": [
+        "dev-tools/scripts/automation/generate-configs.mjs",
+        "--env=production"
+      ],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Env: Validate Environment State",
+      "type": "shell",
+      "command": "node",
+      "args": [
+        "dev-tools/scripts/automation/generate-configs.mjs",
+        "--validate"
+      ],
+      "group": "test",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
       "label": "Deploy: Full Automated Frontend",
       "type": "shell",
       "command": "npm run lint && npm test && npm run build && npx --yes vercel@latest --prod --confirm --scope appsmithery --project prospect-pro --cwd dist",
@@ -1161,30 +1238,6 @@
     }
   ],
   "inputs": [
-    {
-      "label": "Context: Integration Tests",
-      "type": "shell",
-      "command": "npm",
-      "args": [
-        "run",
-        "test",
-        "--",
-        "tooling/test-automation/context/context.test.js"
-      ],
-      "group": "test",
-      "presentation": {
-        "echo": true,
-        "reveal": "always",
-        "panel": "shared"
-      },
-      "problemMatcher": [],
-      "postRun": [
-        {
-          "type": "shell",
-          "command": "npx nyc --reporter=markdown --report-dir=dev-tools/workspace/context/session_store -- temp tooling/test-automation/context/context.test.js"
-        }
-      ]
-    },
     {
       "id": "functionName",
       "type": "pickString",
