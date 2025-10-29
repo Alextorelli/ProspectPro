@@ -1,0 +1,73 @@
+version: "3"
+
+vars:
+  AGENT_DIR: ../../agents/client-service-layer
+  TEST_CONFIG: ../configs/vitest.agents.config.ts
+  PLAYWRIGHT_CONFIG: ../configs/playwright.agents.config.ts
+
+tasks:
+  unit:
+    desc: Run client service layer unit tests
+    cmds:
+      - npx vitest --config {{.TEST_CONFIG}} run {{.AGENT_DIR}}/unit
+    sources:
+      - "{{.AGENT_DIR}}/unit/**/*.test.ts"
+      - "{{.AGENT_DIR}}/src/**/*.ts"
+    generates:
+      - "../reports/coverage/client-service-layer/*"
+
+  integration:
+    desc: Run client service layer integration tests
+    cmds:
+      - npx vitest --config {{.TEST_CONFIG}} run {{.AGENT_DIR}}/integration
+    sources:
+      - "{{.AGENT_DIR}}/integration/**/*.test.ts"
+      - "{{.AGENT_DIR}}/src/**/*.ts"
+    generates:
+      - "../reports/coverage/client-service-layer/*"
+
+  e2e:
+    desc: Run client service layer E2E tests
+    cmds:
+      - npx playwright test --config {{.PLAYWRIGHT_CONFIG}} {{.AGENT_DIR}}/e2e
+    sources:
+      - "{{.AGENT_DIR}}/e2e/**/*.spec.ts"
+      - "{{.AGENT_DIR}}/src/**/*.ts"
+    generates:
+      - "../reports/playwright/client-service-layer/*"
+
+  test:
+    desc: Run all client service layer tests
+    deps:
+      - unit
+      - integration
+      - e2e
+  tasks:
+    integration:
+      desc: Run client service layer integration tests
+      cmds:
+        - npx vitest --config {{.TEST_CONFIG}} run {{.AGENT_DIR}}/integration
+      sources:
+        - "{{.AGENT_DIR}}/integration/**/*.test.ts"
+        - "{{.AGENT_DIR}}/src/**/*.ts"
+      generates:
+        - "../reports/coverage/client-service-layer/*"
+  coverage:
+    desc: Generate coverage report for client service layer
+    cmds:
+      - npx vitest --config {{.TEST_CONFIG}} run --coverage {{.AGENT_DIR}}
+    generates:
+      - "../reports/coverage/client-service-layer/*"
+
+  lint:
+    desc: Lint client service layer code
+    cmds:
+      - npx eslint {{.AGENT_DIR}}/**/*.ts
+    sources:
+      - "{{.AGENT_DIR}}/**/*.ts"
+
+  clean:
+    desc: Clean client service layer test reports
+    cmds:
+      - rm -rf ../reports/coverage/client-service-layer/*
+      - rm -rf ../reports/playwright/client-service-layer/*
