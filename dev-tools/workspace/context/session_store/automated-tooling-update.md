@@ -3,6 +3,7 @@
 ## Phase 0: Pre-flight Validation & Setup
 
 ### Step 0.1: Install Task CLI
+
 ```bash
 #!/bin/bash
 # filepath: dev-tools/scripts/automation/install-task-cli.sh
@@ -21,6 +22,7 @@ echo "✓ Task CLI installed: $(task --version)"
 ```
 
 ### Step 0.2: Validation Script
+
 ```bash
 #!/bin/bash
 # filepath: dev-tools/scripts/automation/validate-testing-prerequisites.sh
@@ -69,6 +71,7 @@ echo "=== Prerequisites Valid ==="
 ## Phase 1: Highlight Node Observability Package
 
 ### Step 1.1: Package Structure
+
 ```bash
 #!/bin/bash
 # filepath: dev-tools/scripts/automation/scaffold-highlight-node.sh
@@ -123,6 +126,7 @@ echo "✓ Package scaffolded at $HIGHLIGHT_DIR"
 ```
 
 ### Step 1.2: Core Implementation
+
 ```typescript
 import { H } from "@highlight-run/node";
 
@@ -141,7 +145,7 @@ let highlightInitialized = false;
  */
 export function initHighlightNode(config?: HighlightConfig): void {
   const projectId = config?.projectId || process.env.HIGHLIGHT_PROJECT_ID;
-  
+
   if (!projectId) {
     console.warn("[Highlight] No project ID provided, telemetry disabled");
     return;
@@ -160,7 +164,9 @@ export function initHighlightNode(config?: HighlightConfig): void {
   });
 
   highlightInitialized = true;
-  console.log(`[Highlight] Initialized for ${config?.serviceName || "backend"}`);
+  console.log(
+    `[Highlight] Initialized for ${config?.serviceName || "backend"}`
+  );
 }
 
 /**
@@ -175,7 +181,7 @@ export function highlightMiddleware() {
 
     // Extract session ID from frontend (if present)
     const sessionId = req.headers["x-highlight-request"];
-    
+
     H.startSpan({
       name: `${req.method} ${req.path}`,
       attributes: {
@@ -223,7 +229,8 @@ export { H };
 ```
 
 ### Step 1.3: Documentation
-```markdown
+
+````markdown
 # Highlight Node Wrapper
 
 Shared Highlight.io instrumentation for ProspectPro backend services, agents, and Supabase Edge Functions.
@@ -233,6 +240,7 @@ Shared Highlight.io instrumentation for ProspectPro backend services, agents, an
 ```bash
 npm install --workspace=dev-tools/observability/highlight-node
 ```
+````
 
 ## Usage
 
@@ -256,7 +264,10 @@ initHighlightNode({
 
 ```typescript
 import express from "express";
-import { initHighlightNode, highlightMiddleware } from "@prospectpro/highlight-node";
+import {
+  initHighlightNode,
+  highlightMiddleware,
+} from "@prospectpro/highlight-node";
 
 const app = express();
 
@@ -272,11 +283,15 @@ app.get("/api/discover", (req, res) => {
 ### Supabase Edge Function
 
 ```typescript
-import { initHighlightNode, createSpan, flushHighlight } from "@prospectpro/highlight-node";
+import {
+  initHighlightNode,
+  createSpan,
+  flushHighlight,
+} from "@prospectpro/highlight-node";
 
 Deno.serve(async (req) => {
   initHighlightNode({ serviceName: "enrichment-orchestrator" });
-  
+
   const span = createSpan("process_enrichment", {
     campaign_id: "cmp_123",
   });
@@ -297,6 +312,7 @@ Deno.serve(async (req) => {
 Per [Highlight docs](https://www.highlight.io/docs/getting-started/frontend-backend-mapping), include the session ID in request headers:
 
 **Frontend (React):**
+
 ```typescript
 import { H } from "highlight.run";
 
@@ -323,7 +339,8 @@ The middleware extracts `X-Highlight-Request` and associates backend spans with 
 - [Highlight Node SDK](https://www.highlight.io/docs/sdk/nodejs)
 - [Getting Started with Node.js](https://www.highlight.io/docs/getting-started/server/js/nodejs)
 - [Frontend-Backend Mapping](https://www.highlight.io/docs/getting-started/frontend-backend-mapping)
-```
+
+````
 
 ---
 
@@ -364,13 +381,16 @@ export default defineConfig({
     },
   },
 });
-```
+````
 
 ### Step 2.2: Playwright Agent Config
+
 ```typescript
 import { defineConfig, devices } from "@playwright/test";
 
-const baseURL = process.env.PLAYWRIGHT_BASE_URL || "https://prospect-5i7mc1o2c-appsmithery.vercel.app";
+const baseURL =
+  process.env.PLAYWRIGHT_BASE_URL ||
+  "https://prospect-5i7mc1o2c-appsmithery.vercel.app";
 
 export default defineConfig({
   testDir: "../agents",
@@ -379,20 +399,20 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
   workers: process.env.CI ? 1 : undefined,
-  
+
   reporter: [
     ["html", { outputFolder: "../reports/playwright", open: "never" }],
     ["json", { outputFile: "../reports/playwright-results.json" }],
     ["list"],
   ],
-  
+
   use: {
     baseURL,
     trace: "retain-on-failure",
     screenshot: "only-on-failure",
     video: "retain-on-failure",
   },
-  
+
   projects: [
     {
       name: "chromium",
@@ -411,6 +431,7 @@ export default defineConfig({
 ```
 
 ### Step 2.3: Enhanced Setup Utilities
+
 ```typescript
 import { afterAll, beforeAll, beforeEach } from "vitest";
 import { createClient } from "@supabase/supabase-js";
@@ -429,13 +450,16 @@ beforeAll(async () => {
 
   // Initialize Supabase test client (anon key only, no service role)
   const supabaseUrl = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
-  const supabaseKey = process.env.VITE_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY;
+  const supabaseKey =
+    process.env.VITE_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY;
 
   if (supabaseUrl && supabaseKey) {
     supabase = createClient(supabaseUrl, supabaseKey);
     console.log("[setup] Supabase test client initialized");
   } else {
-    console.warn("[setup] Supabase credentials missing, mocking database calls");
+    console.warn(
+      "[setup] Supabase credentials missing, mocking database calls"
+    );
   }
 });
 
@@ -466,8 +490,9 @@ export { supabase };
 ## Phase 3: Taskfile Hierarchy
 
 ### Step 3.1: Root Taskfile
+
 ```yaml
-version: '3'
+version: "3"
 
 vars:
   VITEST_CONFIG: ./configs/vitest.agents.config.ts
@@ -490,17 +515,17 @@ tasks:
     desc: Run all agent unit tests
     cmds:
       - npx vitest run --config {{.VITEST_CONFIG}}
-  
+
   agents:test:integration:
     desc: Run all agent integration tests
     cmds:
       - npx vitest run --config {{.VITEST_CONFIG}} --testNamePattern="integration"
-  
+
   agents:test:e2e:
     desc: Run all agent E2E tests (Playwright)
     cmds:
       - npx playwright test --config {{.PLAYWRIGHT_CONFIG}}
-  
+
   agents:test:full:
     desc: Run complete test suite with linting
     deps:
@@ -508,18 +533,18 @@ tasks:
     cmds:
       - task: agents:test:unit
       - task: agents:test:e2e
-  
+
   lint:
     desc: Run ESLint on test files
     cmds:
       - npx eslint "**/*.test.ts" "**/*.spec.ts" --max-warnings 0
-  
+
   reports:clean:
     desc: Clean all test reports
     cmds:
       - rm -rf {{.REPORTS_DIR}}/*
       - echo "✓ Reports cleaned"
-  
+
   reports:open:
     desc: Open Playwright HTML report
     cmds:
@@ -527,37 +552,38 @@ tasks:
 ```
 
 ### Step 3.2: Per-Agent Taskfile Template
+
 ```yaml
-version: '3'
+version: "3"
 
 tasks:
   unit:
     desc: Run business-discovery unit tests
     cmds:
       - npx vitest run unit/ --config ../../configs/vitest.agents.config.ts
-  
+
   integration:
     desc: Run business-discovery integration tests
     cmds:
       - npx vitest run integration/ --config ../../configs/vitest.agents.config.ts
-  
+
   e2e:
     desc: Run business-discovery E2E tests
     cmds:
       - npx playwright test e2e/ --config ../../configs/playwright.agents.config.ts
-  
+
   test:all:
     desc: Run all business-discovery tests
     cmds:
       - task: unit
       - task: integration
       - task: e2e
-  
+
   debug:unit:
     desc: Debug unit tests with VS Code
     cmds:
       - npx vitest --inspect-brk unit/ --config ../../configs/vitest.agents.config.ts
-  
+
   debug:e2e:
     desc: Debug E2E tests with headed browser
     cmds:
@@ -569,6 +595,7 @@ tasks:
 ## Phase 4: Test Suite Relocation
 
 ### Step 4.1: Directory Scaffold Script
+
 ```bash
 #!/bin/bash
 # filepath: dev-tools/scripts/automation/scaffold-agent-tests.sh
@@ -583,15 +610,15 @@ AGENTS=("business-discovery" "enrichment-orchestrator" "export-diagnostics")
 
 for agent in "${AGENTS[@]}"; do
   AGENT_DIR="$TESTING_DIR/agents/$agent"
-  
+
   mkdir -p "$AGENT_DIR"/{unit,integration,e2e,fixtures}
-  
+
   # Copy Taskfile template
   cp "$TESTING_DIR/configs/Taskfile.agent.template.yml" "$AGENT_DIR/Taskfile.yml"
-  
+
   # Replace placeholders
   sed -i "s/{{AGENT_NAME}}/$agent/g" "$AGENT_DIR/Taskfile.yml"
-  
+
   # Create placeholder tests
   cat > "$AGENT_DIR/unit/${agent}.test.ts" << EOF
 import { describe, it, expect } from "vitest";
@@ -641,7 +668,8 @@ echo "=== Agent Test Scaffolding Complete ==="
 ## Phase 5: VS Code Integration
 
 ### Step 5.1: Staged Settings Update
-```markdown
+
+````markdown
 ## 2025-10-29: Testing Consolidation - Taskfile Integration
 
 **Planned `.vscode/settings.json` additions:**
@@ -656,6 +684,7 @@ echo "=== Agent Test Scaffolding Complete ==="
   "task.problemMatchers": ["$tsc", "$eslint"]
 }
 ```
+````
 
 **Planned tasks.json entries:**
 
@@ -705,7 +734,8 @@ echo "=== Agent Test Scaffolding Complete ==="
   }
 }
 ```
-```
+
+````
 
 ---
 
@@ -721,10 +751,11 @@ echo "=== Agent Test Scaffolding Complete ==="
     "test:agents:watch": "task -d dev-tools/testing agents:test:unit -- --watch"
   }
 }
-```
+````
 
 ### Step 6.2: Testing README Update
-```markdown
+
+````markdown
 # ProspectPro Testing Suite
 
 Unified testing infrastructure for agent workflows, backend services, and frontend components.
@@ -744,6 +775,7 @@ npm run test:agents:e2e
 # Watch mode for development
 npm run test:agents:watch
 ```
+````
 
 ## Using Taskfile Directly
 
@@ -807,7 +839,8 @@ export HIGHLIGHT_PROJECT_ID=your-project-id
 ```
 
 See `dev-tools/observability/highlight-node/README.md` for details.
-```
+
+````
 
 ---
 
@@ -926,7 +959,44 @@ echo "  3. Update frontend to send X-Highlight-Request headers"
 echo "  4. Run: task -d dev-tools/testing agents:test:full"
 echo "  5. Commit changes with: git add -A && git commit -m 'feat: testing & observability consolidation'"
 echo ""
-```
+````
+
+---
+
+## Phase 8: Taskfile Migration & VS Code Shim Replacement
+
+### Step 8.1: Root Taskfile Blueprint
+
+- Author `Taskfile.yml` at the repository root exposing only curated entrypoints (`bootstrap`, `test:all`, `deploy:frontend`, `agents:<name>:orchestrate`).
+- Use `includes` to delegate to domain Taskfiles located under `dev-tools/tasks/`.
+- Configure `dotenv: .env.local` and scoped `env:` blocks to load secrets per task without committing credentials.
+
+### Step 8.2: Domain Taskfile Scaffold
+
+- Create MECE-aligned Taskfiles under `dev-tools/tasks/{environment,supabase,edge,testing,observability,docs,roadmap,workspace,context}/Taskfile.yml`.
+- Migrate existing `.vscode/tasks.json` commands into their respective domain Taskfiles, normalizing variable handling and shared helpers.
+- Add `dev-tools/tasks/agents/Taskfile.yml` to aggregate per-agent automation and include `dev-tools/testing/agents/<agent>/Taskfile.yml` for test fan-out.
+
+### Step 8.3: VS Code Task Shim Update
+
+- Replace `.vscode/tasks.json` entries with thin wrappers that invoke `task <target>` and preserve existing `inputs` definitions.
+- Document all editor configuration changes in `docs/tooling/settings-staging.md` prior to touching `.vscode/` assets.
+- Ensure launch configurations in `.vscode/launch.json` continue to reference npm/vitest entrypoints without duplicating task logic.
+
+---
+
+## Phase 9: Post-Migration Snapshot & Inventory Refresh
+
+### Step 9.1: Capture Codebase Snapshot
+
+- After completing the Taskfile migration, execute context snapshot utilities (`node scripts/context/fetch-repo-context.js`, `node scripts/context/fetch-supabase-context.js`) to record the current state of the codebase and external integrations.
+- Persist outputs under `dev-tools/workspace/context/session_store/` for audit and rollback.
+
+### Step 9.2: Update Inventories & Coverage
+
+- Regenerate filetree inventories (`dev-tools/workspace/context/session_store/{repo-tree-summary,app-filetree,dev-tools-filetree,integration-filetree}.txt`).
+- Append a provenance entry to `coverage.md` summarizing the migration and confirming snapshots were taken.
+- Review generated artifacts to identify deprecated files for purge before finalizing the consolidation.
 
 ---
 
@@ -952,4 +1022,6 @@ chmod +x dev-tools/scripts/automation/*.sh
 - [ ] VS Code settings staged in `settings-staging.md`
 - [ ] Inventories updated in `session_store/*-filetree.txt`
 - [ ] Changes logged in `coverage.md`
+- [ ] Taskfile migration completed and `.vscode/tasks.json` reduced to shims
+- [ ] Post-migration snapshot and inventories captured
 - [ ] Ready for commit

@@ -1,3 +1,10 @@
+# 2025-10-29: Taskfile Migration Plan Update
+
+- Extended automated-tooling implementation plan with dedicated phases for Taskfile migration, VS Code shim replacement, and post-migration snapshots.
+- Added checklist items to ensure root Taskfile blueprint, MECE domain Taskfiles, and agent aggregation are implemented before retiring legacy `.vscode/tasks.json` commands.
+- Introduced mandatory post-migration snapshot step (context fetch plus inventory refresh) to support pruning deprecated assets.
+- Next actions: scaffold domain Taskfiles under `dev-tools/tasks/`, reduce `.vscode/tasks.json` to Task CLI wrappers, run snapshot utilities once migration completes.
+
 # 2025-10-28: Staging Subdomain Alias
 
 - Added `deploy:staging:alias` npm script for Vercel preview → staging alias automation.
@@ -382,6 +389,7 @@ ev## 2025-10-23: Codespaces Bootstrap Realignment
 **Change**: Flattened `dev-tools/agents/workflows/*/` subdirectories into single-level persona-prefixed files.
 
 **Actions**:
+
 - Moved `config.json`, `instructions.md`, `toolset.jsonc` from nested directories to flat files.
 - Removed all `.gitkeep` files.
 - Updated references in:
@@ -394,25 +402,26 @@ ev## 2025-10-23: Codespaces Bootstrap Realignment
 
 **Inventories Updated**: `dev-tools-filetree.txt`
 
-
 ## 2025-10-28: Chatmode & CI Workflow Sync
 
 **Changes**:
+
 - Updated all chatmode files to reference flattened workflow paths
 - Injected staging deployment instructions and telemetry endpoints
 - Refreshed chatmode-manifest.json with new npm scripts
 - Enhanced CI workflows with artifact collection and observability logging
 
 **Artifacts**:
+
 - CI logs now captured in `dev-tools/reports/ci/<workflow>/<run>`
 - Chatmode manifest includes deployment script reference
 
 **Validation**: All contexts pass `npm run validate:contexts`
 
-
 ## 2025-10-28: Staging Environment Configuration Update
 
 **Changes**:
+
 - Renamed environment from "troubleshooting" to "staging" for consistency
 - Updated Vercel deployment URL to recent production deployment: `https://prospect-5i7mc1o2c-appsmithery.vercel.app`
 - Enabled async discovery and realtime campaigns to match production feature set
@@ -421,13 +430,14 @@ ev## 2025-10-23: Codespaces Bootstrap Realignment
 **Validation**: `npm run validate:contexts` passes (URL accessibility deferred to runtime)
 
 **Related**:
+
 - Staging alias workflow documented in `.github/chatmodes/*.chatmode.md`
 - Deployment scripts: `npm run deploy:staging:alias`
-
 
 ## 2025-10-28: Staging Environment Configuration Update
 
 **Changes**:
+
 - Renamed environment from "troubleshooting" to "staging" for consistency
 - Updated Vercel deployment URL to recent production deployment: `https://prospect-5i7mc1o2c-appsmithery.vercel.app`
 - Enabled async discovery and realtime campaigns to match production feature set
@@ -436,6 +446,6 @@ ev## 2025-10-23: Codespaces Bootstrap Realignment
 **Validation**: `npm run validate:contexts` passes (URL accessibility deferred to runtime)
 
 **Related**:
+
 - Staging alias workflow documented in `.github/chatmodes/*.chatmode.md`
 - Deployment scripts: `npm run deploy:staging:alias`
-
