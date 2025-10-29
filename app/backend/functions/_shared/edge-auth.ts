@@ -417,9 +417,28 @@ export async function authenticateRequest(
 
 export const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type, x-prospect-session",
+  "Access-Control-Allow-Headers": [
+    "authorization",
+    "x-client-info",
+    "apikey",
+    "content-type",
+    "x-prospect-session",
+    "x-highlight-request",
+    "x-highlight-trace",
+    "x-highlight-session",
+    "x-highlight-project",
+    "x-highlight-user",
+    "x-highlight-origin",
+  ].join(", "),
   "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+  "Access-Control-Expose-Headers": [
+    "x-highlight-request",
+    "x-highlight-trace",
+    "x-highlight-session",
+    "x-highlight-project",
+    "x-highlight-user",
+    "x-highlight-origin",
+  ].join(", "),
 };
 
 export function handleCORS(request: Request): Response | null {

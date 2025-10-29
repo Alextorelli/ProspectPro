@@ -17,7 +17,7 @@
   "github.copilot.inlineSuggest.enable": true,
   "github.copilot.chat.codeGeneration.useInstructionFiles": true,
   "github.copilot.chat.agent.runTasks": true,
-  "github.copilot.chat.agent.autoFix": false,
+  "github.copilot.chat.agent.autoFix": true,
   "github.copilot.chat.historyCount": 3,
   "github.copilot.chat.welcomeMessage": "never",
   "github.copilot.chat.localeOverride": "en",
@@ -189,5 +189,6 @@
   "chat.agent.thinkingStyle": "expanded",
   "chat.allowAnonymousAccess": true,
   "chat.mcp.assisted.nuget.enabled": true,
-  "chat.setup.signInDialogVariant": "default"
+  "chat.setup.signInDialogVariant": "default",
+  "github.copilot.chat.codesearch.enabled": true
 }

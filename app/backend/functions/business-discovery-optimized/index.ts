@@ -5,6 +5,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.38.0";
 import type { AuthenticatedRequestContext } from "../_shared/edge-auth.ts";
 import { authenticateRequest, corsHeaders } from "../_shared/edge-auth.ts";
+import { createHighlightContext } from "../_shared/highlight-context.ts";
 
 // Import optimization modules (converted to Deno-compatible imports)
 // Note: These would need to be transpiled or rewritten for Deno, but showing the structure
@@ -1177,11 +1178,19 @@ function removeDuplicates(businesses: unknown[]): unknown[] {
 }
 
 serve(async (req) => {
+  const highlight = createHighlightContext(req);
+
   if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
+    return highlight.applyToResponse(
+      new Response(null, { headers: corsHeaders })
+    );
   }
 
   try {
+    highlight.debug("Incoming optimized discovery request", {
+      method: req.method,
+      url: req.url,
+    });
     let authContext: AuthenticatedRequestContext;
     try {
       authContext = await authenticateRequest(req);
@@ -1190,20 +1199,32 @@ serve(async (req) => {
         "❌ Authentication failed for optimized discovery",
         authError
       );
-      return new Response(
-        JSON.stringify({
-          success: false,
-          error:
-            authError instanceof Error
-              ? authError.message
-              : "Authentication failed",
-        }),
-        {
-          status: 401,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        }
+      highlight.warn("Authentication failed", {
+        message:
+          authError instanceof Error ? authError.message : String(authError),
+      });
+      return highlight.applyToResponse(
+        new Response(
+          JSON.stringify({
+            success: false,
+            error:
+              authError instanceof Error
+                ? authError.message
+                : "Authentication failed",
+            highlight: highlight.toJSON(),
+          }),
+          {
+            status: 401,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          }
+        )
       );
     }
+    highlight.info("Authenticated request", {
+      userId: authContext.userId,
+      sessionId: authContext.sessionId,
+      highlight: highlight.toJSON(),
+    });
     console.log(
       `🔐 Authenticated Supabase session for ${authContext.userId} (${
         authContext.isAnonymous ? "anonymous" : "authenticated"
@@ -1531,119 +1552,139 @@ serve(async (req) => {
         );
       } catch (error) {
         console.error("Database storage error with new auth:", error);
+        highlight.error("Failed to persist campaign data", {
+          message: error instanceof Error ? error.message : String(error),
+        });
       }
     }
 
+    highlight.info("Discovery run completed", {
+      campaignId,
+      totalLeads: enhancedLeads.length,
+      durationMs: processingTime,
+    });
+
     // Return optimized results
-    return new Response(
-      JSON.stringify({
-        success: true,
-        campaignId,
-        discoveryEngine:
-          "Optimized Discovery Engine v3.1 + Census Intelligence",
-        requirements: {
-          targetLeads: maxResults,
-          budgetLimit,
-          minConfidenceScore,
-        },
-        results: {
-          totalFound: enhancedLeads.length,
-          qualified: enhancedLeads.length,
-          qualificationRate: `${(
-            (enhancedLeads.length / allRawBusinesses.length) *
-            100
-          ).toFixed(1)}%`,
-          averageConfidence: Math.round(
-            enhancedLeads.reduce(
-              (sum: number, lead: BusinessLead) => sum + lead.optimizedScore,
-              0
-            ) / enhancedLeads.length
-          ),
-        },
-        // NEW: Census Geographic Intelligence
-        census_intelligence: censusIntelligence
-          ? {
-              business_density: {
-                total_establishments: censusIntelligence.total_establishments,
-                density_score: censusIntelligence.density_score,
-                confidence_multiplier:
-                  censusIntelligence.optimization.confidence_multiplier,
-              },
-              geographic_optimization: {
-                optimal_radius: censusIntelligence.optimization.search_radius,
-                expected_results:
-                  censusIntelligence.optimization.expected_results,
-                api_efficiency_score:
-                  censusIntelligence.optimization.api_efficiency_score,
-              },
-              market_insights: {
-                market_density:
-                  censusIntelligence.density_score > 50
-                    ? "High"
-                    : censusIntelligence.density_score > 20
-                    ? "Medium"
-                    : "Low",
-                competition_level:
-                  censusIntelligence.total_establishments > 1000
-                    ? "High"
-                    : censusIntelligence.total_establishments > 100
-                    ? "Medium"
-                    : "Low",
-                search_optimization:
-                  censusIntelligence.optimization.api_efficiency_score > 70
-                    ? "Highly optimized"
-                    : "Standard targeting",
-              },
-            }
-          : null,
-        optimization: {
-          processingTime: `${processingTime}ms`,
-          apiCallsSaved: optimizationStats.totalAPICallsSaved || 0,
-          parallelProcessing: optimizationStats.parallelProcessingUsed || 0,
-          averageConfidenceBoost: optimizationStats.averageConfidenceBoost || 0,
-          // Enhanced with Census intelligence
-          geographic_intelligence_applied: censusIntelligence ? true : false,
-          costOptimization: {
-            enhancementCost,
-            totalCost,
-            savingsFromIntelligentRouting:
-              (optimizationStats.totalAPICallsSaved || 0) * 0.1, // Estimated savings
-            census_optimization_savings:
-              (censusIntelligence?.optimization?.api_efficiency_score || 0) > 70
-                ? totalCost * 0.15
-                : 0, // 15% savings estimate for high-efficiency targeting
+    return highlight.applyToResponse(
+      new Response(
+        JSON.stringify({
+          success: true,
+          campaignId,
+          discoveryEngine:
+            "Optimized Discovery Engine v3.1 + Census Intelligence",
+          requirements: {
+            targetLeads: maxResults,
+            budgetLimit,
+            minConfidenceScore,
           },
-        },
-        costs: {
-          totalCost,
-          costPerLead: totalCost / enhancedLeads.length,
-          enhancementCost,
-          validationCost: totalCost - enhancementCost,
-        },
-        leads: enhancedLeads,
-        metadata: {
-          timestamp: new Date().toISOString(),
-          version: "3.0",
-          optimizationsApplied: true,
-        },
-      }),
-      {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      }
+          results: {
+            totalFound: enhancedLeads.length,
+            qualified: enhancedLeads.length,
+            qualificationRate: `${(
+              (enhancedLeads.length / allRawBusinesses.length) *
+              100
+            ).toFixed(1)}%`,
+            averageConfidence: Math.round(
+              enhancedLeads.reduce(
+                (sum: number, lead: BusinessLead) => sum + lead.optimizedScore,
+                0
+              ) / enhancedLeads.length
+            ),
+          },
+          // NEW: Census Geographic Intelligence
+          census_intelligence: censusIntelligence
+            ? {
+                business_density: {
+                  total_establishments: censusIntelligence.total_establishments,
+                  density_score: censusIntelligence.density_score,
+                  confidence_multiplier:
+                    censusIntelligence.optimization.confidence_multiplier,
+                },
+                geographic_optimization: {
+                  optimal_radius: censusIntelligence.optimization.search_radius,
+                  expected_results:
+                    censusIntelligence.optimization.expected_results,
+                  api_efficiency_score:
+                    censusIntelligence.optimization.api_efficiency_score,
+                },
+                market_insights: {
+                  market_density:
+                    censusIntelligence.density_score > 50
+                      ? "High"
+                      : censusIntelligence.density_score > 20
+                      ? "Medium"
+                      : "Low",
+                  competition_level:
+                    censusIntelligence.total_establishments > 1000
+                      ? "High"
+                      : censusIntelligence.total_establishments > 100
+                      ? "Medium"
+                      : "Low",
+                  search_optimization:
+                    censusIntelligence.optimization.api_efficiency_score > 70
+                      ? "Highly optimized"
+                      : "Standard targeting",
+                },
+              }
+            : null,
+          optimization: {
+            processingTime: `${processingTime}ms`,
+            apiCallsSaved: optimizationStats.totalAPICallsSaved || 0,
+            parallelProcessing: optimizationStats.parallelProcessingUsed || 0,
+            averageConfidenceBoost:
+              optimizationStats.averageConfidenceBoost || 0,
+            // Enhanced with Census intelligence
+            geographic_intelligence_applied: censusIntelligence ? true : false,
+            costOptimization: {
+              enhancementCost,
+              totalCost,
+              savingsFromIntelligentRouting:
+                (optimizationStats.totalAPICallsSaved || 0) * 0.1, // Estimated savings
+              census_optimization_savings:
+                (censusIntelligence?.optimization?.api_efficiency_score || 0) >
+                70
+                  ? totalCost * 0.15
+                  : 0, // 15% savings estimate for high-efficiency targeting
+            },
+          },
+          costs: {
+            totalCost,
+            costPerLead: totalCost / enhancedLeads.length,
+            enhancementCost,
+            validationCost: totalCost - enhancementCost,
+          },
+          leads: enhancedLeads,
+          metadata: {
+            timestamp: new Date().toISOString(),
+            version: "3.0",
+            optimizationsApplied: true,
+          },
+          highlight: highlight.toJSON(),
+        }),
+        {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      )
     );
   } catch (error) {
     console.error("Optimized discovery error:", error);
+    highlight.error("Optimized discovery error", {
+      message: error instanceof Error ? error.message : String(error),
+    });
 
-    return new Response(
-      JSON.stringify({
-        success: false,
-        error: error instanceof Error ? error.message : "Unknown error",
-        timestamp: new Date().toISOString(),
-      }),
-      {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      }
+    return highlight.applyToResponse(
+      new Response(
+        JSON.stringify({
+          success: false,
+          error: error instanceof Error ? error.message : "Unknown error",
+          timestamp: new Date().toISOString(),
+          highlight: highlight.toJSON(),
+        }),
+        {
+          status: 500,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      )
     );
   }
 });
