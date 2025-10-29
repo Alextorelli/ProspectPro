@@ -173,20 +173,12 @@ dev-tools/
 |   |-- .task/
 |   |   `-- checksum/
 |   |-- agents/
-|   |   |-- business-discovery/
-|   |   |   |-- e2e/
-|   |   |   |   `-- business-discovery.spec.ts
-|   |   |   `-- unit/
-|   |   |       `-- business-discovery.test.ts
 |   |   |-- client-service-layer/
 |   |   |   `-- Taskfile.yml
 |   |   |-- context/
 |   |   |   `-- Taskfile.yml
 |   |   `-- mcp-servers/
 |   |       `-- Taskfile.yml
-|   |-- business-discovery/
-|   |   |-- e2e/
-|   |   `-- unit/
 |   |-- configs/
 |   |   |-- playwright.agents.config.ts
 |   |   `-- vitest.agents.config.ts
@@ -212,6 +204,8 @@ dev-tools/
 |   |   |-- playwright/
 |   |   |   |-- html/
 |   |   |   |   `-- index.html
+|   |   |   |-- results/
+|   |   |   |   `-- .last-run.json
 |   |   |   |-- .last-run.json
 |   |   |   `-- playwright-report.json
 |   |   `-- vitest-results.json
