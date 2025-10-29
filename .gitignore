@@ -80,6 +80,13 @@ yarn-error.log*
 !dev-tools/agents/.env.agent.example
 dev-tools/agents/.env.agent.local
 
+# Supabase CLI artifacts (backend workspace)
+app/backend/.branches
+app/backend/.temp
+app/backend/.env.keys
+app/backend/.env.local
+app/backend/.env.*.local
+
 # Docker runtime files
 docker-compose.override.yml
 .docker/
