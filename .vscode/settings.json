@@ -190,5 +190,25 @@
   "chat.allowAnonymousAccess": true,
   "chat.mcp.assisted.nuget.enabled": true,
   "chat.setup.signInDialogVariant": "default",
-  "github.copilot.chat.codesearch.enabled": true
+  "github.copilot.chat.codesearch.enabled": true,
+  "github.codespaces.defaultExtensions": [
+    "GitHub.codespaces",
+    "GitHub.vscode-pull-request-github",
+    "Github.copilot",
+    "Github.copilot.chat"
+  ],
+  "github.copilot.nextEditSuggestions.enabled": true,
+  "github.copilot.chat.agent.thinkingTool": true,
+  "github.copilot.chat.alternateGptPrompt.enabled": true,
+  "github.copilot.chat.editor.temporalContext.enabled": true,
+  "github.copilot.chat.edits.temporalContext.enabled": true,
+  "github.copilot.chat.executePrompt.enabled": true,
+  "github.copilot.chat.generateTests.codeLens": true,
+  "github.copilot.chat.languageContext.fix.typescript.enabled": true,
+  "github.copilot.chat.languageContext.inline.typescript.enabled": true,
+  "github.copilot.chat.languageContext.typescript.includeDocumentation": true,
+  "github.copilot.chat.languageContext.typescript.enabled": true,
+  "github.copilot.chat.newWorkspace.useContext7": true,
+  "debug.javascript.unmapMissingSources": true,
+  "json.trace.server": "messages"
 }
