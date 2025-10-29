@@ -27,7 +27,7 @@
     "debug.overrideEngine": "gpt-4",
     "debug.useNodeFetcher": true
   },
-  "chat.agent.maxRequests": 200,
+  "chat.agent.maxRequests": 250,
   "chat.editing.autoAcceptDelay": 100,
   "chat.useAgentsMdFile": true,
   "chat.instructionsFilesLocations": {
@@ -133,7 +133,7 @@
     }
   },
   "tasks.showQuickPick": true,
-  "chat.todoListTool.writeOnly": true,
+  "chat.todoListTool.writeOnly": false,
   "chat.agent.todoList": {
     "position": "default"
   },
@@ -177,9 +177,6 @@
   "chat.todoListTool.descriptionField": true,
   "chat.emptyState.history.enabled": true,
   "chat.mcp.gallery.enabled": true,
-  "chat.mcp.discovery.enabled": {
-    "windsurf": true
-  },
   "chat.tools.terminal.autoReplyToPrompts": true,
   "chat.useNestedAgentsMdFiles": true,
   "mermaidChart.enableLivePreview": true,
@@ -189,5 +186,8 @@
   "vitest.nodeEnv": {},
   "deno.cacheOnSave": false,
   "chat.mcp.autostart": "never",
-  "chat.agent.thinkingStyle": "expanded"
+  "chat.agent.thinkingStyle": "expanded",
+  "chat.allowAnonymousAccess": true,
+  "chat.mcp.assisted.nuget.enabled": true,
+  "chat.setup.signInDialogVariant": "default"
 }
