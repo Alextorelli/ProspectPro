@@ -103,12 +103,12 @@
   - Updated package name to `@prospectpro/client-service-layer`
   - Source code reorganized under `src/` subdirectory
   - Package-lock.json regenerated with new namespace
-- **Validation**: 
+- **Validation**:
   - Run: `cd dev-tools/agents/client-service-layer && npm install && npm run build && npm test`
   - Verify: `npm run lint` passes
   - Check: Deployment script can locate dist/ outputs
 - **Rollback**: Restore from git history at commit prior to rename
-- **Notes**: 
+- **Notes**:
   - MCP config remains at `.vscode/mcp_config.json` (primary) and `config/mcp-config.json` (fallback)
   - Archive/log references left unchanged for historical context
   - Next: Update MCP server cleanup and automation alignment
@@ -120,4 +120,3 @@
 - Consolidated environments and utility server
 - Ran npm run docs:update and repo:scan to refresh all inventories
 - All changes staged and validated
-

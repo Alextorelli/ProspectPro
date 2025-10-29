@@ -169,6 +169,12 @@ dev-tools/
 |   |   `-- validate-ignore-config.cjs
 |   `-- README.md
 |-- testing/
+|   |-- agents/
+|   |   `-- business-discovery/
+|   |       |-- e2e/
+|   |       |   `-- business-discovery.spec.ts
+|   |       `-- unit/
+|   |           `-- business-discovery.test.ts
 |   |-- business-discovery/
 |   |   |-- e2e/
 |   |   |   `-- business-discovery.spec.ts
@@ -197,9 +203,14 @@ dev-tools/
 |   |       `-- mcp.spec.ts
 |   |-- utils/
 |   |   |-- fixtures/
-|   |   |   `-- campaigns.json
+|   |   |   |-- campaigns.json
+|   |   |   |-- fixture-dataset.json
+|   |   |   |-- sample-mcp-response.json
+|   |   |   |-- sample-supabase.log
+|   |   |   `-- sample-vercel-status.json
 |   |   `-- setup.ts
-|   `-- README.md
+|   |-- README.md
+|   `-- Taskfile.yml
 |-- workspace/
 |   `-- context/
 |       |-- archive/
