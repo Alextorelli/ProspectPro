@@ -90,13 +90,21 @@
   "suites": [],
   "errors": [
     {
-      "message": "Error: No tests found",
-      "stack": "Error: No tests found"
+      "message": "TypeError: Cannot redefine property: Symbol($$jest-matchers-object)",
+      "stack": "TypeError: Cannot redefine property: Symbol($$jest-matchers-object)\n    at /workspaces/ProspectPro/node_modules/@vitest/expect/dist/index.js:667:9"
+    },
+    {
+      "message": "TypeError: Cannot redefine property: Symbol($$jest-matchers-object)",
+      "stack": "TypeError: Cannot redefine property: Symbol($$jest-matchers-object)\n    at /workspaces/ProspectPro/node_modules/@vitest/expect/dist/index.js:667:9"
+    },
+    {
+      "message": "TypeError: Cannot redefine property: Symbol($$jest-matchers-object)",
+      "stack": "TypeError: Cannot redefine property: Symbol($$jest-matchers-object)\n    at /workspaces/ProspectPro/node_modules/@vitest/expect/dist/index.js:667:9"
     }
   ],
   "stats": {
-    "startTime": "2025-10-29T23:32:11.065Z",
-    "duration": 8.031999999999925,
+    "startTime": "2025-10-29T23:36:34.099Z",
+    "duration": 121.731,
     "expected": 0,
     "skipped": 0,
     "unexpected": 0,

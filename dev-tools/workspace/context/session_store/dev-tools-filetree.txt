@@ -174,10 +174,28 @@ dev-tools/
 |   |   `-- checksum/
 |   |-- agents/
 |   |   |-- client-service-layer/
+|   |   |   |-- e2e/
+|   |   |   |   `-- client-service-layer.spec.ts
+|   |   |   |-- integration/
+|   |   |   |   `-- client-service-layer.integration.ts
+|   |   |   |-- unit/
+|   |   |   |   `-- client-service-layer.test.ts
 |   |   |   `-- Taskfile.yml
 |   |   |-- context/
+|   |   |   |-- e2e/
+|   |   |   |   `-- context.spec.ts
+|   |   |   |-- integration/
+|   |   |   |   `-- context.integration.ts
+|   |   |   |-- unit/
+|   |   |   |   `-- context.test.ts
 |   |   |   `-- Taskfile.yml
 |   |   `-- mcp-servers/
+|   |       |-- e2e/
+|   |       |   `-- mcp-servers.spec.ts
+|   |       |-- integration/
+|   |       |   `-- mcp-servers.integration.ts
+|   |       |-- unit/
+|   |       |   `-- mcp-servers.test.ts
 |   |       `-- Taskfile.yml
 |   |-- configs/
 |   |   |-- playwright.agents.config.ts
@@ -256,7 +274,6 @@ dev-tools/
 |       |   |-- ex3.mmd
 |       |   |-- mcp-integration-plan.md
 |       |   |-- mece-agent-mcp-integration-plan.md
-|       |   |-- Optimized Agents Config Patch Plan.md
 |       |   |-- patch-execution.sh
 |       |   |-- patch-implementation.sh
 |       |   |-- phase-5-validation-log.md
@@ -276,6 +293,7 @@ dev-tools/
 |       |   |-- dev-tools-filetree.txt
 |       |   |-- integration-filetree.txt
 |       |   |-- live-tooling-list.txt
+|       |   |-- Optimized Agents Config Patch Plan.md
 |       |   |-- rename-finalization-20251029-111629.log
 |       |   `-- repo-tree-summary.txt
 |       `-- event-bus.ts
