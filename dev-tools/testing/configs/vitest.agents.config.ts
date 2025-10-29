@@ -31,6 +31,14 @@ export default defineConfig({
       "default",
       ["json", { outputFile: "./reports/vitest-results.json" }],
     ],
+    include: [
+      "agents/**/*.test.ts",
+      "agents/**/*.integration.ts",
+      "unit/**/*.test.ts",
+      "unit/**/*.integration.ts",
+      "**/__tests__/**/*.test.ts",
+      "**/__tests__/**/*.integration.ts",
+    ],
   },
   resolve: {
     alias: {

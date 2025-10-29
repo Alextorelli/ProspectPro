@@ -18,7 +18,8 @@ describe("ConfigLocator", () => {
       const configLocator = new ConfigLocator(
         "/workspace",
         ".vscode/mcp_config.json",
-        "config/mcp-config.json"
+        "config/mcp-config.json",
+        mockedFs
       );
       const mockConfig = { mcpServers: { test: {} } };
 
@@ -43,7 +44,8 @@ describe("ConfigLocator", () => {
       const configLocator = new ConfigLocator(
         "/workspace",
         ".vscode/mcp_config.json",
-        "config/mcp-config.json"
+        "config/mcp-config.json",
+        mockedFs
       );
       const mockConfig = { mcpServers: { test: {} } };
 
