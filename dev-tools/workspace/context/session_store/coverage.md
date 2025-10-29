@@ -1,3 +1,13 @@
+# 2025-10-29: Agent Test Suite ESM/Spy Fix & Validation
+
+- Completed ESM-safe refactor of agent/unit/integration tests (ConfigLocator, MCPClientManager, etc.)
+- Fixed all describe/it scoping and block structure issues in integration tests
+- Updated Vitest config to multi-project, ensured agent configs are included and Playwright/E2E tests are excluded
+- Validated test discovery and execution: all agent/unit/integration tests pass, no ESM/spy errors remain
+- Confirmed configLocator fallback and fs mocking patterns are robust and documented
+- Ran full suite via `npx vitest --config dev-tools/testing/configs/vitest.agents.config.ts run` and confirmed all tests pass
+- Ready for Taskfile migration and test orchestration phase
+
 # 2025-10-29: Taskfile Migration Plan Update
 
 - Extended automated-tooling implementation plan with dedicated phases for Taskfile migration, VS Code shim replacement, and post-migration snapshots.

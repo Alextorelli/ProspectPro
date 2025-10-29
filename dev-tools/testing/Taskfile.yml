@@ -1,57 +1,84 @@
 version: "3"
+vars:
+  VITEST_CONFIG: ./configs/vitest.agents.config.ts
+  PLAYWRIGHT_CONFIG: ./configs/playwright.agents.config.ts
+  REPORTS_DIR: ./reports
 
 tasks:
   agents:test:unit:
     desc: Run all agent unit tests (Vitest)
-    dir: dev-tools/testing
     cmds:
-      - npx vitest --config ./configs/vitest.agents.config.ts run
+      - npx vitest --config {{.VITEST_CONFIG}} run --dir agents --include '**/unit/**/*.test.ts'
+    sources:
+      - agents/**/unit/**/*.test.ts
+    generates:
+      - "{{.REPORTS_DIR}}/coverage/*"
 
   agents:test:integration:
     desc: Run all agent integration tests (Vitest)
-    dir: dev-tools/testing
     cmds:
-      - npx vitest --config ./configs/vitest.agents.config.ts run --dir agents --include integration
+      - npx vitest --config {{.VITEST_CONFIG}} run --dir agents --include '**/integration/**/*.test.ts'
+    sources:
+      - agents/**/integration/**/*.test.ts
+    generates:
+      - "{{.REPORTS_DIR}}/coverage/*"
 
   agents:test:e2e:
     desc: Run all agent E2E tests (Playwright)
-    dir: dev-tools/testing
     cmds:
-      - npx playwright test --config=./configs/playwright.agents.config.ts
+      - npx playwright test --config {{.PLAYWRIGHT_CONFIG}}
+    sources:
+      - agents/**/e2e/**/*.spec.ts
+    generates:
+      - "{{.REPORTS_DIR}}/playwright/*"
 
   agents:test:full:
-    desc: Run all agent test suites (unit, integration, e2e)
-    deps: [agents:test:unit, agents:test:integration, agents:test:e2e]
+    desc: Run all agent tests (unit, integration, E2E)
+    deps:
+      - agents:test:unit
+      - agents:test:integration
+      - agents:test:e2e
 
-  lint:
-    desc: Lint all agent and test code
-    dir: dev-tools/testing
+  agents:test:watch:
+    desc: Watch all agent unit/integration tests (Vitest)
     cmds:
-      - npx eslint agents/ utils/ configs/ --ext .ts,.tsx
+      - npx vitest --config {{.VITEST_CONFIG}} watch
 
-  report:coverage:
-    desc: Generate and consolidate coverage reports
-    dir: dev-tools/testing
+  agents:test:coverage:
+    desc: Generate coverage report for all agent tests
     cmds:
-      - npx vitest --config ./configs/vitest.agents.config.ts run --coverage
-      - npx playwright show-report --config=./configs/playwright.agents.config.ts
+      - npx vitest --config {{.VITEST_CONFIG}} run --coverage
+    generates:
+      - "{{.REPORTS_DIR}}/coverage/*"
 
-      # Per-agent Taskfiles should be placed in dev-tools/testing/agents/<agent>/Taskfile.yml
-      # Example agent Taskfile:
-      # version: '3'
-      # tasks:
-      #   unit:
-      #     desc: Run unit tests for this agent
-      #     cmds:
-      #       - npx vitest run --dir unit
-      #   e2e:
-      #     desc: Run E2E tests for this agent
-      #     cmds:
-      #       - npx playwright test --dir e2e
+  agents:test:lint:
+    desc: Lint all agent test code
+    cmds:
+      - npx eslint agents/**/*.ts
+    sources:
+      - agents/**/*.ts
 
-      - echo "✓ Reports cleaned"
+  agents:test:clean:
+    desc: Clean all agent test reports
+    cmds:
+      - rm -rf {{.REPORTS_DIR}}/*
+    generates:
+      - "{{.REPORTS_DIR}}/*"
 
   reports:open:
     desc: Open Playwright HTML report
     cmds:
       - npx playwright show-report {{.REPORTS_DIR}}/playwright
+# Per-agent Taskfiles should be placed in dev-tools/testing/agents/<agent>/Taskfile.yml
+# Example agent Taskfile:
+# version: '3'
+# tasks:
+#   unit:
+#     desc: Run unit tests for this agent
+#     cmds:
+#       - npx vitest run --dir unit
+#   e2e:
+#     desc: Run E2E tests for this agent
+#     cmds:
+#       - npx playwright test --dir e2e
+#     cmds:

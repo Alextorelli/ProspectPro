@@ -17,7 +17,10 @@
     "redhat.vscode-yaml",
     "GraphBook.mermaid-chart",
     "bierner.mermaid-markdown-syntax-highlighting",
-    "task.vscode-task"
+    "task.vscode-task",
+    "supabase.vscode-supabase-extension",
+    "antfu.vite",
+    "huggingface.huggingface-vscode-chat"
   ],
   "unwantedRecommendations": [
     "ms-mssql.mssql",
