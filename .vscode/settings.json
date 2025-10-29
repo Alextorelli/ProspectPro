@@ -188,5 +188,6 @@
   "mermaidChart.externalSnippets": ["docs/shared/mermaid/config/mermaid.json"],
   "vitest.nodeEnv": {},
   "deno.cacheOnSave": false,
-  "chat.mcp.autostart": "never"
+  "chat.mcp.autostart": "never",
+  "chat.agent.thinkingStyle": "expanded"
 }

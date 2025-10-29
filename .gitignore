@@ -75,7 +75,6 @@ yarn-error.log*
 .env
 .env.*
 !/.env.example
-!/.env.sync
 !/.env.docker
 !dev-tools/agents/.env.agent.example
 dev-tools/agents/.env.agent.local
