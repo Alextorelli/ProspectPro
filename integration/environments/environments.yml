@@ -1,0 +1,118 @@
+---
+# ProspectPro Environment Configurations
+# Source of truth for all environment settings
+# Generate via: node dev-tools/scripts/automation/generate-configs.mjs
+
+environments:
+  development:
+    name: "development"
+    description: "Local development sandbox with unrestricted access for rapid iteration"
+    url: "http://localhost:5173"
+    supabase:
+      projectRef: "sriycekxdqnesdsgwiuc"
+      url: "https://sriycekxdqnesdsgwiuc.supabase.co"
+      anonKey: "${VITE_SUPABASE_ANON_KEY}"
+      serviceRoleKey: "${SUPABASE_SERVICE_ROLE_KEY}"
+    permissions:
+      writeOperations: true
+      canDeploy: false
+      canFetchLogs: true
+      canRunTests: true
+      requiresApproval: false
+      allowedMcpTools:
+        - "supabase:query"
+        - "supabase:insert"
+        - "supabase:update"
+        - "utility:memory"
+        - "observability:log"
+    flags:
+      enableAsyncDiscovery: true
+      enableRealtimeCampaigns: false
+      enableDebugMode: true
+    env:
+      NODE_ENV: "development"
+      VITE_SUPABASE_URL: "https://sriycekxdqnesdsgwiuc.supabase.co"
+      VITE_SUPABASE_ANON_KEY: "${VITE_SUPABASE_ANON_KEY}"
+    mcpServers:
+      command: "node"
+      args: ["dev-tools/agents/mcp-servers/environments/development.js"]
+      env:
+        ENVIRONMENT: "development"
+
+  staging:
+    name: "staging"
+    description: "Persistent staging environment for QA validation and agent testing before production deployment"
+    url: "https://prospect-5i7mc1o2c-appsmithery.vercel.app"
+    supabase:
+      projectRef: "sriycekxdqnesdsgwiuc"
+      url: "https://sriycekxdqnesdsgwiuc.supabase.co"
+      anonKey: "${VITE_SUPABASE_ANON_KEY}"
+      serviceRoleKey: "${SUPABASE_SERVICE_ROLE_KEY}"
+    vercel:
+      deploymentUrl: "https://prospect-5i7mc1o2c-appsmithery.vercel.app"
+      projectName: "prospect-pro"
+      teamSlug: "appsmithery"
+    permissions:
+      writeOperations: true
+      canDeploy: true
+      canFetchLogs: true
+      canRunTests: true
+      requiresApproval: false
+      allowedMcpTools:
+        - "supabase:query"
+        - "supabase:insert"
+        - "supabase:update"
+        - "utility:memory"
+        - "observability:log"
+        - "observability:trace"
+    flags:
+      enableAsyncDiscovery: true
+      enableRealtimeCampaigns: true
+      enableDebugMode: false
+    env:
+      NODE_ENV: "staging"
+      VITE_SUPABASE_URL: "https://sriycekxdqnesdsgwiuc.supabase.co"
+      VITE_SUPABASE_ANON_KEY: "${VITE_SUPABASE_ANON_KEY}"
+    mcpServers:
+      command: "node"
+      args: ["dev-tools/agents/mcp-servers/environments/production.js"]
+      env:
+        ENVIRONMENT: "staging"
+
+  production:
+    name: "production"
+    description: "Live ProspectPro environment with verified customer data"
+    url: "https://prospectpro.appsmithery.co"
+    supabase:
+      projectRef: "sriycekxdqnesdsgwiuc"
+      url: "https://sriycekxdqnesdsgwiuc.supabase.co"
+      anonKey: "${VITE_SUPABASE_ANON_KEY}"
+      serviceRoleKey: "${SUPABASE_SERVICE_ROLE_KEY}"
+    vercel:
+      deploymentUrl: "https://prospectpro.appsmithery.co"
+      projectName: "prospect-pro"
+      teamSlug: "appsmithery"
+    permissions:
+      writeOperations: false
+      canDeploy: true
+      canFetchLogs: true
+      canRunTests: false
+      requiresApproval: true
+      allowedMcpTools:
+        - "supabase:query"
+        - "observability:log"
+        - "observability:trace"
+        - "observability:error"
+    flags:
+      enableAsyncDiscovery: true
+      enableRealtimeCampaigns: true
+      enableDebugMode: false
+    env:
+      NODE_ENV: "production"
+      VITE_SUPABASE_URL: "https://sriycekxdqnesdsgwiuc.supabase.co"
+      VITE_SUPABASE_ANON_KEY: "${VITE_SUPABASE_ANON_KEY}"
+    mcpServers:
+      command: "node"
+      args: ["dev-tools/agents/mcp-servers/environments/production.js"]
+      env:
+        ENVIRONMENT: "production"
