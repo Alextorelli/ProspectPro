@@ -628,7 +628,7 @@
       "command": "bash",
       "args": [
         "-lc",
-        "${workspaceFolder}/scripts/diagnostics/edge-function-diagnostics.sh ${input:sessionJWT}"
+        "${workspaceFolder}/integration/monitoring/diagnostics/edge-function-diagnostics.sh ${input:sessionJWT}"
       ],
       "group": "test",
       "presentation": {
