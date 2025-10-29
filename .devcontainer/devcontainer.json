@@ -15,28 +15,15 @@
         "supabase.supabase-vscode",
         "dbaeumer.vscode-eslint",
         "esbenp.prettier-vscode",
-        "eamodio.gitlens",
         "github.copilot",
         "github.copilot-chat",
-        "streetsidesoftware.code-spell-checker",
-        "wayou.vscode-todo-highlight",
-        "humao.rest-client",
-        "rangav.vscode-thunder-client",
-        "mtxr.sqltools",
-        "mtxr.sqltools-driver-pg",
-        "snyk-security.snyk-vulnerability-scanner",
-        "wix.vscode-import-cost",
-        "bierner.markdown-preview-github-styles",
-        "deepforest.theme",
         "vscode-icons-team.vscode-icons",
-        "Supabase.vscode-supabase-extension",
         "bradlc.vscode-tailwindcss",
         "antfu.vite",
         "redhat.vscode-yaml",
         "ms-playwright.playwright",
         "vitest.explorer",
         "GraphQL.vscode-graphql",
-        "Heroku-Dev-Tools.heroku",
         "task.vscode-task"
       ],
       "settings": {
@@ -136,7 +123,7 @@
     }
   },
   "forwardPorts": [3000, 5432],
-  "postCreateCommand": "bash -lc 'set -e; echo \"[setup] Initializing ProspectPro verified business intelligence environment...\"; if [ -f package-lock.json ]; then npm ci; else npm install; fi; if ! npm ls supabase --depth=0 >/dev/null 2>&1; then npm install supabase --save-dev; fi; npm run mcp:init; npm run codebase:index; echo \"[ready] Verified data environment prepared with zero fake data policy.\"; echo \"[next] ProspectPro verified business intelligence development ready.\"'",
+  "postCreateCommand": "bash -lc 'set -e; echo \"[setup] Initializing ProspectPro verified business intelligence environment...\"; if [ -f package-lock.json ]; then npm ci; else npm install; fi; if ! npm ls supabase --depth=0 >/dev/null 2>&1; then npm install supabase --save-dev; fi; npx playwright install-deps; npm run mcp:init; npm run codebase:index; echo \"[ready] Verified data environment prepared with zero fake data policy.\"; echo \"[next] ProspectPro verified business intelligence development ready.\"'",
   "postStartCommand": "bash -c 'echo \"[start] ProspectPro verified business intelligence environment active.\"; echo \"Data Policy: Zero Fake Data | Contacts: Verified Only | Architecture: Supabase Edge Functions\"; echo \"[hint] Use Copilot Chat for AI-assisted development with verified data context.\"'",
   "remoteUser": "node"
 }
