@@ -3,7 +3,7 @@
   "deno.enablePaths": ["./app/backend/functions"],
   "deno.lint": true,
   "deno.unstable": ["bare-node-builtins", "byonm", "sloppy-imports"],
-  "deno.path": "/home/node/.deno/bin/deno",
+  "deno.path": "${env:HOME}/.deno/bin/deno",
   "supabase.projectRef": "sriycekxdqnesdsgwiuc",
   "supabase.workspaceFolder": "${workspaceFolder}",
   "supabase.functions.autoWatch": true,
