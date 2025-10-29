@@ -4,9 +4,7 @@ import { defineConfig } from "vitest/config";
 
 const frontendRoot = path.resolve(__dirname, "app/frontend");
 
-// https://vitejs.dev/config/
-const frontendConfig = defineConfig({
-  root: frontendRoot,
+export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: {
@@ -32,11 +30,9 @@ const frontendConfig = defineConfig({
     ),
   },
   test: {
-    root: path.resolve(__dirname, "app/frontend"),
-    environment: "jsdom",
-    globals: true,
-    css: true,
+    projects: [
+      "./app/frontend/vitest.config.ts",
+      // Add more project config paths here if needed
+    ],
   },
 });
-
-export default [frontendConfig];
