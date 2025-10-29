@@ -10,6 +10,7 @@ ProspectPro/
 |   |-- automation/
 |   |-- context/
 |   |-- observability/
+|   |-- reports/
 |   |-- scripts/
 |   |-- testing/
 |   `-- workspace/

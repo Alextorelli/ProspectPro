@@ -487,3 +487,12 @@ ev## 2025-10-23: Codespaces Bootstrap Realignment
 - Status report and execution log are available for provenance and rollback.
 - No further code changes are needed for the rename.
 - Next phases: Extension wiring (Phase 3B), MCP server cleanup, Taskfile migration/testing consolidation.
+
+## 2025-10-29: MCP Server Cleanup
+
+- Created backup of dev-tools/agents/mcp-servers/ before cleanup
+- Removed deprecated artifacts: observability-server.js, tool-reference.md, MCP-package.json, test-results.json
+- Consolidated environments: removed troubleshooting.js, kept only development.js and production.js
+- Ensured only canonical utility/ directory and lockfile remain
+- Refreshed inventories and documentation via npm run docs:update and repo:scan
+- All changes validated and provenance logged

@@ -113,3 +113,11 @@
   - Archive/log references left unchanged for historical context
   - Next: Update MCP server cleanup and automation alignment
 
+## 2025-10-29: MCP Server Cleanup & Inventory Refresh
+
+- Backed up and cleaned dev-tools/agents/mcp-servers/ per audit plan
+- Removed deprecated artifacts and redundant lockfiles
+- Consolidated environments and utility server
+- Ran npm run docs:update and repo:scan to refresh all inventories
+- All changes staged and validated
+

@@ -104,23 +104,6 @@ dev-tools/
 |   |   |-- validate-agents.sh
 |   |   |-- validate-highlight-integration.sh
 |   |   `-- validate-observability-migration.sh
-|   |-- workflows/
-|   |   |-- archive/
-|   |   |   |-- Automated Workflow Flattening Plan.md
-|   |   |   |-- step1.sh
-|   |   |   |-- step2.sh
-|   |   |   |-- step3.sh
-|   |   |   |-- step4.sh
-|   |   |   |-- step5.sh
-|   |   |   `-- step6.sh
-|   |   |-- templates/
-|   |   |   |-- .gitkeep
-|   |   |   |-- deployment-checklist-template.md
-|   |   |   |-- observability-testing-snippet.md
-|   |   |   |-- playwright-toolset-snippet.jsonc
-|   |   |   `-- README.md
-|   |   `-- .gitkeep
-|   |-- .env.agent.example
 |   |-- .env.agent.local
 |   |-- .env.development
 |   |-- .env.production
@@ -151,8 +134,13 @@ dev-tools/
 |   `-- highlight-node/
 |       |-- package.json
 |       `-- tsconfig.json
+|-- reports/
+|   `-- validation/
+|       |-- mcp-audit-20251029-114951.md
+|       `-- mcp-servers-backup-20251029-115254.tar.gz
 |-- scripts/
 |   |-- automation/
+|   |   |-- audit-mcp-servers.sh
 |   |   |-- enhance-production-ops-context.sh
 |   |   |-- finalize-client-service-layer-rename.sh
 |   |   |-- generate-configs.mjs
@@ -253,6 +241,8 @@ dev-tools/
 |       |   |-- automated-tooling-update.md
 |       |   |-- client-service-layer-rename-status.md
 |       |   |-- coverage.md
+|       |   |-- dev-tools-filetree.txt
+|       |   |-- integration-filetree.txt
 |       |   |-- live-tooling-list.txt
 |       |   |-- Optimized Environment Config Patch Plan.md
 |       |   |-- rename-finalization-20251029-111629.log
