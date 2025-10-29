@@ -16,7 +16,8 @@
     "davidanson.vscode-markdownlint",
     "redhat.vscode-yaml",
     "GraphBook.mermaid-chart",
-    "bierner.mermaid-markdown-syntax-highlighting"
+    "bierner.mermaid-markdown-syntax-highlighting",
+    "task.vscode-task"
   ],
   "unwantedRecommendations": [
     "ms-mssql.mssql",
