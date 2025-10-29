@@ -19,6 +19,14 @@
 - **Temporary & Working Files**: Use `dev-tools/workspace/context/session_store/` exclusively for scratch plans, coverage snapshots, logs-in-transit, and migration trackers. Clean up after shipping to keep it lightweight.
 - **Automation & Tasks**: Prefer the curated VS Code tasks (see `.vscode/TASKS_REFERENCE.md`) and npm scripts in `package.json` for deployment, validation, and diagnostics before adding new workflows.
 
+## Agent Profiles & Testing Suite
+
+- **Portable agent profiles**: Canonical agents (`_development-workflow`, `_observability`, `_production-ops`, `_system-architect`, etc.) ship with coordinated `taskfile.yaml`, `toolset.jsonc`, `instructions.md`, and `config.json` assets. Treat the set as a portable package you can drop into other repos without app-specific rewrites.
+- **Automation lives in Taskfiles**: Each agent’s `taskfile.yaml` is the primary home for lint, unit, integration, and cross-browser E2E orchestration. `.vscode/tasks.json` exposes only thin shims so VS Code’s Run/Debug UI mirrors the Task CLI experience without duplicating logic.
+- **Unified tooling**: Tasks invoke Vitest, Playwright, and Deno pipelines, refresh documentation/inventories, and sync telemetry (Highlight/OpenTelemetry) through the agent’s defined MCP toolset. The suite should always be runnable via `task` or the VS Code Testing panel with no manual wiring.
+- **Workspace flow**: Developers install dependencies once, pick the agent profile that matches their role, and trigger the curated tasks. Automation cascades across app + dev-tools boundaries, captures artifacts under `dev-tools/reports/`, and writes provenance to session_store inventories so migrations stay auditable.
+- **Separation of concerns**: Integration between `dev-tools` and `app` stays intentionally light—agents remain app-agnostic modules that validate the full stack yet remain portable for future projects.
+
 ## Data Integrity & Integrations
 
 - Production data only—no synthetic pipelines.
