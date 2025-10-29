@@ -1,3 +1,66 @@
+// --- Additional type for updateScratchpad ---
+export interface UpdateScratchpadInput {
+  agentId: string;
+  data: {
+    currentTask?: string | null;
+    summary?: string | null;
+    notes?: ScratchpadNoteInput | ScratchpadNoteInput[];
+  };
+  tags?: string[];
+  append?: boolean;
+  environment?: EnvironmentName;
+}
+// --- Type Fixes for missing types (must be at top level, before imports) ---
+export type OptionATag =
+  | "ux"
+  | "platform"
+  | "devops"
+  | "secops"
+  | "integrations";
+
+export interface SelectFilters {
+  limit?: number;
+  sinceMinutes?: number;
+  keywords?: string[];
+  keywordMatch?: "any" | "all";
+  environment?: EnvironmentName;
+  topics?: string[];
+}
+
+export type ScratchpadNoteInput = string | Partial<ScratchpadNote>;
+
+export interface CompressResult {
+  compressed: boolean;
+  dropped: number;
+  retained: number;
+  summary?: string;
+}
+
+export interface UpsertMemoryInput {
+  agentId: string;
+  memory: Partial<LongTermMemoryItem>;
+  updateLastAccessed?: boolean;
+}
+// Utility: Check if a tool is allowed for the current environment and agent
+// Looks for permissions.mcpToolsAllowlist (array of allowed tool names) or mcpToolsDenylist (array of denied tool names)
+// If allowlist is present, only those tools are allowed. If denylist is present, those tools are denied. If neither, all tools allowed.
+export async function canUseTool(
+  toolName: string,
+  agentId?: string
+): Promise<boolean> {
+  const envManager = new EnvironmentContextManager();
+  const env = await envManager.current(agentId);
+  const allowlist =
+    env.permissions && (env.permissions as any).mcpToolsAllowlist;
+  const denylist = env.permissions && (env.permissions as any).mcpToolsDenylist;
+  if (Array.isArray(allowlist)) {
+    return allowlist.includes(toolName);
+  }
+  if (Array.isArray(denylist)) {
+    return !denylist.includes(toolName);
+  }
+  return true;
+}
 import { createHash, randomUUID } from "node:crypto";
 import { promises as fs } from "node:fs";
 import * as path from "node:path";
@@ -18,7 +81,7 @@ if (DRY_RUN) {
   );
 }
 // MCP routing helpers
-function getMCPServerForParticipant(tag) {
+function getMCPServerForParticipant(tag: OptionATag): string {
   // Option A mapping, can be extended for dynamic registry lookup
   const mapping = {
     ux: "development",
@@ -417,7 +480,7 @@ export class ContextManager {
       const incoming = Array.isArray(input.data.notes)
         ? input.data.notes
         : [input.data.notes];
-      const notes = incoming.map((note) =>
+      const notes = incoming.map((note: ScratchpadNoteInput) =>
         this.normalizeNote(note, input.tags ?? [])
       );
       if (input.append === false) {
@@ -502,8 +565,8 @@ export class ContextManager {
 
     const updated: LongTermMemoryItem = {
       id,
-      topic: payload.topic,
-      payload: payload.payload,
+      topic: payload.topic ?? "untitled",
+      payload: payload.payload ?? {},
       createdAt,
       lastAccessed,
       environment,
@@ -664,7 +727,7 @@ export class ContextManager {
     tags.forEach((tag) => mergedTags.add(tag));
     return {
       timestamp: note.timestamp ?? this.nowISO(),
-      content: note.content,
+      content: note.content ?? "",
       tags: mergedTags.size > 0 ? Array.from(mergedTags) : undefined,
     };
   }
@@ -797,6 +860,11 @@ export class ContextManager {
 }
 
 export class EnvironmentContextManager {
+  private readonly ENV_CONTEXT_DIR: string = path.join(
+    defaultStoreDir,
+    "shared",
+    "environments"
+  );
   private readonly storeDir: string;
   private readonly statePath: string;
   private readonly ledger: TaskLedger;
@@ -823,7 +891,7 @@ export class EnvironmentContextManager {
   }
 
   async list(): Promise<EnvironmentContext[]> {
-    const envDir = path.join(ENV_CONTEXT_DIR);
+    const envDir = path.join(this.ENV_CONTEXT_DIR);
     try {
       const entries = await fs.readdir(envDir);
       const contexts: EnvironmentContext[] = [];
@@ -895,12 +963,26 @@ export class EnvironmentContextManager {
   }
 
   async canPerform(
-    action: "write" | "deploy" | "fetchLogs" | "runTests",
-    environmentName?: EnvironmentName
+    action: "write" | "deploy" | "fetchLogs" | "runTests" | { mcpTool: string },
+    environmentName?: EnvironmentName,
+    agentId?: string
   ): Promise<boolean> {
     const context = environmentName
       ? await this.readEnvironment(environmentName)
-      : await this.current();
+      : await this.current(agentId);
+    if (typeof action === "object" && action.mcpTool) {
+      const allowlist =
+        context.permissions && (context.permissions as any).mcpToolsAllowlist;
+      const denylist =
+        context.permissions && (context.permissions as any).mcpToolsDenylist;
+      if (Array.isArray(allowlist)) {
+        return allowlist.includes(action.mcpTool);
+      }
+      if (Array.isArray(denylist)) {
+        return !denylist.includes(action.mcpTool);
+      }
+      return true;
+    }
     switch (action) {
       case "write":
         return context.permissions.writeOperations;
@@ -925,7 +1007,7 @@ export class EnvironmentContextManager {
   private async readEnvironment(
     name: EnvironmentName
   ): Promise<EnvironmentContext> {
-    const file = path.join(ENV_CONTEXT_DIR, `${name}.json`);
+    const file = path.join(this.ENV_CONTEXT_DIR, `${name}.json`);
     const raw = await fs.readFile(file, "utf8");
     const parsed = JSON.parse(raw) as EnvironmentContext;
     return {
