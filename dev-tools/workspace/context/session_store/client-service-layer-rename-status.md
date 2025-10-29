@@ -31,7 +31,7 @@
 
 ---
 
-## 🔄 Automated Batch Updates (Pending Execution)
+## 🔄 Automated Batch Updates (Completed)
 
 ### Script: `finalize-client-service-layer-rename.sh`
 
@@ -39,44 +39,71 @@
 
 #### Phase 1: Deployment Script Migration
 
-- [ ] Rename: `deploy-mcp-service-layer.sh` → `deploy-client-service-layer.sh`
-- [ ] Update SERVICE_NAME variable
-- [ ] Update SERVICE_DIR path reference
-- [ ] Update systemd unit name: `prospectpro-mcp-service-layer` → `prospectpro-client-service-layer`
-- [ ] Update OTEL_SERVICE_NAME environment variable
-- [ ] Update config validation checks
+- [x] Rename: `deploy-mcp-service-layer.sh` → `deploy-client-service-layer.sh`
+- [x] Update SERVICE_NAME variable
+- [x] Update SERVICE_DIR path reference
+- [x] Update systemd unit name: `prospectpro-mcp-service-layer` → `prospectpro-client-service-layer`
+- [x] Update OTEL_SERVICE_NAME environment variable
+- [x] Update config validation checks
 
 #### Phase 2: Root Package.json Cleanup
 
-- [ ] Review and document any legacy `mcp-service-layer` references
-- [ ] Create timestamped backup before changes
-- [ ] Validate no broken script references remain
+- [x] Review and document any legacy `mcp-service-layer` references
+- [x] Create timestamped backup before changes
+- [x] Validate no broken script references remain
 
 #### Phase 3: Documentation Staging
 
-- [ ] Append completion notes to `docs/tooling/settings-staging.md`
-- [ ] Include rollback procedures
-- [ ] Document validation checklist
+- [x] Append completion notes to `docs/tooling/settings-staging.md`
+- [x] Include rollback procedures
+- [x] Document validation checklist
 
 #### Phase 4: Coverage Tracking
 
-- [ ] Log all changes to `dev-tools/workspace/context/session_store/coverage.md`
-- [ ] Include provenance links (execution log, backups)
-- [ ] Note outstanding work (MCP server cleanup, Taskfile migration)
+- [x] Log all changes to `dev-tools/workspace/context/session_store/coverage.md`
+- [x] Include provenance links (execution log, backups)
+- [x] Note outstanding work (MCP server cleanup, Taskfile migration)
 
 #### Phase 5: Inventory Refresh
 
-- [ ] Run `dev-tools/automation/ci-cd/repo_scan.sh`
-- [ ] Update file tree inventories
-- [ ] Regenerate repo-tree-summary.txt
+- [x] Run `dev-tools/automation/ci-cd/repo_scan.sh`
+- [x] Update file tree inventories
+- [x] Regenerate repo-tree-summary.txt
 
 #### Phase 6: Validation Checks
 
-- [ ] Verify package name in client-service-layer/package.json
-- [ ] Confirm src/ directory structure
-- [ ] Check for dist/ build outputs (informational)
-- [ ] Validate deployment script content updates
-- [ ] Generate summary report
+- [x] Verify package name in client-service-layer/package.json
+- [x] Confirm src/ directory structure
+- [x] Check for dist/ build outputs (informational)
+- [x] Validate deployment script content updates
+- [x] Generate summary report
+
+---
+
+## 🚦 Rename Automation: Status & Next Steps
+
+**All automated rename and validation steps are complete.**
+
+### Next Phases:
+
+1. **Extension Wiring (Phase 3B)**
+   - Wire chat participants to use new package
+   - Register VS Code commands
+   - Integrate with VS Code API for workspace context
+   - Add UI components
+2. **MCP Server Cleanup (Independent Track)**
+   - Consolidate redundant MCP server artifacts
+   - Update active-registry.json
+   - Standardize server naming conventions
+   - Remove deprecated server implementations
+3. **Taskfile Migration & Testing Consolidation**
+   - Create domain-level Taskfiles and per-agent Taskfiles
+   - Migrate VS Code tasks to Task CLI wrappers
+   - Establish npm shims for backward compatibility
+
+---
+
+**Rename propagation is fully complete and validated. Proceed to the next roadmap phase.**
 
 ---
 
