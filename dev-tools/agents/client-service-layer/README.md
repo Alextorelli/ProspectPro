@@ -14,7 +14,7 @@ import {
   ConfigLocator,
   WorkspaceContext,
   NoOpTelemetrySink,
-} from "@prospectpro/mcp-service-layer";
+} from "@prospectpro/client-service-layer";
 
 // 1. Setup components with dependency injection
 const manager = new MCPClientManager({
@@ -154,7 +154,7 @@ class MyTelemetrySink implements TelemetrySink {
 }
 
 // Or use the tracing-enabled implementation
-import { TracingTelemetrySink } from "@prospectpro/mcp-service-layer";
+import { TracingTelemetrySink } from "@prospectpro/client-service-layer";
 
 const telemetrySink = new TracingTelemetrySink({
   serviceName: "my-mcp-service",
@@ -170,7 +170,7 @@ telemetrySink.info("Service started", { port: 3000 });
 The service layer includes built-in OpenTelemetry tracing support:
 
 ```typescript
-import { TracingTelemetrySink } from "@prospectpro/mcp-service-layer";
+import { TracingTelemetrySink } from "@prospectpro/client-service-layer";
 
 const tracingSink = new TracingTelemetrySink({
   serviceName: "prospectpro-mcp-client",
@@ -301,7 +301,7 @@ console.log((client1 === client2) === client3); // true
 The package includes a mock MCP adapter for development and testing:
 
 ```typescript
-import { MockMCPClientAdapter } from "@prospectpro/mcp-service-layer";
+import { MockMCPClientAdapter } from "@prospectpro/client-service-layer";
 
 const manager = new MCPClientManager({
   // ... other options

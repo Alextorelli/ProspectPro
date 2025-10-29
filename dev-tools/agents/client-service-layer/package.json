@@ -1,8 +1,9 @@
 {
-  "name": "@prospectpro/mcp-service-layer",
+  "name": "@prospectpro/client-service-layer",
   "version": "1.0.0",
   "description": "Portable MCP client service layer for ProspectPro dev tools",
-  "main": "index.ts",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc",
     "test": "jest",
@@ -32,7 +33,7 @@
       "**/__tests__/**/*.test.ts"
     ],
     "collectCoverageFrom": [
-      "**/*.ts",
+      "src/**/*.ts",
       "!**/__tests__/**",
       "!**/node_modules/**"
     ]
