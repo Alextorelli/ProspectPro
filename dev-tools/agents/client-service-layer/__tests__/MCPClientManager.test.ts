@@ -1,7 +1,7 @@
-import { ConfigLocator } from "../ConfigLocator";
-import { MCPClientManager } from "../MCPClientManager";
-import { TelemetrySink } from "../TelemetrySink";
-import { WorkspaceContext } from "../WorkspaceContext";
+import { ConfigLocator } from "../src/ConfigLocator";
+import { MCPClientManager } from "../src/MCPClientManager";
+import { TelemetrySink } from "../src/TelemetrySink";
+import { WorkspaceContext } from "../src/WorkspaceContext";
 
 // Mock dependencies
 const mockConfigLocator = new ConfigLocator("/workspace");

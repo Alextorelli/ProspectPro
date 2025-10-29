@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# ProspectPro MCP Service Layer Production Deployment Script
+# ProspectPro Client Service Layer Production Deployment Script
 # Phase 4: Production deployment and monitoring integration
 
 set -e
@@ -14,9 +14,9 @@ YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
 # Configuration
-SERVICE_NAME="mcp-service-layer"
+SERVICE_NAME="client-service-layer"
 WORKSPACE_ROOT="/workspaces/ProspectPro"
-SERVICE_DIR="$WORKSPACE_ROOT/dev-tools/agents/mcp"
+SERVICE_DIR="$WORKSPACE_ROOT/dev-tools/agents/client-service-layer"
 DIST_DIR="$SERVICE_DIR/dist"
 CONFIG_FILE="$WORKSPACE_ROOT/config/mcp-config.json"
 
@@ -84,8 +84,8 @@ build_service() {
 validate_config() {
     log "Validating MCP configuration..."
 
-    # Check if service is configured in mcp-config.json
-    if ! grep -q '"mcp-service-layer"' "$CONFIG_FILE"; then
+    # Check if service is configured in MCP config
+    if ! grep -q '"client-service-layer"' "$CONFIG_FILE"; then
         error "MCP Service Layer not found in configuration"
         exit 1
     fi
@@ -120,7 +120,7 @@ deploy_service() {
     # Create production environment file
     cat > "$SERVICE_DIR/.env.production" << EOF
 NODE_ENV=production
-OTEL_SERVICE_NAME=prospectpro-mcp-service-layer
+OTEL_SERVICE_NAME=prospectpro-client-service-layer
 OTEL_SERVICE_VERSION=1.0.0
 OTEL_TRACES_EXPORTER=otlp
 OTLP_ENDPOINT=${OTLP_ENDPOINT:-http://localhost:4317}
@@ -134,7 +134,7 @@ EOF
     if command -v systemctl &> /dev/null && [ -d "/etc/systemd/system" ]; then
         log "Creating systemd service..."
 
-        cat > "/etc/systemd/system/prospectpro-mcp-service-layer.service" << EOF
+        cat > "/etc/systemd/system/prospectpro-client-service-layer.service" << EOF
 [Unit]
 Description=ProspectPro MCP Service Layer
 After=network.target
@@ -155,8 +155,8 @@ WantedBy=multi-user.target
 EOF
 
         log "Systemd service created"
-        log "Enable with: sudo systemctl enable prospectpro-mcp-service-layer"
-        log "Start with: sudo systemctl start prospectpro-mcp-service-layer"
+        log "Enable with: sudo systemctl enable prospectpro-client-service-layer"
+        log "Start with: sudo systemctl start prospectpro-client-service-layer"
     else
         log "Systemd not available, manual startup required"
         log "Start with: cd $SERVICE_DIR && source .env.production && node dist/index.js"
@@ -168,8 +168,8 @@ run_health_checks() {
     log "Running health checks..."
 
     # Check if service is accessible
-    if [ -f "/etc/systemd/system/prospectpro-mcp-service-layer.service" ]; then
-        if systemctl is-active --quiet prospectpro-mcp-service-layer; then
+    if [ -f "/etc/systemd/system/prospectpro-client-service-layer.service" ]; then
+        if systemctl is-active --quiet prospectpro-client-service-layer; then
             log "Service is running"
         else
             warn "Service is not running"
@@ -203,7 +203,7 @@ main() {
     log "🎉 MCP Service Layer deployment completed successfully!"
     log ""
     log "Next steps:"
-    log "1. Monitor logs: journalctl -u prospectpro-mcp-service-layer -f"
+    log "1. Monitor logs: journalctl -u prospectpro-client-service-layer -f"
     log "2. Check traces in Jaeger: http://localhost:16686"
     log "3. Verify integration with other MCP servers"
     log "4. Update monitoring dashboards if needed"

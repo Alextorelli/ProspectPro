@@ -1,5 +1,5 @@
 import * as fs from "fs";
-import { ConfigLocator } from "../ConfigLocator";
+import { ConfigLocator } from "../src/ConfigLocator";
 
 // Mock dependencies (keep real path.join; only mock fs)
 jest.mock("fs");

@@ -1,10 +1,10 @@
 import * as fs from "fs";
 import * as path from "path";
-import { ConfigLocator } from "../ConfigLocator";
-import { MockMCPClientAdapter } from "../MCPClientAdapter";
-import { MCPClientManager } from "../MCPClientManager";
-import { TelemetrySink } from "../TelemetrySink";
-import { WorkspaceContext } from "../WorkspaceContext";
+import { ConfigLocator } from "../src/ConfigLocator";
+import { MockMCPClientAdapter } from "../src/MCPClientAdapter";
+import { MCPClientManager } from "../src/MCPClientManager";
+import { TelemetrySink } from "../src/TelemetrySink";
+import { WorkspaceContext } from "../src/WorkspaceContext";
 
 // Mock fs for creating temporary config files
 jest.mock("fs", () => ({

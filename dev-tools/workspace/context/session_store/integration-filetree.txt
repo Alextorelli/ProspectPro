@@ -1,0 +1,86 @@
+integration/
+|-- data/
+|   |-- foursquare-places.md
+|   |-- google-places.md
+|   |-- hunter-io.md
+|   `-- neverbounce.md
+|-- environments/
+|   |-- development.json
+|   |-- environments.yml
+|   |-- production.json
+|   `-- staging.json
+|-- infrastructure/
+|   `-- scripts/
+|       |-- git-hooks/
+|       |   `-- pre-push-ignore-check.sh
+|       |-- cache-publishable-key.sh
+|       |-- check-docs-schema.sh
+|       |-- deploy.sh
+|       |-- inject-api-keys.sh
+|       |-- install-git-hooks.sh
+|       |-- launch-react-devtools.sh
+|       |-- migration-phase.sh
+|       |-- populate-secrets.sh
+|       |-- preflight-checklist.sh
+|       |-- snapshot-pre-move.sh
+|       |-- toggle-gitignore.sh
+|       `-- update-paths.sh
+|-- monitoring/
+|   |-- diagnostics/
+|   |   |-- collect-diagnostics.sh
+|   |   |-- debug-campaign.sql
+|   |   |-- deployment-validation-workflow.sh
+|   |   |-- diagnose-campaign-failure.sh
+|   |   |-- diagnose-zero-results.sh
+|   |   |-- edge-function-diagnostics.sh
+|   |   |-- manual-verification.sh
+|   |   |-- monitor-discovery-job.sh
+|   |   |-- production-health-check.sh
+|   |   |-- validate-production-enrichment.sh
+|   |   |-- validate-supabase-architecture.sh
+|   |   `-- verify-toolchain.sh
+|   |-- observability/
+|   |   |-- redis-observability.sh
+|   |   |-- start-observability.sh
+|   |   |-- stop-observability.sh
+|   |   |-- supabase-pull-logs.sh
+|   |   `-- verify-observability.sh
+|   `-- otel-config.yml
+|-- platform/
+|   |-- github/
+|   |   |-- docs-automation/
+|   |   |   |-- generate-mermaid-diagrams.js
+|   |   |   |-- mermaid-template-registry.js
+|   |   |   |-- mermaid-template-registry.json
+|   |   |   `-- sync-github-projects.js
+|   |   |-- webhook-handler.js
+|   |   `-- webhook-validator.js
+|   |-- supabase/
+|   |   |-- scripts/
+|   |   |   |-- deploy-background-tasks.sh
+|   |   |   |-- ensure-supabase-cli-session.sh
+|   |   |   |-- supabase_cli_helpers.sh
+|   |   |   `-- update-edge-secrets.sh
+|   |   |-- tests/
+|   |   |   `-- database/
+|   |   |       |-- campaigns.test.sql
+|   |   |       |-- core_schema.test.sql
+|   |   |       |-- edge-functions.test.ts
+|   |   |       |-- leads.test.sql
+|   |   |       `-- placeholder.test.ts
+|   |   |-- package-supabase.json
+|   |   |-- supabase-ca-2021.crt
+|   |   `-- supabase.js
+|   |-- vercel/
+|   |   |-- vercel-status-check.sh
+|   |   |-- vercel-validate.sh
+|   |   `-- vercel.json
+|   `-- workflow/
+|       `-- engine.ts
+|-- symlinks/
+|   |-- create-symlinks.sh
+|   |-- platform-detector.js
+|   `-- validate-symlinks.sh
+`-- templates/
+    |-- .prospectpro-template-schema.json
+    `-- init-template.sh

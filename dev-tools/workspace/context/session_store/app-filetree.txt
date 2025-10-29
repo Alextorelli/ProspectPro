@@ -1,0 +1,173 @@
+app/
+|-- backend/
+|   |-- .branches/
+|   |   `-- _current_branch
+|   |-- .temp/
+|   |   |-- cli-latest
+|   |   |-- gotrue-version
+|   |   |-- pooler-url
+|   |   |-- postgres-version
+|   |   |-- project-ref
+|   |   |-- rest-version
+|   |   `-- storage-version
+|   |-- backend
+|   |-- db/
+|   |   |-- schema/
+|   |   |   `-- users.ts
+|   |   |-- client.ts
+|   |   |-- drizzle.config.ts
+|   |   `-- example-crud.ts
+|   |-- functions/
+|   |   |-- _shared/
+|   |   |   |-- api-usage.ts
+|   |   |   |-- cache-manager.ts
+|   |   |   |-- cobalt-cache.ts
+|   |   |   |-- edge-auth-simplified.ts
+|   |   |   |-- edge-auth.ts
+|   |   |   |-- highlight-context.ts
+|   |   |   `-- vault-client.ts
+|   |   |-- auth-diagnostics/
+|   |   |   |-- function.toml
+|   |   |   `-- index.ts
+|   |   |-- business-discovery-background/
+|   |   |   |-- function.toml
+|   |   |   `-- index.ts
+|   |   |-- business-discovery-optimized/
+|   |   |   |-- function.toml
+|   |   |   `-- index.ts
+|   |   |-- business-discovery-user-aware/
+|   |   |   |-- function.toml
+|   |   |   `-- index.ts
+|   |   |-- campaign-export/
+|   |   |   |-- function.toml
+|   |   |   `-- index.ts
+|   |   |-- campaign-export-user-aware/
+|   |   |   |-- function.toml
+|   |   |   `-- index.ts
+|   |   |-- enrichment-business-license/
+|   |   |   |-- function.toml
+|   |   |   `-- index.ts
+|   |   |-- enrichment-cobalt/
+|   |   |   |-- function.toml
+|   |   |   `-- index.ts
+|   |   |-- enrichment-hunter/
+|   |   |   |-- function.toml
+|   |   |   `-- index.ts
+|   |   |-- enrichment-neverbounce/
+|   |   |   |-- function.toml
+|   |   |   `-- index.ts
+|   |   |-- enrichment-orchestrator/
+|   |   |   |-- function.toml
+|   |   |   `-- index.ts
+|   |   |-- enrichment-pdl/
+|   |   |   |-- function.toml
+|   |   |   `-- index.ts
+|   |   |-- example-function/
+|   |   |   |-- function.toml
+|   |   |   `-- index.ts
+|   |   `-- tests/
+|   |       |-- test-google-places/
+|   |       |   |-- function.toml
+|   |       |   `-- index.ts
+|   |       |-- test-new-auth/
+|   |       |   |-- function.toml
+|   |       |   `-- index.ts
+|   |       |-- test-user-deduplication/
+|   |       |   |-- function.toml
+|   |       |   `-- index.ts
+|   |       `-- business-discovery.test.ts
+|   |-- migrations/
+|   |   |-- 20251017175251_remote_schema.sql
+|   |   |-- 20251017180924_install_pgtap.sql
+|   |   |-- 20251017181104_install_pgtap.sql
+|   |   |-- 20251017181118_install_pgtap.sql
+|   |   |-- 20251017181742_remote_schema.sql
+|   |   |-- 20251018001004_remote_schema.sql
+|   |   |-- 20251018072140_remote_schema.sql
+|   |   `-- _install_pgtap.sql
+|   |-- schema/
+|   |   |-- 001_core_schema.sql
+|   |   |-- 002_user_functions.sql
+|   |   |-- 003_deduplication.sql
+|   |   |-- 004_enrichment_cache.sql
+|   |   `-- README.md
+|   `-- config.toml
+|-- frontend/
+|   |-- public/
+|   |   |-- favicon-yellow-arrow.svg
+|   |   `-- logo-full.svg
+|   |-- src/
+|   |   |-- components/
+|   |   |   |-- ApiUsageChart.tsx
+|   |   |   |-- ApiUsageTable.tsx
+|   |   |   |-- AuthComponent.tsx
+|   |   |   |-- CampaignsTable.tsx
+|   |   |   |-- CollapsibleCard.tsx
+|   |   |   |-- EnrichmentButton.tsx
+|   |   |   |-- ErrorBoundary.tsx
+|   |   |   |-- GeographicSelector.tsx
+|   |   |   |-- Layout.tsx
+|   |   |   |-- LeadCard.tsx
+|   |   |   |-- LeadDetailsDrawer.tsx
+|   |   |   |-- LeadExplorerGrid.tsx
+|   |   |   |-- LeadExplorerTable.tsx
+|   |   |   |-- LogoIcon.tsx
+|   |   |   |-- MultiSelectBusinessTypes.tsx
+|   |   |   |-- PaymentMethods.tsx
+|   |   |   |-- ProgressDisplay.tsx
+|   |   |   |-- SelectedChips.tsx
+|   |   |   |-- Stepper.tsx
+|   |   |   |-- Tabs.tsx
+|   |   |   |-- ThemeToggle.tsx
+|   |   |   `-- TierSelector.tsx
+|   |   |-- constants/
+|   |   |   `-- businessTaxonomy.ts
+|   |   |-- contexts/
+|   |   |   `-- AuthContext.tsx
+|   |   |-- hooks/
+|   |   |   |-- useBusinessDiscovery.ts
+|   |   |   |-- useCampaignResults.ts
+|   |   |   |-- useJobProgress.tsx
+|   |   |   `-- useLeadEnrichment.ts
+|   |   |-- lib/
+|   |   |   |-- highlight.ts
+|   |   |   |-- supabase.ts
+|   |   |   `-- utils.ts
+|   |   |-- pages/
+|   |   |   |-- AccountPage.tsx
+|   |   |   |-- AdminPanel.tsx
+|   |   |   |-- AuthCallback.tsx
+|   |   |   |-- BusinessDiscovery.tsx
+|   |   |   |-- Campaign.tsx
+|   |   |   |-- CampaignProgress.tsx
+|   |   |   |-- Dashboard.tsx
+|   |   |   `-- Results.tsx
+|   |   |-- stores/
+|   |   |   |-- utils/
+|   |   |   |   `-- leadSanitizers.ts
+|   |   |   |-- campaignStore.ts
+|   |   |   `-- enhancedCampaignStore.ts
+|   |   |-- types/
+|   |   |   |-- index.ts
+|   |   |   `-- supabase.ts
+|   |   |-- utils/
+|   |   |   |-- __tests__/
+|   |   |   |   |-- basic.test.ts
+|   |   |   |   |-- campaignTransforms.test.ts
+|   |   |   |   `-- smoke.test.ts
+|   |   |   |-- campaignTransforms.ts
+|   |   |   |-- exportLeadsToCsv.ts
+|   |   |   `-- leadFilters.ts
+|   |   |-- App.tsx
+|   |   |-- index.css
+|   |   `-- main.tsx
+|   |-- .env.development
+|   |-- .env.local
+|   |-- index.html
+|   |-- package-lock.json
+|   |-- package.json
+|   |-- tsconfig.node.json
+|   |-- vite-env.d.ts
+|   |-- vite.config.devtools.ts
+|   `-- vitest.config.ts
+`-- app.json

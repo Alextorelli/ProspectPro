@@ -1,4 +1,4 @@
-import { WorkspaceContext } from "../WorkspaceContext";
+import { WorkspaceContext } from "../src/WorkspaceContext";
 
 describe("WorkspaceContext", () => {
   describe("getWorkspaceRoot", () => {

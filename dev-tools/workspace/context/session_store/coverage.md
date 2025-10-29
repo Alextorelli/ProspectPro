@@ -449,3 +449,30 @@ ev## 2025-10-23: Codespaces Bootstrap Realignment
 
 - Staging alias workflow documented in `.github/chatmodes/*.chatmode.md`
 - Deployment scripts: `npm run deploy:staging:alias`
+
+## 2025-10-29: Client Service Layer Rename Finalization
+
+**Actions:**
+- Renamed `dev-tools/agents/scripts/deploy-mcp-service-layer.sh` to `deploy-client-service-layer.sh`
+- Updated deployment script variables: SERVICE_NAME, SERVICE_DIR, systemd unit names
+- Scrubbed package.json for legacy references (backup created)
+- Updated settings-staging.md with rollback procedures
+
+**Validation:**
+- ✅ Package metadata: `@prospectpro/client-service-layer`
+- ✅ Source structure: `src/` directory with TypeScript sources
+- ✅ Lockfile: Regenerated with npm clean namespace
+- ✅ README: Import paths updated
+- ✅ Deployment script: All paths and names aligned
+- ⏳ Build/test: Ready for validation run
+
+**Outstanding:**
+- MCP server cleanup (separate phase per roadmap)
+- Automation wiring updates (Taskfile migration)
+- CI/CD health check integration
+
+**Provenance:**
+- Execution log: `/workspaces/ProspectPro/dev-tools/workspace/context/session_store/rename-finalization-20251029-111629.log`
+- Package backup: `/workspaces/ProspectPro/package.json.backup-20251029-111629`
+- Script: `dev-tools/scripts/automation/finalize-client-service-layer-rename.sh`
+

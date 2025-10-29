@@ -93,3 +93,23 @@
 - prometheus deprecated in favor of OTEL/highlight implementation
 
 **Validation**: `npm run validate:contexts` succeeds (deployment URL validation deferred).
+
+# Staged: Client Service Layer Rename Completion (2025-10-29)
+
+- **Change**: Completed propagation of `mcp-service-layer` → `client-service-layer` rename
+- **Actions**:
+  - Renamed deployment script: `deploy-mcp-service-layer.sh` → `deploy-client-service-layer.sh`
+  - Updated all internal references: SERVICE_NAME, SERVICE_DIR, systemd unit names
+  - Updated package name to `@prospectpro/client-service-layer`
+  - Source code reorganized under `src/` subdirectory
+  - Package-lock.json regenerated with new namespace
+- **Validation**: 
+  - Run: `cd dev-tools/agents/client-service-layer && npm install && npm run build && npm test`
+  - Verify: `npm run lint` passes
+  - Check: Deployment script can locate dist/ outputs
+- **Rollback**: Restore from git history at commit prior to rename
+- **Notes**: 
+  - MCP config remains at `.vscode/mcp_config.json` (primary) and `config/mcp-config.json` (fallback)
+  - Archive/log references left unchanged for historical context
+  - Next: Update MCP server cleanup and automation alignment
+

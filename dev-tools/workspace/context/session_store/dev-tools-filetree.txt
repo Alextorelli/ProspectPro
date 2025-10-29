@@ -1,0 +1,261 @@
+dev-tools/
+|-- agents/
+|   |-- _development-workflow/
+|   |   |-- config.json
+|   |   |-- instructions.md
+|   |   |-- taskfile.yaml
+|   |   `-- toolset.jsonc
+|   |-- _observability/
+|   |   |-- config.json
+|   |   |-- instructions.md
+|   |   |-- taskfile.yaml
+|   |   `-- toolset.jsonc
+|   |-- _production-ops/
+|   |   |-- config.json
+|   |   |-- deployment-checklist-template.md
+|   |   |-- instructions.md
+|   |   |-- taskfile.yaml
+|   |   `-- toolset.jsonc
+|   |-- _system-architect/
+|   |   |-- config.json
+|   |   |-- instructions.md
+|   |   |-- taskfile.yaml
+|   |   `-- toolset.jsonc
+|   |-- client-service-layer/
+|   |   |-- __tests__/
+|   |   |   |-- ConfigLocator.test.ts
+|   |   |   |-- MCPClientManager.integration.test.ts
+|   |   |   |-- MCPClientManager.test.ts
+|   |   |   `-- WorkspaceContext.test.ts
+|   |   |-- src/
+|   |   |   |-- ChatModeLoader.ts
+|   |   |   |-- ConfigLocator.ts
+|   |   |   |-- index.ts
+|   |   |   |-- MCPClientAdapter.ts
+|   |   |   |-- MCPClientManager.ts
+|   |   |   |-- TelemetrySink.ts
+|   |   |   |-- TracingTelemetrySink.ts
+|   |   |   `-- WorkspaceContext.ts
+|   |   |-- package-lock.json
+|   |   |-- package.json
+|   |   |-- README.md
+|   |   `-- tsconfig.json
+|   |-- context/
+|   |   |-- schemas/
+|   |   |   |-- agent-context.schema.json
+|   |   |   |-- environment-context.schema.json
+|   |   |   `-- task-ledger.schema.json
+|   |   |-- store/
+|   |   |   |-- shared/
+|   |   |   |   `-- cost-thresholds.json
+|   |   |   |-- development-workflow.json
+|   |   |   |-- observability.json
+|   |   |   |-- production-ops.json
+|   |   |   |-- README.md
+|   |   |   `-- system-architect.json
+|   |   |-- agents-manifest.json
+|   |   |-- checkpoint-contexts.ts
+|   |   |-- context-manager.ts
+|   |   |-- CONTEXTMANAGER_QUICKREF.md
+|   |   |-- get-canonical-timestamp.js
+|   |   |-- MCP_MODE_TOOL_MATRIX.md
+|   |   |-- README.md
+|   |   |-- RELEASE_NOTES_AND_DIFF_TEMPLATE.md
+|   |   |-- TEST_RUN_EXPECTATIONS.md
+|   |   |-- update-checksum.cjs
+|   |   `-- update-checksum.js
+|   |-- mcp-servers/
+|   |   |-- environments/
+|   |   |   |-- development.js
+|   |   |   |-- production.js
+|   |   |   `-- troubleshooting.js
+|   |   |-- utility/
+|   |   |   |-- src/
+|   |   |   |   |-- index.ts
+|   |   |   |   |-- memory.ts
+|   |   |   |   `-- sequential.ts
+|   |   |   |-- package-lock.json
+|   |   |   |-- package.json
+|   |   |   `-- tsconfig.json
+|   |   |-- active-registry.json
+|   |   |-- MCP-package.json
+|   |   |-- mcp.json
+|   |   |-- observability-server.js
+|   |   |-- package-lock.json
+|   |   |-- package.json
+|   |   |-- README.md
+|   |   |-- test-results.json
+|   |   `-- tool-reference.md
+|   |-- scripts/
+|   |   |-- .env.agent.local
+|   |   |-- cache-session.js
+|   |   |-- context-snapshot.sh
+|   |   |-- deploy-client-service-layer.sh
+|   |   |-- fetch-repo-context.js
+|   |   |-- fetch-supabase-context.js
+|   |   |-- hydrate-local-env.sh
+|   |   |-- mcp-chat-sync.js
+|   |   |-- mcp-chat-validate.js
+|   |   |-- participant-routing.sh
+|   |   |-- remove-legacy-troubleshooting-server.sh
+|   |   |-- start-mcp.sh
+|   |   |-- stop-mcp.sh
+|   |   |-- toolset-sync.cjs
+|   |   |-- validate-agents.sh
+|   |   |-- validate-highlight-integration.sh
+|   |   `-- validate-observability-migration.sh
+|   |-- workflows/
+|   |   |-- archive/
+|   |   |   |-- Automated Workflow Flattening Plan.md
+|   |   |   |-- step1.sh
+|   |   |   |-- step2.sh
+|   |   |   |-- step3.sh
+|   |   |   |-- step4.sh
+|   |   |   |-- step5.sh
+|   |   |   `-- step6.sh
+|   |   |-- templates/
+|   |   |   |-- .gitkeep
+|   |   |   |-- deployment-checklist-template.md
+|   |   |   |-- observability-testing-snippet.md
+|   |   |   |-- playwright-toolset-snippet.jsonc
+|   |   |   `-- README.md
+|   |   `-- .gitkeep
+|   |-- .env.agent.example
+|   |-- .env.agent.local
+|   |-- .env.development
+|   |-- .env.production
+|   |-- .env.staging
+|   `-- observability-cli.js
+|-- automation/
+|   `-- ci-cd/
+|       |-- check-docs-schema.sh
+|       |-- ci.yml
+|       |-- generate-diagram-bundle.sh
+|       |-- patch-diagrams.sh
+|       |-- pipeline.yml
+|       |-- render-diagrams.sh
+|       |-- repo_scan.sh
+|       `-- stage-taxonomy.sh
+|-- context/
+|   |-- repo-GPS/
+|   |   |-- app-filetree.txt
+|   |   |-- dev-tools-filetree.txt
+|   |   |-- integration-filetree.txt
+|   |   `-- repo-tree-summary.txt
+|   `-- session_store/
+|       |-- app-filetree.txt
+|       |-- dev-tools-filetree.txt
+|       |-- integration-filetree.txt
+|       `-- repo-tree-summary.txt
+|-- observability/
+|   `-- highlight-node/
+|       |-- package.json
+|       `-- tsconfig.json
+|-- scripts/
+|   |-- automation/
+|   |   |-- enhance-production-ops-context.sh
+|   |   |-- finalize-client-service-layer-rename.sh
+|   |   |-- generate-configs.mjs
+|   |   |-- inject-playwright-tasks.sh
+|   |   |-- install-task-cli.sh
+|   |   |-- patch-staging-environment.sh
+|   |   |-- promote-e2e-docs.sh
+|   |   |-- README.md
+|   |   |-- remove-legacy-paths.sh
+|   |   |-- sample-automation.sh
+|   |   |-- scaffold-highlight-node.sh
+|   |   |-- start-ollama.sh
+|   |   |-- update-agent-telemetry-context.sh
+|   |   |-- update-chatmodes.sh
+|   |   |-- update-telemetry-quickref.sh
+|   |   |-- validate-testing-prerequisites.sh
+|   |   `-- verify-agent-context.sh
+|   |-- operations/
+|   |   |-- ensure-supabase-cli-session.sh
+|   |   |-- launch-react-devtools.sh
+|   |   `-- shared-functions.sh
+|   |-- setup/
+|   |   `-- .codespaces-init.sh
+|   |-- tooling/
+|   |   |-- migrate-supabase-functions.sh
+|   |   `-- validate-ignore-config.cjs
+|   `-- README.md
+|-- testing/
+|   |-- business-discovery/
+|   |   |-- e2e/
+|   |   |   `-- business-discovery.spec.ts
+|   |   `-- unit/
+|   |       `-- business-discovery.test.ts
+|   |-- configs/
+|   |   |-- playwright.agents.config.ts
+|   |   `-- vitest.agents.config.ts
+|   |-- fixtures/
+|   |   |-- fixture-dataset.json
+|   |   |-- sample-mcp-response.json
+|   |   |-- sample-supabase.log
+|   |   `-- sample-vercel-status.json
+|   |-- integration/
+|   |   |-- api/
+|   |   |   `-- README.md
+|   |   `-- context.test.js
+|   |-- unit/
+|   |   |-- app/
+|   |   |   `-- agents.spec.ts
+|   |   |-- dev-tools/
+|   |   |   |-- automation.bats
+|   |   |   |-- automation.spec.ts
+|   |   |   `-- devtools-regression.sh
+|   |   `-- mcp/
+|   |       `-- mcp.spec.ts
+|   |-- utils/
+|   |   |-- fixtures/
+|   |   |   `-- campaigns.json
+|   |   `-- setup.ts
+|   `-- README.md
+|-- workspace/
+|   `-- context/
+|       |-- archive/
+|       |   |-- chatmode-sync-2025-10-28/
+|       |   |   |-- chatmode-ref-sync.sh
+|       |   |   |-- documentation_prov.sh
+|       |   |   |-- live-tooling-list.txt
+|       |   |   |-- manifest-refresh.sh
+|       |   |   |-- MCP_MODE_TOOL_MATRIX.md
+|       |   |   |-- Optimized Audit & Refactor Plan.md
+|       |   |   `-- workflow-enhancements.md
+|       |   |-- # OTEL-Observability-MCP-Migration.md
+|       |   |-- agent-MCP-map.mmd
+|       |   |-- agent-workflows-sequence.mmd
+|       |   |-- app-filetree.txt
+|       |   |-- context-development.mmd
+|       |   |-- context-mgmt.mmd
+|       |   |-- context-production.mmd
+|       |   |-- context-schema.mmd
+|       |   |-- context-staging.mmd
+|       |   |-- e2e-playwright-reactdevtools-workplan.md
+|       |   |-- ex1.mmd
+|       |   |-- ex2.mmd
+|       |   |-- ex3.mmd
+|       |   |-- mcp-integration-plan.md
+|       |   |-- mece-agent-mcp-integration-plan.md
+|       |   |-- patch-execution.sh
+|       |   |-- patch-implementation.sh
+|       |   |-- phase-5-validation-log.md
+|       |   |-- system-architecture.mmd
+|       |   |-- Untitled-2.mmd
+|       |   |-- Untitled-3.mmd
+|       |   `-- Untitled-4.mmd
+|       |-- schemas/
+|       |   |-- compile.sh
+|       |   `-- ollama-helper.sh
+|       |-- session_store/
+|       |   |-- app-filetree.txt
+|       |   |-- automated-tooling-update.md
+|       |   |-- client-service-layer-rename-status.md
+|       |   |-- coverage.md
+|       |   |-- live-tooling-list.txt
+|       |   |-- Optimized Environment Config Patch Plan.md
+|       |   |-- rename-finalization-20251029-111629.log
+|       |   `-- repo-tree-summary.txt
+|       `-- event-bus.ts
+`-- README.md
