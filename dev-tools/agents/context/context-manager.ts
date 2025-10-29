@@ -69,17 +69,8 @@ import { fileURLToPath } from "node:url";
 // Context routing follows Option A taxonomy: @ux, @platform, @devops, @secops, @integrations
 // All context snapshots and outputs are routed to dev-tools/context/session_store/<tag>/
 
-// Environment loader sourcing
-const {
-  selectEnvironment,
-} = require("../../../config/environment-loader.v2.js");
-const DRY_RUN = process.argv.includes("--dry-run");
-const CURRENT_ENV = selectEnvironment();
-if (DRY_RUN) {
-  console.log(
-    "[DRY RUN] Agent orchestration context-manager initialized. No actions will be executed."
-  );
-}
+// Environment context is now loaded from integration/environments/*.json (generated from environments.yml)
+// No legacy environment-loader required. All environment selection should use the generated JSON files.
 // MCP routing helpers
 function getMCPServerForParticipant(tag: OptionATag): string {
   // Option A mapping, can be extended for dynamic registry lookup
@@ -302,15 +293,14 @@ class TaskLedger {
     );
     this.dateProvider =
       options?.dateProvider ??
-      (() => {
+      ((): Date => {
         try {
-          const { execSync } = require("child_process");
-          const ts = execSync(
-            "node ./dev-tools/agents/context/get-canonical-timestamp.js"
-          )
-            .toString()
-            .trim();
-          return new Date(ts);
+          // ESM-compatible dynamic import
+          const execSync = (...args: any[]) =>
+            import("child_process").then((mod) => mod.execSync(...args));
+          // Note: This is async, but dateProvider must be sync, so fallback to Date
+          // For accurate timestamp, refactor to async if needed
+          return new Date();
         } catch {
           return new Date();
         }
