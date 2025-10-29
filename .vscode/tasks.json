@@ -19,7 +19,7 @@
       "type": "shell",
       "command": "node",
       "args": [
-        "dev-tools/scripts/automation/generate-configs.mjs",
+        "dev-tools/agents/context/context-manager.ts",
         "--env=development"
       ],
       "group": "build",
@@ -34,10 +34,7 @@
       "label": "Env: Switch to Staging",
       "type": "shell",
       "command": "node",
-      "args": [
-        "dev-tools/scripts/automation/generate-configs.mjs",
-        "--env=staging"
-      ],
+      "args": ["dev-tools/agents/context/context-manager.ts", "--env=staging"],
       "group": "build",
       "presentation": {
         "echo": true,
@@ -51,7 +48,7 @@
       "type": "shell",
       "command": "node",
       "args": [
-        "dev-tools/scripts/automation/generate-configs.mjs",
+        "dev-tools/agents/context/context-manager.ts",
         "--env=production"
       ],
       "group": "build",
