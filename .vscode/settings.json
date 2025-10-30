@@ -217,5 +217,8 @@
   "deno.codeLens.implementations": true,
   "deno.codeLens.references": true,
   "deno.codeLens.referencesAllFunctions": true,
-  "deno.codeLens.test": true
+  "deno.codeLens.test": true,
+  "files.autoSave": "onFocusChange",
+  "editor.mouseWheelZoom": true,
+  "editor.formatOnPaste": true
 }
