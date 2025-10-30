@@ -6,8 +6,7 @@
     "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {
       "moby": false,
       "version": "latest"
-    },
-    "ghcr.io/devcontainers/features/deno:2": {}
+    }
   },
   "customizations": {
     "vscode": {
@@ -33,21 +32,20 @@
         "terminal.integrated.defaultProfile.linux": "bash",
         "deno.enable": true,
         "deno.enablePaths": ["./app/backend/functions"],
+        "deno.lint": true,
+        "deno.unstable": ["bare-node-builtins", "byonm", "sloppy-imports"],
+        "deno.path": "/usr/local/bin/deno",
         "git.autofetch": true,
         "git.confirmSync": false,
         "git.enableSmartCommit": true,
-
-        // Editor Performance Settings - Enhanced for Development
         "editor.minimap.enabled": false,
         "editor.renderWhitespace": "none",
         "editor.renderControlCharacters": false,
-        "workbench.colorTheme": "Vira Deepforest", // Development-specific theme
-        "workbench.iconTheme": "vscode-icons", // Better file icons for organization
+        "workbench.colorTheme": "Vira Deepforest",
+        "workbench.iconTheme": "vscode-icons",
         "workbench.list.smoothScrolling": false,
         "workbench.tree.renderIndentGuides": "none",
         "workbench.editor.closeOnFileDelete": true,
-
-        // Development-specific UI enhancements
         "workbench.colorCustomizations": {
           "[Vira Deepforest]": {
             "titleBar.activeBackground": "#1a4d3a",
@@ -60,8 +58,6 @@
         },
         "workbench.settings.editor": "json",
         "breadcrumbs.enabled": true,
-
-        // File System Performance
         "files.watcherExclude": {
           "**/*.log": true,
           "**/*.tmp": true,
@@ -70,8 +66,6 @@
           "**/.git/**": true,
           "**/logs/**": true
         },
-
-        // Search Performance
         "search.exclude": {
           "**/node_modules": true,
           "**/*.log": true,
@@ -79,35 +73,23 @@
           "**/.git": true
         },
         "search.searchOnType": false,
-
-        // Copilot Optimization
         "github.copilot.chat.historyCount": 8,
         "github.copilot.chat.welcomeMessage": "none",
         "github.copilot.chat.completionPhrasesEnabled": false,
         "github.copilot.advanced.setAutoCompletionTriggerThreshold": 30,
-
-        // Terminal Settings - Development Enhanced
         "terminal.integrated.gpuAcceleration": "on",
         "terminal.integrated.scrollback": 1000,
         "terminal.integrated.fontFamily": "Consolas, 'Courier New', monospace",
         "terminal.integrated.fontSize": 13,
-
-        // Development Environment Indicators
         "window.title": "🎯 ${folderName} - Verified Business Intelligence ${separator} ${activeEditorShort}",
         "workbench.startupEditor": "welcomePageInEmptyWorkbench",
-
-        // === MCP (Model Context Protocol) Configuration ===
         "mcp.enable": true,
         "mcp.configFile": "${workspaceFolder}/.vscode/mcp-config.json",
-
-        // API Development Specific Settings
         "rest-client.enableTelemetry": false,
         "files.associations": {
           "*.http": "http",
           "*.rest": "http"
         },
-
-        // AI-Enhanced Development Settings for Verified Data Integration
         "ai.contextAware": true,
         "ai.projectContext": {
           "type": "verified-business-intelligence-platform",
@@ -126,7 +108,7 @@
     }
   },
   "forwardPorts": [3000, 5432],
-  "postCreateCommand": "bash -lc 'set -e; echo \"[setup] Initializing ProspectPro verified business intelligence environment...\"; if [ -f package-lock.json ]; then npm ci; else npm install; fi; if ! npm ls supabase --depth=0 >/dev/null 2>&1; then npm install supabase --save-dev; fi; npx playwright install-deps; npm run mcp:init; npm run codebase:index; command -v deno >/dev/null || (curl -fsSL https://deno.land/install.sh | DENO_INSTALL=/usr/local sh && chmod +x /usr/local/bin/deno); echo \"[ready] Verified data environment prepared with zero fake data policy.\"; echo \"[next] ProspectPro verified business intelligence development ready.\"'",
+  "postCreateCommand": "npm install && command -v deno >/dev/null || (curl -fsSL https://deno.land/install.sh | DENO_INSTALL=/usr/local sh && chmod +x /usr/local/bin/deno)",
   "postStartCommand": "bash -c 'echo \"[start] ProspectPro verified business intelligence environment active.\"; echo \"Data Policy: Zero Fake Data | Contacts: Verified Only | Architecture: Supabase Edge Functions\"; echo \"[hint] Use Copilot Chat for AI-assisted development with verified data context.\"'",
   "remoteUser": "node"
 }
