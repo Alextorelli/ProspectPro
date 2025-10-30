@@ -2,7 +2,6 @@
   "recommendations": [
     "supabase.supabase",
     "denoland.vscode-deno",
-    "github.copilot",
     "github.copilot-chat",
     "github.codespaces",
     "github.remotehub",
