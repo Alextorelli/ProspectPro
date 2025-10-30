@@ -6,7 +6,8 @@
     "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {
       "moby": false,
       "version": "latest"
-    }
+    },
+    "ghcr.io/devcontainers/features/deno:1": {}
   },
   "customizations": {
     "vscode": {
@@ -31,7 +32,7 @@
       "settings": {
         "terminal.integrated.defaultProfile.linux": "bash",
         "deno.enable": true,
-        "deno.enablePaths": ["supabase/functions"],
+        "deno.enablePaths": ["./app/backend/functions"],
         "git.autofetch": true,
         "git.confirmSync": false,
         "git.enableSmartCommit": true,
