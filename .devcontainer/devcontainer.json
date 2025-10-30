@@ -26,7 +26,10 @@
         "GraphQL.vscode-graphql",
         "task.vscode-task",
         "HuggingFace.huggingface-vscode-chat",
-        "chrisdias.promptboost"
+        "chrisdias.promptboost",
+        "GitHub.codespaces",
+        "GitHub.copilot",
+        "GitHub.copilot-chat"
       ],
       "settings": {
         "terminal.integrated.defaultProfile.linux": "bash",
