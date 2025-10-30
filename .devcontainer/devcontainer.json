@@ -25,7 +25,8 @@
         "vitest.explorer",
         "GraphQL.vscode-graphql",
         "task.vscode-task",
-        "HuggingFace.huggingface-vscode-chat"
+        "HuggingFace.huggingface-vscode-chat",
+        "chrisdias.promptboost"
       ],
       "settings": {
         "terminal.integrated.defaultProfile.linux": "bash",
