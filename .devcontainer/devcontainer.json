@@ -7,7 +7,7 @@
       "moby": false,
       "version": "latest"
     },
-    "ghcr.io/devcontainers/features/deno:1": {}
+    "ghcr.io/devcontainers/features/deno:2": {}
   },
   "customizations": {
     "vscode": {
@@ -126,7 +126,7 @@
     }
   },
   "forwardPorts": [3000, 5432],
-  "postCreateCommand": "bash -lc 'set -e; echo \"[setup] Initializing ProspectPro verified business intelligence environment...\"; if [ -f package-lock.json ]; then npm ci; else npm install; fi; if ! npm ls supabase --depth=0 >/dev/null 2>&1; then npm install supabase --save-dev; fi; npx playwright install-deps; npm run mcp:init; npm run codebase:index; echo \"[ready] Verified data environment prepared with zero fake data policy.\"; echo \"[next] ProspectPro verified business intelligence development ready.\"'",
+  "postCreateCommand": "bash -lc 'set -e; echo \"[setup] Initializing ProspectPro verified business intelligence environment...\"; if [ -f package-lock.json ]; then npm ci; else npm install; fi; if ! npm ls supabase --depth=0 >/dev/null 2>&1; then npm install supabase --save-dev; fi; npx playwright install-deps; npm run mcp:init; npm run codebase:index; command -v deno >/dev/null || (curl -fsSL https://deno.land/install.sh | DENO_INSTALL=/usr/local sh && chmod +x /usr/local/bin/deno); echo \"[ready] Verified data environment prepared with zero fake data policy.\"; echo \"[next] ProspectPro verified business intelligence development ready.\"'",
   "postStartCommand": "bash -c 'echo \"[start] ProspectPro verified business intelligence environment active.\"; echo \"Data Policy: Zero Fake Data | Contacts: Verified Only | Architecture: Supabase Edge Functions\"; echo \"[hint] Use Copilot Chat for AI-assisted development with verified data context.\"'",
   "remoteUser": "node"
 }
